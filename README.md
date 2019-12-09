@@ -1,8 +1,14 @@
+
+# PDFsharp Documentation
+
+http://www.nudoq.org/#!/Packages/PDFsharp-MigraDoc-GDI/PdfSharp
+
+A .NET library for processing PDF documents using C#
+
 # PDFsharp
 A .NET library for processing PDF
 
 # Resources
-
 The official project web site:  
 http://pdfsharp.net/
 
@@ -32,4 +38,5 @@ The naming convention for the packages has changed.
 
 If you are using "PdfSharp -Version 1.32.3057" then the version you need now is "PDFsharp-gdi -Version 1.50".  
 Or get the corresponding package " PDFsharp-MigraDoc-GDI -Version 1.50".
+
 
