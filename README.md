@@ -1,35 +1,49 @@
-# PDFsharp
-A .NET library for processing PDF
+# PDFSharpCoreOpt 
 
-# Resources
+#### PDFSharpCoreOpt 
 
-The official project web site:  
-http://pdfsharp.net/
+This is modified  Version of PDFSharp , this version is compatible with .net Core 
 
-The official peer-to-peer support forum:  
-http://forum.pdfsharp.net/
-
-# Release Notes for PDFsharp/MigraDoc 1.50 (stable)
-
-The stable version of PDFsharp 1.32 was published in 2013.  
-So a new stable version is long overdue.
-
-I really hope the stable version does not have any regressions versus 1.50 beta 3b or later.
-
-And I hope there are no regressions versus version 1.32 stable. But several bugs have been fixed.  
-There are a few breaking changes that require code updates.
-
-To use PDFsharp with Medium Trust you have to get the source code and make some changes. The NuGet packages do not support Medium Trust.  
-Azure servers do not require Medium Trust.
-
-I'm afraid that many users who never tried any beta version of PDFsharp 1.50 will now switch from version 1.32 stable to version 1.50 stable.  
-Nothing wrong about that. I hope we don't get an avalanche of bug reports now.
+With this package you can create or modify PDFs with well positioned strings and Images 
 
 
-# Which Version to Get?
+## How To Install ?
 
-The naming convention for the packages has changed.
+With Package Manager install the Nuget package 
+```
+Install-Package PdfSharpCoreOpt -Version 1.0.0 
+```
 
-If you are using "PdfSharp -Version 1.32.3057" then the version you need now is "PDFsharp-gdi -Version 1.50".  
-Or get the corresponding package " PDFsharp-MigraDoc-GDI -Version 1.50".
 
+
+## Sample Code 
+
+ 
+ 
+        static void Main(string[] args)
+        {
+         PdfDocument pdf = new PdfDocument();
+            pdf.Info.Title = "My First PDF";
+            //Loop to create Number of Pages 
+            for (int i = 0; i < 500; i++)
+            {
+                PdfPage pdfPage = pdf.AddPage();
+                XGraphics graph = XGraphics.FromPdfPage(pdfPage);
+                
+                //Specify your Font 
+                XFont font = new XFont("Amiri", 5, XFontStyle.Regular);
+                
+
+                //Position the string you want to Write into the pdf 
+                graph.DrawString("SSSSSSSSS" + i.ToString(), font, XBrushes.Black, new XRect(250, 360, pdfPage.Width.Point, pdfPage.Height.Point), XStringFormats.Center);
+
+                // Insert an image if you want
+                string imageLoc = "test.png"; 
+
+                graph.DrawImage(graph, imageLoc, 535, 700, 50, 50);//Specify the image and position it 
+            }
+
+
+            string pdfFilename = "My First PDF.pdf";
+            pdf.Save(pdfFilename);
+            }
