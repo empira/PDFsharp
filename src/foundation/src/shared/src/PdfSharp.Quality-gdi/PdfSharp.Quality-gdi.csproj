@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <RootNamespace>PdfSharp.Quality</RootNamespace>
+        <UseWindowsForms>true</UseWindowsForms>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="..\PdfSharp.Quality\CommonBase.cs" Link="CommonBase.cs" />
+        <Compile Include="..\PdfSharp.Quality\DefaultFontResolver.cs" Link="DefaultFontResolver.cs" />
+        <Compile Include="..\PdfSharp.Quality\FeatureBase.cs" Link="FeatureBase.cs" />
+        <Compile Include="..\PdfSharp.Quality\FontHelper.cs" Link="FontHelper.cs" />
+        <Compile Include="..\PdfSharp.Quality\GlobalUsings.cs" Link="GlobalUsings.cs" />
+        <Compile Include="..\PdfSharp.Quality\IOHelper.cs" Link="IOHelper.cs" />
+        <Compile Include="..\PdfSharp.Quality\PathHelper.cs" Link="PathHelper.cs" />
+        <Compile Include="..\PdfSharp.Quality\PdfFileFormatter.cs" Link="PdfFileFormatter.cs" />
+        <Compile Include="..\PdfSharp.Quality\SnippetBase.cs" Link="SnippetBase.cs" />
+        <Compile Include="..\PdfSharp.Quality\TestClassBase.cs" Link="TestClassBase.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-gdi\PdfSharp-gdi.csproj" />
+        <ProjectReference Include="..\PdfSharp.WPFonts\PdfSharp.WPFonts.csproj" />
+    </ItemGroup>
+
+</Project>

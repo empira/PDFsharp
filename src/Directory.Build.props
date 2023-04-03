@@ -1,0 +1,34 @@
+<Project>
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- Found no other way to resolve the following warning than disable it -->
+    <NoWarn>NU1507</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <DefaultItemExcludes>*.ncrunchproject;*.DotSettings</DefaultItemExcludes>
+
+    <Product>PDFsharp</Product>
+    <Company>empira Software</Company>
+    <Copyright>© 2023 empira</Copyright>
+    <Authors>PDFsharp Team</Authors>
+    <Owners>empira Software GmbH</Owners>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <UpdateAssemblyInfo>false</UpdateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(NCrunch)' == '1'">
+    <DisableGitVersionTask>true</DisableGitVersionTask>
+  </PropertyGroup>
+
+  <ItemGroup>
+  <PackageReference Include="GitVersion.MsBuild">
+    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    <PrivateAssets>all</PrivateAssets>
+  </PackageReference>
+  </ItemGroup>
+</Project>

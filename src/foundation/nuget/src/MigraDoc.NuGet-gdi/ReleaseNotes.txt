@@ -1,0 +1,5 @@
+﻿This is a preview version of PDFsharp and MigraDoc Foundation 6.0.0 using .NET 6.
+The package ’PDFsharp-MigraDoc’ can be used on any platform including Windows and Linux.
+The packages ’PDFsharp-MigraDoc-GDI’ and ’PDFsharp-MigraDoc-WPF’ can be used under Windows only.
+See the project docs site for further information:
+https://docs.pdfsharp.net/link/readme-v6.0.html

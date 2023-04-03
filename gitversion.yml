@@ -1,0 +1,45 @@
+# 23-03-22
+assembly-versioning-scheme: MajorMinorPatch
+mode: Mainline
+assembly-informational-format: '{NuGetVersion}'
+branches:
+  develop: # Current development
+    # 5.0.0-develop.123
+    regex: ^develop$
+    mode: ContinuousDeployment
+    increment: None
+    tag: develop
+    prevent-increment-of-merged-branch-version: false
+    track-merge-target: true
+    source-branches: ['feature', 'release']
+  release: # Release and preview versions.
+    # 22.40.0 / 22.40.0-rc-1
+    # 5.0.0-preview-2
+    #regex: ^(release[/-]|master)
+    regex: ^release?[/-]
+    # ^(user|feature|fix)[/-]
+    # Must not have mode set to be mainline
+    increment: None
+    tag: ''
+    prevent-increment-of-merged-branch-version: true
+    track-merge-target: true
+    is-release-branch: true
+    is-mainline: true
+    source-branches: ['develop', 'release', 'feature']
+  feature: # Features and bug fixes.
+    # 22.40.0-dev-anse-gvupd.1
+    # 5.0.0-dev-my-branch.123
+    regex: ^(user|feature|fix)[/-]
+    mode: ContinuousDeployment
+    increment: None
+    tag: 'dev-{BranchName}'
+    prevent-increment-of-merged-branch-version: true
+    track-merge-target: true
+    source-branches: ['develop', 'release', 'feature']
+  pull-request:
+    regex: ^(pull|pull\-requests|pr)[/-]
+    tag: PullRequest
+    mode: ContinuousDeployment
+#ignore:
+#  sha: []
+merge-message-formats: {}

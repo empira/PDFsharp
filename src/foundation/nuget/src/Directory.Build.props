@@ -1,0 +1,53 @@
+﻿<Project>
+	<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+	<ItemGroup>
+		<DescriptionFile Include="$(MSBuildProjectDirectory)\Description.txt" />
+		<ReleaseNotesFile Include="$(MSBuildProjectDirectory)\ReleaseNotes.txt" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<!-- Yes, MSBUILD is powerful but weird. -->
+		<NuGetDescription>@(DescriptionFileContents->'%(Identity)', '%0d')</NuGetDescription>
+		<NuGetReleaseNotes>@(ReleaseNotesFileContents->'%(Identity)', '%0d')</NuGetReleaseNotes>
+		<DebugBuildMessage>***** THIS IS A DEBUG BUILD - DO NOT PUBLISH *****%0d</DebugBuildMessage>
+
+		<!--<NuGetProjectUrl>https://docs.pdfsharp.net</NuGetProjectUrl>-->
+		<NuGetProjectUrl>http://pdfsharp.net</NuGetProjectUrl>
+		<NuGetTags_PdfSharp>PDFsharp PDF creation</NuGetTags_PdfSharp>
+		<NuGetTags_MigraDoc>MigraDoc PdfSharp Pdf Document Generation</NuGetTags_MigraDoc>
+	</PropertyGroup>
+
+	<Target Name="SetNuspecProperties" BeforeTargets="GenerateNuspec">
+
+		<ReadLinesFromFile File="@(DescriptionFile)">
+			<Output TaskParameter="Lines" ItemName="DescriptionFileContents" />
+		</ReadLinesFromFile>
+
+		<ReadLinesFromFile File="@(ReleaseNotesFile)">
+			<Output TaskParameter="Lines" ItemName="ReleaseNotesFileContents" />
+		</ReadLinesFromFile>
+
+		<PropertyGroup>
+			<NuspecProperties>$(NuspecProperties);id=$(NuGetId)</NuspecProperties>
+			<NuspecProperties>$(NuspecProperties);title=$(NuGetTitle)</NuspecProperties>
+			<NuspecProperties>$(NuspecProperties);config=$(Configuration)</NuspecProperties>
+			<NuspecProperties>$(NuspecProperties);version=$(PackageVersion)</NuspecProperties>
+			<NuspecProperties>$(NuspecProperties);description=$(NuGetDescription)</NuspecProperties>
+			<NuspecProperties>$(NuspecProperties);summary=$(NuGetSummary)</NuspecProperties>
+			<NuspecProperties>$(NuspecProperties);authors=$(Authors)</NuspecProperties>
+			<NuspecProperties>$(NuspecProperties);owners=$(Owners)</NuspecProperties>
+			<NuspecProperties>$(NuspecProperties);projectUrl=$(NuGetProjectUrl)</NuspecProperties>
+			<NuspecProperties>$(NuspecProperties);copyright=$(Copyright)</NuspecProperties>
+			<NuspecProperties>$(NuspecProperties);releaseNotes=$(NuGetReleaseNotes)</NuspecProperties>
+			<NuspecProperties>$(NuspecProperties);tags=$(NuGetTags)</NuspecProperties>
+		</PropertyGroup>
+
+		<!--
+		<Message Text="============================================================="  Importance="high" />
+		<Message Text="YYYYY NuspecProperties = OOOOO $(NuspecProperties);description PPPPP" Importance="high" />
+		<Message Text="============================================================="  Importance="high" />
+		-->
+
+	</Target>
+</Project>

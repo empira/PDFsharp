@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>MigraDoc</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Rendering.Forms\**" />
+    <Compile Remove="Rendering.Printing\**" />
+    <Compile Remove="Rendering.Windows\**" />
+    <EmbeddedResource Remove="Rendering.Forms\**" />
+    <EmbeddedResource Remove="Rendering.Printing\**" />
+    <EmbeddedResource Remove="Rendering.Windows\**" />
+    <None Remove="Rendering.Forms\**" />
+    <None Remove="Rendering.Printing\**" />
+    <None Remove="Rendering.Windows\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Rendering.Resources\Messages.de.restext" />
+    <None Remove="Rendering.Resources\Messages.restext" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Rendering.Resources\Messages.de.restext" />
+    <EmbeddedResource Include="Rendering.Resources\Messages.restext" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp.Charting\PdfSharp.Charting.csproj" />
+    <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp\PdfSharp.csproj" />
+    <ProjectReference Include="..\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
+  </ItemGroup>
+
+</Project>

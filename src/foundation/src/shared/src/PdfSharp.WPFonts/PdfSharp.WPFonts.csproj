@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\..\..\..\..\assets\pdfsharp-6.x\fonts\SegoeWP\SegoeWP-Black.ttf" Link="Fonts\SegoeWP-Black.ttf" />
+    <EmbeddedResource Include="..\..\..\..\..\..\assets\pdfsharp-6.x\fonts\SegoeWP\SegoeWP-Bold.ttf" Link="Fonts\SegoeWP-Bold.ttf" />
+    <EmbeddedResource Include="..\..\..\..\..\..\assets\pdfsharp-6.x\fonts\SegoeWP\SegoeWP-Light.ttf" Link="Fonts\SegoeWP-Light.ttf" />
+    <EmbeddedResource Include="..\..\..\..\..\..\assets\pdfsharp-6.x\fonts\SegoeWP\SegoeWP-Semibold.ttf" Link="Fonts\SegoeWP-Semibold.ttf" />
+    <EmbeddedResource Include="..\..\..\..\..\..\assets\pdfsharp-6.x\fonts\SegoeWP\SegoeWP-Semilight.ttf" Link="Fonts\SegoeWP-Semilight.ttf" />
+    <EmbeddedResource Include="..\..\..\..\..\..\assets\pdfsharp-6.x\fonts\SegoeWP\SegoeWP.ttf" Link="Fonts\SegoeWP.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Fonts\" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,240 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <RootNamespace>MigraDoc</RootNamespace>
+        <UseWindowsForms>true</UseWindowsForms>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <!--<DefineConstants>GDI</DefineConstants> technically not needed, but needs some work -->
+        <DefineConstants>GDI</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- UseWindowsForms automatically includes two implicit namespaces whitch leads to ambiguities. -->
+        <Using Remove="System.Drawing" />
+        <Using Remove="System.Windows.Forms" />
+    </ItemGroup>
+
+    <ItemGroup>
+	    <Compile Include="..\MigraDoc.Rendering\Properties\GlobalDeclarations.cs">
+		    <Link>Properties\GlobalDeclarations.cs</Link>
+	    </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.Resources\Messages2.cs">
+            <Link>Rendering.Resources\Messages2.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Properties\VersionInfo.cs">
+            <Link>Properties\VersionInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.ChartMapper\AxisMapper.cs">
+            <Link>Rendering.ChartMapper\AxisMapper.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.ChartMapper\ChartMapper.cs">
+            <Link>Rendering.ChartMapper\ChartMapper.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.ChartMapper\DataLabelMapper.cs">
+            <Link>Rendering.ChartMapper\DataLabelMapper.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.ChartMapper\FillFormatMapper.cs">
+            <Link>Rendering.ChartMapper\FillFormatMapper.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.ChartMapper\FontMapper.cs">
+            <Link>Rendering.ChartMapper\FontMapper.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.ChartMapper\LegendMapper.cs">
+            <Link>Rendering.ChartMapper\LegendMapper.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.ChartMapper\LineFormatMapper.cs">
+            <Link>Rendering.ChartMapper\LineFormatMapper.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.ChartMapper\PlotAreaMapper.cs">
+            <Link>Rendering.ChartMapper\PlotAreaMapper.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.ChartMapper\SeriesCollectionMapper.cs">
+            <Link>Rendering.ChartMapper\SeriesCollectionMapper.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.ChartMapper\XValuesMapper.cs">
+            <Link>Rendering.ChartMapper\XValuesMapper.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\Area.cs">
+            <Link>Rendering\Area.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\BordersRenderer.cs">
+            <Link>Rendering\BordersRenderer.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\ChartFormatInfo.cs">
+            <Link>Rendering\ChartFormatInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\ChartRenderer.cs">
+            <Link>Rendering\ChartRenderer.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\ChartRenderInfo.cs">
+            <Link>Rendering\ChartRenderInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\ColorHelper.cs">
+            <Link>Rendering\ColorHelper.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\DocumentRenderer.cs">
+            <Link>Rendering\DocumentRenderer.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\enums\ElementAlignment.cs">
+            <Link>Rendering\enums\ElementAlignment.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\enums\Floating.cs">
+            <Link>Rendering\enums\Floating.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\enums\HorizontalReference.cs">
+            <Link>Rendering\enums\HorizontalReference.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\enums\ImageFailure.cs">
+            <Link>Rendering\enums\ImageFailure.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\enums\PageRenderOptions.cs">
+            <Link>Rendering\enums\PageRenderOptions.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\enums\VerticalReference.cs">
+            <Link>Rendering\enums\VerticalReference.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\FieldInfos.cs">
+            <Link>Rendering\FieldInfos.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\FillFormatRenderer.cs">
+            <Link>Rendering\FillFormatRenderer.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\FontHandler.cs">
+            <Link>Rendering\FontHandler.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\FormatInfo.cs">
+            <Link>Rendering\FormatInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\FormattedCell.cs">
+            <Link>Rendering\FormattedCell.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\FormattedDocument.cs">
+            <Link>Rendering\FormattedDocument.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\FormattedHeaderFooter.cs">
+            <Link>Rendering\FormattedHeaderFooter.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\FormattedTextArea.cs">
+            <Link>Rendering\FormattedTextArea.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\FormattedTextFrame.cs">
+            <Link>Rendering\FormattedTextFrame.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\IAreaProvider.cs">
+            <Link>Rendering\IAreaProvider.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\ImageFormatInfo.cs">
+            <Link>Rendering\ImageFormatInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\ImageRenderer.cs">
+            <Link>Rendering\ImageRenderer.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\ImageRenderInfo.cs">
+            <Link>Rendering\ImageRenderInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\LayoutInfo.cs">
+            <Link>Rendering\LayoutInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\LineFormatRenderer.cs">
+            <Link>Rendering\LineFormatRenderer.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\MigraDocRenderingBuildInformation.cs" Link="MigraDocRenderingBuildInformation.cs" />
+        <Compile Include="..\MigraDoc.Rendering\Rendering\NumberFormatter.cs">
+            <Link>Rendering\NumberFormatter.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\PageBreakFormatInfo.cs">
+            <Link>Rendering\PageBreakFormatInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\PageBreakRenderer.cs">
+            <Link>Rendering\PageBreakRenderer.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\PageBreakRenderInfo.cs">
+            <Link>Rendering\PageBreakRenderInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\PageInfo.cs">
+            <Link>Rendering\PageInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\ParagraphFormatInfo.cs">
+            <Link>Rendering\ParagraphFormatInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\ParagraphIterator.cs">
+            <Link>Rendering\ParagraphIterator.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\ParagraphRenderer.cs">
+            <Link>Rendering\ParagraphRenderer.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\ParagraphRenderInfo.cs">
+            <Link>Rendering\ParagraphRenderInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\PdfDocumentRenderer.cs">
+            <Link>Rendering\PdfDocumentRenderer.cs</Link>
+        </Compile>
+        <!-- <Compile Include="..\MigraDoc.Rendering\Rendering\PdfPrinter.cs">
+      <Link>Rendering\PdfPrinter.cs</Link>
+    </Compile> -->
+        <Compile Include="..\MigraDoc.Rendering\Rendering\Renderer.cs">
+            <Link>Rendering\Renderer.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\RenderInfo.cs">
+            <Link>Rendering\RenderInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\ShadingRenderer.cs">
+            <Link>Rendering\ShadingRenderer.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\ShapeFormatInfo.cs">
+            <Link>Rendering\ShapeFormatInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\ShapeRenderer.cs">
+            <Link>Rendering\ShapeRenderer.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\ShapeRenderInfo.cs">
+            <Link>Rendering\ShapeRenderInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\TableFormatInfo.cs">
+            <Link>Rendering\TableFormatInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\TableRenderer.cs">
+            <Link>Rendering\TableRenderer.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\TableRenderInfo.cs">
+            <Link>Rendering\TableRenderInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\TextFrameFormatInfo.cs">
+            <Link>Rendering\TextFrameFormatInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\TextFrameRenderer.cs">
+            <Link>Rendering\TextFrameRenderer.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\TextFrameRenderInfo.cs">
+            <Link>Rendering\TextFrameRenderInfo.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering\TopDownFormatter.cs">
+            <Link>Rendering\TopDownFormatter.cs</Link>
+        </Compile>
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="..\MigraDoc.Rendering\Rendering.Resources\Messages.de.restext">
+            <Link>Rendering.Resources\Messages.de.restext</Link>
+        </EmbeddedResource>
+        <EmbeddedResource Include="..\MigraDoc.Rendering\Rendering.Resources\Messages.restext">
+            <Link>Rendering.Resources\Messages.restext</Link>
+        </EmbeddedResource>
+        <None Include="..\MigraDoc.Rendering\StrongnameKey.snk">
+            <Link>StrongnameKey.snk</Link>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-gdi\PdfSharp-gdi.csproj" />
+        <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp.Charting-gdi\PdfSharp.Charting-gdi.csproj" />
+        <ProjectReference Include="..\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
+    </ItemGroup>
+
+</Project>

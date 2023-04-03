@@ -1,0 +1,16 @@
+; // MigraDoc - Creating Documents on the Fly
+; // See the LICENSE file in the solution root for more information.
+
+PropertyNotSetBefore = '{0}' must be set before calling '{1}'.
+BookmarkNotDefined = Bookmark '{0}' is not defined within the document.
+ImageNotFound = Image '{0}' not found.
+InvalidImageType = Invalid image type: '{0}'.
+ImageNotReadable = Image {0} could not be read.\n Inner exception: {1}
+EmptyImageSize = The specified image size is empty.
+ObjectNotRenderable = Only images, textframes, charts and paragraphs can be rendered freely.
+NumberTooLargeForRoman = The number {0} is to large to be displayed as roman.
+NumberTooLargeForLetters = The number {0} is to large to be displayed as letters.
+DisplayEmptyImageSize = Image has empty size.
+DisplayImageFileNotFound = Image not found.
+DisplayInvalidImageType = Image has no valid type.
+DisplayImageNotRead = Image could not be read.

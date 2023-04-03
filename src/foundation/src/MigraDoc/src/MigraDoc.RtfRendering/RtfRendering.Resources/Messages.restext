@@ -1,0 +1,16 @@
+; // MigraDoc - Creating Documents on the Fly
+; // See the LICENSE file in the solution root for more information.
+
+; ----- Default Messages -------------------------------------------------------
+;  Default Messages for any system culture.
+; ------------------------------------------------------------------------------
+
+UpdateField = < Please update this field. >
+TextframeContentsNotTurned = Textframe contents could not be turned. Only paragraphs can be turned within textframes.
+ImageFreelyPlacedInWrongContext = Images can be placed freely only within headers, footers and sections. Image {0} will be ignored.
+ChartFreelyPlacedInWrongContext = Chart is being ignored. A chart can be placed freely only within headers, footers and sections. 
+ImageNotFound = Image '{0}' could not be found.
+ImageNotReadable = Image '{0}' could not be read. Inner Exception:\n{1}.
+ImageTypeNotSupported = Type of image '{0}' is not supported.
+CharacterNotAllowedInDateFormat = The character '{0}' is not allowed in a date field's format string and will be ignored.
+InvalidNumericFieldFormat = '{0}' is not a valid format for a numeric field und will be ignored.

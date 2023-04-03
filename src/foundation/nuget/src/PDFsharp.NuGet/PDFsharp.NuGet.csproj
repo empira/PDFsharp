@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <NoBuild>true</NoBuild>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <NuspecFile>$(MSBuildThisFileDirectory)$(MSBuildProjectName).nuspec</NuspecFile>
+    <NuGetId>PDFsharp</NuGetId>
+    <NuGetTitle>PDFsharp for Windows and Linux</NuGetTitle>
+    <NuGetDescription Condition=" '$(Configuration)'=='Debug' ">$(DebugBuildMessage)%0D$(NuGetDescription)</NuGetDescription>
+    <NuGetSummary>A .NET library for processing PDF.</NuGetSummary>
+    <NuGetTags>$(NuGetTags_PdfSharp)</NuGetTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\PDFsharp\src\PdfSharp.Charting\PdfSharp.Charting.csproj" />
+    <ProjectReference Include="..\..\..\src\PDFsharp\src\PdfSharp\PdfSharp.csproj" />
+    <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.Quality\PdfSharp.Quality.csproj" />
+    <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.Snippets\PdfSharp.Snippets.csproj" />
+    <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
+    <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.WPFonts\PdfSharp.WPFonts.csproj" />
+  </ItemGroup>
+
+</Project>

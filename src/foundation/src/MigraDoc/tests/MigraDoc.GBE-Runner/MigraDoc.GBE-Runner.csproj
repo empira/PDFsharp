@@ -1,0 +1,81 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>MigraDoc.GBE_Runner</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <StartupObject>MigraDoc.GBE_Runner.Program</StartupObject>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);TRACE;CORE;GBE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants);TRACE;CORE;GBE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="TestResults\**" />
+    <EmbeddedResource Remove="TestResults\**" />
+    <None Remove="TestResults\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\MigraDoc.GrammarByExample\helper\DdlGbeTestBase.cs" Link="helper\DdlGbeTestBase.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\helper\DdlToPdfHelper.cs" Link="helper\DdlToPdfHelper.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\helper\GbeFixture.cs" Link="helper\GbeFixture.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\helper\TestContext.cs" Link="helper\TestContext.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\helper\VisualComparisonTestBase.cs" Link="helper\VisualComparisonTestBase.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Attributes_Border.cs" Link="tests\DdlGBE_Attributes_Border.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Attributes_Color.cs" Link="tests\DdlGBE_Attributes_Color.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Attributes_LineAndFillFormat.cs" Link="tests\DdlGBE_Attributes_LineAndFillFormat.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Attributes_Shading.cs" Link="tests\DdlGBE_Attributes_Shading.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Attributes_Units.cs" Link="tests\DdlGBE_Attributes_Units.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Barcode.cs" Link="tests\DdlGBE_Barcode.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Chart_Layout.cs" Link="tests\DdlGBE_Chart_Layout.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Chart_Types.cs" Link="tests\DdlGBE_Chart_Types.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Document_Info.cs" Link="tests\DdlGBE_Document_Info.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Document_Style.cs" Link="tests\DdlGBE_Document_Style.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Document_Styles.cs" Link="tests\DdlGBE_Document_Styles.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Image_Layout.cs" Link="tests\DdlGBE_Image_Layout.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Index.cs" Link="tests\DdlGBE_Index.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Paragraph_Fields.cs" Link="tests\DdlGBE_Paragraph_Fields.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Paragraph_Font.cs" Link="tests\DdlGBE_Paragraph_Font.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Paragraph_Footnotes.cs" Link="tests\DdlGBE_Paragraph_Footnotes.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Paragraph_Hyperlinks.cs" Link="tests\DdlGBE_Paragraph_Hyperlinks.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Paragraph_Hyphenation.cs" Link="tests\DdlGBE_Paragraph_Hyphenation.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Paragraph_Layout.cs" Link="tests\DdlGBE_Paragraph_Layout.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Paragraph_OutlineLevel.cs" Link="tests\DdlGBE_Paragraph_OutlineLevel.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Paragraph_PagebreakControl.cs" Link="tests\DdlGBE_Paragraph_PagebreakControl.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Paragraph_Spaces.cs" Link="tests\DdlGBE_Paragraph_Spaces.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Paragraph_SpecialCharacters.cs" Link="tests\DdlGBE_Paragraph_SpecialCharacters.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Paragraph_Tabs.cs" Link="tests\DdlGBE_Paragraph_Tabs.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Section_HeaderAndFooter.cs" Link="tests\DdlGBE_Section_HeaderAndFooter.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Section_HorizontalPagebreak.cs" Link="tests\DdlGBE_Section_HorizontalPagebreak.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Section_MirrorMargins.cs" Link="tests\DdlGBE_Section_MirrorMargins.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Section_PageLayout.cs" Link="tests\DdlGBE_Section_PageLayout.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Section_PageNumbering.cs" Link="tests\DdlGBE_Section_PageNumbering.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Shape_Layout.cs" Link="tests\DdlGBE_Shape_Layout.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Table_CellLayout.cs" Link="tests\DdlGBE_Table_CellLayout.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Table_Inheritance.cs" Link="tests\DdlGBE_Table_Inheritance.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Table_Layout.cs" Link="tests\DdlGBE_Table_Layout.cs" />
+    <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_TextFrame_Layout.cs" Link="tests\DdlGBE_TextFrame_Layout.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="helper\" />
+    <Folder Include="tests\" />
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp\PdfSharp.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets\PdfSharp.Snippets.csproj" />
+    <ProjectReference Include="..\..\src\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
+    <ProjectReference Include="..\..\src\MigraDoc.Rendering\MigraDoc.Rendering.csproj" />
+  </ItemGroup>
+
+</Project>

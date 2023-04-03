@@ -1,0 +1,4 @@
+﻿<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('dotnet-test.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+</Project>

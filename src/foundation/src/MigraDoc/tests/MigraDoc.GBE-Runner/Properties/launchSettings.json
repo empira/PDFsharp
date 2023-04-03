@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "MigraDoc.GBE-Runner": {
+      "commandName": "Project",
+      "commandLineArgs": ""
+    },
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    }
+  }
+}

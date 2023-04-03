@@ -1,0 +1,2 @@
+PDFsharp is the Open Source .NET library that easily creates and processes PDF documents on the fly from any .NET language. The same drawing routines can be used to create PDF documents, draw on the screen, or send output to any printer.
+This is the PDFsharp PDF Core package. See Project Information for details.

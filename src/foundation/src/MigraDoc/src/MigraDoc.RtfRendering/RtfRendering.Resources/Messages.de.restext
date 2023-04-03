@@ -1,0 +1,17 @@
+; // MigraDoc - Creating Documents on the Fly
+; // See the LICENSE file in the solution root for more information.
+
+; ----- German (de) Messages ---------------------------------------------------
+;  Messages for German language
+;  that differ from the default messages.
+; ------------------------------------------------------------------------------
+
+UpdateField = < Feld bitte aktualisieren. >
+TextframeContentsNotTurned = Textrahmen-Inhalt konnte nicht gedreht werden. Nur Absätze können innerhalb von Textrahmen gedreht werden.
+ImageFreelyPlacedInWrongContext = Bilder können nur innerhalb von Abschnitten und Kopf- und Fußzeilen absolut auf der Seite platziert werden. Das Bild {0} wird ignoriert.
+ChartFreelyPlacedInWrongContext = Ein Diagramm wird ignoriert. Diagramme können nur innerhalb von Abschnitten und Kopf- und Fußzeilen absolut auf der Seite platziert werden.
+ImageNotFound = Bild '{0}' konnte nicht gefunden werden.
+ImageNotReadable = Bild '{0}' konnte nicht eingelesen werden. Es trat eine Ausnahme mit der folgenden Meldung auf:\n{1}
+ImageTypeNotSupported = Der Typ des Bildes '{0}' wird nicht unterstützt. Das Bild wird ignoriert.
+CharacterNotAllowedInDateFormat = Das Zeichen '{0}' ist für das Format eines Datumsfeldes nicht erlaubt und wird ignoriert.
+InvalidNumericFieldFormat = '{0}' ist kein gültiges Format für ein numerisches Feld und wird ignoriert.
