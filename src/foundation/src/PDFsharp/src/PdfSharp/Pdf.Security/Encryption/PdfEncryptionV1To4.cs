@@ -602,21 +602,31 @@ namespace PdfSharp.Pdf.Security.Encryption
             if (objectEncryptionKey is null || _objectEncryptionKeySize is 0)
                 throw TH.InvalidOperationException_EncryptionKeyNotSetForEncryptionVersion1To4();
 
-            // Initialize AES.
-            using var aes = Aes.Create();
-            aes.Mode = CipherMode.CBC;
-            aes.Padding = PaddingMode.PKCS7;
-            aes.BlockSize = 128; // 16 bytes
-            aes.KeySize = _objectEncryptionKeySize * 8;
+            try
+            {
+                // Initialize AES.
+                using var aes = Aes.Create();
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.PKCS7;
+                aes.BlockSize = 128; // 16 bytes
+                aes.KeySize = _objectEncryptionKeySize * 8;
 
-            // Read the prepended 16 byte AES initialization vector.
-            var iv = new byte[16];
-            Array.Copy(bytes, 0, iv, 0, 16);
+                // Read the prepended 16 byte AES initialization vector.
+                var iv = new byte[16];
+                Array.Copy(bytes, 0, iv, 0, 16);
 
-            // Decrypt the rest of the original bytes.
-            using var decryptor = aes.CreateDecryptor(objectEncryptionKey, iv);
-            var decrypted = decryptor.TransformFinalBlock(bytes, 16, bytes.Length - 16);
-            bytes = decrypted;
+                // Decrypt the rest of the original bytes.
+                using var decryptor = aes.CreateDecryptor(objectEncryptionKey, iv);
+                var decrypted = decryptor.TransformFinalBlock(bytes, 16, bytes.Length - 16);
+                bytes = decrypted;
+            }
+            catch (CryptographicException)
+            {
+                // Exception: "Padding is invalid and cannot be removed"
+                // no idea how to properly handle this, but in every encountered document that caused this behavior,
+                // the data was simply not encrypted.
+                // assume unencrypted data
+            }
         }
 
         /// <summary>

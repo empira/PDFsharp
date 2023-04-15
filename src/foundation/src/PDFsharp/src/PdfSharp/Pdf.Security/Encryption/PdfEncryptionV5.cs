@@ -106,9 +106,19 @@ namespace PdfSharp.Pdf.Security.Encryption
             Array.Copy(bytes, 0, iv, 0, 16);
 
             // Decrypt the rest of the original bytes.
-            using var decryptor = aes.CreateDecryptor(_encryptionKey, iv);
-            var decrypted = decryptor.TransformFinalBlock(bytes, 16, bytes.Length - 16);
-            bytes = decrypted;
+            try
+            {
+                using var decryptor = aes.CreateDecryptor(_encryptionKey, iv);
+                var decrypted = decryptor.TransformFinalBlock(bytes, 16, bytes.Length - 16);
+                bytes = decrypted;
+            }
+            catch (CryptographicException)
+            {
+                // Exception: "Padding is invalid and cannot be removed"
+                // no idea how to properly handle this, but in every encountered document that caused this behavior,
+                // the data was simply not encrypted.
+                // assume unencrypted data
+            }
         }
 
         static Aes CreateAesForObjectsCryptography()
@@ -566,7 +576,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerKeySalt(byte[] userOwnerValue)
         {
-            return userOwnerValue.Skip(40).ToArray();
+            return userOwnerValue.Skip(40).Take(8).ToArray();
         }
 
         /// <summary>

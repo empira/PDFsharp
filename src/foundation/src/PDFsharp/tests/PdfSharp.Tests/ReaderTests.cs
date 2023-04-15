@@ -8,11 +8,19 @@ using FluentAssertions;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace PdfSharp.Tests
 {
     public class ReaderTests
     {
+        private ITestOutputHelper output;
+
+        public ReaderTests(ITestOutputHelper testOutputHelper)
+        { 
+            output = testOutputHelper;
+        }
+
         [Fact]
         public void Read_empty_file()
         {
@@ -68,6 +76,57 @@ namespace PdfSharp.Tests
 
             doc3.Info.Author.Should().Be("empira");
             doc3.Info.Title.Should().Be("Test");
+        }
+
+        [Theory]
+        [InlineData("c:\\Temp\\TestPdf")]
+        public void TestListOfFiles(string basePath)
+        {
+            Directory.Exists(basePath).Should().BeTrue("Folder with Pdf-files should exist");
+            var allFiles = Directory.EnumerateFiles(basePath, "*.pdf", SearchOption.AllDirectories);
+            allFiles.Count().Should().BeGreaterThan(0, "Folder should contain at least one Pdf-file");
+            foreach (var file in allFiles)
+            {
+                VerifyPdfCanBeImported(file);
+            }
+        }
+
+        [Theory]
+        //[InlineData(@"c:\Temp\TestPdf\16E_0721_Neuaufnahmeantrag_ENG_CMYK_A4_Web_barrierefrei.pdf")]
+        //[InlineData(@"c:\Temp\TestPdf\issue #70 - Copy.PDF")]
+        //[InlineData(@"c:\Temp\TestPdf\apoBank\Produktprofile\Versicherungsbedingungen der R+V apoGoldCardPlus\Versicherungsbedingungen der R+V für die apoGoldCard Plus_06.2018.pdf")]
+        //[InlineData(@"c:\Temp\TestPdf\Wiener Städtische Versicherung AG\Formulare\Unfallmeldung\Unfallsmeldung_55ME201s.pdf")]
+        //[InlineData(@"c:\Temp\TestPdf\apoBank\Studenten\Studie Generation Y\generation-y.pdf")]
+        [InlineData(@"c:\Temp\TestPdf\apoBank\Über die apoBank\Halbjahresbericht 2020\apobank-halbjahresfinanzbericht-2020.pdf")]
+        // PNG-Decoder skipped:
+        //[InlineData(@"c:\Temp\TestPdf\16E_0721_Neuaufnahmeantrag_ENG_CMYK_A4_Web_barrierefrei.pdf")]
+        public void TestSingleFile(string filePath)
+        {
+            File.Exists(filePath).Should().BeTrue("File should exist");
+            VerifyPdfCanBeImported(filePath);
+        }
+
+        private bool VerifyPdfCanBeImported(string filePath)
+        {
+            try
+            {
+                var document = PdfReader.Open(filePath, PdfDocumentOpenMode.Import);
+                var documentCopy = new PdfDocument();
+                foreach (var page in document.Pages)
+                {
+                    documentCopy.AddPage(page);
+                }
+                documentCopy.Save(Path.Combine(Path.GetTempPath(), "out.pdf"));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                var message = string.Format("{0}:{1}{2}{1}{1}", filePath, Environment.NewLine, ex);
+                Console.WriteLine(message);
+                Console.WriteLine();
+                output.WriteLine(message);
+            }
+            return false;
         }
     }
 }

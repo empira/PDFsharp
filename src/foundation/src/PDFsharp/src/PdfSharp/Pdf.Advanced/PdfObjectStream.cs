@@ -34,6 +34,14 @@ namespace PdfSharp.Pdf.Advanced
         internal PdfObjectStream(PdfDictionary dict)
             : base(dict)
         {
+            // while objects inside an object-stream are not encrypted, the object-streams themself ARE !
+            // 7.5.7, Page 47:
+            // In an encrypted file (i.e., entire object stream is encrypted),
+            // strings occurring anywhere in an object stream shall not be separately encrypted.
+            var xrefEncrypt = _document._trailer.Elements[PdfTrailer.Keys.Encrypt] as PdfReference;
+            if (xrefEncrypt != null && _document.SecurityHandler != null)
+                _document.SecurityHandler.DecryptObject(dict);
+
             int n = Elements.GetInteger(Keys.N);
             int first = Elements.GetInteger(Keys.First);
             Stream.TryUnfilter();

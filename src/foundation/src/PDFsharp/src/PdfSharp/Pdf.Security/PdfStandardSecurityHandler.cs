@@ -183,6 +183,8 @@ namespace PdfSharp.Pdf.Security
 
         private string _ownerPassword = "";
 
+        private bool skipObjectStreams;
+
         /// <summary>
         /// Gets or sets the user access permission represented as an integer in the P key.
         /// </summary>
@@ -217,10 +219,19 @@ namespace PdfSharp.Pdf.Security
         /// </summary>
         internal void DecryptDocument()
         {
-            foreach (var iref in _document._irefTable.AllReferences)
+            // object streams are already decrypted
+            skipObjectStreams = true;
+            try
             {
-                if (!ReferenceEquals(iref.Value, this))
-                    DecryptObject(iref.Value);
+                foreach (var iref in _document._irefTable.AllReferences)
+                {
+                    if (!ReferenceEquals(iref.Value, this))
+                        DecryptObject(iref.Value);
+                }
+            }
+            finally
+            {
+                skipObjectStreams = false;
             }
         }
 
@@ -243,7 +254,7 @@ namespace PdfSharp.Pdf.Security
         /// <summary>
         /// Decrypts an indirect PdfObject.
         /// </summary>
-        void DecryptObject(PdfObject value)
+        internal void DecryptObject(PdfObject value)
         {
             Debug.Assert(value.Reference != null);
 
@@ -270,6 +281,14 @@ namespace PdfSharp.Pdf.Security
         /// </summary>
         void DecryptDictionary(PdfDictionary dict)
         {
+            // Pdf Reference 1.7, Chapter 7.5.8.2: The cross-reference stream shall not be encrypted
+            // Pdf Reference 1.7, Chapter 7.6.1: Strings in the Encryption-Dictionary shall not be encrypted
+            //if (dict.Elements.GetName("/Type") == "/XRef" || dict.ObjectNumber == ObjectNumber)
+            //    return;
+            // also skip objects read from object streams (already done in PdfObjectStream.ctor())
+            if (skipObjectStreams && (dict.Elements.GetName("/Type") == "/ObjStm" || dict.Reference != null && dict.Reference.Position < 0))
+                return;
+
             foreach (var item in dict.Elements)
             {
                 switch (item.Value)

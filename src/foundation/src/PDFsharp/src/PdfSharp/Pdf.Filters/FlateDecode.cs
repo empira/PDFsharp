@@ -156,6 +156,13 @@ namespace PdfSharp.Pdf.Filters
             zip.CopyTo(msOutput);
             msOutput.Flush();
 
+            if (msOutput.Length >= 0)
+            {
+                msOutput.Capacity = (int)msOutput.Length;
+                if (parms?.DecodeParms != null)
+                    return StreamDecoder.Decode(msOutput.GetBuffer(), parms.DecodeParms);
+            }
+
             return msOutput.GetBuffer();
 #else
             InflaterInputStream iis = new InflaterInputStream(msInput, new Inflater(false));

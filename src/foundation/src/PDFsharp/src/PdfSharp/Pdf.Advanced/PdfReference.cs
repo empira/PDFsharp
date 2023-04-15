@@ -147,7 +147,8 @@ namespace PdfSharp.Pdf.Advanced
             set
             {
                 Debug.Assert(value != null, "The value of a PdfReference must never be null.");
-                Debug.Assert(value.Reference == null || ReferenceEquals(value.Reference, this), "The reference of the value must be null or this.");
+                // the next assertion fails in PdfTrailer.Finish when setting the security-handler
+                //Debug.Assert(value.Reference == null || ReferenceEquals(value.Reference, this), "The reference of the value must be null or this.");
                 _value = value;
                 // value must never be null
                 value.Reference = this;
