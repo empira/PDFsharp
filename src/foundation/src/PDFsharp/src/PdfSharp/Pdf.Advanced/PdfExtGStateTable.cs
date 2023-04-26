@@ -1,8 +1,6 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.Collections.Generic;
-
 namespace PdfSharp.Pdf.Advanced
 {
     /// <summary>
@@ -49,9 +47,11 @@ namespace PdfSharp.Pdf.Advanced
             string key = PdfExtGState.MakeKey(alpha, overprint);
             if (!_nonStrokeStates.TryGetValue(key, out var extGState))
             {
-                extGState = new PdfExtGState(Owner);
-                //extGState.Elements[PdfExtGState.Keys.ca] = new PdfReal(alpha);
-                extGState.NonStrokeAlpha = alpha;
+                extGState = new PdfExtGState(Owner)
+                {
+                    //extGState.Elements[PdfExtGState.Keys.ca] = new PdfReal(alpha);
+                    NonStrokeAlpha = alpha
+                };
                 if (overprint)
                 {
                     extGState.NonStrokeOverprint = true;

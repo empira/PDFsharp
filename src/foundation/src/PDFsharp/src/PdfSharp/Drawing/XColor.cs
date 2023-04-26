@@ -737,9 +737,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public string RgbCmykG
         {
-            get =>  // BUG Formatting of float values is missing.
-                String.Format(CultureInfo.InvariantCulture,
-                    "{0};{1};{2};{3};{4};{5};{6};{7};{8}", _r, _g, _b, _c, _m, _y, _k, _gs, _a);
+            get => Invariant($"{_r};{_g};{_b};{_c:0.###};{_m:0.###};{_y:0.###};{_k:0.###};{_gs:0.###};{_a:0.###}");
             set
             {
                 string[] values = value.Split(';');

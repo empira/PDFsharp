@@ -46,7 +46,7 @@ namespace PdfSharp.Pdf.Advanced
             if (!IsSymbolFont)
                 Encoding = "/WinAnsiEncoding";
 
-            Owner._irefTable.Add(FontDescriptor);
+            Owner.IrefTable.Add(FontDescriptor);
             Elements[Keys.FontDescriptor] = FontDescriptor.Reference;
 
             FontEncoding = font.PdfOptions.FontEncoding;

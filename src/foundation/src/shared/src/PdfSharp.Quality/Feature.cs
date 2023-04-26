@@ -1,21 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+#if WPF
 using System.IO;
-using System.Text;
+#endif
+using Microsoft.Extensions.Logging;
+using PdfSharp.Logging;
 using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Quality
 {
-    public abstract class FeatureBase : CommonBase
+    /// <summary>
+    /// Base class for features.
+    /// </summary>
+    public abstract class Feature : FeatureAndSnippetBase
     {
-        protected static void RenderSnippetAsPdf(SnippetBase snippet)
+        /// <summary>
+        /// Renders a code snippet to PDF.
+        /// </summary>
+        /// <param name="snippet">A code snippet.</param>
+        protected void RenderSnippetAsPdf(Snippet snippet)
         {
             snippet.RenderSnippetAsPdf();
             snippet.SaveAndShowFile(snippet.PdfBytes, "", true);
         }
 
-#if true
         /// <summary>
         /// Creates a PDF test document.
         /// </summary>
@@ -28,6 +38,13 @@ namespace PdfSharp.Quality
             return document;
         }
 
+        /// <summary>
+        /// Saves a PDF document to stream or save to file.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <param name="stream">The stream.</param>
+        /// <param name="filenameTag">The filename tag.</param>
+        /// <param name="show">if set to <c>true</c> [show].</param>
         protected string? SaveToStreamOrSaveToFile(PdfDocument document, Stream? stream, string filenameTag, bool show)
         {
             string? filename;
@@ -49,31 +66,27 @@ namespace PdfSharp.Quality
             return filename;
         }
 
-#if true //CORE || GDI || WPF
+        /// <summary>
+        /// Saves a PDF document and show it document.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <param name="filenameTag">The filename tag.</param>
         protected string SaveAndShowDocument(PdfDocument document, string filenameTag)
         {
             // Save the PDF document...
             var filename = SaveDocument(document, filenameTag);
 
             // ... and start a viewer.
-            Process.Start(filename);
+            Process.Start(new ProcessStartInfo(filename) { UseShellExecute = true });
 
             return filename;
         }
-#endif
 
-        //#if NET/FX_CORE
-        //        protected async Task<string> SaveAndShowDocumentAsync(PdfDocument document, string filenameTag)
-        //        {
-        //            // Save the PDF document...
-        //            string filename = await SaveDocumentAsync(document, filenameTag);
-
-        //            // ... and start a viewer.
-        //            //Process.Start(filename);
-        //            return filename;
-        //        }
-        //#endif
-
+        /// <summary>
+        /// Saves a PDF document into a file.
+        /// </summary>
+        /// <param name="document">The PDF document.</param>
+        /// <param name="filenameTag">The tag of the PDF file.</param>
         protected string SaveDocument(PdfDocument document, string filenameTag)
         {
             var filename = Invariant($"{Guid.NewGuid():N}_{filenameTag}_tempfile.pdf");
@@ -81,7 +94,38 @@ namespace PdfSharp.Quality
             return filename;
         }
 
-#if false //true || !NET/FX_CORE
+        /// <summary>
+        /// Reads and writes a PDF document.
+        /// </summary>
+        /// <param name="filename">The PDF file to read.</param>
+        /// <param name="passwordProvider">The password provider if the file is protected.</param>
+        protected string ReadWritePdfDocument(string filename, PdfPasswordProvider? passwordProvider = null)
+        {
+            var outFilename = Path.GetFileNameWithoutExtension(filename) + "_" + Path.GetExtension(filename);
+            try
+            {
+                PdfDocument document;
+                if (passwordProvider is null)
+                    document = PdfReader.Open(filename, PdfDocumentOpenMode.Import);
+                else
+                    document = PdfReader.Open(filename, PdfDocumentOpenMode.Import, passwordProvider);
+
+                var outDocument = new PdfDocument();
+                foreach (var page in document.Pages)
+                {
+                    outDocument.AddPage(page);
+                }
+                outDocument.Save(outFilename);
+            }
+            catch (Exception ex)
+            {
+                LogHost.Logger.LogError(ex, $"{nameof(ReadWritePdfDocument)} failed with file '{filename}'.");
+                throw;
+            }
+            return outFilename;
+        }
+
+#if true_
         Task<ProcessorArchitecture> WhatProcessor()
         {
             var t = new TaskCompletionSource<ProcessorArchitecture>();
@@ -112,7 +156,6 @@ namespace PdfSharp.Quality
             w.InvokeScript("execScript", new[] { "window.external.notify(navigator.userAgent); " });
             return t.Task;
         }
-#endif
 #endif
     }
 }

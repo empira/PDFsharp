@@ -1,11 +1,13 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using System.Security.Cryptography;
 using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Internal
 {
     /// <summary>
+    /// Throw helper class of PDFsharp.
     /// </summary>
     // ReSharper disable once InconsistentNaming
     static class TH
@@ -24,6 +26,9 @@ namespace PdfSharp.Internal
 
         public static InvalidOperationException InvalidOperationException_EncryptionRevisionValueNotYetCalculated() =>
             new("The encryption revision value has not been calculated.");
+
+        public static CryptographicException CryptographicException_InputDataTooShort() =>
+            new("The input data is too short to hold encrypted content.");
         #endregion
 
         #region Version1-4

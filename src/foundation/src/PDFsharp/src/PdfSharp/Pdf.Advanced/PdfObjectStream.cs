@@ -34,6 +34,12 @@ namespace PdfSharp.Pdf.Advanced
         internal PdfObjectStream(PdfDictionary dict)
             : base(dict)
         {
+            // While objects inside an object-stream are not encrypted, the object-streams themselves are.
+            // PDF Reference 2.0: 7.5.7, Page 63:
+            // "In an encrypted file (i.e., entire object stream is encrypted), strings occurring anywhere in an object stream shall not be separately encrypted."
+            // Object Stream must be decrypted here to remove compression filter.
+            _document.EffectiveSecurityHandler?.DecryptObjectStream(this);
+
             int n = Elements.GetInteger(Keys.N);
             int first = Elements.GetInteger(Keys.First);
             Stream.TryUnfilter();
@@ -97,7 +103,7 @@ namespace PdfSharp.Pdf.Advanced
         /// The second integer represents the absolute offset of that object in the decoded stream,
         /// i.e. the byte offset plus First entry.
         /// </summary>
-        readonly int[][] _header = null!; // NRT  // Reference: Page 102
+        readonly int[][] _header = default!; // Reference: Page 102
 
         /// <summary>
         /// Predefined keys common to all font dictionaries.

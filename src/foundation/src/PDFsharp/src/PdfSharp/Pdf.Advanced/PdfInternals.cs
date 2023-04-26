@@ -27,35 +27,35 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public string FirstDocumentID
         {
-            get => _document._trailer.GetDocumentID(0);
-            set => _document._trailer.SetDocumentID(0, value);
+            get => _document.Trailer.GetDocumentID(0);
+            set => _document.Trailer.SetDocumentID(0, value);
         }
 
         /// <summary>
         /// Gets the first document identifier as GUID.
         /// </summary>
-        public Guid FirstDocumentGuid => GuidFromString(_document._trailer.GetDocumentID(0));
+        public Guid FirstDocumentGuid => GuidFromString(_document.Trailer.GetDocumentID(0));
 
         /// <summary>
         /// Gets or sets the second document identifier.
         /// </summary>
         public string SecondDocumentID
         {
-            get => _document._trailer.GetDocumentID(1);
-            set => _document._trailer.SetDocumentID(1, value);
+            get => _document.Trailer.GetDocumentID(1);
+            set => _document.Trailer.SetDocumentID(1, value);
         }
 
         /// <summary>
         /// Gets the first document identifier as GUID.
         /// </summary>
-        public Guid SecondDocumentGuid => GuidFromString(_document._trailer.GetDocumentID(0));
+        public Guid SecondDocumentGuid => GuidFromString(_document.Trailer.GetDocumentID(0));
 
         Guid GuidFromString(string id)
         {
-            if (id == null || id.Length != 16)
+            if (id is not { Length: 16 })
                 return Guid.Empty;
 
-            StringBuilder guid = new StringBuilder();
+            var guid = new StringBuilder();
             for (int idx = 0; idx < 16; idx++)
                 guid.AppendFormat("{0:X2}", (byte)id[idx]);
 
@@ -84,7 +84,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public PdfObject? GetObject(PdfObjectID objectID)
         {
-            return _document._irefTable[objectID]?.Value;
+            return _document.IrefTable[objectID]?.Value;
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public PdfObject[] GetAllObjects()
         {
-            PdfReference[] irefs = _document._irefTable.AllReferences;
+            PdfReference[] irefs = _document.IrefTable.AllReferences;
             int count = irefs.Length;
             PdfObject[] objects = new PdfObject[count];
             for (int idx = 0; idx < count; idx++)
@@ -167,7 +167,7 @@ namespace PdfSharp.Pdf.Advanced
         {
 #if true
             T obj = Activator.CreateInstance<T>();
-            _document._irefTable.Add(obj);
+            _document.IrefTable.Add(obj);
 #else
             T result = null;
             ConstructorInfo ctorInfo = typeof(T).GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.ExactBinding,
@@ -195,7 +195,7 @@ namespace PdfSharp.Pdf.Advanced
                 obj.Document = _document;
             else if (obj.Owner != _document)
                 throw new InvalidOperationException("Object does not belong to this document.");
-            _document._irefTable.Add(obj);
+            _document.IrefTable.Add(obj);
         }
 
         /// <summary>
@@ -210,7 +210,7 @@ namespace PdfSharp.Pdf.Advanced
             if (obj.Owner != _document)
                 throw new InvalidOperationException("Object does not belong to this document.");
 
-            _document._irefTable.Remove(obj.Reference);
+            _document.IrefTable.Remove(obj.Reference);
         }
 
         /// <summary>
@@ -231,7 +231,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public PdfObject[] GetClosure(PdfObject obj, int depth)
         {
-            PdfReference[] references = _document._irefTable.TransitiveClosure(obj, depth);
+            PdfReference[] references = _document.IrefTable.TransitiveClosure(obj, depth);
             int count = references.Length + 1;
             PdfObject[] objects = new PdfObject[count];
             objects[0] = obj;

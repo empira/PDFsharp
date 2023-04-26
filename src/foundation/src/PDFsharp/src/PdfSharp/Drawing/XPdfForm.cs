@@ -33,8 +33,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         internal XPdfForm(string path)
         {
-            int pageNumber;
-            path = ExtractPageNumber(path, out pageNumber);
+            path = ExtractPageNumber(path, out var pageNumber);
 
             path = Path.GetFullPath(path);
             if (!File.Exists(path))
@@ -159,7 +158,6 @@ namespace PdfSharp.Drawing
             get => _placeHolder;
             set => _placeHolder = value;
         }
-
         XImage? _placeHolder;
 
         /// <summary>
@@ -201,7 +199,7 @@ namespace PdfSharp.Drawing
         {
             get
             {
-                PdfPage page = ExternalDocument.Pages[_pageNumber - 1];
+                var page = ExternalDocument.Pages[_pageNumber - 1];
                 return page.Width;
             }
         }
@@ -214,7 +212,7 @@ namespace PdfSharp.Drawing
         {
             get
             {
-                PdfPage page = ExternalDocument.Pages[_pageNumber - 1];
+                var page = ExternalDocument.Pages[_pageNumber - 1];
                 return page.Height;
             }
         }
@@ -226,7 +224,7 @@ namespace PdfSharp.Drawing
         {
             get
             {
-                PdfPage page = ExternalDocument.Pages[_pageNumber - 1];
+                var page = ExternalDocument.Pages[_pageNumber - 1];
                 return page.Width;
             }
         }
@@ -238,7 +236,7 @@ namespace PdfSharp.Drawing
         {
             get
             {
-                PdfPage page = ExternalDocument.Pages[_pageNumber - 1];
+                var page = ExternalDocument.Pages[_pageNumber - 1];
                 return page.Height;
             }
         }

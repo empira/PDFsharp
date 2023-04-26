@@ -5,8 +5,6 @@
         <RootNamespace>MigraDoc</RootNamespace>
         <DefineConstants>GDI</DefineConstants>
         <!--<UseWindowsForms>true</UseWindowsForms>-->
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
         <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     </PropertyGroup>
 

@@ -6,7 +6,7 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Drawings
 {
-    public class TextAlignmentLeft : SnippetBase
+    public class TextAlignmentLeft : Snippet
     {
         // Some chars with ascenders and descenders.
         const string TestChars = " Îygp";

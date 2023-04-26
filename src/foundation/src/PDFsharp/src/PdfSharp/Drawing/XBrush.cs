@@ -2,12 +2,9 @@
 // See the LICENSE file in the solution root for more information.
 
 #if GDI
-using System;
-using System.Drawing;
 using System.Drawing.Drawing2D;
 #endif
 #if WPF
-using System.Windows.Media;
 #endif
 #if UWP
 using Microsoft.Graphics.Canvas.Brushes;
@@ -39,7 +36,7 @@ namespace PdfSharp.Drawing
             }
             else if (brush is LinearGradientBrush lgBrush)
             {
-                // TODO: xbrush = new LinearGradientBrush(lgBrush.Rectangle, lgBrush.co(solidBrush.Color);
+                // xbrush = new LinearGradientBrush(lgBrush.Rectangle, lgBrush.co(solidBrush.Color);
                 throw new NotImplementedException("XBrush type not yet supported by PDFsharp.");
             }
             else

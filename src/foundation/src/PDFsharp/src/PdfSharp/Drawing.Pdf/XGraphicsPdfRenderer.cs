@@ -6,11 +6,9 @@
 using System.Text;
 using PdfSharp.Events;
 #if GDI
-using System.Drawing;
 using System.Drawing.Drawing2D;
 #endif
 #if WPF
-using System.Windows;
 using System.Windows.Media;
 using SysPoint = System.Windows.Point;
 using SysSize = System.Windows.Size;
@@ -75,17 +73,17 @@ namespace PdfSharp.Drawing.Pdf
                 var content2 = _page.RenderContent!; // NRT
                 content2.CreateStream(PdfEncoders.RawEncoding.GetBytes(GetContent()));
 
-                _gfx = null!; // NRT
-                _page.RenderContent!._pdfRenderer = null!; // NRT
-                _page.RenderContent = null!; // NRT
-                _page = null!; // NRT
+                _gfx = default!;
+                _page.RenderContent!._pdfRenderer = default!;
+                _page.RenderContent = default!;
+                _page = default!;
             }
             else if (_form != null!)
             {
                 _form._pdfForm!.CreateStream(PdfEncoders.RawEncoding.GetBytes(GetContent())); // NRT
-                _gfx = null!; // NRT
-                _form.PdfRenderer = null!; // NRT
-                _form = null!; // NRT
+                _gfx = default!;
+                _form.PdfRenderer = default!;
+                _form = default!;
             }
         }
 
@@ -102,7 +100,7 @@ namespace PdfSharp.Drawing.Pdf
         /// </summary>
         public void DrawLine(XPen pen, double x1, double y1, double x2, double y2)
         {
-            DrawLines(pen, new XPoint[] { new XPoint(x1, y1), new XPoint(x2, y2) });
+            DrawLines(pen, new XPoint[] { new(x1, y1), new(x2, y2) });
         }
 
         // ----- DrawLines ----------------------------------------------------------------------------
@@ -137,7 +135,7 @@ namespace PdfSharp.Drawing.Pdf
 
         public void DrawBezier(XPen pen, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)
         {
-            DrawBeziers(pen, new XPoint[] { new XPoint(x1, y1), new XPoint(x2, y2), new XPoint(x3, y3), new XPoint(x4, y4) });
+            DrawBeziers(pen, new XPoint[] { new(x1, y1), new(x2, y2), new(x3, y3), new(x4, y4) });
         }
 
         // ----- DrawBeziers --------------------------------------------------------------------------
@@ -236,7 +234,9 @@ namespace PdfSharp.Drawing.Pdf
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
             if (pen == null && brush == null)
+            {    // ReSharper disable once NotResolvedInText
                 throw new ArgumentNullException("pen and brush");
+            }
 
             const string format = Config.SignificantFigures3;
 
@@ -810,6 +810,7 @@ namespace PdfSharp.Drawing.Pdf
 
         public void BeginContainer(XGraphicsContainer container, XRect dstrect, XRect srcrect, XGraphicsUnit unit)
         {
+            // TODO implement begin container
             // Before saving, the current transformation matrix must be completely realized.
             BeginGraphicMode();
             RealizeTransform();
@@ -1168,9 +1169,8 @@ namespace PdfSharp.Drawing.Pdf
 
             Debug.Assert(pathStart == PathStart.Ignore1st);
 
-            int pieces;
             var points = GeometryHelper.ArcToBezier(point1.X, point1.Y, size.Width, size.Height, rotationAngle, isLargeArc,
-              sweepDirection == SweepDirection.Clockwise, point2.X, point2.Y, out pieces);
+              sweepDirection == SweepDirection.Clockwise, point2.X, point2.Y, out var pieces);
             if (points == null)
                 return;
 
@@ -1313,7 +1313,10 @@ namespace PdfSharp.Drawing.Pdf
         internal void AppendPath(GraphicsPath path)
         {
 #if true
-            AppendPath(XGraphics.MakeXPointArray(path.PathPoints, 0, path.PathPoints.Length), path.PathTypes);
+            if (path.PointCount == 0)
+                return; // Return if nothing to do.
+            var points = path.PathPoints; // Call the getter only once.
+            AppendPath(XGraphics.MakeXPointArray(points, 0, points.Length), path.PathTypes);
 #else
             int count = path.PointCount;
             if (count == 0)
@@ -1512,7 +1515,7 @@ namespace PdfSharp.Drawing.Pdf
                         else if (type == typeof(PolyQuadraticBezierSegment))
                         {
                             PolyQuadraticBezierSegment seg = (PolyQuadraticBezierSegment)segment;
-                            currentPoint = seg.Points[seg.Points.Count - 1];
+                            currentPoint = seg.Points[^1];
                             // TODOWPF: Undone because XGraphics has no such curve type
                             throw new NotImplementedException("AppendPath with PolyQuadraticBezierSegment.");
                         }
@@ -1769,13 +1772,16 @@ namespace PdfSharp.Drawing.Pdf
         /// </summary>
         internal void BeginGraphicMode()
         {
-            if (_streamMode != StreamMode.Graphic)
-            {
-                if (_streamMode == StreamMode.Text)
-                    _content.Append("ET\n");
+            if (_streamMode == StreamMode.Graphic)
+                return;
 
-                _streamMode = StreamMode.Graphic;
-            }
+            Debug.Assert(_streamMode == StreamMode.Text, "Undefined stream mode. Check what happened.");
+
+            // Why the check?
+            if (_streamMode == StreamMode.Text)
+                _content.Append("ET\n");
+
+            _streamMode = StreamMode.Graphic;
         }
 
         /// <summary>
@@ -1783,20 +1789,20 @@ namespace PdfSharp.Drawing.Pdf
         /// </summary>
         internal void BeginTextMode()
         {
-            if (_streamMode != StreamMode.Text)
-            {
-                _streamMode = StreamMode.Text;
-                _content.Append("BT\n");
-                // Text matrix is empty after BT
-                _gfxState.RealizedTextPosition = new XPoint();
-                _gfxState.ItalicSimulationOn = false;
-            }
+            if (_streamMode == StreamMode.Text)
+                return;
+
+            Debug.Assert(_streamMode == StreamMode.Graphic, "Undefined stream mode. Check what happened.");
+
+            _streamMode = StreamMode.Text;
+            _content.Append("BT\n");
+            // Text matrix is empty after BT.
+            _gfxState.RealizedTextPosition = new XPoint();
+            _gfxState.ItalicSimulationOn = false;
         }
 
         internal bool IsInTextMode()  // @PDF/UA
-        {
-            return _streamMode == StreamMode.Text;
-        }
+            => _streamMode == StreamMode.Text;
 
         StreamMode _streamMode;
 
@@ -2040,12 +2046,12 @@ namespace PdfSharp.Drawing.Pdf
         }
 
         // ReSharper disable InconsistentNaming
-        internal PdfPage _page = null!; // NRT
-        internal XForm _form = null!; // NRT
+        internal PdfPage _page = default!;
+        internal XForm _form = default!;
         internal PdfColorMode _colorMode;
         XGraphicsPdfPageOptions _options;
         XGraphics _gfx;
-        internal readonly StringBuilder _content = null!; // NRT
+        internal readonly StringBuilder _content = default!;
         // ReSharper restore InconsistentNaming
 
         /// <summary>
@@ -2112,7 +2118,7 @@ namespace PdfSharp.Drawing.Pdf
         /// <summary>
         /// The graphical state stack.
         /// </summary>
-        readonly Stack<PdfGraphicsState> _gfxStateStack = new Stack<PdfGraphicsState>();
+        readonly Stack<PdfGraphicsState> _gfxStateStack = new();
 
         #endregion
 

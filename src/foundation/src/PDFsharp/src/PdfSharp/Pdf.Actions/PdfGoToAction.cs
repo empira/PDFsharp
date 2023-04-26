@@ -40,7 +40,7 @@ namespace PdfSharp.Pdf.Actions
             };
             return action;
         }
-        string _destinationName = null!;// NRT
+        string _destinationName = default!;
 
         void Inititalize()
         {

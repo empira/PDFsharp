@@ -3,12 +3,8 @@
 
 using System.Runtime.InteropServices;
 #if GDI
-using System.Drawing;
-using System.Drawing.Drawing2D;
 #endif
 #if WPF
-using System.Windows;
-using System.Windows.Media;
 #endif
 using PdfSharp.Internal;
 
@@ -43,7 +39,6 @@ namespace PdfSharp.Drawing
             _offsetX = offsetX;
             _offsetY = offsetY;
             _type = XMatrixTypes.Unknown;
-            //_padding = 0;
             DeriveMatrixType();
         }
 
@@ -79,15 +74,6 @@ namespace PdfSharp.Drawing
                 // ReSharper restore CompareOfFloatsByEqualityOperator
             }
         }
-
-        ///// <summary>
-        ///// Gets an array of double values that represents the elements of this matrix.
-        ///// </summary>
-        //[Obsolete("Use GetElements().")]
-        //public double[] Elements
-        //{
-        //  get { return GetElements(); }
-        //}
 
         /// <summary>
         /// Gets an array of double values that represents the elements of this matrix.

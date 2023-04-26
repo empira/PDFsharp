@@ -43,7 +43,7 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Font
 {
-    public class DefaultWindowsFontsSnippet : SnippetBase
+    public class DefaultWindowsFontsSnippet : Snippet
     {
         const string Text = "Sphinx";
         const string Text2 = "Sphinx abc test";
@@ -262,7 +262,7 @@ namespace PdfSharp.Snippets.Font
         }
     }
 
-    public class FontFamilyConstructionSnippet : SnippetBase
+    public class FontFamilyConstructionSnippet : Snippet
     {
         const string Text = "Sphinx";
 
@@ -432,7 +432,7 @@ namespace PdfSharp.Snippets.Font
         }
     }
 
-    public class PlatformFontConstructionSnippet : SnippetBase
+    public class PlatformFontConstructionSnippet : Snippet
     {
         const string Text = "Sphinx";
         const string Text2 = "Sphinx abc test";
@@ -710,7 +710,7 @@ namespace PdfSharp.Snippets.Font
         }
     }
 
-    public class PrivateFontCollectionSnippet : SnippetBase
+    public class PrivateFontCollectionSnippet : Snippet
     {
         const string Text = "Sphinx";
         const double EmSize = 24;
@@ -824,7 +824,7 @@ namespace PdfSharp.Snippets.Font
         }
     }
 
-    public class FrutigerFontsSnippet : SnippetBase
+    public class FrutigerFontsSnippet : Snippet
     {
         const string Text = "XÄß-Sphinx";
         const double EmSize = 24;
@@ -996,7 +996,7 @@ namespace PdfSharp.Snippets.Font
         }
     }
 
-    public class HelveticaNeueFontsSnippet : SnippetBase
+    public class HelveticaNeueFontsSnippet : Snippet
     {
         const string Text = "Sphinx";
         const double EmSize = 24;

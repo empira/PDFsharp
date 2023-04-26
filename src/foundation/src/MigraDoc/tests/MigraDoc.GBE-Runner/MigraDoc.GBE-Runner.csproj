@@ -4,8 +4,6 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>MigraDoc.GBE_Runner</RootNamespace>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <StartupObject>MigraDoc.GBE_Runner.Program</StartupObject>
   </PropertyGroup>
 

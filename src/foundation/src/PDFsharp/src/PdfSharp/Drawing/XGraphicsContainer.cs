@@ -27,6 +27,6 @@ namespace PdfSharp.Drawing
         internal XGraphicsContainer()
         { }
 #endif
-        internal InternalGraphicsState InternalState = null!; // NRT
+        internal InternalGraphicsState InternalState = default!;
     }
 }

@@ -12,7 +12,7 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Font
 {
-    public class SegoeWpFontResolverSnippet : SnippetBase
+    public class SegoeWpFontResolverSnippet : Snippet
     {
         static readonly IFontResolver GlobalFontResolver = new SegoeWpFontResolver();
 

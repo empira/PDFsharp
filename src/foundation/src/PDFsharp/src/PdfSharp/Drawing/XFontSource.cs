@@ -141,15 +141,15 @@ namespace PdfSharp.Drawing
 
         internal static byte[] ReadFontBytesFromWpf(WpfGlyphTypeface wpfGlyphTypeface)
         {
-            using (Stream fontStream = wpfGlyphTypeface.GetFontStream())
-            {
-                if (fontStream == null)
-                    throw new InvalidOperationException("Cannot retrieve font data.");
-                int size = (int)fontStream.Length;
-                byte[] bytes = new byte[size];
-                fontStream.Read(bytes, 0, size);
-                return bytes;
-            }
+            using Stream? fontStream = wpfGlyphTypeface.GetFontStream();
+            if (fontStream == null)
+                throw new InvalidOperationException("Cannot retrieve font data.");
+
+            int size = (int)fontStream.Length;
+            byte[] bytes = new byte[size];
+            var readBytes = fontStream.Read(bytes, 0, size);
+            Debug.Assert(readBytes == size);
+            return bytes;
         }
 #endif
 
@@ -219,7 +219,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public string FontName => _fontName;
 
-        string _fontName = default!; // NRT
+        string _fontName = default!;
 
         /// <summary>
         /// Gets the bytes of the font.

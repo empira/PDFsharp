@@ -1,8 +1,6 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-#pragma warning disable 1591
-
 namespace MigraDoc.DocumentObjectModel.Shapes.Charts
 {
     /// <summary>
@@ -10,15 +8,45 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
     /// </summary>
     public enum MarkerStyle
     {
+        /// <summary>
+        /// No marker.
+        /// </summary>
         None,
+        /// <summary>
+        /// Circle.
+        /// </summary>
         Circle,
+        /// <summary>
+        /// Dash.
+        /// </summary>
         Dash,
+        /// <summary>
+        /// Diamond.
+        /// </summary>
         Diamond,
+        /// <summary>
+        /// Dot.
+        /// </summary>
         Dot,
+        /// <summary>
+        /// Plus.
+        /// </summary>
         Plus,
+        /// <summary>
+        /// Square.
+        /// </summary>
         Square,
+        /// <summary>
+        /// Star.
+        /// </summary>
         Star,
+        /// <summary>
+        /// Triangle.
+        /// </summary>
         Triangle,
+        /// <summary>
+        /// X-shaped marker.
+        /// </summary>
         X
     }
 }

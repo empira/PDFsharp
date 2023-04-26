@@ -5,12 +5,8 @@ using System.Runtime.InteropServices;
 #if CORE
 #endif
 #if GDI
-using System.Drawing;
-using System.Drawing.Drawing2D;
 #endif
 #if WPF
-using System.Windows;
-using System.Windows.Media;
 using SysPoint = System.Windows.Point;
 using SysSize = System.Windows.Size;
 using SysRect = System.Windows.Rect;
@@ -746,7 +742,7 @@ namespace PdfSharp.Drawing
 
         static XRect CreateEmptyRect()
         {
-            return new XRect
+            return new()
             {
                 _x = double.PositiveInfinity,
                 _y = double.PositiveInfinity,
@@ -755,12 +751,7 @@ namespace PdfSharp.Drawing
             };
         }
 
-        static XRect()
-        {
-            s_empty = CreateEmptyRect();
-        }
-
-        static readonly XRect s_empty;
+        static readonly XRect s_empty = CreateEmptyRect();
 
         /// <summary>
         /// Gets the DebuggerDisplayAttribute text.

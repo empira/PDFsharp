@@ -1,8 +1,6 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-#pragma warning disable 1591
-
 namespace MigraDoc.DocumentObjectModel
 {
     /// <summary>
@@ -11,29 +9,79 @@ namespace MigraDoc.DocumentObjectModel
     // TODO: Change this class and store symbolName and char in different fields.
     public class Character : DocumentObject
     {
-        // \space
+        // ===== \space =====
+        /// <summary>
+        /// A regular blank.
+        /// </summary>
         public static readonly Character Blank = new Character(SymbolName.Blank);
+        /// <summary>
+        /// An n-width blank.
+        /// </summary>
         public static readonly Character En = new Character(SymbolName.En);
+        /// <summary>
+        /// An em-width blank.
+        /// </summary>
         public static readonly Character Em = new Character(SymbolName.Em);
+        /// <summary>
+        /// A blank that is a quarter of em wide.
+        /// </summary>
         public static readonly Character EmQuarter = new Character(SymbolName.EmQuarter);
+        /// <summary>
+        /// A blank that is a quarter of em wide.
+        /// </summary>
         public static readonly Character Em4 = new Character(SymbolName.Em4);
 
-        // used to serialize as \tab, \linebreak
+        // ===== Used to serialize as \tab, \linebreak =====
+        /// <summary>
+        /// A tabulator.
+        /// </summary>
         public static readonly Character Tab = new Character(SymbolName.Tab);
-
+        /// <summary>
+        /// A line break.
+        /// </summary>
         public static readonly Character LineBreak = new Character(SymbolName.LineBreak);
         //public static readonly Character MarginBreak         = new Character(SymbolName.MarginBreak);
 
-        // \symbol
+        // ===== \symbol =====
+        /// <summary>
+        /// The Euro symbol €.
+        /// </summary>
         public static readonly Character Euro = new Character(SymbolName.Euro);
+        /// <summary>
+        /// The copyright symbol ©.
+        /// </summary>
         public static readonly Character Copyright = new Character(SymbolName.Copyright);
+        /// <summary>
+        /// The trademark symbol ™.
+        /// </summary>
         public static readonly Character Trademark = new Character(SymbolName.Trademark);
+        /// <summary>
+        /// The registered trademark symbol ®.
+        /// </summary>
         public static readonly Character RegisteredTrademark = new Character(SymbolName.RegisteredTrademark);
+        /// <summary>
+        /// The bullet symbol •.
+        /// </summary>
         public static readonly Character Bullet = new Character(SymbolName.Bullet);
+        /// <summary>
+        /// The not symbol ¬.
+        /// </summary>
         public static readonly Character Not = new Character(SymbolName.Not);
+        /// <summary>
+        /// The em dash —.
+        /// </summary>
         public static readonly Character EmDash = new Character(SymbolName.EmDash);
+        /// <summary>
+        /// The en dash –.
+        /// </summary>
         public static readonly Character EnDash = new Character(SymbolName.EnDash);
+        /// <summary>
+        /// A no-break space.
+        /// </summary>
         public static readonly Character NonBreakableBlank = new Character(SymbolName.NonBreakableBlank);
+        /// <summary>
+        /// A no-break space.
+        /// </summary>
         public static readonly Character HardBlank = new Character(SymbolName.HardBlank);
 
         /// <summary>

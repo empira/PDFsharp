@@ -6,8 +6,6 @@
         <DefineConstants>WPF</DefineConstants>
         <UseWindowsForms>true</UseWindowsForms>
         <UseWPF>true</UseWPF>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
         <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     </PropertyGroup>
 

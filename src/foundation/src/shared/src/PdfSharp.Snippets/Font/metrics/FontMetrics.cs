@@ -19,7 +19,7 @@ using System.Windows.Media;
 
 namespace PdfSharp.Snippets.Font
 {
-    public class FontMetrics : FeatureBase
+    public class FontMetrics : Feature
     {
         public static void TestFontMetrics()
         {

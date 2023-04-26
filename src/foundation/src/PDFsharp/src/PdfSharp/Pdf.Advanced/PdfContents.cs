@@ -51,7 +51,7 @@ namespace PdfSharp.Pdf.Advanced
 
             SetModified();
             PdfContent content = new PdfContent(Owner);
-            Owner._irefTable.Add(content);
+            Owner.IrefTable.Add(content);
             Debug.Assert(content.Reference != null);
             Elements.Add(content.Reference);
             return content;
@@ -66,7 +66,7 @@ namespace PdfSharp.Pdf.Advanced
 
             SetModified();
             PdfContent content = new PdfContent(Owner);
-            Owner._irefTable.Add(content);
+            Owner.IrefTable.Add(content);
             Debug.Assert(content.Reference != null);
             Elements.Insert(0, content.Reference);
             return content;
@@ -118,7 +118,7 @@ namespace PdfSharp.Pdf.Advanced
 
             content.CreateStream(contentBytes);
 
-            Owner._irefTable.Add(content);
+            Owner.IrefTable.Add(content);
             Elements.Clear();
             Elements.Add(content.ReferenceNotNull);
 

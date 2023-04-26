@@ -132,7 +132,7 @@ namespace PdfSharp.Pdf.Content
             {
                 ScanNextToken();
                 // HACK: Is image ASCII85 decoded?
-                if (!ascii85 && _symbol == CSymbol.Name && (Token == "/ASCII85Decode" || Token == "/A85"))
+                if (!ascii85 && _symbol == CSymbol.Name && Token is "/ASCII85Decode" or "/A85")
                     ascii85 = true;
             } while (_symbol != CSymbol.Operator || Token != "ID");
 

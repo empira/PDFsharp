@@ -1,8 +1,6 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-#pragma warning disable 1591
-
 namespace MigraDoc.DocumentObjectModel
 {
     /// <summary>
@@ -10,9 +8,24 @@ namespace MigraDoc.DocumentObjectModel
     /// </summary>
     public enum ParagraphAlignment
     {
+        /// <summary>
+        /// Left-aligned paragraph.
+        /// </summary>
         Left,
+
+        /// <summary>
+        /// Center-aligned paragraph.
+        /// </summary>
         Center,
+
+        /// <summary>
+        /// Right-aligned paragraph.
+        /// </summary>
         Right,
+
+        /// <summary>
+        /// Justified paragraph.
+        /// </summary>
         Justify,
     }
 }

@@ -337,8 +337,8 @@ namespace PdfSharp.Fonts.OpenType
     {
         public const string Tag = TableTagNames.HMtx;
 
-        public HorizontalMetrics[] Metrics = null!; // NRT
-        public FWord[] LeftSideBearing = null!; // NRT
+        public HorizontalMetrics[] Metrics = default!;
+        public FWord[] LeftSideBearing = default!;
 
         public HorizontalMetricsTable(OpenTypeFontface fontData)
             : base(fontData, Tag)
@@ -619,7 +619,7 @@ namespace PdfSharp.Fonts.OpenType
         public ushort count;
         public ushort stringOffset;
 
-        byte[] bytes = null!; // NRT
+        byte[] bytes = default!;
 
         public NameTable(OpenTypeFontface fontData)
             : base(fontData, Tag)
@@ -750,12 +750,12 @@ namespace PdfSharp.Fonts.OpenType
         public short yStrikeoutSize;
         public short yStrikeoutPosition;
         public short sFamilyClass;
-        public byte[] panose = null!; // = new byte[10]; // NRT
+        public byte[] panose = default!; // = new byte[10]; // NRT
         public uint ulUnicodeRange1; // Bits 0-31
         public uint ulUnicodeRange2; // Bits 32-63
         public uint ulUnicodeRange3; // Bits 64-95
         public uint ulUnicodeRange4; // Bits 96-127
-        public string achVendID = null!; // = ""; // NRT
+        public string achVendID = default!; // = ""; // NRT
         public ushort fsSelection;
         public ushort usFirstCharIndex;
         public ushort usLastCharIndex;

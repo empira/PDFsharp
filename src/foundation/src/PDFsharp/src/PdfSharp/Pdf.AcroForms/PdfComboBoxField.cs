@@ -58,7 +58,7 @@ namespace PdfSharp.Pdf.AcroForms
                     {
                         try
                         {
-                            ((PdfArray)(((PdfItem[])(Elements.Values))[2])).Elements.Add(Value!);  // NRT Value
+                            ((PdfArray)((PdfItem[])Elements.Values)[2]).Elements.Add(Value!);  // NRT Value
                             SelectedIndex = SelectedIndex;
                         }
                         // ReSharper disable once EmptyGeneralCatchClause

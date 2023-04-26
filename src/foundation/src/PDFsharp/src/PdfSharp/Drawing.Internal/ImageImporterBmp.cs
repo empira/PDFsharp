@@ -78,7 +78,7 @@ namespace PdfSharp.Drawing.Internal
                 // Return true only for supported formats.
                 if (compression is 0 or 3) // BI_RGB == 0, BI_BITFIELDS == 3
                 {
-                    var data = ((ImagePrivateDataBitmap?)ii.Data) ?? NRT.ThrowOnNull<ImagePrivateDataBitmap>();
+                    var data = (ImagePrivateDataBitmap?)ii.Data ?? NRT.ThrowOnNull<ImagePrivateDataBitmap>();
                     //((ImagePrivateDataBitmap)ii.Data).Offset = offset;
                     //((ImagePrivateDataBitmap)ii.Data).ColorPaletteOffset = stream.CurrentOffset + size;
                     data.Offset = offset;
@@ -206,7 +206,7 @@ namespace PdfSharp.Drawing.Internal
         {
             Data = data;
             Length = Data.Length;
-            AlphaMask = mask; // ?? NRT.ThrowOnNull<byte[]>(); Can be null.
+            AlphaMask = mask;
             AlphaMaskLength = AlphaMask?.Length ?? 0;
             // TODO Bitmap mask?
         }

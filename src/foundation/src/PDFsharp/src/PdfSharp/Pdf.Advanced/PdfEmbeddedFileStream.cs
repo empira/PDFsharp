@@ -5,6 +5,8 @@
 using System.IO;
 #endif
 
+using System.Reflection.Metadata;
+
 namespace PdfSharp.Pdf.Advanced
 {
     /// <summary>
@@ -31,6 +33,13 @@ namespace PdfSharp.Pdf.Advanced
         {
             Elements.SetName(Keys.Type, TypeValue);
             Elements.SetInteger("/Length", _data.Length);
+
+            var objParams = new PdfDictionary(_document);
+            objParams.Elements.SetInteger("/Size", _data.Length);
+            var now = DateTime.Now;
+            objParams.Elements.SetDateTime("/CreationDate", now);
+            objParams.Elements.SetDateTime("/ModDate", now);
+            Elements.SetObject(Keys.Params, objParams);
 
             Stream = new PdfStream(_data, this);
         }

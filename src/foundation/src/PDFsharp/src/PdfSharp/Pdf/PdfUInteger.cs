@@ -22,15 +22,13 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfUInteger(uint value)
         {
-            _value = value;
+            Value = value;
         }
 
         /// <summary>
         /// Gets the value as integer.
         /// </summary>
-        public uint Value => _value;
-
-        readonly uint _value;
+        public uint Value { get; }
 
         /// <summary>
         /// Returns the unsigned integer as string.
@@ -39,7 +37,7 @@ namespace PdfSharp.Pdf
         {
             // ToString is impure but does not change the value of _value.
             // ReSharper disable ImpureMethodCallOnReadonlyValueField
-            return _value.ToString(CultureInfo.InvariantCulture);
+            return Value.ToString(CultureInfo.InvariantCulture);
             // ReSharper restore ImpureMethodCallOnReadonlyValueField
         }
 
@@ -55,7 +53,7 @@ namespace PdfSharp.Pdf
         /// Converts the value of this instance to an equivalent 64-bit unsigned integer.
         /// </summary>
         public ulong ToUInt64(IFormatProvider? provider) 
-            => Convert.ToUInt64(_value);
+            => Convert.ToUInt64(Value);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 8-bit signed integer.
@@ -66,7 +64,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Converts the value of this instance to an equivalent double-precision floating-point number.
         /// </summary>
-        public double ToDouble(IFormatProvider? provider) => _value;
+        public double ToDouble(IFormatProvider? provider) => Value;
 
         /// <summary>
         /// Returns an undefined DateTime structure.
@@ -80,54 +78,54 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Converts the value of this instance to an equivalent single-precision floating-point number.
         /// </summary>
-        public float ToSingle(IFormatProvider? provider) => _value;
+        public float ToSingle(IFormatProvider? provider) => Value;
 
         /// <summary>
         /// Converts the value of this instance to an equivalent Boolean value.
         /// </summary>
         public bool ToBoolean(IFormatProvider? provider) 
-            => Convert.ToBoolean(_value);
+            => Convert.ToBoolean(Value);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 32-bit signed integer.
         /// </summary>
         public int ToInt32(IFormatProvider? provider) 
-            => Convert.ToInt32(_value);
+            => Convert.ToInt32(Value);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 16-bit unsigned integer.
         /// </summary>
         public ushort ToUInt16(IFormatProvider? provider) 
-            => Convert.ToUInt16(_value);
+            => Convert.ToUInt16(Value);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 16-bit signed integer.
         /// </summary>
         public short ToInt16(IFormatProvider? provider) 
-            => Convert.ToInt16(_value);
+            => Convert.ToInt16(Value);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent <see cref="T:System.String"></see>.
         /// </summary>
         string IConvertible.ToString(IFormatProvider? provider) 
-            => _value.ToString(provider);
+            => Value.ToString(provider);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 8-bit unsigned integer.
         /// </summary>
         public byte ToByte(IFormatProvider? provider) 
-            => Convert.ToByte(_value);
+            => Convert.ToByte(Value);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent Unicode character.
         /// </summary>
         public char ToChar(IFormatProvider? provider) 
-            => Convert.ToChar(_value);
+            => Convert.ToChar(Value);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 64-bit signed integer.
         /// </summary>
-        public long ToInt64(IFormatProvider? provider) => _value;
+        public long ToInt64(IFormatProvider? provider) => Value;
 
         /// <summary>
         /// Returns type code for 32-bit integers.
@@ -137,7 +135,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Converts the value of this instance to an equivalent <see cref="T:System.Decimal"></see> number.
         /// </summary>
-        public decimal ToDecimal(IFormatProvider? provider) => _value;
+        public decimal ToDecimal(IFormatProvider? provider) => Value;
 
         /// <summary>
         /// Returns null.
@@ -153,7 +151,7 @@ namespace PdfSharp.Pdf
         /// Converts the value of this instance to an equivalent 32-bit unsigned integer.
         /// </summary>
         public uint ToUInt32(IFormatProvider? provider) 
-            => Convert.ToUInt32(_value);
+            => Convert.ToUInt32(Value);
 
         #endregion
     }

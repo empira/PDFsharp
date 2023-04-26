@@ -217,7 +217,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             // Find Cell containing ID#1.
             while (lineIndex < lineCount)
             {
-                if (contentLines[lineIndex].Contains("<002C002700060014>", StringComparison.Ordinal)) // Representation of "ID#1".
+                if (contentLines[lineIndex].Contains("<002C002700060014>", StringComparison.Ordinal)) // Current PdfToUnicodeMap representation of "ID#1".
                     break;
                 lineIndex++;
             }
@@ -262,7 +262,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             // Find Cell containing ID#2.
             while (lineIndex < lineCount)
             {
-                if (contentLines[lineIndex].Contains("<002C002700060015>", StringComparison.Ordinal)) // Representation of "ID#2".
+                if (contentLines[lineIndex].Contains("<002C002700060015>", StringComparison.Ordinal)) // Current PdfToUnicodeMap representation of "ID#2".
                     break;
                 lineIndex++;
             }

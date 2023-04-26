@@ -74,7 +74,7 @@ namespace PdfSharp.Pdf.Annotations
             return link;
         }
 
-        PdfAction _action = null!; // NRT
+        PdfAction _action = default!;
 
         /// <summary>
         /// Creates a link to an external PDF document using a named destination.

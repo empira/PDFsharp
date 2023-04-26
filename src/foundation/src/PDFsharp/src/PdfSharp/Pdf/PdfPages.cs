@@ -51,14 +51,14 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Finds a page by its id. Transforms it to PdfPage if necessary.
         /// </summary>
-        internal PdfPage? FindPage(PdfObjectID id)  // TODO: public?
+        internal PdfPage? FindPage(PdfObjectID id)
         {
             PdfPage? page = null;
-            foreach (PdfItem item in PagesArray)
+            foreach (var item in PagesArray)
             {
-                if (item is PdfReference reference)
+                if (item is PdfReference iref)
                 {
-                    if (reference.Value is PdfDictionary dictionary && dictionary.ObjectID == id)
+                    if (iref.Value is PdfDictionary dictionary && dictionary.ObjectID == id)
                     {
                         page = dictionary as PdfPage ?? new PdfPage(dictionary);
                         break;
@@ -73,7 +73,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfPage Add()
         {
-            PdfPage page = new PdfPage();
+            var page = new PdfPage();
             Insert(Count, page);
             return page;
         }
@@ -118,10 +118,9 @@ namespace PdfSharp.Pdf
                         throw new InvalidOperationException(PSSR.MultiplePageInsert);
                 }
 
-                // TODO: check this case
                 // Because the owner of the inserted page is this document we assume that the page was former part of it 
                 // and it is therefore well-defined.
-                Owner._irefTable.Add(page);
+                Owner.IrefTable.Add(page);
                 Debug.Assert(page.Owner == Owner);
 
                 // Insert page in array.
@@ -143,7 +142,7 @@ namespace PdfSharp.Pdf
                 // Case: New page was newly created and inserted now.
                 page.Document = Owner;
 
-                Owner._irefTable.Add(page);
+                Owner.IrefTable.Add(page);
                 Debug.Assert(page.Owner == Owner);
                 PagesArray.Elements.Insert(index, page.ReferenceNotNull);
                 Elements.SetInteger(Keys.Count, PagesArray.Elements.Count);
@@ -157,7 +156,7 @@ namespace PdfSharp.Pdf
                 // Case: Page is from an external document -> import it.
                 PdfPage importPage = page;
                 page = ImportExternalPage(importPage);
-                Owner._irefTable.Add(page);
+                Owner.IrefTable.Add(page);
 
                 // Add page substitute to importedObjectTable.
                 PdfImportedObjectTable importedObjectTable = Owner.FormTable.GetImportedObjectTable(importPage);
@@ -214,7 +213,7 @@ namespace PdfSharp.Pdf
                 insertPages[idx] = page;
                 importPages[idx] = importPage;
 
-                Owner._irefTable.Add(page);
+                Owner.IrefTable.Add(page);
 
                 // Add page substitute to importedObjectTable.
                 PdfImportedObjectTable importedObjectTable = Owner.FormTable.GetImportedObjectTable(importPage);
@@ -255,7 +254,7 @@ namespace PdfSharp.Pdf
                                 PdfLinkAnnotation newAnnotation = new PdfLinkAnnotation(Owner);
 
                                 PdfName[] importAnnotationKeyNames = annot.Elements.KeyNames;
-                                foreach (PdfName pdfItem in importAnnotationKeyNames)
+                                foreach (var pdfItem in importAnnotationKeyNames)
                                 {
                                     PdfItem? impItem;
                                     switch (pdfItem.Value)
@@ -267,19 +266,19 @@ namespace PdfSharp.Pdf
                                         case "/F":  // /F 4
                                             impItem = annot.Elements.GetValue("/F");
                                             Debug.Assert(impItem is PdfInteger);
-                                            newAnnotation.Elements.Add("/F", impItem!.Clone()); // NRT
+                                            newAnnotation.Elements.Add("/F", impItem.Clone());
                                             break;
 
                                         case "/Rect":  // /Rect [68.6 681.08 145.71 702.53]
                                             impItem = annot.Elements.GetValue("/Rect");
                                             Debug.Assert(impItem is PdfArray);
-                                            newAnnotation.Elements.Add("/Rect", impItem!.Clone()); // NRT
+                                            newAnnotation.Elements.Add("/Rect", impItem.Clone());
                                             break;
 
                                         case "/StructParent":  // /StructParent 3
                                             impItem = annot.Elements.GetValue("/StructParent");
                                             Debug.Assert(impItem is PdfInteger);
-                                            newAnnotation.Elements.Add("/StructParent", impItem!.Clone()); // NRT
+                                            newAnnotation.Elements.Add("/StructParent", impItem.Clone());
                                             break;
 
                                         case "/Subtype":  // Already set.
@@ -290,12 +289,12 @@ namespace PdfSharp.Pdf
                                             impItem = impItem!.Clone(); // NRT
 
                                             // Is value an array with 5 elements where the first one is an iref?
-                                            if (impItem is PdfArray destArray && destArray.Elements.Count == 5)
+                                            if (impItem is PdfArray { Elements.Count: 5 } destArray)
                                             {
                                                 if (destArray.Elements[0] is PdfReference iref)
                                                 {
                                                     var iref2 = RemapReference(insertPages, importPages, iref);
-                                                    if (iref2 != null!)
+                                                    if (iref2 != null)
                                                     {
                                                         destArray.Elements[0] = iref2;
                                                         newAnnotation.Elements.Add("/Dest", destArray);
@@ -452,7 +451,6 @@ namespace PdfSharp.Pdf
             CloneElement(page, importPage, PdfPage.Keys.Annots, true);
 #endif
             // ReSharper restore AccessToStaticMemberViaDerivedType
-            // TODO more elements?
             return page;
         }
 
@@ -569,7 +567,7 @@ namespace PdfSharp.Pdf
         static PdfDictionary[] GetKids(PdfReference iref, PdfPage.InheritedValues values, PdfDictionary? parentNotUsed)
         {
             // TODO: inherit inheritable keys...
-            PdfDictionary kid = (PdfDictionary)iref.Value;
+            var kid = (PdfDictionary)iref.Value;
 
 #if true
             string type = kid.Elements.GetName(Keys.Type);
@@ -627,7 +625,7 @@ namespace PdfSharp.Pdf
         {
             // TODO: Close all open content streams
 
-            // TODO: Create the page tree.
+            // We do not create the page tree.
             // Arrays have a limit of 8192 entries, but I successfully tested documents
             // with 50000 pages and no page tree.
             // ==> wait for bug report.

@@ -7,8 +7,6 @@
         <RootNamespace>PdfSharp</RootNamespace>
         <UseWindowsForms>true</UseWindowsForms>
         <DefineConstants>GDI;NET_ZIP</DefineConstants>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

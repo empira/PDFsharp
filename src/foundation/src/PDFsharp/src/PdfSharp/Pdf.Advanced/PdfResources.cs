@@ -39,7 +39,7 @@ namespace PdfSharp.Pdf.Advanced
                 name = NextFontName;
                 _resources[font] = name;
                 if (font.Reference == null)
-                    Owner._irefTable.Add(font);
+                    Owner.IrefTable.Add(font);
                 Fonts.Elements[name] = font.Reference;
             }
             return name;
@@ -56,7 +56,7 @@ namespace PdfSharp.Pdf.Advanced
                 name = NextImageName;
                 _resources[image] = name;
                 if (image.Reference == null)
-                    Owner._irefTable.Add(image);
+                    Owner.IrefTable.Add(image);
                 XObjects.Elements[name] = image.Reference;
             }
             return name;
@@ -73,7 +73,7 @@ namespace PdfSharp.Pdf.Advanced
                 name = NextFormName;
                 _resources[form] = name;
                 if (form.Reference == null)
-                    Owner._irefTable.Add(form);
+                    Owner.IrefTable.Add(form);
                 XObjects.Elements[name] = form.Reference;
             }
             return name;
@@ -90,7 +90,7 @@ namespace PdfSharp.Pdf.Advanced
                 name = NextExtGStateName;
                 _resources[extGState] = name;
                 if (extGState.Reference == null)
-                    Owner._irefTable.Add(extGState);
+                    Owner.IrefTable.Add(extGState);
                 ExtGStates.Elements[name] = extGState.Reference;
             }
             return name;
@@ -107,7 +107,7 @@ namespace PdfSharp.Pdf.Advanced
                 name = NextPatternName;
                 _resources[pattern] = name;
                 if (pattern.Reference == null)
-                    Owner._irefTable.Add(pattern);
+                    Owner.IrefTable.Add(pattern);
                 Patterns.Elements[name] = pattern.Reference;
             }
             return name;
@@ -124,7 +124,7 @@ namespace PdfSharp.Pdf.Advanced
                 name = NextPatternName;
                 _resources[pattern] = name;
                 if (pattern.Reference == null)
-                    Owner._irefTable.Add(pattern);
+                    Owner.IrefTable.Add(pattern);
                 Patterns.Elements[name] = pattern.Reference;
             }
             return name;
@@ -141,7 +141,7 @@ namespace PdfSharp.Pdf.Advanced
                 name = NextShadingName;
                 _resources[shading] = name;
                 if (shading.Reference == null)
-                    Owner._irefTable.Add(shading);
+                    Owner.IrefTable.Add(shading);
                 Shadings.Elements[name] = shading.Reference;
             }
             return name;
@@ -194,7 +194,8 @@ namespace PdfSharp.Pdf.Advanced
             get
             {
                 string name;
-                while (ExistsResourceName(name = String.Format(CultureInfo.InvariantCulture, "/F{0}", _fontNumber++))) { }
+                while (ExistsResourceName(name = String.Format(CultureInfo.InvariantCulture, "/F{0}", _fontNumber++)))
+                { }
                 return name;
             }
         }
@@ -250,7 +251,9 @@ namespace PdfSharp.Pdf.Advanced
             get
             {
                 string name;
-                while (ExistsResourceName(name = String.Format(CultureInfo.InvariantCulture, "/Pa{0}", _patternNumber++))) ;
+                while (ExistsResourceName(name = String.Format(CultureInfo.InvariantCulture, "/Pa{0}", _patternNumber++)))
+                { }
+
                 return name;
             }
         }

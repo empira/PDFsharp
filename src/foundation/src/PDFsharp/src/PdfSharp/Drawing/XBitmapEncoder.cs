@@ -40,12 +40,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Gets or sets the bitmap source to be encoded.
         /// </summary>
-        public XBitmapSource Source
-        {
-            get => _source;
-            set => _source = value;
-        }
-        XBitmapSource _source = null!; // NRT
+        public XBitmapSource Source { get; set; } = default!;
 
         /// <summary>
         /// When overridden in a derived class saves the image on the specified stream

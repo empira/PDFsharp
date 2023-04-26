@@ -1,11 +1,17 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+#if WPF
 using System.IO;
+#endif
 using PdfSharp.Pdf.IO;
 
+#pragma warning disable 1591
 namespace PdfSharp.Features.IO
 {
+    /// <summary>
+    ///  Move to PDFsharp.Tests
+    /// </summary>
     public class ObjectStreams
     {
         public static void ReadPdfWithObjectStreams()

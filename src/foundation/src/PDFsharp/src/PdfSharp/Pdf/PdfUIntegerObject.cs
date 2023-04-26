@@ -24,7 +24,7 @@ namespace PdfSharp.Pdf
         /// <param name="value">The value.</param>
         public PdfUIntegerObject(uint value)
         {
-            _value = value;
+            Value = value;
         }
 
         /// <summary>
@@ -35,21 +35,19 @@ namespace PdfSharp.Pdf
         public PdfUIntegerObject(PdfDocument document, uint value)
             : base(document)
         {
-            _value = value;
+            Value = value;
         }
 
         /// <summary>
         /// Gets the value as unsigned integer.
         /// </summary>
-        public uint Value => _value;
-
-        readonly uint _value;
+        public uint Value { get; }
 
         /// <summary>
         /// Returns the integer as string.
         /// </summary>
         public override string ToString() 
-            => _value.ToString(CultureInfo.InvariantCulture);
+            => Value.ToString(CultureInfo.InvariantCulture);
 
         /// <summary>
         /// Writes the integer literal.
@@ -57,7 +55,7 @@ namespace PdfSharp.Pdf
         internal override void WriteObject(PdfWriter writer)
         {
             writer.WriteBeginObject(this);
-            writer.Write(_value);
+            writer.Write(Value);
             writer.WriteEndObject();
         }
     }

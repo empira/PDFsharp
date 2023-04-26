@@ -7,6 +7,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
+using PdfSharp.Logging;
 using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Pdf.Advanced
@@ -67,12 +69,15 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal void WriteXRefEntry(PdfWriter writer)
         {
-            // PDFsharp does not yet support PDF 1.5 object streams.
+            // PDFsharp does not yet support PDF 1.5 object streams for writing.
 
             // Each line must be exactly 20 bytes long, otherwise Acrobat repairs the file.
-            string text = String.Format(CultureInfo.InvariantCulture, "{0:0000000000} {1:00000} n\n",
-              _position, _objectID.GenerationNumber); // InUse ? 'n' : 'f');
-            writer.WriteRaw(text);
+            writer.WriteRaw(Invariant($"{_position:0000000000} {_objectID.GenerationNumber:00000} n \n"));
+
+            // DELETE
+            //string text = String.Format(CultureInfo.InvariantCulture, "{0:0000000000} {1:00000} n\n",
+            //  _position, _objectID.GenerationNumber); // InUse ? 'n' : 'f');
+            //writer.WriteRaw(text);
         }
 
         /// <summary>
@@ -128,7 +133,6 @@ namespace PdfSharp.Pdf.Advanced
             get => _position;
             set => _position = value;
         }
-
         int _position;  // I know it should be long, but I have never seen a 2GB PDF file.
 
         //public bool InUse
@@ -149,11 +153,11 @@ namespace PdfSharp.Pdf.Advanced
                 Debug.Assert(value != null, "The value of a PdfReference must never be null.");
                 Debug.Assert(value.Reference == null || ReferenceEquals(value.Reference, this), "The reference of the value must be null or this.");
                 _value = value;
-                // value must never be null
+                // value must never be null.
                 value.Reference = this;
             }
         }
-        PdfObject _value = null!; // NRT
+        PdfObject _value = default!;
 
         /// <summary>
         /// Hack for dead objects.
@@ -168,10 +172,18 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public PdfDocument Document
         {
-            get => _document!; // ?? NRT.ThrowOnNull<PdfDocument>(); Can be null
+            get
+            {
+#if DEBUG
+                if (_document == null)
+                {
+                    LogHost.Logger.LogDebug($"Document of object {_objectID} is null.");
+                }
+#endif
+                return _document!;
+            }
             set => _document = value;
         }
-
         PdfDocument? _document;
 
         /// <summary>
@@ -209,19 +221,17 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal class PdfReferenceComparer : IComparer<PdfReference>
         {
-            public int Compare(PdfReference? x, PdfReference? y)
+            public int Compare(PdfReference? l, PdfReference? r)
             {
-                var l = x;
-                var r = y;
+                //var l = x;
+                //var r = y;
                 if (l != null)
                 {
                     if (r != null)
                         return l._objectID.CompareTo(r._objectID);
                     return -1;
                 }
-                if (r != null)
-                    return 1;
-                return 0;
+                return r != null ? 1 : 0;
             }
         }
 

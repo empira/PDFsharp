@@ -10,6 +10,10 @@ namespace PdfSharp.Internal
     // ReSharper disable once InconsistentNaming
     static class TH
     {
+        // Microsoft throws in the helper function. Maybe this creates less code.
+        // But we decided to throw at the position where the problem happens and 
+        // therefore we only compose the exception here and return it.
+
         [DoesNotReturn]
         public static void ThrowInvalidOperationException_ToDo(string? info = null)
         {

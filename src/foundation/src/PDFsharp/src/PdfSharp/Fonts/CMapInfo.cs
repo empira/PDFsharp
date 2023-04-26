@@ -43,7 +43,7 @@ namespace PdfSharp.Fonts
                         }
                         int glyphIndex = _descriptor.CharCodeToGlyphIndex(ch2);
                         CharacterToGlyphIndex.Add(ch, glyphIndex);
-                        GlyphIndices[glyphIndex] = null!; // BUG NRT
+                        GlyphIndices[glyphIndex] = default!;
                         MinChar = (char)Math.Min(MinChar, ch);
                         MaxChar = (char)Math.Max(MaxChar, ch);
                     }

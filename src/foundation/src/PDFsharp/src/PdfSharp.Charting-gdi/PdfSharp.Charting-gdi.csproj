@@ -6,8 +6,6 @@
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <RootNamespace>PdfSharp.Charting</RootNamespace>
         <!--<UseWindowsForms>true</UseWindowsForms> not needed -->
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

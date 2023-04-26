@@ -104,7 +104,7 @@
 
         <!--<PackageVersion Include="Microsoft.AspNetCore.SignalR.Common" Version="$(AspNetCore_SignalR_PackageVersion)" />-->
         <!--<PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="$(AspNetCore_SignalR_PackageVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="$(AspNetCore_SignalR_PackageVersion)" />-->
+        <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="$(AspNetCore_SignalR_PackageVersion)" />-->
 
         <!--<PackageVersion Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />-->
 

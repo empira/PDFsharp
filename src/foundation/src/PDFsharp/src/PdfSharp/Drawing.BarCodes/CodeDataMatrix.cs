@@ -153,7 +153,7 @@ namespace PdfSharp.Drawing.BarCodes
 
             XPoint pos = position + CalcDistance(Anchor, AnchorType.TopLeft, Size);
 
-            if (MatrixImage == null)
+            if (!HasMatrixImage) // Cannot use (MatrixImage == null) here.
                 MatrixImage = DataMatrixImage.GenerateMatrixImage(Text, Encoding, Rows, Columns);
 
             if (QuietZone > 0)

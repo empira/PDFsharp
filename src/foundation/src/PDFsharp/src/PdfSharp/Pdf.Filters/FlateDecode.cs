@@ -144,17 +144,29 @@ namespace PdfSharp.Pdf.Filters
             var msInput = new MemoryStream(data);
             var msOutput = new MemoryStream();
 #if NET_ZIP
+            // ReSharper disable once RedundantAssignment
             var header = new byte[]
             {
                 (byte)msInput.ReadByte(), // CMF (Compression Method and flags)
                 (byte)msInput.ReadByte() // Flags
             };
-            Debug.Assert((header[0] & 0xF) == 0x8); // Compression method must be deflate
-            Debug.Assert((header[1] & 0x20) == 0); // DeflateStream does not support Adler32
+#if true
+            Debug.Assert((header[0] & 0xF) == 0x8); // Compression method must be deflate.
+            Debug.Assert((header[1] & 0x20) == 0); // DeflateStream does not support Adler32.
+#endif
 
             using var zip = new DeflateStream(msInput, CompressionMode.Decompress, true);
             zip.CopyTo(msOutput);
             msOutput.Flush();
+
+#if true
+            if (msOutput.Length >= 0)
+            {
+                msOutput.Capacity = (int)msOutput.Length;
+                if (parms?.DecodeParms != null)
+                    return StreamDecoder.Decode(msOutput.GetBuffer(), parms.DecodeParms);
+            }
+#endif
 
             return msOutput.GetBuffer();
 #else

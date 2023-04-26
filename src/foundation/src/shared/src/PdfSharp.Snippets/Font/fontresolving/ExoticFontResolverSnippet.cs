@@ -11,7 +11,7 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Font
 {
-    public class ExoticFontResolverSnippet : SnippetBase
+    public class ExoticFontResolverSnippet : Snippet
     {
         public override void RenderSnippet(XGraphics gfx)
         {

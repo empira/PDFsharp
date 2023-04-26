@@ -15,8 +15,7 @@ branches:
   release: # Release and preview versions.
     # 22.40.0 / 22.40.0-rc-1
     # 5.0.0-preview-2
-    #regex: ^(release[/-]|master)
-    regex: ^release?[/-]
+    regex: ^(release[/-]|master)
     # ^(user|feature|fix)[/-]
     # Must not have mode set to be mainline
     increment: None

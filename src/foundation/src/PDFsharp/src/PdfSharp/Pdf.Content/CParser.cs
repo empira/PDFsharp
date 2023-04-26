@@ -6,8 +6,6 @@ using PdfSharp.Internal;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Content.Objects;
 
-//#pragma warning disable 1591
-
 namespace PdfSharp.Pdf.Content
 {
     /// <summary>
@@ -211,7 +209,7 @@ namespace PdfSharp.Pdf.Content
         }
 
         readonly CSequence _operands = new CSequence();
-        PdfPage _page = null!; // NRT
+        PdfPage _page = default!;
         readonly CLexer _lexer;
     }
 }

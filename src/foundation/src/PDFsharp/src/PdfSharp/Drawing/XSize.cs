@@ -1,15 +1,10 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Diagnostics;
-using System.Globalization;
 using System.Runtime.InteropServices;
 #if GDI
-using System.Drawing;
 #endif
 #if WPF
-using System.Windows;
 using SysPoint = System.Windows.Point;
 using SysSize = System.Windows.Size;
 #endif
@@ -165,7 +160,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Creates an XSize from a System.Drawing.Size.
         /// </summary>
-        public static XSize FromSize(System.Drawing.Size size)
+        public static XSize FromSize(Size size)
         {
             return new XSize(size.Width, size.Height);
         }
@@ -174,7 +169,7 @@ namespace PdfSharp.Drawing
         /// Implicit conversion from XSize to System.Drawing.Size. The conversion must be implicit because the
         /// WinForms designer uses it.
         /// </summary>
-        public static implicit operator XSize(System.Drawing.Size size)
+        public static implicit operator XSize(Size size)
         {
             return new XSize(size.Width, size.Height);
         }
@@ -242,7 +237,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public static XSize Empty => s_empty;
 
-        static readonly XSize s_empty;
+        static readonly XSize s_empty = CreateEmptySize();
 
         /// <summary>
         /// Gets a value indicating whether this instance is empty.
@@ -264,7 +259,6 @@ namespace PdfSharp.Drawing
                 _width = value;
             }
         }
-
         double _width;
 
         /// <summary>
@@ -282,7 +276,6 @@ namespace PdfSharp.Drawing
                 _height = value;
             }
         }
-
         double _height;
 
         /// <summary>
@@ -313,15 +306,12 @@ namespace PdfSharp.Drawing
 
         static XSize CreateEmptySize()
         {
-            XSize size = new XSize();
-            size._width = double.NegativeInfinity;
-            size._height = double.NegativeInfinity;
+            var size = new XSize
+            {
+                _width = double.NegativeInfinity,
+                _height = double.NegativeInfinity
+            };
             return size;
-        }
-
-        static XSize()
-        {
-            s_empty = CreateEmptySize();
         }
 
         /// <summary>

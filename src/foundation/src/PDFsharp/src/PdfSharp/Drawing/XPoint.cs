@@ -1,17 +1,12 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Diagnostics;
-using System.Globalization;
 using System.Runtime.InteropServices;
 #if CORE
 #endif
 #if GDI
-using System.Drawing;
 #endif
 #if WPF
-using System.Windows;
 using SysPoint = System.Windows.Point;
 using SysSize = System.Windows.Size;
 #endif
@@ -46,7 +41,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Initializes a new instance of the XPoint class with the specified point.
         /// </summary>
-        public XPoint(System.Drawing.Point point)
+        public XPoint(Point point)
         {
             _x = point.X;
             _y = point.Y;
@@ -295,7 +290,7 @@ namespace PdfSharp.Drawing
         /// Subtracts a size from a point.
         /// </summary>
         [Obsolete("Use XVector instead of XSize as second parameter.")]
-        public static XPoint operator -(XPoint point, XSize size) // TODO: make obsolete
+        public static XPoint operator -(XPoint point, XSize size)
         {
             return new XPoint(point._x - size.Width, point._y - size.Height);
         }

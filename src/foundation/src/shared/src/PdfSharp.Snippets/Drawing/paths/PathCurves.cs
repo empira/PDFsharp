@@ -7,7 +7,7 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Drawing
 {
-    public class PathCurves : SnippetBase
+    public class PathCurves : Snippet
     {
         public PathCurves()
         {

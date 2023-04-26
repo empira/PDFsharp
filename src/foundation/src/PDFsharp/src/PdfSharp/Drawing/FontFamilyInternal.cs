@@ -1,17 +1,11 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Diagnostics;
-using System.Globalization;
 using PdfSharp.Internal;
 #if GDI
-using System.Drawing;
 using GdiFontFamily = System.Drawing.FontFamily;
 #endif
 #if WPF
-using System.Windows.Media;
-using System.Windows.Markup;
 using WpfFontFamily = System.Windows.Media.FontFamily;
 #endif
 

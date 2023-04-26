@@ -258,7 +258,6 @@ namespace PdfSharp.Drawing
             // TODO: What means 'Multiple family names should be separated by commas.'?
             // does not work
 
-
             if (String.IsNullOrEmpty(familyName))
                 throw new ArgumentNullException(nameof(familyName));
 
@@ -388,7 +387,7 @@ namespace PdfSharp.Drawing
                 WpfTypeface typeface = FontHelper.CreateTypeface(fontFamily, style);
                 return typeface;
             }
-            return null!;  // BUG? NRT
+            return default!;
         }
 #endif
 

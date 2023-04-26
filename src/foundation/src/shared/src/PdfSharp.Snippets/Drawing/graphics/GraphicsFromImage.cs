@@ -6,7 +6,7 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Drawing
 {
-    public class GraphicsFromImage : SnippetBase
+    public class GraphicsFromImage : Snippet
     {
         public GraphicsFromImage()
         {

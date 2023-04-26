@@ -205,7 +205,7 @@ namespace PdfSharp.Pdf.Security
         {
             var permissionsValue = (uint)Permissions;
 
-            // Correct permission bits
+            // Correct permission bits.
             permissionsValue &= 0xfffffffc; // 1... 1111 1111 1100 - Bit 1 & 2 must be 0.
             permissionsValue |= 0x000002c0; // 0... 0010 1100 0000 - Bit 7 & 8 must be 1. Also Bit 10 is no longer used and shall be always set to 1.
 
@@ -213,11 +213,25 @@ namespace PdfSharp.Pdf.Security
         }
 
         /// <summary>
-        /// Decrypts the whole document.
+        /// Decrypts an ObjectStream. ObjectStreams have to be decrypted before document decryption to allow the removing of the compression filter.
+        /// </summary>
+        internal void DecryptObjectStream(PdfObjectStream objectStream)
+        {
+            Debug.Assert(objectStream.Reference != null);
+
+            EnterObject(objectStream.ObjectID);
+
+            DecryptDictionary(objectStream, true);
+
+            LeaveObject();
+        }
+
+        /// <summary>
+        /// Decrypts the whole document (except ObjectStreams which are decrypted once when read in).
         /// </summary>
         internal void DecryptDocument()
         {
-            foreach (var iref in _document._irefTable.AllReferences)
+            foreach (var iref in _document.IrefTable.AllReferences)
             {
                 if (!ReferenceEquals(iref.Value, this))
                     DecryptObject(iref.Value);
@@ -268,8 +282,12 @@ namespace PdfSharp.Pdf.Security
         /// <summary>
         /// Decrypts a dictionary.
         /// </summary>
-        void DecryptDictionary(PdfDictionary dict)
+        void DecryptDictionary(PdfDictionary dict, bool decryptObjectStream = false)
         {
+            // ObjectStreams are decrypted once when read in. They and their contents must not be decrypted again on DecryptDocument.
+            if (!decryptObjectStream && dict.Elements.GetName("/Type") == "/ObjStm")
+                return;
+
             foreach (var item in dict.Elements)
             {
                 switch (item.Value)
@@ -764,7 +782,7 @@ namespace PdfSharp.Pdf.Security
         
         void ResetCryptFilterEntriesInAllElements()
         {
-            foreach (var iref in _document._irefTable.AllReferences)
+            foreach (var iref in _document.IrefTable.AllReferences)
             {
                 var pdfObject = iref.Value;
                 if (pdfObject is not PdfDictionary dictionary)

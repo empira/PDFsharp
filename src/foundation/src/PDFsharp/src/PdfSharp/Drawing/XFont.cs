@@ -89,7 +89,7 @@ namespace PdfSharp.Drawing
         /// Not yet implemented.
         /// </summary>
         /// <param name="familyName">Name of the family.</param>
-        /// <param name="emSize">Size of the em.</param>
+        /// <param name="emSize">The em size.</param>
         /// <param name="style">The style.</param>
         /// <param name="weight">The weight.</param>
         /// <param name="fontStretch">The font stretch.</param>
@@ -108,7 +108,7 @@ namespace PdfSharp.Drawing
         /// Not yet implemented.
         /// </summary>
         /// <param name="typeface">The typeface.</param>
-        /// <param name="emSize">Size of the em.</param>
+        /// <param name="emSize">The em size.</param>
         /// <param name="pdfOptions">The PDF options.</param>
         /// <param name="styleSimulations">The style simulations.</param>
         /// <exception cref="System.NotImplementedException">XFont</exception>
@@ -342,11 +342,9 @@ namespace PdfSharp.Drawing
             WpfFontFamily = GlyphTypeface.FontFamily.WpfFamily;
             WpfTypeface = GlyphTypeface.WpfTypeface;
 
-            if (WpfFontFamily == null)
-                WpfFontFamily = new WpfFontFamily(Name);
+            WpfFontFamily ??= new WpfFontFamily(Name);
 
-            if (WpfTypeface == null)
-                WpfTypeface = FontHelper.CreateTypeface(WpfFontFamily ?? NRT.ThrowOnNull<WpfFontFamily>(), _style);
+            WpfTypeface ??= FontHelper.CreateTypeface(WpfFontFamily ?? NRT.ThrowOnNull<WpfFontFamily>(), _style);
 #endif
             CreateDescriptorAndInitializeFontMetrics();
         }
@@ -544,7 +542,6 @@ namespace PdfSharp.Drawing
             get => _cellSpace;
             internal set => _cellSpace = value;
         }
-
         int _cellSpace;
 
         /// <summary>
@@ -555,7 +552,6 @@ namespace PdfSharp.Drawing
             get => _cellAscent;
             internal set => _cellAscent = value;
         }
-
         int _cellAscent;
 
         /// <summary>
@@ -566,7 +562,6 @@ namespace PdfSharp.Drawing
             get => _cellDescent;
             internal set => _cellDescent = value;
         }
-
         int _cellDescent;
 
         /// <summary>
@@ -589,7 +584,7 @@ namespace PdfSharp.Drawing
             }
         }
 
-        XFontMetrics _fontMetrics = null!; // NRT
+        XFontMetrics _fontMetrics = default!;
 
         /// <summary>
         /// Returns the line spacing, in pixels, of this font. The line spacing is the vertical distance

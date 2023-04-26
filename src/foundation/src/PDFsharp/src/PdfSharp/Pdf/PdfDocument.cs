@@ -69,7 +69,7 @@ namespace PdfSharp.Pdf
             Initialize();
             Info.CreationDate = _creation;
 
-            _outStream = new FileStream(filename, FileMode.Create);
+            OutStream = new FileStream(filename, FileMode.Create);
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace PdfSharp.Pdf
             Initialize();
             Info.CreationDate = _creation;
 
-            _outStream = outputStream;
+            OutStream = outputStream;
         }
 
         internal PdfDocument(Lexer lexer)
@@ -105,7 +105,7 @@ namespace PdfSharp.Pdf
             ////_font = new PdfFont();
             //_objects = new PdfObjectTable(this);
             //_trailer = new PdfTrailer(this);
-            _irefTable = new PdfCrossReferenceTable(this);
+            IrefTable = new PdfCrossReferenceTable(this);
             _lexer = lexer;
         }
 
@@ -114,9 +114,9 @@ namespace PdfSharp.Pdf
             //_info = new PdfInfo(this);
             _fontTable = new PdfFontTable(this);
             _imageTable = new PdfImageTable(this);
-            _trailer = new PdfTrailer(this);
-            _irefTable = new PdfCrossReferenceTable(this);
-            _trailer.CreateNewDocumentIDs();
+            Trailer = new PdfTrailer(this);
+            IrefTable = new PdfCrossReferenceTable(this);
+            Trailer.CreateNewDocumentIDs();
         }
 
         //~PdfDocument()
@@ -142,9 +142,9 @@ namespace PdfSharp.Pdf
                 if (disposing)
                 {
                     // Dispose managed resources.
-                    if (_outStream is not null)
+                    if (OutStream is not null)
                     {
-                        ((IDisposable)_outStream).Dispose();
+                        ((IDisposable)OutStream).Dispose();
                     }
                 }
                 //PdfDocument.Gob.DetachDocument(Handle);
@@ -195,12 +195,12 @@ namespace PdfSharp.Pdf
             if (!CanModify)
                 throw new InvalidOperationException(PSSR.CannotModify);
 
-            if (_outStream != null)
+            if (OutStream != null)
             {
                 // Get security handler if document gets encrypted.
-                var securityHandler = SecuritySettings.SecurityHandler.GetIfEncryptionActive();
+                var effectiveSecurityHandler = SecuritySettings.EffectiveSecurityHandler;
 
-                PdfWriter writer = new PdfWriter(_outStream, securityHandler);
+                var writer = new PdfWriter(OutStream, effectiveSecurityHandler);
                 try
                 {
                     DoSave(writer);
@@ -265,12 +265,12 @@ namespace PdfSharp.Pdf
                 throw new PdfSharpException(message);
 
             // Get security handler if document gets encrypted.
-            var securityHandler = SecuritySettings.SecurityHandler.GetIfEncryptionActive();
+            var effectiveSecurityHandler = SecuritySettings.EffectiveSecurityHandler;
 
             PdfWriter? writer = null;
             try
             {
-                writer = new PdfWriter(stream, securityHandler);
+                writer = new PdfWriter(stream, effectiveSecurityHandler);
                 DoSave(writer);
             }
             finally
@@ -308,7 +308,7 @@ namespace PdfSharp.Pdf
         {
             if (_pages == null || _pages.Count == 0)
             {
-                if (_outStream != null)
+                if (OutStream != null)
                 {
                     // Give feedback if the wrong constructor was used.
                     throw new InvalidOperationException("Cannot save a PDF document with no pages. Do not use \"public PdfDocument(string filename)\" or \"public PdfDocument(Stream outputStream)\" if you want to open an existing PDF document from a file or stream; use PdfReader.Open() for that purpose.");
@@ -319,32 +319,32 @@ namespace PdfSharp.Pdf
             try
             {
                 // HACK: Remove XRefTrailer
-                if (_trailer is PdfCrossReferenceStream)
+                if (Trailer is PdfCrossReferenceStream)
                 {
                     // HACK^2: Preserve the SecurityHandler.
-                    var securityHandler = _securitySettings?.SecurityHandler;
-                    _trailer = new PdfTrailer((PdfCrossReferenceStream)_trailer);
-                    _trailer._securityHandler = securityHandler;
+                    var securityHandler = Trailer.SecurityHandlerInternal;
+                    Trailer = new PdfTrailer((PdfCrossReferenceStream)Trailer);
+                    Trailer.SecurityHandlerInternal = securityHandler;
                 }
 
-                var activeSecurityHandler = _securitySettings?.SecurityHandler.GetIfEncryptionActive();
-                if (activeSecurityHandler != null)
+                var effectiveSecurityHandler = _securitySettings?.EffectiveSecurityHandler;
+                if (effectiveSecurityHandler != null)
                 {
-                    if (activeSecurityHandler.Reference == null)
-                        _irefTable.Add(activeSecurityHandler);
+                    if (effectiveSecurityHandler.Reference == null)
+                        IrefTable.Add(effectiveSecurityHandler);
                     else
-                        Debug.Assert(_irefTable.Contains(activeSecurityHandler.ObjectID));
-                    _trailer.Elements[PdfTrailer.Keys.Encrypt] = _securitySettings!.SecurityHandler.Reference;
+                        Debug.Assert(IrefTable.Contains(effectiveSecurityHandler.ObjectID));
+                    Trailer.Elements[PdfTrailer.Keys.Encrypt] = _securitySettings!.SecurityHandler.Reference;
                 }
                 else
-                    _trailer.Elements.Remove(PdfTrailer.Keys.Encrypt);
+                    Trailer.Elements.Remove(PdfTrailer.Keys.Encrypt);
 
                 PrepareForSave();
 
-                activeSecurityHandler?.PrepareForWriting();
+                effectiveSecurityHandler?.PrepareForWriting();
 
                 writer.WriteFileHeader(this);
-                var irefs = _irefTable.AllReferences;
+                var irefs = IrefTable.AllReferences;
                 int count = irefs.Length;
                 for (int idx = 0; idx < count; idx++)
                 {
@@ -357,10 +357,10 @@ namespace PdfSharp.Pdf
                     iref.Value.WriteObject(writer);
                 }
                 int startxref = writer.Position;
-                _irefTable.WriteObject(writer);
+                IrefTable.WriteObject(writer);
                 writer.WriteRaw("trailer\n");
-                _trailer.Elements.SetInteger("/Size", count + 1);
-                _trailer.WriteObject(writer);
+                Trailer.Elements.SetInteger("/Size", count + 1);
+                Trailer.WriteObject(writer);
                 writer.WriteEof(this, startxref);
 
                 //if (encrypt)
@@ -426,10 +426,10 @@ namespace PdfSharp.Pdf
 
 #if true
             // Remove all unreachable objects (e.g. from deleted pages).
-            int removed = _irefTable.Compact();
+            int removed = IrefTable.Compact();
             if (removed != 0)
                 Debug.WriteLine("PrepareForSave: Number of deleted unreachable objects: " + removed);
-            _irefTable.Renumber();
+            IrefTable.Renumber();
 #endif
 
             // @PDF/UA
@@ -504,7 +504,7 @@ namespace PdfSharp.Pdf
                 Version = requiredVersion;
                 return true;
             }
-            
+
             return false;
 
         }
@@ -570,7 +570,7 @@ namespace PdfSharp.Pdf
         /// Gets information about the document.
         /// </summary>
         public PdfDocumentInformation Info
-            => _info ??= _trailer.Info;
+            => _info ??= Trailer.Info;
 
         PdfDocumentInformation? _info;  // Never changes if once created.
 
@@ -694,7 +694,7 @@ namespace PdfSharp.Pdf
         /// Gets the PdfCatalog of the current document.
         /// </summary>
         internal PdfCatalog Catalog
-            => _catalog ??= _trailer.Root;
+            => _catalog ??= Trailer.Root;
 
         PdfCatalog? _catalog;  // never changes if once created
 
@@ -794,15 +794,22 @@ namespace PdfSharp.Pdf
         }
 
         /// <summary>
-        /// Gets the security handler.
+        /// Gets the standard security handler and creates it, if not existing.
         /// </summary>
-        public PdfStandardSecurityHandler? SecurityHandler => _trailer?.SecurityHandler;
+        public PdfStandardSecurityHandler SecurityHandler => Trailer.SecurityHandler;
 
-        internal PdfTrailer _trailer = null!;  //NRT
-        internal PdfCrossReferenceTable _irefTable = null!;  //NRT
-        internal Stream? _outStream;
+        /// <summary>
+        /// Gets the standard security handler, if existing and encryption is active.
+        /// </summary>
+        internal PdfStandardSecurityHandler? EffectiveSecurityHandler => Trailer.EffectiveSecurityHandler;
 
-        // Imported Document
+        internal PdfTrailer Trailer { get; set; } = default!;
+
+        internal PdfCrossReferenceTable IrefTable { get; set; } = default!;
+
+        internal Stream? OutStream { get; set; }
+
+        // Imported Document.
         internal Lexer? _lexer;
 
         internal DateTime _creation;

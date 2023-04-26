@@ -6,7 +6,7 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Drawing
 {
-    public class TransformationXImages : SnippetBase
+    public class TransformationXImages : Snippet
     {
         public TransformationXImages()
         {

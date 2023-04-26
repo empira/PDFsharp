@@ -23,15 +23,14 @@ namespace PdfSharp.Pdf.Advanced
             get => _mediaBox;
             set => _mediaBox = value;
         }
-
-        PdfRectangle _mediaBox = null!; // NRT
+        PdfRectangle _mediaBox = default!;
 
         public PdfRectangle CropBox
         {
             get => _cropBox;
             set => _cropBox = value;
         }
-        PdfRectangle _cropBox = null!; // NRT
+        PdfRectangle _cropBox = default!;
 
         public int Rotate
         {
@@ -43,7 +42,6 @@ namespace PdfSharp.Pdf.Advanced
                 _rotate = value;
             }
         }
-
         int _rotate;
     }
 }

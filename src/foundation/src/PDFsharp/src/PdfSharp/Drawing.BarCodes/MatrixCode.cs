@@ -35,7 +35,7 @@ namespace PdfSharp.Drawing.BarCodes
         }
 
         /// <summary>
-        /// Gets or sets the encoding. TODO docDaSt
+        /// Gets or sets the encoding.
         /// </summary>
         public string Encoding
         {
@@ -46,11 +46,10 @@ namespace PdfSharp.Drawing.BarCodes
                 _matrixImage = null;
             }
         }
-
         string _encoding;
 
         /// <summary>
-        /// TODO docDaSt
+        /// Gets or sets the number of columns.
         /// </summary>
         public int Columns
         {
@@ -61,11 +60,10 @@ namespace PdfSharp.Drawing.BarCodes
                 _matrixImage = null;
             }
         }
-
         int _columns;
 
         /// <summary>
-        /// TODO docDaSt
+        /// Gets or sets the number of rows.
         /// </summary>
         public int Rows
         {
@@ -76,11 +74,10 @@ namespace PdfSharp.Drawing.BarCodes
                 _matrixImage = null;
             }
         }
-
         int _rows;
 
         /// <summary>
-        /// TODO docDaSt
+        /// Gets or sets the text.
         /// </summary>
         public new string Text
         {
@@ -92,12 +89,25 @@ namespace PdfSharp.Drawing.BarCodes
             }
         }
 
+        /// <summary>
+        /// Gets or sets the MatrixImage.
+        /// Getter throws if MatrixImage is null.
+        /// Use HasMatrixImage to test if image was created.
+        /// </summary>
         internal XImage MatrixImage
         {
             get => _matrixImage ?? NRT.ThrowOnNull<XImage>();
             set => _matrixImage = value;
         }
         XImage? _matrixImage = null!;
+
+        /// <summary>
+        /// MatrixImage throws if it is null. Here is a way to check if the image was created.
+        /// </summary>
+        internal bool HasMatrixImage
+        {
+            get => _matrixImage is not null;
+        }
 
         /// <summary>
         /// When implemented in a derived class renders the 2D code.

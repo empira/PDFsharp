@@ -46,7 +46,7 @@ namespace PdfSharp.Pdf.Advanced
             _descendantFont.BaseFont = BaseFont;
 
             PdfArray descendantFonts = new PdfArray(document);
-            Owner._irefTable.Add(_descendantFont);
+            Owner.IrefTable.Add(_descendantFont);
             descendantFonts.Elements.Add(_descendantFont.Reference!); // Reference is set in Add(_descendantFont).
             Elements[Keys.DescendantFonts] = descendantFonts;
         }
@@ -83,14 +83,14 @@ namespace PdfSharp.Pdf.Advanced
             _descendantFont.BaseFont = BaseFont;
 
             PdfArray descendantFonts = new PdfArray(document);
-            Owner._irefTable.Add(_descendantFont);
+            Owner.IrefTable.Add(_descendantFont);
             descendantFonts.Elements.Add(_descendantFont.Reference!);
             Elements[Keys.DescendantFonts] = descendantFonts;
         }
 
         XPdfFontOptions FontOptions => _fontOptions;
 
-        XPdfFontOptions _fontOptions = null!; // NRT
+        XPdfFontOptions _fontOptions = default!;
 
         public string BaseFont
         {
@@ -100,7 +100,7 @@ namespace PdfSharp.Pdf.Advanced
 
         internal PdfCIDFont DescendantFont => _descendantFont;
 
-        readonly PdfCIDFont _descendantFont = null!; // NRT
+        readonly PdfCIDFont _descendantFont = default!;
 
         internal override void PrepareForSave()
         {

@@ -135,6 +135,6 @@ namespace PdfSharp.Drawing
 
         readonly XGraphics _gfx;
 
-        internal XGraphicsState State = null!;  // NRT
+        internal XGraphicsState State = default!;
     }
 }

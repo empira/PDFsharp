@@ -22,10 +22,6 @@ using PdfSharp.Drawing.Internal;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Advanced;
 
-// WPFHACK
-//#pragma warning disable 0169
-//#pragma warning disable 0649
-
 namespace PdfSharp.Drawing
 {
     [Flags]
@@ -605,7 +601,7 @@ namespace PdfSharp.Drawing
                         continue;
                     }
                 }
-                AddByte:
+            AddByte:
                 if ((ch & 0xff80) == 0)
                 {
                     result.Append(ch);
@@ -1367,7 +1363,7 @@ namespace PdfSharp.Drawing
 #endif
 #if GDI
         // ReSharper disable once InconsistentNaming
-        internal Image _gdiImage = null!; // NRT
+        internal Image _gdiImage = default!;
 #endif
 #if WPF
         internal BitmapSource _wpfImage = null!;

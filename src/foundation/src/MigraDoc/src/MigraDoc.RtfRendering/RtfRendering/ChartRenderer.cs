@@ -149,7 +149,34 @@ namespace MigraDoc.RtfRendering
         bool StoreTempImage(string fileName)
         {
 #if !WPF
-            // NET6 return false TODO
+            // ReviewSTLA THHO4STLA
+            // EXPERIMENTAL
+            switch (Capabilities.Compatibility.ChartsCannotBeRendered)
+            {
+                case Capabilities.FeatureNotAvailableAction.DoNothing:
+                    break;
+
+                case Capabilities.FeatureNotAvailableAction.FailWithException:
+                    //DiagnosticsHelper.HandleNotImplemented("XGraphicsPath.AddString");
+                    throw new NotSupportedException("Charts in RTF are not yet implemented for Core and GDI build.");
+                    //break;
+
+                case Capabilities.FeatureNotAvailableAction.LogWarning:
+                    // TODO Logging. TODO Unified handling for PDFsharp and MigraDoc.
+                    break;
+
+                case Capabilities.FeatureNotAvailableAction.LogError:
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+
+            //// NET6 return false TODO
+            //if (Capabilities.Compatibility.ChartsCannotBeRendered)
+            //    throw new InvalidOperationException("This version of MigraDoc cannot render charts to RTF. Use the WPF build under Windows to create RTF files with charts.");
+
             return false;
 #else
             try

@@ -1,16 +1,20 @@
-﻿using PdfSharp.Quality;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
 
+#pragma warning disable 1591
 namespace PdfSharp.Features
 {
-    public class FontResolvers : FeatureBase
+    public class FontResolvers : Feature
     {
-        public static void TestSegoeWpFontResolver()
+        public void TestSegoeWpFontResolver()
         {
             RenderSnippetAsPdf(new SegoeWpFontResolverSnippet());
         }
 
-        public static void TestExoticFontResolver()
+        public void TestExoticFontResolver()
         {
             RenderSnippetAsPdf(new ExoticFontResolverSnippet());
         }

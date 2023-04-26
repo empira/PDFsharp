@@ -5,4 +5,3 @@ PDFsharp is the Open Source library for creating and modifying PDF documents usi
 This package relies on Windows Forms (GDI+) and can be used under Windows only.
 
 See [docs.pdfsharp.net](https://docs.pdfsharp.net) for details.
-

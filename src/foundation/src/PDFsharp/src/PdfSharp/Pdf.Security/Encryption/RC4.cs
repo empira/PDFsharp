@@ -14,7 +14,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         public void SetKey(byte[] key)
         {
-            SetKey(key, key.Length);
+            SetKey(key, 0, key.Length);
         }
 
         /// <summary>

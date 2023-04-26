@@ -157,7 +157,7 @@ namespace PdfSharp.Drawing
                 }
 
 #if GDI
-                GdiFont gdiFont = default!; // NRT
+                GdiFont gdiFont = default!;
 #endif
 #if WPF
                 WpfFontFamily? wpfFontFamily = null;
@@ -436,7 +436,6 @@ namespace PdfSharp.Drawing
                     default: throw new ArgumentOutOfRangeException(nameof(fontResolvingOptions));
                 }
             }
-            // TODO StringBuilder?
 #if true
             // Attempt to make it faster.
             var bold = fontResolvingOptions.IsBold;
@@ -445,18 +444,18 @@ namespace PdfSharp.Drawing
                 return KeyPrefix + familyName.ToLowerInvariant()
                                  + "/n/400/5"
                                  + simulationSuffix;
-            else if (bold && !italic)
+            if (bold && !italic)
                 return KeyPrefix + familyName.ToLowerInvariant()
                                  + "/n/700/5"
                                  + simulationSuffix;
-            else if (!bold && italic)
+            if (!bold && italic)
                 return KeyPrefix + familyName.ToLowerInvariant()
                                  + "/i/400/5"
                                  + simulationSuffix;
-            else /*if (bold && italic)*/
-                return KeyPrefix + familyName.ToLowerInvariant()
-                                 + "/i/700/5"
-                                 + simulationSuffix;
+            /*if (bold && italic)*/
+            return KeyPrefix + familyName.ToLowerInvariant()
+                             + "/i/700/5"
+                             + simulationSuffix;
 #else
             string key = KeyPrefix + familyName.ToLowerInvariant()
                 + (fontResolvingOptions.IsItalic ? "/i" : "/n") // normal / oblique / italic  
@@ -508,17 +507,17 @@ namespace PdfSharp.Drawing
             //string key = name + '/' + style + '/' + weight + '/' + stretch + '/' + simulations;
 
             // Consider using StringBuilder.
-            string key = (KeyPrefix 
-                    + name 
-                    + '/' 
-                    + style[..1] 
-                    + '/' 
-                    + wpfGlyphTypeface.Weight.ToOpenTypeWeight().ToString(CultureInfo.InvariantCulture) 
-                    + '/' 
+            string key = (KeyPrefix
+                    + name
+                    + '/'
+                    + style[..1]
+                    + '/'
+                    + wpfGlyphTypeface.Weight.ToOpenTypeWeight().ToString(CultureInfo.InvariantCulture)
+                    + '/'
                     + wpfGlyphTypeface.Stretch.ToOpenTypeStretch().ToString(CultureInfo.InvariantCulture)).ToLowerInvariant();
             switch (wpfGlyphTypeface.StyleSimulations)
             {
-                case WpfStyleSimulations.BoldSimulation: 
+                case WpfStyleSimulations.BoldSimulation:
                     return key + "|b+/i-";
                 case WpfStyleSimulations.ItalicSimulation:
                     return key + "|b-/i+";

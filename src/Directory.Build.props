@@ -2,6 +2,8 @@
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
     <!-- Found no other way to resolve the following warning than disable it -->
     <NoWarn>NU1507</NoWarn>
   </PropertyGroup>

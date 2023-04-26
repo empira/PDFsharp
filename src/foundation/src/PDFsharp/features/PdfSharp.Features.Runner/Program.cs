@@ -16,29 +16,28 @@ namespace PdfSharp.Features
             //GlobalFontSettings.FontResolver = new SegoeWpFontResolver();
             GlobalFontSettings.FontResolver = new FailsafeFontResolver();
 #endif
+            // Drawing.graphics
+            //new Features.Drawing.GraphicsFromImage().t ();
 
+            // Drawing.lines
+            // new Features.Drawing.Lines1()..t();
 
-            //var doc = PdfReader.Open(@"C:\Users\StLa\Desktop\slide0.pdf");
-            //var doc = PdfReader.Open(@"C:\Users\StLa\Desktop\04_Cloud-UseCase.pdf");
-            //doc.Save(@"C:\Users\StLa\Desktop\04_Cloud-UseCase_.pdf");
-            //doc.GetType();
-
+            // === reviewed up to here ===
 
             // Paths
-            //Features.Drawing.Paths.PathCurves();
-            //Features.Drawing.Paths.PathText();
-            //Features.Drawing.Paths.PathText();
-            //Features.Drawing.Paths.PathText();
+            //new Drawing.Paths().PathCurves();
+            //new Drawing.Paths().PathMisc();
+            //new Drawing.Paths().PathShapes();
+            //new Drawing.Paths().PathText();
 
             // Font
-            //FontSelection.HelloWord1Test();
-            //FontResolvers.TestSegoeWpFontResolver();
-            //FontSelection.DefaultFontConstructionTest();
-            //FontSelection.FontFamilyConstructionTest();
-            //FontSelection.FrutigerFontsTest();
-            FontSelection.PlatformFontConstructionTest();
-            //FontResolvers.TestExoticFontResolver();
-
+            //new FontSelection().HelloWord1Test();
+            //new FontSelection()..TestSegoeWpFontResolver();
+            //new FontSelection().DefaultFontConstructionTest();
+            new FontSelection().FontFamilyConstructionTest();
+            //new FontSelection().FrutigerFontsTest();
+            //new FontSelection().PlatformFontConstructionTest();
+            //new FontResolvers().TestExoticFontResolver();
 
             //  IO.Info.ReadPdfInfo();
             // Annotations.LinkAnnotations.MergeDocumentsWithLinkAnnotations();

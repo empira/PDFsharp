@@ -8,8 +8,6 @@ using System.Text;
 using PdfSharp.Internal;
 using PdfSharp.Pdf.Internal;
 
-//#pragma warning disable 1591
-
 namespace PdfSharp.Pdf.IO
 {
     /// <summary>

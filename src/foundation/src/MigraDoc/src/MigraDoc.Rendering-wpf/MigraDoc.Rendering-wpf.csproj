@@ -5,8 +5,6 @@
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <RootNamespace>MigraDoc</RootNamespace>
         <UseWPF>true</UseWPF>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
         <!--<DefineConstants>WPF</DefineConstants> technically not needed, but needs some work -->
         <DefineConstants>WPF</DefineConstants>
     </PropertyGroup>

@@ -22,7 +22,7 @@ namespace PdfSharp.Fonts.OpenType
     {
         public const string Tag = TableTagNames.Glyf;
 
-        internal byte[] GlyphTable = null!; // NRT
+        internal byte[] GlyphTable = default!;
 
         public GlyphDataTable()
             : base(null, Tag)

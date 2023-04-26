@@ -22,7 +22,6 @@ using PdfSharp.Drawing;
 using PdfSharp.Fonts.Internal;
 using System.Runtime.InteropServices;
 
-//#pragma warning disable 1591
 // Re-Sharper disable RedundantNameQualifier
 
 namespace PdfSharp.Fonts

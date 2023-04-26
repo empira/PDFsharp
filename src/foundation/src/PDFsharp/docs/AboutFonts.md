@@ -15,6 +15,10 @@
 This section define terms used in PDFsharp. For a general introduction on typography see 
 [Microsoft Typography documentation](https://learn.microsoft.com/en-us/typography/).
 
+## em size
+The em size specifies the size of a font.
+It is the size of the [em quad](https://en.wikipedia.org/wiki/Quad_(typography)) used for the font.
+
 ### Font
 Generally in typography a font is a complete character set in a particular point size, in a particular typeface.
 A computer font is a file that contains a set of characters in a particular style of a typeface. E.g in Windows

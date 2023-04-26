@@ -11,7 +11,7 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Drawing
 {
-    public class ImagesMisc : SnippetBase
+    public class ImagesMisc : Snippet
     {
         public ImagesMisc()
         {
