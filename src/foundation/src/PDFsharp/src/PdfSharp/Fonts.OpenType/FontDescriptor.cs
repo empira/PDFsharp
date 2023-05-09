@@ -63,7 +63,7 @@ namespace PdfSharp.Fonts.OpenType
             get => _fontName;
             protected set => _fontName = value;
         }
-        string _fontName = null!; // NRT
+        string _fontName = default!;
 
         ///// <summary>
         ///// 
@@ -93,7 +93,7 @@ namespace PdfSharp.Fonts.OpenType
             get;
             private set;
             // BUG: never set
-        } = null!; // NRT
+        } = default!;
 
         /// <summary>
         /// Gets a value indicating whether this instance belongs to a bold font.
@@ -168,7 +168,7 @@ namespace PdfSharp.Fonts.OpenType
             get;
             private set;
             // BUG: never set
-        } = null!; // NRT
+        } = default!;
 
         ///// <summary>
         ///// 
@@ -187,7 +187,7 @@ namespace PdfSharp.Fonts.OpenType
             get;
             private set;
             // BUG: never set
-        } = null!; // NRT
+        } = default!;
 
         /// <summary>
         /// 

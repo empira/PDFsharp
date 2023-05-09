@@ -7,7 +7,7 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Drawing
 {
-    public class PathText : SnippetBase
+    public class PathText : Snippet
     {
         // Some chars with ascenders and descenders.
         const string TestChars = " Îygp";

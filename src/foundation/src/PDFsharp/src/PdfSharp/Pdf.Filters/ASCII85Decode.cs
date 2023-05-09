@@ -54,47 +54,53 @@ namespace PdfSharp.Pdf.Filters
                 }
                 wCount++;
             }
-            if (rest == 1)
+            switch (rest)
             {
-                uint val = (uint)data[idxIn] << 24;
-                val /= 85 * 85 * 85;
-                byte c2 = (byte)(val % 85 + '!');
-                val /= 85;
-                byte c1 = (byte)(val + '!');
+                case 1:
+                {
+                    uint val = (uint)data[idxIn] << 24;
+                    val /= 85 * 85 * 85;
+                    byte c2 = (byte)(val % 85 + '!');
+                    val /= 85;
+                    byte c1 = (byte)(val + '!');
 
-                result[idxOut++] = c1;
-                result[idxOut++] = c2;
-            }
-            else if (rest == 2)
-            {
-                uint val = ((uint)data[idxIn++] << 24) + ((uint)data[idxIn] << 16);
-                val /= 85 * 85;
-                byte c3 = (byte)(val % 85 + '!');
-                val /= 85;
-                byte c2 = (byte)(val % 85 + '!');
-                val /= 85;
-                byte c1 = (byte)(val + '!');
+                    result[idxOut++] = c1;
+                    result[idxOut++] = c2;
+                    break;
+                }
+                case 2:
+                {
+                    uint val = ((uint)data[idxIn++] << 24) + ((uint)data[idxIn] << 16);
+                    val /= 85 * 85;
+                    byte c3 = (byte)(val % 85 + '!');
+                    val /= 85;
+                    byte c2 = (byte)(val % 85 + '!');
+                    val /= 85;
+                    byte c1 = (byte)(val + '!');
 
-                result[idxOut++] = c1;
-                result[idxOut++] = c2;
-                result[idxOut++] = c3;
-            }
-            else if (rest == 3)
-            {
-                uint val = ((uint)data[idxIn++] << 24) + ((uint)data[idxIn++] << 16) + ((uint)data[idxIn] << 8);
-                val /= 85;
-                byte c4 = (byte)(val % 85 + '!');
-                val /= 85;
-                byte c3 = (byte)(val % 85 + '!');
-                val /= 85;
-                byte c2 = (byte)(val % 85 + '!');
-                val /= 85;
-                byte c1 = (byte)(val + '!');
+                    result[idxOut++] = c1;
+                    result[idxOut++] = c2;
+                    result[idxOut++] = c3;
+                    break;
+                }
+                case 3:
+                {
+                    uint val = ((uint)data[idxIn++] << 24) + ((uint)data[idxIn++] << 16) + ((uint)data[idxIn] << 8);
+                    val /= 85;
+                    byte c4 = (byte)(val % 85 + '!');
+                    val /= 85;
+                    byte c3 = (byte)(val % 85 + '!');
+                    val /= 85;
+                    byte c2 = (byte)(val % 85 + '!');
+                    val /= 85;
+                    byte c1 = (byte)(val + '!');
 
-                result[idxOut++] = c1;
-                result[idxOut++] = c2;
-                result[idxOut++] = c3;
-                result[idxOut++] = c4;
+                    result[idxOut++] = c1;
+                    result[idxOut++] = c2;
+                    result[idxOut++] = c3;
+                    result[idxOut++] = c4;
+                    break;
+                }
             }
             result[idxOut++] = (byte)'~';
             result[idxOut++] = (byte)'>';
@@ -133,7 +139,7 @@ namespace PdfSharp.Pdf.Filters
                         throw new ArgumentException("Illegal character.", nameof(data));
                     break;
                 }
-                // ingnore unknown character
+                // ignore unknown character
             }
             // Loop not ended with break?
             if (idx == length)
@@ -185,73 +191,81 @@ namespace PdfSharp.Pdf.Filters
             // I have found no appropriate algorithm, so I write my own. In some rare cases the value must not
             // increased by one, but I cannot found a general formula or a proof.
             // All possible cases are tested programmatically.
-            if (remainder == 2) // one byte
+            switch (remainder)
             {
-                uint value =
-                  (uint)(data[idx++] - '!') * (85 * 85 * 85 * 85) +
-                  (uint)(data[idx] - '!') * (85 * 85 * 85);
-
-                // Always increase if not zero (tried out).
-                if (value != 0)
-                    value += 0x01000000;
-
-                output[idxOut] = (byte)(value >> 24);
-            }
-            else if (remainder == 3) // two bytes
-            {
-                int idxIn = idx;
-                uint value =
-                  (uint)(data[idx++] - '!') * (85 * 85 * 85 * 85) +
-                  (uint)(data[idx++] - '!') * (85 * 85 * 85) +
-                  (uint)(data[idx] - '!') * (85 * 85);
-
-                if (value != 0)
-                {
-                    value &= 0xFFFF0000;
-                    uint val = value / (85 * 85);
-                    byte c3 = (byte)(val % 85 + '!');
-                    val /= 85;
-                    byte c2 = (byte)(val % 85 + '!');
-                    val /= 85;
-                    byte c1 = (byte)(val + '!');
-                    if (c1 != data[idxIn] || c2 != data[idxIn + 1] || c3 != data[idxIn + 2])
+                case 2: // one byte
                     {
-                        value += 0x00010000;
-                        //Count2++;
-                    }
-                }
-                output[idxOut++] = (byte)(value >> 24);
-                output[idxOut] = (byte)(value >> 16);
-            }
-            else if (remainder == 4) // three bytes
-            {
-                int idxIn = idx;
-                uint value =
-                  (uint)(data[idx++] - '!') * (85 * 85 * 85 * 85) +
-                  (uint)(data[idx++] - '!') * (85 * 85 * 85) +
-                  (uint)(data[idx++] - '!') * (85 * 85) +
-                  (uint)(data[idx] - '!') * 85;
+                    uint value =
+                        (uint)(data[idx++] - '!') * (85 * 85 * 85 * 85) +
+                        (uint)(data[idx] - '!') * (85 * 85 * 85);
 
-                if (value != 0)
-                {
-                    value &= 0xFFFFFF00;
-                    uint val = value / 85;
-                    byte c4 = (byte)(val % 85 + '!');
-                    val /= 85;
-                    byte c3 = (byte)(val % 85 + '!');
-                    val /= 85;
-                    byte c2 = (byte)(val % 85 + '!');
-                    val /= 85;
-                    byte c1 = (byte)(val + '!');
-                    if (c1 != data[idxIn] || c2 != data[idxIn + 1] || c3 != data[idxIn + 2] || c4 != data[idxIn + 3])
-                    {
-                        value += 0x00000100;
-                        //Count3++;
-                    }
+                    // Always increase if not zero (tried out).
+                    if (value != 0)
+                        value += 0x01000000;
+
+                    output[idxOut] = (byte)(value >> 24);
+                    break;
                 }
-                output[idxOut++] = (byte)(value >> 24);
-                output[idxOut++] = (byte)(value >> 16);
-                output[idxOut] = (byte)(value >> 8);
+
+                case 3: // two bytes
+                    {
+                    int idxIn = idx;
+                    uint value =
+                        (uint)(data[idx++] - '!') * (85 * 85 * 85 * 85) +
+                        (uint)(data[idx++] - '!') * (85 * 85 * 85) +
+                        (uint)(data[idx] - '!') * (85 * 85);
+
+                    if (value != 0)
+                    {
+                        value &= 0xFFFF0000;
+                        uint val = value / (85 * 85);
+                        byte c3 = (byte)(val % 85 + '!');
+                        val /= 85;
+                        byte c2 = (byte)(val % 85 + '!');
+                        val /= 85;
+                        byte c1 = (byte)(val + '!');
+                        if (c1 != data[idxIn] || c2 != data[idxIn + 1] || c3 != data[idxIn + 2])
+                        {
+                            value += 0x00010000;
+                            //Count2++;
+                        }
+                    }
+                    output[idxOut++] = (byte)(value >> 24);
+                    output[idxOut] = (byte)(value >> 16);
+                    break;
+                }
+
+                case 4: // three bytes
+                    {
+                    int idxIn = idx;
+                    uint value =
+                        (uint)(data[idx++] - '!') * (85 * 85 * 85 * 85) +
+                        (uint)(data[idx++] - '!') * (85 * 85 * 85) +
+                        (uint)(data[idx++] - '!') * (85 * 85) +
+                        (uint)(data[idx] - '!') * 85;
+
+                    if (value != 0)
+                    {
+                        value &= 0xFFFFFF00;
+                        uint val = value / 85;
+                        byte c4 = (byte)(val % 85 + '!');
+                        val /= 85;
+                        byte c3 = (byte)(val % 85 + '!');
+                        val /= 85;
+                        byte c2 = (byte)(val % 85 + '!');
+                        val /= 85;
+                        byte c1 = (byte)(val + '!');
+                        if (c1 != data[idxIn] || c2 != data[idxIn + 1] || c3 != data[idxIn + 2] || c4 != data[idxIn + 3])
+                        {
+                            value += 0x00000100;
+                            //Count3++;
+                        }
+                    }
+                    output[idxOut++] = (byte)(value >> 24);
+                    output[idxOut++] = (byte)(value >> 16);
+                    output[idxOut] = (byte)(value >> 8);
+                    break;
+                }
             }
             return output;
         }

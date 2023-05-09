@@ -6,7 +6,7 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Drawing
 {
-    public class LineStyle : SnippetBase
+    public class LineStyle : Snippet
     {
         public LineStyle()
         {

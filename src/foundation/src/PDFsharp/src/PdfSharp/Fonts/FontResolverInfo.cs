@@ -116,32 +116,12 @@ namespace PdfSharp.Fonts
         /// <summary>
         /// Gets the font resolver info key for this object.
         /// </summary>
-#if true
-        internal string Key
-            // TODO StringBuilder?
-        {
-            get
-            {
-                // Attempt to make it faster.
-                return _key ??= !MustSimulateBold && !MustSimulateItalic ?
-                    KeyPrefix + FaceName.ToLowerInvariant() + "/b-i-" : 
-                        MustSimulateBold && !MustSimulateItalic ? 
-                            KeyPrefix + FaceName.ToLowerInvariant() + "/b+i-" : 
-                            !MustSimulateBold && MustSimulateItalic ? 
-                                KeyPrefix + FaceName.ToLowerInvariant() + "/b-i+" :
-                                /* MustSimulateBold && MustSimulateItalic ? */
-                                KeyPrefix + FaceName.ToLowerInvariant() + "/b+i+";
-            }
-        }
-#else
         internal string Key =>
-            // TODO StringBuilder?
             _key ??= KeyPrefix
                      + FaceName.ToLowerInvariant()
                      + '/'
                      + (MustSimulateBold ? "b+" : "b-")
                      + (MustSimulateItalic ? "i+" : "i-");
-#endif
         string? _key;
 
         /// <summary>

@@ -1,8 +1,6 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-#pragma warning disable 1591
-
 namespace MigraDoc.DocumentObjectModel
 {
     /// <summary>
@@ -10,12 +8,39 @@ namespace MigraDoc.DocumentObjectModel
     /// </summary>
     public enum Underline
     {
+        /// <summary>
+        /// No underline.
+        /// </summary>
         None,
+
+        /// <summary>
+        /// Continuous single underline.
+        /// </summary>
         Single,
+
+        /// <summary>
+        /// Word underline.
+        /// </summary>
         Words,
+
+        /// <summary>
+        /// Dotted underline.
+        /// </summary>
         Dotted,
+
+        /// <summary>
+        /// Dashed underline.
+        /// </summary>
         Dash,
+
+        /// <summary>
+        /// Dash-dotted underline.
+        /// </summary>
         DotDash,
+
+        /// <summary>
+        /// Dash-dot-dotted underline.
+        /// </summary>
         DotDotDash,
 
         /* --- unsupported ---

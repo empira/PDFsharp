@@ -18,7 +18,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfNameObject()
         {
-            _value = "/";  // Empty name.
+            Value = "/";  // Empty name.
         }
 
         /// <summary>
@@ -34,30 +34,25 @@ namespace PdfSharp.Pdf
             if (value.Length == 0 || value[0] != '/')
                 throw new ArgumentException(PSSR.NameMustStartWithSlash);
 
-            _value = value;
+            Value = value;
         }
 
         /// <summary>
         /// Determines whether the specified object is equal to the current object.
         /// </summary>
         public override bool Equals(object? obj) 
-            => _value.Equals(obj);
+            => Value.Equals(obj);
 
         /// <summary>
         /// Serves as a hash function for this type.
         /// </summary>
         public override int GetHashCode() 
-            => _value.GetHashCode();
+            => Value.GetHashCode();
 
         /// <summary>
         /// Gets or sets the name value.
         /// </summary>
-        public string Value
-        {
-            get => _value;
-            set => _value = value;
-        }
-        string _value;
+        public string Value { get; set; }
 
         /// <summary>
         /// Returns the name. The string always begins with a slash.
@@ -65,7 +60,7 @@ namespace PdfSharp.Pdf
         public override string ToString()
         {
             // TODO: Encode characters.
-            return _value;
+            return Value;
         }
 
         /// <summary>
@@ -76,7 +71,7 @@ namespace PdfSharp.Pdf
             if (name is null)
                 return str is null;
 
-            return name._value == str;
+            return name.Value == str;
         }
 
         /// <summary>
@@ -91,7 +86,7 @@ namespace PdfSharp.Pdf
         internal override void WriteObject(PdfWriter writer)
         {
             writer.WriteBeginObject(this);
-            writer.Write(new PdfName(_value));
+            writer.Write(new PdfName(Value));
             writer.WriteEndObject();
         }
     }

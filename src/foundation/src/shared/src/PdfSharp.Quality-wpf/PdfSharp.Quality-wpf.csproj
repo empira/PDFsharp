@@ -5,25 +5,23 @@
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <RootNamespace>PdfSharp.Quality</RootNamespace>
         <UseWPF>true</UseWPF>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
+	    <DefineConstants>WPF</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
   <ItemGroup>
-        <Compile Include="..\PdfSharp.Quality\CommonBase.cs" Link="CommonBase.cs" />
+        <Compile Include="..\PdfSharp.Quality\FeatureAndSnippetBase.cs" Link="FeatureAndSnippetBase.cs" />
         <Compile Include="..\PdfSharp.Quality\DefaultFontResolver.cs" Link="DefaultFontResolver.cs" />
-        <Compile Include="..\PdfSharp.Quality\FeatureBase.cs" Link="FeatureBase.cs" />
-        <Compile Include="..\PdfSharp.Quality\FeatureBaseWithTask.cs" Link="FeatureBaseWithTask.cs" />
+        <Compile Include="..\PdfSharp.Quality\Feature.cs" Link="Feature.cs" />
         <Compile Include="..\PdfSharp.Quality\FontHelper.cs" Link="FontHelper.cs" />
         <Compile Include="..\PdfSharp.Quality\GlobalUsings.cs" Link="GlobalUsings.cs" />
         <Compile Include="..\PdfSharp.Quality\IOHelper.cs" Link="IOHelper.cs" />
         <Compile Include="..\PdfSharp.Quality\PathHelper.cs" Link="PathHelper.cs" />
         <Compile Include="..\PdfSharp.Quality\PdfFileFormatter.cs" Link="PdfFileFormatter.cs" />
-        <Compile Include="..\PdfSharp.Quality\SnippetBase.cs" Link="SnippetBase.cs" />
+        <Compile Include="..\PdfSharp.Quality\Snippet.cs" Link="Snippet.cs" />
         <Compile Include="..\PdfSharp.Quality\TestClassBase.cs" Link="TestClassBase.cs" />
     </ItemGroup>
 

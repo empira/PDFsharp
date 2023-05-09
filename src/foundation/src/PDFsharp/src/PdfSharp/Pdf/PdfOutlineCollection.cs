@@ -261,8 +261,8 @@ namespace PdfSharp.Pdf
             outline.Parent = _parent;
 
             //_outlines.Add(outline);
-            if (!Owner._irefTable.Contains(outline.ObjectID))
-                Owner._irefTable.Add(outline);
+            if (!Owner.IrefTable.Contains(outline.ObjectID))
+                Owner.IrefTable.Add(outline);
             else
             {
                 outline.GetType();
@@ -291,7 +291,7 @@ namespace PdfSharp.Pdf
             //outline.Document = Owner;
             outline.Parent = null!;
 
-            Owner._irefTable.Remove(outline.Reference);
+            Owner.IrefTable.Remove(outline.Reference);
         }
 
         /// <summary>

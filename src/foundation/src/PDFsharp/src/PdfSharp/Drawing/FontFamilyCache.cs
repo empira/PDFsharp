@@ -3,18 +3,15 @@
 
 using System.Text;
 #if GDI
-using System.Drawing;
 using GdiFontFamily = System.Drawing.FontFamily;
 #endif
 #if WPF
-using System.Windows.Media;
-using System.Windows.Markup;
 using WpfFontFamily = System.Windows.Media.FontFamily;
 #endif
-using PdfSharp.Fonts;
-using PdfSharp.Fonts.OpenType;
+//using PdfSharp.Fonts;
+//using PdfSharp.Fonts.OpenType;
 using PdfSharp.Internal;
-using PdfSharp.Pdf;
+//using PdfSharp.Pdf;
 
 namespace PdfSharp.Drawing
 {

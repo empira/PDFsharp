@@ -88,7 +88,7 @@ namespace PdfSharp.Pdf.Advanced
                 root = ImportClosure(importedObjectTable, thisDocument, root);
                 // If the root was a direct object, make it indirect.
                 if (root.Reference == null)
-                    thisDocument._irefTable.Add(root);
+                    thisDocument.IrefTable.Add(root);
 
                 Debug.Assert(root.Reference != null);
                 Elements["/Resources"] = root.Reference;

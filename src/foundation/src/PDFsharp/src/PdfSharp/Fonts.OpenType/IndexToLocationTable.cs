@@ -107,7 +107,7 @@ namespace PdfSharp.Fonts.OpenType
             DirectoryEntry.CheckSum = CalcChecksum(_bytes);
         }
 
-        byte[] _bytes = null!; // NRT
+        byte[] _bytes = default!;
 
         /// <summary>
         /// Converts the font into its binary representation.

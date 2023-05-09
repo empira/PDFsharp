@@ -682,7 +682,7 @@ namespace MigraDoc.Tests
 
             var pdfRenderer = RenderSecuredDocument(document, options);
             var pdfDocument = pdfRenderer.PdfDocument;
-            pdfDocument.SecurityHandler!.EncryptEmbeddedFilesOnly();
+            pdfDocument.SecurityHandler.EncryptEmbeddedFilesOnly();
             pdfRenderer.Save(filename);
 
 

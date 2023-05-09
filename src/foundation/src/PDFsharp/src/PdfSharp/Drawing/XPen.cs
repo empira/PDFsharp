@@ -2,14 +2,12 @@
 // See the LICENSE file in the solution root for more information.
 
 
-using PdfSharp.Internal;
 #if GDI
-using System.Drawing;
+using PdfSharp.Internal;
 using System.Drawing.Drawing2D;
 using GdiPen = System.Drawing.Pen;
 #endif
 #if WPF
-using System.Windows;
 using System.Windows.Media;
 using WpfPen = System.Windows.Media.Pen;
 using WpfBrush = System.Windows.Media.Brush;
@@ -178,6 +176,7 @@ namespace PdfSharp.Drawing
             {
                 if (_immutable)
                     throw new ArgumentException(PSSR.CannotChangeImmutableObject("XPen"));
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
                 _dirty = _dirty || _dashOffset != value;
                 _dashOffset = value;
             }
@@ -269,7 +268,7 @@ namespace PdfSharp.Drawing
             return xpen;
         }
 
-        internal System.Drawing.Pen RealizeGdiPen()
+        internal Pen RealizeGdiPen()
         {
             if (_dirty)
             {
@@ -294,7 +293,7 @@ namespace PdfSharp.Drawing
                     _gdiPen.DashPattern = pattern;
                 }
                 else
-                    _gdiPen.DashStyle = (System.Drawing.Drawing2D.DashStyle)_dashStyle;
+                    _gdiPen.DashStyle = (DashStyle)_dashStyle;
             }
             return _gdiPen;
         }

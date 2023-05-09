@@ -3,26 +3,27 @@
 
 using PdfSharp.Quality;
 
+#pragma warning disable 1591
 namespace PdfSharp.Features.Drawing
 {
-    public class Paths : FeatureBase
+    public class Paths : Feature
     {
-        public static void PathCurves()
+        public void PathCurves()
         {
             RenderSnippetAsPdf(new Snippets.Drawing.PathCurves());
         }
 
-        public static void PathMisc()
+        public void PathMisc()
         {
             RenderSnippetAsPdf(new Snippets.Drawing.PathMisc());
         }
 
-        public static void PathShapes()
+        public void PathShapes()
         {
             RenderSnippetAsPdf(new Snippets.Drawing.PathShapes());
         }
 
-        public static void PathText()
+        public void PathText()
         {
             RenderSnippetAsPdf(new Snippets.Drawing.PathText());
         }

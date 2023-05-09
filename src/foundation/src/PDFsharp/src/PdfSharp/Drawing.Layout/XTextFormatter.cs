@@ -33,7 +33,7 @@ namespace PdfSharp.Drawing.Layout
             get => _text;
             set => _text = value;
         }
-        string _text=null!; // NRT
+        string _text = default!;
 
         /// <summary>
         /// Gets or sets the font.
@@ -55,7 +55,7 @@ namespace PdfSharp.Drawing.Layout
             }
         }
 
-        XFont _font = null!; // NRT
+        XFont _font = default!;
         double _lineSpace;
         double _cyAscent;
         double _cyDescent;
@@ -326,7 +326,7 @@ namespace PdfSharp.Drawing.Layout
             /// <summary>
             /// The text represented by this block.
             /// </summary>
-            public readonly string Text = null!; // NRT
+            public readonly string Text = default!;
 
             /// <summary>
             /// The type of the block.

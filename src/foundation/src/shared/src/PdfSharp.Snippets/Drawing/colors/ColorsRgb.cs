@@ -6,7 +6,7 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Drawing
 {
-    public class ColorsRgb : SnippetBase
+    public class ColorsRgb : Snippet
     {
         public ColorsRgb()
         {

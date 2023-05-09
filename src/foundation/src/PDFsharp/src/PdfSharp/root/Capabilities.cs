@@ -9,27 +9,32 @@ namespace PdfSharp
     /// Defines the action to be taken if a requested feature is not available
     /// in the current build.
     /// </summary>
-    public enum FeatureNotAvailableAction
+    public enum FeatureNotAvailableAction  // RENAME ProblemBehavior
     {
         /// <summary>
-        /// Do Nothing.
+        /// Do nothing.
         /// </summary>
         DoNothing = 0,
 
         /// <summary>
-        /// The fail with exception
+        /// The log warning.
+        /// </summary>
+        LogInformation = 2,
+
+        /// <summary>
+        /// The log warning.
+        /// </summary>
+        LogWarning = 3,
+
+        /// <summary>
+        /// The log error.
+        /// </summary>
+        LogError = 4,
+
+        /// <summary>
+        /// The fail with exception.
         /// </summary>
         FailWithException = 1,
-
-        /// <summary>
-        /// The log warning
-        /// </summary>
-        LogWarning = 2,
-
-        /// <summary>
-        /// The log error
-        /// </summary>
-        LogError = 3
     }
 
     /// <summary>
@@ -125,6 +130,20 @@ namespace PdfSharp
             /// and this feature is currently not supported.
             /// </summary>
             public static FeatureNotAvailableAction GlyphsToPath { get; set; } = FeatureNotAvailableAction.DoNothing;
+        }
+
+        /// <summary>
+        /// Access to compatibility features with fluent API.
+        /// </summary>
+        public static class Compatibility
+        {
+            /// <summary>
+            /// Gets or sets a flag that defines how cryptographic exceptions should be handled that occur while decrypting objects of an encrypted document.
+            /// If false, occurring exceptions will be rethrown and PDFsharp will only open correctly encrypted documents.
+            /// If true, occurring exceptions will be caught and only logged for information purposes.
+            /// This way PDFsharp will be able to load documents with unencrypted contents that should be encrypted due to the settings of the file.
+            /// </summary>
+            public static bool IgnoreErrorsOnDecryption { get; set; } = true;  // Define a behavior.
         }
     }
 }

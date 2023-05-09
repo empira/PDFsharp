@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.Logging;
 
-#pragma warning disable 1591
+#pragma warning disable 1591 // Because this is preview code.
 
 namespace MigraDoc.DocumentObjectModel.Internals
 {

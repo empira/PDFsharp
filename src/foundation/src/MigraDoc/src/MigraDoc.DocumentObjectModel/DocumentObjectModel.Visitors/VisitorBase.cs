@@ -1,8 +1,6 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-#pragma warning disable 1591
-
 using MigraDoc.DocumentObjectModel.Tables;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.DocumentObjectModel.Shapes.Charts;
@@ -24,32 +22,30 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 visitable.AcceptVisitor(this, true);
         }
 
-        protected void FlattenParagraphFormat(ParagraphFormat format, ParagraphFormat? refFormat) // BUG ParagraphFormat?
+        /// <summary>
+        /// Flattens the the specified document object.
+        /// </summary>
+        protected void FlattenParagraphFormat(ParagraphFormat format, ParagraphFormat? refFormat)
         {
             if (refFormat != null)
             {
                 var refValues = refFormat.Values;
                 var values = format.Values;
-                if (values.Alignment is null) // BUG Correct??? Was "IsNull".
+                if (values.Alignment is null)
                     values.Alignment = refValues.Alignment;
 
-                //if (format.Values.FirstLineIndent is null)
                 if (values.FirstLineIndent.IsValueNullOrEmpty())
                     values.FirstLineIndent = refValues.FirstLineIndent;
 
-                //if (format.Values.LeftIndent is null)
                 if (values.LeftIndent.IsValueNullOrEmpty())
                     values.LeftIndent = refValues.LeftIndent;
 
-                //if (format.Values.RightIndent is null)
                 if (values.RightIndent.IsValueNullOrEmpty())
                     values.RightIndent = refValues.RightIndent;
 
-                //if (format.Values.SpaceBefore is null)
                 if (values.SpaceBefore.IsValueNullOrEmpty())
                     values.SpaceBefore = refValues.SpaceBefore;
 
-                //if (format.Values.SpaceAfter is null)
                 if (values.SpaceAfter.IsValueNullOrEmpty())
                     values.SpaceAfter = refValues.SpaceAfter;
 
@@ -77,7 +73,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 {
                     if (refValues.Font is not null)
                     {
-                        //The font is cloned here to avoid parent problems.
+                        // The font is cloned here to avoid parent problems.
                         values.Font = refValues.Font.Clone();
                         values.Font.Parent = format;
                     }
@@ -113,6 +109,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             throw new ArgumentNullException(nameof(refFormat));
         }
 
+        /// <summary>
+        /// Flattens the the specified document object.
+        /// </summary>
         protected void FlattenListInfo(ListInfo listInfo, ListInfo refListInfo)
         {
             if (listInfo.Values.ContinuePreviousList is null)
@@ -123,17 +122,16 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 listInfo.Values.NumberPosition = refListInfo.Values.NumberPosition;
         }
 
+        /// <summary>
+        /// Flattens the the specified document object.
+        /// </summary>
         protected void FlattenFont(Font? font, Font? refFont)  // BUG params must be not-nullable
         {
             if (font == null)
-            {
                 throw new ArgumentNullException(nameof(font));
-            }
 
             if (refFont == null)
-            {
                 throw new ArgumentNullException(nameof(refFont));
-            }
 
             font.Values.Name ??= refFont.Values.Name;
             font.Values.Size ??= refFont.Values.Size;  // TODO ??=
@@ -152,16 +150,21 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 font.Values.Subscript = refFont.Values.Subscript;
         }
 
+        /// <summary>
+        /// Flattens the the specified document object.
+        /// </summary>
         protected void FlattenShading(Shading shading, Shading refShading)
         {
             //fClear?
             if (shading.Values.Visible is null)
                 shading.Values.Visible = refShading.Values.Visible;
-            //if (shading.Values.Color is null || shading.Values.Color.Value.IsNull)  // BUG: May be wrong
             if (shading.Values.Color.IsValueNullOrEmpty())
                 shading.Values.Color = refShading.Values.Color;
         }
 
+        /// <summary>
+        /// Flattens the the specified document object.
+        /// </summary>
         protected Border FlattenedBorderFromBorders(Border? border, Borders parentBorders)
         {
             if (border == null)
@@ -173,7 +176,6 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             if (border.Values.Style is null)
                 border.Values.Style = parentBorders.Values.Style;
 
-            //if (border.Values.Width is null)
             if (border.Values.Width.IsValueNullOrEmpty())
                 border.Values.Width = parentBorders.Values.Width;
 
@@ -183,6 +185,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             return border;
         }
 
+        /// <summary>
+        /// Flattens the the specified document object.
+        /// </summary>
         protected void FlattenBorders(Borders borders, Borders refBorders)
         {
             borders.Values.Visible ??= refBorders.Values.Visible;
@@ -226,6 +231,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             }
         }
 
+        /// <summary>
+        /// Flattens the the specified document object.
+        /// </summary>
         protected void FlattenBorder(Border border, Border refBorder)
         {
             border.Values.Visible ??= refBorder.Values.Visible;
@@ -243,6 +251,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             }
         }
 
+        /// <summary>
+        /// Flattens the the specified document object.
+        /// </summary>
         protected void FlattenTabStops(TabStops tabStops, TabStops refTabStops)
         {
             if (!tabStops.TabsCleared)
@@ -266,6 +277,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             tabStops.TabsCleared = true;
         }
 
+        /// <summary>
+        /// Flattens the the specified document object.
+        /// </summary>
         protected void FlattenPageSetup(PageSetup pageSetup, PageSetup refPageSetup)
         {
             if (pageSetup.Values.PageWidth.IsValueNullOrEmpty() && pageSetup.Values.PageHeight is null)
@@ -340,12 +354,21 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 pageSetup.Values.HorizontalPageBreak = refPageSetup.Values.HorizontalPageBreak;
         }
 
+        /// <summary>
+        /// Flattens the the specified document object.
+        /// </summary>
         protected void FlattenHeaderFooter(HeaderFooter headerFooter, bool isHeader)
         { }
 
+        /// <summary>
+        /// Flattens the the specified document object.
+        /// </summary>
         protected void FlattenFillFormat(FillFormat? fillFormat)
         { }
 
+        /// <summary>
+        /// Flattens the the specified document object.
+        /// </summary>
         protected void FlattenLineFormat(LineFormat? lineFormat, LineFormat? refLineFormat)
         {
             if (refLineFormat != null && lineFormat != null)
@@ -355,6 +378,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             }
         }
 
+        /// <summary>
+        /// Flattens the the specified document object.
+        /// </summary>
         protected void FlattenAxis(Axis? axis)
         {
             if (axis == null)
@@ -385,11 +411,17 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             // axis.title;
         }
 
-        protected void FlattenPlotArea(PlotArea? plotArea)  // bug PlotArea?
+        /// <summary>
+        /// Flattens the the specified document object.
+        /// </summary>
+        protected void FlattenPlotArea(PlotArea? plotArea)
         {
             // plotArea can be null.
         }
 
+        /// <summary>
+        /// Flattens the the specified document object.
+        /// </summary>
         protected void FlattenDataLabel(DataLabel? dataLabel)
         { }
 
@@ -424,6 +456,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         // Document
+
         internal override void VisitDocument(Document document)
         { }
 
@@ -479,7 +512,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             var document = paragraph.Document;
 
             ParagraphFormat format;
-            DocumentObject currentElementHolder = GetDocumentElementHolder(paragraph);
+            var currentElementHolder = GetDocumentElementHolder(paragraph);
             var style = document.Styles[paragraph.Values.Style ?? String.Empty];
             if (style != null)
                 format = ParagraphFormatFromStyle(style);
@@ -871,15 +904,6 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             }
         }
 
-        //void CloneHelper(ref Borders borders, Borders source)
-        //{
-        //    if (source != null)
-        //    {
-        //        borders = source.Clone();
-        //        borders.Parent = source.Parent;
-        //    }
-        //}
-
         internal override void VisitLegend(Legend legend)
         {
             ParagraphFormat parentFormat;
@@ -904,7 +928,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 
         internal override void VisitTextArea(TextArea? textArea)
         {
-            if (textArea == null || textArea.Values.Elements == null)
+            if (textArea?.Values.Elements == null)
                 return;
 
             var document = textArea.Document;

@@ -100,11 +100,11 @@ namespace PdfSharp.Drawing
         /// Draws a series of glyphs identified by the specified text and font.
         /// </summary>
         void DrawString(string s, XFont font, XBrush brush, XRect layoutRectangle, XStringFormat format);
-        
+
         /// <summary>
         /// Draws a series of glyphs identified by the specified text and font.
         /// </summary>
-        [Obsolete ("Not yet implemented.")]
+        [Obsolete("Not yet implemented.")]
         void DrawString(string s, XGlyphTypeface typeface, XBrush brush, XRect layoutRectangle, XStringFormat format);
 
         /// <summary>
@@ -129,13 +129,18 @@ namespace PdfSharp.Drawing
         void Restore(XGraphicsState state);
 
         /// <summary>
-        /// TODO
+        /// Creates and pushes a transformation matrix that maps from the source rect to the destination rect.
         /// </summary>
+        /// <param name="container">The container.</param>
+        /// <param name="dstrect">The dstrect.</param>
+        /// <param name="srcrect">The srcrect.</param>
+        /// <param name="unit">The unit.</param>
         void BeginContainer(XGraphicsContainer container, XRect dstrect, XRect srcrect, XGraphicsUnit unit);
 
         /// <summary>
-        /// TODO
+        /// Pops the current transformation matrix such that the transformation is as it was before BeginContainer.
         /// </summary>
+        /// <param name="container">The container.</param>
         void EndContainer(XGraphicsContainer container);
 
         #endregion

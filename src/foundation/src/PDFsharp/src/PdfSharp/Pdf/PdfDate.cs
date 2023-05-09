@@ -1,8 +1,6 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Diagnostics;
 using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Pdf
@@ -24,7 +22,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfDate(string value)
         {
-            _value = Parser.ParseDateTime(value, DateTime.MinValue);
+            Value = Parser.ParseDateTime(value, DateTime.MinValue);
         }
 
         /// <summary>
@@ -32,23 +30,21 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfDate(DateTime value)
         {
-            _value = value;
+            Value = value;
         }
 
         /// <summary>
         /// Gets the value as DateTime.
         /// </summary>
-        public DateTime Value => _value;
-
-        DateTime _value;
+        public DateTime Value { get; }
 
         /// <summary>
         /// Returns the value in the PDF date format.
         /// </summary>
         public override string ToString()
         {
-            string delta = _value.ToString("zzz").Replace(':', '\'');
-            return String.Format("D:{0:yyyyMMddHHmmss}{1}'", _value, delta);
+            string delta = Value.ToString("zzz").Replace(':', '\'');
+            return $"D:{Value:yyyyMMddHHmmss}{delta}'";
         }
 
         /// <summary>

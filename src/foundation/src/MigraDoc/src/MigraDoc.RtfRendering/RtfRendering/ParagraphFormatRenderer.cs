@@ -68,11 +68,11 @@ namespace MigraDoc.RtfRendering
                     break;
 
                 case LineSpacingRule.Double:
-                    _rtfWriter.WriteControl("sl", 480); // equals 12 * 2 * 20 (Standard line height * 2  in twips)
+                    _rtfWriter.WriteControl("sl", 480); // equals 12 * 2 * 20 (Standard line height * 2 in twips)
                     break;
 
                 case LineSpacingRule.OnePtFive:
-                    _rtfWriter.WriteControl("sl", 360); // equals 12 * 1.5 * 20 (Standard lineheight * 1.5  in twips)
+                    _rtfWriter.WriteControl("sl", 360); // equals 12 * 1.5 * 20 (Standard lineheight * 1.5 in twips)
                     break;
             }
             Translate("LineSpacingRule", "slmult");

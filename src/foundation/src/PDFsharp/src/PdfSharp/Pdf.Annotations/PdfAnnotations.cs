@@ -32,7 +32,7 @@ namespace PdfSharp.Pdf.Annotations
         public void Add(PdfAnnotation annotation)
         {
             annotation.Document = Owner;
-            Owner._irefTable.Add(annotation);
+            Owner.IrefTable.Add(annotation);
             Elements.Add(annotation.ReferenceNotNull);
         }
 

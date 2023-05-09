@@ -86,7 +86,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Adds the slash to a string, that is needed at the beginning of a PDFName string.
         /// </summary>
-        public static string AddSlash(string value) // TODO PDFsharp6: Naming.
+        public static string AddSlash(string value) // TODO PDFsharp6: Naming. StL: WithSlash?
         {
             if (value.Length == 0)
                 return "/";
@@ -97,7 +97,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Removes the slash from a string, that is needed at the beginning of a PDFName string.
         /// </summary>
-        public static string RemoveSlash(string value) // TODO PDFsharp6: Naming.
+        public static string RemoveSlash(string value) // TODO PDFsharp6: Naming. StL: WithoutSlash?
         {
             if (value.Length == 0 || value[0] != '/')
                 return value;

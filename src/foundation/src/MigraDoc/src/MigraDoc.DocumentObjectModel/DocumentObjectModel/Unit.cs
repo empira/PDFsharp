@@ -338,9 +338,9 @@ namespace MigraDoc.DocumentObjectModel
         public override string ToString()
         {
             if (IsNull)
-                return 0.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                return 0.ToString(CultureInfo.InvariantCulture);
 
-            var value = _value.ToString(System.Globalization.CultureInfo.InvariantCulture) + GetSuffix();
+            var value = _value.ToString(CultureInfo.InvariantCulture) + GetSuffix();
             return value;
         }
 
@@ -379,7 +379,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public static Unit FromCentimeter(double value)
         {
-            var unit = Unit.Zero;
+            var unit = Zero;
             unit._value = (float)value;
             unit._type = UnitType.Centimeter;
             return unit;
@@ -390,7 +390,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public static Unit FromMillimeter(double value)
         {
-            var unit = Unit.Zero;
+            var unit = Zero;
             unit._value = (float)value;
             unit._type = UnitType.Millimeter;
             return unit;
@@ -401,7 +401,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public static Unit FromPoint(double value)
         {
-            var unit = Unit.Zero;
+            var unit = Zero;
             unit._value = (float)value;
             unit._type = UnitType.Point;
             return unit;
@@ -412,7 +412,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public static Unit FromInch(double value)
         {
-            var unit = Unit.Zero;
+            var unit = Zero;
             unit._value = (float)value;
             unit._type = UnitType.Inch;
             return unit;
@@ -423,7 +423,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public static Unit FromPica(double value)
         {
-            var unit = Unit.Zero;
+            var unit = Zero;
             unit._value = (float)value;
             unit._type = UnitType.Pica;
             return unit;
@@ -437,7 +437,9 @@ namespace MigraDoc.DocumentObjectModel
         public static implicit operator Unit(string? value)
         {
             if (value is null)
-                NRT.ThrowOnNull("string parameter was null"); // BUG Throwing on null.
+                //NRT.ThrowOnNull("string parameter was null"); // BUG Throwing on null.
+                return Zero;
+
 
             var unit = Zero;
             value = value.Trim();
@@ -450,7 +452,7 @@ namespace MigraDoc.DocumentObjectModel
             for (; valLen < count;)
             {
                 char ch = value[valLen];
-                if (ch == '.' || ch == '-' || ch == '+' || Char.IsNumber(ch))
+                if (ch is '.' or '-' or '+' || Char.IsNumber(ch))
                     valLen++;
                 else
                     break;
@@ -459,14 +461,14 @@ namespace MigraDoc.DocumentObjectModel
             unit._value = 1;
             try
             {
-                unit._value = float.Parse(value.Substring(0, valLen).Trim(), CultureInfo.InvariantCulture);
+                unit._value = float.Parse(value[..valLen].Trim(), CultureInfo.InvariantCulture);
             }
             catch (FormatException ex)
             {
                 throw new ArgumentException(DomSR.InvalidUnitValue(value), ex);
             }
 
-            var typeStr = value.Substring(valLen).Trim().ToLower();
+            var typeStr = value[valLen..].Trim().ToLower();
             unit._type = UnitType.Point;
             switch (typeStr)
             {

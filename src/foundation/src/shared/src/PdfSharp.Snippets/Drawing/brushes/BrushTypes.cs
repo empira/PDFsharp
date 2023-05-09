@@ -6,7 +6,7 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Drawings
 {
-    public class BrushTypes : SnippetBase
+    public class BrushTypes : Snippet
     {
         public BrushTypes()
         {

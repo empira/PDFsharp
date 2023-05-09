@@ -1,11 +1,13 @@
-﻿using System.IO;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+using System.IO;
 //#if NET/FX_CORE || UWP || DNC10
 //using System.Threading.Tasks;
 //using Windows.Foundation;
 //using Windows.Storage;
 //#endif
 #if CORE || GDI
-using System.Drawing;
 using System.Drawing.Imaging;
 #endif
 using PdfSharp.Drawing;
@@ -18,17 +20,42 @@ namespace PdfSharp.Quality
     /// <summary>
     /// Base class with common code for both features and snippets.
     /// </summary>
-    public abstract class CommonBase
+    public abstract class FeatureAndSnippetBase
     {
-        protected CommonBase()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FeatureAndSnippetBase"/> class.
+        /// </summary>
+        protected FeatureAndSnippetBase()
         { }
 
+        /// <summary>
+        /// Specifies how to draw a fox on the a PDF page.
+        /// </summary>
         protected enum BoxOptions
         {
+            /// <summary>
+            /// Draw no box.
+            /// </summary>
             None,
+
+            /// <summary>
+            /// Draw a box.
+            /// </summary>
             Box,
+
+            /// <summary>
+            /// Draw 
+            /// </summary>
             DrawX,
+
+            /// <summary>
+            /// Draw 
+            /// </summary>
             Fill,
+
+            /// <summary>
+            /// Draw 
+            /// </summary>
             Tile,
         }
 
@@ -41,13 +68,37 @@ namespace PdfSharp.Quality
         //public static readonly double HeightInMillimeter = 180;
         //public static readonly double WidthInPoint = 380; // 360
         //public static readonly double HeightInPoint = 510;  // 480
+
+        /// <summary>
+        /// The width of the PDF page in point.
+        /// </summary>
         public const double WidthInPoint = 360;
+
+        /// <summary>
+        /// The height of the PDF page in point.
+        /// </summary>
         public const double HeightInPoint = 480;
-        public const double WidthInMillimeter = WidthInPoint * 25.4 / 72;  // XUnit.FromPoint(WidthInPoint).Millimeter;  // 127.0
-        public const double HeightInMillimeter = HeightInPoint * 25.4 / 72;  // XUnit.FromPoint(HeightInPoint).Millimeter;  // 169.3...
+
+        /// <summary>
+        /// The width of the PDF page in millimeter.
+        /// </summary>
+        public const double WidthInMillimeter = WidthInPoint * 25.4 / 72;
+
+        /// <summary>
+        /// The height of the PDF page in millimeter.
+        /// </summary>
+        public const double HeightInMillimeter = HeightInPoint * 25.4 / 72;
+
         // ReSharper disable InconsistentNaming
-        public const double WidthInPU = 480;  // XUnit.FromPoint(WidthInPoint).Presentation;  // 480
-        public const double HeightInPU = 640;  // XUnit.FromPoint(HeightInPoint).Presentation;  // 640
+        /// <summary>
+        /// The width of the PDF page in presentation units.
+        /// </summary>
+        public const double WidthInPU = 480;
+
+        /// <summary>
+        /// The width of the PDF page in presentation units.
+        /// </summary>
+        public const double HeightInPU = 640;
         // ReSharper restore InconsistentNaming
 
         /// <summary>
@@ -65,16 +116,28 @@ namespace PdfSharp.Quality
         /// <summary>
         /// The center of the box.
         /// </summary>
-        public readonly XPoint BoxCenter = new XPoint(BoxWidth / 2, BoxHeight / 2);
+        public XPoint BoxCenter { get; } = new(BoxWidth / 2, BoxHeight / 2);
 
-        protected readonly XSolidBrush _gray = new XSolidBrush(XColor.FromArgb(204, 204, 204));
+        /// <summary>
+        /// Gets the gray background brush for boxes.
+        /// </summary>
+        protected XSolidBrush Gray { get; } = new(XColor.FromArgb(204, 204, 204));
 
+        /// <summary>
+        /// Gets a tag that specifies the PDFsharp build technology.
+        /// It is either 'core', 'gdi', or 'wpf'.
+        /// </summary>
         public static string PdfSharpTechnology
         {
             get
             {
-                var technology = PdfSharpProductVersionInformation.Technology.Trim('-').ToUpper();
-                return !String.IsNullOrEmpty(technology) ? technology : "CORE";
+                if (Capabilities.Build.IsCoreBuild)
+                    return "core";
+                if (Capabilities.Build.IsGdiBuild)
+                    return "gdi";
+                if (Capabilities.Build.IsWpfBuild)
+                    return "wpf";
+                throw new NotImplementedException("Unknown build.");
             }
         }
 
@@ -129,6 +192,9 @@ namespace PdfSharp.Quality
             _page = null;
         }
 
+        /// <summary>
+        /// Generates a PDF document for parallel comparison of two render results.
+        /// </summary>
         public void GenerateParallelComparisonDocument()
         {
             var document = new PdfDocument();
@@ -152,6 +218,9 @@ namespace PdfSharp.Quality
             ComparisonBytes = bytes;
         }
 
+        /// <summary>
+        /// Generates the serial comparison document. DOCTODO
+        /// </summary>
         public void GenerateSerialComparisonDocument()
         {
             var document = new PdfDocument();
@@ -197,7 +266,7 @@ namespace PdfSharp.Quality
 
         void DrawImageToBox(XGraphics gfx, XRect box)
         {
-            if (PngBytes == null)
+            if (PngBytes == null!)
             {
                 DrawEmptyBox(gfx, box);
                 return;
@@ -216,6 +285,14 @@ namespace PdfSharp.Quality
             gfx.DrawLine(pen, box.TopLeft, box.BottomRight);
         }
 
+        /// <summary>
+        /// Saves the and show file.
+        /// </summary>
+        /// <param name="sourceBytes">The source bytes.</param>
+        /// <param name="filepath">The filepath.</param>
+        /// <param name="startViewer">if set to <c>true</c> [start viewer].</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentNullException">sourceBytes</exception>
         public string SaveAndShowFile(byte[]? sourceBytes, string filepath = "", bool startViewer = false)
         {
             if (sourceBytes is null)
@@ -227,7 +304,7 @@ namespace PdfSharp.Quality
             using var stream = File.Create(filepath);
             stream.Write(sourceBytes, 0, sourceBytes.Length);
 
-#if GDI || WPF
+#if true //GDI || WPF
             // ... and start a viewer.
             if (startViewer)
                 Process.Start(new ProcessStartInfo(filepath) { UseShellExecute = true });
@@ -235,19 +312,19 @@ namespace PdfSharp.Quality
             return filepath;
         }
 
-//#if UWP
-//        public async void UwpSaveAndShowFile(byte[] sourceBytes, string filepath = "", bool startViewer = false)
-//        {
-//            filepath = CompleteFilePath(sourceBytes, filepath);
+        //#if UWP
+        //        public async void UwpSaveAndShowFile(byte[] sourceBytes, string filepath = "", bool startViewer = false)
+        //        {
+        //            filepath = CompleteFilePath(sourceBytes, filepath);
 
-//            var localFolder = ApplicationData.Current.LocalFolder;
-//            StorageFile file = await localFolder.CreateFileAsync(filepath, CreationCollisionOption.ReplaceExisting);
-//            var stream = await file.OpenStreamForWriteAsync();
-//            stream.Write(sourceBytes, 0, sourceBytes.Length);
-//            stream.Flush();
-//            stream.Dispose();
-//        }
-//#endif
+        //            var localFolder = ApplicationData.Current.LocalFolder;
+        //            StorageFile file = await localFolder.CreateFileAsync(filepath, CreationCollisionOption.ReplaceExisting);
+        //            var stream = await file.OpenStreamForWriteAsync();
+        //            stream.Write(sourceBytes, 0, sourceBytes.Length);
+        //            stream.Flush();
+        //            stream.Dispose();
+        //        }
+        //#endif
 
         string CompleteFilePath(byte[]? sourceBytes, string filepath)
         {
@@ -277,21 +354,41 @@ namespace PdfSharp.Quality
             return "";
         }
 
+        /// <summary>
+        /// Saves and optionally shows a PDF document.
+        /// </summary>
+        /// <param name="filepath">The filepath.</param>
+        /// <param name="startViewer">if set to <c>true</c> [start viewer].</param>
         public string SaveAndShowPdfDocument(string filepath, bool startViewer = false)
         {
             return SaveAndShowFile(PdfBytes, filepath, startViewer);
         }
 
+        /// <summary>
+        /// Saves and optionally shows a PNG image.
+        /// </summary>
+        /// <param name="filepath">The filepath.</param>
+        /// <param name="startViewer">if set to <c>true</c> [start viewer].</param>
         public string SaveAndShowPngImage(string filepath, bool startViewer = false)
         {
             return SaveAndShowFile(PngBytes, filepath, startViewer);
         }
 
+        /// <summary>
+        /// Saves and shows a parallel comparison PDF document.
+        /// </summary>
+        /// <param name="filepath">The filepath.</param>
+        /// <param name="startViewer">if set to <c>true</c> [start viewer].</param>
         public string SaveAndShowComparisonDocument(string filepath, bool startViewer = false)
         {
             return SaveAndShowFile(ComparisonBytes, filepath, startViewer);
         }
 
+        /// <summary>
+        /// Saves a stream to a file.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="path">The path.</param>
         public void SaveStreamToFile(Stream stream, string path)
         {
             int length = (int)stream.Length;
@@ -401,7 +498,7 @@ namespace PdfSharp.Quality
                 _document = value;
                 //_page = null;
 #if GDI
-                _gfx = null;
+                _gfx = null!;
 #endif
                 _pdfBytes = Array.Empty<byte>();
             }
@@ -418,7 +515,7 @@ namespace PdfSharp.Quality
             {
                 _page = value;
 #if GDI
-                _gfx = null;
+                _gfx = null!;
 #endif
             }
         }
@@ -446,19 +543,25 @@ namespace PdfSharp.Quality
             private set
             {
                 _gfx = value;
-                _image = null;
+                _image = null!;
             }
         }
-        Graphics _gfx;
+        Graphics _gfx = default!;
 
+        /// <summary>
+        /// Gets the current GDI+ image object.
+        /// </summary>
         public Image Image
         {
             get { return _image; }
             private set { _image = value; }
         }
-        Image _image;
+        Image _image = default!;
 #endif
 
+        /// <summary>
+        /// Gets the bytes of a PDF document.
+        /// </summary>
         public byte[]? PdfBytes
         {
             get => _pdfBytes;
@@ -467,13 +570,16 @@ namespace PdfSharp.Quality
                 _pdfBytes = value ?? Array.Empty<byte>();
                 _document = null;
 #if GDI
-                _gfx = null;
+                _gfx = null!;
 #endif
                 _page = null;
             }
         }
         byte[] _pdfBytes = Array.Empty<byte>();
 
+        /// <summary>
+        /// Gets the bytes of a PNG image.
+        /// </summary>
         public byte[] PngBytes
         {
             get => _pngBytes;
@@ -481,13 +587,16 @@ namespace PdfSharp.Quality
             {
                 _pngBytes = Array.Empty<byte>();
 #if GDI
-                _gfx = null;
-                _image = null;
+                _gfx = null!;
+                _image = null!;
 #endif
             }
         }
         byte[] _pngBytes = Array.Empty<byte>();
 
+        /// <summary>
+        /// Gets the bytes of a comparision document.
+        /// </summary>
         public byte[] ComparisonBytes
         {
             get => _comparisonBytes;

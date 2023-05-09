@@ -462,41 +462,51 @@ namespace MigraDoc.Rendering
         XUnit ProbeAfterDecimalAlignedTab(XUnit tabStopPosition, out bool notFitting)
         {
             notFitting = false;
-            var savedLeaf = _currentLeaf;
 
-            // Extra for auto tab after list symbol.
-            if (IsTab(_currentLeaf?.Current ?? NRT.ThrowOnNull<DocumentObject>()))
-                _currentLeaf = _currentLeaf.GetNextLeaf();
-            if (_currentLeaf == null)
+            //--- Save ---------------------------------
+            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth);
+            //------------------------------------------
+
+            try
             {
-                _currentLeaf = savedLeaf;
-                return _currentXPosition + tabStopPosition;
+                // Extra for auto tab after list symbol.
+                if (IsTab(_currentLeaf?.Current ?? NRT.ThrowOnNull<DocumentObject>()))
+                    _currentLeaf = _currentLeaf.GetNextLeaf();
+                if (_currentLeaf == null)
+                {
+                    return _currentXPosition + tabStopPosition;
+                }
+                var newVerticalInfo = CalcCurrentVerticalInfo();
+                var fittingRect = _formattingArea.GetFittingRect(_currentYPosition, newVerticalInfo.Height);
+                if (fittingRect == null)
+                {
+                    notFitting = true;
+                    return _currentXPosition;
+                }
+
+                if (IsPlainText(_currentLeaf.Current))
+                {
+                    Text text = (Text)_currentLeaf.Current;
+                    string word = text.Content;
+                    int lastIndex = text.Content.LastIndexOfAny(new[] { ',', '.' });
+                    if (lastIndex > 0)
+                        word = word.Substring(0, lastIndex);
+
+                    XUnit wordLength = MeasureString(word);
+                    notFitting = _currentXPosition + wordLength >= _formattingArea.X + _formattingArea.Width + Tolerance;
+                    if (!notFitting)
+                        return _formattingArea.X + tabStopPosition - wordLength;
+
+                    return _currentXPosition;
+                }
             }
-            var newVerticalInfo = CalcCurrentVerticalInfo();
-            var fittingRect = _formattingArea.GetFittingRect(_currentYPosition, newVerticalInfo.Height);
-            if (fittingRect == null)
+            finally
             {
-                notFitting = true;
-                _currentLeaf = savedLeaf;
-                return _currentXPosition;
+                //--- Restore ------------------------------
+                RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth);
+                //------------------------------------------
             }
 
-            if (IsPlainText(_currentLeaf.Current))
-            {
-                Text text = (Text)_currentLeaf.Current;
-                string word = text.Content;
-                int lastIndex = text.Content.LastIndexOfAny(new[] { ',', '.' });
-                if (lastIndex > 0)
-                    word = word.Substring(0, lastIndex);
-
-                XUnit wordLength = MeasureString(word);
-                notFitting = _currentXPosition + wordLength >= _formattingArea.X + _formattingArea.Width + Tolerance;
-                if (!notFitting)
-                    return _formattingArea.X + tabStopPosition - wordLength;
-
-                return _currentXPosition;
-            }
-            _currentLeaf = savedLeaf;
             return ProbeAfterRightAlignedTab(tabStopPosition, out notFitting);
         }
 

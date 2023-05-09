@@ -1,4 +1,7 @@
-﻿#define RotisSerifPro
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+#define RotisSerifPro
 #define xRotisSemiSansPro
 
 #define regular
@@ -7,23 +10,23 @@
 
 #define ansi
 
-using System;
 using System.Diagnostics;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Quality;
 
+#pragma warning disable 1591
 namespace PdfSharp.Features
 {
-    public class RotisWinAnsiTester : FeatureBase
+    public class RotisWinAnsiTester : Feature
     {
-        public static void RotisWinAnsiTest()
+        public void RotisWinAnsiTest()
         {
             RenderSnippetAsPdf(new RotisWinAnsiSnippet());
         }
     }
 
-    public class RotisWinAnsiSnippet : SnippetBase
+    public class RotisWinAnsiSnippet : Snippet
     {
         static readonly IFontResolver Fs = new RotisFontResolver();
 
@@ -170,7 +173,7 @@ namespace PdfSharp.Features
         /// <returns>
         /// Information about the physical font, or null if the request cannot be satisfied.
         /// </returns>
-        public FontResolverInfo ResolveTypeface(string familyName, bool isBold, bool isItalic)
+        public FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
         {
             // Note: PDFsharp calls ResolveTypeface only once for each unique combination
             // of familyName, isBold, and isItalic.
@@ -203,7 +206,7 @@ namespace PdfSharp.Features
                 var simulateItalic = false;
 
 
-                string faceName = null;
+                string? faceName = null;
 
                 // In this sample family names are case sensitive. You can relax this in your own implementation
                 // and make them case insensitive.

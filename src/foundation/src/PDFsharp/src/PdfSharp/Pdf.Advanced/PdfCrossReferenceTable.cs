@@ -23,12 +23,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public Dictionary<PdfObjectID, PdfReference> ObjectTable = new Dictionary<PdfObjectID, PdfReference>();
 
-        internal bool IsUnderConstruction
-        {
-            get => _isUnderConstruction;
-            set => _isUnderConstruction = value;
-        }
-        bool _isUnderConstruction;
+        internal bool IsUnderConstruction { get; set; }
 
         /// <summary>
         /// Adds a cross reference entry to the table. Used when parsing the trailer.
@@ -114,9 +109,13 @@ namespace PdfSharp.Pdf.Advanced
         {
             // New objects are numbered consecutively. If a document is imported, maxObjectNumber is
             // set to the highest object number used in the document.
-            return ++_maxObjectNumber;
+            return ++MaxObjectNumber;
         }
-        internal int _maxObjectNumber;
+
+        /// <summary>
+        /// Gets or sets the highest object number used in this docuemnt.
+        /// </summary>
+        internal int MaxObjectNumber { get; set; }
 
         /// <summary>
         /// Writes the xref section in pdf stream.
@@ -125,21 +124,17 @@ namespace PdfSharp.Pdf.Advanced
         {
             writer.WriteRaw("xref\n");
 
-            PdfReference[] irefs = AllReferences;
+            var iRefs = AllReferences;
 
-            int count = irefs.Length;
-            //writer.WriteRaw(String.Format("0 {0}\n", count + 1));
+            int count = iRefs.Length;
             writer.WriteRaw(Invariant($"0 {count + 1}\n"));
-            //writer.WriteRaw(String.Format("{0:0000000000} {1:00000} {2} \n", 0, 65535, "f"));
             writer.WriteRaw(Invariant($"{0:0000000000} {65535:00000} f \n"));
-            //PdfEncoders.WriteAnsi(stream, text);
 
             for (int idx = 0; idx < count; idx++)
             {
-                PdfReference iref = irefs[idx];
+                var iref = iRefs[idx];
 
                 // Acrobat is very pedantic; it must be exactly 20 bytes per line.
-                //writer.WriteRaw(String.Format("{0:0000000000} {1:00000} {2} \n", iref.Position, iref.GenerationNumber, "n"));
                 writer.WriteRaw(Invariant($"{iref.Position:0000000000} {iref.GenerationNumber:00000} n \n"));
             }
         }
@@ -152,7 +147,7 @@ namespace PdfSharp.Pdf.Advanced
             get
             {
                 ICollection collection = ObjectTable.Keys;
-                PdfObjectID[] objectIDs = new PdfObjectID[collection.Count];
+                var objectIDs = new PdfObjectID[collection.Count];
                 collection.CopyTo(objectIDs, 0);
                 return objectIDs;
             }
@@ -165,12 +160,12 @@ namespace PdfSharp.Pdf.Advanced
         {
             get
             {
-                Dictionary<PdfObjectID, PdfReference>.ValueCollection collection = ObjectTable.Values;
-                List<PdfReference> list = new List<PdfReference>(collection);
+                var collection = ObjectTable.Values;
+                var list = new List<PdfReference>(collection);
                 list.Sort(PdfReference.Comparer);
-                PdfReference[] irefs = new PdfReference[collection.Count];
-                list.CopyTo(irefs, 0);
-                return irefs;
+                var iRefs = new PdfReference[collection.Count];
+                list.CopyTo(iRefs, 0);
+                return iRefs;
             }
         }
 
@@ -187,7 +182,7 @@ namespace PdfSharp.Pdf.Advanced
             int removed = ObjectTable.Count;
             //CheckConsistence();
             // TODO: Is this really so easy?
-            PdfReference[] irefs = TransitiveClosure(_document._trailer);
+            PdfReference[] irefs = TransitiveClosure(_document.Trailer);
 
 #if DEBUG
             // Have any two objects the same ID?
@@ -237,7 +232,7 @@ namespace PdfSharp.Pdf.Advanced
             }
 #endif
 
-            _maxObjectNumber = 0;
+            MaxObjectNumber = 0;
             ObjectTable.Clear();
             foreach (PdfReference iref in irefs)
             {
@@ -247,7 +242,7 @@ namespace PdfSharp.Pdf.Advanced
                 if (!ObjectTable.ContainsKey(iref.ObjectID))
                 {
                     ObjectTable.Add(iref.ObjectID, iref);
-                    _maxObjectNumber = Math.Max(_maxObjectNumber, iref.ObjectNumber);
+                    MaxObjectNumber = Math.Max(MaxObjectNumber, iref.ObjectNumber);
                 }
             }
             //CheckConsistence();
@@ -276,7 +271,7 @@ namespace PdfSharp.Pdf.Advanced
                 // Rehash with new number.
                 ObjectTable.Add(iref.ObjectID, iref);
             }
-            _maxObjectNumber = count;
+            MaxObjectNumber = count;
             //CheckConsistence();
         }
 

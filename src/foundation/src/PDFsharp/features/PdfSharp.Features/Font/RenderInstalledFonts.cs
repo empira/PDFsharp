@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using PdfSharp.Quality;
@@ -8,11 +8,12 @@ using PdfSharp.Quality;
 using System.Drawing.Text;
 #endif
 
+#pragma warning disable 1591
 namespace PdfSharp.Features.Font
 {
-    public class RenderInstalledFonts : FeatureBase
+    public class RenderInstalledFonts : Feature
     {
-        public static void RenderInstalledFontsTest()
+        public void RenderInstalledFontsTest()
         {
             RenderSnippetAsPdf(new RenderInstalledFontsSnippet());
         }
@@ -28,7 +29,7 @@ namespace PdfSharp.Features.Font
         }
     }
 
-    public class RenderInstalledFontsSnippet : SnippetBase
+    public class RenderInstalledFontsSnippet : Snippet
     {
 #if true
         static readonly XPdfFontOptions PdfOptions = XPdfFontOptions.WinAnsiDefault;
@@ -51,7 +52,7 @@ namespace PdfSharp.Features.Font
         const int FaceOffset = 20;
 
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
-        readonly List<string> _fonts = new List<string>();
+        /*readonly*/ List<string> _fonts = new List<string>();
         int _fontIdx = -1;
 
         // Fonts starting with one of the strings in _excludedFonts* are excluded. Use "/r", "/b", "/i", "/bi" to exclude only regular, bold, italic or bolditalic face (Combine it to exclude several faces: e.g. "/b/i/bi").
@@ -59,8 +60,8 @@ namespace PdfSharp.Features.Font
         readonly List<string> _excludedFontsUnicode = new List<string>();
         readonly List<string> _excludedFontsWinAnsi = new List<string> { "Myriad Pro", "rotis" };
 
-        XFont _headingFont;
-        XFont _exceptionFont;
+        XFont? _headingFont;
+        XFont? _exceptionFont;
 
         //public RenderInstalledFontsSnippet(List<string> fonts)
         //{
@@ -126,7 +127,7 @@ namespace PdfSharp.Features.Font
             }
             catch (Exception e)
             {
-                gfx.DrawString($"{font} - {styleName} - Exception: {e.Message}", _exceptionFont, XBrushes.Red, posX, posY);
+                gfx.DrawString($"{font} - {styleName} - Exception: {e.Message}", _exceptionFont!, XBrushes.Red, posX, posY);
             }
         }
 

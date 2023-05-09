@@ -76,7 +76,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal static string CreateEmbeddedFontSubsetName(string name)
         {
-            StringBuilder s = new StringBuilder(64);
+            var s = new StringBuilder(64);
             byte[] bytes = Guid.NewGuid().ToByteArray();
             for (int idx = 0; idx < 6; idx++)
                 s.Append((char)('A' + bytes[idx] % 26));

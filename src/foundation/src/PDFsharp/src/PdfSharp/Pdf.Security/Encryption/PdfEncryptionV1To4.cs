@@ -560,7 +560,15 @@ namespace PdfSharp.Pdf.Security.Encryption
         // ReSharper disable once InconsistentNaming
         public void DecryptForEnteredObjectUsingRC4(ref byte[] bytes)
         {
-            EncryptForEnteredObjectUsingRC4(ref bytes); // As the RC4 encryption is symmetric, encryption and decryption is the same.
+            try
+            {
+                EncryptForEnteredObjectUsingRC4(ref bytes); // As the RC4 encryption is symmetric, encryption and decryption is the same.
+            }
+            catch (CryptographicException)
+            {
+                if (!HandleCryptographicExceptionOnDecryption())
+                    throw;
+            }
         }
 
         /// <summary>
@@ -595,15 +603,15 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         public void DecryptForEnteredObjectUsingAES(ref byte[] bytes)
         {
-            EnsureIsAESSupported();
-
-            var objectEncryptionKey = GetObjectEncryptionKeyAES();
-
-            if (objectEncryptionKey is null || _objectEncryptionKeySize is 0)
-                throw TH.InvalidOperationException_EncryptionKeyNotSetForEncryptionVersion1To4();
-
             try
             {
+                EnsureIsAESSupported();
+
+                var objectEncryptionKey = GetObjectEncryptionKeyAES();
+
+                if (objectEncryptionKey is null || _objectEncryptionKeySize is 0)
+                    throw TH.InvalidOperationException_EncryptionKeyNotSetForEncryptionVersion1To4();
+
                 // Initialize AES.
                 using var aes = Aes.Create();
                 aes.Mode = CipherMode.CBC;
@@ -612,6 +620,8 @@ namespace PdfSharp.Pdf.Security.Encryption
                 aes.KeySize = _objectEncryptionKeySize * 8;
 
                 // Read the prepended 16 byte AES initialization vector.
+                if (bytes.Length < 16)
+                    throw TH.CryptographicException_InputDataTooShort();
                 var iv = new byte[16];
                 Array.Copy(bytes, 0, iv, 0, 16);
 
@@ -622,10 +632,8 @@ namespace PdfSharp.Pdf.Security.Encryption
             }
             catch (CryptographicException)
             {
-                // Exception: "Padding is invalid and cannot be removed"
-                // no idea how to properly handle this, but in every encountered document that caused this behavior,
-                // the data was simply not encrypted.
-                // assume unencrypted data
+                if (!HandleCryptographicExceptionOnDecryption())
+                    throw;
             }
         }
 
@@ -653,6 +661,13 @@ namespace PdfSharp.Pdf.Security.Encryption
             {
                 // Additional padding needed for AES encryption.
                 var aesPadding = new byte[] { 0x73, 0x41, 0x6C, 0x54 }; // 'sAlT'
+                var aesPadding2 = "sAlT"u8.ToArray();
+                Debug.Assert(aesPadding.Length == 4);
+                Debug.Assert(aesPadding2.Length == 4);
+                Debug.Assert(aesPadding[0]  == aesPadding2[0]);
+                Debug.Assert(aesPadding[1]  == aesPadding2[1]);
+                Debug.Assert(aesPadding[2]  == aesPadding2[2]);
+                Debug.Assert(aesPadding[3]  == aesPadding2[3]);
                 _md5.TransformBlock(aesPadding, 0, aesPadding.Length, aesPadding, 0);
             }
 

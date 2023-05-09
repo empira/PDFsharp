@@ -42,7 +42,7 @@ namespace PdfSharp.Fonts.OpenType
         /// </summary>
         public OpenTypeFontface? FontData => _fontData;
 
-        internal OpenTypeFontface? _fontData = null!; // NRT
+        internal OpenTypeFontface? _fontData = default!;
 
         public TableDirectoryEntry DirectoryEntry;
 

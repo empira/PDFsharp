@@ -7,8 +7,14 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Features.Drawing
 {
-    public class GraphicsFromImage : FeatureBase
+    /// <summary>
+    /// Drawing in a image. CGI and WPF only.
+    /// </summary>
+    public class GraphicsFromImage : Feature
     {
+        /// <summary>
+        /// Create a PNG.
+        /// </summary>
         public static void Test1()
         {
             var image = XBitmapImage.CreateBitmap(400, 300);

@@ -5,4 +5,3 @@ PDFsharp is the Open Source library for creating and modifying PDF documents usi
 This package does not depend on Windows and can be used on any .NET compatible platform including Linux and macOS.
 
 See [docs.pdfsharp.net](https://docs.pdfsharp.net) for details.
-

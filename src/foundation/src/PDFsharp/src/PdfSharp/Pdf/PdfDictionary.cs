@@ -556,7 +556,7 @@ namespace PdfSharp.Pdf
                 if (obj is PdfReference reference)
                     obj = reference.Value;
 
-                if (obj is PdfArray array && array.Elements.Count == 4)
+                if (obj is PdfArray { Elements.Count: 4 } array)
                 {
                     value = new PdfRectangle(array.Elements.GetReal(0), array.Elements.GetReal(1),
                       array.Elements.GetReal(2), array.Elements.GetReal(3));
@@ -735,7 +735,7 @@ namespace PdfSharp.Pdf
 
                             if (options == VCF.CreateIndirect)
                             {
-                                _ownerDictionary?.Owner._irefTable.Add(obj);
+                                _ownerDictionary?.Owner.IrefTable.Add(obj);
                                 this[key] = obj.Reference;
                             }
                             else

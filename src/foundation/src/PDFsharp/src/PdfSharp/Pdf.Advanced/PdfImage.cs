@@ -462,7 +462,6 @@ namespace PdfSharp.Pdf.Advanced
                     default:
                         throw new NotImplementedException("Image format not supported.");
                 }
-                return;
             }
 #endif
 
@@ -569,8 +568,7 @@ namespace PdfSharp.Pdf.Advanced
 
             {
                 FlateDecode fd = new FlateDecode();
-                if (firstMaskColor != -1 &&
-                  lastMaskColor != -1)
+                if (firstMaskColor != -1 && lastMaskColor != -1)
                 {
                     // Color mask requires Reader 4.0 or higher.
                     if (!segmentedColorMask && pdfVersion >= 13 && !idb.IsGray)
@@ -588,7 +586,7 @@ namespace PdfSharp.Pdf.Advanced
                         pdfMask.Elements.SetName(Keys.Type, "/XObject");
                         pdfMask.Elements.SetName(Keys.Subtype, "/Image");
 
-                        Owner._irefTable.Add(pdfMask);
+                        Owner.IrefTable.Add(pdfMask);
                         pdfMask.Stream = new PdfStream(maskDataCompressed, pdfMask);
                         pdfMask.Elements["/Length"] = new PdfInteger(maskDataCompressed.Length);
                         pdfMask.Elements["/Filter"] = new PdfName("/FlateDecode");
@@ -608,7 +606,7 @@ namespace PdfSharp.Pdf.Advanced
                     smask.Elements.SetName(Keys.Type, "/XObject");
                     smask.Elements.SetName(Keys.Subtype, "/Image");
 
-                    Owner._irefTable.Add(smask);
+                    Owner.IrefTable.Add(smask);
                     smask.Stream = new PdfStream(alphaMaskCompressed, smask);
                     smask.Elements["/Length"] = new PdfInteger(alphaMaskCompressed.Length);
                     smask.Elements["/Filter"] = new PdfName("/FlateDecode");
@@ -704,7 +702,7 @@ namespace PdfSharp.Pdf.Advanced
                         colorPalette.CreateStream(idb.PaletteData);
                         colorPalette.Elements["/Length"] = new PdfInteger(idb.PaletteDataLength);
                     }
-                    Owner._irefTable.Add(colorPalette);
+                    Owner.IrefTable.Add(colorPalette);
 
                     var arrayColorSpace = new PdfArray(_document);
                     arrayColorSpace.Elements.Add(new PdfName("/Indexed"));
@@ -741,7 +739,7 @@ namespace PdfSharp.Pdf.Advanced
                 pdfMask.Elements.SetName(Keys.Type, "/XObject");
                 pdfMask.Elements.SetName(Keys.Subtype, "/Image");
 
-                Owner._irefTable.Add(pdfMask);
+                Owner.IrefTable.Add(pdfMask);
                 pdfMask.Stream = new PdfStream(maskDataCompressed, pdfMask);
                 pdfMask.Elements["/Length"] = new PdfInteger(maskDataCompressed.Length);
                 pdfMask.Elements["/Filter"] = new PdfName("/FlateDecode");
@@ -759,7 +757,7 @@ namespace PdfSharp.Pdf.Advanced
                 smask.Elements.SetName(Keys.Type, "/XObject");
                 smask.Elements.SetName(Keys.Subtype, "/Image");
 
-                Owner._irefTable.Add(smask);
+                Owner.IrefTable.Add(smask);
                 smask.Stream = new PdfStream(alphaMaskCompressed, smask);
                 smask.Elements["/Length"] = new PdfInteger(alphaMaskCompressed.Length);
                 smask.Elements["/Filter"] = new PdfName("/FlateDecode");
@@ -816,7 +814,7 @@ namespace PdfSharp.Pdf.Advanced
         void ReadTrueColorMemoryBitmap(int components, int bits, bool hasAlpha)
         {
 //#if DEBUG_
-//            image.image.Save("$$$.bmp", ImageFormat.Bmp);
+//          image.image.Save("$$$.bmp", ImageFormat.Bmp);
 //#endif
             int pdfVersion = Owner.Version;
             var memory = new MemoryStream();
@@ -940,7 +938,7 @@ namespace PdfSharp.Pdf.Advanced
                     pdfMask.Elements.SetName(Keys.Type, "/XObject");
                     pdfMask.Elements.SetName(Keys.Subtype, "/Image");
 
-                    Owner._irefTable.Add(pdfMask);
+                    Owner.IrefTable.Add(pdfMask);
                     pdfMask.Stream = new PdfStream(maskDataCompressed, pdfMask);
                     pdfMask.Elements["/Length"] = new PdfInteger(maskDataCompressed.Length);
                     pdfMask.Elements["/Filter"] = new PdfName("/FlateDecode");
@@ -958,7 +956,7 @@ namespace PdfSharp.Pdf.Advanced
                     smask.Elements.SetName(Keys.Type, "/XObject");
                     smask.Elements.SetName(Keys.Subtype, "/Image");
 
-                    Owner._irefTable.Add(smask);
+                    Owner.IrefTable.Add(smask);
                     smask.Stream = new PdfStream(alphaMaskCompressed, smask);
                     smask.Elements[PdfStream.Keys.Length] = new PdfInteger(alphaMaskCompressed.Length);
                     smask.Elements[PdfStream.Keys.Filter] = new PdfName("/FlateDecode");
@@ -1263,7 +1261,7 @@ namespace PdfSharp.Pdf.Advanced
                         pdfMask.Elements.SetName(Keys.Type, "/XObject");
                         pdfMask.Elements.SetName(Keys.Subtype, "/Image");
 
-                        Owner._irefTable.Add(pdfMask);
+                        Owner.IrefTable.Add(pdfMask);
                         pdfMask.Stream = new PdfStream(maskDataCompressed, pdfMask);
                         //pdfMask.Elements["/Length"] = new PdfInteger(maskDataCompressed.Length);
                         pdfMask.Elements[PdfStream.Keys.Length] = new PdfInteger(maskDataCompressed.Length);
@@ -1307,7 +1305,7 @@ namespace PdfSharp.Pdf.Advanced
                     }
                     else
                     {
-                        if (imageDataFaxCompressed == null) // NRT
+                        if (imageDataFaxCompressed == null)
                             throw new ArgumentNullException(nameof(imageDataFaxCompressed));
 
                         Stream = new PdfStream(imageDataFaxCompressed, this);
@@ -1366,7 +1364,7 @@ namespace PdfSharp.Pdf.Advanced
                         colorPalette.CreateStream(paletteData);
                         colorPalette.Elements[PdfStream.Keys.Length] = new PdfInteger(paletteData.Length);
                     }
-                    Owner._irefTable.Add(colorPalette);
+                    Owner.IrefTable.Add(colorPalette);
 
                     var arrayColorSpace = new PdfArray(_document);
                     arrayColorSpace.Elements.Add(new PdfName("/Indexed"));

@@ -1085,7 +1085,7 @@ namespace PdfSharp.Drawing
             figure.Segments.Add(new LineSegment { Point = new SysPoint(x + width - ex, y) });
 #endif
 
-            // TODOWPF XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx
+            // TODOWPF
 #if true
             figure.Segments.Add(new ArcSegment(new SysPoint(x + width, y + ey), new SysSize(ex, ey), 0, false, SweepDirection.Clockwise, true));
             //figure.Segments.Add(new LineSegment(new SysPoint(x + width, y + ey), true));
@@ -1771,7 +1771,7 @@ namespace PdfSharp.Drawing
             if (family == null)
                 throw new ArgumentNullException(nameof(family));
 
-            if (format == null)
+            if (format == null!)
                 format = XStringFormats.Default;
 
             if (format.LineAlignment == XLineAlignment.BaseLine && layoutRect.Height != 0)

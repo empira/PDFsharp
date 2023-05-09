@@ -335,7 +335,7 @@ namespace PdfSharp.Pdf
                                 // It is already an array of content streams.
                                 if (array.IsIndirect)
                                 {
-                                    // Make it a direct array
+                                    // Make it a direct array.
                                     array = array.Clone();
                                     array.Document = Owner;
                                 }

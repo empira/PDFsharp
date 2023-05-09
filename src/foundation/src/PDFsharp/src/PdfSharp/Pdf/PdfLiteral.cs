@@ -24,7 +24,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfLiteral(string value)
         {
-            _value = value;
+            Value = value;
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfLiteral(string format, params object[] args)
         {
-            _value = PdfEncoders.Format(format, args);
+            Value = PdfEncoders.Format(format, args);
         }
 
         /// <summary>
@@ -46,14 +46,12 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Gets the value as literal string.
         /// </summary>
-        public string Value => _value;
-
-        readonly string _value = String.Empty;
+        public string Value { get; } = String.Empty;
 
         /// <summary>
         /// Returns a string that represents the current value.
         /// </summary>
-        public override string ToString() => _value;
+        public override string ToString() => Value;
 
         internal override void WriteObject(PdfWriter writer) 
             => writer.Write(this);

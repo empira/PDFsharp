@@ -83,10 +83,10 @@ namespace PdfSharp.Pdf
         /// </summary>
         public string Value
         {
-            get => _value ?? "";
+            get => _value;
             set => _value = value ?? "";
         }
-        string? _value;
+        string _value = "";
 
         /// <summary>
         /// Gets or sets the string value for encryption purposes.
@@ -94,7 +94,7 @@ namespace PdfSharp.Pdf
         internal byte[] EncryptionValue
         {
             // TODO: Unicode case is not handled!
-            get => _value == null ? Array.Empty<byte>() : PdfEncoders.RawEncoding.GetBytes(_value);
+            get => /*_value == null ? Array.Empty<byte>() :*/ PdfEncoders.RawEncoding.GetBytes(_value);
             set => _value = PdfEncoders.RawEncoding.GetString(value, 0, value.Length);
         }
 

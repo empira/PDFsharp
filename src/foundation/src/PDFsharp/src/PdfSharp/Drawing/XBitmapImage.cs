@@ -2,30 +2,15 @@
 // See the LICENSE file in the solution root for more information.
 
 #if GDI
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using PdfSharp.Internal;
 #endif
 #if WPF
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using PdfSharp.Internal;
-
-#if !GDI
-//using PdfSharp.Internal;
-#endif
 #endif
 #if UWP
 using Windows.UI.Xaml.Media.Imaging;
 using PdfSharp.Internal;
-
 #endif
-
-// WPFHACK
-#pragma warning disable 0169
-#pragma warning disable 0649
 
 namespace PdfSharp.Drawing
 {

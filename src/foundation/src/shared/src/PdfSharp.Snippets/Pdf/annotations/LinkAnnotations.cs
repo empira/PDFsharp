@@ -12,7 +12,7 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Pdf
 {
-    public class LinkAnnotations : SnippetBase
+    public class LinkAnnotations : Snippet
     {
         public LinkAnnotations()
         {

@@ -6,8 +6,6 @@
         <RootNamespace>PdfSharp.Snippets</RootNamespace>
         <UseWindowsForms>true</UseWindowsForms>
         <DefineConstants>TRACE;GDI</DefineConstants>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

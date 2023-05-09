@@ -229,7 +229,7 @@ namespace MigraDoc.Tests
                 if (options.OwnerPassword is not null)
                     pdfDoc.SecuritySettings.OwnerPassword = options.OwnerPassword;
 
-                var securityHandler = pdfDoc.SecurityHandler ?? NRT.ThrowOnNull<PdfStandardSecurityHandler>();
+                var securityHandler = pdfDoc.SecurityHandler;
 
                 // Encryptions to initialize manually with additional options.
                 if (options.Encryption == PdfStandardSecurityHandler.DefaultEncryption.V4UsingRC4)

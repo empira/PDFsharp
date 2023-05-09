@@ -3,7 +3,6 @@
 
 using System.Text;
 #if GDI
-using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using GdiPoint = System.Drawing.Point;
@@ -334,7 +333,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #if GDI
             // HACK: This does not work with #MediumTrust
             //_gfx = Graphics.FromHwnd(IntPtr.Zero);  // _gfx should not be necessary anymore.
-            _gfx = null!; // BUG NRT
+            _gfx = default!;
             TargetContext = XGraphicTargetContext.GDI;
 #endif
 #if WPF
@@ -479,7 +478,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #if WPF && !GDI
             TargetContext = XGraphicTargetContext.WPF;
             // If form.Owner is null create a meta file.
-            if (form.Owner == null)
+            if (form.Owner == null!)
             {
                 _dv = new DrawingVisual();
                 _dc = _dv.RenderOpen();
@@ -675,7 +674,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// </summary>
         public static XGraphics FromPdfForm(XPdfForm form)
         {
-            if (form.Gfx != null)
+            if (form.Gfx != null!)
                 return form.Gfx;
 
             return new XGraphics(form);
@@ -686,7 +685,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// </summary>
         public static XGraphics FromForm(XForm form)
         {
-            if (form.Gfx != null)
+            if (form.Gfx != null!)
                 return form.Gfx;
 
             return new XGraphics(form);
@@ -849,7 +848,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                     }
                 }
 
-                if (_form != null)
+                if (_form != null!)
                     _form.Finish();
 #if GDI
                 if (TargetContext == XGraphicTargetContext.GDI)
@@ -858,7 +857,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                     {
                         Lock.EnterGdiPlus();
                         // GDI+ requires this to disassociate it from metafiles.
-                        if (_gfx != null)
+                        if (_gfx != default!)
                             _gfx.Dispose();
                         _gfx = null!;
                         Metafile = null;
@@ -867,7 +866,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 }
 #endif
 #if WPF
-                if (_dc != null)
+                if (_dc != null!)
                 {
                     _dc.Close();
                     // Free resources. Only needed when running on a server, but does no harm with desktop applications.
@@ -916,7 +915,6 @@ namespace PdfSharp.Drawing  // #??? Clean up
             get { return _pageUnit; }
             //set
             //{
-            //  // TODO: other page units
             //  if (value != XGraphicsUnit.Point)
             //    throw new NotImplementedException("PageUnit must be XGraphicsUnit.Point in current implementation.");
             //}
@@ -958,10 +956,9 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// </summary>
         public XSize PageSize
         {
-            get { return _pageSize; }
+            get => _pageSize;
             //set
             //{
-            //  //TODO
             //  throw new NotImplementedException("PageSize cannot be modified in current implementation.");
             //}
         }
@@ -1017,7 +1014,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public void DrawLine(XPen pen, double x1, double y1, double x2, double y2)
         {
             if (pen == null)
-                throw new ArgumentNullException("pen");
+                throw new ArgumentNullException(nameof(pen));
 
             if (_drawGraphics)
             {
@@ -1797,7 +1794,10 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public void DrawRectangle(XPen? pen, XBrush? brush, double x, double y, double width, double height)
         {
             if (pen == null && brush == null)
+            {
+                // ReSharper disable once NotResolvedInText
                 throw new ArgumentNullException("pen and brush", PSSR.NeedPenOrBrush);
+            }
 
             if (_drawGraphics)
             {
@@ -1998,7 +1998,10 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public void DrawRectangles(XPen? pen, XBrush? brush, XRect[] rectangles)
         {
             if (pen == null && brush == null)
+            {
+                // ReSharper disable once NotResolvedInText
                 throw new ArgumentNullException("pen and brush", PSSR.NeedPenOrBrush);
+            }
             if (rectangles == null)
                 throw new ArgumentNullException(nameof(rectangles));
 
@@ -2198,7 +2201,10 @@ namespace PdfSharp.Drawing  // #??? Clean up
             double ellipseWidth, double ellipseHeight)
         {
             if (pen == null && brush == null)
+            {
+                // ReSharper disable once NotResolvedInText
                 throw new ArgumentNullException("pen and brush", PSSR.NeedPenOrBrush);
+            }
 
             if (_drawGraphics)
             {
@@ -2399,7 +2405,10 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public void DrawEllipse(XPen? pen, XBrush? brush, double x, double y, double width, double height)
         {
             if (pen == null && brush == null)
+            {
+                // ReSharper disable once NotResolvedInText
                 throw new ArgumentNullException("pen and brush", PSSR.NeedPenOrBrush);
+            }
 
             if (_drawGraphics)
             {
@@ -2627,9 +2636,13 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public void DrawPolygon(XPen? pen, XBrush? brush, XPoint[] points, XFillMode fillMode)
         {
             if (pen == null && brush == null)
+            {
+                // ReSharper disable once NotResolvedInText
                 throw new ArgumentNullException("pen and brush", PSSR.NeedPenOrBrush);
+            }
             if (points == null)
                 throw new ArgumentNullException("points");
+
             if (points.Length < 2)
                 throw new ArgumentException(PSSR.PointArrayAtLeast(2), "points");
 
@@ -3641,7 +3654,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             //if (_gfx != null)
             //    gdiSize = XSize.FromSizeF(_gfx.MeasureString(text, font.Realize_GdiFont(), new GdiPointF(0, 0), stringFormat.RealizeGdiStringFormat()));
             //else
-            //    gdiSize = FontHelper.MeasureString(text, font, XStringFormats.Default); // TODO 4STLA: Why is parameter stringFormat not used here?
+            //    gdiSize = FontHelper.MeasureString(text, font, XStringFormats.Default); 
 #if DEBUG_
             XSize edfSize = FontHelper.MeasureString(text, font, XStringFormats.Default);
             //Debug.Assert(gdiSize == edfSize, "Measure string failed.");
@@ -3847,7 +3860,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #if WPF
                 if (TargetContext == XGraphicTargetContext.WPF)
                 {
-                    if (image._wpfImage != null)
+                    if (image._wpfImage != null!)
                     {
                         _dc.DrawImage(image._wpfImage, new Rect(x, y, image.PointWidth, image.PointHeight));
                     }
@@ -3951,7 +3964,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #if WPF
                 if (TargetContext == XGraphicTargetContext.WPF)
                 {
-                    if (image._wpfImage != null)
+                    if (image._wpfImage != null!)
                     {
                         //InterpolationMode interpolationMode = InterpolationMode.Invalid;
                         //if (!image.Interpolate)
@@ -4032,7 +4045,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                     try
                     {
                         Lock.EnterGdiPlus();
-                        if (image._gdiImage != null)
+                        if (image._gdiImage != null!)
                         {
                             InterpolationMode interpolationMode = InterpolationMode.Invalid;
                             if (!image.Interpolate)
@@ -4091,7 +4104,6 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 _renderer.DrawImage(image, destRect, srcRect, srcUnit);
         }
 
-        //TODO?
         //public void DrawImage(XImage image, Rectangle destRect, double srcX, double srcY, double srcWidth, double srcHeight, GraphicsUnit srcUnit);
         //public void DrawImage(XImage image, Rectangle destRect, double srcX, double srcY, double srcWidth, double srcHeight, GraphicsUnit srcUnit);
 
@@ -4282,7 +4294,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 {
                     Lock.EnterGdiPlus();
                     _gsStack.Restore(state.InternalState);
-                    if (_gfx != null)
+                    if (_gfx != null!)
                         _gfx.Restore(state.GdiState!);  // BUG NRT
                     _transform = state.InternalState.Transform;
                 }
@@ -4737,7 +4749,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             {
                 GetType();
                 // TODO: _gsStack...
-// ReviewSTLA THHO4STLA
+                // ReviewSTLA THHO4STLA
             }
 #endif
 #if GDI
@@ -4887,7 +4899,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 
         /// <summary>
         /// Writes a comment to the output stream. Comments have no effect on the rendering of the output.
-        /// They may be useful to mark a position in a content stream of a PDF document.
+        /// They may be useful to mark a position in a content stream of a page in a PDF document.
         /// </summary>
         public void WriteComment(string comment)
         {
@@ -4909,7 +4921,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public XGraphicsInternals Internals
             => _internals ??= new(this);
 
-        XGraphicsInternals _internals = null!; // NRT
+        XGraphicsInternals _internals = default!;
 
         /// <summary>
         /// (Under construction. May change in future versions.)
@@ -4918,7 +4930,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         {
             get { return _transformer ??= new SpaceTransformer(this); }
         }
-        SpaceTransformer _transformer = null!; // NRT
+        SpaceTransformer _transformer = default!;
 
         #endregion
 
@@ -5114,15 +5126,15 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// <summary>
         /// Always defined System.Drawing.Graphics object. Used as 'query context' for PDF pages.
         /// </summary>
-        internal Graphics _gfx = null!; // NRT
+        internal Graphics _gfx;
 #endif
 
 #if WPF
         /// <summary>
         /// Always defined System.Drawing.Graphics object. Used as 'query context' for PDF pages.
         /// </summary>
-        DrawingVisual? _dv; // = null!; // NRT
-        internal DrawingContext _dc = null!; // NRT
+        DrawingVisual? _dv;
+        internal DrawingContext _dc = default!;
 #endif
 
 #if UWP
@@ -5141,7 +5153,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// </summary>
         bool _drawGraphics;
 
-        readonly XForm _form = null!; // NRT
+        readonly XForm _form = default!;
 
 #if GDI
         internal Metafile? Metafile;

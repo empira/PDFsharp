@@ -7,7 +7,7 @@ using PdfSharp.Pdf.Internal;
 
 namespace PdfSharp.Pdf
 {
-    // TODO: Make code more readeable with PDF 1.7 strings: text string, ASCII string, byte string etc.
+    // TODO: Make code more readable with PDF 1.7 strings: text string, ASCII string, byte string etc.
 
     /// <summary>
     /// Determines the encoding of a PdfString or PdfStringObject.
@@ -184,7 +184,7 @@ namespace PdfSharp.Pdf
         internal byte[] EncryptionValue
         {
             // TODO: Unicode case is not handled!
-            get => _value == null ? new byte[0] : PdfEncoders.RawEncoding.GetBytes(_value);
+            get => _value == null ? Array.Empty<byte>() : PdfEncoders.RawEncoding.GetBytes(_value);
             // BUG: May lead to trouble with the value semantics of PdfString
             set => _value = PdfEncoders.RawEncoding.GetString(value, 0, value.Length);
         }
@@ -195,7 +195,7 @@ namespace PdfSharp.Pdf
         public override string ToString()
         {
 #if true
-            PdfStringEncoding encoding = (PdfStringEncoding)(_flags & PdfStringFlags.EncodingMask);
+            var encoding = (PdfStringEncoding)(_flags & PdfStringFlags.EncodingMask);
             string pdf = (_flags & PdfStringFlags.HexLiteral) == 0 ?
                 PdfEncoders.ToStringLiteral(Value, encoding, null) :
                 PdfEncoders.ToHexStringLiteral(Value, encoding, null);
@@ -229,7 +229,7 @@ namespace PdfSharp.Pdf
             }
             var sb = new StringBuilder(length);
             for (int idx = 0; idx < length; idx++)
-                sb.Append((char)bytes[idx]);
+                sb.Append(bytes[idx]);
             return sb.ToString();
         }
 

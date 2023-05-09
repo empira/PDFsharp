@@ -43,7 +43,7 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Font
 {
-    public class HelloWorld1Snippet : SnippetBase
+    public class HelloWorld1Snippet : Snippet
     {
         const string Text = "Sphinx";
         const string Text2 = "Sphinx abc test";

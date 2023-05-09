@@ -75,7 +75,7 @@ namespace PdfSharp.Pdf.Advanced
                 {
                     var decodeParams = Elements[PdfStream.Keys.DecodeParms];
                     var bytes = Filtering.Decode(Stream.Value, item, decodeParams);
-                    if (bytes != null)
+                    if (bytes != null!)
                     {
                         Stream.Value = bytes;
                         Elements.Remove("/Filter");
@@ -94,7 +94,7 @@ namespace PdfSharp.Pdf.Advanced
             // prepended or appended. Some nasty PDF tools do not preserve the graphical state correctly.
             // Therefore we try to relieve the problem by surrounding the content stream with push/restore 
             // graphic state operation.
-            if (Stream != null)
+            if (Stream != null!)
             {
                 var value = Stream.Value;
                 if (value != null!)  // NRT
@@ -126,7 +126,7 @@ namespace PdfSharp.Pdf.Advanced
                 Debug.Assert(_pdfRenderer == null);
             }
 
-            if (Stream != null)
+            if (Stream != null!)
             {
                 //if (Owner.Options.CompressContentStreams)
                 if (Owner.Options.CompressContentStreams && Elements.GetName("/Filter").Length == 0)

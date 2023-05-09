@@ -26,8 +26,6 @@ namespace Shared.TestApp
 
             LogHost.Logger.TestMessage(LogLevel.Critical, "blah");
             LogHost.Logger.TestMessage("blub");
-
-            Console.ReadLine();
         }
     }
 }

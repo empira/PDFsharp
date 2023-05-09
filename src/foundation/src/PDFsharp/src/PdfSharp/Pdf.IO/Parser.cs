@@ -51,7 +51,7 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public int MoveToObject(PdfObjectID objectID)
         {
-            int position = _document._irefTable[objectID]?.Position ?? throw new AggregateException("Invalid object ID.");
+            int position = _document.IrefTable[objectID]?.Position ?? throw new AggregateException("Invalid object ID.");
             return _lexer.Position = position;
         }
 
@@ -374,8 +374,8 @@ namespace PdfSharp.Pdf.IO
 
                 string key = val.ToString() ?? NRT.ThrowOnNull<string>();
                 val = items[idx + 1];
-                if (includeReferences && val is PdfReference)
-                    val = ReadReference((PdfReference)val, true);
+                if (includeReferences && val is PdfReference reference)
+                    val = ReadReference(reference, true);
                 dict.Elements[key] = val;
             }
             return dict;
@@ -454,12 +454,12 @@ namespace PdfSharp.Pdf.IO
                             Debug.Assert(_stack.GetItem(-1) is PdfInteger && _stack.GetItem(-2) is PdfInteger);
                             PdfObjectID objectID = new PdfObjectID(_stack.GetInteger(-2), _stack.GetInteger(-1));
 
-                            var iref = _document._irefTable[objectID];
+                            var iref = _document.IrefTable[objectID];
                             if (iref == null)
                             {
                                 // If a document has more than one PdfXRefTable it is possible that the first trailer has
                                 // indirect references to objects whose iref entry is not yet read in.
-                                if (_document._irefTable.IsUnderConstruction)
+                                if (_document.IrefTable.IsUnderConstruction)
                                 {
                                     // XRefTable not complete when trailer is read. Create temporary irefs that are
                                     // removed later in PdfTrailer.FixXRefs.
@@ -791,8 +791,8 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         internal void ReadIRefsFromCompressedObject(PdfObjectID objectID)
         {
-            Debug.Assert(_document._irefTable.ObjectTable.ContainsKey(objectID));
-            if (!_document._irefTable.ObjectTable.TryGetValue(objectID, out var iref))
+            Debug.Assert(_document.IrefTable.ObjectTable.ContainsKey(objectID));
+            if (!_document.IrefTable.ObjectTable.TryGetValue(objectID, out var iref))
             {
                 // We should never come here because the object stream must be a type 1 entry in the xref stream
                 // and iref was created before.
@@ -804,7 +804,7 @@ namespace PdfSharp.Pdf.IO
             {
                 try
                 {
-                    Debug.Assert(_document._irefTable.Contains(iref.ObjectID));
+                    Debug.Assert(_document.IrefTable.Contains(iref.ObjectID));
                     PdfDictionary pdfObject = (PdfDictionary)ReadObject(null, iref.ObjectID, false, false);
                     PdfObjectStream objectStream = new PdfObjectStream(pdfObject);
                     Debug.Assert(objectStream.Reference == iref);
@@ -834,7 +834,7 @@ namespace PdfSharp.Pdf.IO
             //PdfObjectStream objectStreamStream = (PdfObjectStream)iref.Value;
             if (objectStreamStream == null)
                 throw new Exception("Something went wrong here.");
-            objectStreamStream.ReadReferences(_document._irefTable);
+            objectStreamStream.ReadReferences(_document.IrefTable);
         }
 
         /// <summary>
@@ -844,8 +844,8 @@ namespace PdfSharp.Pdf.IO
         internal PdfReference ReadCompressedObject(PdfObjectID objectID, int index)
         {
 #if true
-            Debug.Assert(_document._irefTable.ObjectTable.ContainsKey(objectID));
-            if (!_document._irefTable.ObjectTable.TryGetValue(objectID, out var iref))
+            Debug.Assert(_document.IrefTable.ObjectTable.ContainsKey(objectID));
+            if (!_document.IrefTable.ObjectTable.TryGetValue(objectID, out var iref))
             {
                 throw new NotImplementedException("This case is not coded or something else went wrong");
             }
@@ -883,7 +883,7 @@ namespace PdfSharp.Pdf.IO
             {
                 try
                 {
-                    Debug.Assert(_document._irefTable.Contains(iref.ObjectID));
+                    Debug.Assert(_document.IrefTable.Contains(iref.ObjectID));
                     PdfDictionary pdfObject = (PdfDictionary)ReadObject(null, iref.ObjectID, false, false);
                     PdfObjectStream objectStream = new PdfObjectStream(pdfObject);
                     Debug.Assert(objectStream.Reference == iref);
@@ -1005,10 +1005,10 @@ namespace PdfSharp.Pdf.IO
             // Read all trailers.
             while (true)
             {
-                var trailer = ReadXRefTableAndTrailer(_document._irefTable);
+                var trailer = ReadXRefTableAndTrailer(_document.IrefTable);
                 // 1st trailer seems to be the best.
-                if (_document._trailer == null!)
-                    _document._trailer = trailer ?? NRT.ThrowOnNull<PdfTrailer>();
+                if (_document.Trailer == null!)
+                    _document.Trailer = trailer ?? NRT.ThrowOnNull<PdfTrailer>();
                 int prev = trailer != null ? trailer.Elements.GetInteger(PdfTrailer.Keys.Prev) : 0;
                 if (prev == 0)
                     break;
@@ -1017,7 +1017,7 @@ namespace PdfSharp.Pdf.IO
                 _lexer.Position = prev;
             }
 
-            return _document._trailer;
+            return _document.Trailer;
         }
 
         /// <summary>

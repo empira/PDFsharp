@@ -207,7 +207,7 @@ namespace PdfSharp.Pdf.Security
         {
             var permissionsValue = (uint)Permissions;
 
-            // Correct permission bits
+            // Correct permission bits.
             permissionsValue &= 0xfffffffc; // 1... 1111 1111 1100 - Bit 1 & 2 must be 0.
             permissionsValue |= 0x000002c0; // 0... 0010 1100 0000 - Bit 7 & 8 must be 1. Also Bit 10 is no longer used and shall be always set to 1.
 
@@ -215,23 +215,28 @@ namespace PdfSharp.Pdf.Security
         }
 
         /// <summary>
-        /// Decrypts the whole document.
+        /// Decrypts an ObjectStream. ObjectStreams have to be decrypted before document decryption to allow the removing of the compression filter.
+        /// </summary>
+        internal void DecryptObjectStream(PdfObjectStream objectStream)
+        {
+            Debug.Assert(objectStream.Reference != null);
+
+            EnterObject(objectStream.ObjectID);
+
+            DecryptDictionary(objectStream, true);
+
+            LeaveObject();
+        }
+
+        /// <summary>
+        /// Decrypts the whole document (except ObjectStreams which are decrypted once when read in).
         /// </summary>
         internal void DecryptDocument()
         {
-            // object streams are already decrypted
-            skipObjectStreams = true;
-            try
+            foreach (var iref in _document.IrefTable.AllReferences)
             {
-                foreach (var iref in _document._irefTable.AllReferences)
-                {
-                    if (!ReferenceEquals(iref.Value, this))
-                        DecryptObject(iref.Value);
-                }
-            }
-            finally
-            {
-                skipObjectStreams = false;
+                if (!ReferenceEquals(iref.Value, this))
+                    DecryptObject(iref.Value);
             }
         }
 
@@ -279,14 +284,10 @@ namespace PdfSharp.Pdf.Security
         /// <summary>
         /// Decrypts a dictionary.
         /// </summary>
-        void DecryptDictionary(PdfDictionary dict)
+        void DecryptDictionary(PdfDictionary dict, bool decryptObjectStream = false)
         {
-            // Pdf Reference 1.7, Chapter 7.5.8.2: The cross-reference stream shall not be encrypted
-            // Pdf Reference 1.7, Chapter 7.6.1: Strings in the Encryption-Dictionary shall not be encrypted
-            //if (dict.Elements.GetName("/Type") == "/XRef" || dict.ObjectNumber == ObjectNumber)
-            //    return;
-            // also skip objects read from object streams (already done in PdfObjectStream.ctor())
-            if (skipObjectStreams && (dict.Elements.GetName("/Type") == "/ObjStm" || dict.Reference != null && dict.Reference.Position < 0))
+            // ObjectStreams are decrypted once when read in. They and their contents must not be decrypted again on DecryptDocument.
+            if (!decryptObjectStream && dict.Elements.GetName("/Type") == "/ObjStm")
                 return;
 
             foreach (var item in dict.Elements)
@@ -783,7 +784,7 @@ namespace PdfSharp.Pdf.Security
         
         void ResetCryptFilterEntriesInAllElements()
         {
-            foreach (var iref in _document._irefTable.AllReferences)
+            foreach (var iref in _document.IrefTable.AllReferences)
             {
                 var pdfObject = iref.Value;
                 if (pdfObject is not PdfDictionary dictionary)

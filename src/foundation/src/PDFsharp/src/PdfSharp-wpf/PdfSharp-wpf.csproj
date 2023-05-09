@@ -7,8 +7,6 @@
         <RootNamespace>PdfSharp</RootNamespace>
         <UseWPF>true</UseWPF>
         <DefineConstants>WPF;NET_ZIP</DefineConstants>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -19,7 +17,6 @@
         <Compile Include="..\PdfSharp\!internal\Configuration.cs" Link="!internal\Configuration.cs" />
         <Compile Include="..\PdfSharp\!internal\Directives.cs" Link="!internal\Directives.cs" />
         <Compile Include="..\PdfSharp\!internal\TargetContext.cs" Link="!internal\TargetContext.cs" />
-        <Compile Include="..\PdfSharp\Diagnostics\DebugAssert.cs" Link="Diagnostics\DebugAssert.cs" />
         <Compile Include="..\PdfSharp\Diagnostics\DebugAssertException.cs" Link="Diagnostics\DebugAssertException.cs" />
         <Compile Include="..\PdfSharp\Diagnostics\RuntimeAssert.cs" Link="Diagnostics\RuntimeAssert.cs" />
         <Compile Include="..\PdfSharp\Diagnostics\RuntimeAssertException.cs" Link="Diagnostics\RuntimeAssertException.cs" />

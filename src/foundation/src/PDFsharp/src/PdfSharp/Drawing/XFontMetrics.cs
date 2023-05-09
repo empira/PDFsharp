@@ -13,21 +13,21 @@ namespace PdfSharp.Drawing
             int underlinePosition, int underlineThickness, int strikethroughPosition, int strikethroughThickness)
         {
             Name = name;
-            _unitsPerEm = unitsPerEm;
-            _ascent = ascent;
-            _descent = descent;
-            _leading = leading;
-            _lineSpacing = lineSpacing;
-            _capHeight = capHeight;
-            _xHeight = xHeight;
-            _stemV = stemV;
-            _stemH = stemH;
-            _averageWidth = averageWidth;
-            _maxWidth = maxWidth;
-            _underlinePosition = underlinePosition;
-            _underlineThickness = underlineThickness;
-            _strikethroughPosition = strikethroughPosition;
-            _strikethroughThickness = strikethroughThickness;
+            UnitsPerEm = unitsPerEm;
+            Ascent = ascent;
+            Descent = descent;
+            Leading = leading;
+            LineSpacing = lineSpacing;
+            CapHeight = capHeight;
+            XHeight = xHeight;
+            StemV = stemV;
+            StemH = stemH;
+            AverageWidth = averageWidth;
+            MaxWidth = maxWidth;
+            UnderlinePosition = underlinePosition;
+            UnderlineThickness = underlineThickness;
+            StrikethroughPosition = strikethroughPosition;
+            StrikethroughThickness = strikethroughThickness;
         }
 
         /// <summary>
@@ -38,106 +38,76 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Gets the ascent value.
         /// </summary>
-        public int UnitsPerEm => _unitsPerEm;
-
-        readonly int _unitsPerEm;
+        public int UnitsPerEm { get; }
 
         /// <summary>
         /// Gets the ascent value.
         /// </summary>
-        public int Ascent => _ascent;
-
-        readonly int _ascent;
+        public int Ascent { get; }
 
         /// <summary>
         /// Gets the descent value.
         /// </summary>
-        public int Descent => _descent;
-
-        readonly int _descent;
+        public int Descent { get; }
 
         /// <summary>
         /// Gets the average width.
         /// </summary>
-        public int AverageWidth => _averageWidth;
-
-        readonly int _averageWidth;
+        public int AverageWidth { get; }
 
         /// <summary>
         /// Gets the height of capital letters.
         /// </summary>
-        public int CapHeight => _capHeight;
-
-        readonly int _capHeight;
+        public int CapHeight { get; }
 
         /// <summary>
         /// Gets the leading value.
         /// </summary>
-        public int Leading => _leading;
-
-        readonly int _leading;
+        public int Leading { get; }
 
         /// <summary>
         /// Gets the line spacing value.
         /// </summary>
-        public int LineSpacing => _lineSpacing;
-
-        readonly int _lineSpacing;
+        public int LineSpacing { get; }
 
         /// <summary>
         /// Gets the maximum width of a character.
         /// </summary>
-        public int MaxWidth => _maxWidth;
-
-        readonly int _maxWidth;
+        public int MaxWidth { get; }
 
         /// <summary>
         /// Gets an internal value.
         /// </summary>
-        public int StemH => _stemH;
-
-        readonly int _stemH;
+        public int StemH { get; }
 
         /// <summary>
         /// Gets an internal value.
         /// </summary>
-        public int StemV => _stemV;
-
-        readonly int _stemV;
+        public int StemV { get; }
 
         /// <summary>
         /// Gets the height of a lower-case character.
         /// </summary>
-        public int XHeight => _xHeight;
-
-        readonly int _xHeight;
+        public int XHeight { get; }
 
         /// <summary>
         /// Gets the underline position.
         /// </summary>
-        public int UnderlinePosition => _underlinePosition;
-
-        readonly int _underlinePosition;
+        public int UnderlinePosition { get; }
 
         /// <summary>
         /// Gets the underline thickness.
         /// </summary>
-        public int UnderlineThickness => _underlineThickness;
-
-        readonly int _underlineThickness;
+        public int UnderlineThickness { get; }
 
         /// <summary>
         /// Gets the strikethrough position.
         /// </summary>
-        public int StrikethroughPosition => _strikethroughPosition;
-
-        readonly int _strikethroughPosition;
+        public int StrikethroughPosition { get; }
 
         /// <summary>
         /// Gets the strikethrough thickness.
         /// </summary>
-        public int StrikethroughThickness => _strikethroughThickness;
-
-        readonly int _strikethroughThickness;
+        public int StrikethroughThickness { get; }
     }
 }

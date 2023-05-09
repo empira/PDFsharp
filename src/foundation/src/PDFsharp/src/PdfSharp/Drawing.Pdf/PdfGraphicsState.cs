@@ -46,7 +46,7 @@ namespace PdfSharp.Drawing.Pdf
 
         internal int Level;
 
-        internal InternalGraphicsState InternalState = null!; // NRT
+        internal InternalGraphicsState InternalState = default!;
 
         public void PushState()
         {
@@ -67,7 +67,7 @@ namespace PdfSharp.Drawing.Pdf
         int _realizedLineJoin = -1;
         double _realizedMiterLimit = -1;
         XDashStyle _realizedDashStyle = (XDashStyle)(-1);
-        string _realizedDashPattern = null!; // NRT
+        string _realizedDashPattern = default!;
         XColor _realizedStrokeColor = XColor.Empty;
         bool _realizedStrokeOverPrint;
 

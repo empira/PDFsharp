@@ -10,11 +10,11 @@ param (
 Push-Location $PSScriptRoot
 
 try {
-    Write-Host "Delete Bin and Obj " $deleteBinAndObj
+    Write-Host "Delete bin and obj " $deleteBinAndObj
     if ($deleteBinAndObj) {
         Write-Host "Deleting BIN and OBJ"
         .\del-bin-and-obj.ps1
-        Write-Host "Done deleting BIN and OBJ"
+        Write-Host "Done deleting bin and obj"
     }
 
     Push-Location ..

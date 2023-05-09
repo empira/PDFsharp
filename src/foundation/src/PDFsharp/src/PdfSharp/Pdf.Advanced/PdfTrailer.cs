@@ -54,8 +54,7 @@ namespace PdfSharp.Pdf.Advanced
             set => Elements.SetInteger(Keys.Size, value);
         }
 
-        // TODO: needed when linearized...
-        //public int Prev
+        //public int Prev needed when linearized..
         //{
         //  get {return Elements.GetInteger(Keys.Prev);}
         //}
@@ -73,15 +72,30 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public string GetDocumentID(int index)
         {
-            if (index < 0 || index > 1)
+            if (index is < 0 or > 1)
                 throw new ArgumentOutOfRangeException(nameof(index), index, "Index must be 0 or 1.");
 
             var array = Elements[Keys.ID] as PdfArray;
             if (array == null || array.Elements.Count < 2)
                 return "";
+#if true
+            var item = array.Elements[index] as PdfString;
+            if (item != null)
+            {
+                // The DocumentID is just a hex string, never represents unicode content.
+                // Add FEFF if it was truncated from the ID. Unlikely, but can happen.
+                if ((item.Flags & PdfStringFlags.Unicode) != 0)
+                {
+                    return new string(new[] { '\u00FE', '\u00FF' })
+                           + new string(item.Value.SelectMany(x => new[] { (char)(x / 256), (char)(x % 256) }).ToArray());
+                }
+                return item.Value;
+            }
+#else
             var item = array.Elements[index];
             if (item is PdfString pdfString)
                 return pdfString.Value;
+#endif
             return "";
         }
 
@@ -90,7 +104,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public void SetDocumentID(int index, string value)
         {
-            if (index < 0 || index > 1)
+            if (index is < 0 or > 1)
                 throw new ArgumentOutOfRangeException(nameof(index), index, "Index must be 0 or 1.");
 
             var array = Elements[Keys.ID] as PdfArray;
@@ -114,12 +128,20 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         /// <summary>
-        /// Gets the standard security handler.
+        /// Gets the standard security handler and creates it, if not existing.
         /// </summary>
-        public PdfStandardSecurityHandler? SecurityHandler 
-            => _securityHandler ??= (PdfStandardSecurityHandler?)Elements.GetValue(Keys.Encrypt, VCF.CreateIndirect);
+        public PdfStandardSecurityHandler SecurityHandler
+            => SecurityHandlerInternal ??= (PdfStandardSecurityHandler?)Elements.GetValue(Keys.Encrypt, VCF.CreateIndirect)!;
 
-        internal PdfStandardSecurityHandler? _securityHandler;
+        /// <summary>
+        /// Gets the standard security handler, if existing and encryption is active.
+        /// </summary>
+        public PdfStandardSecurityHandler? EffectiveSecurityHandler => (SecurityHandlerInternal ??= (PdfStandardSecurityHandler?)Elements.GetValue(Keys.Encrypt))?.GetIfEncryptionActive();
+
+        /// <summary>
+        /// Gets and sets the internally saved standard security handler.
+        /// </summary>
+        internal PdfStandardSecurityHandler? SecurityHandlerInternal;
 
         internal override void WriteObject(PdfWriter writer)
         {
@@ -140,43 +162,43 @@ namespace PdfSharp.Pdf.Advanced
         internal void Finish()
         {
             // /Root
-            var iref = _document._trailer.Elements[Keys.Root] as PdfReference;
+            var iref = _document.Trailer.Elements[Keys.Root] as PdfReference;
             //if (iref != null && iref.Value == null)
             if (iref is { Value: null })
             {
-                iref = _document._irefTable[iref.ObjectID];
+                iref = _document.IrefTable[iref.ObjectID];
                 Debug.Assert(iref!.Value != null);
-                _document._trailer.Elements[Keys.Root] = iref;
+                _document.Trailer.Elements[Keys.Root] = iref;
             }
 
             // /Info
-            iref = _document._trailer.Elements[PdfTrailer.Keys.Info] as PdfReference;
+            iref = _document.Trailer.Elements[Keys.Info] as PdfReference;
             if (iref is { Value: null })
             {
-                iref = _document._irefTable[iref.ObjectID];
+                iref = _document.IrefTable[iref.ObjectID];
                 Debug.Assert(iref!.Value != null);
-                _document._trailer.Elements[Keys.Info] = iref;
+                _document.Trailer.Elements[Keys.Info] = iref;
             }
 
             // /Encrypt
-            iref = _document._trailer.Elements[Keys.Encrypt] as PdfReference;
+            iref = _document.Trailer.Elements[Keys.Encrypt] as PdfReference;
             if (iref != null)
             {
-                iref = _document._irefTable[iref.ObjectID];
+                iref = _document.IrefTable[iref.ObjectID];
                 Debug.Assert(iref!.Value != null);
-                _document._trailer.Elements[Keys.Encrypt] = iref;
+                _document.Trailer.Elements[Keys.Encrypt] = iref;
 
                 // The encryption dictionary (security handler) was read in before the XRefTable construction 
                 // was completed. The next lines fix that state (it took several hours to find these bugs...).
-                iref.Value = _document._trailer._securityHandler!;
-                _document._trailer._securityHandler!.Reference = iref;
-                iref.Value.Reference = iref;
+                var securityHandler = _document.Trailer.SecurityHandlerInternal!;
+                securityHandler.Reference = null; // Reference will be updated new when setting iref.Value.
+                iref.Value = securityHandler;
             }
 
             Elements.Remove(Keys.Prev);
 
-            Debug.Assert(_document._irefTable.IsUnderConstruction == false);
-            _document._irefTable.IsUnderConstruction = false;
+            Debug.Assert(_document.IrefTable.IsUnderConstruction == false);
+            _document.IrefTable.IsUnderConstruction = false;
         }
 
         /// <summary>
@@ -242,7 +264,7 @@ namespace PdfSharp.Pdf.Advanced
             /// </summary>
             public static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
 
-            static DictionaryMeta _meta = null!;
+            static DictionaryMeta? _meta;
         }
 
         /// <summary>

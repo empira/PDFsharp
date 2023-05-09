@@ -99,25 +99,25 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         public override void DecryptForEnteredObject(ref byte[] bytes)
         {
-            using var aes = CreateAesForObjectsCryptography();
-
-            // Read the prepended 16 byte AES initialization vector.
-            var iv = new byte[16];
-            Array.Copy(bytes, 0, iv, 0, 16);
-
-            // Decrypt the rest of the original bytes.
             try
             {
+                using var aes = CreateAesForObjectsCryptography();
+
+                // Read the prepended 16 byte AES initialization vector.
+                if (bytes.Length < 16)
+                    throw TH.CryptographicException_InputDataTooShort();
+                var iv = new byte[16];
+                Array.Copy(bytes, 0, iv, 0, 16);
+
+                // Decrypt the rest of the original bytes.
                 using var decryptor = aes.CreateDecryptor(_encryptionKey, iv);
                 var decrypted = decryptor.TransformFinalBlock(bytes, 16, bytes.Length - 16);
                 bytes = decrypted;
             }
             catch (CryptographicException)
             {
-                // Exception: "Padding is invalid and cannot be removed"
-                // no idea how to properly handle this, but in every encountered document that caused this behavior,
-                // the data was simply not encrypted.
-                // assume unencrypted data
+                if (!HandleCryptographicExceptionOnDecryption())
+                    throw;
             }
         }
 
@@ -259,7 +259,7 @@ namespace PdfSharp.Pdf.Security.Encryption
 
             // b) Truncate, if longer than 127 bytes.
             if (utf8Bytes.Length > 127)
-                utf8Bytes = utf8Bytes.Take(127).ToArray();
+                utf8Bytes = utf8Bytes[..127];
 
             return utf8Bytes;
         }
@@ -376,13 +376,13 @@ namespace PdfSharp.Pdf.Security.Encryption
                 var k1 = k1Enumerable.ToArray();
 
                 // b): Create e: Encrypt k1 using AES-128 (CBC, no padding), with the first 16 bytes of k as the key and the second 16 bytes of k as the initialization vector.
-                var aesKey = k.Take(16).ToArray();
-                var aesIV = k.Skip(16).Take(16).ToArray();
+                var aesKey = k[..16];
+                var aesIV = k[16..32];
                 using var encryptor = aes.CreateEncryptor(aesKey, aesIV);
                 var e = encryptor.TransformFinalBlock(k1, 0, k1.Length);
 
                 // c) + d): Take the first 16 bytes of e as an unsigned big-endian integer.
-                var e16 = e.Take(16).ToArray();
+                var e16 = e[..16];
                 var e16BigEndianUnsigned = new BigInteger(e16, true, true);
                 // Calculate the remainder of the result by modulo 3
                 // and according to that result choose the SHA algorithm to calculate the new k from e.
@@ -398,7 +398,7 @@ namespace PdfSharp.Pdf.Security.Encryption
             }
 
             // The first 32 bytes of the final K are the output of the algorithm.
-            var result = k.Take(32).ToArray();
+            var result = k[..32];
             return result;
         }
 
@@ -560,7 +560,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerHashValue(byte[] userOwnerValue)
         {
-            return userOwnerValue.Take(32).ToArray();
+            return userOwnerValue[..32];
         }
 
         /// <summary>
@@ -568,7 +568,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerValidationSalt(byte[] userOwnerValue)
         {
-            return userOwnerValue.Skip(32).Take(8).ToArray();
+            return userOwnerValue[32..40];
         }
 
         /// <summary>
@@ -576,7 +576,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerKeySalt(byte[] userOwnerValue)
         {
-            return userOwnerValue.Skip(40).Take(8).ToArray();
+            return userOwnerValue[40..48];
         }
 
         /// <summary>
@@ -635,7 +635,7 @@ namespace PdfSharp.Pdf.Security.Encryption
                 return false;
 
             // Bytes 0-3 of the decrypted Perms entry, treated as a little-endian integer, are the user permissions. They should match the value in the P key.
-            var pFromPerms = BitConverter.ToUInt32(permsDecrypted.Take(4).ToArray()); // Little-endian is default, so we don't have to change the order.
+            var pFromPerms = BitConverter.ToUInt32(permsDecrypted[..4]); // Little-endian is default, so we don't have to change the order.
             if (pFromPerms != pValue)
                 return false;
 

@@ -6,9 +6,10 @@ using PdfSharp.Pdf;
 using PdfSharp.Quality;
 using PdfSharp.Snippets.Drawing;
 
+#pragma warning disable 1591
 namespace PdfSharp.Features.Drawing
 {
-    public class RoundedRectangles : FeatureBase
+    public class RoundedRectangles : Feature
     {
         public static void Test1()
         {

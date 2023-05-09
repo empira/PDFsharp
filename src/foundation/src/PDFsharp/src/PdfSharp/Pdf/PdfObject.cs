@@ -109,7 +109,7 @@ namespace PdfSharp.Pdf
 
             // TODO: check imported
             if (_iref == null)
-                _iref = _document._irefTable[objectID];
+                _iref = _document.IrefTable[objectID];
             if (_iref == null)
             {
                 // ReSharper disable once ObjectCreationAsStatement because the new object is set to this object
@@ -144,7 +144,7 @@ namespace PdfSharp.Pdf
                 }
             }
         }
-        internal PdfDocument _document = null!; // NRT
+        internal PdfDocument _document = default!;
 
         /// <summary>
         /// Indicates whether the object is an indirect object.
@@ -234,7 +234,7 @@ namespace PdfSharp.Pdf
                 {
                     // Case: The cloned object was an indirect object.
                     // Add clone to new owner document.
-                    owner._irefTable.Add(clone);
+                    owner.IrefTable.Add(clone);
                     // The clone gets an iref by adding it to its new owner.
                     Debug.Assert(clone.Reference != null);
                     // Save an association from old object identifier to new iref.
@@ -328,7 +328,7 @@ namespace PdfSharp.Pdf
                     {
                         // Case: The cloned object was an indirect object.
                         // Add clone to new owner document.
-                        owner._irefTable.Add(clone);
+                        owner.IrefTable.Add(clone);
                         Debug.Assert(clone.Reference != null);
                         // Save an association from old object identifier to new iref.
                         importedObjectTable.Add(obj.ObjectID, clone.Reference);
@@ -411,7 +411,7 @@ namespace PdfSharp.Pdf
 
                         //Debug.Assert(iref.Document == iot.Document);
                         // No: Replace with iref of cloned object.
-                        PdfReference newXRef = iot[iref.ObjectID];  // TODO: Explain this line of code in all details.
+                        var newXRef = iot[iref.ObjectID];  // TODO: Explain this line of code in all details.
                         Debug.Assert(newXRef != null);
                         Debug.Assert(newXRef.Document == owner);
                         dict.Elements[name] = newXRef;

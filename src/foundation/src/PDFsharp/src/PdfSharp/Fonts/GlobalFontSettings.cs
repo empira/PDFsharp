@@ -74,7 +74,7 @@ namespace PdfSharp.Fonts
         static IFontResolver? _fontResolver;
 
         /// <summary>
-        /// Adds a font resolver. NXI
+        /// Adds a font resolver. NYI
         /// </summary>
         /// <param name="fontResolver">The font resolver.</param>
         [Obsolete("Not yet implemented.")]

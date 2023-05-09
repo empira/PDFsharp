@@ -1,4 +1,7 @@
-﻿using PdfSharp.Drawing;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 
@@ -7,39 +10,69 @@ namespace PdfSharp.Quality
     /// <summary>
     /// Base class of code snippets for testing.
     /// </summary>
-    public abstract class SnippetBase : CommonBase
+    public abstract class Snippet : FeatureAndSnippetBase
     {
-        protected SnippetBase()
-        {
-            BoxOption = BoxOptions.Tile;
-        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Snippet"/> class.
+        /// </summary>
+        protected Snippet()
+        { }
 
+        /// <summary>
+        /// Gets or sets the title of the snipped
+        /// </summary>
         public string Title { get; set; } = "";
 
-        protected BoxOptions BoxOption { get; set; }
+        /// <summary>
+        /// Gets or sets the box option.
+        /// </summary>
+        protected BoxOptions BoxOption { get; set; } = BoxOptions.Tile;
 
+        /// <summary>
+        /// Gets or sets a value indicating how this <see cref="Snippet"/> is drawn.
+        /// If it is true, all describing graphics like title and boxes are omitted.
+        /// Use this option to produce a clean PDF for debugging purposes.
+        /// If it is false, all describing graphics like title and boxes are drawn.
+        /// This is the regular case.
+        /// </summary>
         public bool Cleanroom { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether all graphics output is omitted.
+        /// </summary>
         public bool NoGraphic { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether all text output is omitted.
+        /// </summary>
         public bool NoText { get; set; }
 
-        public static string FontNameStd = GlobalFontSettings.DefaultFontName;
+        /// <summary>
+        /// The standard font name used in snippet.
+        /// </summary>
+        public static string FontNameStd { get; } = GlobalFontSettings.DefaultFontName;
 
+        /// <summary>
+        /// Gets the standard font in snippets.
+        /// </summary>
         public XFont FontStd =>
             // Create only on demand.
             _fontStd ??= new XFont(FontNameStd, 12, XFontStyleEx.Regular,
                 new XPdfFontOptions(PdfFontEncoding.Unicode));
-
         XFont? _fontStd;
 
+        /// <summary>
+        /// Gets the header font in snippets.
+        /// </summary>
         public XFont FontHeader =>
             // Create only on demand.
             _fontHeader ??= new XFont(FontNameStd, 9, XFontStyleEx.Regular,
                 new XPdfFontOptions(PdfFontEncoding.Unicode));
-
         XFont? _fontHeader;
 
+        /// <summary>
+        /// Draws a text that states that a feature is not supported in a particular build.
+        /// </summary>
         protected void DrawNotSupportedFeature(XGraphics gfx)
         {
             var message = $"This feature is not supported in {PdfSharpTechnology}.";
@@ -47,6 +80,9 @@ namespace PdfSharp.Quality
             gfx.DrawString(message, FontStd, XBrushes.DarkSlateGray, 10, 10);
         }
 
+        /// <summary>
+        /// Draws the header.
+        /// </summary>
         public void DrawHeader(XGraphics gfx, string renderTarget)
         {
             if (Cleanroom || NoText)
@@ -56,28 +92,47 @@ namespace PdfSharp.Quality
             gfx.DrawString(header, FontHeader, XBrushes.DarkSlateGray, WidthInPU / 2, 0, XStringFormats.TopCenter);
         }
 
+        /// <summary>
+        /// Draws the header.
+        /// </summary>
         public void DrawHeader(string renderTarget)
         {
             DrawHeader(XGraphics, renderTarget);
         }
 
+        /// <summary>
+        /// Draws the header for a PDF document.
+        /// </summary>
         public void DrawPdfHeader()
         {
-            DrawHeader("Pdf");
+            DrawHeader("PDF");
         }
 
+        /// <summary>
+        /// Draws the header for a PNG image.
+        /// </summary>
         public void DrawPngHeader()
         {
-            DrawHeader("Png");
+            DrawHeader("PNG");
         }
 
+        /// <summary>
+        /// When implemented in a derived class renders the snippet in the specified XGraphic object.
+        /// </summary>
+        /// <param name="gfx">The XGraphics where to render the snippet.</param>
         public abstract void RenderSnippet(XGraphics gfx);
 
+        /// <summary>
+        /// When implemented in a derived class renders the snippet in an XGraphic object.
+        /// </summary>
         public void RenderSnippet()
         {
             RenderSnippet(XGraphics);
         }
 
+        /// <summary>
+        /// Renders a snippet as PDF document.
+        /// </summary>
         public void RenderSnippetAsPdf()
         {
             BeginPdfDocument();
@@ -88,6 +143,9 @@ namespace PdfSharp.Quality
             EndPdfDocument();
         }
 
+        /// <summary>
+        /// Renders a snippet as PNG image.
+        /// </summary>
         public void RenderSnippetAsPng()
         {
 #if !CORE && !WPF
@@ -98,6 +156,10 @@ namespace PdfSharp.Quality
 #endif
         }
 
+        /// <summary>
+        /// Creates a PDF page for the specified document.
+        /// </summary>
+        /// <param name="doc">The document.</param>
         public PdfPage CreatePdfPage(PdfDocument doc)
         {
             var page = doc.AddPage();
@@ -152,7 +214,7 @@ namespace PdfSharp.Quality
 
                 case BoxOptions.Fill:
                     {
-                        gfx.DrawRectangle(_gray, 0, 0, BoxWidth, BoxHeight);
+                        gfx.DrawRectangle(Gray, 0, 0, BoxWidth, BoxHeight);
                     }
                     break;
 
@@ -194,60 +256,92 @@ namespace PdfSharp.Quality
             gfx.WriteComment(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         }
 
+        /// <summary>
+        /// Begins rendering the content of a box.
+        /// </summary>
+        /// <param name="gfx">The XGraphics object.</param>
+        /// <param name="boxNumber">The box number.</param>
         protected void BeginBox(XGraphics gfx, int boxNumber)
         {
             BeginBox(gfx, boxNumber, BoxOption, null);
         }
 
+        /// <summary>
+        /// Begins rendering the content of a box.
+        /// </summary>
+        /// <param name="gfx">The XGraphics object.</param>
+        /// <param name="boxNumber">The box number.</param>
+        /// <param name="options">The box options.</param>
         protected void BeginBox(XGraphics gfx, int boxNumber, BoxOptions options)
         {
             BeginBox(gfx, boxNumber, options, null);
         }
 
+        /// <summary>
+        /// Ends rendering of the current box.
+        /// </summary>
+        /// <param name="gfx">The XGraphics object.</param>
         protected void EndBox(XGraphics gfx)
         {
             gfx.WriteComment("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
             gfx.Restore();
         }
 
-        [Obsolete]
-        protected void EndBox(XGraphics gfx, string subTitle)
-        {
-            //if (!NoText)
-            //{
-            //    gfx.DrawString(subTitle, new XFont("Arial", 8, XFontStyleEx.Italic), XBrushes.Black,
-            //        new XRect(0, BoxHeight + 8, BoxWidth, 0), XStringFormats.BaseLineCenter);
-            //}
-            EndBox(gfx);
-        }
+        //[Obsolete]
+        //protected void EndBox(XGraphics gfx, string subTitle)
+        //{
+        //    //if (!NoText)
+        //    //{
+        //    //    gfx.DrawString(subTitle, new XFont("Arial", 8, XFontStyleEx.Italic), XBrushes.Black,
+        //    //        new XRect(0, BoxHeight + 8, BoxWidth, 0), XStringFormats.BaseLineCenter);
+        //    //}
+        //    EndBox(gfx);
+        //}
 
+        /// <summary>
+        /// Draws a tiled box.
+        /// </summary>
+        /// <param name="gfx">The XGraphics object.</param>
+        /// <param name="x">The left position of the box.</param>
+        /// <param name="y">The top position of the box.</param>
+        /// <param name="width">The width of the box.</param>
+        /// <param name="height">The height of the box.</param>
+        /// <param name="delta">The size of the grid square.</param>
         protected void DrawTiledBox(XGraphics gfx, double x, double y, double width, double height, double delta)
         {
             var path = new XGraphicsPath();
             var points = new List<XPoint>();
-            //const double delta = 8;
-            points.Add(new XPoint(x, y));
+
+            points.Add(new(x, y));
             for (var xx = x; xx < x + width; xx += 2 * delta)
             {
-                points.Add(new XPoint(xx, y + height));
-                points.Add(new XPoint(xx + delta, y + height));
-                points.Add(new XPoint(xx + delta, y));
-                points.Add(new XPoint(xx + 2 * delta, y));
+                points.Add(new(xx, y + height));
+                points.Add(new(xx + delta, y + height));
+                points.Add(new(xx + delta, y));
+                points.Add(new(xx + 2 * delta, y));
             }
-            points.Add(new XPoint(x + width, y + height));
+
+            points.Add(new(x + width, y + height));
             for (var yy = y + height; yy > y; yy -= 2 * delta)
             {
-                points.Add(new XPoint(x, yy));
-                points.Add(new XPoint(x, yy - delta));
-                points.Add(new XPoint(x + width, yy - delta));
-                points.Add(new XPoint(x + width, yy - 2 * delta));
+                points.Add(new(x, yy));
+                points.Add(new(x, yy - delta));
+                points.Add(new(x + width, yy - delta));
+                points.Add(new(x + width, yy - 2 * delta));
             }
             path.AddPolygon(points.ToArray());
-            gfx.DrawPath(_gray, path);
+            gfx.DrawPath(Gray, path);
         }
 
-        protected static XRect RectBox = new XRect(0, 0, BoxWidth, BoxHeight);
+        /// <summary>
+        /// Gets the rectangle of a box.
+        /// </summary>
+        protected static XRect RectBox { get; } = new(0, 0, BoxWidth, BoxHeight);
 
+        /// <summary>
+        /// Draws the center point of a box.
+        /// </summary>
+        /// <param name="gfx">The XGraphics object.</param>
         protected static void DrawCenterPoint(XGraphics gfx)
         {
             const double centerV = BoxHeight / 2;
@@ -257,6 +351,12 @@ namespace PdfSharp.Quality
             gfx.DrawEllipse(XBrushes.Red, centerH - size / 2, centerV - size / 2, size, size);
         }
 
+        /// <summary>
+        /// Draws the alignment grid.
+        /// </summary>
+        /// <param name="gfx">The XGraphics object.</param>
+        /// <param name="highlightHorizontal">if set to <c>true</c> [highlight horizontal].</param>
+        /// <param name="highlightVertical">if set to <c>true</c> [highlight vertical].</param>
         protected static void DrawAlignmentGrid(XGraphics gfx, bool highlightHorizontal = false, bool highlightVertical = false)
         {
             var rectBox = new XRect(0, 0, BoxWidth, BoxHeight);
@@ -276,6 +376,10 @@ namespace PdfSharp.Quality
                 gfx.DrawLine(XPens.Red, centerH, 0, centerH, BoxHeight);
         }
 
+        /// <summary>
+        /// Draws a dotted line showing the art box.
+        /// </summary>
+        /// <param name="gfx">The XGraphics object.</param>
         protected void DrawArtBox(XGraphics gfx)
         {
             var pen1 = new XPen(XColors.DarkGreen, 1) { DashStyle = XDashStyle.Dot };
@@ -285,6 +389,9 @@ namespace PdfSharp.Quality
             gfx.DrawLine(pen1, 212, 12, 12, 132);
         }
 
+        /// <summary>
+        /// Gets the points of a pentagram in a unit circle.
+        /// </summary>
         protected static XPoint[] Pentagram
         {
             get
@@ -301,6 +408,12 @@ namespace PdfSharp.Quality
             }
         }
 
+        /// <summary>
+        /// Gets the points of a pentagram relative to a center and scaled by a size factor.
+        /// </summary>
+        /// <param name="size">The scaling factor of the pentagram.</param>
+        /// <param name="center">The center of the pentagram.</param>
+        /// <returns></returns>
         protected static XPoint[] GetPentagram(double size, XPoint center)
         {
             var points = Pentagram;
@@ -348,27 +461,27 @@ namespace PdfSharp.Quality
         }
 #endif
 
-//#if NET/FX_CORE
-//        protected async Task<string> SaveAndShowDocumentAsync(PdfDocument document, string filenameTag)
-//        {
-//            // Save the PDF document...
-//            string filename = await SaveDocumentAsync(document, filenameTag);
+        //#if NET/FX_CORE
+        //        protected async Task<string> SaveAndShowDocumentAsync(PdfDocument document, string filenameTag)
+        //        {
+        //            // Save the PDF document...
+        //            string filename = await SaveDocumentAsync(document, filenameTag);
 
-//            // ... and start a viewer.
-//            //Process.Start(filename);
-//            return filename;
-//        }
-//#endif
+        //            // ... and start a viewer.
+        //            //Process.Start(filename);
+        //            return filename;
+        //        }
+        //#endif
 
-//#if NET/FX_CORE
-//        protected async Task<string> SaveDocumentAsync(PdfDocument document, string filenameTag)
-//        {
-//            var filename = String.Format("{0:N}_{1}_tempfile.pdf", Guid.NewGuid(), filenameTag);
-//            document.Save(filename);
-//            await Task.Factory.StartNew(() => { });
-//            return filename;
-//        }
-//#endif
+        //#if NET/FX_CORE
+        //        protected async Task<string> SaveDocumentAsync(PdfDocument document, string filenameTag)
+        //        {
+        //            var filename = String.Format("{0:N}_{1}_tempfile.pdf", Guid.NewGuid(), filenameTag);
+        //            document.Save(filename);
+        //            await Task.Factory.StartNew(() => { });
+        //            return filename;
+        //        }
+        //#endif
 
         /// <summary>
         /// Creates a HelloWorld document, optionally with custom message.
@@ -400,6 +513,10 @@ namespace PdfSharp.Quality
             return document;
         }
 
+        /// <summary>
+        /// Gets a XGraphics object for the last page of the specified document.
+        /// </summary>
+        /// <param name="doc">The PDF document.</param>
         public static XGraphics GfxForLastPage(PdfDocument doc)
         {
             XGraphics gfx = XGraphics.FromPdfPage(doc.Pages[doc.Pages.Count - 1]);
@@ -816,8 +933,18 @@ namespace PdfSharp.Quality
 #endif
     }
 
+    /// <summary>
+    /// Extensions for the XGraphics class.
+    /// </summary>
     public static class XGraphicsDevExtensions
     {
+        /// <summary>
+        /// Draws the measurement box for a specified text and a font.
+        /// </summary>
+        /// <param name="gfx">The XGraphics object</param>
+        /// <param name="text">The text to be measured.</param>
+        /// <param name="font">The font to be used for measuring.</param>
+        /// <param name="pos">The start point of the box.</param>
         public static void DrawMeasureBox(this XGraphics gfx, string text, XFont font, XPoint pos)
         {
             var pen = new XPen(XColor.FromArgb(0x80, 0xFF, 0x00, 0x00), 1);

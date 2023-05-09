@@ -3,9 +3,14 @@
 
 using PdfSharp.Drawing;
 
+#pragma warning disable 1591
 namespace PdfSharp.Features.Drawing
 {
-    public class Lines1 : Quality.SnippetBase
+    /// <summary>
+    /// Snippet??
+    /// </summary>
+    /// <seealso cref="PdfSharp.Quality.Snippet" />
+    public class Lines1 : Quality.Snippet
     {
         public Lines1()
         {
@@ -48,14 +53,15 @@ namespace PdfSharp.Features.Drawing
 
             BeginBox(gfx, 5, BoxOptions.Tile);
             {
-                var pen = new XPen(XColors.DarkBlue, 3);
+                var pen = new XPen(XColors.DarkBlue, 3)
+                {
+                    // Custom pattern
+                    //pen.DashStyle = XDashStyle.Custom;
+                    DashPattern = new[] { 3, 1, 2.5, 1.5 },
+                    Width = 7,
+                    DashOffset = 1
+                };
 
-                // Custom pattern
-                //pen.DashStyle = XDashStyle.Custom;
-                pen.DashPattern = new[] { 3, 1, 2.5, 1.5 };
-                pen.Width = 7;
-
-                pen.DashOffset = 1;
                 gfx.DrawLine(pen, 18, 18, 204, 18);
 
                 pen.DashOffset = 2;

@@ -34,7 +34,7 @@ namespace MigraDoc.RtfRendering
             Translate("HeadingFormat", "trhdr");
 
             // trkeepfollow is intended to keep table rows together.
-            // Unfortunalte, this does not work in word.
+            // Unfortunately, this does not work in word.
             int thisRowIdx = _row.Index;
             for (int rowIdx = 0; rowIdx <= _row.Index; ++rowIdx)
             {

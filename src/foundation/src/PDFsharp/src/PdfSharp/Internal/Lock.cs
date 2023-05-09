@@ -39,6 +39,7 @@ namespace PdfSharp.Internal
         }
 
         static readonly object FontFactory = new();
-        [ThreadStatic] static int _fontFactoryLockCount;
+        [ThreadStatic] 
+        static int _fontFactoryLockCount;
     }
 }

@@ -13,9 +13,9 @@
 		<DebugBuildMessage>***** THIS IS A DEBUG BUILD - DO NOT PUBLISH *****%0d</DebugBuildMessage>
 
 		<!--<NuGetProjectUrl>https://docs.pdfsharp.net</NuGetProjectUrl>-->
-		<NuGetProjectUrl>http://pdfsharp.net</NuGetProjectUrl>
+		<NuGetProjectUrl>https://docs.pdfsharp.net</NuGetProjectUrl>
 		<NuGetTags_PdfSharp>PDFsharp PDF creation</NuGetTags_PdfSharp>
-		<NuGetTags_MigraDoc>MigraDoc PdfSharp Pdf Document Generation</NuGetTags_MigraDoc>
+		<NuGetTags_MigraDoc>MigraDoc PDFsharp PDF Document Generation</NuGetTags_MigraDoc>
 	</PropertyGroup>
 
 	<Target Name="SetNuspecProperties" BeforeTargets="GenerateNuspec">

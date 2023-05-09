@@ -184,7 +184,7 @@ namespace PdfSharp.Drawing
             _formState = FormState.UnderConstruction;
             Gfx = gfx;
         }
-        internal XGraphics Gfx = null!; // NRT
+        internal XGraphics Gfx = default!;
 
         /// <summary>
         /// Disposes this instance.
@@ -317,12 +317,10 @@ namespace PdfSharp.Drawing
         /// </summary>
         public XRect BoundingBox
         {
-            get => _boundingBox;
-            set => _boundingBox = value;
+            get;
+            set;
             // TODO: pdfForm = null
         }
-
-        XRect _boundingBox;
 
         /// <summary>
         /// Gets or sets the transformation matrix.
@@ -433,7 +431,7 @@ namespace PdfSharp.Drawing
             {
                 Debug.Assert(IsTemplate, "This function is for form templates only.");
                 if (_pdfForm!.Reference == null)
-                    _document._irefTable.Add(_pdfForm);
+                    _document.IrefTable.Add(_pdfForm);
                 return _pdfForm;
             }
         }
@@ -464,35 +462,26 @@ namespace PdfSharp.Drawing
         /// </summary>
         internal PdfFormXObject? _pdfForm;  // TODO: make private
 
-        internal XGraphicsPdfRenderer PdfRenderer = null!;
+        internal XGraphicsPdfRenderer PdfRenderer = default!;
 
 #if WPF
         /// <summary>
         /// Gets a value indicating whether this image is cmyk.
         /// </summary>
         /// <value><c>true</c> if this image is cmyk; otherwise, <c>false</c>.</value>
-        internal override bool IsCmyk
-        {
-            get { return false; } // not supported and not relevant
-        }
+        internal override bool IsCmyk => false; // not supported and not relevant
 
         /// <summary>
         /// Gets a value indicating whether this image is JPEG.
         /// </summary>
         /// <value><c>true</c> if this image is JPEG; otherwise, <c>false</c>.</value>
-        internal override bool IsJpeg
-        {
-            get { return base.IsJpeg; }// not supported and not relevant
-        }
+        internal override bool IsJpeg => base.IsJpeg; // not supported and not relevant
 
         /// <summary>
         /// Gets the JPEG memory stream (if IsJpeg returns true).
         /// </summary>
         /// <value>The memory.</value>
-        public override MemoryStream Memory
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public override MemoryStream Memory => throw new NotImplementedException();
 #endif
     }
 }

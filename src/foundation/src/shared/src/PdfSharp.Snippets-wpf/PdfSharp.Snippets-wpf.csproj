@@ -6,8 +6,6 @@
         <RootNamespace>PdfSharp.Snippets</RootNamespace>
         <UseWPF>true</UseWPF>
         <DefineConstants>TRACE;WPF</DefineConstants>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

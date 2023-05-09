@@ -97,19 +97,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public double Point
         {
-            get
-            {
-                return _pointValue;
-                //return Type switch
-                //{
-                //    XGraphicsUnit.Point => Value,
-                //    XGraphicsUnit.Inch => Value * 72,
-                //    XGraphicsUnit.Millimeter => Value * 72 / 25.4,
-                //    XGraphicsUnit.Centimeter => Value * 72 / 2.54,
-                //    XGraphicsUnit.Presentation => Value * 72 / 96,
-                //    _ => throw new InvalidCastException()
-                //};
-            }
+            get => _pointValue;
             set
             {
                 PointValue = Value = value;
@@ -352,8 +340,8 @@ namespace PdfSharp.Drawing
                 "in" => XGraphicsUnit.Inch,
                 "mm" => XGraphicsUnit.Millimeter,
                 "" or "pt" => XGraphicsUnit.Point,
-                "pu" => // presentation units
-                    XGraphicsUnit.Presentation,
+                // presentation units
+                "pu" => XGraphicsUnit.Presentation,
                 _ => throw new ArgumentException("Unknown unit type: '" + typeStr + "'")
             };
 

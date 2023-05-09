@@ -11,7 +11,7 @@ namespace PdfSharp.Fonts.OpenType
     /// Represents an indirect reference to an existing font table in a font image.
     /// Used to create binary copies of an existing font table that is not modified.
     /// </summary>
-    // ReSharper disable once InconsistentNaming - "I" stands for "indirect", not "interface".
+    // ReSharper disable once InconsistentNaming because "I" stands for "indirect", not "interface".
     sealed class IRefFontTable : OpenTypeFontTable
     {
         public IRefFontTable(OpenTypeFontface fontData, OpenTypeFontTable fontTable)

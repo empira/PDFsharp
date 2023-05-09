@@ -66,7 +66,7 @@ namespace PdfSharp.Snippets.Font
             // always simulate italic if it is requested.
             bool simulateItalic = isItalic;
 
-            string faceName = "";
+            string? faceName = null;
 
             // In this sample family names are case sensitive. You can relax this in your own implementation
             // and make them case insensitive.
