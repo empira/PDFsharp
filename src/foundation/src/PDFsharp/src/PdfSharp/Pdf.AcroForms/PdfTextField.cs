@@ -36,7 +36,16 @@ namespace PdfSharp.Pdf.AcroForms
         /// <summary>
         /// Gets or sets the font used to draw the text of the field.
         /// </summary>
-        public XFont Font { get; set; } = new XFont("Courier New", 10);
+        public XFont Font
+        {
+            get {
+                string s = Elements.GetString(PdfAcroField.Keys.DA);
+                s = s.Substring(1);
+                string[] fontParts = s.Split(" ".ToCharArray(),StringSplitOptions.RemoveEmptyEntries);
+                return new XFont(fontParts[0], double.Parse(fontParts[1]));
+            }
+            set { Elements.SetString(PdfAcroField.Keys.DA, value.ToString()); RenderAppearance(); } //HACK in PdfTextField
+        }
 
         /// <summary>
         /// Gets or sets the foreground color of the field.
@@ -57,6 +66,11 @@ namespace PdfSharp.Pdf.AcroForms
             get => Elements.GetInteger(Keys.MaxLen);
             set => Elements.SetInteger(Keys.MaxLen, value);
         }
+
+        /// <summary>
+        /// Defines TextAnchor inside TextField e.g. Centering
+        /// </summary>
+        public XStringFormat TextAchor { get; set; } = XStringFormats.CenterLeft;
 
         /// <summary>
         /// Gets or sets a value indicating whether the field has multiple lines.
@@ -204,7 +218,7 @@ namespace PdfSharp.Pdf.AcroForms
             string text = Text;
             if (text.Length > 0)
                 gfx.DrawString(Text, Font, new XSolidBrush(ForeColor),
-                  rect.ToXRect() - rect.Location + new XPoint(2, 0), XStringFormats.TopLeft);
+                  rect.ToXRect() - rect.Location + new XPoint(2, 0), this.TextAchor);
 
             form.DrawingFinished();
             form.PdfForm.Elements.Add("/FormType", new PdfLiteral("1"));
