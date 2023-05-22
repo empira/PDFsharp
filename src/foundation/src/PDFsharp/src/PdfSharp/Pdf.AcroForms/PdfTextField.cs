@@ -5,6 +5,7 @@ using PdfSharp.Drawing;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Annotations;
 using PdfSharp.Pdf.Internal;
+using System.Text.RegularExpressions;
 
 namespace PdfSharp.Pdf.AcroForms
 {
@@ -38,11 +39,8 @@ namespace PdfSharp.Pdf.AcroForms
         /// </summary>
         public XFont Font
         {
-            get {
-                string s = Elements.GetString(PdfAcroField.Keys.DA);
-                s = s.Substring(1);
-                string[] fontParts = s.Split(" ".ToCharArray(),StringSplitOptions.RemoveEmptyEntries);
-                return new XFont(fontParts[0], double.Parse(fontParts[1]));
+            get {                
+                return GetFontFromDAKeyString(Elements.GetString(PdfAcroField.Keys.DA));
             }
             set { Elements.SetString(PdfAcroField.Keys.DA, value.ToString()); RenderAppearance(); } //HACK in PdfTextField
         }
@@ -243,6 +241,25 @@ namespace PdfSharp.Pdf.AcroForms
             if (xobj.Stream != null)
                 xobj.Stream.Value = new RawEncoding().GetBytes(s);
 #endif
+        }
+
+        /// <summary>
+        /// Parses <see cref="XFont"/> from a PODF Dictionary DA Key String
+        /// </summary>
+        /// <param name="DAValue">String Value of Dictionary Key</param>
+        /// <returns>XFont corresponding to DA Key string</returns>
+        public static XFont GetFontFromDAKeyString(string DAValue)
+        {
+            string fontRegexPattern = "^\\/(?<FontName>[^\\s]*)\\s(?<FontSize>[.?\\d]+]*)"; // REgex to match a /DA Key string e.g. /Arial 10 Tf 0.0 g
+            Regex fontRegex = new Regex(fontRegexPattern);
+            Match fontMatch = fontRegex.Match(DAValue);
+
+            if (!fontMatch.Success) throw new ArgumentException($"The Font string '{DAValue}' is not matched by font regex '{fontRegexPattern}'. Check if the string is correct.");
+
+            string fontName = fontMatch.Groups["FontName"].Value;
+            string fontSize = fontMatch.Groups["FontSize"].Value;
+
+            return new XFont(fontName, double.Parse(fontSize));
         }
 
         internal override void PrepareForSave()
