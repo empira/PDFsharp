@@ -552,7 +552,6 @@ namespace PdfSharp.SharpZipLib.Zip.Compression.Streams
         }
 #endif
 
-
         void GetAuthCodeIfAES()
         {
 #if false

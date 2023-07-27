@@ -34,7 +34,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public GraphicsPath GdiPath
         {
-            get { return _path._gdipPath; }
+            get { return _path.GdipPath; }
         }
 #endif
 
@@ -44,7 +44,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public PathGeometry WpfPath
         {
-            get { return _path._pathGeometry; }
+            get { return _path.PathGeometry; }
         }
 #endif
     }

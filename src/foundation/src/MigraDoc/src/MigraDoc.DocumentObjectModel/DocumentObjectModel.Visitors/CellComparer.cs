@@ -46,7 +46,6 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         //  return cellLhs.Column.Index - cellRhs.Column.Index;
         //}
 
-
         /// <summary>
         /// Compares the specified cells.
         /// </summary>

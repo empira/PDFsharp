@@ -3,8 +3,6 @@
 
 using System.Reflection;
 
-#pragma warning disable 1591
-
 namespace MigraDoc.Rendering.UnitTest
 {
     /// <summary>
@@ -12,9 +10,6 @@ namespace MigraDoc.Rendering.UnitTest
     /// </summary>
     class ValueDumper
     {
-        internal ValueDumper()
-        { }
-
         internal static string DumpValues(object obj)
         {
             string dumpString = "[" + obj.GetType() + "]\r\n";

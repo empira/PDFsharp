@@ -74,7 +74,6 @@ namespace PdfSharp.Pdf.Security.Encryption
 
             EncryptMetadata = (SecurityHandler.Elements[PdfStandardSecurityHandler.Keys.EncryptMetadata] as PdfBoolean)?.Value ?? true; // GetBoolean() returns false if not existing, but default is true.
 
-
             CheckVersionAndLength(VersionValue, LengthValue);
 
             var calculatedRevision = CalculateRevisionValue(VersionValue.Value, SecurityHandler.GetCorrectedPermissionsValue());
@@ -129,7 +128,6 @@ namespace PdfSharp.Pdf.Security.Encryption
                 throw TH.InvalidOperationException_AESNotSupportedForChosenEncryptionVersion();
         }
 
-
         /// <summary>
         /// Sets the encryption dictionary's values for saving.
         /// </summary>
@@ -163,7 +161,6 @@ namespace PdfSharp.Pdf.Security.Encryption
                     SecurityHandler.SetIdentityCryptFilter(metadata);
                 }
             }
-
 
             // Use user password twice if no owner password provided.
             if (String.IsNullOrEmpty(ownerPassword))
@@ -399,7 +396,6 @@ namespace PdfSharp.Pdf.Security.Encryption
                 _objectEncryptionKeySize = 16;
         }
 
-
         /// <summary>
         /// Validates the password.
         /// </summary>
@@ -488,8 +484,10 @@ namespace PdfSharp.Pdf.Security.Encryption
             // On revision 3 or higher, only the first 16 bytes have to be compared.
             var comparisonLength = RevisionValue >= 3 ? 16 : 32;
 
-            if (value1.Length != 32 || value2.Length != 32)
-                throw TH.InvalidOperationException_InvalidPasswordKeyLengthForEncryptionVersion1To4();
+            if (value1.Length != 32)
+                throw TH.InvalidOperationException_InvalidPasswordKeyLengthForEncryptionVersion1To4(value1.Length);
+            if (value2.Length != 32)
+                throw TH.InvalidOperationException_InvalidPasswordKeyLengthForEncryptionVersion1To4(value2.Length);
 
             for (var idx = 0; idx < comparisonLength; idx++)
             {
@@ -498,7 +496,6 @@ namespace PdfSharp.Pdf.Security.Encryption
             }
             return true;
         }
-
 
         /// <summary>
         /// Has to be called if a PdfObject is entered for encryption/decryption.
@@ -548,7 +545,6 @@ namespace PdfSharp.Pdf.Security.Encryption
 
             if (objectEncryptionKey is null || _objectEncryptionKeySize is 0)
                 throw TH.InvalidOperationException_EncryptionKeyNotSetForEncryptionVersion1To4();
-
 
             _rc4.SetKey(objectEncryptionKey, _objectEncryptionKeySize);
             _rc4.Encrypt(bytes);
@@ -676,7 +672,6 @@ namespace PdfSharp.Pdf.Security.Encryption
 
             return _md5.Hash;
         }
-
 
         /// <summary>
         /// The global encryption key.

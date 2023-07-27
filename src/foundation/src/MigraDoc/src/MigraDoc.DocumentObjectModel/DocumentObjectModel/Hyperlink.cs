@@ -657,10 +657,6 @@ namespace MigraDoc.DocumentObjectModel
             /// Gets or sets the internal nullable implementation value of the enclosing document object property.
             /// See enclosing document object class for documentation of this property.
             /// </summary>
-            /// <summary>
-            /// Gets or sets the internal nullable implementation value of the enclosing document object property.
-            /// See enclosing document object class for documentation of this property.
-            /// </summary>
             public string? Name
             {
                 get => Owner.Name; 

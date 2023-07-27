@@ -32,7 +32,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Gets a document object by its index.
         /// </summary>
-        public new DocumentObject this[int index] => base[index]!; // BUG???
+        public new DocumentObject this[int index] => base[index]!; // May return null in derived classes.
 
         /// <summary>
         /// Creates a deep copy of this object.

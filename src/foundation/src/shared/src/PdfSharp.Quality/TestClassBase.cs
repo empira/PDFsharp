@@ -79,8 +79,6 @@
 //            }
 //        }
 
-
-
 //        /// <summary>
 //        /// Creates a PDF test document.
 //        /// </summary>
@@ -104,7 +102,6 @@
 //            //page.Height = XUnit.FromPresentation(HeightInPU);
 //            return page;
 //        }
-
 
 //        protected void TestSnippet(SnippetBase snippet, bool startViewer = false)
 //        {
@@ -161,7 +158,6 @@
 //                Process.Start(TestDocumentsDirectory);
 //            // return filename;
 //        }
-
 
 //        //[Obsolete]
 //        protected void SaveAndShowDocument(PdfDocument document, bool startViewer = false)

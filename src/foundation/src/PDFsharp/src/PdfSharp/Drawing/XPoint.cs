@@ -142,8 +142,9 @@ namespace PdfSharp.Drawing
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
-            // TODO: Reflect reliable implementation from Avalon
-            // TODOWPF
+
+            // IMPROVE: Reflect reliable implementation from Avalon.
+            value = value.Trim();
             string[] values = value.Split(' ');
             int count = values.Length;
             XPoint[] points = new XPoint[count];

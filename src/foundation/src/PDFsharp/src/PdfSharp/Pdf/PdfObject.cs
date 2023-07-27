@@ -61,7 +61,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         protected override object Copy()
         {
-            PdfObject obj = (PdfObject)base.Copy();
+            var obj = (PdfObject)base.Copy();
             obj._document = null!;
             obj._iref = null;
             return obj;
@@ -105,7 +105,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         internal void SetObjectID(int objectNumber, int generationNumber)
         {
-            PdfObjectID objectID = new PdfObjectID(objectNumber, generationNumber);
+            var objectID = new PdfObjectID(objectNumber, generationNumber);
 
             // TODO: check imported
             if (_iref == null)
@@ -137,7 +137,7 @@ namespace PdfSharp.Pdf
                 if (!ReferenceEquals(_document, value))
                 {
                     if (_document != null)
-                        throw new InvalidOperationException("Cannot change document.");
+                        throw new InvalidOperationException("Cannot change document if it was set.");
                     _document = value;
                     if (_iref != null)
                         _iref.Document = value;
@@ -170,25 +170,14 @@ namespace PdfSharp.Pdf
         /// </summary>
         internal override void WriteObject(PdfWriter writer)
         {
-            Debug.Assert(false, "Must not come here!");
-            //Debug.Assert(_inStreamOffset <= 0);
-            //if (_inStreamOffset == 0)
-            //{
-            //    //_InStreamOffset = stream.Position;
-            //    _document.xrefTable.AddObject(this);
-            //    return Format("{0} {1} obj\n", _objectID, _generation);
-            //}
-            //else if (_inStreamOffset == -1)
-            //{
-            //}
-            //return null;
+            Debug.Assert(false, "Must not come here, WriteObject must be overridden in derived class.");
         }
 
         /// <summary>
         /// Gets the object identifier. Returns PdfObjectID.Empty for direct objects,
         /// i.e. never returns null.
         /// </summary>
-        internal PdfObjectID ObjectID => _iref != null ? _iref.ObjectID : PdfObjectID.Empty;
+        internal PdfObjectID ObjectID => _iref != null! ? _iref.ObjectID : PdfObjectID.Empty;
 
         /// <summary>
         /// Gets the object number.
@@ -223,11 +212,11 @@ namespace PdfSharp.Pdf
             }
 #endif
             // 1st loop. Replace all objects by their clones.
-            PdfImportedObjectTable iot = new PdfImportedObjectTable(owner, externalObject.Owner);
+            var iot = new PdfImportedObjectTable(owner, externalObject.Owner);
             for (int idx = 0; idx < count; idx++)
             {
-                PdfObject obj = elements[idx];
-                PdfObject clone = obj.Clone();
+                var obj = elements[idx];
+                var clone = obj.Clone();
                 Debug.Assert(clone.Reference == null);
                 clone.Document = owner;
                 if (obj.Reference != null)
@@ -263,7 +252,7 @@ namespace PdfSharp.Pdf
             // 2nd loop. Fix up all indirect references that still refer to the import document.
             for (int idx = 0; idx < count; idx++)
             {
-                PdfObject obj = elements[idx];
+                var obj = elements[idx];
                 Debug.Assert(obj.Owner == owner);
                 FixUpObject(iot, owner, obj);
             }
@@ -321,7 +310,7 @@ namespace PdfSharp.Pdf
                 else
                 {
                     // Case: External object was not yet imported earlier and must be cloned.
-                    PdfObject clone = obj.Clone();
+                    var clone = obj.Clone();
                     Debug.Assert(clone.Reference == null);
                     clone.Document = owner;
                     if (obj.Reference != null)
@@ -357,7 +346,7 @@ namespace PdfSharp.Pdf
             // 2nd loop. Fix up indirect references that still refers to the external document.
             for (int idx = 0; idx < count; idx++)
             {
-                PdfObject obj = elements[idx];
+                var obj = elements[idx];
                 Debug.Assert(owner != null);
                 FixUpObject(importedObjectTable, importedObjectTable.Owner, obj);
             }
@@ -529,10 +518,13 @@ namespace PdfSharp.Pdf
                 case PdfRectangle:
                 case PdfNull:
                     return;
+
                 default:
                     {
+#if DEBUG
                         Type type = item.GetType();
                         Debug.Assert(type != null, $"CheckNonObjects: Add {type.Name} to the list.");
+#endif
                         break;
                     }
             }

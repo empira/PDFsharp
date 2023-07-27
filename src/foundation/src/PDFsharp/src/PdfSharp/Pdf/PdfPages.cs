@@ -29,7 +29,12 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Gets the number of pages.
         /// </summary>
-        public int Count => PagesArray.Elements.Count;
+        //public int Count => PagesArray.Elements.Count; // This can be wrong in Import mode.
+        //public int Count => _document.PageCount; // Slower, but also works in Import mode.
+        public int Count =>
+            _document.CanModify ?
+                PagesArray.Elements.Count : // Only valid in Modify mode.
+                _document.PageCount; // Valid in Import mode.
 
         /// <summary>
         /// Gets the page with the specified index.
@@ -322,15 +327,20 @@ namespace PdfSharp.Pdf
                     // At least one link annotation found?
                     if (annotations.Count > 0)
                     {
-#if DEBUG
+#if DEBUG_
                         // BUG!!! Hack to make it work: Fails if there already are annotations. // ReviewSTLA.
                         var annots2 = page.Elements.GetArray(PdfPage.Keys.Annots);
                         if (annots2 is null)
                         {
                             page.Elements.Add(PdfPage.Keys.Annots, annotations);
                         }
-
 #else
+                        var annots2 = page.Elements.GetArray(PdfPage.Keys.Annots);
+                        if (annots2 is not null)
+                        {
+                            GetType(); // Temporary line for breakpoints.
+                        }
+
                         //Owner._irefTable.Add(annotations);
                         page.Elements.Add(PdfPage.Keys.Annots, annotations);
 #endif
@@ -538,13 +548,13 @@ namespace PdfSharp.Pdf
             PdfPage.InheritValues(this, ref values);
             PdfDictionary[] pages = GetKids(ReferenceNotNull, values, null);
 
-            // Replace /Pages in catalog by this object
+            // Replace /Pages in catalog by this object.
             // xrefRoot.Value = this;
 
             var array = new PdfArray(Owner);
             foreach (var page in pages)
             {
-                // Fix the parent
+                // Fix the parent.
                 page.Elements[PdfPage.Keys.Parent] = Reference;
                 array.Elements.Add(page.ReferenceNotNull);
             }

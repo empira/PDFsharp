@@ -23,7 +23,6 @@ namespace MigraDoc.Tests
         public const string PasswordOwnerDefault = "Owner";
         public const string PasswordWrong = "Nobody";
 
-
         /// <summary>
         /// Enum for different encryption configurations.
         /// Using the enum for [InlineData], [MemberData] or [ClassData] in unit tests produces a readable output of the test configuration.
@@ -51,7 +50,6 @@ namespace MigraDoc.Tests
 
         public const string SkippedTestOptionsMessage = "Skipped through SkippedTestOptions.";
 
-
         /// <summary>
         /// Wrapper class containing classes returning the desired encryption configuration for use in [Theory] unit test with [ClassData].
         /// Note that every class needs its pendant returning the skipped tests of the desired encryption configuration range.
@@ -72,7 +70,6 @@ namespace MigraDoc.Tests
                 { }
             }
 
-
             public class AllVersions : TestDataBase
             {
                 public AllVersions() : this(false)
@@ -86,7 +83,6 @@ namespace MigraDoc.Tests
                 public AllVersionsSkipped() : base(true)
                 { }
             }
-
 
             public class V4 : TestDataBase
             {
@@ -102,7 +98,6 @@ namespace MigraDoc.Tests
                 { }
             }
 
-
             public class V5 : TestDataBase
             {
                 public V5() : this(false)
@@ -116,7 +111,6 @@ namespace MigraDoc.Tests
                 public V5Skipped() : base(true)
                 { }
             }
-
 
             /// <summary>
             /// Base class for the encryption configuration [ClassData] containing the logic.
@@ -187,9 +181,6 @@ namespace MigraDoc.Tests
                 };
             }
         }
-
-
-
 
         public static Document CreateEmptyTestDocument()
         {

@@ -39,7 +39,24 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         public void Render(Document doc, string file, string workingDirectory)
         {
-            StreamWriter? strmWrtr = null;
+#if true
+            var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
+#else
+            Encoding? ansiEncoding;
+            try
+            {
+                // Try to get ANSI encoding.
+                ansiEncoding = Encoding.GetEncoding(1252);
+            }
+            catch (NotSupportedException)
+            {
+                // Register provider if ANSI encoding is not available.
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                ansiEncoding = Encoding.GetEncoding(1252);
+            }
+#endif
+
+            StreamWriter? streamWriter = null;
             try
             {
                 _document = doc;
@@ -50,16 +67,16 @@ namespace MigraDoc.RtfRendering
                 if (workingDirectory != null)
                     path = Path.Combine(workingDirectory, file);
 
-                strmWrtr = new StreamWriter(path, false, Encoding.GetEncoding(1252));
-                _rtfWriter = new RtfWriter(strmWrtr);
+                streamWriter = new StreamWriter(path, false, ansiEncoding);
+                _rtfWriter = new RtfWriter(streamWriter);
                 WriteDocument();
             }
             finally
             {
-                if (strmWrtr != null)
+                if (streamWriter != null)
                 {
-                    strmWrtr.Flush();
-                    strmWrtr.Close();
+                    streamWriter.Flush();
+                    streamWriter.Close();
                 }
             }
         }
@@ -82,26 +99,27 @@ namespace MigraDoc.RtfRendering
             if (document.UseCmykColor)
                 throw new InvalidOperationException("Cannot create RTF document with CMYK colors.");
 
-            StreamWriter? strmWrtr = null;
+            var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
+            StreamWriter? streamWriter = null;
             try
             {
-                strmWrtr = new(stream, Encoding.GetEncoding(1252));
+                streamWriter = new(stream, ansiEncoding);
                 _document = document;
                 _docObject = document;
                 _workingDirectory = workingDirectory;
-                _rtfWriter = new(strmWrtr);
+                _rtfWriter = new(streamWriter);
                 WriteDocument();
             }
             finally
             {
-                if (strmWrtr != null)
+                if (streamWriter != null)
                 {
-                    strmWrtr.Flush();
+                    streamWriter.Flush();
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
                     if (stream != null)
                     {
                         if (closeStream)
-                            strmWrtr.Close();
+                            streamWriter.Close();
                         else
                             stream.Position = 0; // Reset the stream position if the stream is kept open.
                     }

@@ -99,7 +99,7 @@ namespace PdfSharp.Drawing
             provider ??= CultureInfo.InvariantCulture;
             if (!XFontWeights.FontWeightToString(Weight, out var weight))
                 return Weight.ToString(format, provider);
-            return weight ?? "";  // BUG?
+            return weight; 
         }
 
         /// <summary>

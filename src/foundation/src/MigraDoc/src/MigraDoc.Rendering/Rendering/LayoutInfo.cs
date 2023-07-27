@@ -57,7 +57,7 @@ namespace MigraDoc.Rendering
         /// <summary>
         /// Gets or sets the Area needed by the content (including padding and borders for e.g. paragraphs).
         /// </summary>
-        public Area ContentArea { get; set; } = null!;  //BUG
+        public Area ContentArea { get; set; } = default!;
 
         /// <summary>
         /// Gets or sets the value indicating whether the element shall appear on a new page.

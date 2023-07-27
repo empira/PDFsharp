@@ -121,7 +121,6 @@ namespace MigraDoc.RtfRendering
         }
         protected ParagraphFormat? _parentFormat;
 
-
         /// <summary>
         /// Sets the cell the border is part of.
         /// This property is set by the CellFormatRenderer

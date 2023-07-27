@@ -46,7 +46,6 @@ namespace PdfSharp
                 case PageSize.A5:
                     return new XSize(420, 595);
 
-
                 case PageSize.RA0:
                     return new XSize(2438, 3458);
 
@@ -64,7 +63,6 @@ namespace PdfSharp
 
                 case PageSize.RA5:
                     return new XSize(433, 609);
-
 
                 case PageSize.B0:
                     return new XSize(2835, 4008);

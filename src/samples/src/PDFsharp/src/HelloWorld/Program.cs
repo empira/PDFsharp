@@ -7,6 +7,7 @@ using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
 using PdfSharp.Snippets.Font;
 
 namespace HelloWorld
@@ -79,6 +80,11 @@ namespace HelloWorld
             // ...and start a viewer.
             Process.Start(new ProcessStartInfo(filename) { UseShellExecute = true });
             //Process.Start(processStartInfo);
+        }
+
+        static void ProvidePassword(PdfPasswordProviderArgs args)
+        {
+            args.GetType();
         }
     }
 }

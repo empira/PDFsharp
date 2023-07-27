@@ -3,7 +3,6 @@
 
 using Microsoft.Extensions.Logging;
 
-
 namespace PdfSharp.Internal
 {
     /// <summary>

@@ -46,7 +46,7 @@ namespace MigraDoc.Rendering
 
         FormattedTextArea? GetFormattedTextArea(TextArea? area)
         {
-            return GetFormattedTextArea(area, double.NaN);
+            return GetFormattedTextArea(area, Double.NaN);
         }
 
         void GetLeftRightVerticalPosition(out XUnit top, out XUnit bottom)
@@ -185,22 +185,22 @@ namespace MigraDoc.Rendering
             var formatInfo = (ChartFormatInfo)_renderInfo.FormatInfo;
 
             var textArea = _chart.Values.HeaderArea;
-            formatInfo.FormattedHeader = GetFormattedTextArea(textArea, _chart.Width.Point); // BUG is null ?? Throw();
+            formatInfo.FormattedHeader = GetFormattedTextArea(textArea, _chart.Width.Point);
 
             textArea = _chart.Values.FooterArea;
-            formatInfo.FormattedFooter = GetFormattedTextArea(textArea, _chart.Width.Point); // BUG is null ?? Throw();
+            formatInfo.FormattedFooter = GetFormattedTextArea(textArea, _chart.Width.Point);
 
             textArea = _chart.Values.LeftArea;
-            formatInfo.FormattedLeft = GetFormattedTextArea(textArea); // BUG is null ?? Throw();
+            formatInfo.FormattedLeft = GetFormattedTextArea(textArea);
 
             textArea = _chart.Values.RightArea;
-            formatInfo.FormattedRight = GetFormattedTextArea(textArea); // BUG is null ?? Throw();
+            formatInfo.FormattedRight = GetFormattedTextArea(textArea);
 
             textArea = _chart.Values.TopArea;
-            formatInfo.FormattedTop = GetFormattedTextArea(textArea, GetTopBottomWidth()); // BUG is null ?? Throw();
+            formatInfo.FormattedTop = GetFormattedTextArea(textArea, GetTopBottomWidth());
 
             textArea = _chart.Values.BottomArea;
-            formatInfo.FormattedBottom = GetFormattedTextArea(textArea, GetTopBottomWidth()); // BUG is null ?? Throw();
+            formatInfo.FormattedBottom = GetFormattedTextArea(textArea, GetTopBottomWidth());
 
             base.Format(area, previousFormatInfo);
             formatInfo.ChartFrame = ChartMapper.ChartMapper.Map(_chart);
@@ -208,7 +208,6 @@ namespace MigraDoc.Rendering
             //FormattedTextArea Throw() // StL: Added to make it compile without warnings.
             //    => throw new InvalidOperationException("Must not be null here.");
         }
-
 
         XUnit AlignVertically(VerticalAlignment vAlign, XUnit top, XUnit bottom, XUnit height)
         {

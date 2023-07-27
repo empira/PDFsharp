@@ -21,10 +21,7 @@ namespace PdfSharp.Internal
             LogLevel level,
             string hostName);
 
-
         // What to log?
-
-       
 
         // TODO remove all Console.WriteLine calls.
     }

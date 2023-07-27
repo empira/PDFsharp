@@ -32,7 +32,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Creates a deep copy of this object.
         /// </summary>
-        public new HeaderFooter Clone() 
+        public new HeaderFooter Clone()
             => (HeaderFooter)DeepCopy();
 
         /// <summary>
@@ -153,12 +153,12 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Returns true if this is a header, false otherwise.
         /// </summary>
-        public bool IsHeader => ((HeadersFooters?)Parent)!.IsHeader; // BUG Exception if no parent? (following properties too)
+        public bool IsHeader => ((HeadersFooters?)Parent)?.IsHeader ?? false;
 
         /// <summary>
         /// Returns true if this is a footer, false otherwise.
         /// </summary>
-        public bool IsFooter => ((HeadersFooters?)Parent)!.IsFooter;
+        public bool IsFooter => ((HeadersFooters?)Parent)?.IsFooter ?? false;
 
         /// <summary>
         /// Returns true if this is a first page header or footer, false otherwise.
@@ -245,11 +245,11 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         internal void Serialize(Serializer serializer, string prefix)
         {
-            if (IsNull()) // BUG???
+            if (IsNull())
                 return;
 
-            // Do not write attributes if there are no elements. // BUG???
-            if (Values.Elements is null) // BUG???
+            // Do not write attributes if there are no elements.
+            if (Values.Elements is null)
                 return;
 
             serializer.WriteComment(Values.Comment);
@@ -280,7 +280,8 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public override bool IsNull()
         {
-            return false; // BUG???
+            // Object exists and is therefore not null.
+            return false;
         }
 
         /// <summary>

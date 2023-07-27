@@ -714,7 +714,6 @@ namespace MigraDoc.DocumentObjectModel.IO
             return Symbol.Comment;
         }
 
-
         /// <summary>
         /// Gets the current symbol.
         /// </summary>
@@ -1339,7 +1338,6 @@ namespace MigraDoc.DocumentObjectModel.IO
         //  ScanNextChar();
         //  return str;
         //}
-
 
         /// <summary>
         /// Scans verbatim strings like «@"String with ""quoted"" text"».

@@ -123,7 +123,6 @@ namespace PdfSharp.Snippets.Font
                 Debug.Assert(Math.Abs(xCellHeightPix - (xInternalLeadingPix + xEmHeightPix)) < 0.00001);
                 Debug.Assert(Math.Abs(xCellHeightPix - (xAscentPix + xDescentPix)) < 0.00001);
 
-
                 // Returns the line spacing, in pixels, of this font. The line spacing is the vertical distance
                 // between the base lines of two consecutive lines of text. Thus, the line spacing includes the
                 // blank space between lines along with the height of the character itself.

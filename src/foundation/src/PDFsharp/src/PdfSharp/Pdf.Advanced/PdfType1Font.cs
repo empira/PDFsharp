@@ -30,7 +30,6 @@ namespace PdfSharp.Pdf.Advanced
         //}
         //string baseFont;
 
-
         //    internal override void AssignObjectID(ref int objectID)
         //    {
         //      SetObjectID(ref objectID);

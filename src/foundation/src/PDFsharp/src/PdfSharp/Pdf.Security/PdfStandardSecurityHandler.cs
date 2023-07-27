@@ -456,8 +456,6 @@ namespace PdfSharp.Pdf.Security
             GetEncryption().DecryptForEnteredObject(ref bytes);
         }
 
-
-
         /// <summary>
         /// Does all necessary initialization for reading and decrypting the document with this security handler.
         /// </summary>
@@ -536,7 +534,6 @@ namespace PdfSharp.Pdf.Security
             return _encryption;
         }
         PdfEncryptionBase? _encryption;
-
 
 #region CryptFilters
         bool VersionSupportsCryptFilter()
@@ -736,7 +733,6 @@ namespace PdfSharp.Pdf.Security
                 return;
             }
 
-
             _loadedCryptFilters = pdfCryptFilters.GetCryptFiltersAsDictionary();
             if (initializeCryptFilters)
             {
@@ -769,7 +765,6 @@ namespace PdfSharp.Pdf.Security
 
             return cryptFilter;
         }
-
 
         /// <summary>
         /// Resets the explicitly set crypt filter of a dictionary.
@@ -870,7 +865,6 @@ namespace PdfSharp.Pdf.Security
             return _defaultCryptFilterStreams;
         }
 #endregion CryptFilters
-
 
         Dictionary<string, PdfCryptFilter>? _loadedCryptFilters;
         CryptFilterBase? _defaultCryptFilterStreams;

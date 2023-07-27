@@ -80,7 +80,6 @@ namespace MigraDoc
             /// </summary>
             public static bool DoNotCreateLastSection { get; set; } = false;
 
-
             // TODO Space before on new page
 
             /// <summary>
@@ -108,7 +107,6 @@ namespace MigraDoc
         //    /// </summary>
         //    public static FeatureNotAvailableAction GlyphsToPath { get; set; } = FeatureNotAvailableAction.DoNothing;
         //}
-
 
         /// <summary>
         /// Compatibility settings for MigraDoc.

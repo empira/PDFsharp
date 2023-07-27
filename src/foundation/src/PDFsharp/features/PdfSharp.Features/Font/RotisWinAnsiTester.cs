@@ -45,7 +45,6 @@ namespace PdfSharp.Features
             var rotisSize = 30;
             XFont font;
 
-
 #if RotisSerifPro
             gfx.DrawString("Rotis Serif Pro", defaultFont, XBrushes.Black, 40, 40);
 
@@ -55,7 +54,6 @@ namespace PdfSharp.Features
             font = new XFont("Rotis Serif Pro", rotisSize, XFontStyleEx.Regular, pdfOptions);
             gfx.DrawString("Rotis Serif Pro Regular: kviec", font, XBrushes.Black, 40, 120);
 #endif
-
 
 #if bold
             gfx.DrawString("bold", defaultFont, XBrushes.Black, 40, 160);
@@ -67,7 +65,6 @@ namespace PdfSharp.Features
             font = new XFont("Rotis Serif Pro", rotisSize, XFontStyleEx.Bold, pdfOptions);
             gfx.DrawString("Rotis Serif Pro Bold: kviec", font, XBrushes.Black, 40, 200);
 #endif
-
 
 #if italic
             gfx.DrawString("italic", defaultFont, XBrushes.Black, 40, 240);
@@ -82,7 +79,6 @@ namespace PdfSharp.Features
 
 #endif
 
-
 #if RotisSemiSansPro
             gfx.DrawString("Rotis Semi Sans Pro", defaultFont, XBrushes.Black, 40, 340);
 
@@ -92,7 +88,6 @@ namespace PdfSharp.Features
             font = new XFont("Rotis Semi Sans Pro", rotisSize, XFontStyleEx.Regular, pdfOptions);
             gfx.DrawString("Rotis Semi Sans Pro Regular: kviec", font, XBrushes.Black, 40, 420);
 #endif
-
 
 #if bold
             gfx.DrawString("bold", defaultFont, XBrushes.Black, 40, 460);
@@ -104,7 +99,6 @@ namespace PdfSharp.Features
             font = new XFont("Rotis Semi Sans Pro", rotisSize, XFontStyleEx.Bold, pdfOptions);
             gfx.DrawString("Rotis Semi Sans Pro Bold: kviec", font, XBrushes.Black, 40, 500);
 #endif
-
 
 #if italic
             gfx.DrawString("italic", defaultFont, XBrushes.Black, 40, 540);
@@ -196,7 +190,6 @@ namespace PdfSharp.Features
 
             string lowerFamilyName = familyName.ToLower();
 
-
             //return PlatformFontResolver.ResolveTypeface("Calibri", isBold, isItalic);
 
             // Looking for a Rotis font?
@@ -204,7 +197,6 @@ namespace PdfSharp.Features
             {
                 var simulateBold = false;
                 var simulateItalic = false;
-
 
                 string? faceName = null;
 
@@ -239,13 +231,11 @@ namespace PdfSharp.Features
                         break;
 #endif
 
-
 #if RotisSemiSansPro
                     case FamilyNames.RotisSemiSansPro:
 #if regular
                         faceName = FaceNames.RotisSemiSansPro;
 #endif
-
                         if (isBold)
                         {
 #if bold
@@ -315,7 +305,6 @@ namespace PdfSharp.Features
 
 #endif
 
-
 #if RotisSemiSansPro
 
 #if regular
@@ -366,7 +355,6 @@ namespace PdfSharp.Features
 #endif
 
 #endif
-
 
 #if RotisSemiSansPro
 

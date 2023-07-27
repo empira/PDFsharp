@@ -83,7 +83,6 @@ namespace MigraDoc.Rendering
             return SeekLastLeaf();
         }
 
-
         /// <summary>
         /// Gets the first leaf of the element tree.
         /// </summary>

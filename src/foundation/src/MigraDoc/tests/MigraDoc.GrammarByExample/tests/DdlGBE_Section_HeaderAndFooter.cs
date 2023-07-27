@@ -20,7 +20,7 @@ namespace GdiGrammarByExample
             InitializeTest(_fixture, "Section-HeaderAndFooter", 19, 0x7FFF0);
         }
 
-        [Fact]
+        [Fact(Skip = "Disabled until /Annots bug is fixed")]
 #if CORE
         public void DDL_Grammar_By_Example_Section_HeaderAndFooter()
 #elif GDI

@@ -648,7 +648,6 @@ namespace PdfSharp.SharpZipLib.Zip
             }
         }
 
-
         /// <summary>
         /// Initialise default instance of <see cref="ZipConstants">ZipConstants</see>
         /// </summary>

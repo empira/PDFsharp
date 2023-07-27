@@ -4,7 +4,7 @@
 namespace PdfSharp.Pdf.IO
 {
     /// <summary>
-    /// Terminal symbols recognized by lexer.
+    /// PDF Terminal symbols recognized by lexer.
     /// </summary>
     public enum Symbol
     {

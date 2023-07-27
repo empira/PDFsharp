@@ -63,7 +63,6 @@ namespace MigraDoc.Rendering.Resources
 
         internal static string ObjectNotRenderable => FormatMessage(IDs.ObjectNotRenderable);
 
-
         // ReSharper disable InconsistentNaming
         enum IDs
         {
@@ -98,16 +97,11 @@ namespace MigraDoc.Rendering.Resources
 
         static ResourceManager? _resourceManager;
 
-
         static string FormatMessage(IDs id, params object[] args)
         {
             string? message;
             try
             {
-#if true_
-                //BUG 
-                return $"BUG IN ResourceManager: {id.ToString()}";
-#else
                 message = ResourceManager.GetString(id.ToString());
                 if (message != null)
                 {
@@ -122,7 +116,6 @@ namespace MigraDoc.Rendering.Resources
                 else
                     message = "<<<error: message not found>>>";
                 return message;
-#endif
             }
             catch (Exception /*ex*/)
             {

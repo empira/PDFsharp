@@ -15,7 +15,6 @@ namespace PdfSharp.Pdf.Advanced
             : base(document)
         { }
 
-
         /// <summary>
         /// Gets a PdfExtGState with the key 'CA' set to the specified alpha value.
         /// </summary>

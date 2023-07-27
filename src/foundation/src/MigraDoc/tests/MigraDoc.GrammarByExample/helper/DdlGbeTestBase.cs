@@ -61,9 +61,9 @@ namespace GdiGrammarByExample
 
         void DoTest()
         {
-#if true
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-#endif
+//#if true
+//            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+//#endif
 
 #if CORE
             //GlobalFontSettings.FontResolver ??= new SegoeUiFontResolver();
@@ -131,7 +131,6 @@ namespace GdiGrammarByExample
         //const string PathSource = @"D:\MigraDocAssets\GBE\GBE-DDL";
         const string PathSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\GBE-DDL";
 
-
         // ***** Select the reference for comparison *****
         // Legacy (the old C++ build):
         //const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\CPP 1.10";
@@ -145,7 +144,6 @@ namespace GdiGrammarByExample
         //const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\WPF 1.30";
         const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\WPF 1.31";
         //const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\WPF 1.40";
-
 
         GbeFixture _fixture = null!;
         string? _testName;

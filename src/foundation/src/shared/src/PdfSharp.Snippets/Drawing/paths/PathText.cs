@@ -58,7 +58,6 @@ namespace PdfSharp.Snippets.Drawing
                 path.AddString(TestChars, new XFontFamily("Segoe UI"), XFontStyleEx.Regular, 30, RectBox, XStringFormats.TopRight);
                 gfx.DrawPath(XPens.Black, XBrushes.LightPink, path);
 
-
                 path = new XGraphicsPath();
                 path.AddString(TestChars, new XFontFamily("Segoe UI"), XFontStyleEx.Regular, 30, RectCenterVLine, XStringFormats.BaseLineLeft);
                 gfx.DrawPath(XPens.Black, XBrushes.Yellow, path);
@@ -71,7 +70,6 @@ namespace PdfSharp.Snippets.Drawing
                 path.AddString(TestChars, new XFontFamily("Segoe UI"), XFontStyleEx.Regular, 30, RectCenterVLine, XStringFormats.BaseLineRight);
                 gfx.DrawPath(XPens.Black, XBrushes.Green, path);
 
-
                 path = new XGraphicsPath();
                 path.AddString(TestChars, new XFontFamily("Segoe UI"), XFontStyleEx.Regular, 30, RectBox, XStringFormats.CenterLeft);
                 gfx.DrawPath(XPens.Black, XBrushes.LightGray, path);
@@ -83,7 +81,6 @@ namespace PdfSharp.Snippets.Drawing
                 path = new XGraphicsPath();
                 path.AddString(TestChars, new XFontFamily("Segoe UI"), XFontStyleEx.Regular, 30, RectBox, XStringFormats.CenterRight);
                 gfx.DrawPath(XPens.Black, XBrushes.Red, path);
-
 
                 path = new XGraphicsPath();
                 path.AddString(TestChars, new XFontFamily("Segoe UI"), XFontStyleEx.Regular, 30, RectBox, XStringFormats.BottomLeft);

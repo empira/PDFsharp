@@ -85,7 +85,6 @@ namespace MigraDoc.RtfRendering.Resources
         }
         static ResourceManager? _resourceManager;
 
-
         static string FormatMessage(IDs id, params object[] args)
         {
             string? message;

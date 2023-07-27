@@ -192,7 +192,6 @@ namespace MigraDoc.DocumentObjectModel.Internals
                 if (vd.ValueName is "Owner" or "Tag" or "Document" or "Section")
                     continue;
 
-
                 if (vd.IsRefOnly is false)
                 {
                     //ValueDescriptors[index].SetNull(dom);

@@ -40,7 +40,6 @@ namespace PdfSharp.Pdf.Advanced
             get => _dpiX;
             set => _dpiX = value;
         }
-
         double _dpiX = 72;
 
         internal double DpiY
@@ -48,7 +47,6 @@ namespace PdfSharp.Pdf.Advanced
             get => _dpiY;
             set => _dpiY = value;
         }
-
         double _dpiY = 72;
 
         internal PdfFormXObject(PdfDocument thisDocument, PdfImportedObjectTable importedObjectTable, XPdfForm form)
@@ -172,9 +170,9 @@ namespace PdfSharp.Pdf.Advanced
             }
 
             // Take /Rotate into account.
-            PdfRectangle rect = importPage.Elements.GetRectangle(PdfPage.Keys.MediaBox);
+            PdfRectangle rect = importPage.Elements.GetRectangle(PdfPage.InheritablePageKeys.MediaBox);
             // Reduce rotation to 0, 90, 180, or 270.
-            int rotate = (importPage.Elements.GetInteger(PdfPage.Keys.Rotate) % 360 + 360) % 360;
+            int rotate = (importPage.Elements.GetInteger(PdfPage.InheritablePageKeys.Rotate) % 360 + 360) % 360;
             //rotate = 0;
             if (rotate == 0)
             {

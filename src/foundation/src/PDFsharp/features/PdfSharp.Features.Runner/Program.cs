@@ -45,7 +45,6 @@ namespace PdfSharp.Features
             //IO.ObjectStreams.ReadPdfWithObjectStreams();
             //IO.ObjectStreams.ReadManyPdfsWithObjectStreams();
 
-
             //GraphicsFromImage.Test1();
 
             //Paths.Test1();

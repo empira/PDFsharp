@@ -167,7 +167,7 @@ namespace PdfSharp.Pdf.Advanced
             if (iref is { Value: null })
             {
                 iref = _document.IrefTable[iref.ObjectID];
-                Debug.Assert(iref!.Value != null);
+                Debug.Assert(iref is not null && iref.Value != null);
                 _document.Trailer.Elements[Keys.Root] = iref;
             }
 
@@ -176,7 +176,7 @@ namespace PdfSharp.Pdf.Advanced
             if (iref is { Value: null })
             {
                 iref = _document.IrefTable[iref.ObjectID];
-                Debug.Assert(iref!.Value != null);
+                Debug.Assert(iref is not null && iref.Value != null);
                 _document.Trailer.Elements[Keys.Info] = iref;
             }
 
@@ -185,7 +185,7 @@ namespace PdfSharp.Pdf.Advanced
             if (iref != null)
             {
                 iref = _document.IrefTable[iref.ObjectID];
-                Debug.Assert(iref!.Value != null);
+                Debug.Assert(iref is not null && iref.Value != null);
                 _document.Trailer.Elements[Keys.Encrypt] = iref;
 
                 // The encryption dictionary (security handler) was read in before the XRefTable construction 

@@ -13,6 +13,7 @@ using Xunit;
 
 namespace MigraDoc.Tests
 {
+    [Collection("MGD")]
     public class Template
     {
         [Fact]

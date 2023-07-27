@@ -144,7 +144,6 @@ namespace PdfSharp.Snippets.Drawing
             }
             EndBox(gfx);
 
-
             BeginBox(gfx, 8, BoxOptions.Tile);
             {
 //#warning TODO Duplicate test.

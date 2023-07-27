@@ -9,7 +9,7 @@ namespace PdfSharp.Drawing.BarCodes
     public class CodeOmr : BarCode
     {
         /// <summary>
-        /// initializes a new OmrCode with the given data.
+        /// Initializes a new OmrCode with the given data.
         /// </summary>
         public CodeOmr(string text, XSize size, CodeDirection direction)
             : base(text, size, direction)
@@ -48,7 +48,7 @@ namespace PdfSharp.Drawing.BarCodes
 #endif
             if (_synchronizeCode)
             {
-                XRect rect = new XRect(pt.X, pt.Y, _makerThickness, Size.Height);
+                var rect = new XRect(pt.X, pt.Y, _makerThickness, Size.Height);
                 gfx.DrawRectangle(brush, rect);
                 pt.X += 2 * _makerDistance;
             }
@@ -56,7 +56,7 @@ namespace PdfSharp.Drawing.BarCodes
             {
                 if ((value & 1) == 1)
                 {
-                    XRect rect = new XRect(pt.X + idx * _makerDistance, pt.Y, _makerThickness, Size.Height);
+                    var rect = new XRect(pt.X + idx * _makerDistance, pt.Y, _makerThickness, Size.Height);
                     gfx.DrawRectangle(brush, rect);
                 }
                 value = value >> 1;

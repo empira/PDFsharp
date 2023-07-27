@@ -1,15 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Diagnostics;
-using System.Resources;
-using System.Reflection;
 using PdfSharp.Drawing;
-using PdfSharp.Internal;
 using PdfSharp.Pdf;
-
-#pragma warning disable 1591
 
 namespace PdfSharp
 {
@@ -222,7 +215,6 @@ namespace PdfSharp
             return Format("Cannot get a matching glyph typeface for font '{0}'.", fontName);
         }
 
-
         // ----- PdfParser ----------------------------------------------------------------------------
 
         public static string UnexpectedToken(string token) => $"Token '{token}' was not expected.";
@@ -230,7 +222,7 @@ namespace PdfSharp
         //    return Format(PSMsgID.UnexpectedToken, token);
         //    //return Format("Token '{0}' was not expected.", token);
         //}
-        
+
         #endregion
 
         #region Resource manager

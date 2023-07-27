@@ -1,8 +1,9 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using FluentAssertions;
 using PdfSharp.Pdf;
 using MigraDoc.DocumentObjectModel;
@@ -15,16 +16,18 @@ using PdfSharp.Fonts;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
 using Xunit;
+using System.Text;
 
 namespace MigraDoc.Tests
 {
+    [Collection("MGD")]
     public class RtfRendererTests
     {
         [Fact]
         public void Create_Hello_World_RtfRendererTests()
         {
-            // TODO Register encoding here or in RtfDocumentRenderer?
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            //// TODO Register encoding here or in RtfDocumentRenderer?
+            //System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
 #if CORE
             GlobalFontSettings.FontResolver = NewFontResolver.Get();
@@ -32,6 +35,9 @@ namespace MigraDoc.Tests
 
             // Create a MigraDoc document.
             var document = CreateDocument();
+
+            document.LastSection.AddParagraph("Some Unicode text: ƔɣΓγ.");
+            document.LastSection.AddParagraph("Some Unicode surrogate pairs: 💩\ud83d\udca9🤺\ud83e\udd3a.");
 
             // ----- Unicode encoding in MigraDoc is demonstrated here. -----
 
@@ -170,10 +176,9 @@ namespace MigraDoc.Tests
 #if CORE
             GlobalFontSettings.FontResolver = NewFontResolver.Get();
 #endif
-            // TODO Register encoding here or in RtfDocumentRenderer?
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            //// TODO Register encoding here or in RtfDocumentRenderer?
+            //System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
-            
             var document = new Document();
 
             var styles = document.Styles;
@@ -182,14 +187,14 @@ namespace MigraDoc.Tests
             style!.Font.Size = 14;
             style.ParagraphFormat.SpaceBefore = Unit.FromMillimeter(5);
             style.ParagraphFormat.SpaceAfter = Unit.FromMillimeter(2);
-            
+
             var section = document.AddSection();
 
             // Values - see Description:
             var value = 1234567.89;
-            var valueStr = $"{value:N}";
+            var valueStr = value.ToString(CultureInfo.InvariantCulture);
             var valueUnifyTabStops = 7654321.98;
-            var valueUnifyTabStopsStr = $"{valueUnifyTabStops:N}";
+            var valueUnifyTabStopsStr = valueUnifyTabStops.ToString(CultureInfo.InvariantCulture);
 
             var position1 = Unit.FromCentimeter(3);
             var position2 = Unit.FromCentimeter(8);
@@ -202,14 +207,12 @@ namespace MigraDoc.Tests
                                  "This special case occurs, if a single decimal tabstop is used in a table rendered in RTF." +
                                  "In that case RTF requires no tab to reach the tabstop.");
 
-
             // Print alignment order.
             var paragraph = section.AddParagraph("Alignment order");
             paragraph.Style = StyleNames.Heading1;
-            
+
             foreach (var alignment in Enum.GetValues<TabAlignment>())
                 section.AddParagraph(alignment.ToString());
-
 
             // 1.1 Single tabs in paragraph: Nothing special - every tabstop needs a tab to be reached.
             paragraph = section.AddParagraph("1.1. Single tabs in paragraph");
@@ -226,7 +229,6 @@ namespace MigraDoc.Tests
                 paragraph.AddText(valueStr);
             }
             TestHelper.DrawHorizontalPosition(section, position1);
-
 
             // 1.2. Multiple tabs in paragraph: Nothing special - every tabstop needs a tab to be reached.
             paragraph = section.AddParagraph("1.2. Multiple tabs in paragraph");
@@ -247,13 +249,12 @@ namespace MigraDoc.Tests
             }
             TestHelper.DrawHorizontalPosition(section, position1, position2);
 
-
             // 2.1. Single tabs in a table:
             // Decimal tab in a table is a special case in RTF, because here is no tabstop required to reach the tab.
             paragraph = section.AddParagraph("2.1. Single tabs in table\n" +
                                              "(special case in RTF for decimal tabstop!)");
             paragraph.Style = StyleNames.Heading1;
-            
+
             TestHelper.DrawHorizontalPosition(section, position1);
 
             var table = section.AddTable();
@@ -267,7 +268,7 @@ namespace MigraDoc.Tests
                 paragraph = cell.AddParagraph();
                 paragraph.Format.TabStops.ClearAll();
                 paragraph.Format.TabStops.AddTabStop(position1, alignment);
-                
+
                 paragraph.AddTab();
                 // For the special case an additional left aligned tabstop will be inserted add position 0 in RTF TabStopsRenderer.
                 // We mark this special case with a special value and a colored paragraph.
@@ -280,7 +281,6 @@ namespace MigraDoc.Tests
                     paragraph.AddText(valueStr);
             }
             TestHelper.DrawHorizontalPosition(section, position1);
-
 
             // 2.2. Single tabs in a second table column:
             // Decimal tab in a table is a special case in RTF, because here is no tabstop required to reach the tab.
@@ -306,7 +306,7 @@ namespace MigraDoc.Tests
                 paragraph = cell.AddParagraph();
                 paragraph.Format.TabStops.ClearAll();
                 paragraph.Format.TabStops.AddTabStop(position1, alignment);
-                
+
                 paragraph.AddTab();
                 // For the special case an additional left aligned tabstop will be inserted add position 0 in RTF TabStopsRenderer.
                 // We mark this special case with a special value and a colored paragraph.
@@ -319,7 +319,6 @@ namespace MigraDoc.Tests
                     paragraph.AddText(valueStr);
             }
             TestHelper.DrawHorizontalPosition(section, absolutePosition);
-
 
             // 2.3. Multiple tabs in a table: Nothing special - every tabstop needs a tab to be reached.
             paragraph = section.AddParagraph("2.3. Multiple tabs in table");
@@ -339,14 +338,13 @@ namespace MigraDoc.Tests
                 paragraph.Format.TabStops.ClearAll();
                 paragraph.Format.TabStops.AddTabStop(position1, alignment);
                 paragraph.Format.TabStops.AddTabStop(position2, alignment);
-                
+
                 paragraph.AddTab();
                 paragraph.AddText(valueStr);
                 paragraph.AddTab();
                 paragraph.AddText(valueStr);
             }
             TestHelper.DrawHorizontalPosition(section, position1, position2);
-
 
             // 2.4. Single tabs in a table with a bundle of empty Paragraphs, FormattedTexts and Texts:
             // Decimal tab in a table is a special case in RTF, because here is no tabstop required to reach the tab.
@@ -364,7 +362,7 @@ namespace MigraDoc.Tests
                 var row = table.AddRow();
 
                 var cell = row[0];
-                paragraph = cell.AddParagraph(); 
+                paragraph = cell.AddParagraph();
                 paragraph.AddText("");
                 var ft = paragraph.AddFormattedText("");
                 ft.AddText("");
@@ -391,7 +389,6 @@ namespace MigraDoc.Tests
                     paragraph.AddText(valueStr);
             }
             TestHelper.DrawHorizontalPosition(section, position1);
-
 
             // 2.5. Single tabs in a table with preceding text:
             // Decimal tab in a table is a special case in RTF, because here is no tabstop required to reach the tab.
@@ -427,7 +424,6 @@ namespace MigraDoc.Tests
             }
             TestHelper.DrawHorizontalPosition(section, position1);
 
-
             // 2.6. Single tabs in a table with tabstops declared in style:
             // Decimal tab in a table is a special case in RTF, because here is no tabstop required to reach the tab.
             paragraph = section.AddParagraph("2.6. Single tabs in table with tabstops declared in style\n" +
@@ -445,7 +441,7 @@ namespace MigraDoc.Tests
 
                 var cell = row[0];
                 paragraph = cell.AddParagraph();
-                
+
                 var styleName = $"TabStyle{alignment}";
                 style = styles.AddStyle(styleName, StyleNames.Normal);
                 style.ParagraphFormat.TabStops.ClearAll();
@@ -465,7 +461,6 @@ namespace MigraDoc.Tests
             }
             TestHelper.DrawHorizontalPosition(section, position1);
 
-
             // Render PDF and RTF files.
             var filename = "Test_Tabs_";
             filename += Capabilities.BackwardCompatibility.DoNotUnifyTabStopHandling ? "DoNotUnifyTabStopHandling" : "UnifyTabStopHandling";
@@ -480,14 +475,13 @@ namespace MigraDoc.Tests
             pdfRenderer.RenderDocument();
             pdfRenderer.Save(pdfFilename);
 
-
             // Check if additional tabStops to achieve a consistent behavior in PDFsharp are correctly added not added for single decimal tabstops in RTF tables,
             // according to the DoNotUnifyTabStopHandling backward compatibility capability setting.
             var rtf = File.ReadAllText(rtfFilename);
 
             // Do not include description text in search.
             var startSearchPos = rtf.IndexOf("Alignment order", StringComparison.Ordinal);
-            
+
             const string cellStr = "\\cell\\";
             const string paragraphStr = "\\par\\";
             const string decimalTabStopStr = "\\tqdec\\";
@@ -523,7 +517,6 @@ namespace MigraDoc.Tests
                 var parseSuccess = int.TryParse(positionValueStr, out var positionValue);
                 parseSuccess.Should().BeTrue();
                 positionValue.Should().NotBe(0);
-
 
                 // Get the position of the left tabstop previous to the decimal tabstop for this cell.
                 var leftTabStopPos = rtf.LastIndexOf(leftTabStopStr, decTabStopPos, StringComparison.Ordinal);
@@ -591,6 +584,226 @@ namespace MigraDoc.Tests
 
                 searchPos = valuePos + valueStr.Length;
             }
+        }
+        [Fact]
+
+        public void Create_Rtf_with_Image()
+        {
+            //// TODO #warning empira Register this in RtfRenderer.
+            //// TODO Register encoding here or in RtfDocumentRenderer?
+            //System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+#if CORE
+            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+#endif
+
+            // Create a MigraDoc document.
+            var document = new Document();
+
+            var sect = document.AddSection();
+
+            sect.AddImage(@"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\bmp\Color4A.bmp"); // Fails: Cannot load resources.
+            //sect.AddImage(@"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\png\color8A.png"); // OK
+            //sect.AddImage(@"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\jpeg\color8A.jpg"); // OK
+
+            // Create a renderer for the MigraDoc document.
+            var rtfRenderer = new RtfDocumentRenderer();
+
+            // Save the document...
+            var filename = PdfFileHelper.CreateTempFileName("HelloWorld");
+
+#if DEBUG___
+            MigraDoc.DocumentObjectModel.IO.DdlWriter dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_0.mdddl");
+            dw.WriteDocument(document);
+            dw.Close();
+#endif
+
+            // Layout and render document to PDF.
+            rtfRenderer.Render(document, filename + ".rtf", Environment.CurrentDirectory);
+
+#if DEBUG___
+            dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_1.mdddl");
+            dw.WriteDocument(document);
+            dw.Close();
+#endif
+
+            //// ...and start a viewer.
+            //PdfFileHelper.StartPdfViewerIfDebugging(filename);
+
+        }
+
+        [Fact]
+        public void Create_Rtf_with_Embedded_Base64Image()
+        {
+            //// TODO #warning empira Register this in RtfRenderer.
+            //// TODO Register encoding here or in RtfDocumentRenderer?
+            //System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+#if CORE
+            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+#endif
+
+            // Create a MigraDoc document.
+            var document = new Document();
+
+            var sect = document.AddSection();
+
+            AddImage(document);
+
+            // Create a renderer for the MigraDoc document.
+            var rtfRenderer = new RtfDocumentRenderer();
+
+            // Save the document...
+            var filename = PdfFileHelper.CreateTempFileName("HelloWorldEmbeddedBase64");
+
+#if DEBUG___
+            MigraDoc.DocumentObjectModel.IO.DdlWriter dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_0.mdddl");
+            dw.WriteDocument(document);
+            dw.Close();
+#endif
+
+            // Layout and render document to PDF.
+            rtfRenderer.Render(document, filename + ".rtf", Environment.CurrentDirectory);
+
+#if DEBUG___
+            dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_1.mdddl");
+            dw.WriteDocument(document);
+            dw.Close();
+#endif
+
+            //// ...and start a viewer.
+            //PdfFileHelper.StartPdfViewerIfDebugging(filename);
+
+        }
+
+        private static void AddImage(Document document)
+        {
+            var base64 = @"base64:iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAACUlBMVEUAAAABAAACAQADAgAHBAAH
+BQANCAALCQARCwARDgAcFQAeFQAeGAAtHAApHgAoHwAuIQAvJQAtJwA4KAA/KQA3LABBLwBGMQBC
+NABANwD/AABGOQBSNwD/BABTOAD/BQD/CAD/CQD/DABbPQBPQQD/DQD/EAD/EQBTRgD/FAD/FQBl
+RQD/GQD/GgBaTAD/HQD/HgD/IQD/IgD/JQD/JgBlVAD/KQD/KgB3VAD/LQD/LgB1WAB0WQD/MgCI
+VgD/MwD/NgD/NwB4YgD/OgD/OwCDYQD/PgD/PwCCZQCKYwD/QgD/QwD/RwCbZQD/SACSaQD/SwD/
+TACLbwD/TwD/UAD/UwCRdAD/VACJeQD/VwD/WACtdAD/XACrdQD/YAD/YQCzeAD/ZAD/ZQD/aAD/
+aQCchwD/bAD/bQD/cAD/cQDAhACojAD/dQD/dgD/eQD/egCulAD/fQD/fgD/gQCzmAD/ggD/hQD/
+hgDTlADikAD/iQD/igDPnAD/jgDBoQD/jwDOngD/kgD/kwD/lgD/lwDvnADdogD/mgDjowD/mwD/
+ngD/nwDUrQDpqADcrQD/owD/pAD4pwD2qAD/pwD/qAD/qwD/rAD+rwDktwD/rwD/sAD/swDougD/
+tAD/twD/uAD/vAD/vQD/wADjyQD/wQD/xAD/xQD/yAD/yQD1zQDw0AD/zAD/zQD/0QD50wD/0gD+
+1AD/1QD/1gD/2QD/2gD/3QD/3gD/4QD/4gD/5QD/5gD/6gD/6wD/7gD/7wD/8gD/8wD/9gD/9wD/
++gD/+wD//wBS8BVmAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gsbDiwNWTYMaQAAAB1p
+VFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAFpUlEQVRYw3VXiV/URRydsNPu
+u+gALJYgTRGDsgMIwsIyaSWii1wIqAQSYiuKkKO2sBuhFgJjk9UCMmGXq2WRNv+vZub7nZnvzG+Z
+P+B9vsd77/uGZWZm5eT6CnbtLtxXsv+pssoDB184fKT2tTfeOtrY8u6x9uPdH33a2z8YOvn9qdHx
+ydO/RWbOzc1fWIwvr/2zvvHvf5cusczM+7J3+Ap2AkB5ZdXBQ4f9dfUcoIkDdBzvkgBfC4AwBzhj
+AJIEIK9g557ComIBwCuo8fMKGgCgUwAMDHGAEQQ4ywFi8ZW1xPrGZkoCyBZkBY9jC37ZQlOzaAEB
+hjkAtjDLAZZWeAsXVQU5soW9cgYVooIjdTiDtnZZQb+sYGxcV7DoAOSKFvYWwRCrOQAMUVbQHVQz
+GAuTIXKApAbIFgC75QxwC6KCQFOLaqF/KDSsKoie0xVsmBbyrBY4gN4CtqDWOI0VLIkhXrS2wIeo
+tgA8CMghdgoeDAzqLUTIDDY2dQs+BQAV+Gvr9Qy6ggpgzGxhcUnyAAGycAZAJAOgZ9DXbwBwBnG5
+BRtAzqAcKpBrlADYQuik4kGUt7DAAVYTSdICABTvLxVUVgCNugLJRLpGSSS+xpR3C5SJsoKuoBZT
+2J4BWSNUUOSoEcQEauRURjVGoYJlSiRVAdkCEKn1GFB5YBC0MIEzkENMOFRWRKqqpkRqN3IWW5i6
+g7G75vQabSLhFqo0kRpbbCKNhSe+yti+PeMXJFLSZWJRyRZM7FNUnniePfEke/m83EJC80DNQKsR
+xERbgDWOT97EPjvBbp5fSOsHhUZMZo0d1ho/ZjdEojeyb9whOi0cokwkch4NP8aejcw8x56RlkaG
+mJNrAMCRah0qD0kq/3wt+zIS/Y5d93csvrwqtKA8kbewizuSNhTpyspQUI0/nBp9j90qiHQ7+zwG
+TNRiMn5QBmusI2tUMxgZfZi9NM0BXmGPLloAuAUzxBoxgwYjJgT48ept34oKft12zV8wg810TORD
+rCFqFBX0AcDr7E6phdl72AeSB2qIWdlGC4KJsIUGcKTOLiWmkXuZfg/FLR5k77AdSdt6K+cBMJET
+6YvLDcAVf4IWUpatoyNV4xbUDILIxBfZ/dLSzs7OP8jeWXGOaz6/jcKRYAt+che6lRpvY2+CnGfn
+32d3r6x67kJhmtOm/IBX8MllV/6kbP2PqzJ+J0wUppoPl6m0rFKtUTBRziDYI9f4NHsAbJ1XcOER
+9qrVQq6PzMBooZlepuvZ28bSPmS3rBkqE08sVadNE4kykVymuCPnPB1xKmgL2lDIaQNTjcMQUx45
+g6H4UQutMuL04HHllqYAFjGhOGIqUYeFbMGsEQ9LVN4FAZBMV4Gkcg3hAW1BnzYMGB4xFVszEC20
+oaVBxAlPTtnH1Y55cBsrdMQJGDkPDKKpTpHbSFxZEYmcd5uJeFic47rutGA8Ud6FhoA5rgNWyCIx
+L+UJmngXai1D6SUBI2JClt5CFsa8fZapNgQ8rmwnlERyy8tUAy00wnkPmtNGzju9jXbEMURqMnIe
+DKl8oHPiqjvEPUBlctqEJ3YYJuoZzPLbCC0QOeejGstJUlU86On1iMmJuhi2TcQxnthBiMTP+xTN
+yjQj+WTYVo6kxNSs7gL+F+yoyyuwDcWdQaApLRNFCwsxO6UpWy82570e1tjmZCTliU4LnIn55tOl
+QxbxA0Mk2cICfjg2U3bIKoZPl3YkctpCNpVjngq0I1XYQZPOgFcwNa0AltMAEDViBa3qyyNbwCGK
+sB1zeJBLWjhAwnYrzoCk9TMzOupqOWd5wjb9uXZBThzWM5AVIA+2uI1KTM0mYNAfy5z7b9QfT7sF
+JWfyZ5owLazYIUtQGXlQ5VwmklTDYgv042nLmX77as23r5v8XCdOT/OAMXfew0TjB0TOR52AIXng
+VeP/8gP+s//MzMQAAAAASUVORK5CYII=
+";
+
+            var logo = document.LastSection.AddImage(base64);
+        }
+
+        // TODO 2023-05-23 Make tests for all three builds.
+#if !CORE
+        // Not supported by Core build.
+        [Theory]
+        [InlineData(@"bmp\Test_OS2.bmp")]
+        [InlineData(@"png\color4A.png")]
+#else
+        [Theory]
+#endif
+        [InlineData(@"jpeg\windows7problem.jpg")]
+        [InlineData(@"jpeg\PowerBooks_CMYK.jpg")]
+        [InlineData(@"jpeg\grayscaleA.jpg")]
+        [InlineData(@"jpeg\Balloons_CMYK.jpg")]
+        [InlineData(@"jpeg\Balloons_CMYK - Copy.jpg")]
+
+        [InlineData(@"bmp\BlackwhiteA.bmp")]
+        [InlineData(@"bmp\Color4A.bmp")]
+        [InlineData(@"bmp\Color8A.bmp")]
+        [InlineData(@"bmp\TruecolorA.bmp")]
+
+        [InlineData(@"png\truecolorAlpha.png")]
+        [InlineData(@"png\color8A.png")]
+
+        [InlineData(@"MigraDoc.bmp")]
+        [InlineData(@"Logo landscape.bmp")]
+        [InlineData(@"Logo landscape.png")]
+        [InlineData(@"Logo landscape 256.png")]
+        public void Create_Rtf_with_Base64Image(string assetName)
+        {
+            //// TODO #warning empira Register this in RtfRenderer.
+            //// TODO Register encoding here or in RtfDocumentRenderer?
+            //System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+#if CORE
+            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+#endif
+
+            // Create a MigraDoc document.
+            var document = new Document();
+
+            var sect = document.AddSection();
+
+            var imagePath = @"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\" + assetName;
+
+            var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+
+            //Use BinaryReader to read file stream into byte array.
+            var br = new BinaryReader(stream, Encoding.Default);
+
+            //When you use BinaryReader, you need to supply number of bytes to read from file.
+            //In this case we want to read entire file. So supplying total number of bytes.
+            var imageData = br.ReadBytes((int)stream.Length);
+
+            var image = "base64:" + Convert.ToBase64String(imageData);
+
+            sect.AddParagraph(assetName);
+            sect.AddImage(image);
+            sect.AddParagraph(assetName);
+
+            // Create a renderer for the MigraDoc document.
+            var rtfRenderer = new RtfDocumentRenderer();
+
+            // Save the document...
+            var filename = PdfFileHelper.CreateTempFileName("HelloWorldBase64");
+
+#if DEBUG___
+            MigraDoc.DocumentObjectModel.IO.DdlWriter dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_0.mdddl");
+            dw.WriteDocument(document);
+            dw.Close();
+#endif
+
+            // Layout and render document to PDF.
+            rtfRenderer.Render(document, filename + ".rtf", Environment.CurrentDirectory);
+
+#if DEBUG___
+            dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_1.mdddl");
+            dw.WriteDocument(document);
+            dw.Close();
+#endif
+
+            //// ...and start a viewer.
+            //PdfFileHelper.StartPdfViewerIfDebugging(filename);
         }
     }
 }

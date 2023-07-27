@@ -131,8 +131,19 @@ namespace PdfSharp.Pdf.Advanced
         public int Position
         {
             get => _position;
+#if true
+            set
+            {
+                if (value < 0)
+                    GetType();
+                Debug.Assert(value >= 0);
+                _position = value;
+            }
+#else
             set => _position = value;
+#endif
         }
+
         int _position;  // I know it should be long, but I have never seen a 2GB PDF file.
 
         //public bool InUse

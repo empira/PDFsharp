@@ -37,7 +37,6 @@ namespace MigraDoc.RtfRendering.UnitTest
 //      par.Style = "TestStyle1";
       par.Format.ListInfo.NumberPosition = 2;
 
-
       par = sec.AddParagraph("Paragraph 2");
       par.Format.ListInfo.ListType = ListType.BulletList3;
       Image img1 = par.AddImage("logo.gif");
@@ -49,7 +48,6 @@ namespace MigraDoc.RtfRendering.UnitTest
       img1.PictureFormat.CropLeft = "-2cm";
       img1.FillFormat.Color = Color.PowderBlue;
       img1.LineFormat.Width = 2;
-
 
       par = sec.AddParagraph("Paragraph 3");
       par.AddLineBreak();

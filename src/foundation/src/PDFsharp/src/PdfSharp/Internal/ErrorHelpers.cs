@@ -35,8 +35,8 @@ namespace PdfSharp.Internal
         public static InvalidOperationException InvalidOperationException_InvalidVersionValueForEncryptionVersion1To4() =>
             new("The encryption version value must be 1, 2, or 4 for encryptions lower than version 5.");
 
-        public static InvalidOperationException InvalidOperationException_InvalidPasswordKeyLengthForEncryptionVersion1To4() =>
-            new("Password keys must have a length of 32 bytes.");
+        public static InvalidOperationException InvalidOperationException_InvalidPasswordKeyLengthForEncryptionVersion1To4(int len) =>
+            new($"Password keys must have a length of 32 bytes. Found {len} bytes.");
 
         public static InvalidOperationException InvalidOperationException_EncryptionKeyNotSetForEncryptionVersion1To4() =>
             new("Encryption key for the entered indirect PdfObject has to be set.");

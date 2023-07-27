@@ -91,7 +91,6 @@ namespace MigraDoc.Rendering
             FinishLayoutInfo(area);
         }
 
-
         void FinishLayoutInfo(Area area)
         {
             var layoutInfo = _renderInfo.LayoutInfo;

@@ -75,13 +75,13 @@ namespace MigraDoc.Rendering
                 }
 
                 var renderer = Renderer.Create(gfx, _documentRenderer, docObj, _areaProvider.AreaFieldInfos);
-                if (renderer != null) // "Slightly hacked" for legends: see below
+                if (renderer != null) // "Slightly hacked" for legends: see below.
                     renderer.MaxElementHeight = maxHeight;
 
                 if (topLevel && _documentRenderer.HasPrepareDocumentProgress)
                 {
                     _documentRenderer.OnPrepareDocumentProgress(_documentRenderer.ProgressCompleted + idx + 1,
-                      _documentRenderer.ProgressMaximum);
+                        _documentRenderer.ProgressMaximum);
                 }
 
                 // "Slightly hacked" for legends: they are rendered as part of the chart.

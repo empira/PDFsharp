@@ -4,7 +4,6 @@
 #define VARIANT1  // Walrod, Battlestar, X-Files
 #define VARIANT2_  // Walrod, Battlestar, X-Files
 
-
 #define TIMES_NEW_ROMAN_  // Times New Roman
 #define SEGOE_UI  // Segoe UI
 #define SEGOE_UI_2_  // Segoe UI via platform API
@@ -135,7 +134,6 @@ namespace PdfSharp.Snippets.Font
             }
             EndBox(gfx);
 #endif
-
 
 #if BOX3
             BeginBox(gfx, 3, BoxOptions.Tile, "Typefaces of " + FamilyName);
@@ -607,7 +605,6 @@ namespace PdfSharp.Snippets.Font
             EndBox(gfx);
 #endif
 
-
 #if BOX3
             BeginBox(gfx, 3, BoxOptions.Tile, "semibold - bold - black");
             {
@@ -720,8 +717,6 @@ namespace PdfSharp.Snippets.Font
 #else
         readonly XPdfFontOptions _fontOptions = new XPdfFontOptions(PdfFontEncoding.Unicode);
 #endif
-
-
         public PrivateFontCollectionSnippet()
         {
             //NoText = true;

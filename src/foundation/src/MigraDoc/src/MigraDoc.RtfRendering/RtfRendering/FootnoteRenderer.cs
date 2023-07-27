@@ -41,7 +41,6 @@ namespace MigraDoc.RtfRendering
             _rtfWriter.EndContent();
         }
 
-
         /// <summary>
         /// Renders the footnote's content.
         /// </summary>

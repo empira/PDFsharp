@@ -42,8 +42,10 @@ namespace PdfSharp.Pdf.Internal
                     // Use .net encoder if available.
                     _winAnsiEncoding = Encoding.GetEncoding(1252);  // 
 #else
-                    // Use own implementation because there is not ANSI encoding in .NET 6.
-                    _winAnsiEncoding = new AnsiEncoding();
+                    //// Use own implementation because there is not ANSI encoding in .NET 6.
+                    //_winAnsiEncoding = new AnsiEncoding();
+                    // There is ANSI encoding available with .NET 6. Use it.
+                    _winAnsiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
 #endif
                 }
                 return _winAnsiEncoding;

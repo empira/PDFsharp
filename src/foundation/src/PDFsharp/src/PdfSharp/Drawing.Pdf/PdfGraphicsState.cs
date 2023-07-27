@@ -482,24 +482,24 @@ namespace PdfSharp.Drawing.Pdf
 #endif
 #if GDI
             // Do not render an empty path.
-            if (clipPath._gdipPath.PointCount < 0)
+            if (clipPath.GdipPath.PointCount < 0)
                 return;
 #endif
 #if WPF
             // Do not render an empty path.
-            if (clipPath._pathGeometry.Bounds.IsEmpty)
+            if (clipPath.PathGeometry.Bounds.IsEmpty)
                 return;
 #endif
             _renderer.BeginGraphicMode();
             RealizeCtm();
 #if CORE
-            _renderer.AppendPath(clipPath._corePath);
+            _renderer.AppendPath(clipPath.CorePath);
 #endif
 #if GDI && !WPF
-            _renderer.AppendPath(clipPath._gdipPath);
+            _renderer.AppendPath(clipPath.GdipPath);
 #endif
 #if WPF && !GDI
-            _renderer.AppendPath(clipPath._pathGeometry);
+            _renderer.AppendPath(clipPath.PathGeometry);
 #endif
 #if WPF && GDI
             if (_renderer.Gfx.TargetContext == XGraphicTargetContext.GDI)

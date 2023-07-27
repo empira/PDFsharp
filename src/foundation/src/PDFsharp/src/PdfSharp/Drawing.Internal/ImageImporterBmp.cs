@@ -62,7 +62,7 @@ namespace PdfSharp.Drawing.Internal
                 uint width = stream.GetDWord(4, false);
                 int height = (int)stream.GetDWord(8, false);
                 int planes = stream.GetWord(12, false);
-                int bitCount = stream.GetWord(14, false);
+                uint bitCount = stream.GetWord(14, false);
                 int compression = (int)stream.GetDWord(16, false);
                 int sizeImage = (int)stream.GetDWord(20, false);
                 int xPelsPerMeter = (int)stream.GetDWord(24, false);
@@ -83,6 +83,7 @@ namespace PdfSharp.Drawing.Internal
                     //((ImagePrivateDataBitmap)ii.Data).ColorPaletteOffset = stream.CurrentOffset + size;
                     data.Offset = offset;
                     data.ColorPaletteOffset = stream.CurrentOffset + size;
+                    ii.Information.BitCount = bitCount;
                     ii.Information.Width = width;
                     ii.Information.Height = (uint)Math.Abs(height);
                     ii.Information.HorizontalDPM = xPelsPerMeter;
@@ -156,7 +157,6 @@ namespace PdfSharp.Drawing.Internal
             }
             return false;
         }
-
 
         public ImageData PrepareImage(ImagePrivateData data)
         {
@@ -306,7 +306,10 @@ namespace PdfSharp.Drawing.Internal
                     break;
 
                 case ImageInformation.ImageFormats.RGB24:
-                    CopyTrueColorMemoryBitmap(4, 8, false, dest);
+                    if (this.Image.Information.BitCount == 32)
+                        CopyTrueColorMemoryBitmap(4, 8, false, dest);
+                    else
+                        CopyTrueColorMemoryBitmap(3, 8, false, dest);
                     break;
 
                 case ImageInformation.ImageFormats.Palette8:

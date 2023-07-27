@@ -68,7 +68,11 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         public Font Font
         {
             get => Values.Font ??= new(this);
-            set => Values.Font = value;
+            set
+            {
+                SetParent(value);
+                Values.Font = value;
+            }
         }
 
         /// <summary>

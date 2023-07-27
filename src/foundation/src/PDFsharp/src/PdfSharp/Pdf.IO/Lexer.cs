@@ -1,10 +1,10 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-#if WPF
-using System.IO;  // BUG  Only required for WPF build, but why???
-#endif
 using System.Text;
+#if WPF
+using System.IO;
+#endif
 using PdfSharp.Internal;
 using PdfSharp.Pdf.Internal;
 
@@ -25,8 +25,8 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public Lexer(Stream pdfInputStream)
         {
-            _pdfSteam = pdfInputStream;
-            _pdfLength = (int)_pdfSteam.Length;
+            _pdfStream = pdfInputStream;
+            _pdfLength = (int)_pdfStream.Length;
             _idxChar = 0;
             Position = 0;
         }
@@ -39,11 +39,16 @@ namespace PdfSharp.Pdf.IO
             get => _idxChar;
             set
             {
+#if DEBUG
+                if (value < 0)
+                    GetType();
+#endif
+                Debug.Assert(value >= 0);
                 _idxChar = value;
-                _pdfSteam.Position = value;
+                _pdfStream.Position = value;
                 // ReadByte return -1 (eof) at the end of the stream.
-                _curChar = (char)_pdfSteam.ReadByte();
-                _nextChar = (char)_pdfSteam.ReadByte();
+                _currChar = (char)_pdfStream.ReadByte();
+                _nextChar = (char)_pdfStream.ReadByte();
                 ClearToken();
             }
         }
@@ -81,7 +86,7 @@ namespace PdfSharp.Pdf.IO
                 //  }
                 //  break;
 
-                case '+': //TODO is it so easy?
+                case '+':
                 case '-':
                     return _symbol = ScanNumber();
 
@@ -122,10 +127,12 @@ namespace PdfSharp.Pdf.IO
 #if true_
                 return ScanNumberOrReference();
 #else
-                if (PeekReference())
-                    return _symbol = ScanNumber();
-                else
-                    return _symbol = ScanNumber();
+                // Skip calling PeekReference, result is not used at the moment.
+                //if (PeekReference())
+                //    return _symbol = ScanNumber();
+                //else
+                //    return _symbol = ScanNumber();
+                return _symbol = ScanNumber();
 #endif
 
             if (Char.IsLetter(ch))
@@ -148,11 +155,11 @@ namespace PdfSharp.Pdf.IO
             int pos;
 
             // Skip illegal blanks behind «stream».
-            while (_curChar == Chars.SP)
+            while (_currChar == Chars.SP)
                 ScanNextChar(true);
 
             // Skip new line behind «stream».
-            if (_curChar == Chars.CR)
+            if (_currChar == Chars.CR)
             {
                 if (_nextChar == Chars.LF)
                     pos = _idxChar + 2;
@@ -162,9 +169,9 @@ namespace PdfSharp.Pdf.IO
             else
                 pos = _idxChar + 1;
 
-            _pdfSteam.Position = pos;
+            _pdfStream.Position = pos;
             byte[] bytes = new byte[length];
-            int read = _pdfSteam.Read(bytes, 0, length);
+            int read = _pdfStream.Read(bytes, 0, length);
             Debug.Assert(read == length);
             // With corrupted files, read could be different from length.
             if (bytes.Length != read)
@@ -182,9 +189,10 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public String ReadRawString(int position, int length)
         {
-            _pdfSteam.Position = position;
+            _pdfStream.Position = position;
             var bytes = new byte[length];
-            var readBytes = _pdfSteam.Read(bytes, 0, length);
+            // ReSharper disable once RedundantAssignment
+            var readBytes = _pdfStream.Read(bytes, 0, length);
             Debug.Assert(readBytes == length);
             return PdfEncoders.RawEncoding.GetString(bytes, 0, bytes.Length);
         }
@@ -194,7 +202,7 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public Symbol ScanComment()
         {
-            Debug.Assert(_curChar == Chars.Percent);
+            Debug.Assert(_currChar == Chars.Percent);
 
             ClearToken();
             while (true)
@@ -214,25 +222,49 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public Symbol ScanName()
         {
-            Debug.Assert(_curChar == Chars.Slash);
+            Debug.Assert(_currChar == Chars.Slash);
 
             ClearToken();
             while (true)
             {
                 char ch = AppendAndScanNextChar();
                 if (IsWhiteSpace(ch) || IsDelimiter(ch) || ch == Chars.EOF)
+                {
+                    // Name objects use UTF-8 encoding. We have to decode it here.
+                    var name = Token;
+
+                    for (int idx = 0; idx < name.Length; ++idx)
+                    {
+                        // If MSB is set, we need UTF-8 decoding.
+                        if (name[idx] > 127)
+                        {
+                            // Special characters in Name objects use UTF-8 encoding.
+                            var bytes = new Byte[name.Length];
+                            for (int idx2 = 0; idx2 < name.Length; ++idx2)
+                            {
+                                bytes[idx2] = (byte)name[idx2];
+                            }
+                            var decodedName = Encoding.UTF8.GetString(bytes);
+                            _token.Clear();
+                            _token.Append(decodedName);
+
+                            break;
+                        }
+                    }
+
                     return _symbol = Symbol.Name;
+                }
 
                 if (ch == '#')
                 {
                     ScanNextChar(true);
                     char[] hex = new char[2];
-                    hex[0] = _curChar;
+                    hex[0] = _currChar;
                     hex[1] = _nextChar;
                     ScanNextChar(true);
                     // TODO Check syntax
                     ch = (char)(ushort)Int32.Parse(new string(hex), NumberStyles.AllowHexSpecifier);
-                    _curChar = ch;
+                    _currChar = ch;
                 }
             }
         }
@@ -240,6 +272,93 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Scans a number.
         /// </summary>
+#if true
+        public Symbol ScanNumber()
+        {
+            // Note: This is a copy of CLexer.ScanNumber with minimal changes. Keep both versions in sync as far as possible.
+            const int maxDigitsForLong = 18;
+            const int maxDecimalDigits = 10;
+            long value = 0;
+            int totalDigits = 0;
+            int decimalDigits = 0;
+            bool period = false;
+            bool negative = false;
+
+            ClearToken();
+            char ch = _currChar;
+            if (ch is '+' or '-')
+            {
+                if (ch == '-')
+                    negative = true;
+                _token.Append(ch);
+                ch = ScanNextChar(true);
+            }
+            while (true)
+            {
+                if (Char.IsDigit(ch))
+                {
+                    _token.Append(ch);
+                    ++totalDigits;
+                    if (decimalDigits < maxDecimalDigits)
+                    {
+                        // Calculate the value if it still fits into long.
+                        if (totalDigits <= maxDigitsForLong)
+                            value = 10 * value + ch - '0';
+                    }
+                    if (period)
+                        ++decimalDigits;
+                }
+                else if (ch == '.')
+                {
+                    if (period)
+                        ContentReaderDiagnostics.ThrowContentReaderException("More than one period in number.");
+
+                    period = true;
+                    _token.Append(ch);
+                }
+                else
+                    break;
+                ch = ScanNextChar(true);
+            }
+
+            if (totalDigits > maxDigitsForLong || decimalDigits > maxDecimalDigits)
+            {
+                // The number is too big for long or has too many decimal digits for our own code, so we provide it as real only.
+                // Number will be parsed here.
+                _tokenAsReal = Double.Parse(_token.ToString(), CultureInfo.InvariantCulture);
+                return Symbol.Real;
+            }
+
+            if (negative)
+                value = -value;
+
+            if (period)
+            {
+                if (decimalDigits > 0)
+                {
+                    _tokenAsReal = value / PowersOf10[decimalDigits];
+                    //_tokenAsLong = value / PowersOf10[decimalDigits];
+                }
+                else
+                {
+                    _tokenAsReal = value;
+                    _tokenAsLong = value;
+                }
+                return Symbol.Real;
+            }
+            _tokenAsLong = value;
+            _tokenAsReal = Convert.ToDouble(value);
+
+            Debug.Assert(Int64.Parse(_token.ToString(), CultureInfo.InvariantCulture) == value);
+
+            if (value is >= Int32.MinValue and < Int32.MaxValue)
+                return Symbol.Integer;
+
+            return Symbol.Real;
+        }
+
+        static readonly double[] PowersOf10 = { 1, 10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000, 100_000_000, 1_000_000_000, 10_000_000_000 };
+#else  // DELETE
         public Symbol ScanNumber()
         {
             // I found a PDF file created with Acrobat 7 with this entry 
@@ -278,19 +397,26 @@ namespace PdfSharp.Pdf.IO
 
             if (period)
                 return Symbol.Real;
-            long l = Int64.Parse(_token.ToString(), CultureInfo.InvariantCulture);
-            if (l is >= Int32.MinValue and <= Int32.MaxValue)
-                return Symbol.Integer;
-            if (l is > 0 and <= UInt32.MaxValue)
-                return Symbol.UInteger;
+
+            var s = _token.ToString();
+            // Test for Integer and UInteger. Skip strings that have 12 or more characters and are too long for Int32 ("-2147483648").
+            if (s.Length < 12)
+            {
+                long l = Int64.Parse(s, CultureInfo.InvariantCulture);
+                if (l is >= Int32.MinValue and <= Int32.MaxValue)
+                    return Symbol.Integer;
+                if (l is > 0 and <= UInt32.MaxValue)
+                    return Symbol.UInteger;
+            }
 
             // Got an AutoCAD PDF file that contains this: /C 264584027963392
             // Best we can do is to convert it to real value.
             return Symbol.Real;
             //thr ow new PdfReaderException("Number exceeds integer range.");
         }
+#endif
 
-        public Symbol ScanNumberOrReference()
+        public Symbol ScanNumberOrReference_NOT_USED()
         {
             Symbol result = ScanNumber();
 #if true_
@@ -309,8 +435,8 @@ namespace PdfSharp.Pdf.IO
         public Symbol ScanKeyword()
         {
             ClearToken();
-            char ch = _curChar;
-            // Scan token
+            char ch = _currChar;
+            // Scan token.
             while (true)
             {
                 if (Char.IsLetter(ch))
@@ -367,7 +493,7 @@ namespace PdfSharp.Pdf.IO
             // Reference: 3.2.3  String Objects / Page 53
             // Reference: TABLE 3.32  String Types / Page 157
 
-            Debug.Assert(_curChar == Chars.ParenLeft);
+            Debug.Assert(_currChar == Chars.ParenLeft);
             ClearToken();
             int parenLevel = 0;
             char ch = ScanNextChar(false);
@@ -477,6 +603,7 @@ namespace PdfSharp.Pdf.IO
                             }
                             break;
                         }
+
                     default:
                         break;
                 }
@@ -534,7 +661,7 @@ namespace PdfSharp.Pdf.IO
 
         public Symbol ScanHexadecimalString()
         {
-            Debug.Assert(_curChar == Chars.Less);
+            Debug.Assert(_currChar == Chars.Less);
 
             ClearToken();
             char[] hex = new char[2];
@@ -542,14 +669,14 @@ namespace PdfSharp.Pdf.IO
             while (true)
             {
                 MoveToNonWhiteSpace();
-                if (_curChar == '>')
+                if (_currChar == '>')
                 {
                     ScanNextChar(true);
                     break;
                 }
-                if (Char.IsLetterOrDigit(_curChar))
+                if (Char.IsLetterOrDigit(_currChar))
                 {
-                    hex[0] = Char.ToUpper(_curChar);
+                    hex[0] = Char.ToUpper(_currChar);
                     // Second char is optional in PDF spec.
                     if (Char.IsLetterOrDigit(_nextChar))
                     {
@@ -567,7 +694,7 @@ namespace PdfSharp.Pdf.IO
                     _token.Append(Convert.ToChar(ch));
                 }
                 else
-                    ParserDiagnostics.HandleUnexpectedCharacter(_curChar);
+                    ParserDiagnostics.HandleUnexpectedCharacter(_currChar);
             }
             string chars = _token.ToString();
             int count = chars.Length;
@@ -586,35 +713,36 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Move current position one character further in PDF stream.
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         internal char ScanNextChar(bool handleCRLF)
         {
             if (_pdfLength <= _idxChar)
             {
-                _curChar = Chars.EOF;
+                _currChar = Chars.EOF;
                 _nextChar = Chars.EOF;
             }
             else
             {
-                _curChar = _nextChar;
-                _nextChar = (char)_pdfSteam.ReadByte();
+                _currChar = _nextChar;
+                _nextChar = (char)_pdfStream.ReadByte();
                 _idxChar++;
-                if (handleCRLF && _curChar == Chars.CR)
+                if (handleCRLF && _currChar == Chars.CR)
                 {
                     if (_nextChar == Chars.LF)
                     {
                         // Treat CR LF as LF.
-                        _curChar = _nextChar;
-                        _nextChar = (char)_pdfSteam.ReadByte();
+                        _currChar = _nextChar;
+                        _nextChar = (char)_pdfStream.ReadByte();
                         _idxChar++;
                     }
                     else
                     {
                         // Treat single CR as LF.
-                        _curChar = Chars.LF;
+                        _currChar = Chars.LF;
                     }
                 }
             }
-            return _curChar;
+            return _currChar;
         }
 
         /// <summary>
@@ -626,47 +754,48 @@ namespace PdfSharp.Pdf.IO
         {
             // A Reference has the form "nnn mmm R". The implementation of the parser used a
             // reduce/shift algorithm in the first place. But this case is the only one we need to
-            // look ahead 3 tokens. 
-            int positon = Position;
+            // look ahead 3 tokens.
+            int position = Position;
 
             // Skip digits.
-            while (Char.IsDigit(_curChar))
+            while (Char.IsDigit(_currChar))
                 ScanNextChar(true);
 
             // Space expected.
-            if (_curChar != Chars.SP)
+            if (_currChar != Chars.SP)
                 goto False;
 
             // Skip spaces.
-            while (_curChar == Chars.SP)
+            while (_currChar == Chars.SP)
                 ScanNextChar(true);
 
             // Digit expected.
-            if (!Char.IsDigit(_curChar))
+            if (!Char.IsDigit(_currChar))
                 goto False;
 
             // Skip digits.
-            while (Char.IsDigit(_curChar))
+            while (Char.IsDigit(_currChar))
                 ScanNextChar(true);
 
             // Space expected.
-            if (_curChar != Chars.SP)
+            if (_currChar != Chars.SP)
                 goto False;
 
             // Skip spaces.
-            while (_curChar == Chars.SP)
+            while (_currChar == Chars.SP)
                 ScanNextChar(true);
 
             // "R" expected.
             // We can ignore _nextChar because there is no other valid token that starts with an 'R'.
-            if (_curChar != 'R')
+
+            if (_currChar != 'R')
                 goto False;
 
-            Position = positon;
+            Position = position;
             return true;
 
         False:
-            Position = positon;
+            Position = position;
             return false;
         }
 
@@ -675,10 +804,10 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         internal char AppendAndScanNextChar()
         {
-            if (_curChar == Chars.EOF)
+            if (_currChar == Chars.EOF)
                 ParserDiagnostics.ThrowParserException("Undetected EOF reached.");
 
-            _token.Append(_curChar);
+            _token.Append(_currChar);
             return ScanNextChar(true);
         }
 
@@ -689,9 +818,9 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public char MoveToNonWhiteSpace()
         {
-            while (_curChar != Chars.EOF)
+            while (_currChar != Chars.EOF)
             {
-                switch (_curChar)
+                switch (_currChar)
                 {
                     case Chars.NUL:
                     case Chars.HT:
@@ -707,12 +836,11 @@ namespace PdfSharp.Pdf.IO
                         ScanNextChar(true);
                         break;
 
-
                     default:
-                        return _curChar;
+                        return _currChar;
                 }
             }
-            return _curChar;
+            return _currChar;
         }
 
 #if DEBUG
@@ -721,11 +849,11 @@ namespace PdfSharp.Pdf.IO
             const int range = 20;
             int start = Math.Max(Position - range, 0);
             int length = Math.Min(2 * range, PdfLength - start);
-            long posOld = _pdfSteam.Position;
-            _pdfSteam.Position = start;
+            long posOld = _pdfStream.Position;
+            _pdfStream.Position = start;
             byte[] bytes = new byte[length];
-            _pdfSteam.Read(bytes, 0, length);
-            _pdfSteam.Position = posOld;
+            _pdfStream.Read(bytes, 0, length);
+            _pdfStream.Position = posOld;
             string result = "";
             if (hex)
             {
@@ -764,25 +892,67 @@ namespace PdfSharp.Pdf.IO
             get
             {
                 Debug.Assert(_token.ToString() == "true" || _token.ToString() == "false");
-                //return _token.ToString()[0] == 't';
                 return _token[0] == 't';
             }
         }
 
+#if true
+        // New versions to go with new ScanNumber.
+        /// <summary>
+        /// Interprets current token as integer literal.
+        /// </summary>
+        public int TokenToInteger
+        {
+            get
+            {
+                Debug.Assert(_tokenAsLong == Int32.Parse(_token.ToString(), CultureInfo.InvariantCulture));
+                return (Int32)_tokenAsLong;
+            }
+        }
+
+        /// <summary>
+        /// Interprets current token as unsigned integer literal.
+        /// </summary>
+        public uint TokenToUInteger
+        {
+            get
+            {
+                Debug.Assert(_tokenAsLong == UInt32.Parse(_token.ToString(), CultureInfo.InvariantCulture));
+                return (UInt32)_tokenAsLong;
+            }
+        }
+
+        /// <summary>
+        /// Interprets current token as real or integer literal.
+        /// </summary>
+        public double TokenToReal
+        {
+            get
+            {
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                Debug.Assert(_tokenAsReal == double.Parse(_token.ToString(), CultureInfo.InvariantCulture));
+                return _tokenAsReal;
+            }
+        }
+#else
         /// <summary>
         /// Interprets current token as integer literal.
         /// </summary>
         public int TokenToInteger => Int32.Parse(_token.ToString(), CultureInfo.InvariantCulture);
+#warning TODO
 
         /// <summary>
         /// Interprets current token as unsigned integer literal.
         /// </summary>
         public uint TokenToUInteger => UInt32.Parse(_token.ToString(), CultureInfo.InvariantCulture);
+#warning TODO
 
         /// <summary>
         /// Interprets current token as real or integer literal.
         /// </summary>
         public double TokenToReal => Double.Parse(_token.ToString(), CultureInfo.InvariantCulture);
+#warning TODO
+#endif
 
         /// <summary>
         /// Interprets current token as object ID.
@@ -845,11 +1015,13 @@ namespace PdfSharp.Pdf.IO
 
         readonly int _pdfLength;
         int _idxChar;
-        char _curChar;
+        char _currChar;
         char _nextChar;
         readonly StringBuilder _token = new();
+        long _tokenAsLong;
+        double _tokenAsReal;
         Symbol _symbol = Symbol.None;
 
-        readonly Stream _pdfSteam;
+        readonly Stream _pdfStream;
     }
 }

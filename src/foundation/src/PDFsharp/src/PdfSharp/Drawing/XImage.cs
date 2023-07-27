@@ -53,7 +53,6 @@ namespace PdfSharp.Drawing
         //    set { _disposed = value; }
         //}
 
-
         /// <summary>
         /// Initializes a new instance of the <see cref="XImage"/> class.
         /// </summary>
@@ -137,7 +136,7 @@ namespace PdfSharp.Drawing
 
 #if UWP
         /// <summary>
-        /// Initializes a new instance of the <see cref="XImage"/> class from a WinRT image.
+        /// Initializes a new instance of the <see cref="XImage"/> class from a UWP image.
         /// </summary>
         XImage(BitmapSource image)
         {

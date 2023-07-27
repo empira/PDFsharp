@@ -154,7 +154,6 @@ namespace PdfSharp.Features.Font
                 var excludedFontSplit = excludedFont.Split('/');
                 var excludedFontName = excludedFontSplit[0].ToLower();
 
-
                 if (!font.StartsWith(excludedFontName, StringComparison.Ordinal))
                     // This font is not excluded by excludedFont.
                     continue;

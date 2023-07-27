@@ -217,7 +217,7 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         /// <value></value>
         public CObject this[int index]
         {
-            get => (CObject)_items[index];
+            get => _items[index];
             set => _items[index] = value;
         }
         #endregion
@@ -231,7 +231,6 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         {
             _items.CopyTo(array, index);
         }
-
 
         /// <summary>
         /// Gets the number of elements contained in the sequence.
@@ -281,7 +280,8 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
             stream.Position = 0;
             int count = (int)stream.Length;
             byte[] bytes = new byte[count];
-            stream.Read(bytes, 0, count);
+            var readBytes = stream.Read(bytes, 0, count);
+            Debug.Assert(readBytes == count);
 #if !UWP
             stream.Close();
 #else
@@ -295,7 +295,7 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         /// </summary>
         public override string ToString()
         {
-            StringBuilder s = new StringBuilder();
+            var s = new StringBuilder();
 
             for (int idx = 0; idx < _items.Count; idx++)
                 s.Append(_items[idx]);
@@ -651,7 +651,6 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
                     s.Append(')');
                     break;
 
-
                 case CStringType.HexString:
                     throw new NotImplementedException();
                 //break;
@@ -844,7 +843,6 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         public OpCode OpCode => _opCode;
 
         readonly OpCode _opCode;
-
 
         /// <summary>
         /// Returns a string that represents the current operator.

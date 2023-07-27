@@ -152,7 +152,6 @@ namespace MigraDoc.Rendering
                 _gfx.DrawLine(pen, left + width, top, left, top);
         }
 
-
         internal void RenderDiagonally(BorderType type, XUnit left, XUnit top, XUnit width, XUnit height)
         {
             XUnit borderWidth = GetWidth(type);

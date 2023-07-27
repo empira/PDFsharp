@@ -69,7 +69,6 @@ namespace PdfSharp.Pdf.Advanced
         // ReSharper disable once InconsistentNaming
         internal PdfToUnicodeMap? _toUnicodeMap;
 
-
         /// <summary>
         /// Adds a tag of exactly six uppercase letters to the font name 
         /// according to PDF Reference Section 5.5.3 'Font Subsets'

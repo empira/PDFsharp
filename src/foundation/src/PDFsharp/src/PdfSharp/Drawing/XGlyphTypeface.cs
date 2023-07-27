@@ -153,6 +153,11 @@ namespace PdfSharp.Drawing
                 if (fontResolverInfo == null)
                 {
                     // No fallback - just stop.
+#if CORE
+                    if (GlobalFontSettings.FontResolver is null)
+                        throw new InvalidOperationException($"No appropriate font found for family name \"{familyName}\". "+
+                                                            "Implement IFontResolver and assign to \"GlobalFontSettings.FontResolver\" to use fonts.");
+#endif
                     throw new InvalidOperationException($"No appropriate font found for family name \"{familyName}\".");
                 }
 
@@ -496,7 +501,6 @@ namespace PdfSharp.Drawing
             string name4 = wpfGlyphTypeface.ManufacturerNames[FontHelper.CultureInfoEnUs];
             string name5 = wpfGlyphTypeface.Win32FaceNames[FontHelper.CultureInfoEnUs];
             string name6 = wpfGlyphTypeface.Win32FamilyNames[FontHelper.CultureInfoEnUs];
-
 
             string name = familyName.ToLower() + '/' + faceName.ToLowerInvariant();
             string style = wpfGlyphTypeface.Style.ToString();

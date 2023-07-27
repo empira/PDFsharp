@@ -13,7 +13,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         /// </summary>
         public Image()
         {
-            BaseValues = new ImageValues(this);   
+            BaseValues = new ImageValues(this);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         /// <summary>
         /// Creates a deep copy of this object.
         /// </summary>
-        public new Image Clone() 
+        public new Image Clone()
             => (Image)DeepCopy();
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
         //#endregion
 
-//#region Properties
+        //#region Properties
         /// <summary>
         /// Gets or sets the name of the image.
         /// </summary>
@@ -99,7 +99,11 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         public PictureFormat PictureFormat
         {
             get => Values.PictureFormat ??= new(this);
-            set => Values.PictureFormat = value;
+            set
+            {
+                SetParent(value);
+                Values.PictureFormat = value;
+            }
         }
 
         /// <summary>

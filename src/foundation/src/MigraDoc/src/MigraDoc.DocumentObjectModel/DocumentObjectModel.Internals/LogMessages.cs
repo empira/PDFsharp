@@ -20,7 +20,6 @@ namespace MigraDoc.DocumentObjectModel.Internals
             this ILogger logger,
             LogLevel level);
 
-
         // What to log?
 
         // Image not found (not loadable, not found, ...)

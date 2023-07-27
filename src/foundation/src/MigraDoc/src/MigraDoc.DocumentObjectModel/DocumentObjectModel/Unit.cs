@@ -440,7 +440,6 @@ namespace MigraDoc.DocumentObjectModel
                 //NRT.ThrowOnNull("string parameter was null"); // BUG Throwing on null.
                 return Zero;
 
-
             var unit = Zero;
             value = value.Trim();
 

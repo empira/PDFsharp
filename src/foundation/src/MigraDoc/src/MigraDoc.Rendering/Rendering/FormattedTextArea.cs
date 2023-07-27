@@ -56,7 +56,6 @@ namespace MigraDoc.Rendering
             }
         }
 
-
         XUnit CalcInherentWidth()
         {
             XUnit inherentWidth = 0;

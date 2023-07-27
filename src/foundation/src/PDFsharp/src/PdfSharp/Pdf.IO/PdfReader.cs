@@ -6,7 +6,6 @@ using System.IO;
 #endif
 using PdfSharp.Internal;
 using PdfSharp.Pdf.Advanced;
-using PdfSharp.Pdf.Security;
 using PdfSharp.Pdf.Internal;
 
 namespace PdfSharp.Pdf.IO
@@ -376,7 +375,6 @@ namespace PdfSharp.Pdf.IO
                         }
                     }
                 }
-                
 
                 PdfReference[] irefs = document.IrefTable.AllReferences;
                 int count = irefs.Length;
@@ -385,7 +383,7 @@ namespace PdfSharp.Pdf.IO
                 for (int idx = 0; idx < count; idx++)
                 {
                     PdfReference iref = irefs[idx];
-                    if (iref.Value == null)
+                    if (iref.Value == null!)
                     {
 #if DEBUG_
                         if (iref.ObjectNumber == 1074)

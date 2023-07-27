@@ -62,7 +62,6 @@ namespace PdfSharp.SharpZipLib.Zip.Compression
         /// </summary>
         Filtered = 1,
 
-
         /// <summary>
         /// This strategy will not look for string repetitions at all.  It
         /// only encodes with Huffman trees (which means, that more common
@@ -83,7 +82,6 @@ namespace PdfSharp.SharpZipLib.Zip.Compression
     // linked list of matches with the same hash: prev[index & WMASK] points
     // to the previous index with the same hash.
     // 
-
 
     /// <summary>
     /// Low level compression engine for deflate algorithm which uses a 32K sliding window

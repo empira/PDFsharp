@@ -1,6 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace PdfSharp.Drawing
 {
     enum FontWeightValue
@@ -100,7 +102,7 @@ namespace PdfSharp.Drawing
             return false;
         }
 
-        internal static bool FontWeightToString(int weight, out string? convertedValue)
+        internal static bool FontWeightToString(int weight, [NotNullWhen(true)] out string? convertedValue)
         {
             switch (weight)
             {

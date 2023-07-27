@@ -66,10 +66,8 @@ namespace PdfSharp.Pdf
         {
             Size = RegionInfo.CurrentRegion.IsMetric ? PageSize.A4 : PageSize.Letter;
 
-#pragma warning disable 168
             // Force creation of MediaBox object by invoking property.
-            PdfRectangle rect = MediaBox;
-#pragma warning restore 168
+            var _ = MediaBox;
         }
 
         /// <summary>
@@ -153,7 +151,7 @@ namespace PdfSharp.Pdf
                 if (!Enum.IsDefined(typeof(PageSize), value))
                     throw new InvalidEnumArgumentException("value", (int)value, typeof(PageSize));
 
-                XSize size = PageSizeConverter.ToSize(value);
+                var size = PageSizeConverter.ToSize(value);
                 // MediaBox is always in Portrait mode (see Height, Width).
                 // So take Orientation NOT into account.
                 MediaBox = new PdfRectangle(0, 0, size.Width, size.Height);
@@ -170,13 +168,13 @@ namespace PdfSharp.Pdf
         {
             get
             {
-                if (_trimMargins == null!)
+                if (_trimMargins == default!)
                     _trimMargins = new TrimMargins();
                 return _trimMargins;
             }
             set
             {
-                if (_trimMargins == null!)
+                if (_trimMargins == default!)
                     _trimMargins = new TrimMargins();
                 if (value != null!)
                 {
@@ -189,7 +187,6 @@ namespace PdfSharp.Pdf
                     _trimMargins.All = 0;
             }
         }
-
         TrimMargins _trimMargins = new TrimMargins();
 
         /// <summary>
@@ -246,12 +243,12 @@ namespace PdfSharp.Pdf
         {
             get
             {
-                PdfRectangle rect = MediaBox;
+                var rect = MediaBox;
                 return _orientation == PageOrientation.Portrait ? rect.Height : rect.Width;
             }
             set
             {
-                PdfRectangle rect = MediaBox;
+                var rect = MediaBox;
                 if (_orientation == PageOrientation.Portrait)
                     MediaBox = new PdfRectangle(rect.X1, 0, rect.X2, value);
                 else
@@ -268,12 +265,12 @@ namespace PdfSharp.Pdf
         {
             get
             {
-                PdfRectangle rect = MediaBox;
+                var rect = MediaBox;
                 return _orientation == PageOrientation.Portrait ? rect.Width : rect.Height;
             }
             set
             {
-                PdfRectangle rect = MediaBox;
+                var rect = MediaBox;
                 if (_orientation == PageOrientation.Portrait)
                     MediaBox = new PdfRectangle(0, rect.Y1, value, rect.Y2);
                 else
@@ -344,7 +341,7 @@ namespace PdfSharp.Pdf
                             }
                             else
                             {
-                                // Only one content stream -> create array
+                                // Only one content stream -> create array.
                                 _contents = new PdfContents(Owner);
                                 //Owner.irefTable.Add(_contents);
                                 var content = new PdfContent((PdfDictionary)item);

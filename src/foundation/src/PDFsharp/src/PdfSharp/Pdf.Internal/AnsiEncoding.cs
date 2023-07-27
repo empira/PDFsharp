@@ -8,6 +8,7 @@ namespace PdfSharp.Pdf.Internal
     /// <summary>
     /// An encoder for PDF AnsiEncoding.
     /// </summary>
+    [Obsolete("Use CodePagesEncodingProvider.Instance.GetEncoding(1252)")]
     public sealed class AnsiEncoding : Encoding
     {
         /// <summary>
@@ -183,7 +184,7 @@ namespace PdfSharp.Pdf.Internal
         public static void ProofImplementation()
         {
             // Implementation was verified with .NET Ansi encoding.
-            Encoding dotnetImplementation = Encoding.GetEncoding(1252);
+            Encoding dotnetImplementation = CodePagesEncodingProvider.Instance.GetEncoding(1252);
             Encoding thisImplementation = new AnsiEncoding();
 
             // Check ANSI chars.

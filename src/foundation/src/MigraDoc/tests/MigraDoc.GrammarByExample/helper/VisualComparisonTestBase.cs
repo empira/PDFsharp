@@ -78,13 +78,14 @@ namespace GdiGrammarByExample
 
         Document DdlReaderDocumentFromFile(string file)
         {
+            var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
             //Console.WriteLine($"DdlReaderDocumentFromFile(string {file})");
             Document document;
             DdlReader? reader = null;
             try
             {
                 // The Grammar By Example files still have ANSI encoding.
-                using (var streamReader = new StreamReader(DdlGbeTestBase.WslPathHack(file), Encoding.GetEncoding(1252)))
+                using (var streamReader = new StreamReader(DdlGbeTestBase.WslPathHack(file), ansiEncoding))
                 {
                     reader = new DdlReader(streamReader); //, _errorManager);
                     document = reader.ReadDocument();
@@ -172,7 +173,6 @@ namespace GdiGrammarByExample
                 // Add pdfFile pages and save.
                 AddDocument(pdfResultDocument, PdfReader.Open(DdlGbeTestBase.WslPathHack(pdfFile), PdfDocumentOpenMode.Import), testName, font, format);
                 pdfResultDocument.Save(DdlGbeTestBase.WslPathHack(resultFileName));
-
 
                 // Open output file for references.
                 var originalFileName = testContext.AddResultFileEx("!!TestResult_References.pdf");

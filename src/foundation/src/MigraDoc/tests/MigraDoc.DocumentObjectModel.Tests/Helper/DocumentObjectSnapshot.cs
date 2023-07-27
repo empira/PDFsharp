@@ -38,7 +38,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
         public static readonly Dictionary<Type, List<String>>? DefaultObjectsForAutoCreation = null;
 #endif
 
-
         // This properties are used for test debugging and have public getters to allow reading in further tests.
         // ReSharper disable MemberCanBePrivate.Local
         // ReSharper disable UnusedAutoPropertyAccessor.Local
@@ -60,16 +59,13 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
 
         public bool ExcludeFromComparison { get; }
 
-
         public bool DocumentObjectAlreadyProcessed { get; }
 
         public DocumentObjectSnapshot? FirstSnapshotForThisObject { get; }
 
-
         public Dictionary<String, DocumentObjectSnapshot> Values { get; } = new();
 
         public List<DocumentObjectSnapshot> Children { get; } = new();
-
 
         public Dictionary<DocumentObject, DocumentObjectSnapshot> ProcessedDocumentObjects { get; }
 
@@ -78,7 +74,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
         public Dictionary<Type, List<String>> PropertiesExcludedFromComparison { get; }
         // ReSharper restore UnusedAutoPropertyAccessor.Local
         // ReSharper restore MemberCanBePrivate.Local
-
 
         /// <summary>
         /// Creates a recursive snapshot of obj with all its values and children.
@@ -128,7 +123,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
             if (!IsDocumentObjectType || IsNull)
                 return;
 
-
             var docObj = (DocumentObject)obj!;
             var alreadyProcessed = ProcessedDocumentObjects.ContainsKey(docObj);
             if (alreadyProcessed)
@@ -141,7 +135,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
                 Children = firstMatch.Children;
                 return;
             }
-
 
             // For DocumentObjectSnapshots representing unknown DocumentObjects process is values and children.
             ProcessedDocumentObjects.Add(docObj, this);
@@ -253,7 +246,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
             var excludeFromComparison2 = snapshot2.ExcludeFromComparison;
             excludeFromComparison1.Should().Be(excludeFromComparison2, CreateSnapshotEqualityBecauseString(pathToObject1));
 
-
             var isDocumentObjectType1 = snapshot1.IsDocumentObjectType;
             var isDocumentObjectType2 = snapshot2.IsDocumentObjectType;
 
@@ -289,7 +281,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
                     return;
             }
 
-
             // AlreadyProcessed must be equal. If differing, we'll have a reference to an already processed object on the on hand and a copy on the other hand.
             var isAlreadyProcessed1 = snapshot1.DocumentObjectAlreadyProcessed;
             var isAlreadyProcessed2 = snapshot2.DocumentObjectAlreadyProcessed;
@@ -300,7 +291,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
             firstSnapshotForThisObjectPath1.Should().Be(firstSnapshotForThisObjectPath2, CreateSnapshotEqualityBecauseString(pathToObject1));
             if (isAlreadyProcessed1)
                 return;
-
 
             // Recursion for values.
             var values1 = snapshot1.Values;
@@ -314,7 +304,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
 
                 CompareSnapshots(value1, value2);
             }
-
 
             // Recursion for children.
             var children1 = snapshot1.Children;

@@ -34,7 +34,6 @@ namespace PdfSharp.Features.IO
             //string path = Path.Combine(@"D:\!StLa\empira1\edf\! PDF files with ObjStm and XRef", @"wr2014_web_0.pdf");
             string path = Path.Combine(@"D:\!StLa\empira1\edf\! PDF files with ObjStm and XRef", @"UBT-PB 625 400V50Hz mit Bypass.pdf");
 
-
             var document = PdfReader.Open(path);
             document.Info.Author = "empira";
             document.Save("test.pdf");

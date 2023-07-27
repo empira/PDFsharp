@@ -141,7 +141,6 @@ namespace PdfSharp.Drawing.BarCodes
             new bool[] {false, true, false, false, true, false, true, false, false},
         };
 
-
         /// <summary>
         /// Calculates the thick and thin line widths,
         /// taking into account the required rendering size.

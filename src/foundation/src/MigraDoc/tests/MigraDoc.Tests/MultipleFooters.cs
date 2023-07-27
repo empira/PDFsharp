@@ -7,12 +7,15 @@ using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Rendering;
 using PdfSharp.Fonts;
+#if CORE
 using PdfSharp.Snippets.Font;
+#endif
 using PdfSharp.TestHelper;
 using Xunit;
 
 namespace MigraDoc.Tests
 {
+    [Collection("MGD")]
     public class MultipleFooters
     {
         [Fact]
@@ -38,7 +41,6 @@ namespace MigraDoc.Tests
                 // Associate the MigraDoc document with a renderer.
                 Document = document
             };
-
 
             // Layout and render document to PDF.
             pdfRenderer.RenderDocument();

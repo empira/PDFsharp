@@ -23,12 +23,10 @@ namespace PdfSharp.Drawing.BarCodes
         /// </summary>
         Below,
 
-
         /// <summary>
         /// The text is located above within the code.
         /// </summary>
         AboveEmbedded,
-
 
         /// <summary>
         /// The text is located below within the code.

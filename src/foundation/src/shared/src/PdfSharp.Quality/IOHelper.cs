@@ -105,7 +105,6 @@ namespace PdfSharp.Quality
         //        }
         //#endif
 
-
 #if old
 //        protected DrawingVisual PrepareDrawingVisual(out DrawingContext dc)
 //        {

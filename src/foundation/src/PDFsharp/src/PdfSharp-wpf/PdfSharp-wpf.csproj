@@ -388,6 +388,15 @@
         <Compile Include="..\PdfSharp\SharpZipLib\Zip\Compression\Streams\StreamManipulator.cs" Link="SharpZipLib\Zip\Compression\Streams\StreamManipulator.cs" />
         <Compile Include="..\PdfSharp\SharpZipLib\Zip\ZipConstants.cs" Link="SharpZipLib\Zip\ZipConstants.cs" />
         <Compile Include="..\PdfSharp\SharpZipLib\Zip\ZipException.cs" Link="SharpZipLib\Zip\ZipException.cs" />
+        <Compile Include="..\PdfSharp\UniversalAccessibility.Drawing\XGraphicsExtensions.cs" Link="UniversalAccessibility.Drawing\XGraphicsExtensions.cs" />
+        <Compile Include="..\PdfSharp\UniversalAccessibility\enums\PdfBlockLevelElementTag.cs" Link="UniversalAccessibility\enums\PdfBlockLevelElementTag.cs" />
+        <Compile Include="..\PdfSharp\UniversalAccessibility\enums\PdfGroupingElementTag.cs" Link="UniversalAccessibility\enums\PdfGroupingElementTag.cs" />
+        <Compile Include="..\PdfSharp\UniversalAccessibility\enums\PdfIllustrationElementTag.cs" Link="UniversalAccessibility\enums\PdfIllustrationElementTag.cs" />
+        <Compile Include="..\PdfSharp\UniversalAccessibility\enums\PdfInlineLevelElementTag.cs" Link="UniversalAccessibility\enums\PdfInlineLevelElementTag.cs" />
+        <Compile Include="..\PdfSharp\UniversalAccessibility\PdfRendererExtensions.cs" Link="UniversalAccessibility\PdfRendererExtensions.cs" />
+        <Compile Include="..\PdfSharp\UniversalAccessibility\StructureBuilder.cs" Link="UniversalAccessibility\StructureBuilder.cs" />
+        <Compile Include="..\PdfSharp\UniversalAccessibility\StructureElementStack.cs" Link="UniversalAccessibility\StructureElementStack.cs" />
+        <Compile Include="..\PdfSharp\UniversalAccessibility\UAManager.cs" Link="UniversalAccessibility\UAManager.cs" />
         <Compile Include="..\PdfSharp\Windows\enums\RenderMode.cs" Link="Windows\enums\RenderMode.cs" />
         <Compile Include="..\PdfSharp\Windows\enums\Zoom.cs" Link="Windows\enums\Zoom.cs" />
         <Compile Include="..\PdfSharp\Windows\VisualPresenter.cs" Link="Windows\VisualPresenter.cs" />

@@ -19,7 +19,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         /// <summary>
         /// Creates a deep copy of this object.
         /// </summary>
-        public new Series Clone() 
+        public new Series Clone()
             => (Series)DeepCopy();
 
         /// <summary>
@@ -116,7 +116,11 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         public FillFormat FillFormat
         {
             get => Values.FillFormat ??= new(this);
-            set => Values.FillFormat = value;
+            set
+            {
+                SetParent(value);
+                Values.FillFormat = value;
+            }
         }
 
         /// <summary>
@@ -306,7 +310,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             public Color? MarkerForegroundColor
             {
                 get => _color;
-                set => _color = DocumentObjectModel.Color.MakeNullIfEmpty(value);
+                set => _color = Color.MakeNullIfEmpty(value);
             }
             Color? _color;
 
@@ -314,7 +318,12 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             /// Gets or sets the internal nullable implementation value of the enclosing document object property.
             /// See enclosing document object class for documentation of this property.
             /// </summary>
-            public Color? MarkerBackgroundColor { get; set; }  // BUG Differs from MarkerForegroundColor
+            public Color? MarkerBackgroundColor
+            {
+                get => _markerBackgroundColor;
+                set => _markerBackgroundColor = Color.MakeNullIfEmpty(value);
+            } 
+            Color? _markerBackgroundColor;
 
             /// <summary>
             /// Gets or sets the internal nullable implementation value of the enclosing document object property.
