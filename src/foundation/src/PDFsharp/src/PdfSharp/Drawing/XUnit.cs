@@ -86,7 +86,6 @@ namespace PdfSharp.Drawing
         }
         double _pointValue;
 
-
         /// <summary>
         /// Gets the unit of measure.
         /// </summary>

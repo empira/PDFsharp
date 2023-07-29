@@ -61,19 +61,14 @@ namespace PdfSharp.Drawing
         public InternalGraphicsState(XGraphics gfx, XGraphicsContainer container)
         {
             _gfx = gfx;
-            State = null!; // BUG
+            //State = null!; // BUG
             container.InternalState = this;
         }
 
         /// <summary>
         /// Gets or sets the current transformation matrix.
         /// </summary>
-        public XMatrix Transform
-        {
-            get => _transform;
-            set => _transform = value;
-        }
-        XMatrix _transform;
+        public XMatrix Transform { get; set; }
 
         /// <summary>
         /// Called after this instanced was pushed on the internal graphics stack.

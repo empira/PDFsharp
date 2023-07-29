@@ -454,10 +454,7 @@ namespace PdfSharp.Drawing
             Debug.Assert(fm.UnitsPerEm == Descriptor.UnitsPerEm);
         }
 
-
-
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
         /// <summary>
         /// Gets the XFontFamily object associated with this XFont object.
@@ -519,7 +516,6 @@ namespace PdfSharp.Drawing
             set => _isVertical = value;
         }
         bool _isVertical;
-
 
         /// <summary>
         /// Gets the PDF options of the font.
@@ -680,9 +676,7 @@ namespace PdfSharp.Drawing
 
         internal XGlyphTypeface GlyphTypeface { get; private set; } = default!;
 
-
         internal OpenTypeDescriptor Descriptor { get; private set; } = default!;
-
 
         internal string FamilyName => _familyName;
 
@@ -737,8 +731,7 @@ namespace PdfSharp.Drawing
 #endif
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
+        
         /// <summary>
         /// Cache PdfFontTable.FontSelector to speed up finding the right PdfFont
         /// if this font is used more than once.

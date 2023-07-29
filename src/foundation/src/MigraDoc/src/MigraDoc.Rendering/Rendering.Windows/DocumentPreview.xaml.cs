@@ -284,7 +284,6 @@ namespace MigraDoc.Rendering.Windows
         /// </summary>
         public DocumentRenderer? Renderer { get; private set; }
 
-
         /// <summary>
         /// Helper class to render a single visual.
         /// </summary>

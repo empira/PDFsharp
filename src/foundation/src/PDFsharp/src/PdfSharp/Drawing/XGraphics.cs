@@ -199,7 +199,6 @@ namespace PdfSharp.Drawing  // #??? Clean up
             //////brush.AutoLayoutContent = true;
             //////canvas.Background = brush;
 
-
             _gsStack = new GraphicsStateStack(this);
             TargetContext = XGraphicTargetContext.WPF;
 
@@ -405,11 +404,11 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 // If form.Owner is null create a meta file.
                 if (form.Owner == null)
                 {
-                    MemoryStream stream = new MemoryStream();
+                    var stream = new MemoryStream();
                     // BUG: This Windows 1.0 technique issued an exception under Microsoft Azure.  // #???
-                    using (Graphics refgfx = Graphics.FromHwnd(IntPtr.Zero))
+                    using (var refGfx = Graphics.FromHwnd(IntPtr.Zero))
                     {
-                        IntPtr hdc = refgfx.GetHdc();
+                        IntPtr hdc = refGfx.GetHdc();
 #if true_
                         // This code comes from my C++ RenderContext and checks some confusing details in connection 
                         // with metafiles.
@@ -428,7 +427,6 @@ namespace PdfSharp.Drawing  // #??? Clean up
                                                                                                       //       330 : 254
                                                                                                       //       254 : 203
                                                                                                       // Obviously my ATI driver reports the exact size of the monitor.
-
 
                         // device size in pixel
                         int horzSizePixel = NativeMethods.GetDeviceCaps(hdc, NativeMethods.HORZRES);     // = 1280 : 1280             | 4676
@@ -456,7 +454,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                         Metafile = new Metafile(stream, hdc, rect, MetafileFrameUnit.Pixel); //, EmfType.EmfPlusOnly);
 
                         // Petzold disposes the refgfx object, although the hdc is in use of the metafile
-                        refgfx.ReleaseHdc(hdc);
+                        refGfx.ReleaseHdc(hdc);
                     } // refgfx.Dispose();
 
                     _gfx = Graphics.FromImage(Metafile);
@@ -878,11 +876,8 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
                 _drawGraphics = false;
 
-                if (_renderer != null)
-                {
-                    _renderer.Close();
-                    _renderer = null;
-                }
+                _renderer?.Close();
+                _renderer = null;
             }
         }
         bool _disposed;
@@ -1038,8 +1033,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawLines(pen, new[] { new XPoint(x1, y1), new XPoint(x2, y2) });
+            _renderer?.DrawLines(pen, new[] { new XPoint(x1, y1), new XPoint(x2, y2) });
         }
 
         // ----- DrawLines ----------------------------------------------------------------------------
@@ -1085,10 +1079,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 finally { Lock.ExitGdiPlus(); }
             }
 
-            if (_renderer != null)
-            {
-                _renderer.DrawLines(pen, MakeXPointArray(points, 0, points.Length));
-            }
+            _renderer?.DrawLines(pen, MakeXPointArray(points, 0, points.Length));
         }
 #endif
 
@@ -1151,8 +1142,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawLines(pen, points);
+            _renderer?.DrawLines(pen, points);
         }
 
         /// <summary>
@@ -1263,9 +1253,8 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawBeziers(pen,
-                  new XPoint[] { new XPoint(x1, y1), new XPoint(x2, y2), new XPoint(x3, y3), new XPoint(x4, y4) });
+            _renderer?.DrawBeziers(pen,
+                new[] { new XPoint(x1, y1), new XPoint(x2, y2), new XPoint(x3, y3), new XPoint(x4, y4) });
         }
 
         // ----- DrawBeziers --------------------------------------------------------------------------
@@ -1351,8 +1340,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawBeziers(pen, points);
+            _renderer?.DrawBeziers(pen, points);
         }
 
         // ----- DrawCurve ----------------------------------------------------------------------------
@@ -1535,8 +1523,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawCurve(pen, points, tension);
+            _renderer?.DrawCurve(pen, points, tension);
         }
 
         // ----- DrawArc ------------------------------------------------------------------------------
@@ -1612,8 +1599,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
                 }
 
-                if (_renderer != null)
-                    _renderer.DrawArc(pen, x, y, width, height, startAngle, sweepAngle);
+                _renderer?.DrawArc(pen, x, y, width, height, startAngle, sweepAngle);
             }
         }
 
@@ -1685,8 +1671,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawRectangle(pen, null, x, y, width, height);
+            _renderer?.DrawRectangle(pen, null, x, y, width, height);
         }
 
         // ----- fill -----
@@ -1753,8 +1738,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawRectangle(null, brush, x, y, width, height);
+            _renderer?.DrawRectangle(null, brush, x, y, width, height);
         }
 
         // ----- stroke and fill -----
@@ -1824,8 +1808,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawRectangle(pen, brush, x, y, width, height);
+            _renderer?.DrawRectangle(pen, brush, x, y, width, height);
         }
 
         // ----- DrawRectangles -----------------------------------------------------------------------
@@ -2232,8 +2215,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawRoundedRectangle(pen, brush, x, y, width, height, ellipseWidth, ellipseHeight);
+            _renderer?.DrawRoundedRectangle(pen, brush, x, y, width, height, ellipseWidth, ellipseHeight);
         }
 
         // ----- DrawEllipse --------------------------------------------------------------------------
@@ -2300,8 +2282,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawEllipse(pen, null, x, y, width, height);
+            _renderer?.DrawEllipse(pen, null, x, y, width, height);
         }
 
         // ----- fill -----
@@ -2365,8 +2346,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawEllipse(null, brush, x, y, width, height);
+            _renderer?.DrawEllipse(null, brush, x, y, width, height);
         }
 
         // ----- stroke and fill -----
@@ -2456,8 +2436,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawEllipse(pen, brush, x, y, width, height);
+            _renderer?.DrawEllipse(pen, brush, x, y, width, height);
         }
 
         // ----- DrawPolygon --------------------------------------------------------------------------
@@ -2527,8 +2506,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawPolygon(pen, null, points, XFillMode.Alternate);  // XFillMode is ignored
+            _renderer?.DrawPolygon(pen, null, points, XFillMode.Alternate);  // XFillMode is ignored
         }
 
         // ----- fill -----
@@ -2594,8 +2572,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawPolygon(null, brush, points, fillMode);
+            _renderer?.DrawPolygon(null, brush, points, fillMode);
         }
 
         // ----- stroke and fill -----
@@ -2675,8 +2652,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawPolygon(pen, brush, points, fillMode);
+            _renderer?.DrawPolygon(pen, brush, points, fillMode);
         }
 
         // ----- DrawPie ------------------------------------------------------------------------------
@@ -2740,8 +2716,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawPie(pen, null, x, y, width, height, startAngle, sweepAngle);
+            _renderer?.DrawPie(pen, null, x, y, width, height, startAngle, sweepAngle);
         }
 
         // ----- fill -----
@@ -2802,8 +2777,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawPie(null, brush, x, y, width, height, startAngle, sweepAngle);
+            _renderer?.DrawPie(null, brush, x, y, width, height, startAngle, sweepAngle);
         }
 
         // ----- stroke and fill -----
@@ -2886,8 +2860,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawPie(pen, brush, x, y, width, height, startAngle, sweepAngle);
+            _renderer?.DrawPie(pen, brush, x, y, width, height, startAngle, sweepAngle);
         }
 
         // ----- DrawClosedCurve ----------------------------------------------------------------------
@@ -3260,8 +3233,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawClosedCurve(pen, brush, points, tension, fillMode);
+            _renderer?.DrawClosedCurve(pen, brush, points, tension, fillMode);
         }
 
         // ----- DrawPath -----------------------------------------------------------------------------
@@ -3286,19 +3258,18 @@ namespace PdfSharp.Drawing  // #??? Clean up
                     try
                     {
                         Lock.EnterGdiPlus();
-                        _gfx.DrawPath(pen.RealizeGdiPen(), path._gdipPath);
+                        _gfx.DrawPath(pen.RealizeGdiPen(), path.GdipPath);
                     }
                     finally { Lock.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
                 if (TargetContext == XGraphicTargetContext.WPF)
-                    _dc.DrawGeometry(null, pen.RealizeWpfPen(), path._pathGeometry);
+                    _dc.DrawGeometry(null, pen.RealizeWpfPen(), path.PathGeometry);
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawPath(pen, null, path);
+            _renderer?.DrawPath(pen, null, path);
         }
 
         // ----- fill -----
@@ -3321,19 +3292,18 @@ namespace PdfSharp.Drawing  // #??? Clean up
                     try
                     {
                         Lock.EnterGdiPlus();
-                        _gfx.FillPath(brush.RealizeGdiBrush(), path._gdipPath);
+                        _gfx.FillPath(brush.RealizeGdiBrush(), path.GdipPath);
                     }
                     finally { Lock.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
                 if (TargetContext == XGraphicTargetContext.WPF)
-                    _dc.DrawGeometry(brush.RealizeWpfBrush(), null, path._pathGeometry);
+                    _dc.DrawGeometry(brush.RealizeWpfBrush(), null, path.PathGeometry);
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawPath(null, brush, path);
+            _renderer?.DrawPath(null, brush, path);
         }
 
         // ----- stroke and fill -----
@@ -3360,9 +3330,9 @@ namespace PdfSharp.Drawing  // #??? Clean up
                     {
                         Lock.EnterGdiPlus();
                         if (brush != null)
-                            _gfx.FillPath(brush.RealizeGdiBrush(), path._gdipPath);
+                            _gfx.FillPath(brush.RealizeGdiBrush(), path.GdipPath);
                         if (pen != null)
-                            _gfx.DrawPath(pen.RealizeGdiPen(), path._gdipPath);
+                            _gfx.DrawPath(pen.RealizeGdiPen(), path.GdipPath);
                     }
                     finally { Lock.ExitGdiPlus(); }
                 }
@@ -3372,13 +3342,12 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 {
                     var wpfBrush = brush?.RealizeWpfBrush();
                     var wpfPen = pen?.RealizeWpfPen();
-                    _dc.DrawGeometry(wpfBrush, wpfPen, path._pathGeometry);
+                    _dc.DrawGeometry(wpfBrush, wpfPen, path.PathGeometry);
                 }
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawPath(pen, brush, path);
+            _renderer?.DrawPath(pen, brush, path);
         }
 
         // ----- DrawString ---------------------------------------------------------------------------
@@ -3628,8 +3597,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawString(text, font, brush, layoutRectangle, format);
+            _renderer?.DrawString(text, font, brush, layoutRectangle, format);
         }
 
         // ----- MeasureString ------------------------------------------------------------------------
@@ -3872,8 +3840,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawImage(image, x, y, image.PointWidth, image.PointHeight);
+            _renderer?.DrawImage(image, x, y, image.PointWidth, image.PointHeight);
             //image.Width * 72 / image.HorizontalResolution,
             //image.Height * 72 / image.HorizontalResolution);
         }
@@ -3995,8 +3962,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawImage(image, x, y, width, height);
+            _renderer?.DrawImage(image, x, y, width, height);
         }
 
         // TODO: calculate destination size
@@ -4074,7 +4040,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #if WPF
                 if (TargetContext == XGraphicTargetContext.WPF)
                 {
-                    if (image._wpfImage != null)
+                    if (image._wpfImage != null!)
                     {
                         //InterpolationMode interpolationMode = InterpolationMode.Invalid;
                         //if (!image.Interpolate)
@@ -4100,8 +4066,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.DrawImage(image, destRect, srcRect, srcUnit);
+            _renderer?.DrawImage(image, destRect, srcRect, srcUnit);
         }
 
         //public void DrawImage(XImage image, Rectangle destRect, double srcX, double srcY, double srcWidth, double srcHeight, GraphicsUnit srcUnit);
@@ -4264,9 +4229,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 _gsStack.Push(iState);
             }
 #endif
-
-            if (_renderer != null)
-                _renderer.Save(xState);
+            _renderer?.Save(xState);
 
             return xState;
         }
@@ -4308,9 +4271,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 _transform = state.InternalState.Transform;
             }
 #endif
-
-            if (_renderer != null)
-                _renderer.Restore(state);
+            _renderer?.Restore(state);
         }
 
         /// <summary>
@@ -4404,8 +4365,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 
             _gsStack.Push(iState);
 
-            if (_renderer != null)
-                _renderer.BeginContainer(xContainer, dstrect, srcrect, unit);
+            _renderer?.BeginContainer(xContainer, dstrect, srcrect, unit);
 
             XMatrix matrix = new XMatrix();
             double scaleX = dstrect.Width / srcrect.Width;
@@ -4447,8 +4407,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             _transform = container.InternalState.Transform;
 
-            if (_renderer != null)
-                _renderer.EndContainer(container);
+            _renderer?.EndContainer(container);
         }
 
         /// <summary>
@@ -4780,8 +4739,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 _gsStack.Current.PushTransform(mt);
             }
 #endif
-            if (_renderer != null)
-                _renderer.AddTransform(transform, XMatrixOrder.Prepend);
+            _renderer?.AddTransform(transform, XMatrixOrder.Prepend);
         }
 
         //public void TransformPoints(CoordinateSpace destSpace, CoordinateSpace srcSpace, Point[] points)
@@ -4852,14 +4810,14 @@ namespace PdfSharp.Drawing  // #??? Clean up
                     try
                     {
                         Lock.EnterGdiPlus();
-                        _gfx.SetClip(path._gdipPath, CombineMode.Intersect);
+                        _gfx.SetClip(path.GdipPath, CombineMode.Intersect);
                     }
                     finally { Lock.ExitGdiPlus(); }
                 }
 #endif
 #if WPF && !GDI
                 if (TargetContext == XGraphicTargetContext.WPF)
-                    _gsStack.Current.PushClip(path._pathGeometry);
+                    _gsStack.Current.PushClip(path.PathGeometry);
 #endif
 #if GDI && WPF
                 if (TargetContext == XGraphicTargetContext.GDI)
@@ -4878,8 +4836,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            if (_renderer != null)
-                _renderer.SetClip(path, XCombineMode.Intersect);
+            _renderer?.SetClip(path, XCombineMode.Intersect);
         }
 
         //public void SetClip(Graphics g);
@@ -4911,8 +4868,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 // TODO: Do something if metafile?
             }
 
-            if (_renderer != null)
-                _renderer.WriteComment(comment);
+            _renderer?.WriteComment(comment);
         }
 
         /// <summary>
@@ -4946,7 +4902,6 @@ namespace PdfSharp.Drawing  // #??? Clean up
         {
             if (points == null)
                 return Array.Empty<GdiPointF>();
-
 
             //int length = points.Length;
             var result = new GdiPointF[count];
@@ -4987,7 +4942,6 @@ namespace PdfSharp.Drawing  // #??? Clean up
         {
             if (points == null)
                 return Array.Empty<XPoint>();
-
 
             //int length = points.Length;
             var result = new XPoint[count];
@@ -5048,7 +5002,6 @@ namespace PdfSharp.Drawing  // #??? Clean up
         {
             if (rects == null)
                 return Array.Empty<GdiRectF>();
-
 
             //int length = rects.Length;
             GdiRectF[] result = new GdiRectF[count];

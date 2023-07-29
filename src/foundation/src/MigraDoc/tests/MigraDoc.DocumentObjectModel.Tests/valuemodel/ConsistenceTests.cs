@@ -26,9 +26,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
                 if (type.IsAbstract)
                     continue;
 
-                //if (type.Name == nameof(DocumentObjectCollection))
-                //    continue; // BUG
-
                 domTypes.Add(type);
             }
             return domTypes.ToArray();
@@ -112,8 +109,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
                 }
             }
         }
-
-
 
         [Fact]
         public void Test_DocumentSelfSectionAndParentReferences()

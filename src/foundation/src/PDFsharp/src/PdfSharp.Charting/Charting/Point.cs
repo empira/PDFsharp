@@ -17,20 +17,23 @@ namespace PdfSharp.Charting
         /// <summary>
         /// Initializes a new instance of the Point class with a real value.
         /// </summary>
-        public Point(double value) : this() 
+        public Point(double value) : this()
             => Value = value;
 
         /// <summary>
         /// Initializes a new instance of the Point class with a real value.
         /// </summary>
-        public Point(string value) : this() =>
+        public Point(string value) : this()
+        {
             // = "34.5 23.9"
-            Value = 0;  // BUG: Not implemented
+            Value = 0; // BUG: Not implemented
+            throw new NotImplementedException("Point from string.");
+        }
 
         /// <summary>
         /// Creates a deep copy of this object.
         /// </summary>
-        public new Point Clone() 
+        public new Point Clone()
             => (Point)DeepCopy();
 
         /// <summary>

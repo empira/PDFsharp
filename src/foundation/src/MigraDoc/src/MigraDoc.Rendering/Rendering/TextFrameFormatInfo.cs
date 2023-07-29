@@ -8,6 +8,6 @@ namespace MigraDoc.Rendering
     /// </summary>
     sealed class TextFrameFormatInfo : ShapeFormatInfo
     {
-        internal FormattedTextFrame FormattedTextFrame = null!;  // BUG
+        internal FormattedTextFrame FormattedTextFrame = default!;
     }
 }

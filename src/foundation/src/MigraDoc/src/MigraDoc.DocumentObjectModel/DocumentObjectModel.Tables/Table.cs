@@ -257,7 +257,11 @@ namespace MigraDoc.DocumentObjectModel.Tables
         public ParagraphFormat Format
         {
             get => Values.Format ??= new(this);
-            set => Values.Format = value;
+            set
+            {
+                SetParent(value);
+                Values.Format = value;
+            }
         }
 
         /// <summary>
@@ -302,7 +306,11 @@ namespace MigraDoc.DocumentObjectModel.Tables
         public Borders Borders
         {
             get => Values.Borders ??= new(this);
-            set => Values.Borders = value;
+            set
+            {
+                SetParent(value);
+                Values.Borders = value;
+            }
         }
 
         /// <summary>

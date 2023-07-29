@@ -340,9 +340,6 @@ namespace PdfSharp.Fonts
 #endif
     }
 
-
-
-
     /// <summary>
     /// Not yet implemented.
     /// </summary>
@@ -497,8 +494,7 @@ namespace PdfSharp.Fonts
             // Caveat: fc-match *always* returns a "next best" match or default font, even if it's bad.
             // Caveat: some preprocessing/refactoring needed to produce a pattern fc-match can understand.
             // Caveat: fontconfig needs additional configuration to know about WSL having Windows Fonts available at /mnt/c/Windows/Fonts.
-
-
+            
             foreach (var fontLocation in LinuxFontLocations)
             {
                 if (!Directory.Exists(fontLocation))

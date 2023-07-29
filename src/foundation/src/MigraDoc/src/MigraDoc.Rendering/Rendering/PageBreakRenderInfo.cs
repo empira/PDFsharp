@@ -21,7 +21,7 @@ namespace MigraDoc.Rendering
             get => _pageBreakFormatInfo;
             internal set => _pageBreakFormatInfo = (PageBreakFormatInfo)value;
         }
-        PageBreakFormatInfo _pageBreakFormatInfo = null!; // BUG NRT
+        PageBreakFormatInfo _pageBreakFormatInfo = default!;
 
         /// <summary>
         /// Gets the document object to which the layout information applies. Use the Tag property of DocumentObject to identify an object.
@@ -31,6 +31,6 @@ namespace MigraDoc.Rendering
             get => _pageBreak;
             internal set => _pageBreak = (PageBreak)value;
         }
-        PageBreak _pageBreak = null!; // BUG NRT
+        PageBreak _pageBreak = default!;
     }
 }

@@ -330,7 +330,6 @@ namespace PdfSharp.SharpZipLib.Zip.Compression
                     }
                     heap[path] = last;
 
-
                     int second = heap[0];
 
                     // Create a new node father of first and second
@@ -956,7 +955,6 @@ namespace PdfSharp.SharpZipLib.Zip.Compression
             }
             return IsFull();
         }
-
 
         /// <summary>
         /// Reverse the bits of a 16 bit value.

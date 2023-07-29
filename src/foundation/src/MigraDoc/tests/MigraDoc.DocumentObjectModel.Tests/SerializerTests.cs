@@ -1366,5 +1366,35 @@ namespace MigraDoc.DocumentObjectModel.Tests
 
             //GetType();
         }
+
+        [Fact(Skip = "Escaping bug in current implementation")]
+        public void Test_Write_And_Read_MDDDL_LinefeedEscaping()
+        {
+            var doc = new Document
+            {
+                Info =
+                {
+                    Title = "A Title",
+                    Subject = "A subject with a \r\n line break",
+                    Author = "empira"
+                },
+            };
+
+            //var section = doc.AddSection();
+            //section.AddParagraph(@"Test 1");
+
+            var mdddl = DdlWriter.WriteToString(doc);
+            mdddl.Should().NotBeNullOrEmpty();
+
+            //GetType();
+
+            // Read MDDDL.
+            // Throws exception "DdlParserException" with message "Newline in string not allowed.".
+            // Exception should be thrown in DdlWriter or linefeed should be escaped.
+            var docRead = DdlReader.DocumentFromString(mdddl);
+
+            //GetType();
+        }
+
     }
 }

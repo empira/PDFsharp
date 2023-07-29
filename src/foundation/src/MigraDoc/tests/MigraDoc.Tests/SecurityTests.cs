@@ -13,6 +13,7 @@ using static MigraDoc.Tests.SecurityTestHelper;
 
 namespace MigraDoc.Tests
 {
+    [Collection("MGD")]
     public class SecurityTests
     {
         // Notice: Test opening files written by these tests in Adobe Acrobat Reader after changes that may affect encryption.
@@ -61,7 +62,6 @@ namespace MigraDoc.Tests
         //   - _EmbBoth = encrypted file containing an encrypted embedded file
         //   - _EmbOnly = encrypted file with EncryptEmbeddedFilesOnly containing a not encrypted embedded file
         //   - Perm{X} = Permissions test
-
 
         // ReSharper disable once UnusedParameter.Local
         static void OpenPdf(string filename)
@@ -201,8 +201,6 @@ namespace MigraDoc.Tests
             OpenPdf(filename);
         }
 
-
-
         [Theory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
@@ -307,9 +305,6 @@ namespace MigraDoc.Tests
             pdfRenderer.Save(filename);
             OpenPdf(filename);
         }
-
-
-
 
         [Theory]
         [ClassData(typeof(TestData.AllVersions))]
@@ -443,8 +438,6 @@ namespace MigraDoc.Tests
             OpenPdf(filename);
         }
 
-
-
         [Theory]
         [InlineData(TestOptionsEnum.V5)]
         // Older encryption versions don't support these password values. Passwords for revision 4 and earlier are up to 32 characters in length.
@@ -505,7 +498,6 @@ namespace MigraDoc.Tests
             OpenPdf(filenameRead);
         }
 
-
         [Theory]
         [InlineData(TestOptionsEnum.Default)] // Testing with one encryption version should do it.
         public void Test_EmbeddedFile_WrapperEncrypted(TestOptionsEnum optionsEnum)
@@ -524,7 +516,6 @@ namespace MigraDoc.Tests
 
             pdfRendererEmbedded.Save(filenameEmbedded);
 
-
             // Write file containing embedded file with only this embedded file stream encrypted.
             var filename = AddPrefixToFilename("_EmbWrap w UO.pdf", options);
             var referenceNameEmbedded = "referenceEmbedded";
@@ -539,7 +530,6 @@ namespace MigraDoc.Tests
 
             var pdfRenderer = RenderSecuredDocument(document, options);
             pdfRenderer.Save(filename);
-
 
             // Read encrypted file and write it without encryption.
             var pdfDoc = PdfReader.Open(filename, PasswordOwnerDefault);
@@ -568,7 +558,6 @@ namespace MigraDoc.Tests
 
             pdfRendererEmbedded.Save(filenameEmbedded);
 
-
             // Write file containing embedded file with only this embedded file stream encrypted.
             var filename = AddPrefixToFilename("_EmbEmb w UO.pdf", options);
             var referenceNameEmbedded = "referenceEmbedded";
@@ -583,7 +572,6 @@ namespace MigraDoc.Tests
 
             var pdfRenderer = RenderDocument(document);
             pdfRenderer.Save(filename);
-
 
             // Read encrypted file and write it without encryption.
             var pdfDoc = PdfReader.Open(filename, PasswordOwnerDefault);
@@ -612,7 +600,6 @@ namespace MigraDoc.Tests
 
             pdfRendererEmbedded.Save(filenameEmbedded);
 
-
             // Write file containing embedded file with only this embedded file stream encrypted.
             var filename = AddPrefixToFilename("_EmbBoth w UO.pdf", options);
             var referenceNameEmbedded = "referenceEmbedded";
@@ -628,7 +615,6 @@ namespace MigraDoc.Tests
             var pdfRenderer = RenderSecuredDocument(document, options);
             pdfRenderer.Save(filename);
 
-
             // Read encrypted file and write it without encryption.
             var pdfDoc = PdfReader.Open(filename, PasswordOwnerDefault);
             var pdfRendererRead = new PdfDocumentRenderer { PdfDocument = pdfDoc };
@@ -637,9 +623,8 @@ namespace MigraDoc.Tests
             pdfRendererRead.Save(filenameRead);
             OpenPdf(filenameRead);
         }
-
 #if true
-        private const string SkippedTestEmbeddedFilesMessage = "The feature to encrypt embedded files only is not yet correctly implemented. The resulting files may not be readyble with PDF readers.";
+        const string SkippedTestEmbeddedFilesMessage = "The feature to encrypt embedded files only is not yet correctly implemented. The resulting files may not be readyble with PDF readers.";
 
         [Theory]
         [ClassData(typeof(TestData.V4), Skip = SkippedTestEmbeddedFilesMessage)]
@@ -667,7 +652,6 @@ namespace MigraDoc.Tests
 
             pdfRendererEmbedded.Save(filenameEmbedded);
 
-
             // Write file containing embedded file with only this embedded file stream encrypted.
             var filename = AddPrefixToFilename("_EmbOnly w UO.pdf", options);
             var referenceNameEmbedded = "referenceEmbedded";
@@ -685,7 +669,6 @@ namespace MigraDoc.Tests
             pdfDocument.SecurityHandler.EncryptEmbeddedFilesOnly();
             pdfRenderer.Save(filename);
 
-
             // Read encrypted file and write it without encryption.
             var pdfDoc = PdfReader.Open(filename, PasswordOwnerDefault);
             var pdfRendererRead = new PdfDocumentRenderer { PdfDocument = pdfDoc };
@@ -694,7 +677,6 @@ namespace MigraDoc.Tests
             pdfRendererRead.Save(filenameRead);
             OpenPdf(filenameRead);
         }
-        
         
         [Theory]
         [ClassData(typeof(TestData.AllVersions))]

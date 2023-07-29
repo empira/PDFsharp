@@ -1,9 +1,9 @@
 ﻿# PDFsharp & MigraDoc 6.0
 
-Version **6.0.0-preview-2**  
-Published **2023-04-25**
+Version **6.0.0-preview-3**  
+Published **2023-07-27**
 
-This is the second preview of the **PDFsharp** project, the main project of PDFsharp & MigraDoc 6.0 with updates for C# 10 and .NET 6.0.
+This is the third preview of the **PDFsharp** project, the main project of PDFsharp & MigraDoc 6.0 with updates for C# 10 and .NET 6.0.
 
 PDFsharp: Copyright (c) 2005-2023 empira Software GmbH, Troisdorf (Cologne Area, Germany)  
 MigraDoc: Copyright (c) 2001-2023 empira Software GmbH, Troisdorf (Cologne Area, Germany)  

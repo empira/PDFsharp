@@ -36,7 +36,7 @@ namespace PdfSharp.Drawing
 
         XFontSource(byte[] bytes, ulong key)
         {
-            _fontName = null!;  // BUG?
+            //_fontName = null!;  // B_UG?
             Bytes = bytes;
             _key = key;
         }

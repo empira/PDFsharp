@@ -12,7 +12,6 @@ namespace MigraDoc.Tests.Helper
             table.Borders.Left.Width = Unit.FromPoint(1);
             table.Borders.Right.Width = Unit.FromPoint(1);
 
-
             var currentPosition = Unit.Zero;
 
             foreach (var position in positions.OrderBy(x => x.Millimeter))

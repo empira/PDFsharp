@@ -418,7 +418,6 @@ namespace MigraDoc.DocumentObjectModel
             set => Values.Comment = value;
         }
 
-
         /// <summary>
         /// Allows the visitor object to visit the document object and its child objects.
         /// </summary>

@@ -21,7 +21,6 @@ namespace MigraDoc.RtfRendering
             _dateField = (DateField)domObj;
         }
 
-
         /// <summary>
         /// Renders a date field to RTF.
         /// </summary>
@@ -32,7 +31,6 @@ namespace MigraDoc.RtfRendering
             TranslateFormat();
             EndField();
         }
-
 
         /// <summary>
         /// Translates the date field format to RTF.
@@ -213,7 +211,6 @@ namespace MigraDoc.RtfRendering
             }
             _rtfWriter.WriteText(rtfFrmt2 + @""" \* MERGEFORMAT");
         }
-
 
         /// <summary>
         /// Translates an unescaped character of a DateField's custom format to RTF.

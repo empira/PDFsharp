@@ -116,7 +116,6 @@ namespace PdfSharp.Events
     /// <param name="e">The PageGraphicsEventArgs of the event.</param>
     public delegate void PageGraphicsEventHandler(object sender, PageGraphicsEventArgs e);
 
-
     /// <summary>
     /// A class encapsulating all events of a PdfDocument.
     /// </summary>

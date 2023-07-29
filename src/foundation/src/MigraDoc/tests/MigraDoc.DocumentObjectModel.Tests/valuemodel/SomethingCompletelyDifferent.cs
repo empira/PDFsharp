@@ -1,5 +1,3 @@
-
-
 namespace MigraDoc.DocumentObjectModel.Tests
 {
     public class SomethingCompletelyDifferent
@@ -11,7 +9,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
 
         public void SetValue<T>(T value, ref T field)
         { }
-
 
         public int SomeValue
         {

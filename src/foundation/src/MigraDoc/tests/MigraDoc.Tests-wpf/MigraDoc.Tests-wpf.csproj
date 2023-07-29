@@ -21,8 +21,14 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="..\MigraDoc.Tests\ChartTests.cs" Link="ChartTests.cs" />
+        <Compile Include="..\MigraDoc.Tests\Helper\TestHelper.cs" Link="Helper\TestHelper.cs" />
         <Compile Include="..\MigraDoc.Tests\ImageFormats.cs" Link="ImageFormats.cs" />
+        <Compile Include="..\MigraDoc.Tests\MultipleFooters.cs" Link="MultipleFooters.cs" />
+        <Compile Include="..\MigraDoc.Tests\RtfRendererTests.cs" Link="RtfRendererTests.cs" />
         <Compile Include="..\MigraDoc.Tests\SecurityTestHelper.cs" Link="SecurityTestHelper.cs" />
+        <Compile Include="..\MigraDoc.Tests\SecurityTests.cs" Link="SecurityTests.cs" />
+        <Compile Include="..\MigraDoc.Tests\SpaceBeforeTests.cs" Link="SpaceBeforeTests.cs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -33,8 +39,14 @@
         <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper\PdfSharp.TestHelper.csproj" />
         <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-wpf\PdfSharp-wpf.csproj" />
         <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp.Charting-wpf\PdfSharp.Charting-wpf.csproj" />
+        <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets-wpf\PdfSharp.Snippets-wpf.csproj" />
         <ProjectReference Include="..\..\src\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
         <ProjectReference Include="..\..\src\MigraDoc.Rendering-wpf\MigraDoc.Rendering-wpf.csproj" />
+        <ProjectReference Include="..\..\src\MigraDoc.RtfRendering-wpf\MigraDoc.RtfRendering-wpf.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Helper\" />
     </ItemGroup>
 
 </Project>

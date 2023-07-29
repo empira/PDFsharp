@@ -48,11 +48,9 @@ namespace PdfSharp.Pdf.Security.Encryption
             }
             str = strBuilder.ToString();
 
-
             // Step 2. Normalize: SASLprep "2.2. Normalization"
             // Normalize with normalization form KC (stringprep "4. Normalization" and UAX15) 
             var normalized = str.Normalize(NormalizationForm.FormKC);
-
 
             // Initialize some variables for the next steps.
             var normalizedLength = normalized.Length;
@@ -81,7 +79,6 @@ namespace PdfSharp.Pdf.Security.Encryption
                     charCount = 1;
                 }
 
-
                 // Step 3. Prohibit: SASLprep "2.3. Prohibited Output".
                 if (IsProhibited(codepoint))
                     throw TH.ArgumentException_SASLprepProhibitedCharacter(codepoint, i);
@@ -89,7 +86,6 @@ namespace PdfSharp.Pdf.Security.Encryption
                 // Check for unassigned code points, if desired.
                 if (!allowUnassignedCodepoints && IsUnassignedCodePoint(codepoint))
                     throw TH.ArgumentException_SASLprepProhibitedUnassignedCodepoint(codepoint, i);
-
 
                 // Step 4. Check bidi: SASLprep "2.4. Bidirectional Characters" and stringprep "6. Bidirectional Characters"
                 // Check if the current code point is RandAlCat (stringprep "D.1 Characters with bidirectional property "R" or "AL")
@@ -104,11 +100,9 @@ namespace PdfSharp.Pdf.Security.Encryption
 
                 containsLCat |= IsLCat(codepoint);
 
-
                 // Increase i by the char count of the current code point and precede.
                 i += charCount;
             }
-
 
             // Finally do check for step 4: stringprep "6. Bidirectional Characters".
             if (containsRandALCat)
@@ -129,8 +123,6 @@ namespace PdfSharp.Pdf.Security.Encryption
 
             return normalized;
         }
-
-
 
         /// <summary>
         /// Checks if a char is part of stringprep "C.1.2 Non-ASCII space characters".
@@ -696,7 +688,6 @@ namespace PdfSharp.Pdf.Security.Encryption
                 or >= 0xF0000 and <= 0xFFFFD
                 or >= 0x100000 and <= 0x10FFFD;
         }
-
 
         /// <summary>
         /// Checks if a Unicode codepoint is part of stringprep "A.1 Unassigned code points in Unicode 3.2".

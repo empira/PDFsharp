@@ -320,7 +320,7 @@ namespace MigraDoc.DocumentObjectModel
         {
             int pos = serializer.BeginContent(name);
 
-            if (!Values.Font.IsValueNullOrEmpty() && Parent!.GetType() != typeof(Style)) // BUG??? "!" added.
+            if (!Values.Font.IsValueNullOrEmpty() && Parent!.GetType() != typeof(Style))
                 Font.Serialize(serializer);
 
             // If a refFormat is specified, it is important to compare the fields and not the properties.

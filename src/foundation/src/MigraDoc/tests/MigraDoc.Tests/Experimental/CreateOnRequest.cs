@@ -34,10 +34,12 @@ namespace MigraDoc.Tests.Experimental.CreateOnRequest
     public interface ISectionInterface<in T> where T : ISectionInterface<T>
     {
         Collection<Paragraph> Paragraphs { get; set; }
-        Paragraph AddParagraph(Paragraph paragraph);
-        string ToString();
-        bool Equals(object o);
 
+        Paragraph AddParagraph(Paragraph paragraph);
+        
+        string ToString();
+        
+        bool Equals(object o);
 
         static abstract bool operator ==(T c1, T c2);
 

@@ -238,13 +238,13 @@ namespace MigraDoc.DocumentObjectModel.Shapes
             /// Gets or sets the internal nullable implementation value of the enclosing document object property.
             /// See enclosing document object class for documentation of this property.
             /// </summary>
-            public Unit? Height { get; set; } //= null; // BUG??? Unit.NullValue;
+            public Unit? Height { get; set; }
 
             /// <summary>
             /// Gets or sets the internal nullable implementation value of the enclosing document object property.
             /// See enclosing document object class for documentation of this property.
             /// </summary>
-            public Unit? Width { get; set; } //= null; // BUG??? Unit.NullValue;
+            public Unit? Width { get; set; }
         }
     }
 }

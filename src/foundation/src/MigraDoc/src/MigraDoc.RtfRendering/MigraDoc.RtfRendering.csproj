@@ -21,6 +21,16 @@
     <None Remove="Rendering.Windows\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="RtfRendering.Resources\Messages.de.restext" />
+    <None Remove="RtfRendering.Resources\Messages.restext" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="RtfRendering.Resources\Messages.de.restext" />
+    <EmbeddedResource Include="RtfRendering.Resources\Messages.restext" />
+  </ItemGroup>
+
   <!--<ItemGroup>
     <None Remove="Rendering.Resources\Messages.de.restext" />
     <None Remove="Rendering.Resources\Messages.restext" />

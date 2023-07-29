@@ -565,7 +565,6 @@ namespace PdfSharp.Pdf.Advanced
             bool segmentedColorMask = idb.SegmentedColorMask;
             bool hasAlphaMask = idb.AlphaMaskLength > 0;
 
-
             {
                 FlateDecode fd = new FlateDecode();
                 if (firstMaskColor != -1 && lastMaskColor != -1)
@@ -1038,7 +1037,6 @@ namespace PdfSharp.Pdf.Advanced
                   ReadDWord(imageBits, 2) != streamLength ||
                   ReadDWord(imageBits, 14) != 40 || // sizeof BITMAPINFOHEADER
 #if WPF
-                  // TODOWPF: bug with height and width??? With which files???
                   ReadDWord(imageBits, 18) != width ||
                   ReadDWord(imageBits, 22) != height)
 #else

@@ -164,7 +164,6 @@ namespace PdfSharp.Snippets.Font
             EndBox(gfx);
 #endif
 
-
 #if BOX3
             BeginBox(gfx, 3, BoxOptions.Tile, "Native typefaces of " + FamilyNameT);
             {
@@ -373,5 +372,4 @@ namespace PdfSharp.Snippets.Font
             return descent;
         }
     }
-
 }

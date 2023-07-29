@@ -100,7 +100,7 @@ namespace PdfSharp.Pdf
                     }
                 }
             }
-            if (dict.Stream != null)
+            if (dict.Stream != null!)
             {
                 dict.Stream = dict.Stream.Clone();
                 dict.Stream.ChangeOwner(dict);
@@ -139,7 +139,7 @@ namespace PdfSharp.Pdf
             list.Sort(PdfName.Comparer);
             list.CopyTo(keys, 0);
 
-            StringBuilder pdf = new StringBuilder();
+            var pdf = new StringBuilder();
             pdf.Append("<< ");
             foreach (PdfName key in keys)
                 pdf.Append(key + " " + Elements[key] + " ");
@@ -230,7 +230,6 @@ namespace PdfSharp.Pdf
             set => _stream = value;
         }
         PdfStream? _stream;
-
 
         /// <summary>
         /// Creates the stream of this dictionary and initializes it with the specified byte array.
@@ -868,7 +867,7 @@ namespace PdfSharp.Pdf
                 }
                 return array ?? NRT.ThrowOnNull<PdfArray>();
 #else
-                // Rewritten WinRT style.
+                // Rewritten Win_RT style.
                 PdfArray array = null;
                 if (oldArray == null)
                 {
@@ -929,7 +928,7 @@ namespace PdfSharp.Pdf
                 }
                 return dict ?? NRT.ThrowOnNull<PdfDictionary>();
 #else
-                // Rewritten WinRT style.
+                // Rewritten Win_RT style.
                 PdfDictionary dict = null;
                 if (oldDictionary == null)
                 {
@@ -983,7 +982,7 @@ namespace PdfSharp.Pdf
                 }
                 return obj ?? NRT.ThrowOnNull<PdfItem>();
 #else
-                // Rewritten WinRT style.
+                // Rewritten Win_RT style.
                 PdfObject obj = null;
                 var ctorInfos = type.GetTypeInfo().DeclaredConstructors; // GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, new Type[] { typeof(PdfDocument) }, null);
                 foreach (var ctorInfo in ctorInfos)
@@ -1022,19 +1021,7 @@ namespace PdfSharp.Pdf
                 // HACK?
                 _elements[key] = value;
             }
-
-            ///// <summary>
-            ///// Returns the indirect object if the value of the specified key is a PdfReference.
-            ///// </summary>
-            //[Obsolete("Use GetObject, GetDictionary, GetArray, or GetReference")]
-            //public PdfObject GetIndirectObject(string key)
-            //{
-            //    PdfItem item = this[key];
-            //    if (item is PdfReference)
-            //        return ((PdfReference)item).Value;
-            //    return null;
-            //}
-
+            
             /// <summary>
             /// Gets the PdfObject with the specified key, or null if no such object exists. If the key refers to
             /// a reference, the referenced PdfObject is returned.
@@ -1489,7 +1476,7 @@ namespace PdfSharp.Pdf
                         {
                             var decodeParms = _ownerDictionary.Elements[Keys.DecodeParms];
                             bytes = Filtering.Decode(_value, filter, decodeParms);
-                            if (bytes == null)
+                            if (bytes == null!)
                             {
                                 string message = $"«Cannot decode filter '{filter}'»";
                                 bytes = PdfEncoders.RawEncoding.GetBytes(message);

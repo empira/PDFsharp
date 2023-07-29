@@ -201,7 +201,6 @@ namespace PdfSharp.Pdf.Security.Encryption
                 SecurityHandler.SetIdentityCryptFilter(metadata);
             }
 
-
             // Use user password twice if no owner password provided.
             if (String.IsNullOrEmpty(ownerPassword))
                 ownerPassword = userPassword;
@@ -467,12 +466,10 @@ namespace PdfSharp.Pdf.Security.Encryption
 
             EncryptMetadata = (SecurityHandler.Elements[PdfStandardSecurityHandler.Keys.EncryptMetadata] as PdfBoolean)?.Value ?? true; // GetBoolean() returns false if not existing, but default is true.
 
-
             // 7.6.4.3.3 a) - b): Create UTF-8 password.
             var utf8InputPassword = CreateUtf8Password(inputPassword);
 
             RetrieveAndStoreEncryptionKey(utf8InputPassword, userValue, userEValue, ownerValue, ownerEValue);
-
 
             var result = PasswordValidity.Invalid;
 

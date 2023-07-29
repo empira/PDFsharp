@@ -30,7 +30,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Gets a ParagraphElement by its index.
         /// </summary>
-        public new DocumentObject? this[int index] => base[index]; // BUG???
+        public new DocumentObject? this[int index] => base[index];
 
         /// <summary>
         /// Creates a deep copy of this object.
@@ -48,8 +48,7 @@ namespace MigraDoc.DocumentObjectModel
         {
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
-#if true
-            Text txt = null!;
+            Text txt = default!;
             string[] lines = text.Split('\n');
             int lineCount = lines.Length;
             for (int line = 0; line < lineCount; line++)
@@ -69,13 +68,7 @@ namespace MigraDoc.DocumentObjectModel
                 if (line < lineCount - 1)
                     AddLineBreak();
             }
-            return txt; // BUG return value does not make much sense to me.
-#else
-            Text txt = new Text();
-            txt.Content = text;
-            Add(txt);
             return txt;
-#endif
         }
 
         /// <summary>
@@ -493,7 +486,7 @@ namespace MigraDoc.DocumentObjectModel
             int count = Count;
             for (int index = 0; index < count; ++index)
             {
-                DocumentObject element = this[index]!; // BUG??? "!" added.
+                DocumentObject element = this[index]!;
                 element.Serialize(serializer);
             }
         }

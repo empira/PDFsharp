@@ -232,7 +232,6 @@ namespace PdfSharp.Drawing.Internal
 
         //    int i = 0;
 
-
         //    if ((pData[i] == 0xFF) && (pData[i + 1] == 0xD8) && (pData[i + 2] == 0xFF) && (pData[i + 3] == 0xE0))
         //    {
         //        i += 4;

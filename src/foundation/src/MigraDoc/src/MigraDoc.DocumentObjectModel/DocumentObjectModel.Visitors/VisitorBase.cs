@@ -125,7 +125,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         /// <summary>
         /// Flattens the the specified document object.
         /// </summary>
-        protected void FlattenFont(Font? font, Font? refFont)  // BUG params must be not-nullable
+        protected void FlattenFont(Font font, Font refFont)  // BUG params must be not-nullable
         {
             if (font == null)
                 throw new ArgumentNullException(nameof(font));
@@ -134,7 +134,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 throw new ArgumentNullException(nameof(refFont));
 
             font.Values.Name ??= refFont.Values.Name;
-            font.Values.Size ??= refFont.Values.Size;  // TODO ??=
+            font.Values.Size ??= refFont.Values.Size;
             if (font.Values.Color.IsValueNullOrEmpty())
                 font.Values.Color = refFont.Values.Color;
             if (font.Values.Underline is null)
@@ -440,7 +440,6 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             }
             else
                 FlattenParagraphFormat(chart.Values.Format, style?.Values.ParagraphFormat ?? NRT.ThrowOnNull<ParagraphFormat>());
-
 
             FlattenLineFormat(chart.Values.LineFormat, null);
             FlattenFillFormat(chart.Values.FillFormat);

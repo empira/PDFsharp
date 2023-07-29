@@ -137,7 +137,6 @@ namespace MigraDoc.RtfRendering
             _rtfWriter.WriteControl("picscalex", 100);
             _rtfWriter.WriteControl("picscaley", 100);
 
-
             RenderUnit("pichgoal", GetShapeHeight());
             RenderUnit("picwgoal", GetShapeWidth());
 
@@ -171,7 +170,6 @@ namespace MigraDoc.RtfRendering
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
 
             //// NET6 return false TODO
             //if (Capabilities.Compatibility.ChartsCannotBeRendered)

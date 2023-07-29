@@ -54,7 +54,6 @@ namespace PdfSharp.Fonts
     // https://graphicdesign.stackexchange.com/questions/35619/difference-between-font-face-typeface-font-in-the-context-of-typography
     //
 
-
     /// <summary>
     /// Describes the physical font that must be used to render a particular XFont.
     /// </summary>
@@ -131,7 +130,7 @@ namespace PdfSharp.Fonts
         public string FaceName { get; }
 
         /// <summary>
-        /// Indicates whether bold must be simulated. Bold simulation is not implemented in PDFsharp. BUG really?
+        /// Indicates whether bold must be simulated.
         /// </summary>
         public bool MustSimulateBold { get; }
 

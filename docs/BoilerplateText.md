@@ -65,8 +65,8 @@ MigraDoc is a .NET library that allows developers to create documents such as PD
 
 PDFsharp:
 This is a preview version of PDFsharp 6.0.0 using .NET 6.
-The package ’PdfSharp’ can be used on any platform including Windows and Linux.
-The packages ’PDFsharp-gdi’ and ’PDFsharp-wpf’ can be used under Windows only.
+The package ’PdfSharp’ can be used on any platform including Windows and Linux. The Target Framework is ’net6.0’.
+The packages ’PDFsharp-gdi’ and ’PDFsharp-wpf’ can be used under Windows only. The Target Framework is ’net6.0-windows’.
 We also publish packages that contain PDFsharp plus MigraDoc.
 See the project docs site for further information:
 https://docs.pdfsharp.net/history/readme-v6.0.html
@@ -74,7 +74,7 @@ https://docs.pdfsharp.net/history/readme-v6.0.html
 
 PDFsharp & MigraDoc:
 This is a preview version of PDFsharp and MigraDoc Foundation 6.0.0 using .NET 6.
-The package ’PDFsharp-MigraDoc’ can be used on any platform including Windows and Linux.
-The packages ’PDFsharp-MigraDoc-GDI’ and ’PDFsharp-MigraDoc-WPF’ can be used under Windows only.
+The package ’PDFsharp-MigraDoc’ can be used on any platform including Windows and Linux. The Target Framework is ’net6.0’.
+The packages ’PDFsharp-MigraDoc-GDI’ and ’PDFsharp-MigraDoc-WPF’ can be used under Windows only. The Target Framework is ’net6.0-windows’.
 See the project docs site for further information:
 https://docs.pdfsharp.net/history/readme-v6.0.html

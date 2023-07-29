@@ -23,6 +23,8 @@ namespace PdfSharp.Pdf
         /// <param name="value">The value.</param>
         public PdfReal(double value)
         {
+            if (value is < Single.MinValue or > Single.MaxValue)
+                Debug.Assert(false);
             _value = value;
         }
 

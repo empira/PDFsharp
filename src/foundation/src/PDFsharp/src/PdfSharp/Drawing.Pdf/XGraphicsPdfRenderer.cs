@@ -395,17 +395,17 @@ namespace PdfSharp.Drawing.Pdf
 
 #if CORE
             Realize(pen, brush);
-            AppendPath(path._corePath);
+            AppendPath(path.CorePath);
             AppendStrokeFill(pen, brush, path.FillMode, false);
 #endif
 #if GDI && !WPF
             Realize(pen, brush);
-            AppendPath(path._gdipPath);
+            AppendPath(path.GdipPath);
             AppendStrokeFill(pen, brush, path.FillMode, false);
 #endif
 #if WPF && !GDI
             Realize(pen, brush);
-            AppendPath(path._pathGeometry);
+            AppendPath(path.PathGeometry);
             AppendStrokeFill(pen, brush, path.FillMode, false);
 #endif
 #if WPF && GDI
@@ -1436,12 +1436,12 @@ namespace PdfSharp.Drawing.Pdf
                 // Look for:
                 // MAOS4STLA: CurrentPathFigure.
 
-
                 if (figure.Segments.Count == 0)
                     42.GetType();
                 Debug.Assert(figure.Segments.Count > 0);
 #endif
-                // Skip the Move if the segment is empty. Workaround for empty segments. Empty segments should not occur (see Debug.Assert above).
+                // Skip the Move if the segment is empty. Workaround for empty segments.
+                // Empty segments should not occur (see Debug.Assert above).
                 if (figure.Segments.Count > 0)
                 {
                     // Move to start point.
@@ -1464,7 +1464,7 @@ namespace PdfSharp.Drawing.Pdf
                             PointCollection points = ((PolyLineSegment)segment).Points;
                             foreach (SysPoint point in points)
                             {
-                                currentPoint = point;  // I forced myself not to optimize this assignment.
+                                currentPoint = point;
                                 AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", point.X, point.Y);
                             }
                         }
@@ -1509,14 +1509,16 @@ namespace PdfSharp.Drawing.Pdf
                         {
                             QuadraticBezierSegment seg = (QuadraticBezierSegment)segment;
                             currentPoint = seg.Point2;
-                            // TODOWPF: Undone because XGraphics has no such curve type
+                            // IMPROVE: Undone because XGraphics has no such curve type.
+                            // Easy to implement, but not worthy enough.
                             throw new NotImplementedException("AppendPath with QuadraticBezierSegment.");
                         }
                         else if (type == typeof(PolyQuadraticBezierSegment))
                         {
                             PolyQuadraticBezierSegment seg = (PolyQuadraticBezierSegment)segment;
                             currentPoint = seg.Points[^1];
-                            // TODOWPF: Undone because XGraphics has no such curve type
+                            // IMPROVE: Undone because XGraphics has no such curve type.
+                            // Easy to implement, but not worthy enough.
                             throw new NotImplementedException("AppendPath with PolyQuadraticBezierSegment.");
                         }
                     }

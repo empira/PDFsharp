@@ -20,7 +20,7 @@ namespace PdfSharp.Pdf.Advanced
         {
             Elements.SetName(Keys.Type, "/Catalog");
 
-            _version = "1.4";  // HACK in PdfCatalog
+            //_version = "1.4";  // HACK in PdfCatalog
         }
 
         internal PdfCatalog(PdfDictionary dictionary)
@@ -56,8 +56,7 @@ namespace PdfSharp.Pdf.Advanced
                 }
             }
         }
-
-        string _version = "1.3";
+        string _version = "1.4";
 
         /// <summary>
         /// Gets the pages collection of this document.

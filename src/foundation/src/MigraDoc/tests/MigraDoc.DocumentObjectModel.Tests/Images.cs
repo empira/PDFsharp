@@ -33,7 +33,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
                 Document = document
             };
 
-
             // Layout and render document to PDF.
             pdfRenderer.RenderDocument();
 

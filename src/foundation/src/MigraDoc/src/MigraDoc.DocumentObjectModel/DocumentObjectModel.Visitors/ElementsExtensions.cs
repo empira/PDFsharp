@@ -403,7 +403,6 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             return documentObject.GetUsedFormatValue(getValue, value => value.IsEmpty, Unit.Zero);
         }
 
-
         /// <summary>
         /// Gets a directly or via style assigned Font sub-value.
         /// </summary>

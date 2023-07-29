@@ -103,7 +103,6 @@ namespace MigraDoc.RtfRendering
                 RenderNameValuePair("fLine", "0");
         }
 
-
         /// <summary>
         /// Renders the shape's Left attribute by setting the \posv, \shptop and \shpbottom RTF controls.
         /// </summary>
@@ -137,7 +136,6 @@ namespace MigraDoc.RtfRendering
             if (topValue != "" && !RenderInParagraph())
                 RenderNameValuePair("posv", topValue);
         }
-
 
         /// <summary>
         /// Renders the shape's Left attribute by setting the \posh, \shpleft and \shpright RTF controls.
@@ -180,7 +178,6 @@ namespace MigraDoc.RtfRendering
         {
             return _shape.Height;
         }
-
 
         /// <summary>
         /// Gets the user defined shape width.
@@ -227,7 +224,6 @@ namespace MigraDoc.RtfRendering
             RenderParagraphIndents();
             RenderParagraphDistances();
         }
-
 
         /// <summary>
         /// Renders the dummy paragraph's space before and space after attributes.
@@ -311,7 +307,6 @@ namespace MigraDoc.RtfRendering
                 }
             }
         }
-
 
         /// <summary>
         /// Renders the RelativeVerticalattribute.
@@ -661,7 +656,6 @@ namespace MigraDoc.RtfRendering
             _rtfWriter.WriteControl("pard");
             RenderParagraphAttributes();
         }
-
 
         /// <summary>
         /// Ends a dummy paragraph to put a shape in, which is wrapped TopBottom style.

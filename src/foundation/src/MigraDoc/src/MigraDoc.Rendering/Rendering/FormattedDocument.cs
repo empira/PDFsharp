@@ -126,7 +126,6 @@ namespace MigraDoc.Rendering
             }
         }
 
-
         void FormatHeader(HeaderFooterPosition hfp, HeaderFooter? header)
         {
             if (header != null && !_formattedHeaders.ContainsKey(hfp))
@@ -139,7 +138,6 @@ namespace MigraDoc.Rendering
                 _formattedHeaders.Add(hfp, formattedHeaderFooter);
             }
         }
-
 
         void FormatFooter(HeaderFooterPosition hfp, HeaderFooter? footer)
         {
@@ -357,7 +355,6 @@ namespace MigraDoc.Rendering
         /// </summary>
         public int PageCount { get; private set; }
 
-
         /// <summary>
         /// Gets information about the specified page.
         /// </summary>
@@ -461,7 +458,6 @@ namespace MigraDoc.Rendering
         {
             var rect = CalcContentRect(_currentPage);
             var align = GetCurrentAlignment(layoutInfo.HorizontalAlignment);
-
 
             switch (align)
             {

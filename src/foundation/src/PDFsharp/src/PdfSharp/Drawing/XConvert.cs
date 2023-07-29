@@ -59,7 +59,7 @@ namespace PdfSharp.Drawing
         {
             return WpfLineCap[(int)lineCap];
         }
-        static readonly PenLineCap[] WpfLineCap = new PenLineCap[] { PenLineCap.Flat, PenLineCap.Round, PenLineCap.Square };
+        static readonly PenLineCap[] WpfLineCap = { PenLineCap.Flat, PenLineCap.Round, PenLineCap.Square };
 #endif
     }
 }

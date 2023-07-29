@@ -17,7 +17,6 @@ namespace MigraDoc.RtfRendering
             _headersFooters = (HeadersFooters)domObj;
         }
 
-
         /// <summary>
         /// Renders a section's headers and footers to RTF.
         /// </summary>

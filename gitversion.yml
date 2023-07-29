@@ -1,10 +1,11 @@
-# 23-03-22
+# 23-05-24
 assembly-versioning-scheme: MajorMinorPatch
 mode: Mainline
 assembly-informational-format: '{NuGetVersion}'
 branches:
   develop: # Current development
-    # 5.0.0-develop.123
+    # branch:  develop             -- is always 'develop'
+    # version: {6.0.0}-develop.123 -- taken from git tag plus 'develop' plus commit count
     regex: ^develop$
     mode: ContinuousDeployment
     increment: None
@@ -13,11 +14,10 @@ branches:
     track-merge-target: true
     source-branches: ['feature', 'release']
   release: # Release and preview versions.
-    # 22.40.0 / 22.40.0-rc-1
-    # 5.0.0-preview-2
+    # branch:  release/6.0.0-preview-3 -- must be same as git tag without leading 'v'.
+    # version: {6-0-0-preview-3}       -- taken from git tag only
     regex: ^(release[/-]|master)
-    # ^(user|feature|fix)[/-]
-    # Must not have mode set to be mainline
+    # Must not have mode set to be mainline? WTF?
     increment: None
     tag: ''
     prevent-increment-of-merged-branch-version: true
@@ -26,8 +26,8 @@ branches:
     is-mainline: true
     source-branches: ['develop', 'release', 'feature']
   feature: # Features and bug fixes.
-    # 22.40.0-dev-anse-gvupd.1
-    # 5.0.0-dev-my-branch.123
+    # branch:  feature/my-new-feature           -- arbitrary name, e.g. a new preview
+    # version: {6.0.0}-dev-{my-new-feature}.123 -- taken from git tag plus 'dev-' plus branch name plus commit count
     regex: ^(user|feature|fix)[/-]
     mode: ContinuousDeployment
     increment: None
@@ -39,6 +39,4 @@ branches:
     regex: ^(pull|pull\-requests|pr)[/-]
     tag: PullRequest
     mode: ContinuousDeployment
-#ignore:
-#  sha: []
 merge-message-formats: {}

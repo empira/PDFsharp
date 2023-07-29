@@ -101,7 +101,6 @@ namespace PdfSharp.Windows
         }
         XGraphicsUnit _pageGraphicsUnit = XGraphicsUnit.Point;
 
-
         /// <summary>
         /// DependencyProperty of PageSize.
         /// </summary>

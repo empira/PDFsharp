@@ -24,7 +24,7 @@ namespace PdfSharp.Pdf.Content
         // The following names come from "PDF Reference Third Edition"
         // Appendix D.1, Latin Character Set and Encoding
         public const char SP = ' ';
-        public const char QuoteDbl = '"';
+        public const char QuoteDouble = '"';
         public const char QuoteSingle = '\'';
         public const char ParenLeft = '(';
         public const char ParenRight = ')';

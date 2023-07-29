@@ -256,7 +256,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// The elements can contain null depending on the derived class.
         /// </summary>
-        protected List<DocumentObject?> _elements = new();  // BUG Hack for generic implementation
+        List<DocumentObject?> _elements = new();
+
+        internal IEnumerable<DocumentObject?> Elements => _elements;
 
         #region IList Members
 

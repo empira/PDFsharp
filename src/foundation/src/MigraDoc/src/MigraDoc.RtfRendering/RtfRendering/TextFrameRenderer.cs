@@ -75,7 +75,6 @@ namespace MigraDoc.RtfRendering
             }
         }
 
-
         /// <summary>
         /// Gets the user defined shape height if given, else 1 inch.
         /// </summary>
@@ -86,7 +85,6 @@ namespace MigraDoc.RtfRendering
 
             return base.GetShapeHeight();
         }
-
 
         /// <summary>
         /// Gets the user defined shape width if given, else 1 inch.

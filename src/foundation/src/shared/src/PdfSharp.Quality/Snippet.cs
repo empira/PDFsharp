@@ -364,7 +364,6 @@ namespace PdfSharp.Quality
             const double centerV = BoxHeight / 2;
             const double centerH = BoxWidth / 2;
 
-
             gfx.DrawRectangle(XPens.YellowGreen, rectBox);
             gfx.DrawLine(XPens.YellowGreen, 0, centerV, BoxWidth, centerV);
             gfx.DrawLine(XPens.YellowGreen, centerH, 0, centerH, BoxHeight);

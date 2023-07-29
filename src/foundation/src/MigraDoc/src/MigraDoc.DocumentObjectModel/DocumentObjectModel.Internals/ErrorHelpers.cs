@@ -21,7 +21,6 @@ namespace MigraDoc.DocumentObjectModel.Internals
     {
         #region General Messages
 
-
         //public static string? BaseStyleRequired => GetString(DomMsgID.BaseStyleRequired);
 
         //public static string? EmptyBaseStyle => GetString(DomMsgID.EmptyBaseStyle);
@@ -105,7 +104,6 @@ namespace MigraDoc.DocumentObjectModel.Internals
         //}
 
         public static string InvalidDocumentObjectType => "The given document object is not valid in this context.";
-
 
         //// ----- General Messages ---------------------------------------------------------------------
         //StyleExpected,

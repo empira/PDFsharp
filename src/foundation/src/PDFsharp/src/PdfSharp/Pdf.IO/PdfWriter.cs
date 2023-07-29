@@ -73,7 +73,8 @@ namespace PdfSharp.Pdf.IO
         public void Write(bool value)
         {
             WriteSeparator(CharCat.Character);
-            WriteRaw(value ? bool.TrueString : bool.FalseString);
+            // Wrong: Writes "True" or "False" where it should be "true" or "false": WriteRaw(value ? bool.TrueString : bool.FalseString);
+            WriteRaw(value ? "true" : "false");
             _lastCat = CharCat.Character;
         }
 
@@ -143,8 +144,7 @@ namespace PdfSharp.Pdf.IO
         public void Write(PdfReal value)
         {
             WriteSeparator(CharCat.Character);
-            // Ensure that value is written with decimal point.
-            WriteRaw(value.Value.ToString(Config.SignificantFigures1Plus9, CultureInfo.InvariantCulture));
+            WriteRaw(value.Value.ToString(Config.SignificantFigures7, CultureInfo.InvariantCulture));
             _lastCat = CharCat.Character;
         }
 
@@ -198,10 +198,40 @@ namespace PdfSharp.Pdf.IO
         {
             WriteSeparator(CharCat.Delimiter, '/');
             string name = value.Value;
+            for (int idx = 1; idx < name.Length; idx++)
+            {
+                char ch = name[idx];
+                if (ch > 126)
+                {
+                    // Special character found, convert whole string to UTF-8.
+                    var bytes = Encoding.UTF8.GetBytes(name);
+                    var nameBuilder = new StringBuilder();
+                    foreach (var ch2 in bytes)
+                        nameBuilder.Append((char)ch2);
+                    name = nameBuilder.ToString();
+                    break;
+                }
+            }
 
             StringBuilder pdf = new StringBuilder("/");
             for (int idx = 1; idx < name.Length; idx++)
             {
+                // From Adobe specs: 3.2.4 Name objects
+                // Beginning with PDF 1.2, any character except null (character code 0) may be included
+                // in a name by writing its 2-digit hexadecimal code, preceded by the number
+                // sign character (#); see implementation notes 3 and 4 in Appendix H. This
+                // syntax is required in order to represent any of the delimiter or white-space characters
+                // or the number sign character itself; it is recommended but not required for
+                // characters whose codes are outside the range 33(!) to 126(~).
+
+                // And also:
+                // In such situations, it is recommended that the sequence of bytes (after expansion
+                // of # sequences, if any) be interpreted according to UTF-8, a variable-length byte-encoded
+                // representation of Unicode in which the printable ASCII characters have
+                // the same representations as in ASCII.This enables a name object to represent text
+                // in any natural language, subject to the implementation limit on the length of a
+                // name.
+
                 char ch = name[idx];
                 Debug.Assert(ch < 256);
                 if (ch > ' ')
@@ -220,10 +250,15 @@ namespace PdfSharp.Pdf.IO
                             break;
 
                         default:
-                            pdf.Append(name[idx]);
-                            continue;
+                            if (ch <= 126)
+                            {
+                                // See recommendation above.
+                                pdf.Append(ch);
+                                continue;
+                            }
+                            break;
                     }
-                pdf.AppendFormat("#{0:X2}", (int)name[idx]);
+                pdf.AppendFormat("#{0:X2}", (int)ch);
             }
             WriteRaw(pdf.ToString());
             _lastCat = CharCat.Character;

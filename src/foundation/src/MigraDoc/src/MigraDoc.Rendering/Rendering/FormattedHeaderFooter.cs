@@ -60,7 +60,6 @@ namespace MigraDoc.Rendering
         XUnit ContentHeight => _contentHeight;
         XUnit _contentHeight;
 
-
         bool IAreaProvider.PositionVertically(LayoutInfo layoutInfo)
         {
             IAreaProvider formattedDoc = _documentRenderer.FormattedDocument;

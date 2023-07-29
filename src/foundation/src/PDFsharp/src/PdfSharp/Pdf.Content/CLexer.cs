@@ -2,10 +2,10 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
+#if WPF
 using System.IO;
+#endif
 using PdfSharp.Internal;
-
-#pragma warning disable 1591
 
 namespace PdfSharp.Pdf.Content
 {
@@ -38,7 +38,7 @@ namespace PdfSharp.Pdf.Content
         /// </summary>
         public CSymbol ScanNextToken()
         {
-            Again:
+        Again:
             ClearToken();
             char ch = MoveToNonWhiteSpace();
             switch (ch)
@@ -193,6 +193,9 @@ namespace PdfSharp.Pdf.Content
             }
         }
 
+        /// <summary>
+        /// Scans the dictionary.
+        /// </summary>
         protected CSymbol ScanDictionary()
         {
             // TODO Do an actual recursive parse instead of this simple scan.
@@ -203,9 +206,9 @@ namespace PdfSharp.Pdf.Content
 
             bool inString = false, inHexString = false;
             int nestedDict = 0, nestedStringParen = 0;
-            char ch;
             while (true)
             {
+                char ch;
                 _token.Append(ch = ScanNextChar());
                 if (ch == '<')
                 {
@@ -248,7 +251,6 @@ namespace PdfSharp.Pdf.Content
                         else
                         {
                             ScanNextChar();
-
 #if true
                             return CSymbol.Dictionary;
 #else
@@ -267,14 +269,18 @@ namespace PdfSharp.Pdf.Content
         /// </summary>
         public CSymbol ScanNumber()
         {
+            // Note: This is a copy of Lexer.ScanNumber with minimal changes. Keep both versions in sync as far as possible.
+            const int maxDigitsForLong = 18;
+            const int maxDecimalDigits = 10;
             long value = 0;
+            int totalDigits = 0;
             int decimalDigits = 0;
             bool period = false;
             bool negative = false;
 
             ClearToken();
             char ch = _currChar;
-            if (ch == '+' || ch == '-')
+            if (ch is '+' or '-')
             {
                 if (ch == '-')
                     negative = true;
@@ -286,12 +292,15 @@ namespace PdfSharp.Pdf.Content
                 if (Char.IsDigit(ch))
                 {
                     _token.Append(ch);
-                    if (decimalDigits < 10)
+                    ++totalDigits;
+                    if (decimalDigits < maxDecimalDigits)
                     {
-                        value = 10 * value + ch - '0';
-                        if (period)
-                            decimalDigits++;
+                        // Calculate the value if it still fits into long.
+                        if (totalDigits <= maxDigitsForLong)
+                            value = 10 * value + ch - '0';
                     }
+                    if (period)
+                        ++decimalDigits;
                 }
                 else if (ch == '.')
                 {
@@ -306,8 +315,18 @@ namespace PdfSharp.Pdf.Content
                 ch = ScanNextChar();
             }
 
+            if (totalDigits > maxDigitsForLong ||
+                decimalDigits > maxDecimalDigits)
+            {
+                // The number is too big for long or has too many decimal digits for our own code, so we provide it as real only.
+                // Number will be parsed here.
+                _tokenAsReal = Double.Parse(_token.ToString(), CultureInfo.InvariantCulture);
+                return CSymbol.Real;
+            }
+
             if (negative)
                 value = -value;
+
             if (period)
             {
                 if (decimalDigits > 0)
@@ -327,14 +346,13 @@ namespace PdfSharp.Pdf.Content
 
             Debug.Assert(Int64.Parse(_token.ToString(), CultureInfo.InvariantCulture) == value);
 
-            if (value >= Int32.MinValue && value < Int32.MaxValue)
+            if (value is >= Int32.MinValue and < Int32.MaxValue)
                 return CSymbol.Integer;
 
-            ContentReaderDiagnostics.ThrowNumberOutOfIntegerRange(value);
-            return CSymbol.Error;
+            return CSymbol.Real;
         }
 
-        static readonly double[] PowersOf10 = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000 };
+        static readonly double[] PowersOf10 = { 1, 10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000, 100_000_000, 1_000_000_000, 10_000_000_000 };
 
         /// <summary>
         /// Scans an operator.
@@ -343,14 +361,17 @@ namespace PdfSharp.Pdf.Content
         {
             ClearToken();
             char ch = _currChar;
-            // Scan token
+            // Scan token.
             while (IsOperatorChar(ch))
                 ch = AppendAndScanNextChar();
 
             return _symbol = CSymbol.Operator;
         }
 
-        // TODO
+        // TODO        
+        /// <summary>
+        /// Scans a literal string.
+        /// </summary>
         public CSymbol ScanLiteralString()
         {
             Debug.Assert(_currChar == Chars.ParenLeft);
@@ -376,7 +397,7 @@ namespace PdfSharp.Pdf.Content
                 ch = (char)(chHi * 256 + chLo);
                 while (true)
                 {
-                    SkipChar:
+                SkipChar:
                     switch (ch)
                     {
                         case '(':
@@ -476,7 +497,7 @@ namespace PdfSharp.Pdf.Content
                 // 8-bit characters
                 while (true)
                 {
-                    SkipChar:
+                SkipChar:
                     switch (ch)
                     {
                         case '(':
@@ -566,7 +587,9 @@ namespace PdfSharp.Pdf.Content
             }
         }
 
-        // TODO
+        /// <summary>
+        /// Scans a hexadecimal string.
+        /// </summary>
         public CSymbol ScanHexadecimalString()
         {
             Debug.Assert(_currChar == Chars.Less);
@@ -755,7 +778,7 @@ namespace PdfSharp.Pdf.Content
             {
                 case Chars.Asterisk:    // *
                 case Chars.QuoteSingle: // '
-                case Chars.QuoteDbl:    // "
+                case Chars.QuoteDouble:    // "
                     return true;
             }
             return false;
@@ -774,8 +797,6 @@ namespace PdfSharp.Pdf.Content
                 case '>':
                 case '[':
                 case ']':
-                //case '{':
-                //case '}':
                 case '/':
                 case '%':
                     return true;
@@ -788,7 +809,9 @@ namespace PdfSharp.Pdf.Content
         /// </summary>
         public int ContLength => _content.Length;
 
-        // ad
+        /// <summary>
+        /// Gets or sets the position in the content.
+        /// </summary>
         public int Position
         {
             get => _charIndex;
@@ -805,7 +828,7 @@ namespace PdfSharp.Pdf.Content
         char _currChar;
         char _nextChar;
 
-        readonly StringBuilder _token = new StringBuilder();
+        readonly StringBuilder _token = new();
         long _tokenAsLong;
         double _tokenAsReal;
         CSymbol _symbol = CSymbol.None;

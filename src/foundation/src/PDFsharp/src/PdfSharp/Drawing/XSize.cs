@@ -237,7 +237,11 @@ namespace PdfSharp.Drawing
         /// </summary>
         public static XSize Empty => s_empty;
 
-        static readonly XSize s_empty = CreateEmptySize();
+        static readonly XSize s_empty = new XSize
+        {
+            _width = Double.NegativeInfinity,
+            _height = Double.NegativeInfinity
+        };
 
         /// <summary>
         /// Gets a value indicating whether this instance is empty.
@@ -303,16 +307,6 @@ namespace PdfSharp.Drawing
             return new XSize(size.Width, size.Height);
         }
 #endif
-
-        static XSize CreateEmptySize()
-        {
-            var size = new XSize
-            {
-                _width = double.NegativeInfinity,
-                _height = double.NegativeInfinity
-            };
-            return size;
-        }
 
         /// <summary>
         /// Gets the DebuggerDisplayAttribute text.

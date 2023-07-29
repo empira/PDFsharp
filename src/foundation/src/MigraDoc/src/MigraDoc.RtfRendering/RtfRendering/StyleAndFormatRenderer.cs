@@ -55,7 +55,6 @@ namespace MigraDoc.RtfRendering
             }
         }
 
-
         /// <summary>
         /// Ends the format and style rendering. Always paired with RenderStyleAndFormat().
         /// </summary>

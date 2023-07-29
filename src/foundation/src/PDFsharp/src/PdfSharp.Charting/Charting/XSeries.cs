@@ -20,7 +20,7 @@ namespace PdfSharp.Charting
         /// Gets the xvalue at the specified index.
         /// </summary>
         public XValue? this[int index]
-            => _xSeriesElements[index] as XValue; // BUG??? ?? throw new InvalidOperationException("Element is not an XValue.");
+            => _xSeriesElements[index] as XValue;
 
         /// <summary>
         /// The actual value container of the XSeries.

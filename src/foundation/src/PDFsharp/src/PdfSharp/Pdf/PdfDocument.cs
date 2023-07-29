@@ -14,6 +14,7 @@ using PdfSharp.Pdf.Internal;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.AcroForms;
 using PdfSharp.Pdf.Security;
+using PdfSharp.UniversalAccessibility;
 // ReSharper disable InconsistentNaming
 
 // ReSharper disable ConvertPropertyToExpressionBody
@@ -184,7 +185,8 @@ namespace PdfSharp.Pdf
         }
         static int _nameCount;
 
-        internal bool CanModify => true;
+        //internal bool CanModify => true;
+        internal bool CanModify => _openMode == PdfDocumentOpenMode.Modify;
 
         // TODO Explain what Close() actually does.
         /// <summary>
@@ -518,7 +520,7 @@ namespace PdfSharp.Pdf
             {
                 if (CanModify)
                     return Pages.Count;
-                // PdfOpenMode is InformationOnly
+                // PdfOpenMode is InformationOnly.
                 var pageTreeRoot = (PdfDictionary?)Catalog.Elements.GetObject(PdfCatalog.Keys.Pages);
                 return pageTreeRoot?.Elements.GetInteger(PdfPages.Keys.Count) ?? 0;
             }
@@ -874,6 +876,6 @@ namespace PdfSharp.Pdf
         }
 
 #pragma warning disable CS0649
-        internal object? _uaManager;
+        internal UAManager? _uaManager;
     }
 }

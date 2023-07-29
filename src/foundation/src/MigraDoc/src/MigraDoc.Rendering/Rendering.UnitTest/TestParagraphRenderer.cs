@@ -3,8 +3,6 @@
 
 using MigraDoc.DocumentObjectModel;
 
-#pragma warning disable 1591
-
 namespace MigraDoc.Rendering.UnitTest
 {
     /// <summary>
@@ -17,9 +15,9 @@ namespace MigraDoc.Rendering.UnitTest
         /// </summary>
         public static void TextAndBlanks(string pdfOutputFile)
         {
-            Document document = new Document();
-            Section section = document.AddSection();
-            Paragraph par = section.AddParagraph("Dies");
+            var document = new Document();
+            var section = document.AddSection();
+            var par = section.AddParagraph("Dies");
             for (int idx = 0; idx <= 40; ++idx)
             {
                 par.AddCharacter(SymbolName.Blank);
@@ -29,8 +27,7 @@ namespace MigraDoc.Rendering.UnitTest
                 par.AddCharacter(SymbolName.Blank);
                 par.AddText((idx + 2).ToString());
             }
-            PdfDocumentRenderer renderer = new PdfDocumentRenderer();
-            renderer.Document = document;
+            var renderer = new PdfDocumentRenderer { Document = document };
             renderer.RenderDocument();
             renderer.PdfDocument.Save(pdfOutputFile);
         }
@@ -40,12 +37,11 @@ namespace MigraDoc.Rendering.UnitTest
         /// </summary>
         public static void Formatted(string pdfOutputFile)
         {
-            Document document = new Document();
-            Section section = document.AddSection();
-            Paragraph par = section.AddParagraph();
+            var document = new Document();
+            var section = document.AddSection();
+            var par = section.AddParagraph();
             FillFormattedParagraph(par);
-            PdfDocumentRenderer printer = new PdfDocumentRenderer();
-            printer.Document = document;
+            var printer = new PdfDocumentRenderer { Document = document };
             printer.RenderDocument();
             printer.PdfDocument.Save(pdfOutputFile);
         }
@@ -56,7 +52,7 @@ namespace MigraDoc.Rendering.UnitTest
             {
                 if (idx < 60)
                 {
-                    FormattedText formText = par.AddFormattedText((idx).ToString(), TextFormat.Bold);
+                    var formText = par.AddFormattedText((idx).ToString(), TextFormat.Bold);
                     formText.Font.Size = 16;
                     formText.AddText(" ");
                 }
@@ -67,7 +63,7 @@ namespace MigraDoc.Rendering.UnitTest
                 }
                 else
                 {
-                    FormattedText formText = par.AddFormattedText((idx).ToString(), TextFormat.Italic);
+                    var formText = par.AddFormattedText((idx).ToString(), TextFormat.Italic);
                     formText.Font.Size = 6;
                     formText.AddText(" ");
                 }
@@ -82,11 +78,11 @@ namespace MigraDoc.Rendering.UnitTest
         /// </summary>
         public static void Alignment(string pdfOutputFile)
         {
-            Document document = new Document();
-            Section section = document.AddSection();
+            var document = new Document();
+            var section = document.AddSection();
             section.PageSetup.LeftMargin = 0;
             section.PageSetup.RightMargin = 0;
-            Paragraph par = section.AddParagraph();
+            var par = section.AddParagraph();
             //      FillFormattedParagraph(par);
             //      par.Format.Alignment = ParagraphAlignment.Left;
 
@@ -105,8 +101,7 @@ namespace MigraDoc.Rendering.UnitTest
             par.Format.FirstLineIndent = "-2cm";
             par.Format.LeftIndent = "2cm";
             par.Format.RightIndent = "3cm";
-            PdfDocumentRenderer renderer = new PdfDocumentRenderer();
-            renderer.Document = document;
+            var renderer = new PdfDocumentRenderer { Document = document };
             renderer.RenderDocument();
             renderer.PdfDocument.Save(pdfOutputFile);
         }
@@ -116,24 +111,23 @@ namespace MigraDoc.Rendering.UnitTest
         /// </summary>
         public static void Tabs(string pdfOutputFile)
         {
-            Document document = new Document();
-            Section section = document.AddSection();
+            var document = new Document();
+            var section = document.AddSection();
             section.PageSetup.LeftMargin = 0;
             section.PageSetup.RightMargin = 0;
-            Paragraph par = section.AddParagraph();
+            var par = section.AddParagraph();
             par.Format.TabStops.AddTabStop("20cm", TabAlignment.Right);
             par.AddText(" text before tab bla bla bla. text before tab bla bla bla. text before tab bla bla bla. text before tab bla bla bla.");
             //par.AddTab();
             par.AddText(" ............ after tab bla bla bla.");
-            PdfDocumentRenderer renderer = new PdfDocumentRenderer();
-            renderer.Document = document;
+            var renderer = new PdfDocumentRenderer { Document = document };
             renderer.RenderDocument();
             renderer.PdfDocument.Save(pdfOutputFile);
         }
 
         internal static void GiveBorders(Paragraph par)
         {
-            Borders borders = par.Format.Borders;
+            var borders = par.Format.Borders;
             borders.Top.Color = Colors.Gray;
             borders.Top.Width = 4;
             borders.Top.Style = BorderStyle.DashDot;
@@ -160,14 +154,13 @@ namespace MigraDoc.Rendering.UnitTest
         /// </summary>
         public static void Borders(string outputFile)
         {
-            Document document = new Document();
-            Section section = document.AddSection();
-            Paragraph par = section.AddParagraph();
+            var document = new Document();
+            var section = document.AddSection();
+            var par = section.AddParagraph();
             FillFormattedParagraph(par);
             GiveBorders(par);
 
-            PdfDocumentRenderer renderer = new PdfDocumentRenderer();
-            renderer.Document = document;
+            var renderer = new PdfDocumentRenderer { Document = document };
             renderer.RenderDocument();
             renderer.PdfDocument.Save(outputFile);
         }
@@ -177,9 +170,9 @@ namespace MigraDoc.Rendering.UnitTest
         /// </summary>
         public static void Fields(string outputFile)
         {
-            Document document = new Document();
-            Section section = document.AddSection();
-            Paragraph par = section.AddParagraph();
+            var document = new Document();
+            var section = document.AddSection();
+            var par = section.AddParagraph();
             par.AddText("Section: ");
             par.AddSectionField().Format = "ALPHABETIC";
             par.AddLineBreak();
@@ -207,8 +200,7 @@ namespace MigraDoc.Rendering.UnitTest
             par.AddText("PageRef: ");
             par.AddPageRefField("Egal");
 
-            PdfDocumentRenderer renderer = new PdfDocumentRenderer();
-            renderer.Document = document;
+            var renderer = new PdfDocumentRenderer { Document = document };
             renderer.RenderDocument();
             renderer.PdfDocument.Save(outputFile);
         }

@@ -41,7 +41,7 @@ namespace PdfSharp.Fonts.OpenType
         //public string FontFile
         //{
         //  get { return _fontFile; }
-        //  private set { _fontFile = value; }  // BUG: never set
+        //  private set { _fontFile = value; }
         //}
         //string _fontFile;
 
@@ -51,7 +51,7 @@ namespace PdfSharp.Fonts.OpenType
         //public string FontType
         //{
         //  get { return _fontType; }
-        //  private set { _fontType = value; }  // BUG: never set
+        //  private set { _fontType = value; }
         //}
         //string _fontType;
 
@@ -71,7 +71,7 @@ namespace PdfSharp.Fonts.OpenType
         //public string FullName
         //{
         //    get { return _fullName; }
-        //    private set { _fullName = value; }  // BUG: never set
+        //    private set { _fullName = value; }
         //}
         //string _fullName;
 
@@ -81,7 +81,7 @@ namespace PdfSharp.Fonts.OpenType
         //public string FamilyName
         //{
         //    get { return _familyName; }
-        //    private set { _familyName = value; }  // BUG: never set
+        //    private set { _familyName = value; }
         //}
         //string _familyName;
 
@@ -238,7 +238,7 @@ namespace PdfSharp.Fonts.OpenType
         /// 
         /// </summary>
         public int LineSpacing { get; protected set; }
-        
+
         internal static string ComputeKey(XFont font)
         {
             return font.GlyphTypeface.Key;

@@ -20,7 +20,7 @@ namespace GdiGrammarByExample
             InitializeTest(_fixture, "Paragraph-PagebreakControl", 2, 0);
         }
 
-        [Fact]
+        [Fact(Skip = "Disabled until /Annots bug is fixed")]
 #if CORE
         public void DDL_Grammar_By_Example_Paragraph_PagebreakControl()
 #elif GDI

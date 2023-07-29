@@ -234,7 +234,6 @@ namespace PdfSharp.Quality
             var pageBox = new XRect(0, 0, page.Width, page.Height);
             DrawPdfToBox(gfx, pageBox);
 
-
             page = document.AddPage();
             page.Width = WidthInPoint;
             page.Height = HeightInPoint;
@@ -242,7 +241,6 @@ namespace PdfSharp.Quality
             gfx = XGraphics.FromPdfPage(page);
 
             DrawImageToBox(gfx, pageBox);
-
 
             var stream = new MemoryStream();
             document.Save(stream);
@@ -398,7 +396,6 @@ namespace PdfSharp.Quality
             using var fs = new FileStream(path, FileMode.Create);
             fs.Write(bytes, 0, length);
         }
-
 
         /// <summary>
         /// Prepares new bitmap image for drawing.
@@ -603,7 +600,6 @@ namespace PdfSharp.Quality
             private set => _comparisonBytes = value ?? Array.Empty<byte>();
         }
         byte[] _comparisonBytes = Array.Empty<byte>();
-
 
 #if old
 //        protected DrawingVisual PrepareDrawingVisual(out DrawingContext dc)

@@ -16,11 +16,9 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var doc = TestHelper.CreateTestDocument(testDocument);
             var snapshot1 = new DocumentObjectSnapshot(doc);
 
-
             // Run the method which shall be tested to not change the document.
             // If this Test fails, check which Property has not the expected value and set breakpoints while these lines are executed to examine if e. g. the property is accessed and created accidentally.
             var docClone = doc.Clone();
-
 
             // Create second snapshot and compare both snapshots.
             var snapshot2 = new DocumentObjectSnapshot(docClone);
@@ -35,21 +33,17 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var doc = TestHelper.CreateTestDocument(testDocument);
             var snapshot1 = new DocumentObjectSnapshot(doc);
 
-
             // Run the method which shall be tested to not change the document.
             // If this Test fails, check which Property has not the expected value and set breakpoints while these lines are executed to examine if e. g. the property is accessed and created accidentally.
             // ReSharper disable once UnusedVariable
             var mdddl = DdlWriter.WriteToString(doc);
 
-
             // Create second snapshot and compare both snapshots.
             var snapshot2 = new DocumentObjectSnapshot(doc);
             snapshot2.CompareTo(snapshot1);
 
-
             // Read Mdddl and check if desired value is restored correctly.
             var docRead = DdlReader.DocumentFromString(mdddl);
-
 
             // Create another snapshot and compare with the first.
             var snapshot3 = new DocumentObjectSnapshot(docRead);
@@ -64,13 +58,11 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var doc = TestHelper.CreateTestDocument(testDocument);
             var snapshot1 = new DocumentObjectSnapshot(doc);
 
-
             // Run the method which shall be tested to not change the document.
             // If this Test fails, check which Property has not the expected value and set breakpoints while these lines are executed to examine if e. g. the property is accessed and created accidentally.
             var elements = doc.GetElementsRecursively(true);
             // ReSharper disable once UnusedVariable
             var elementCount = elements.Count(); // Here GetElementsRecursively() is executed.
-
 
             // Create second snapshot and compare both snapshots.
             var snapshot2 = new DocumentObjectSnapshot(doc);
@@ -99,12 +91,10 @@ namespace MigraDoc.DocumentObjectModel.Tests
 
             var snapshot1 = new DocumentObjectSnapshot(doc);
 
-
             // Run the method which shall be tested to not change the document.
             // If this Test fails, check which Property has not the expected value and set breakpoints while these lines are executed to examine if e. g. the property is accessed and created accidentally.
             // ReSharper disable once UnusedVariable
             var text = cell.GetText();
-
 
             // Create second snapshot and compare both snapshots.
             var snapshot2 = new DocumentObjectSnapshot(doc);
@@ -135,8 +125,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             p.Format.Font.Size = 14;
 
             var snapshot1 = new DocumentObjectSnapshot(doc);
-
-
+            
             // Run the method which shall be tested to not change the document.
             // If this Test fails, check which Property has not the expected value and set breakpoints while these lines are executed to examine if e. g. the property is accessed and created accidentally.
             var fontSize = p.GetUsedFormatValue(font => font.Size);
@@ -146,7 +135,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             fontSize.Point.Should().Be(14);
             leftIndent.Centimeter.Should().Be(3);
             fontColor.Should().Be(Colors.Blue);
-
 
             // Create second snapshot and compare both snapshots.
             var snapshot2 = new DocumentObjectSnapshot(doc);

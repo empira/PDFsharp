@@ -136,8 +136,8 @@ namespace MigraDoc.Rendering
 
         void RenderShading(Cell cell, Rectangle innerRect)
         {
-            var shadeRenderer = new ShadingRenderer(_gfx, cell.Shading);
-            shadeRenderer.Render(innerRect.X, innerRect.Y, innerRect.Width, innerRect.Height, cell.RoundedCorner);
+            var shadingRenderer = new ShadingRenderer(_gfx, cell.Shading);
+            shadingRenderer.Render(innerRect.X, innerRect.Y, innerRect.Width, innerRect.Height, cell.RoundedCorner);
         }
 
         void RenderBorders(Cell cell, Rectangle innerRect)
@@ -337,7 +337,7 @@ namespace MigraDoc.Rendering
 
                 // Equalize the two borders, that are used to determine a rounded corner's border.
                 // This way the innerWidth of the cell, which is got by the saved _formattedCells, is the same regardless of which corner relevant border is set.
-                foreach (var row in _table.Rows.Cast<Row>()) // BUG Make better enumerator.
+                foreach (var row in _table.Rows.Cast<Row>())
                 {
                     foreach (var cell in row.Cells.Cast<Cell>())
                         EqualizeRoundedCornerBorders(cell);
@@ -502,7 +502,7 @@ namespace MigraDoc.Rendering
             else if (_table.Rows.Alignment == RowAlignment.Left)
             {
                 XUnit leftOffset = LeftBorderOffset;
-                leftOffset += _table.Columns[0]!.LeftPadding; // BUG check
+                leftOffset += _table.Columns[0].LeftPadding;
                 layoutInfo.Left = -leftOffset;
             }
 

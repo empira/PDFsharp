@@ -5,8 +5,11 @@
 using System.IO;
 #endif
 using PdfSharp.Internal;
+using PdfSharp.Logging;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Internal;
+using System.Text;
+using Microsoft.Extensions.Logging;
 using static PdfSharp.Pdf.Advanced.PdfCrossReferenceStream;
 using static PdfSharp.Pdf.PdfDictionary;
 
@@ -52,6 +55,10 @@ namespace PdfSharp.Pdf.IO
         public int MoveToObject(PdfObjectID objectID)
         {
             int position = _document.IrefTable[objectID]?.Position ?? throw new AggregateException("Invalid object ID.");
+            if (position < 0)
+            {
+                throw new AggregateException($"Invalid position {position} for object ID {objectID}.");
+            }
             return _lexer.Position = position;
         }
 
@@ -62,13 +69,8 @@ namespace PdfSharp.Pdf.IO
             _lexer.Position = position;
             int objectNumber = ReadInteger();
             int generationNumber = ReadInteger();
-#if DEBUG && CORE
-            if (objectNumber == 1074)
-                GetType();
-#endif
-            return new PdfObjectID(objectNumber, generationNumber);
+            return new(objectNumber, generationNumber);
         }
-
 
         /// <summary>
         /// Reads PDF object from input stream.
@@ -86,6 +88,7 @@ namespace PdfSharp.Pdf.IO
             if (objectID.ObjectNumber == 20)
                 GetType();
 #endif
+
             int objectNumber = objectID.ObjectNumber;
             int generationNumber = objectID.GenerationNumber;
             if (!fromObjectStream)
@@ -94,6 +97,36 @@ namespace PdfSharp.Pdf.IO
                 objectNumber = ReadInteger();
                 generationNumber = ReadInteger();
             }
+            else
+            {
+                // Reading from ObjectStream.
+                var iref = _document.IrefTable[objectID];
+                if (iref != null)
+                {
+                    // Attempt to read an object that was already registered. Keep the former object.
+                    // This only happens with corrupt PDF files that have duplicate IDs.
+                    if (iref.Value != null!)
+                    {
+                        LogHost.Logger.LogWarning($"Another instance of object {iref} was found. Using previously encountered object instead.");
+                        // Attempt to read an object that was already read. Keep the former object.
+                        return iref.Value;
+                    }
+
+                    if (iref.Position >= 0)
+                    {
+                        LogHost.Logger.LogWarning($"Another instance of object {iref} was found. Keeping reference to previously encountered object.");
+                        // The object ID was already found, but the object was not read yet.
+                        // We ignore the object in the object stream and return a dummy object.
+                        // Better: Do not call this method in the first place.
+                        var dummy = new PdfArray
+                        {
+                            Reference = iref
+                        };
+                        return dummy; // Return a dummy object. The object is not used, but Reference must not be empty.
+                    }
+                }
+            }
+
 #if DEBUG
             // The following assertion sometime failed (see below)
             //Debug.Assert(objectID == new PdfObjectID(objectNumber, generationNumber));
@@ -309,9 +342,26 @@ namespace PdfSharp.Pdf.IO
 
             if (value is PdfReference reference)
             {
+#if true
+                object length;
+                if (reference.Position == -1 && reference.Value != null!)
+                {
+                    if (reference.Value is not PdfIntegerObject integer)
+                        throw new InvalidOperationException("Cannot retrieve stream length from stream object.");
+
+                    length = integer;
+                }
+                else
+                {
+                    ParserState state = SaveState();
+                    length = ReadObject(null, reference.ObjectID, false, false);
+                    RestoreState(state);
+                }
+#else
                 ParserState state = SaveState();
                 object length = ReadObject(null, reference.ObjectID, false, false);
                 RestoreState(state);
+#endif
                 int len = ((PdfIntegerObject)length).Value;
                 dict.Elements["/Length"] = new PdfInteger(len);
                 return len;
@@ -323,7 +373,7 @@ namespace PdfSharp.Pdf.IO
         {
             Debug.Assert(Symbol == Symbol.BeginArray);
 
-            if (array == null)
+            if (array == null!)
                 array = new PdfArray(_document);
 
             int sp = _stack.SP;
@@ -830,7 +880,6 @@ namespace PdfSharp.Pdf.IO
             }
             Debug.Assert(objectStreamStream != null);
 
-
             //PdfObjectStream objectStreamStream = (PdfObjectStream)iref.Value;
             if (objectStreamStream == null)
                 throw new Exception("Something went wrong here.");
@@ -839,7 +888,7 @@ namespace PdfSharp.Pdf.IO
 
         /// <summary>
         /// Reads the compressed object with the specified index in the object stream
-        /// of the object with the specified object id.
+        /// of the object with the specified object ID.
         /// </summary>
         internal PdfReference ReadCompressedObject(PdfObjectID objectID, int index)
         {
@@ -910,7 +959,6 @@ namespace PdfSharp.Pdf.IO
             }
             Debug.Assert(objectStreamStream != null);
 
-
             //PdfObjectStream objectStreamStream = (PdfObjectStream)iref.Value;
             if (objectStreamStream == null)
                 throw new Exception("Something went wrong here.");
@@ -943,7 +991,7 @@ namespace PdfSharp.Pdf.IO
         {
             // TODO: Concept for general error  handling.
             // If the stream is corrupted a lot of things can go wrong here.
-            // Make it sense to do a more detailed error checking?
+            // Does it make sense to do a more detailed error checking?
 
             // Create n pairs of integers with object number and offset.
             int[][] header = new int[n][];
@@ -1158,11 +1206,16 @@ namespace PdfSharp.Pdf.IO
 
             int number = _lexer.TokenToInteger;
             int generation = ReadInteger();
-            Debug.Assert(generation == 0);
+            // According to specs, generation number "shall not" be "other than zero".
+            // Debug.Assert(generation == 0);
+
+            // 7.5.7 Object streams:
+            // "The following objects shall not be stored in an object stream: [...]
+            // Objects with a generation number other than zero"
 
             ReadSymbol(Symbol.Obj);
             ReadSymbol(Symbol.BeginDictionary);
-            PdfObjectID objectID = new PdfObjectID(number, generation);
+            var objectID = new PdfObjectID(number, generation);
 
             var xrefStream = new PdfCrossReferenceStream(_document);
 
@@ -1192,7 +1245,6 @@ namespace PdfSharp.Pdf.IO
             }
             Console.WriteLine();
 #endif
-
             //     bytes.GetType();
             // Add to table.
             //    xrefTable.Add(new PdfReference(objectID, -1));
@@ -1235,7 +1287,7 @@ namespace PdfSharp.Pdf.IO
             int wsum = StreamHelper.WSize(wsize);
             if (wsum * subsectionEntryCount != bytes.Length)
                 GetType();
-            // BUG: Assertion fails with original PDF 2.0 documentation (ISO_32000-2_2020(en).pdf)
+            // BUG: This assertion fails with original PDF 2.0 documentation (ISO_32000-2_2020(en).pdf)
             //Debug.Assert(wsum * subsectionEntryCount == bytes.Length, "Check implementation here.");
 #if DEBUG_ && CORE
             if (PdfDiagnostics.TraceXrefStreams)
@@ -1270,7 +1322,6 @@ namespace PdfSharp.Pdf.IO
                 }
             }
 #endif
-
             int index2 = -1;
             for (int ssc = 0; ssc < subsectionCount; ssc++)
             {
@@ -1316,6 +1367,12 @@ namespace PdfSharp.Pdf.IO
                                 xrefTable.Add(new PdfReference(objectID, position));
 
                             }
+#if DEBUG
+                            else
+                            {
+                                GetType();
+                            }
+#endif
                             break;
 
                         case 2:
@@ -1700,9 +1757,11 @@ namespace PdfSharp.Pdf.IO
 
         ParserState SaveState()
         {
-            ParserState state = new ParserState();
-            state.Position = _lexer.Position;
-            state.Symbol = _lexer.Symbol;
+            var state = new ParserState
+            {
+                Position = _lexer.Position,
+                Symbol = _lexer.Symbol
+            };
             return state;
         }
 

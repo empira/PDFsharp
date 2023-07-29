@@ -197,7 +197,7 @@ namespace PdfSharp.Drawing
             //XFontMetrics metrics = descriptor.FontMetrics;
 
             // style &= XFontStyleEx.Regular | XFontStyleEx.Bold | XFontStyleEx.Italic | XFontStyleEx.BoldItalic; // same as XFontStyleEx.BoldItalic
-            List<WpfTypeface> typefaces = new List<WpfTypeface>(family.WpfFamily.GetTypefaces());
+            List<WpfTypeface> typefaces = new(family.WpfFamily.GetTypefaces());
             foreach (WpfTypeface typeface in typefaces)
             {
                 bool bold = typeface.Weight == FontWeights.Bold;

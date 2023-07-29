@@ -47,7 +47,7 @@ namespace PdfSharp.Drawing
             Data = ms.GetBuffer();
             Length = (int)ms.Length;
 #else
-            // For WinRT there is no GetBuffer() => alternative implementation for WinRT.
+            // For Win_RT there is no GetBuffer() => alternative implementation for Win_RT.
             // TODO: Are there advantages of GetBuffer()? It should reduce LOH fragmentation.
             this.stream = stream;
             this.stream.Position = 0;
@@ -280,6 +280,11 @@ namespace PdfSharp.Drawing
         /// The vertical component of the aspect ratio. Can be 0 if not supported by the image format.
         /// </summary>
         internal double VerticalAspectRatio;
+
+        /// <summary>
+        /// The bit count per pixel. Only valid for certain images, will be 0 otherwise.
+        /// </summary>
+        internal uint BitCount;
 
         /// <summary>
         /// The colors used. Only valid for images with palettes, will be 0 otherwise.

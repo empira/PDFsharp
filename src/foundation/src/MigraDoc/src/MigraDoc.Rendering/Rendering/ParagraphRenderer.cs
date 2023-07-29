@@ -320,7 +320,6 @@ namespace MigraDoc.Rendering
             return docObj is Text { Content: " " or "\u00AD" };
         }
 
-
         bool IsBlank(DocumentObject docObj)
         {
             if (docObj is Text { Content: " " })
@@ -737,7 +736,7 @@ namespace MigraDoc.Rendering
                         NRT.ThrowOnNull();
                     goOn = _currentLeaf != null && _currentLeaf.Current != _endLeaf.Current;
                     if (goOn)
-                        _currentLeaf = _currentLeaf!.GetNextLeaf();  // BUG in ReSharper: _currentLeaf cannot be null if goOn is true.
+                        _currentLeaf = _currentLeaf!.GetNextLeaf();
                 }
                 lineInfo.LineWidth = _currentLineWidth;
                 lineInfo.WordsWidth = _currentWordsWidth;
@@ -1077,7 +1076,7 @@ namespace MigraDoc.Rendering
             var obj = prevIter?.Current;
             while (obj is BookmarkField)
             {
-                prevIter = prevIter?.GetPreviousLeaf(); // BUG??? ?? NRT.ThrowOnNull<ParagraphIterator>();
+                prevIter = prevIter?.GetPreviousLeaf();
                 obj = prevIter?.Current;
             }
             if (obj == null)
@@ -1321,7 +1320,7 @@ namespace MigraDoc.Rendering
             }
             else
             {
-                _currentLeaf = prevParaFormatInfo?.GetLastLineInfo().EndIter?.GetNextLeaf() ?? NRT.ThrowOnNull<ParagraphIterator>();
+                _currentLeaf = prevParaFormatInfo?.GetLastLineInfo().EndIter?.GetNextLeaf(); // Do not check here. ?? NRT.ThrowOnNull<ParagraphIterator>();
                 _isFirstLine = false;
                 ((ParagraphFormatInfo)_renderInfo.FormatInfo)._isStarting = false;
             }
@@ -1547,7 +1546,6 @@ namespace MigraDoc.Rendering
                 layoutInfo.TrailingHeight = trailingHeight;
             }
         }
-
 
         XUnit PopSavedBlankWidth()
         {
@@ -2617,7 +2615,7 @@ namespace MigraDoc.Rendering
         bool _isFirstLine;
         bool _isLastLine;
         VerticalLineInfo _currentVerticalInfo;
-        Area _formattingArea = null!;  // BUG check
+        Area _formattingArea = default!;
         XUnit _currentYPosition;
         XUnit _currentXPosition;
         ParagraphIterator? _currentLeaf;
@@ -2625,8 +2623,8 @@ namespace MigraDoc.Rendering
         ParagraphIterator? _endLeaf;
         bool _reMeasureLine;
         XUnit _minWidth = 0;
-        Dictionary<Image, RenderInfo> _imageRenderInfos = null!;  // BUG check
-        List<TabOffset> _tabOffsets = null!;  // BUG check
+        Dictionary<Image, RenderInfo> _imageRenderInfos = default!;
+        List<TabOffset> _tabOffsets = default!;
         DocumentObject? _lastTab;
         bool _lastTabPassed;
         XUnit _lastTabPosition;

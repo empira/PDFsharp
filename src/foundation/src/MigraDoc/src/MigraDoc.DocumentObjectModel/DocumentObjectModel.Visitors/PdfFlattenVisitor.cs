@@ -169,15 +169,15 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 if (formattedText.Values.Font is null && format.Values.Font is not null)
                     formattedText.Font = format.Values.Font.Clone();
                 else if (format.Values.Font is not null)
-                    FlattenFont(formattedText.Values.Font, format.Values.Font);
+                    FlattenFont(formattedText.Values.Font!, format.Values.Font);
             }
 
             var parentFont = GetParentFont(formattedText);
 
-            if (formattedText.Values.Font == null && parentFont != null)
+            if (formattedText.Values.Font is null && parentFont is not null)
                 formattedText.Font = parentFont.Clone();
             else if (parentFont != null)
-                FlattenFont(formattedText.Values.Font, parentFont);
+                FlattenFont(formattedText.Values.Font!, parentFont);
         }
 
         internal override void VisitHyperlink(Hyperlink hyperlink)
@@ -197,7 +197,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             if (hyperlink.Values.Font is null && parentFont is not null)
                 hyperlink.Font = parentFont.Clone();
             else
-                FlattenFont(hyperlink.Values.Font, parentFont);
+                FlattenFont(hyperlink.Values.Font!, parentFont!);
         }
 
         /// <summary>

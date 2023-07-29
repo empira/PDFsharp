@@ -49,7 +49,6 @@ namespace PdfSharp.Snippets.Drawing
 
                 var size = gfx.MeasureString(text, fontRegular);
 
-
                 var xy = new XPoint(60, 80);
 
                 gfx.DrawLine(XPens.DarkGreen, xy, new XPoint(xy.X + size.Width, xy.Y));

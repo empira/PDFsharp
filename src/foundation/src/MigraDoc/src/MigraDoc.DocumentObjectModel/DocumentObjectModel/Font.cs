@@ -278,10 +278,10 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         internal void Serialize(Serializer serializer, Font? font)
         {
-            if (Parent is FormattedText)
+            if (Parent is FormattedText parent)
             {
                 string fontStyle = "";
-                if (((FormattedText)Parent).Values.Style is null)
+                if (parent.Values.Style is null)
                 {
                     // Check if we can use a DDL keyword.
                     var notNull = CheckWhatIsNotNull();
@@ -292,21 +292,24 @@ namespace MigraDoc.DocumentObjectModel
                         return;
                     }
 
-                    // BUG Check what this code really does...    THHO4STLA: "Check if we can use a DDL keyword."
-                    if (notNull == FontProperties.Bold && Bold)  // or if (Values.Bold is true)???
+                    // Check if we can use a DDL keyword.
+                    if (notNull == FontProperties.Bold && Bold)
                     {
+                        // Only Bold is set.
                         serializer.Write("\\bold");
                         return;
                     }
 
                     if (notNull == FontProperties.Italic && Italic)
                     {
+                        // Only Italic is set.
                         serializer.Write("\\italic");
                         return;
                     }
 
                     if (notNull == FontProperties.Color)
                     {
+                        // Only Color is set.
                         serializer.Write(Invariant($"\\fontcolor({Color})"));
                         return;
                     }

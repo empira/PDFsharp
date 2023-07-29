@@ -48,7 +48,7 @@ namespace PdfSharp.Charting.Renderers
                     for (int idx = 0; idx < count; idx++)
                     {
                         double v = sri.Series.Elements[idx].Value;
-                        if (Double.IsNaN(v))
+                        if (Double.IsNaN(v) /*&& cri.Chart.DisplayBlanksAs == BlankType.Zero*/) // TODO DisplayBlanksAs
                             v = 0;
                         points[idx] = new XPoint(idx + xMajorTick / 2, v);
                     }

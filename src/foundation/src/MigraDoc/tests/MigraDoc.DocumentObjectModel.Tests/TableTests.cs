@@ -90,7 +90,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var document = new Document();
             var section = document.AddSection();
 
-
             var table = section.AddTable();
             table.Borders.Width = Unit.FromPoint(1);
 
@@ -160,7 +159,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             PdfFileHelper.StartPdfViewerIfDebugging(filename);
         }
 
-
         [Fact/*(Skip = "Fails - cause has to be found and fixed.")*/]
         public void Test_MergeDown_LineBreak_RowHeight()
         {
@@ -202,7 +200,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             pdfRenderer.PdfDocument.Save(filename);
             PdfFileHelper.StartPdfViewerIfDebugging(filename);
 
-
             // Analyze the drawn borders in the PDF's content stream.
             var page = pdfRenderer.PdfDocument.Pages[0];
             var contentReference = (PdfReference)page.Contents.Elements.Items[0];
@@ -212,7 +209,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var lineCount = contentLines.Length;
 
             var lineIndex = 0;
-
 
             // Find Cell containing ID#1.
             while (lineIndex < lineCount)
@@ -257,7 +253,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             positionParts[2].Should().Be("l", "a line operator is expected");
             positionParts[1].Should().NotBe("721.5276", "this is the value generated with an incorrect cell height");
             positionParts[1].Should().Be("733.0266", "this is the value generated with the correct cell height");
-
 
             // Find Cell containing ID#2.
             while (lineIndex < lineCount)

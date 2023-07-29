@@ -80,7 +80,6 @@ namespace PdfSharp.SharpZipLib.Zip.Compression.Streams
             windowEnd &= WindowMask;
         }
 
-
         void SlowRepeat(int repStart, int length, int distance)
         {
             while (length-- > 0)

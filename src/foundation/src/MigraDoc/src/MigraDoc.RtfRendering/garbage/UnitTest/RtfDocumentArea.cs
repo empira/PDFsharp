@@ -261,7 +261,6 @@ namespace MigraDoc.RtfRendering.UnitTest
       rw = tbl.AddRow();
       rw.Cells[0].AddParagraph("Table 2");
 
-
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfSection.txt", null);
       File.Copy("RtfSection.txt", "RtfSection.rtf", true);
@@ -342,7 +341,6 @@ namespace MigraDoc.RtfRendering.UnitTest
       Section sec = doc.Sections.AddSection();
       Paragraph par = sec.AddParagraph("left dist = 10");
       par.Format.Borders.DistanceFromLeft = 10;
-
 
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfBorderDistances.txt", null);

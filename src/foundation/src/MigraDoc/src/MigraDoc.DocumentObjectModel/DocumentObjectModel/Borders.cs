@@ -56,7 +56,7 @@ namespace MigraDoc.DocumentObjectModel
                 case BorderType.Horizontal: // Not used in MigraDoc 1.2.
                 case BorderType.Vertical:   // Not used in MigraDoc 1.2.
 #pragma warning restore CS0618
-                    return null; /*(Border?)GetValue(type.ToString(), GV.GetNull);*/ // BUG: why??? -> return null
+                    return null;
                 case BorderType.Left:
                     return Values.Left;
                 case BorderType.Right:
@@ -456,7 +456,7 @@ namespace MigraDoc.DocumentObjectModel
 //                    enumerator.Reset();
 //                    for (int idx = 0; idx < _index + 1; idx++)
 //                        enumerator.MoveNext();
-//                    return (((DictionaryEntry)enumerator.Current).Value as Border)!; // BUG: May return null
+//                    return (((DictionaryEntry)enumerator.Current).Value as Border)!; // B_UG: May return null
 //                }
 //            }
 

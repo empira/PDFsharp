@@ -139,9 +139,6 @@ namespace PdfSharp.Pdf.AcroForms
             // Set XRef to normal state
             ap.Elements["/N"] = xobj.Reference;
 
-
-
-
             //// HACK
             //string m =
             //"<?xpacket begin=\" \" id=\"W5M0MpCehiHzreSzNTczkc9d\"?>" + '\n' +
@@ -189,10 +186,6 @@ namespace PdfSharp.Pdf.AcroForms
             //  stream[idx] = (byte)m[idx];
 
             //mdict.Stream.Value = stream;
-
-
-
-
 #else
             var rect = Elements.GetRectangle(PdfAnnotation.Keys.Rect);
             var form = new XForm(_document, rect.Size);

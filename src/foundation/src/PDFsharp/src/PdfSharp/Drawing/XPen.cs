@@ -1,7 +1,6 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-
 #if GDI
 using PdfSharp.Internal;
 using System.Drawing.Drawing2D;
@@ -303,19 +302,20 @@ namespace PdfSharp.Drawing
         internal WpfPen RealizeWpfPen()
         {
 #if true
-            if (_dirty || !_dirty) // TODOWPF: XPen is frozen by design, WPF Pen can change
+            // XPen is frozen by design, WPF Pen can change.
+            // We realize a new pen independent of dirty flag.
+            if (_dirty || !_dirty)
             {
-                //if (_wpfPen == null)
-                _wpfPen = new WpfPen(new SolidColorBrush(_color.ToWpfColor()), _width);
-                //else
-                //{
-                //  _wpfPen.Brush = new SolidColorBrush(_color.ToWpfColor());
-                //  _wpfPen.Thickness = _width;
-                //}
-                PenLineCap lineCap = XConvert.ToPenLineCap(_lineCap);
-                _wpfPen.StartLineCap = lineCap;
-                _wpfPen.EndLineCap = lineCap;
-                _wpfPen.LineJoin = XConvert.ToPenLineJoin(_lineJoin);
+                var lineCap = XConvert.ToPenLineCap(_lineCap);
+
+                // Always create a new WpfPen.
+                _wpfPen = new WpfPen(new SolidColorBrush(_color.ToWpfColor()), _width)
+                {
+                    StartLineCap = lineCap,
+                    EndLineCap = lineCap,
+                    LineJoin = XConvert.ToPenLineJoin(_lineJoin)
+                };
+
                 if (_dashStyle == XDashStyle.Custom)
                 {
                     // TODOWPF: does not work in all cases
@@ -352,9 +352,9 @@ namespace PdfSharp.Drawing
                 }
             }
 #else
-      _wpfPen = new System.Windows.Media.Pen();
-      _wpfPen.Brush = new SolidColorBrush(_color.ToWpfColor());
-      _wpfPen.Thickness = _width;
+            _wpfPen = new System.Windows.Media.Pen();
+            _wpfPen.Brush = new SolidColorBrush(_color.ToWpfColor());
+            _wpfPen.Thickness = _width;
 #endif
             return _wpfPen;
         }

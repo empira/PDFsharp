@@ -86,7 +86,6 @@ namespace PdfSharp.Snippets.Font
             gfx.DrawString(text + "(Segoe WP Black - regular)", wpBlackFont, XBrushes.Black, x, y);
             y += dy;
 
-
             gfx.DrawString(text + "(Segoe WP Light - with italic simulated)", wpLightItalicFont, XBrushes.Black, x, y);
             y += dy;
 

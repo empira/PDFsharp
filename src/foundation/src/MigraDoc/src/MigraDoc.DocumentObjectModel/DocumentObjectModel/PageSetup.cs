@@ -498,7 +498,7 @@ namespace MigraDoc.DocumentObjectModel
             // It is still possible to change DefaultPageSetup directly via Values,
             // but that's your own bad luck.
             if (_frozen)
-                throw new InvalidOperationException("DefaultPageSetup must not be changed.");
+                throw new InvalidOperationException("DefaultPageSetup must not be changed. Change the PageSetup member of your Section. You can assign a Clone() of DefaultPageSetup to that PageSetup member as needed.");
         }
 
         bool _frozen;

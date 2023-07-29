@@ -13,6 +13,7 @@ using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.RtfRendering.Resources;
 using PdfSharp.Diagnostics;
 using Image = MigraDoc.DocumentObjectModel.Shapes.Image;
+//using System.Security.Policy;
 
 namespace MigraDoc.RtfRendering
 {
@@ -122,7 +123,7 @@ namespace MigraDoc.RtfRendering
 
         void RenderSourceType()
         {
-            var extension = Path.GetExtension(_filePath);
+            var extension = GetFileExtension(); // Path.GetExtension(_filePath);
             if (extension.IsValueNullOrEmpty())
             {
                 _imageFile = null;
@@ -130,8 +131,10 @@ namespace MigraDoc.RtfRendering
                 return;
             }
 
-            switch (extension.ToLower())
+            switch (extension)
             {
+                // Documentation: https://www.biblioscape.com/rtf15_spec.htm
+
                 case ".jpeg":
                 case ".jpg":
                     _rtfWriter.WriteControl("jpegblip");
@@ -144,6 +147,14 @@ namespace MigraDoc.RtfRendering
                 case ".gif":
                     _rtfWriter.WriteControl("pngblip");
                     break;
+
+                //// TODO BMP files. It is not that simple. Must extract the bytes we need.
+                //case ".bmp":
+                //    _rtfWriter.WriteControl("dibitmap0");
+                //    break;
+                //case ".bmp":
+                //    _rtfWriter.WriteControl("wbitmap0");
+                //    break;
 
                 case ".pdf":
                     // Show a PDF logo in RTF document
@@ -183,13 +194,26 @@ namespace MigraDoc.RtfRendering
             XImage? bip = null;
             try
             {
-                _imageFile = File.OpenRead(_filePath);
-                //System.Drawing.Bitmap bip2 = new System.Drawing.Bitmap(imageFile);
-                bip = XImage.FromFile(_filePath);
+                if (_filePath.StartsWith("base64:", StringComparison.Ordinal))
+                {
+                    string base64 = _filePath.Substring("base64:".Length);
+                    byte[] bytes = Convert.FromBase64String(base64);
+                    _imageFile = new MemoryStream(bytes, 0, bytes.Length, true, true);
+                    _xImage = bip = XImage.FromStream(_imageFile);
+                    if (_imageFile.Position != 0)
+                        _imageFile.Position = 0;
+                }
+                else
+                {
+                    _imageFile = File.OpenRead(_filePath);
+                    //System.Drawing.Bitmap bip2 = new System.Drawing.Bitmap(imageFile);
+                    _xImage = bip = XImage.FromFile(_filePath);
+                }
+
 
                 float horzResolution;
                 float vertResolution;
-                string ext = Path.GetExtension(_filePath).ToLower();
+                string ext = GetFileExtension(); // Path.GetExtension(_filePath).ToLower();
                 float origHorzRes = (float)bip.HorizontalResolution;
                 float origVertRes = (float)bip.VerticalResolution;
 
@@ -264,7 +288,10 @@ namespace MigraDoc.RtfRendering
             finally
             {
                 if (bip != null)
+                {
+                    _xImage = null;
                     bip.Dispose();
+                }
             }
 
             //Setting defaults in case an error occurred.
@@ -273,6 +300,33 @@ namespace MigraDoc.RtfRendering
             _imageWidth = (Unit)GetValueOrDefault("Width", Unit.FromInch(1));
             _scaleHeight = (double)GetValueOrDefault("ScaleHeight", 1.0);
             _scaleWidth = (double)GetValueOrDefault("ScaleWidth", 1.0);
+        }
+
+        string GetFileExtension()
+        {
+            if (!String.IsNullOrEmpty(_extension))
+                return _extension;
+
+            if (_filePath.StartsWith("base64:", StringComparison.Ordinal))
+            {
+                // Complicated case: We do not have a filename and must peek into the MemoryStream or the XImage.
+                Debug.Assert(_imageFile != null);
+                Debug.Assert(_xImage != null);
+
+                if (Equals(_xImage.Format, XImageFormat.Png))
+                    return _extension = ".png";
+                if (Equals(_xImage.Format, XImageFormat.Gif))
+                    return _extension = ".gif";
+                //if (Equals(_xImage.Format, XImageFormat.Bmp)) // => Add BMP
+                //    return _extension = ".bmp";
+                if (Equals(_xImage.Format, XImageFormat.Jpeg))
+                    return _extension = ".jpg";
+
+                return _extension = "";
+            }
+
+            // Simple case: We have a filename.
+            return _extension = Path.GetExtension(_filePath).ToLower();
         }
 
         /// <summary>
@@ -300,7 +354,6 @@ namespace MigraDoc.RtfRendering
             return _imageHeight * _scaleHeight;
         }
 
-
         protected override Unit GetShapeWidth()
         {
             return _imageWidth * _scaleWidth;
@@ -323,6 +376,8 @@ namespace MigraDoc.RtfRendering
         readonly bool _isInline;
         //FileStream imageFile;
         Stream? _imageFile;
+        string? _extension;
+        XImage? _xImage;
         Unit _imageWidth;
         Unit _imageHeight;
 
