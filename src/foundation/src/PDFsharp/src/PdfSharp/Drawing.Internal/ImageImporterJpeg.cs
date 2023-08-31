@@ -67,7 +67,8 @@ namespace PdfSharp.Drawing.Internal
             //var currentOffset = stream.CurrentOffset;
 
             bool header = TestJfifHeaderWorker(stream, ii) ||
-                          TestExifHeaderWorker(stream/*, ii*/);
+                          TestExifHeaderWorker(stream/*, ii*/) || 
+                          TestPhotoshopHeaderWorker(stream);
 
             //while (!header && MoveToNextHeader(stream))
             //{
@@ -78,6 +79,39 @@ namespace PdfSharp.Drawing.Internal
             return header;
         }
 
+        bool TestPhotoshopHeaderWorker(StreamReaderHelper stream)
+        {
+            if (stream.GetWord(0, true) == 0xffed)
+            {
+                int length = stream.GetWord(2, true);
+        
+                string identifier = "";
+                int idx = 4;
+                do
+                {
+                    byte c = stream.GetByte(idx);
+                    if(c == 0x00)
+                    {
+                        break;
+                    }
+                    identifier += (char)c;
+                    idx++;
+                } while (idx < length);
+        
+                if(!identifier.StartsWith("Photoshop ") && !identifier.StartsWith("Adobe_Photoshop")) // "Photoshop 3.0", "Adobe_Photoshop2.5:", etc.
+                {
+                    return false;
+                }
+                idx++;
+        
+                if(stream.GetDWord(idx, true) == 943868237) // 8BIM
+                {
+                    return true;
+                }
+        
+            }
+            return false;
+        }
         bool TestJfifHeaderWorker(StreamReaderHelper stream, ImportedImage ii)
         {
             // The App0 header should be the first header in every JFIF file.
