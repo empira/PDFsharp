@@ -181,5 +181,16 @@ namespace PdfSharp.Fonts.OpenType
         /// Vertical Metrics.
         /// </summary>
         public const string VMtx = "vmtx";
+
+        /// <summary>
+        /// Color table
+        /// </summary>
+        public const string COLR = "COLR";
+
+        /// <summary>
+        /// Color palette table
+        /// </summary>
+        public const string CPAL = "CPAL";
+
     }
 }

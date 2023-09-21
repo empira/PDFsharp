@@ -680,6 +680,11 @@ namespace PdfSharp.Drawing
 
         internal string FamilyName => _familyName;
 
+        /// <summary>
+        /// Gets the full face name of the font as stored in the font-file
+        /// </summary>
+        public string FullFaceName => Descriptor.FontFace.FullFaceName;
+
         string _familyName = "";
 
         internal int UnitsPerEm { get; private set; }
@@ -745,5 +750,18 @@ namespace PdfSharp.Drawing
         string DebuggerDisplay
         // ReSharper restore UnusedMember.Local
             => Invariant($"font=('{Name}' {Size:0.##}");
+
+        /// <summary>
+        /// Gets the sorted list of characters supported by this font.<br></br>
+        /// </summary>
+        /// <returns>The list of characters supported by this font, sorted in ascending order</returns>
+        /// <remarks>
+        /// The returned list may contain surrogates and/or surrogate pairs, so calling applications
+        /// should use <see cref="char.ConvertFromUtf32(int)"/> to convert such values to a valid string.
+        /// </remarks>
+        public IReadOnlyList<int> GetSupportedCharacters()
+        {
+            return GlyphTypeface.Fontface.cmap.GetSupportedCharacters();
+        }
     }
 }

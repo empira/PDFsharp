@@ -52,11 +52,11 @@ namespace PdfSharp.Pdf.Advanced
               "/CMapName /Adobe-Identity-UCS def /CMapType 2 def\n";
             string suffix = "endcmap CMapName currentdict /CMap defineresource pop end end";
 
-            Dictionary<int, char> glyphIndexToCharacter = new Dictionary<int, char>();
+            Dictionary<int, int> glyphIndexToCharacter = new();
             int lowIndex = 65536, hiIndex = -1;
-            foreach (KeyValuePair<char, int> entry in _cmapInfo.CharacterToGlyphIndex)
+            foreach (var entry in _cmapInfo.CharacterToGlyphIndex)
             {
-                int index = (int)entry.Value;
+                int index = entry.Value;
                 lowIndex = Math.Min(lowIndex, index);
                 hiIndex = Math.Max(hiIndex, index);
                 //glyphIndexToCharacter.Add(index, entry.Key);

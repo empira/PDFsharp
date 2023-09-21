@@ -508,39 +508,146 @@ namespace PdfSharp.Drawing.Pdf
             Debug.Assert(realizedFont != null);
             realizedFont.AddChars(s);
 
-            const string format2 = Config.SignificantFigures4;
             OpenTypeDescriptor descriptor = realizedFont.FontDescriptor._descriptor;
 
-            string? text = null;
+            string? text;
+            // we split the text based on whether special color-handling is required for a character
+            List<List<(int, ColrTable.GlyphRecord?)>> textParts = new();
+            var needsColorHandling = false;
             if (font.Unicode)
             {
-                var sb = new StringBuilder();
+                var partGlyphs = new List<(int, ColrTable.GlyphRecord?)>();
                 bool isSymbolFont = descriptor.FontFace.cmap.symbol;
                 for (int idx = 0; idx < s.Length; idx++)
                 {
+                    int glyphID;
                     char ch = s[idx];
                     if (isSymbolFont)
                     {
                         // Remap ch for symbol fonts.
                         ch = (char)(ch | (descriptor.FontFace.os2.usFirstCharIndex & 0xFF00));  // @@@ refactor
+                        glyphID = descriptor.CharCodeToGlyphIndex(ch);
                     }
-                    int glyphID = descriptor.CharCodeToGlyphIndex(ch);
-                    sb.Append((char)glyphID);
+                    else
+                        glyphID = descriptor.CharCodeToGlyphIndex(s, ref idx);
+                    var color = descriptor.GetColorRecord(glyphID);
+                    // if glyph is colored, render individually, else add to list
+                    if (color != null || (color == null && needsColorHandling))
+                    {
+                        if (partGlyphs.Count > 0)
+                            textParts.Add(partGlyphs);
+                        partGlyphs = new();
+                        needsColorHandling = color != null;
+                    }
+                    partGlyphs.Add((glyphID, color));
                 }
-                s = sb.ToString();
-
-                byte[] bytes = PdfEncoders.RawUnicodeEncoding.GetBytes(s);
-                bytes = PdfEncoders.FormatStringLiteral(bytes, true, false, true, null);
-                text = PdfEncoders.RawEncoding.GetString(bytes, 0, bytes.Length);
+                if (partGlyphs.Count > 0)
+                    textParts.Add(partGlyphs);
             }
             else
             {
                 byte[] bytes = PdfEncoders.WinAnsiEncoding.GetBytes(s);
                 text = PdfEncoders.ToStringLiteral(bytes, false, null);
+                RenderText(text, brush, x, y, font, realizedFont, lineSpace, width,
+                    boldSimulation, italicSimulation, underline, strikeout);
+                return;
             }
 
+            const string format2 = Config.SignificantFigures4;
+
+            foreach (var textPart in textParts)
+            {
+                var colorIsBrushColor = true;
+                var sb = new StringBuilder();
+                foreach (var part in textPart)
+                {
+                    if (part.Item2 != null)
+                    {
+                        var chunkWidth = 0.0;
+                        var glyphRecord = part.Item2.Value;
+                        for (var i = 0; i < glyphRecord.numLayers; i++)
+                        {
+                            var layer = descriptor.FontFace.colr!.layerRecords[i + glyphRecord.firstLayerIndex];
+                            sb.Append((char)layer.glyphId);
+                            // 0xffff is a special entry denoting the current foreground-color
+                            if (layer.paletteIndex != 0xffff)
+                            {
+                                var color = descriptor.FontFace.cpal!.colorRecords[layer.paletteIndex];
+                                AppendFormatArgs("{0:0.####} {1:0.####} {2:0.####} rg\n",
+                                    color.red / 255.0, color.green / 255.0, color.blue / 255.0);
+                                colorIsBrushColor = false;
+                            }
+                            else if (!colorIsBrushColor)
+                            {
+                                if (brush is XSolidBrush solidBrush)
+                                {
+                                    AppendFormatArgs("{0:0.####} {1:0.####} {2:0.####} rg\n",
+                                        solidBrush.Color.R / 255.0, solidBrush.Color.G / 255.0, solidBrush.Color.B / 255.0);
+                                }
+                                else
+                                    Append("0 g\n");
+                                colorIsBrushColor = true;
+                            }
+                            s = sb.ToString();
+                            realizedFont.AddGlyphIndices(s);
+                            var partWidth = descriptor.GlyphIndexToEmfWidth(layer.glyphId, font.Size);
+                            chunkWidth = Math.Max(chunkWidth, partWidth);
+                            var partBytes = PdfEncoders.RawUnicodeEncoding.GetBytes(s);
+                            partBytes = PdfEncoders.FormatStringLiteral(partBytes, true, false, true, null);
+                            text = PdfEncoders.RawEncoding.GetString(partBytes, 0, partBytes.Length);
+                            if (i == 0)
+                            {
+                                var pos = new XPoint(x, y);
+                                pos = WorldToView(pos);
+                                AdjustTdOffset(ref pos, 0, false);
+                                AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} Td {2} Tj\n", pos.X, pos.Y, text);
+                            }
+                            else
+                            {
+                                // rest of the layers are rendered on top of the first layer
+                                AppendFormatArgs("0 0 Td {0} Tj\n", text);
+                            }
+                            sb.Length = 0;
+                        }
+                        x += chunkWidth;
+                    }
+                    else
+                        sb.Append((char)part.Item1);
+                }
+                if (sb.Length > 0)
+                {
+                    width = 0.0;
+                    s = sb.ToString();
+                    foreach (var glyphIndex in s)
+                        width += descriptor.GlyphIndexToWidth(glyphIndex);
+                    width = width * font.Size / descriptor.UnitsPerEm;
+                    byte[] bytes = PdfEncoders.RawUnicodeEncoding.GetBytes(s);
+                    bytes = PdfEncoders.FormatStringLiteral(bytes, true, false, true, null);
+                    text = PdfEncoders.RawEncoding.GetString(bytes, 0, bytes.Length);
+                    if (brush is XSolidBrush solidBrush)
+                    {
+                        AppendFormatArgs("{0:0.####} {1:0.####} {2:0.####} rg\n",
+                            solidBrush.Color.R / 255.0, solidBrush.Color.G / 255.0, solidBrush.Color.B / 255.0);
+                    }
+                    else
+                        Append("0 g\n");
+                    colorIsBrushColor = true;
+                    RenderText(text, brush, x, y, font, realizedFont, lineSpace, width,
+                        boldSimulation, italicSimulation, underline, strikeout);
+                    x += width;
+                }
+            }
+        }
+
+        private void RenderText(string text, XBrush brush, double x, double y,
+            XFont font, PdfFont realizedFont,
+            double lineSpace, double width,
+            bool boldSimulation, bool italicSimulation, bool underline, bool strikeout)
+        {
+            const string format2 = Config.SignificantFigures4;
+
             // Map absolute position to PDF world space.
-            XPoint pos = new XPoint(x, y);
+            XPoint pos = new(x, y);
             pos = WorldToView(pos);
 
             double verticalOffset = 0;

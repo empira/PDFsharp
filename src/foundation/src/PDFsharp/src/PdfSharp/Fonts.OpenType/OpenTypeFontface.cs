@@ -137,6 +137,8 @@ namespace PdfSharp.Fonts.OpenType
         // ReSharper disable InconsistentNaming
         // ReSharper disable IdentifierTypo
         internal CMapTable cmap = default!; // NRT TODO Change programming model so that it fits NRTs.
+        internal ColrTable? colr = default;
+        internal CpalTable? cpal = default;
         internal ControlValueTable cvt = default!; // NRT
         internal FontProgram fpgm = default!; // NRT
         internal MaximumProfileTable maxp = default!; // NRT
@@ -309,6 +311,12 @@ namespace PdfSharp.Fonts.OpenType
                 // Read required tables
                 if (Seek(CMapTable.Tag) != -1)
                     cmap = new CMapTable(this);
+
+                if (Seek(ColrTable.Tag) != -1)
+                    colr = new ColrTable(this);
+
+                if (Seek(CpalTable.Tag) != -1)
+                    cpal = new CpalTable(this);
 
                 if (Seek(ControlValueTable.Tag) != -1)
                     cvt = new ControlValueTable(this);

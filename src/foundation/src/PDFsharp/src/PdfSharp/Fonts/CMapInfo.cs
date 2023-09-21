@@ -32,16 +32,25 @@ namespace PdfSharp.Fonts
                 int length = text.Length;
                 for (int idx = 0; idx < length; idx++)
                 {
+                    int glyphIndex;
+                    if (char.IsSurrogate(text, idx)
+                        || char.IsHighSurrogate(text, idx)
+                        || char.IsSurrogatePair(text, idx))
+                    {
+                        glyphIndex = _descriptor.CharCodeToGlyphIndex(text, ref idx);
+                        GlyphIndices[glyphIndex] = default!;
+                        continue;
+                    }
                     char ch = text[idx];
                     if (!CharacterToGlyphIndex.ContainsKey(ch))
                     {
-                        char ch2 = ch;
+                        var ch2 = ch;
                         if (symbol)
                         {
                             // Remap ch for symbol fonts.
                             ch2 = (char)(ch | (_descriptor.FontFace.os2.usFirstCharIndex & 0xFF00));  // @@@ refactor
                         }
-                        int glyphIndex = _descriptor.CharCodeToGlyphIndex(ch2);
+                        glyphIndex = _descriptor.CharCodeToGlyphIndex(ch2);
                         CharacterToGlyphIndex.Add(ch, glyphIndex);
                         GlyphIndices[glyphIndex] = default!;
                         MinChar = (char)Math.Min(MinChar, ch);

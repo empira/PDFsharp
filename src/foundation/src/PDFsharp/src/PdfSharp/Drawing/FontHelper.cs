@@ -50,6 +50,7 @@ namespace PdfSharp.Drawing
                 int width = 0;
                 for (int idx = 0; idx < length; idx++)
                 {
+                    int glyphIndex;
                     char ch = text[idx];
                     // HACK: Unclear what to do here.
                     if (ch < 32)
@@ -60,8 +61,10 @@ namespace PdfSharp.Drawing
                         // Remap ch for symbol fonts.
                         ch = (char)(ch | (descriptor.FontFace.os2.usFirstCharIndex & 0xFF00));  // @@@ refactor
                         // Used | instead of + because of: http://pdfsharp.codeplex.com/workitem/15954
+                        glyphIndex = descriptor.CharCodeToGlyphIndex(ch);
                     }
-                    int glyphIndex = descriptor.CharCodeToGlyphIndex(ch);
+                    else
+                        glyphIndex = descriptor.CharCodeToGlyphIndex(text, ref idx);
                     width += descriptor.GlyphIndexToWidth(glyphIndex);
                 }
                 // What? size.Width = width * font.Size * (font.Italic ? 1 : 1) / descriptor.UnitsPerEm;

@@ -23,7 +23,14 @@ namespace PdfSharp.Fonts.OpenType
     /// </summary>
     enum WinEncodingId
     {
-        Symbol, Unicode
+        Symbol = 0,
+        UnicodeUSC_2 = 1,
+        ShiftJIS = 2,
+        PRC = 3,
+        Big5 = 4,
+        Wansung = 5,
+        Johab = 6,
+        UnicodeUSC_4 = 10
     }
 
     /// <summary>
@@ -105,6 +112,104 @@ namespace PdfSharp.Fonts.OpenType
                 throw new InvalidOperationException(PSSR.ErrorReadingFontData, ex);
             }
         }
+
+        internal List<int> GetSupportedCharacters()
+        {
+            var characterList = new List<int>();
+
+            int segCount = segCountX2 / 2;
+            for (var i = 0; i < segCount; i++)
+            {
+                var start = startCount[i];
+                var end = endCount[i];
+                if (start == 0xffff && end == 0xffff)
+                    break;
+                for (var c = start; c <= end; c++)
+                {
+                    characterList.Add(c);
+                }
+            }
+            characterList.Sort();   // just in case
+            return characterList;
+        }
+    }
+
+    /// <summary>
+    /// CMap format 12: Segmented coverage.<br></br>
+    /// The Windows standard format.<br></br>
+    /// https://learn.microsoft.com/en-us/typography/opentype/spec/cmap#format-12-segmented-coverage
+    /// </summary>
+    internal class CMap12 : OpenTypeFontTable
+    {
+        // Code based on this commit on github:
+        // https://github.com/LokiMidgard/PDFsharp/commit/05e277686bad46a7c56302bb99af69db4c6ef0be#diff-5e7de79a1595e0882347825b7a7a72a874880594023c12883bed6c2368223e23
+        // Related issue:
+        // https://github.com/empira/PDFsharp-1.5/issues/63
+        internal struct SequentialMapGroup
+        {
+            public UInt32 startCharCode;// Firest character code in this group
+            public UInt32 endCharCode; // Last character code in this group
+            public UInt32 startGlyphID; // Glyph index corresponding to the starting character code.
+        }
+
+        public WinEncodingId encodingId; // Windows encoding ID.
+        public UInt16 format; // Subtable format; set to 12.
+        public UInt32 length; // Byte length of this subtable (including the header)
+        public UInt32 language; // This field must be set to zero for all cmap subtables whose platform IDs are other than Macintosh (platform ID 1). 
+        public UInt32 numGroups; // Number of groupings which follow
+
+        public SequentialMapGroup[] groups = Array.Empty<SequentialMapGroup>();
+
+        public CMap12(OpenTypeFontface fontData, WinEncodingId encodingId)
+            : base(fontData, "----")
+        {
+            this.encodingId = encodingId;
+            Read(fontData);
+        }
+
+        internal void Read(OpenTypeFontface fontData)
+        {
+            try
+            {
+                format = fontData.ReadUShort();
+                Debug.Assert(format == 12, "Only format 12 expected.");
+                fontData.ReadUShort(); // reserved
+                length = fontData.ReadULong();
+                language = fontData.ReadULong();  // Always null in Windows
+                numGroups = fontData.ReadULong();
+
+                groups = new SequentialMapGroup[numGroups];
+
+                for (int i = 0; i < groups.Length; i++)
+                {
+                    ref var group = ref groups[i];
+                    group.startCharCode = fontData.ReadULong();
+                    group.endCharCode = fontData.ReadULong();
+                    group.startGlyphID = fontData.ReadULong();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(PSSR.ErrorReadingFontData, ex);
+            }
+        }
+
+        public List<int> GetSupportedCharacters()
+        {
+            var characterList = new List<int>();
+
+            foreach (var group in groups)
+            {
+                var start = group.startCharCode;
+                var end = group.endCharCode;
+                for (var c = start; c <= end; c++)
+                {
+                    characterList.Add((int)c);
+                }
+            }
+            characterList.Sort();   // just in case
+            return characterList;
+        }
     }
 
     /// <summary>
@@ -124,6 +229,7 @@ namespace PdfSharp.Fonts.OpenType
         public bool symbol;
 
         public CMap4 cmap4 = null!;
+        public CMap12 cmap12 = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CMapTable"/> class.
@@ -157,20 +263,206 @@ namespace PdfSharp.Fonts.OpenType
                     int currentPosition = _fontData.Position;
 
                     // Just read Windows stuff.
-                    if (platformId == PlatformId.Win && (encodingId == WinEncodingId.Symbol || encodingId == WinEncodingId.Unicode))
+                    if (platformId == PlatformId.Win &&
+                        (encodingId == WinEncodingId.Symbol || encodingId == WinEncodingId.UnicodeUSC_2
+                        || encodingId == WinEncodingId.UnicodeUSC_4))
                     {
                         symbol = encodingId == WinEncodingId.Symbol;
 
                         _fontData.Position = tableOffset + offset;
-                        cmap4 = new CMap4(_fontData, encodingId);
+                        var format = _fontData.ReadUShort();
+                        _fontData.Position = tableOffset + offset;
+
+                        if (format == 4)
+                        {
+                            cmap4 = new CMap4(_fontData, encodingId);
+                        }
+                        else if (format == 12)
+                        {
+                            cmap12 = new CMap12(_fontData, encodingId);
+
+                        }
                         _fontData.Position = currentPosition;
                         // We have found what we are looking for, so break.
                         success = true;
-                        break;
+                        //break;
                     }
                 }
                 if (!success)
                     throw new InvalidOperationException("Font has no usable platform or encoding ID. It cannot be used with PDFsharp.");
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(PSSR.ErrorReadingFontData, ex);
+            }
+        }
+
+        internal IReadOnlyList<int> GetSupportedCharacters()
+        {
+            return cmap12?.GetSupportedCharacters() ?? cmap4?.GetSupportedCharacters() ?? emptyGlyphs;
+        }
+
+        private static readonly List<int> emptyGlyphs = new();
+    }
+
+    /// <summary>
+    /// Color Table<br></br>
+    /// https://learn.microsoft.com/en-us/typography/opentype/spec/colr
+    /// </summary>
+    class ColrTable : OpenTypeFontTable
+    {
+        public const string Tag = TableTagNames.COLR;
+
+        internal struct GlyphRecord
+        {
+            public ushort glyphId;
+            public ushort firstLayerIndex;
+            public ushort numLayers;
+        }
+        internal struct LayerRecord
+        {
+            public ushort glyphId;
+            public ushort paletteIndex;
+        }
+
+        class GlyphRecordComparer : IComparer<GlyphRecord>
+        {
+            public Fixed Compare(GlyphRecord x, GlyphRecord y)
+            {
+                return x.glyphId.CompareTo(y.glyphId);
+            }
+        }
+
+        public ushort version;
+        // version 0 tables start
+        public ushort numBaseGlyphRecords;
+        public uint baseGlyphRecordsOffset;
+        public uint layerRecordsOffset;
+        public ushort numLayerRecords;
+        // version 0 tables end
+
+        public GlyphRecord[] baseGlyphRecords = Array.Empty<GlyphRecord>();
+        public LayerRecord[] layerRecords = Array.Empty<LayerRecord>();
+
+        public ColrTable(OpenTypeFontface fontData)
+            : base(fontData, Tag)
+        {
+            Read(fontData);
+        }
+
+        public GlyphRecord? GetLayers(int glyphId)
+        {
+            var index = Array.BinarySearch(baseGlyphRecords,
+                new GlyphRecord { glyphId = (ushort)glyphId },
+                new GlyphRecordComparer());
+            if (index >= 0)
+            {
+                return baseGlyphRecords[index];
+            }
+            return null;
+        }
+
+        void Read(OpenTypeFontface fontData)
+        {
+            try
+            {
+                var tableStart = fontData.Position;
+
+                version = fontData.ReadUShort();
+                Debug.Assert(version == 0 || version == 1, "Version 0 or 1 of COLR table is expected");
+                numBaseGlyphRecords = fontData.ReadUShort();
+                baseGlyphRecordsOffset = fontData.ReadULong();
+                layerRecordsOffset = fontData.ReadULong();
+                numLayerRecords = fontData.ReadUShort();
+
+                baseGlyphRecords = new GlyphRecord[numBaseGlyphRecords];
+                layerRecords = new LayerRecord[numLayerRecords];
+
+                fontData.Position = tableStart + (int)baseGlyphRecordsOffset;
+                for (var i = 0; i < numBaseGlyphRecords; i++)
+                {
+                    baseGlyphRecords[i] = new GlyphRecord
+                    {
+                        glyphId = fontData.ReadUShort(),
+                        firstLayerIndex = fontData.ReadUShort(),
+                        numLayers = fontData.ReadUShort()
+                    };
+                }
+                fontData.Position = tableStart + (int)layerRecordsOffset;
+                for (var i = 0; i < numLayerRecords; i++)
+                {
+                    layerRecords[i] = new LayerRecord
+                    {
+                        glyphId = fontData.ReadUShort(),
+                        paletteIndex = fontData.ReadUShort()
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(PSSR.ErrorReadingFontData, ex);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Color Palette table<br></br>
+    /// https://learn.microsoft.com/en-us/typography/opentype/spec/cpal
+    /// </summary>
+    class CpalTable : OpenTypeFontTable
+    {
+        public const string Tag = TableTagNames.CPAL;
+
+        internal struct ColorRecord
+        {
+            public byte blue;
+            public byte green;
+            public byte red;
+            public byte alpha;
+        }
+
+        public ushort version;
+        public ushort numPaletteEntries;
+        public ushort numPalettes;
+        public ushort numColorRecords;
+        public uint colorRecordsArrayOffset;
+        public ushort[] colorRecordIndices = Array.Empty<ushort>();
+        public ColorRecord[] colorRecords = Array.Empty<ColorRecord>();
+
+        public CpalTable(OpenTypeFontface fontData)
+            : base(fontData, Tag)
+        {
+            Read(fontData);
+        }
+
+        void Read(OpenTypeFontface fontData)
+        {
+            try
+            {
+                var tableStart = fontData.Position;
+
+                version = fontData.ReadUShort();
+                numPaletteEntries = fontData.ReadUShort();
+                numPalettes = fontData.ReadUShort();
+                numColorRecords = fontData.ReadUShort();
+                colorRecordsArrayOffset = fontData.ReadULong();
+
+                colorRecordIndices = new ushort[numPalettes];
+                for (int i = 0; i < numPalettes; i++)
+                {
+                    colorRecordIndices[i] = fontData.ReadUShort();
+                }
+                colorRecords = new ColorRecord[numColorRecords];
+                for (int i = 0; i < numColorRecords; i++)
+                {
+                    colorRecords[i] = new ColorRecord
+                    {
+                        blue = fontData.ReadByte(),
+                        green = fontData.ReadByte(),
+                        red = fontData.ReadByte(),
+                        alpha = fontData.ReadByte()
+                    };
+                }
             }
             catch (Exception ex)
             {
