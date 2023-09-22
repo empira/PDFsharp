@@ -325,14 +325,6 @@ namespace PdfSharp.Fonts.OpenType
             public ushort paletteIndex;
         }
 
-        class GlyphRecordComparer : IComparer<GlyphRecord>
-        {
-            public Fixed Compare(GlyphRecord x, GlyphRecord y)
-            {
-                return x.glyphId.CompareTo(y.glyphId);
-            }
-        }
-
         public ushort version;
         // version 0 tables start
         public ushort numBaseGlyphRecords;
@@ -343,6 +335,8 @@ namespace PdfSharp.Fonts.OpenType
 
         public GlyphRecord[] baseGlyphRecords = Array.Empty<GlyphRecord>();
         public LayerRecord[] layerRecords = Array.Empty<LayerRecord>();
+        // helper array that contains just the glyphIds for the baseGlyphRecords
+        private int[] glyphRecordsHelperArray = Array.Empty<int>();
 
         public ColrTable(OpenTypeFontface fontData)
             : base(fontData, Tag)
@@ -352,9 +346,7 @@ namespace PdfSharp.Fonts.OpenType
 
         public GlyphRecord? GetLayers(int glyphId)
         {
-            var index = Array.BinarySearch(baseGlyphRecords,
-                new GlyphRecord { glyphId = (ushort)glyphId },
-                new GlyphRecordComparer());
+            var index = Array.BinarySearch(glyphRecordsHelperArray, glyphId);
             if (index >= 0)
             {
                 return baseGlyphRecords[index];
@@ -376,17 +368,20 @@ namespace PdfSharp.Fonts.OpenType
                 numLayerRecords = fontData.ReadUShort();
 
                 baseGlyphRecords = new GlyphRecord[numBaseGlyphRecords];
+                glyphRecordsHelperArray = new int[numBaseGlyphRecords];
                 layerRecords = new LayerRecord[numLayerRecords];
 
                 fontData.Position = tableStart + (int)baseGlyphRecordsOffset;
                 for (var i = 0; i < numBaseGlyphRecords; i++)
                 {
+                    var glyphId = fontData.ReadUShort();
                     baseGlyphRecords[i] = new GlyphRecord
                     {
-                        glyphId = fontData.ReadUShort(),
+                        glyphId = glyphId,
                         firstLayerIndex = fontData.ReadUShort(),
                         numLayers = fontData.ReadUShort()
                     };
+                    glyphRecordsHelperArray[i] = glyphId;
                 }
                 fontData.Position = tableStart + (int)layerRecordsOffset;
                 for (var i = 0; i < numLayerRecords; i++)
