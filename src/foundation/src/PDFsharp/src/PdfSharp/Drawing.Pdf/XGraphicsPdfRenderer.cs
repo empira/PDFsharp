@@ -557,7 +557,6 @@ namespace PdfSharp.Drawing.Pdf
 
             foreach (var textPart in textParts)
             {
-                var colorIsBrushColor = true;
                 var sb = new StringBuilder();
                 foreach (var part in textPart)
                 {
@@ -572,21 +571,13 @@ namespace PdfSharp.Drawing.Pdf
                             // 0xffff is a special entry denoting the current foreground-color
                             if (layer.paletteIndex != 0xffff)
                             {
-                                var color = descriptor.FontFace.cpal!.colorRecords[layer.paletteIndex];
-                                AppendFormatArgs("{0:0.####} {1:0.####} {2:0.####} rg\n",
-                                    color.red / 255.0, color.green / 255.0, color.blue / 255.0);
-                                colorIsBrushColor = false;
+                                _gfxState.RealizeBrush(
+                                    new XSolidBrush(descriptor.FontFace.cpal!.colorRecords[layer.paletteIndex]),
+                                    _colorMode, 0, 0);
                             }
-                            else if (!colorIsBrushColor)
+                            else
                             {
-                                if (brush is XSolidBrush solidBrush)
-                                {
-                                    AppendFormatArgs("{0:0.####} {1:0.####} {2:0.####} rg\n",
-                                        solidBrush.Color.R / 255.0, solidBrush.Color.G / 255.0, solidBrush.Color.B / 255.0);
-                                }
-                                else
-                                    Append("0 g\n");
-                                colorIsBrushColor = true;
+                                _gfxState.RealizeBrush(brush, _colorMode, 0, 0);
                             }
                             s = sb.ToString();
                             realizedFont.AddGlyphIndices(s);
@@ -624,14 +615,7 @@ namespace PdfSharp.Drawing.Pdf
                     byte[] bytes = PdfEncoders.RawUnicodeEncoding.GetBytes(s);
                     bytes = PdfEncoders.FormatStringLiteral(bytes, true, false, true, null);
                     text = PdfEncoders.RawEncoding.GetString(bytes, 0, bytes.Length);
-                    if (brush is XSolidBrush solidBrush)
-                    {
-                        AppendFormatArgs("{0:0.####} {1:0.####} {2:0.####} rg\n",
-                            solidBrush.Color.R / 255.0, solidBrush.Color.G / 255.0, solidBrush.Color.B / 255.0);
-                    }
-                    else
-                        Append("0 g\n");
-                    colorIsBrushColor = true;
+                    _gfxState.RealizeBrush(brush, _colorMode, 0, 0);
                     RenderText(text, brush, x, y, font, realizedFont, lineSpace, width,
                         boldSimulation, italicSimulation, underline, strikeout);
                     x += width;
