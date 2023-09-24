@@ -3,6 +3,7 @@
 
 #define VERBOSE_
 
+using PdfSharp.Drawing;
 using System.Text;
 
 using Fixed = System.Int32;
@@ -408,21 +409,13 @@ namespace PdfSharp.Fonts.OpenType
     {
         public const string Tag = TableTagNames.CPAL;
 
-        internal struct ColorRecord
-        {
-            public byte blue;
-            public byte green;
-            public byte red;
-            public byte alpha;
-        }
-
         public ushort version;
         public ushort numPaletteEntries;
         public ushort numPalettes;
         public ushort numColorRecords;
         public uint colorRecordsArrayOffset;
         public ushort[] colorRecordIndices = Array.Empty<ushort>();
-        public ColorRecord[] colorRecords = Array.Empty<ColorRecord>();
+        public XColor[] colorRecords = Array.Empty<XColor>();
 
         public CpalTable(OpenTypeFontface fontData)
             : base(fontData, Tag)
@@ -447,16 +440,14 @@ namespace PdfSharp.Fonts.OpenType
                 {
                     colorRecordIndices[i] = fontData.ReadUShort();
                 }
-                colorRecords = new ColorRecord[numColorRecords];
+                colorRecords = new XColor[numColorRecords];
                 for (int i = 0; i < numColorRecords; i++)
                 {
-                    colorRecords[i] = new ColorRecord
-                    {
-                        blue = fontData.ReadByte(),
-                        green = fontData.ReadByte(),
-                        red = fontData.ReadByte(),
-                        alpha = fontData.ReadByte()
-                    };
+                    var blue = fontData.ReadByte();
+                    var green = fontData.ReadByte();
+                    var red = fontData.ReadByte();
+                    var alpha = fontData.ReadByte();
+                    colorRecords[i] = XColor.FromArgb(alpha, red, green, blue);
                 }
             }
             catch (Exception ex)
