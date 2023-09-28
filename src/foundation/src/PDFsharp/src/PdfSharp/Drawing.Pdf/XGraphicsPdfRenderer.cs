@@ -238,18 +238,31 @@ namespace PdfSharp.Drawing.Pdf
                 throw new ArgumentNullException("pen and brush");
             }
 
-            const string format = Config.SignificantFigures3;
-
             Realize(pen, brush);
-            //AppendFormat123("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} re\n", x, y, width, -height);
-            AppendFormatRect("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} re\n", x, y + height, width, height);
+            
+#if CORE
+            if (brush is XImageBrush xImageBrush)
+            {
+                XGraphicsPath xGraphicsPath = new XGraphicsPath();
+                xGraphicsPath.AddRectangle(x, y, width, height);
+                DrawImageBrush(xImageBrush, xGraphicsPath);
 
-            if (pen != null && brush != null)
-                _content.Append("B\n");
-            else if (pen != null)
-                _content.Append("S\n");
-            else
-                _content.Append("f\n");
+                if (pen != null) {
+                    AppendRectangle();
+                    _content.Append("S\n");
+                }
+                return;
+            }
+#endif
+            AppendRectangle();
+            AppendStrokeFill(pen, brush, XFillMode.Winding, false);
+
+            void AppendRectangle()
+            {
+                const string format = Config.SignificantFigures3;
+                //AppendFormat123("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} re\n", x, y, width, -height);
+                AppendFormatRect("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} re\n", x, y + height, width, height);
+            }
         }
 
         // ----- DrawRectangles -----------------------------------------------------------------------
@@ -283,31 +296,53 @@ namespace PdfSharp.Drawing.Pdf
             if (Owner._uaManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
-            Realize(pen, brush);
+            Realize(pen, brush);           
 
-            // Useful information is here http://home.t-online.de/home/Robert.Rossmair/ellipse.htm (note: link was dead on November 2, 2015)
-            // or here http://www.whizkidtech.redprince.net/bezier/circle/
-            // Deeper but more difficult: http://www.tinaja.com/cubic01.asp
-            XRect rect = new XRect(x, y, width, height);
-            double δx = rect.Width / 2;
-            double δy = rect.Height / 2;
-            double fx = δx * Const.κ;
-            double fy = δy * Const.κ;
-            double x0 = rect.X + δx;
-            double y0 = rect.Y + δy;
+#if CORE
+            if (brush is XImageBrush xImageBrush)
+            {
+                XGraphicsPath xGraphicsPath = new XGraphicsPath();
+                xGraphicsPath.AddEllipse(x, y, width, height);
 
-            // Approximate an ellipse by drawing four cubic splines.
-            const string format = Config.SignificantFigures4;
-            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", x0 + δx, y0);
-            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
-              x0 + δx, y0 + fy, x0 + fx, y0 + δy, x0, y0 + δy);
-            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
-              x0 - fx, y0 + δy, x0 - δx, y0 + fy, x0 - δx, y0);
-            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
-              x0 - δx, y0 - fy, x0 - fx, y0 - δy, x0, y0 - δy);
-            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
-              x0 + fx, y0 - δy, x0 + δx, y0 - fy, x0 + δx, y0);
+                DrawImageBrush(xImageBrush, xGraphicsPath);
+
+                if (pen != null) {
+                    AppendEllipse();
+                    _content.Append("h ");
+                    _content.Append("S\n");
+                }
+
+                return;
+            }
+#endif
+            AppendEllipse();
             AppendStrokeFill(pen, brush, XFillMode.Winding, true);
+
+            void AppendEllipse()
+            {
+                // Useful information is here http://home.t-online.de/home/Robert.Rossmair/ellipse.htm (note: link was dead on November 2, 2015)
+                // or here http://www.whizkidtech.redprince.net/bezier/circle/
+                // Deeper but more difficult: http://www.tinaja.com/cubic01.asp
+                XRect rect = new XRect(x, y, width, height);
+                double δx = rect.Width / 2;
+                double δy = rect.Height / 2;
+                double fx = δx * Const.κ;
+                double fy = δy * Const.κ;
+                double x0 = rect.X + δx;
+                double y0 = rect.Y + δy;
+
+                // Approximate an ellipse by drawing four cubic splines.
+                const string format = Config.SignificantFigures4;
+                AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", x0 + δx, y0);
+                AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                  x0 + δx, y0 + fy, x0 + fx, y0 + δy, x0, y0 + δy);
+                AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                  x0 - fx, y0 + δy, x0 - δx, y0 + fy, x0 - δx, y0);
+                AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                  x0 - δx, y0 - fy, x0 - fx, y0 - δy, x0, y0 - δy);
+                AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                  x0 + fx, y0 - δy, x0 + δx, y0 - fy, x0 + δx, y0);
+            }
         }
 
         // ----- DrawPolygon --------------------------------------------------------------------------
@@ -319,16 +354,36 @@ namespace PdfSharp.Drawing.Pdf
 
             Realize(pen, brush);
 
-            int count = points.Length;
-            if (points.Length < 2)
-                throw new ArgumentException(PSSR.PointArrayAtLeast(2), nameof(points));
+#if CORE
+            if (brush is XImageBrush imageBrush)
+            {
+                XGraphicsPath xGraphicsPath = new XGraphicsPath();
+                xGraphicsPath.AddPolygon(points);
+                DrawImageBrush(imageBrush, xGraphicsPath);
 
-            const string format = Config.SignificantFigures4;
-            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
-            for (int idx = 1; idx < count; idx++)
-                AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", points[idx].X, points[idx].Y);
-
+                if (pen != null)
+                {
+                    AppendPolygon();
+                    _content.Append("h ");
+                    _content.Append("S\n");
+                }
+                return;
+            }
+#endif
+            AppendPolygon();
             AppendStrokeFill(pen, brush, fillmode, true);
+
+            void AppendPolygon()
+            {
+                int count = points.Length;
+                if (points.Length < 2)
+                    throw new ArgumentException(PSSR.PointArrayAtLeast(2), nameof(points));
+
+                const string format = Config.SignificantFigures4;
+                AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
+                for (int idx = 1; idx < count; idx++)
+                    AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", points[idx].X, points[idx].Y);
+            }
         }
 
         // ----- DrawPie ------------------------------------------------------------------------------
@@ -341,10 +396,34 @@ namespace PdfSharp.Drawing.Pdf
 
             Realize(pen, brush);
 
-            const string format = Config.SignificantFigures4;
-            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", x + width / 2, y + height / 2);
-            AppendPartialArc(x, y, width, height, startAngle, sweepAngle, PathStart.LineTo1st, new XMatrix());
+#if CORE
+            if (brush is XImageBrush imageBrush) {
+#if false
+                XGraphicsPath graphicsPath = new XGraphicsPath();
+                graphicsPath.AddPie(x, y, width, height, startAngle, sweepAngle);
+
+                DrawImageBrush(imageBrush, graphicsPath);
+#else
+                DiagnosticsHelper.HandleNotImplemented("XGraphicsPath.AddPie");
+#endif
+                if (pen != null)
+                {
+                    AppendPie();
+                    _content.Append("h ");
+                    _content.Append("S\n");
+                }
+                return;
+            }
+#endif
+            AppendPie();
             AppendStrokeFill(pen, brush, XFillMode.Alternate, true);
+
+            void AppendPie()
+            {
+                const string format = Config.SignificantFigures4;
+                AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", x + width / 2, y + height / 2);
+                AppendPartialArc(x, y, width, height, startAngle, sweepAngle, PathStart.LineTo1st, new XMatrix());
+            }
         }
 
         // ----- DrawClosedCurve ----------------------------------------------------------------------
@@ -364,23 +443,47 @@ namespace PdfSharp.Drawing.Pdf
             tension /= 3;
 
             Realize(pen, brush);
+#if CORE
+            if (brush is XImageBrush imageBrush)
+            {
+#if false
+                XGraphicsPath xGraphicsPath = new XGraphicsPath();
+                xGraphicsPath.AddClosedCurve(points, tension);
+                DrawImageBrush(imageBrush, xGraphicsPath);
+#else
+                DiagnosticsHelper.HandleNotImplemented("XGraphicsPath.AddClosedCurve");
+#endif
+                if (pen != null)
+                {
+                    AppendClosedCurve();
+                    _content.Append("h ");
+                    _content.Append("S\n");
+                }
+                return;
+            }
 
-            const string format = Config.SignificantFigures4;
-            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
-            if (count == 2)
-            {
-                // Just draw a line.
-                AppendCurveSegment(points[0], points[0], points[1], points[1], tension);
-            }
-            else
-            {
-                AppendCurveSegment(points[count - 1], points[0], points[1], points[2], tension);
-                for (int idx = 1; idx < count - 2; idx++)
-                    AppendCurveSegment(points[idx - 1], points[idx], points[idx + 1], points[idx + 2], tension);
-                AppendCurveSegment(points[count - 3], points[count - 2], points[count - 1], points[0], tension);
-                AppendCurveSegment(points[count - 2], points[count - 1], points[0], points[1], tension);
-            }
+#endif
+            AppendClosedCurve();
             AppendStrokeFill(pen, brush, fillmode, true);
+
+            void AppendClosedCurve()
+            {
+                const string format = Config.SignificantFigures4;
+                AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
+                if (count == 2)
+                {
+                    // Just draw a line.
+                    AppendCurveSegment(points[0], points[0], points[1], points[1], tension);
+                }
+                else
+                {
+                    AppendCurveSegment(points[count - 1], points[0], points[1], points[2], tension);
+                    for (int idx = 1; idx < count - 2; idx++)
+                        AppendCurveSegment(points[idx - 1], points[idx], points[idx + 1], points[idx + 2], tension);
+                    AppendCurveSegment(points[count - 3], points[count - 2], points[count - 1], points[0], tension);
+                    AppendCurveSegment(points[count - 2], points[count - 1], points[0], points[1], tension);
+                }
+            }
         }
 
         // ----- DrawPath -----------------------------------------------------------------------------
@@ -395,8 +498,20 @@ namespace PdfSharp.Drawing.Pdf
 
 #if CORE
             Realize(pen, brush);
-            AppendPath(path.CorePath);
-            AppendStrokeFill(pen, brush, path.FillMode, false);
+            if(brush is XImageBrush imageBrush)
+            {
+                DrawImageBrush(imageBrush, path);
+                if (pen != null)
+                {
+                    AppendPath(path.CorePath);
+                    _content.Append("S\n");
+                }
+            }
+            else
+            {
+                AppendPath(path.CorePath);
+                AppendStrokeFill(pen, brush, path.FillMode, false);
+            }
 #endif
 #if GDI && !WPF
             Realize(pen, brush);
@@ -422,7 +537,7 @@ namespace PdfSharp.Drawing.Pdf
             AppendStrokeFill(pen, brush, path.FillMode, false);
 #endif
         }
-
+ 
         // ----- DrawString ---------------------------------------------------------------------------
 
         public void DrawString(string s, XFont font, XBrush brush, XRect rect, XStringFormat format)
@@ -783,7 +898,77 @@ namespace PdfSharp.Drawing.Pdf
             }
         }
 
-        #endregion
+#if CORE
+        void DrawImageBrush(XImageBrush imageBrush, XGraphicsPath graphicsPath)
+        {
+            XImage image = imageBrush._xImage;
+
+            XRect? xRect = GetRectForImageBrush(graphicsPath.CorePath.PathPoints);
+            if (xRect != null)
+            {
+                int xCount = (int)Math.Ceiling(xRect.Value.Width / image.PixelWidth);
+                int yCount = (int)Math.Ceiling(xRect.Value.Height / image.PixelHeight);
+
+                XGraphicsContainer container = new XGraphicsContainer();
+                BeginContainer(container, xRect.Value, xRect.Value, XGraphicsUnit.Point);
+                //I think it should be XCombineMode.Intersect
+                SetClip(graphicsPath, XCombineMode.Intersect);
+                for (int i = 0; i < xCount; i++)
+                {
+                    for (int j = 0; j < yCount; j++)
+                    {
+                        var xPosition = xRect.Value.X + (image.PixelWidth * i);
+                        var yPosition = xRect.Value.Y + (image.PixelHeight * j);
+                        DrawImage(image, xPosition, yPosition, image.PixelWidth, image.PixelHeight);
+                    }
+                }
+                //TODO:Possible reset another clip. Need a way to reset only our clip
+                //ResetClip();
+                EndContainer(container);
+            }
+        }
+
+
+        XRect? GetRectForImageBrush(XPoint[] points)
+        {
+            if (points == null)
+            {
+                return null;
+            }
+
+            double xMin = double.PositiveInfinity;
+            double yMin = double.PositiveInfinity;
+            double xMax = double.NegativeInfinity;
+            double yMax = double.NegativeInfinity;
+            foreach (var item in points)
+            {
+
+                if (item.X < xMin)
+                    xMin = item.X;
+
+                if (item.Y < yMin)
+                    yMin = item.Y;
+
+                if (item.X > xMax)
+                    xMax = item.X;
+
+                if (item.Y > yMax)
+                    yMax = item.Y;
+            }
+
+            if (!double.IsNormal(xMin) || !double.IsNormal(yMin) || !double.IsNormal(xMin) || !double.IsNormal(xMin))
+            {
+                return null;
+            }
+
+            double width = xMax - xMin;
+            double height = yMax - yMin;
+            return new XRect(xMin, yMin, width, height);
+        }
+
+#endif
+
+#endregion
 
         // --------------------------------------------------------------------------------------------
 
