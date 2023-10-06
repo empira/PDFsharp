@@ -8,7 +8,7 @@ using System.IO;
 //using Windows.Storage;
 //#endif
 #if CORE || GDI
-using System.Drawing.Imaging;
+//using System.Drawing.Imaging;
 #endif
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;

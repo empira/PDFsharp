@@ -13,7 +13,7 @@ namespace PdfSharp.Fonts.OpenType
     /// </summary>
     class GlyphTypefaceCache
     {
-        public static bool TryGetGlyphTypeface(string key, [MaybeNullWhen(false)] out XGlyphTypeface glyphTypeface)
+        public static bool TryGetGlyphTypeface(string key, /*[MaybeNullWhen(false)]*/ out XGlyphTypeface glyphTypeface)
         {
             try
             {

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>library</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>PdfSharp</RootNamespace>
   </PropertyGroup>
 

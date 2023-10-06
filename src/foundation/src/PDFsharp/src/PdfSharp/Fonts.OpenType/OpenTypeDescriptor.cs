@@ -60,7 +60,7 @@ namespace PdfSharp.Fonts.OpenType
                 if (idName.Contains("XPS-Font-") && FontFace.name != null && FontFace.name.Name.Length != 0)
                 {
                     string tag = String.Empty;
-                    if (idName.IndexOf('+', StringComparison.Ordinal) == 6)
+                    if (idName.IndexOf("+", StringComparison.Ordinal) == 6)
                         tag = idName.Substring(0, 6);
                     idName = tag + "+" + FontFace.name.Name;
                     if (FontFace.name.Style.Length != 0)

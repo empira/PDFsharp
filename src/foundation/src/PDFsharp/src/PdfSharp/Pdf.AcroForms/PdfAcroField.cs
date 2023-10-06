@@ -353,7 +353,7 @@ namespace PdfSharp.Pdf.AcroForms
                 if (String.IsNullOrEmpty(name))
                     return null;
 
-                int dot = name.IndexOf('.', StringComparison.Ordinal);
+                int dot = name.IndexOf(".", StringComparison.Ordinal);
                 string prefix = dot == -1 ? name : name.Substring(0, dot);
                 string suffix = dot == -1 ? "" : name.Substring(dot + 1);
 

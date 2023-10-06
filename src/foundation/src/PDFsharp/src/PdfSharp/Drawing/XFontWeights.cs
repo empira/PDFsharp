@@ -102,7 +102,7 @@ namespace PdfSharp.Drawing
             return false;
         }
 
-        internal static bool FontWeightToString(int weight, [NotNullWhen(true)] out string? convertedValue)
+        internal static bool FontWeightToString(int weight, /*[NotNullWhen(true)]*/ out string? convertedValue)
         {
             switch (weight)
             {

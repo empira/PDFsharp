@@ -44,7 +44,7 @@ namespace PdfSharp.Pdf
             // Preserve "ï»¿" if text is UTF8 encoded.
             var i = stream.IndexOf(begin, StringComparison.Ordinal);
             var pos = i + begin.Length;
-            stream = stream[..pos] + "xxx" + stream[(pos + 3)..];
+            stream = stream.Substring(0, pos) + "xxx" + string.Join(string.Empty, stream.Skip(pos + 3));
             byte[] bytes = Encoding.UTF8.GetBytes(stream);
             bytes[pos++] = (byte)'ï';
             bytes[pos++] = (byte)'»';

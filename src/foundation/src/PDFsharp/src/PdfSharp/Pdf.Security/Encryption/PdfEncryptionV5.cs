@@ -8,6 +8,7 @@ using System.Text;
 using PdfSharp.Internal;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Internal;
+using System.Security.Cryptography.X509Certificates;
 
 namespace PdfSharp.Pdf.Security.Encryption
 {
@@ -232,7 +233,11 @@ namespace PdfSharp.Pdf.Security.Encryption
         void CreateAndStoreEncryptionKey()
         {
             // The file encryption key shall be a 256-bit (32-byte) value generated with a strong random number generator.
-            _encryptionKey = RandomNumberGenerator.GetBytes(32);
+            _encryptionKey = new byte[32];
+            using (var cryptoProvider = new RNGCryptoServiceProvider())
+            {
+                cryptoProvider.GetBytes(_encryptionKey);
+            }
         }
 
         /// <summary>
@@ -258,7 +263,7 @@ namespace PdfSharp.Pdf.Security.Encryption
 
             // b) Truncate, if longer than 127 bytes.
             if (utf8Bytes.Length > 127)
-                utf8Bytes = utf8Bytes[..127];
+                utf8Bytes = utf8Bytes.Take(127).ToArray();
 
             return utf8Bytes;
         }
@@ -271,8 +276,13 @@ namespace PdfSharp.Pdf.Security.Encryption
         (byte[] UserValue, byte[] UserEValue) ComputeUserValues(byte[] utf8InputPassword)
         {
             // a) Generate random bytes for user validation salt and user key salt.
-            var validationSalt = RandomNumberGenerator.GetBytes(8);
-            var keySalt = RandomNumberGenerator.GetBytes(8);
+            byte[] validationSalt = new byte[8], 
+                keySalt = new byte[8];
+            using (var cryptoProvider = new RNGCryptoServiceProvider())
+            {                
+                cryptoProvider.GetBytes(validationSalt);
+                cryptoProvider.GetBytes(keySalt);
+            }
 
             // Compute the hash with an input string consisting of the UTF-8 password concatenated with the user validation salt.
             // The string consisting of the hash followed by the user validation salt followed by the user key salt is stored as userValue.
@@ -301,8 +311,14 @@ namespace PdfSharp.Pdf.Security.Encryption
         (byte[] OwnerValue, byte[] OwnerEValue) ComputeOwnerValues(byte[] utf8InputPassword, byte[] userValue)
         {
             // a) Generate random bytes for owner validation salt and owner key salt.
-            var validationSalt = RandomNumberGenerator.GetBytes(8);
-            var keySalt = RandomNumberGenerator.GetBytes(8);
+
+            byte[] validationSalt = new byte[8], 
+                keySalt = new byte[8];
+            using (var cryptoProvider = new RNGCryptoServiceProvider())
+            {                
+                cryptoProvider.GetBytes(validationSalt);
+                cryptoProvider.GetBytes(keySalt);
+            }
 
             // Compute the hash with an input string consisting of the UTF-8 password concatenated with
             // the owner validation salt and the userValue.
@@ -352,7 +368,7 @@ namespace PdfSharp.Pdf.Security.Encryption
             var input = password.Concat(salt);
             if (computeOwnerHash)
                 input = input.Concat(userValue!); // Shall not be null, if computeOwnerHash is true.
-            var k = SHA256.HashData(input.ToArray());
+            var k = SHA256.Create().ComputeHash(input.ToArray());
 
             var lastByteOfE = new byte();
 
@@ -375,29 +391,29 @@ namespace PdfSharp.Pdf.Security.Encryption
                 var k1 = k1Enumerable.ToArray();
 
                 // b): Create e: Encrypt k1 using AES-128 (CBC, no padding), with the first 16 bytes of k as the key and the second 16 bytes of k as the initialization vector.
-                var aesKey = k[..16];
-                var aesIV = k[16..32];
+                var aesKey = k.Take(16).ToArray();
+                var aesIV = k.Skip(16).Take(16).ToArray();
                 using var encryptor = aes.CreateEncryptor(aesKey, aesIV);
                 var e = encryptor.TransformFinalBlock(k1, 0, k1.Length);
 
                 // c) + d): Take the first 16 bytes of e as an unsigned big-endian integer.
-                var e16 = e[..16];
-                var e16BigEndianUnsigned = new BigInteger(e16, true, true);
+                var e16 = e.Take(16).ToArray();
+                var e16BigEndianUnsigned = new BigInteger(e16.Reverse().ToArray());//, true, true);
                 // Calculate the remainder of the result by modulo 3
                 // and according to that result choose the SHA algorithm to calculate the new k from e.
                 BigInteger.DivRem(e16BigEndianUnsigned, 3, out var remainder);
                 if (remainder == 0)
-                    k = SHA256.HashData(e);
+                    k = SHA256.Create().ComputeHash(e);
                 else if (remainder == 1)
-                    k = SHA384.HashData(e);
+                    k = SHA384.Create().ComputeHash(e);
                 else if (remainder == 2)
-                    k = SHA512.HashData(e);
+                    k = SHA512.Create().ComputeHash(e);
 
                 lastByteOfE = e.Last();
             }
 
             // The first 32 bytes of the final K are the output of the algorithm.
-            var result = k[..32];
+            var result = k.Take(32).ToArray();
             return result;
         }
 
@@ -429,7 +445,11 @@ namespace PdfSharp.Pdf.Security.Encryption
             perms[11] = (byte)'b';
 
             // e) Set bytes 12-15 to 4 bytes of random data, which will be ignored.
-            var randomData = RandomNumberGenerator.GetBytes(4);
+            byte[] randomData = new byte[8];
+            using (var cryptoProvider = new RNGCryptoServiceProvider())
+            {
+                cryptoProvider.GetBytes(randomData);
+            }
             Array.Copy(randomData, 0, perms, 12, randomData.Length);
 
             // f) Encrypt the block using AES-256 in ECB mode with an initialization vector of zero, using the file encryption key as the key.
@@ -557,7 +577,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerHashValue(byte[] userOwnerValue)
         {
-            return userOwnerValue[..32];
+            return userOwnerValue.Take(32).ToArray();
         }
 
         /// <summary>
@@ -565,7 +585,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerValidationSalt(byte[] userOwnerValue)
         {
-            return userOwnerValue[32..40];
+            return userOwnerValue.Skip(32).Take(8).ToArray();
         }
 
         /// <summary>
@@ -573,7 +593,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerKeySalt(byte[] userOwnerValue)
         {
-            return userOwnerValue[40..48];
+            return userOwnerValue.Skip(40).Take(8).ToArray();
         }
 
         /// <summary>
@@ -632,7 +652,7 @@ namespace PdfSharp.Pdf.Security.Encryption
                 return false;
 
             // Bytes 0-3 of the decrypted Perms entry, treated as a little-endian integer, are the user permissions. They should match the value in the P key.
-            var pFromPerms = BitConverter.ToUInt32(permsDecrypted[..4]); // Little-endian is default, so we don't have to change the order.
+            var pFromPerms = BitConverter.ToUInt32(permsDecrypted.Take(4).ToArray(), 0); // Little-endian is default, so we don't have to change the order.
             if (pFromPerms != pValue)
                 return false;
 

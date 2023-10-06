@@ -183,7 +183,7 @@ namespace PdfSharp.Fonts
             return null;
         }
 
-        public static bool TryGetFontSourceByKey(ulong key, [MaybeNullWhen(false)] out XFontSource fontSource)
+        public static bool TryGetFontSourceByKey(ulong key, /*[MaybeNullWhen(false)]*/ out XFontSource fontSource)
         {
             return FontSourcesByKey.TryGetValue(key, out fontSource);
         }
@@ -193,12 +193,12 @@ namespace PdfSharp.Fonts
         /// </summary>
         public static bool HasFontSources => FontSourcesByName.Count > 0;
 
-        public static bool TryGetFontResolverInfoByTypefaceKey(string typeFaceKey, [MaybeNullWhen(false)] out FontResolverInfo info)
+        public static bool TryGetFontResolverInfoByTypefaceKey(string typeFaceKey, /*[MaybeNullWhen(false)]*/ out FontResolverInfo info)
         {
             return FontResolverInfosByName.TryGetValue(typeFaceKey, out info);
         }
 
-        public static bool TryGetFontSourceByTypefaceKey(string typefaceKey, [MaybeNullWhen(false)] out XFontSource source)
+        public static bool TryGetFontSourceByTypefaceKey(string typefaceKey, /*[MaybeNullWhen(false)]*/ out XFontSource source)
         {
             return FontSourcesByName.TryGetValue(typefaceKey, out source);
         }

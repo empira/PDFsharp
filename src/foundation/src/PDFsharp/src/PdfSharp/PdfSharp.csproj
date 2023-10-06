@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>library</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>11.0</LangVersion>
     <RootNamespace>PdfSharp</RootNamespace>
     <DefineConstants>CORE;NET_ZIP</DefineConstants>
@@ -32,6 +32,10 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Messages.de.restext" />
     <EmbeddedResource Include="Resources\Messages.restext" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Encoding.CodePages" />
   </ItemGroup>
 
 </Project>

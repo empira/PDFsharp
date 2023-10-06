@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>PdfSharp</RootNamespace>
     <!--<Error Condition="!Exists('C:\Process\Fail.txt')" Text="Process did not pass!" />-->
   </PropertyGroup>

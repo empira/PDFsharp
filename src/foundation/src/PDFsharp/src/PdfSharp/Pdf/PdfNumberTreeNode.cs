@@ -27,7 +27,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfNumberTreeNode(bool isRoot)  //??? Needed HACK StLa
         {
-            IsRoot = isRoot;
+            _isRoot = isRoot;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace PdfSharp.Pdf
         public bool IsRoot
         {
             get => _isRoot;
-            private init => _isRoot = value;
+            //private setinit => _isRoot = value;
         }
         readonly bool _isRoot;
 

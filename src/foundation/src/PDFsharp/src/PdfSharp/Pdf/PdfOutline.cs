@@ -511,7 +511,7 @@ namespace PdfSharp.Pdf
                     if (hasKids && _outlines != null)
                     {
                         Elements[Keys.First] = _outlines[0].Reference;
-                        Elements[Keys.Last] = _outlines[^1].Reference;
+                        Elements[Keys.Last] = _outlines.Last().Reference;
                     }
                     // TODO: /Count - the meaning is not completely clear to me
                     if (OpenCount > 0)

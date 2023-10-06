@@ -358,9 +358,9 @@ namespace PdfSharp.Drawing
                     if (length > 0 && path[length] == '#')
                     {
                         // Must have at least one dot left of number sign to distinguish from e.g. '#123'.
-                        if (path.IndexOf('.', StringComparison.Ordinal) != -1)
+                        if (path.IndexOf(".", StringComparison.Ordinal) != -1)
                         {
-                            pageNumber = Int32.Parse(path[(length + 1)..]);
+                            pageNumber = Int32.Parse(path.Substring(length + 1)/*[(length + 1)..]*/);
                             path = path.Substring(0, length);
                         }
                     }

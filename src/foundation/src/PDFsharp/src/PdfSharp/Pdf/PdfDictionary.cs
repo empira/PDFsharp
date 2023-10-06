@@ -462,7 +462,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Tries to get the string. TODO: more TryGet...
             /// </summary>
-            public bool TryGetString(string key, [MaybeNullWhen(false)] out string value)
+            public bool TryGetString(string key, /*[MaybeNullWhen(false)]*/ out string value)
             {
                 value = null;
                 var obj = this[key];
@@ -684,7 +684,7 @@ namespace PdfSharp.Pdf
                     return (int)defaultValue;
                 }
                 //Debug.Assert(obj is Enum);  // BUG This always fails.
-                return (int)Enum.Parse(defaultValue.GetType(), obj.ToString()?[1..] ?? "", false);
+                return (int)Enum.Parse(defaultValue.GetType(), obj.ToString()?.Substring(1)/*[1..]*/ ?? "", false);
             }
 
             internal int GetEnumFromName(string key, object defaultValue)
