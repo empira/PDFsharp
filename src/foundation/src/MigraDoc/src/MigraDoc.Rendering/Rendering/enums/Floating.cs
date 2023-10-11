@@ -9,7 +9,7 @@ namespace MigraDoc.Rendering
     enum Floating
     {
         /// <summary>
-        /// TODO Default
+        /// The element floats from top to bottom. This is the default.
         /// </summary>
         TopBottom = 0,
 
@@ -18,20 +18,20 @@ namespace MigraDoc.Rendering
         /// </summary>
         None,
 
-        // Served for future extensions:
-        
+        // Reserved for future extensions:
+
         /// <summary>
-        /// TODO
+        /// Reserved for future extensions. The element floats from left to right.
         /// </summary>
         Left,
-        
+
         /// <summary>
-        /// TODO
+        /// Reserved for future extensions. The element floats from right to left.
         /// </summary>
         Right,
 
         /// <summary>
-        /// TODO
+        /// Reserved for future extensions.
         /// </summary>
         BothSides,
     }

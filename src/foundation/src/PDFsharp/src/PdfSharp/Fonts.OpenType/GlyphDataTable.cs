@@ -56,7 +56,7 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// Gets the data of the specified glyph.
         /// </summary>
-        public byte[] GetGlyphData(int glyph)
+        public byte[] GetGlyphData(uint glyph)
         {
             //var loca = _fontData!.loca;
             int start = GetOffset(glyph);
@@ -70,7 +70,7 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// Gets the size of the byte array that defines the glyph.
         /// </summary>
-        public int GetGlyphSize(int glyph)
+        public int GetGlyphSize(uint glyph)
         {
             //var loca = _fontData.loca;
             return GetOffset(glyph + 1) - GetOffset(glyph);
@@ -79,7 +79,7 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// Gets the offset of the specified glyph relative to the first byte of the font image.
         /// </summary>
-        public int GetOffset(int glyph)
+        public int GetOffset(uint glyph)
         {
             return DirectoryEntry.Offset + _fontData!.loca.LocaTable[glyph];
         }
@@ -87,10 +87,10 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// Adds for all composite glyphs the glyphs the composite one is made of.
         /// </summary>
-        public void CompleteGlyphClosure(Dictionary<int, object?> glyphs)
+        public void CompleteGlyphClosure(Dictionary<uint, object?> glyphs)
         {
             int count = glyphs.Count;
-            int[] glyphArray = new int[glyphs.Count];
+            uint[] glyphArray = new uint[glyphs.Count];
             glyphs.Keys.CopyTo(glyphArray, 0);
             if (!glyphs.ContainsKey(0))
                 glyphs.Add(0, null);
@@ -107,7 +107,7 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// If the specified glyph is a composite glyph add the glyphs it is made of to the glyph table.
         /// </summary>
-        void AddCompositeGlyphs(Dictionary<int, object?> glyphs, int glyph)
+        void AddCompositeGlyphs(Dictionary<uint, object?> glyphs, uint glyph)
         {
             //int start = fontData.loca.GetOffset(glyph);
             int start = GetOffset(glyph);
@@ -123,7 +123,7 @@ namespace PdfSharp.Fonts.OpenType
             for (; ; )
             {
                 int flags = _fontData.ReadUFWord();
-                int cGlyph = _fontData.ReadUFWord();
+                uint cGlyph = _fontData.ReadUFWord();
                 if (!glyphs.ContainsKey(cGlyph))
                     glyphs.Add(cGlyph, null);
                 if ((flags & MORE_COMPONENTS) == 0)

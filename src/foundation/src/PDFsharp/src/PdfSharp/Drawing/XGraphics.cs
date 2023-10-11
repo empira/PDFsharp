@@ -73,7 +73,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// <summary>
         /// Initializes a new instance of the XGraphics class.
         /// </summary>
-        /// <param name="gfx">The gfx.</param>
+        /// <param name="gfx">The gfx. Can be null for a measuring context.</param>
         /// <param name="size">The size.</param>
         /// <param name="pageUnit">The page unit.</param>
         /// <param name="pageDirection">The page direction.</param>
@@ -4348,7 +4348,9 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 try
                 {
                     Lock.EnterGdiPlus();
-                    xContainer = new XGraphicsContainer(_gfx != null! ? _gfx.Save() : null);
+                    if (_gfx is null)
+                        throw new InvalidOperationException(nameof(_gfx));
+                    xContainer = new XGraphicsContainer(_gfx.Save());
                 }
                 finally { Lock.ExitGdiPlus(); }
             }
@@ -4392,12 +4394,12 @@ namespace PdfSharp.Drawing  // #??? Clean up
             // Nothing to do.
 #endif
 #if GDI
-            if (TargetContext == XGraphicTargetContext.GDI && _gfx != null)
+            if (TargetContext == XGraphicTargetContext.GDI /*&& _gfx != null*/) // NRT
             {
                 try
                 {
                     Lock.EnterGdiPlus();
-                    _gfx.Restore(container.GdiState!); // BUG NRT
+                    _gfx.Restore(container.GdiState);
                 }
                 finally { Lock.ExitGdiPlus(); }
             }
@@ -5078,6 +5080,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #if GDI
         /// <summary>
         /// Always defined System.Drawing.Graphics object. Used as 'query context' for PDF pages.
+        /// Can be null for measuring contexts, but those are not used for drawing.
         /// </summary>
         internal Graphics _gfx;
 #endif

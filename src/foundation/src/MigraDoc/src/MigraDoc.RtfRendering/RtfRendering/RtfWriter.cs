@@ -136,7 +136,7 @@ namespace MigraDoc.RtfRendering
         public void WriteHex(uint hex)
         {
             if (hex > 0xFF)
-                //TODO: Fehlermeldung
+                //TODO: Error message? Debug.Assert?
                 return;
 
             _textWriter.Write(@"\'" + hex.ToString("x"));

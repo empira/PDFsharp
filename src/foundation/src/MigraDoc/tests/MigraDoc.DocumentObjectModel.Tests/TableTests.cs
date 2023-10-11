@@ -80,6 +80,14 @@ namespace MigraDoc.DocumentObjectModel.Tests
             return document;
         }
 
+        PdfDocumentRenderer CreateReadablePdfDocumentRenderer(Document document)
+        {
+            var pdfRenderer = new PdfDocumentRenderer { Document = document };
+            pdfRenderer.PdfDocument = new PdfDocument();
+            pdfRenderer.PdfDocument.Options.CompressContentStreams = false;
+            return pdfRenderer;
+        }
+
         [Fact]
         public void Test_MergeDown_Simple()
         {
@@ -104,7 +112,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var row1 = table.AddRow();
             row1[1].AddParagraph("Row 1 Cell 1");
 
-            var pdfRenderer = new PdfDocumentRenderer { Document = document };
+            var pdfRenderer = CreateReadablePdfDocumentRenderer(document);
             pdfRenderer.RenderDocument();
 
             var filename = PdfFileHelper.CreateTempFileName("Test_MergeDown");
@@ -151,7 +159,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             dataRow2[0].AddParagraph("Item 2 Cell 0");
             dataRow2[1].AddParagraph("Item 2 Cell 1");
 
-            var pdfRenderer = new PdfDocumentRenderer { Document = document };
+            var pdfRenderer = CreateReadablePdfDocumentRenderer(document);
             pdfRenderer.RenderDocument();
 
             var filename = PdfFileHelper.CreateTempFileName("Test_MergeDown");
@@ -193,7 +201,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var row2CommentRow = table.AddRow();
             row2CommentRow[1].AddParagraph("Comment 2 Cell 1");
 
-            var pdfRenderer = new PdfDocumentRenderer { Document = document };
+            var pdfRenderer = CreateReadablePdfDocumentRenderer(document);
             pdfRenderer.RenderDocument();
 
             var filename = PdfFileHelper.CreateTempFileName("Test_MergeDown_LineBreak_RowHeight");
@@ -332,7 +340,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             dataRow1[1].AddParagraph("Item 1 Cell 1");
             dataRow1[2].AddParagraph("Item 1 Cell 2");
 
-            var pdfRenderer = new PdfDocumentRenderer { Document = document };
+            var pdfRenderer = CreateReadablePdfDocumentRenderer(document);
             pdfRenderer.RenderDocument();
 
             var filename = PdfFileHelper.CreateTempFileName("Test_Border_Inheritance");
@@ -421,12 +429,129 @@ namespace MigraDoc.DocumentObjectModel.Tests
             dataRow2 = table.AddRow();
             dataRow2[0].AddParagraph("Item 2 Cell 0");
             dataRow2[1].AddParagraph("Item 2 Cell 1");
-            var pdfRenderer = new PdfDocumentRenderer { Document = document };
+            var pdfRenderer = CreateReadablePdfDocumentRenderer(document);
             pdfRenderer.RenderDocument();
 
             var filename = PdfFileHelper.CreateTempFileName("Test_Huge_MergeDown_Cell");
             pdfRenderer.PdfDocument.Save(filename);
             PdfFileHelper.StartPdfViewerIfDebugging(filename);
+        }
+
+        [Fact]
+        public void Test_Repeated_Heading_Border()
+        {
+#if CORE
+            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+#endif
+            var bottomWidth = Unit.FromPoint(2.3);
+            var bottomColor = Colors.Blue;
+            var contentStreamBottomWidth = "2.3 w";
+            var contentStreamBottomColor = "0 0 1 RG";
+
+            var headingBottomWidth = Unit.FromPoint(4.6);
+            var headingBottomColor = Colors.Red;
+            var contentStreamHeadingBottomWidth = "4.6 w";
+            var contentStreamHeadingBottomColor = "1 0 0 RG";
+
+            var document = new Document();
+            var section = document.AddSection();
+
+            var table = section.AddTable();
+            table.Borders.Bottom.Width = bottomWidth;
+            table.Borders.Bottom.Color = bottomColor;
+
+            table.AddColumn(Unit.FromCentimeter(16));
+
+            var headingRow = table.AddRow();
+            headingRow.HeadingFormat = true;
+            headingRow.Cells[0].AddParagraph("Heading");
+            headingRow.Borders.Bottom.Width = headingBottomWidth;
+            headingRow.Borders.Bottom.Color = headingBottomColor;
+
+            // Add 4 rows with a height forcing a page break after the first two rows.
+            for (var rowNr = 1; rowNr <= 4; rowNr++)
+            {
+                var row = table.AddRow();
+                row.Cells[0].AddParagraph($"Row {rowNr}");
+                row.Height = Unit.FromCentimeter(10);
+            }
+
+            var pdfRenderer = CreateReadablePdfDocumentRenderer(document);
+            pdfRenderer.RenderDocument();
+
+            var filename = PdfFileHelper.CreateTempFileName("Test_Repeated_Heading_Border");
+            pdfRenderer.PdfDocument.Save(filename);
+            PdfFileHelper.StartPdfViewerIfDebugging(filename);
+
+
+            // Analyze the drawn border widths and colors in the PDF's pages content streams.
+            // The two parts the page break breaks the table into should be identical (except the row numbers).
+            for (var pageIdx = 0; pageIdx < pdfRenderer.PageCount; pageIdx++)
+            {
+                var page = pdfRenderer.PdfDocument.Pages[pageIdx];
+                var contentReference = (PdfReference)page.Contents.Elements.Items[0];
+                var content = (PdfDictionary)contentReference.Value;
+                var contentStream = content.Stream.ToString();
+
+                // Split ContentStream where the "Row" text is rendered.
+                var contentByRows = contentStream.Split("Td <00350052005A> Tj");
+                contentByRows.Length.Should().Be(3, "as \"Row\" occurs twice per page, the stream should be splitted into 3 parts");
+
+                var rowsByDrawLinesByLines = contentByRows // Content split by "Row" text ...
+                    .Select(r => r.Split(" l\n") // ... and that parts split by drawn lines ...
+                        .Select(drawLine => drawLine.Split("\n")).ToArray() // ... and that parts split by line breaks.
+                    ).ToArray();
+
+
+                // Heading row.
+                var contentRowDrawLineParts = rowsByDrawLinesByLines[0];
+                contentRowDrawLineParts.Length.Should().Be(2, "for the heading row only one bottom border should split the content into 2 parts");
+
+                // The part before the first draw line contains the data for the bottom border.
+                var bottomBorderDrawLinePartLines = contentRowDrawLineParts[0];
+                bottomBorderDrawLinePartLines.Should().Contain(contentStreamHeadingBottomWidth, "heading bottom border should be of heading bottom border width");
+                bottomBorderDrawLinePartLines.Should().Contain(contentStreamHeadingBottomColor, "heading bottom border should be of heading bottom border color");
+                bottomBorderDrawLinePartLines.Should().NotContain(contentStreamBottomWidth, "heading bottom border should not be of content bottom border width");
+                bottomBorderDrawLinePartLines.Should().NotContain(contentStreamBottomColor, "heading bottom border should not be of content bottom border color");
+
+                
+                // Row 1.
+                contentRowDrawLineParts = rowsByDrawLinesByLines[1];
+                contentRowDrawLineParts.Length.Should().Be(3, "for the content rows one bottom and one top border should split the content into 3 parts");
+
+                // The part before the first draw line contains the data for the bottom border.
+                bottomBorderDrawLinePartLines = contentRowDrawLineParts[0];
+                bottomBorderDrawLinePartLines.Should().Contain(contentStreamBottomWidth, "row 1 bottom border should be of content bottom border width");
+                bottomBorderDrawLinePartLines.Should().Contain(contentStreamBottomColor, "row 1 bottom border should be of content bottom border color");
+                bottomBorderDrawLinePartLines.Should().NotContain(contentStreamHeadingBottomWidth, "row 1 bottom border should not be of heading bottom border width");
+                bottomBorderDrawLinePartLines.Should().NotContain(contentStreamHeadingBottomColor, "row 1 bottom border should not be of heading bottom border color");
+
+                // The part before the second draw line contains the data for the top border. Attention: Row 1 top border is equal to heading bottom border and should therefore have its values.
+                bottomBorderDrawLinePartLines = contentRowDrawLineParts[1];
+                bottomBorderDrawLinePartLines.Should().Contain(contentStreamHeadingBottomWidth, "row 1 top border should be of heading bottom border width, as this is the same border");
+                bottomBorderDrawLinePartLines.Should().Contain(contentStreamHeadingBottomColor, "row 1 top border should be of heading bottom border color, as this is the same border");
+                bottomBorderDrawLinePartLines.Should().NotContain(contentStreamBottomWidth, "row 1 top border should not be of content bottom border width, as this border is the same like heading bottom");
+                bottomBorderDrawLinePartLines.Should().NotContain(contentStreamBottomColor, "row 1 top border should not be of content bottom border color, as this border is the same like heading bottom");
+
+
+                // Row 2.
+                contentRowDrawLineParts = rowsByDrawLinesByLines[2];
+                contentRowDrawLineParts.Length.Should().Be(3, "for the content rows one bottom and one top border should split the content into 3 parts");
+
+                // The part before the first draw line contains the data for the bottom border.
+                bottomBorderDrawLinePartLines = contentRowDrawLineParts[0];
+                bottomBorderDrawLinePartLines.Should().Contain(contentStreamBottomWidth, "row 2 bottom border should be of content bottom border width");
+                bottomBorderDrawLinePartLines.Should().Contain(contentStreamBottomColor, "row 2 bottom border should be of content bottom border color");
+                bottomBorderDrawLinePartLines.Should().NotContain(contentStreamHeadingBottomWidth, "row 2 bottom border should not be of heading bottom border width");
+                bottomBorderDrawLinePartLines.Should().NotContain(contentStreamHeadingBottomColor, "row 2 bottom border should not be of heading bottom border color");
+
+                // The part before the second draw line contains the data for the top border. Attention: This should not be set as the values of the bottom border should remain unchanged.
+                bottomBorderDrawLinePartLines = contentRowDrawLineParts[1];
+                bottomBorderDrawLinePartLines.Should().NotContain(contentStreamBottomWidth, "row 2 top border should not be set as the values should be the same as for the bottom border");
+                bottomBorderDrawLinePartLines.Should().NotContain(contentStreamBottomColor, "row 2 top border should not be set as the values should be the same as for the bottom border");
+                bottomBorderDrawLinePartLines.Should().NotContain(contentStreamHeadingBottomWidth, "row 2 top border should not be set as the values should be the same as for the bottom border");
+                bottomBorderDrawLinePartLines.Should().NotContain(contentStreamHeadingBottomColor, "row 2 top border should not be set as the values should be the same as for the bottom border");
+            }
         }
     }
 }

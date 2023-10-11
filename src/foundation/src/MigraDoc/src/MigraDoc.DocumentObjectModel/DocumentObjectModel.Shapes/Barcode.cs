@@ -76,7 +76,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
 
         /// <summary>
-        /// ??? TODO
+        /// Ratio between narrow and wide lines.
         /// </summary>
         public double LineRatio
         {
@@ -85,7 +85,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
 
         /// <summary>
-        /// ??? TODO
+        /// Height of lines.
         /// </summary>
         public double LineHeight
         {
@@ -94,7 +94,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
 
         /// <summary>
-        /// ??? TODO
+        /// Width of a narrow line.
         /// </summary>
         public double NarrowLineWidth
         {

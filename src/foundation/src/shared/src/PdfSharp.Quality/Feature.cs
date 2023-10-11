@@ -119,7 +119,7 @@ namespace PdfSharp.Quality
             }
             catch (Exception ex)
             {
-                LogHost.Logger.LogError(ex, $"{nameof(ReadWritePdfDocument)} failed with file '{filename}'.");
+                LogHost.Logger.LogError(ex, $"{nameof(ReadWritePdfDocument)} failed with file '{{filename}}'.", filename);
                 throw;
             }
             return outFilename;

@@ -554,7 +554,7 @@ namespace PdfSharp.Pdf.IO
                                     ch = Chars.BackSlash;
                                     break;
 
-                                // AutoCAD PDFs my contain such strings: (\ ) 
+                                // AutoCAD PDFs may contain such strings: (\ ) 
                                 case ' ':
                                     ch = ' ';
                                     break;

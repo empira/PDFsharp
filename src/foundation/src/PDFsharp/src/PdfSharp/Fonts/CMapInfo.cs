@@ -32,8 +32,11 @@ namespace PdfSharp.Fonts
                 int length = text.Length;
                 for (int idx = 0; idx < length; idx++)
                 {
+                    if (char.IsLowSurrogate(text, idx))
+                        continue; // Ignore the second char of a surrogate pair.
+
                     char ch = text[idx];
-                    if (!CharacterToGlyphIndex.ContainsKey(ch))
+                    if (!CharacterToGlyphIndex.ContainsKey(ch) || char.IsHighSurrogate(ch))
                     {
                         char ch2 = ch;
                         if (symbol)
@@ -41,8 +44,27 @@ namespace PdfSharp.Fonts
                             // Remap ch for symbol fonts.
                             ch2 = (char)(ch | (_descriptor.FontFace.os2.usFirstCharIndex & 0xFF00));  // @@@ refactor
                         }
-                        int glyphIndex = _descriptor.CharCodeToGlyphIndex(ch2);
-                        CharacterToGlyphIndex.Add(ch, glyphIndex);
+                        uint glyphIndex;
+
+                        if (char.IsHighSurrogate(ch))
+                        {
+                            // If high surrogate char hasn't been added yet, add high and low surrogate chars:
+                            if (!SurrogatePairs.ContainsKey(ch))
+                                SurrogatePairs.Add(ch, new List<char>(text[idx + 1]));
+                            // If high surrogate char has been added and low surrogate char hasn't been added yet, add low surrogate char:
+                            else if (SurrogatePairs.ContainsKey(ch) && !SurrogatePairs[ch].Contains(text[idx + 1]))
+                                SurrogatePairs[ch].Add(text[idx + 1]);
+                            // If high and low surrogate chars have been added, continue with next loop:
+                            else
+                                continue;
+                            glyphIndex = _descriptor.CharCodeToGlyphIndex(ch, text[idx + 1]);
+                        }
+                        else
+                            glyphIndex = _descriptor.CharCodeToGlyphIndex(ch2);
+
+                        if (!CharacterToGlyphIndex.ContainsKey(ch)) // To do (for support of reading PDF?): Surrogate pair chars with same high surrogate chars and different low surrogate chars are missing in "CharacterToGlyphIndex"!
+                            CharacterToGlyphIndex.Add(ch, glyphIndex);
+
                         GlyphIndices[glyphIndex] = default!;
                         MinChar = (char)Math.Min(MinChar, ch);
                         MaxChar = (char)Math.Max(MaxChar, ch);
@@ -61,7 +83,7 @@ namespace PdfSharp.Fonts
                 int length = glyphIndices.Length;
                 for (int idx = 0; idx < length; idx++)
                 {
-                    int glyphIndex = glyphIndices[idx];
+                    var glyphIndex = glyphIndices[idx];
                     GlyphIndices[glyphIndex] = null!;
                 }
             }
@@ -99,9 +121,9 @@ namespace PdfSharp.Fonts
             }
         }
 
-        public int[] GetGlyphIndices()
+        public uint[] GetGlyphIndices()
         {
-            int[] indices = new int[GlyphIndices.Count];
+            uint[] indices = new uint[GlyphIndices.Count];
             GlyphIndices.Keys.CopyTo(indices, 0);
             Array.Sort(indices);
             return indices;
@@ -109,7 +131,8 @@ namespace PdfSharp.Fonts
 
         public char MinChar = Char.MaxValue;
         public char MaxChar = Char.MinValue;
-        public Dictionary<char, int> CharacterToGlyphIndex = new Dictionary<char, int>();
-        public Dictionary<int, object> GlyphIndices = new Dictionary<int, object>();
+        public Dictionary<char, uint> CharacterToGlyphIndex = new Dictionary<char, uint>();
+        public Dictionary<uint, object> GlyphIndices = new Dictionary<uint, object>();
+        private Dictionary<char, List<char>> SurrogatePairs = new Dictionary<char, List<char>>();
     }
 }

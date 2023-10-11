@@ -78,7 +78,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Indicates whether the style is read-only. 
+        /// Indicates whether the style is read-only.
         /// </summary>
         public bool IsReadOnly
         {
@@ -88,7 +88,7 @@ namespace MigraDoc.DocumentObjectModel
         bool _readOnly;
 
         /// <summary>
-        /// Gets the font of ParagraphFormat. 
+        /// Gets the font of ParagraphFormat.
         /// Calling style.Font is just a shortcut to style.ParagraphFormat.Font.
         /// </summary>
         public Font Font // TODO: Move to Values?
@@ -166,7 +166,7 @@ namespace MigraDoc.DocumentObjectModel
                     // styles cannot be null if idxBaseStyle >= 0.
                     Debug.Assert(styles != null, nameof(styles) + " != null");
 
-                    // Is this style in the base style chain of the new base style.
+                    // Is this style in the base style chain of the new base style?
                     var style = styles[idxBaseStyle];
                     while (style != null)
                     {
@@ -322,7 +322,7 @@ namespace MigraDoc.DocumentObjectModel
                         // Note: we must write "Underline = none" if the base style has "Underline = single" - we cannot
                         // detect this if we compare with the built-in style that has no underline.
                         // Known problem: Default values like "OutlineLevel = Level1" will now be serialized.
-                        // TODO: optimize...
+                        // TODO: Optimize DDL output, remove redundant default values.
                     }
                     else
                     {

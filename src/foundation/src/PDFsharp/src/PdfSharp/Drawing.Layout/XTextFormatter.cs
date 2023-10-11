@@ -353,7 +353,7 @@ namespace PdfSharp.Drawing.Layout
             /// </summary>
             public bool Stop;
         }
-        // TODO:
+        // TODO: Possible Improvements for XTextFormatter:
         // - more XStringFormat variations
         // - calculate bounding box
         // - left and right indent

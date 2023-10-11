@@ -24,9 +24,9 @@ namespace MigraDoc.DocumentObjectModel.Internals
 
         // TODO Not yet used.
 
-        public static EventId FontCreated = new(1000, "Font created");
-        public static EventId FontFound = new(1001, "Font found");
-        public static EventId FontNotFound = new(1002, "Font not found");
+        public static EventId FontCreated = new(AppLogEventIds.MDDOM + 0, "Font created");
+        public static EventId FontFound = new(AppLogEventIds.MDDOM + 1, "Font found");
+        public static EventId FontNotFound = new(AppLogEventIds.MDDOM + 2, "Font not found");
 
 #if DEBUG_
 

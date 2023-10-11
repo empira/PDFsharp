@@ -111,7 +111,7 @@ namespace PdfSharp.Pdf.Advanced
             StringBuilder w = new StringBuilder("[");
             if (_cmapInfo != null)
             {
-                int[] glyphIndices = _cmapInfo.GetGlyphIndices();
+                uint[] glyphIndices = _cmapInfo.GetGlyphIndices();
                 int count = glyphIndices.Length;
                 int[] glyphWidths = new int[count];
 

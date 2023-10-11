@@ -518,14 +518,27 @@ namespace PdfSharp.Drawing.Pdf
                 bool isSymbolFont = descriptor.FontFace.cmap.symbol;
                 for (int idx = 0; idx < s.Length; idx++)
                 {
+                    if (char.IsLowSurrogate(s, idx))
+                        continue; // Ignore second char of Surrogate Pair.
+
                     char ch = s[idx];
                     if (isSymbolFont)
                     {
                         // Remap ch for symbol fonts.
                         ch = (char)(ch | (descriptor.FontFace.os2.usFirstCharIndex & 0xFF00));  // @@@ refactor
                     }
-                    int glyphID = descriptor.CharCodeToGlyphIndex(ch);
-                    sb.Append((char)glyphID);
+
+                    if (char.IsHighSurrogate(ch))
+                    {
+                        var glyphIdUnsigned = descriptor.CharCodeToGlyphIndex(ch, s[idx + 1]);
+                        var glyphID = BitConverter.ToInt32(BitConverter.GetBytes(glyphIdUnsigned), 0);
+                        sb.Append(char.ConvertFromUtf32(glyphID));
+                    }
+                    else
+                    {
+                        var glyphID = descriptor.CharCodeToGlyphIndex(ch);
+                        sb.Append((char)glyphID);
+                    }
                 }
                 s = sb.ToString();
 
@@ -783,7 +796,7 @@ namespace PdfSharp.Drawing.Pdf
             }
         }
 
-        #endregion
+#endregion
 
         // --------------------------------------------------------------------------------------------
 

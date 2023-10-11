@@ -2,6 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics.CodeAnalysis;
+using MigraDoc.DocumentObjectModel.Tables;
 using MigraDoc.DocumentObjectModel.Visitors;
 
 namespace MigraDoc.DocumentObjectModel
@@ -130,6 +131,27 @@ namespace MigraDoc.DocumentObjectModel
                     return sections[^1];
 
                 return Capabilities.BackwardCompatibility.DoNotCreateLastSection ? null! : AddSection();
+            }
+        }
+
+        /// <summary>
+        /// Returns the last table in the document, or null if no table exists.
+        /// </summary>
+        public Table LastTable
+        {
+            get
+            {
+                var sections = Values.Sections;
+                if (sections is null)
+                    return null!;
+                for (int idx = sections.Count - 1; idx >= 0; --idx)
+                {
+                    var section = sections[idx];
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+                    if (section.LastTable is not null)
+                        return section.LastTable;
+                }
+                return null!;
             }
         }
 

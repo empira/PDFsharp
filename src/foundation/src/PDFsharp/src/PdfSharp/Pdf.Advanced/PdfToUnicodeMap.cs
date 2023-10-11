@@ -54,7 +54,7 @@ namespace PdfSharp.Pdf.Advanced
 
             Dictionary<int, char> glyphIndexToCharacter = new Dictionary<int, char>();
             int lowIndex = 65536, hiIndex = -1;
-            foreach (KeyValuePair<char, int> entry in _cmapInfo.CharacterToGlyphIndex)
+            foreach (KeyValuePair<char, uint> entry in _cmapInfo.CharacterToGlyphIndex)
             {
                 int index = (int)entry.Value;
                 lowIndex = Math.Min(lowIndex, index);

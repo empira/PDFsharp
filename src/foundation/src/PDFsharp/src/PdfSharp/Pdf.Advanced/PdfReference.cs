@@ -188,7 +188,7 @@ namespace PdfSharp.Pdf.Advanced
 #if DEBUG
                 if (_document == null)
                 {
-                    LogHost.Logger.LogDebug($"Document of object {_objectID} is null.");
+                    LogHost.Logger.LogDebug("Document of object {_objectID} is null.", _objectID);
                 }
 #endif
                 return _document!;

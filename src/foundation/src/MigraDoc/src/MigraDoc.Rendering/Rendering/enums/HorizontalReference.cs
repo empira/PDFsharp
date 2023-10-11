@@ -9,17 +9,17 @@ namespace MigraDoc.Rendering
     enum HorizontalReference
     {
         /// <summary>
-        /// TODO
+        /// Horizontal reference is the area boundary.
         /// </summary>
         AreaBoundary = 0, // Default
 
         /// <summary>
-        /// TODO
+        /// Horizontal reference is the page margin.
         /// </summary>
         PageMargin,
 
         /// <summary>
-        /// TODO
+        /// Horizontal reference is the page.
         /// </summary>
         Page
     }

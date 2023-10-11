@@ -142,7 +142,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public object ToType(Type conversionType, IFormatProvider? provider)
         {
-            // TODO:  Add PdfUInteger.ToType implementation
+            // TODO: Add PdfUInteger.ToType implementation
             //return null!;
             throw new NotImplementedException(nameof(ToType));
         }

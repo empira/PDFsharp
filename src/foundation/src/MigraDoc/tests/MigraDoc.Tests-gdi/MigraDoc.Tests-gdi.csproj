@@ -29,6 +29,7 @@
         <Compile Include="..\MigraDoc.Tests\SecurityTestHelper.cs" Link="SecurityTestHelper.cs" />
         <Compile Include="..\MigraDoc.Tests\SecurityTests.cs" Link="SecurityTests.cs" />
         <Compile Include="..\MigraDoc.Tests\SpaceBeforeTests.cs" Link="SpaceBeforeTests.cs" />
+        <Compile Include="..\MigraDoc.Tests\TextTests.cs" Link="TextTests.cs" />
     </ItemGroup>
 
     <ItemGroup>

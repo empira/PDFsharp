@@ -56,7 +56,8 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a text phrase to the paragraph.
         /// </summary>
-        public Text AddText(string text)  // TODO: Update docu according to Elements.AddText. Update all places in project. StL: ??? what?
+        /// <returns>Returns a new Text object with the last element of text that was added.</returns>
+        public Text AddText(string text)
             => Elements.AddText(text);
 
         /// <summary>

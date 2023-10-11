@@ -128,7 +128,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         /// Sets the borders surrounding the specified range of the table.
         /// </summary>
         public void SetEdge(int clm, int row, int clms, int rows,
-          Edge edge, BorderStyle style, Unit width, Color clr)  // TODO: make Color?
+          Edge edge, BorderStyle style, Unit width, Color clr)
         {
             int maxRow = row + rows - 1;
             int maxClm = clm + clms - 1;

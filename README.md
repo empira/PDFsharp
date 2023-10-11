@@ -1,7 +1,7 @@
 ﻿# PDFsharp & MigraDoc 6.0
 
-Version **6.0.0-preview-3**  
-Published **2023-07-27**
+Version **6.0.0-preview-4**  
+Published **2023-10-11**
 
 This is the third preview of the **PDFsharp** project, the main project of PDFsharp & MigraDoc 6.0 with updates for C# 10 and .NET 6.0.
 

@@ -21,7 +21,7 @@ namespace PdfSharp.Charting
             => Value = value;
 
         /// <summary>
-        /// Initializes a new instance of the Point class with a real value.
+        /// Initializes a new instance of the Point class with a string value.
         /// </summary>
         public Point(string value) : this()
         {
