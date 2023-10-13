@@ -6,6 +6,7 @@ using PdfSharp.Pdf.IO;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Annotations;
+using System.IO;
 
 namespace PdfSharp.Pdf
 {
@@ -495,6 +496,39 @@ namespace PdfSharp.Pdf
         {
             var annotation = PdfLinkAnnotation.CreateFileLink(rect, fileName);
             Annotations.Add(annotation);
+            return annotation;
+        }
+
+        /// <summary>
+        /// Adds a file attachment annotation.
+        /// </summary>
+        /// <param name="rect">The rect.</param>
+        /// <param name="fileSpecification">The file specification</param>
+        public PdfFileAttachmentAnnotation AddFileAttachmentAnnotation(PdfRectangle rect, PdfFileSpecification fileSpecification)
+        {
+            if (fileSpecification.Reference == null)
+                Owner.Internals.AddObject(fileSpecification);
+
+            var annotation = PdfFileAttachmentAnnotation.CreateFileAttachmentAnnotation(rect, fileSpecification);
+            Annotations.Add(annotation);
+            annotation.Elements.SetReference(PdfFileAttachmentAnnotation.Keys.FS, fileSpecification.ReferenceNotNull);
+            return annotation;
+        }
+
+        /// <summary>
+        /// Adds a file attachment annotation.
+        /// </summary>
+        /// <param name="rect">The rect.</param>
+        /// <param name="fileStream">The file stream</param>
+        /// <param name="fileName">The file name</param>
+        public PdfFileAttachmentAnnotation AddFileAttachmentAnnotation(PdfRectangle rect, PdfEmbeddedFileStream fileStream, string fileName)
+        {
+            var fileSpecification = new PdfFileSpecification(Owner, fileStream, fileName);
+            Owner.Internals.AddObject(fileSpecification);
+
+            var annotation = PdfFileAttachmentAnnotation.CreateFileAttachmentAnnotation(rect, fileSpecification);
+            Annotations.Add(annotation);
+            annotation.Elements.SetReference(PdfFileAttachmentAnnotation.Keys.FS, fileSpecification.ReferenceNotNull);
             return annotation;
         }
 

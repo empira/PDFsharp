@@ -241,6 +241,8 @@
         <Compile Include="..\PdfSharp\Pdf.Annotations\PdfRubberStampAnnotation.cs" Link="Pdf.Annotations\PdfRubberStampAnnotation.cs" />
         <Compile Include="..\PdfSharp\Pdf.Annotations\PdfTextAnnotation.cs" Link="Pdf.Annotations\PdfTextAnnotation.cs" />
         <Compile Include="..\PdfSharp\Pdf.Annotations\PdfWidgetAnnotation.cs" Link="Pdf.Annotations\PdfWidgetAnnotation.cs" />
+        <Compile Include="..\PdfSharp\Pdf.Annotations\PdfFileAttachmentAnnotation.cs" Link="Pdf.Annotations\PdfFileAttachmentAnnotation.cs" />
+        <Compile Include="..\PdfSharp\Pdf.Annotations\enums\PdfFileAttachmentAnnotationIcon.cs" Link="Pdf.Annotations\enums\PdfFileAttachmentAnnotationIcon.cs" />
         <Compile Include="..\PdfSharp\Pdf.Content.Objects\CObjects.cs" Link="Pdf.Content.Objects\CObjects.cs" />
         <Compile Include="..\PdfSharp\Pdf.Content.Objects\enum\OpCodeFlags.cs" Link="Pdf.Content.Objects\enum\OpCodeFlags.cs" />
         <Compile Include="..\PdfSharp\Pdf.Content.Objects\enum\OpCodeName.cs" Link="Pdf.Content.Objects\enum\OpCodeName.cs" />
