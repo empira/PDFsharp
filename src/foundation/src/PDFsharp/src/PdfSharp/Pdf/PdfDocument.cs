@@ -770,10 +770,11 @@ namespace PdfSharp.Pdf
         /// </summary>
         /// <param name="name">The name used to refer and to entitle the embedded file.</param>
         /// <param name="path">The path of the file to embed.</param>
-        public void AddEmbeddedFile(string name, string path)
+        /// <param name="checksum">A 16-byte string which is a MD5 checksum of the bytes of the file</param>
+        public void AddEmbeddedFile(string name, string path, string? checksum = null)
         {
             var stream = new FileStream(path, FileMode.Open);
-            AddEmbeddedFile(name, stream);
+            AddEmbeddedFile(name, stream, checksum);
         }
 
         /// <summary>
@@ -781,8 +782,9 @@ namespace PdfSharp.Pdf
         /// </summary>
         /// <param name="name">The name used to refer and to entitle the embedded file.</param>
         /// <param name="stream">The stream containing the file to embed.</param>
-        public void AddEmbeddedFile(string name, Stream stream)
-            => Internals.Catalog.Names.AddEmbeddedFile(name, stream);
+        /// <param name="checksum">A 16-byte string which is a MD5 checksum of the bytes of the file</param>
+        public void AddEmbeddedFile(string name, Stream stream, string? checksum = null)
+            => Internals.Catalog.Names.AddEmbeddedFile(name, stream, checksum);
 
         /// <summary>
         /// Flattens a document (make the fields non-editable).
