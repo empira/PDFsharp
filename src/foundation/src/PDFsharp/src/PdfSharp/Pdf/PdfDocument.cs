@@ -436,7 +436,8 @@ namespace PdfSharp.Pdf
 
             // @PDF/UA
             // Create PdfMetadata now to include the final document information in XMP generation.
-            Catalog.Elements.SetReference(PdfCatalog.Keys.Metadata, new PdfMetadata(this));
+            if (!Catalog.Elements.ContainsKey(PdfCatalog.Keys.Metadata) || Catalog.Elements.GetReference(PdfCatalog.Keys.Metadata) == null)
+                Catalog.Elements.SetReference(PdfCatalog.Keys.Metadata, new PdfMetadata(this));
         }
 
         /// <summary>
