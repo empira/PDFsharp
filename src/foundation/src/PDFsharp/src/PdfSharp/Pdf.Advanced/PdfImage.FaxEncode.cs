@@ -722,7 +722,7 @@ namespace PdfSharp.Pdf.Advanced
 #endif
             }
 
-            // We only come here if bits fits.
+            // We only come here if bits fit.
             _buffer = (_buffer << (int)bits) + (value & masks[bits]);
             _bitsInBuffer += bits;
 

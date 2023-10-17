@@ -269,7 +269,7 @@ namespace PdfSharp.Fonts.OpenType
             else /*if (isBold && isItalic)*/
                 return name.ToLowerInvariant() + "/bi";
 #else
-            // TODO StringBuilder?
+            // TODO Is StringBuilder more efficient?
             string key = name.ToLowerInvariant() + '/'
                 + (isBold ? "b" : "") + (isItalic ? "i" : "");
             return key;

@@ -55,13 +55,22 @@ namespace PdfSharp.Drawing
                     if (ch < 32)
                         continue;
 
+                    if (char.IsLowSurrogate(ch))
+                        continue; // Don't process high surrogate. Low will process this char.
+
                     if (symbol)
                     {
                         // Remap ch for symbol fonts.
                         ch = (char)(ch | (descriptor.FontFace.os2.usFirstCharIndex & 0xFF00));  // @@@ refactor
                         // Used | instead of + because of: http://pdfsharp.codeplex.com/workitem/15954
                     }
-                    int glyphIndex = descriptor.CharCodeToGlyphIndex(ch);
+
+                    uint glyphIndex;
+                    if (char.IsHighSurrogate(ch))
+                        glyphIndex = descriptor.CharCodeToGlyphIndex(ch, text[idx + 1]);
+                    else
+                        glyphIndex = descriptor.CharCodeToGlyphIndex(ch);
+
                     width += descriptor.GlyphIndexToWidth(glyphIndex);
                 }
                 // What? size.Width = width * font.Size * (font.Italic ? 1 : 1) / descriptor.UnitsPerEm;

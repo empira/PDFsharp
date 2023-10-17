@@ -123,7 +123,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             if (Values.Alignment is not null)
                 serializer.WriteSimpleAttribute("Alignment", Alignment);
 
-            if (Values.VerticalAlignment is not null /*&& !Values.VerticalAlignment.IsNull*/) // BUG??? IsNull?
+            if (Values.VerticalAlignment is not null)
                 serializer.WriteSimpleAttribute("VerticalAlignment", VerticalAlignment);
 
             if (Values.Caption is not null)

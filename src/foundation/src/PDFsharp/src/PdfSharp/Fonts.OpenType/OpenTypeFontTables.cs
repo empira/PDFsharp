@@ -23,7 +23,18 @@ namespace PdfSharp.Fonts.OpenType
     /// </summary>
     enum WinEncodingId
     {
+#if true
+        Symbol = 0,
+        UnicodeUSC_2 = 1,
+        //ShiftJIS = 2,
+        //PRC = 3,
+        //Big5 = 4,
+        //Wansung = 5,
+        //Johab = 6,
+        UnicodeUSC_4 = 10
+#else
         Symbol, Unicode
+#endif
     }
 
     /// <summary>
@@ -108,6 +119,63 @@ namespace PdfSharp.Fonts.OpenType
     }
 
     /// <summary>
+    /// CMap format 12: Segmented coverage.
+    /// The Windows standard format.
+    /// </summary>
+    internal class CMap12 : OpenTypeFontTable
+    {
+        internal struct SequentialMapGroup
+        {
+            public UInt32 startCharCode;// First character code in this group.
+            public UInt32 endCharCode; // Last character code in this group.
+            public UInt32 startGlyphID; // Glyph index corresponding to the starting character code.
+        }
+
+        public WinEncodingId encodingId; // Windows encoding ID.
+        public UInt16 format; // Subtable format; set to 12.
+        public UInt32 length; // Byte length of this subtable (including the header).
+        public UInt32 language; // This field must be set to zero for all cmap subtables whose platform IDs are other than Macintosh (platform ID 1).
+        public UInt32 numGroups; // Number of groupings which follow.
+
+        public SequentialMapGroup[] groups = null!;
+
+        public CMap12(OpenTypeFontface fontData, WinEncodingId encodingId)
+            : base(fontData, "----")
+        {
+            this.encodingId = encodingId;
+            Read();
+        }
+
+        internal void Read()
+        {
+            try
+            {
+                // m_EncodingID = encID;
+                format = _fontData!.ReadUShort(); // NRT
+                Debug.Assert(format == 12, "Only format 12 expected.");
+                _fontData.ReadUShort(); // Reserved.
+                length = _fontData.ReadULong();
+                language = _fontData.ReadULong(); // Always null in Windows.
+                numGroups = _fontData.ReadULong();
+
+                groups = new SequentialMapGroup[numGroups];
+
+                for (int i = 0; i < groups.Length; i++)
+                {
+                    ref var group = ref groups[i];
+                    group.startCharCode = _fontData.ReadULong();
+                    group.endCharCode = _fontData.ReadULong();
+                    group.startGlyphID = _fontData.ReadULong();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(PSSR.ErrorReadingFontData, ex);
+            }
+        }
+    }
+
+    /// <summary>
     /// This table defines the mapping of character codes to the glyph index values used in the font.
     /// It may contain more than one subtable, in order to support more than one character encoding scheme.
     /// </summary>
@@ -124,6 +192,7 @@ namespace PdfSharp.Fonts.OpenType
         public bool symbol;
 
         public CMap4 cmap4 = null!;
+        public CMap12 cmap12 = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CMapTable"/> class.
@@ -142,10 +211,6 @@ namespace PdfSharp.Fonts.OpenType
 
                 version = _fontData.ReadUShort();
                 numTables = _fontData.ReadUShort();
-#if DEBUG_
-                if (_fontData.Name == "Cambria")
-                    Debug-Break.Break();
-#endif
 
                 bool success = false;
                 for (int idx = 0; idx < numTables; idx++)
@@ -157,16 +222,32 @@ namespace PdfSharp.Fonts.OpenType
                     int currentPosition = _fontData.Position;
 
                     // Just read Windows stuff.
-                    if (platformId == PlatformId.Win && (encodingId == WinEncodingId.Symbol || encodingId == WinEncodingId.Unicode))
+                    if (platformId == PlatformId.Win &&
+                        (encodingId == WinEncodingId.Symbol || 
+                         encodingId == WinEncodingId.UnicodeUSC_2 || 
+                         encodingId == WinEncodingId.UnicodeUSC_4))
                     {
                         symbol = encodingId == WinEncodingId.Symbol;
 
                         _fontData.Position = tableOffset + offset;
-                        cmap4 = new CMap4(_fontData, encodingId);
+
+                        var format = _fontData.ReadUShort();
+                        _fontData.Position = tableOffset + offset;
+
+                        if (format == 4)
+                        {
+                            cmap4 = new(_fontData, encodingId);
+                        }
+                        else if (format == 12)
+                        {
+                            cmap12 = new(_fontData, encodingId);
+                        }
+
                         _fontData.Position = currentPosition;
-                        // We have found what we are looking for, so break.
+
+                        // We have found what we are looking for, but we do not break as there may be another hit.
                         success = true;
-                        break;
+                        // break;
                     }
                 }
                 if (!success)
@@ -477,7 +558,7 @@ namespace PdfSharp.Fonts.OpenType
         // UNDONE
         public const string Tag = TableTagNames.VMtx;
 
-        // code comes from HorizontalMetricsTable
+        // Code comes from HorizontalMetricsTable.
         public HorizontalMetrics[] metrics;
         public FWord[] leftSideBearing;
 
@@ -504,7 +585,7 @@ namespace PdfSharp.Fonts.OpenType
 
                     metrics = new HorizontalMetrics[numMetrics];
                     for (int idx = 0; idx < numMetrics; idx++)
-                        metrics[idx] = new HorizontalMetrics(_fontData);
+                        metrics[idx] = new(_fontData);
 
                     if (numLsbs > 0)
                     {
@@ -889,7 +970,7 @@ namespace PdfSharp.Fonts.OpenType
     /// <summary>
     /// This table contains a list of values that can be referenced by instructions.
     /// They can be used, among other things, to control characteristics for different glyphs.
-    /// The length of the table must be an integral number of FWORD units. 
+    /// The length of the table must be an integral number of FWORD units.
     /// </summary>
     class ControlValueTable : OpenTypeFontTable
     {
@@ -924,7 +1005,7 @@ namespace PdfSharp.Fonts.OpenType
     /// <summary>
     /// This table is similar to the CVT Program, except that it is only run once, when the font is first used.
     /// It is used only for FDEFs and IDEFs. Thus the CVT Program need not contain function definitions.
-    /// However, the CVT Program may redefine existing FDEFs or IDEFs. 
+    /// However, the CVT Program may redefine existing FDEFs or IDEFs.
     /// </summary>
     class FontProgram : OpenTypeFontTable
     {
@@ -957,10 +1038,10 @@ namespace PdfSharp.Fonts.OpenType
     }
 
     /// <summary>
-    /// The Control Value Program consists of a set of TrueType instructions that will be executed whenever the font or 
+    /// The Control Value Program consists of a set of TrueType instructions that will be executed whenever the font or
     /// point size or transformation matrix change and before each glyph is interpreted. Any instruction is legal in the
     /// CVT Program but since no glyph is associated with it, instructions intended to move points within a particular
-    /// glyph outline cannot be used in the CVT Program. The name 'prep' is anachronistic. 
+    /// glyph outline cannot be used in the CVT Program. The name 'prep' is anachronistic.
     /// </summary>
     class ControlValueProgram : OpenTypeFontTable
     {
@@ -983,7 +1064,7 @@ namespace PdfSharp.Fonts.OpenType
                 int length = DirectoryEntry.Length;
                 bytes = new byte[length];
                 for (int idx = 0; idx < length; idx++)
-                    bytes[idx] = _fontData!.ReadByte();  // NRT
+                    bytes[idx] = _fontData!.ReadByte(); // NRT
             }
             catch (Exception ex)
             {
@@ -994,7 +1075,7 @@ namespace PdfSharp.Fonts.OpenType
 
     /// <summary>
     /// This table contains information that describes the glyphs in the font in the TrueType outline format.
-    /// Information regarding the rasterizer (scaler) refers to the TrueType rasterizer. 
+    /// Information regarding the rasterizer (scaler) refers to the TrueType rasterizer.
     /// </summary>
     class GlyphSubstitutionTable : OpenTypeFontTable
     {

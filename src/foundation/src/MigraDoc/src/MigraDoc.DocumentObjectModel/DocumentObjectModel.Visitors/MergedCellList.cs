@@ -78,7 +78,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 for (int clmIdx = 0; clmIdx < columns; ++clmIdx)
                 {
                     var cell = table[rwIdx, clmIdx];
-                    // TODO Make this smarter?
+                    // TOxDO Make this smarter?
                     if (!IsAlreadyCovered(cell))
                         Add(cell);
                 }
@@ -121,17 +121,50 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         public new Cell this[int index] => base[index];
 
         /// <summary>
-        /// Gets a borders object that should be used for rendering.
+        /// Gets a borders object that should be used for RTF rendering.
+        /// In RTF heading rows must not be considered, as repeated heading row rendering is done in the RTF application.
+        /// Further, inserting rows later in the RTF application should not move or duplicate any heading row border formatting,
+        /// that could otherwise be assigned here to the following row, down to the table content.
         /// </summary>
         /// <exception cref="System.ArgumentException">
         ///   Thrown when the cell is not in this list.
         ///   This situation occurs if the given cell is merged "away" by a previous one.
         /// </exception>
-        public Borders GetEffectiveBorders(Cell cell)
+        public Borders GetEffectiveBordersRtf(Cell cell)
+        {
+            return GetEffectiveBordersInternal(cell, false, null);
+        }
+
+        /// <summary>
+        /// Gets a borders object that should be used for PDF rendering.
+        /// In PDF heading rows must be considered, as repeated heading row rendering is done in PDF rendering
+        /// Therefore the index of the last heading row (original, not repetition) must be committed.
+        /// </summary>
+        /// <exception cref="System.ArgumentException">
+        ///   Thrown when the cell is not in this list.
+        ///   This situation occurs if the given cell is merged "away" by a previous one.
+        /// </exception>
+        public Borders GetEffectiveBordersPdf(Cell cell, int lastHeadingRow)
+        {
+            return GetEffectiveBordersInternal(cell, true, lastHeadingRow);
+        }
+
+        Borders GetEffectiveBordersInternal(Cell cell, bool considerHeadingRows, int? consideredLastHeadingRow)
         {
 #if CACHE
-            if (_effectiveBordersLookup.TryGetValue(cell, out var result))
-                return result;
+            var lastKnownHeaderInsertionRowIndex = GetLastKnownHeaderInsertionRowIndex();
+
+            // If a cached borders value exists for this cell, determine if it has to be determined again.
+            var existingLookupKey = _effectiveBordersLookup.TryGetValue(cell, out var result);
+            if (existingLookupKey)
+            {
+                // The cached borders object can be returned as no changes are expected, when...
+                if (!considerHeadingRows // ...not considering heading rows (considerHeadingRows should be always true for PDF and false for RTF rendering)...
+                    || lastKnownHeaderInsertionRowIndex <= result.LastKnownHeaderInsertionRowIndex // ...or no heading has been inserted since the last borders determination...
+                    || !_headerInsertionRowIndices.Contains(cell.Row.Index)) // ...or the changed _headerInsertionRowIndices does not contain this row
+                                                                             // (so this row is still not following a repeated heading row).
+                    return result.Borders;
+            }
 #endif
 
             var borders = cell.Values.Borders;
@@ -188,13 +221,35 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                     borders.SetValue("Right", GetBorderFromBorders(nbrBrdrs, BorderType.Left));
             }
 
-            var topNeighbor = GetNeighborTop(cellIdx);
+
+            // If considering heading rows and if cellRowIndex is an index a header is been inserted at, override topRowIndex with the last heading row.
+            // This way for rows after a repeated heading row the original last heading row is considered as the top neighbor for top border determination
+            // instead of the last content row on the page before.
+            // Repetitions of the heading are not managed in MergedCellList (what would be wrong for RTF rendering), therefore jumping to the original header is necessary.
+            // This behaviour is wanted for PDF only, where all heading rows repetitions are rendered with their border formatting into the document and
+            // where their neighbors have to consider this.
+            int? topRowIndexOverride;
+            if (considerHeadingRows && _headerInsertionRowIndices.Contains(cellRowIndex))
+                topRowIndexOverride = consideredLastHeadingRow;
+            else
+                topRowIndexOverride = null;
+
+            var topNeighbor = GetNeighborTop(cellIdx, topRowIndexOverride);
+
+            // If not considering heading rows and if the topNeighbor is a heading row, set it to null to ignore it for top border determination.
+            // This way the first content row's top border doesn't possibly get the bottom border of the original last heading row.
+            // This behaviour is wanted for RTF only, where all heading rows repetitions are rendered with their border formatting in the RTF application when displaying the
+            // document and where content row movement or insertion in the RTF application must not copy formatting values that actually belong to the original last heading row.
+            if (!considerHeadingRows && topNeighbor?.Row.HeadingFormat == true)
+                topNeighbor = null;
+
             if (topNeighbor != null && topNeighbor.RoundedCorner != RoundedCorner.BottomLeft && topNeighbor.RoundedCorner != RoundedCorner.BottomRight)
             {
                 var nbrBrdrs = topNeighbor.Values.Borders;
                 if (nbrBrdrs != null && GetEffectiveBorderWidth(nbrBrdrs, BorderType.Bottom) >= GetEffectiveBorderWidth(borders, BorderType.Top))
                     borders.SetValue("Top", GetBorderFromBorders(nbrBrdrs, BorderType.Bottom));
             }
+
 
             var bottomNeighbor = GetNeighborBottom(cellIdx);
             if (bottomNeighbor != null && bottomNeighbor.RoundedCorner != RoundedCorner.TopLeft && bottomNeighbor.RoundedCorner != RoundedCorner.TopRight)
@@ -204,12 +259,18 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                     borders.SetValue("Bottom", GetBorderFromBorders(nbrBrdrs, BorderType.Top));
             }
 #if CACHE
-            _effectiveBordersLookup.Add(cell, borders);
+            // Add or update cached borders and lastKnownHeaderInsertionRowIndex for cell.
+            _effectiveBordersLookup[cell] = (borders, lastKnownHeaderInsertionRowIndex);
 #endif
             return borders;
         }
+
 #if CACHE
-        Dictionary<Cell, Borders> _effectiveBordersLookup = new Dictionary<Cell, Borders>();
+        /// <summary>
+        /// A dictionary assigning the determined effective borders and the last known header insertion row index at that time to a cell for caching purposes.
+        /// If a new last heading insertion row is known, the cached borders may have to be determined again.
+        /// </summary>
+        readonly Dictionary<Cell, (Borders Borders, int LastKnownHeaderInsertionRowIndex)> _effectiveBordersLookup = new();
 #endif
 
         /// <summary>
@@ -314,7 +375,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             if (border == null || border.Values.Width.IsValueNullOrEmpty())
                 relevantDocObj = borders;
 
-            // TODO Avoid 'GetValue("'.
+            // TOxDO Avoid 'GetValue("'.
             // Avoid unnecessary GetValue calls. => Not trivial because it can be Border or Borders.
             object? visible = relevantDocObj!.GetValue("visible", GV.GetNull); // relevantDocObj cannot be null here.
             if (visible != null && !(bool)visible)
@@ -387,16 +448,23 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             return null;
         }
 
-        Cell? GetNeighborTop(int cellIdx)
+        /// <summary>
+        /// Gets the top neighbor of a cell.
+        /// TopRowIndexOverride may be used to manually override the row index of the top neighbor row.
+        /// For PDF effective border determination in case of heading repetitions the lastHeadingRow index can be used to get a cell
+        /// in the original last heading row as neighbor instead of the last content row on the page before.
+        /// Repetitions of the heading are not managed in MergedCellList (what would be wrong for RTF rendering), therefore jumping to the original header is necessary.
+        /// </summary>
+        Cell? GetNeighborTop(int cellIdx, int? topRowIndexOverride = null)
         {
-            Cell cell = this[cellIdx];
+            var cell = this[cellIdx];
             if (cell.Row.Index == 0)
                 return null;
 
-            for (int index = cellIdx - 1; index >= 0; --index)
+            for (var index = cellIdx - 1; index >= 0; --index)
             {
                 var currCell = this[index];
-                if (IsNeighborTop(cell, currCell))
+                if (IsNeighborTop(cell, currCell, topRowIndexOverride))
                     return currCell;
             }
             return null;
@@ -404,7 +472,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 
         Cell? GetNeighborLeft(int cellIdx)
         {
-            Cell cell = this[cellIdx];
+            var cell = this[cellIdx];
             if (cell.Column.Index == 0)
                 return null;
 
@@ -414,7 +482,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 if (cell2.Row.Index == cell.Row.Index)
                     return cell2;
             }
-            for (int index = cellIdx - 2; index >= 0; --index)
+            for (var index = cellIdx - 2; index >= 0; --index)
             {
                 var currCell = this[index];
                 if (IsNeighborLeft(cell, currCell))
@@ -425,7 +493,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 
         Cell? GetNeighborRight(int cellIdx)
         {
-            Cell cell = this[cellIdx];
+            var cell = this[cellIdx];
             if (cell.Column.Index + cell.MergeRight == cell.Table.Columns.Count - 1)
                 return null;
 
@@ -435,7 +503,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 if (cell2.Row.Index == cell.Row.Index)
                     return cell2;
             }
-            for (int index = cellIdx + 2; index < Count; ++index)
+            for (var index = cellIdx + 2; index < Count; ++index)
             {
                 var currCell = this[index];
                 if (IsNeighborRight(cell, currCell))
@@ -446,11 +514,11 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 
         Cell? GetNeighborBottom(int cellIdx)
         {
-            Cell cell = this[cellIdx];
+            var cell = this[cellIdx];
             if (cell.Row.Index + cell.MergeDown == cell.Table.Rows.Count - 1)
                 return null;
 
-            for (int index = cellIdx + 1; index < Count; ++index)
+            for (var index = cellIdx + 1; index < Count; ++index)
             {
                 var currCell = this[index];
                 if (IsNeighborBottom(cell, currCell))
@@ -501,44 +569,66 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 
         bool IsNeighborBottom(Cell cell1, Cell cell2)
         {
-            bool isNeighbor = false;
-            int bottomRowIdx = cell1.Row.Index + cell1.MergeDown + 1;
+            var bottomRowIdx = cell1.Row.Index + cell1.MergeDown + 1;
             var c1CI = cell1.Column.Index;
             var c2CI = cell2.Column.Index;
-            isNeighbor = cell2.Row.Index == bottomRowIdx &&
-                         c2CI <= c1CI &&
-                         c2CI + cell2.MergeRight >= c1CI;
+            var isNeighbor = cell2.Row.Index == bottomRowIdx &&
+                             c2CI <= c1CI &&
+                             c2CI + cell2.MergeRight >= c1CI;
             return isNeighbor;
         }
 
         bool IsNeighborLeft(Cell cell1, Cell cell2)
         {
-            bool isNeighbor = false;
-            int leftClmIdx = cell1.Column.Index - 1;
-            isNeighbor = cell2.Row.Index <= cell1.Row.Index &&
-                         cell2.Row.Index + cell2.MergeDown >= cell1.Row.Index &&
-                         cell2.Column.Index + cell2.MergeRight == leftClmIdx;
+            var leftClmIdx = cell1.Column.Index - 1;
+            var isNeighbor = cell2.Row.Index <= cell1.Row.Index &&
+                             cell2.Row.Index + cell2.MergeDown >= cell1.Row.Index &&
+                             cell2.Column.Index + cell2.MergeRight == leftClmIdx;
             return isNeighbor;
         }
 
         bool IsNeighborRight(Cell cell1, Cell cell2)
         {
-            bool isNeighbor = false;
-            int rightClmIdx = cell1.Column.Index + cell1.MergeRight + 1;
-            isNeighbor = cell2.Row.Index <= cell1.Row.Index &&
-                         cell2.Row.Index + cell2.MergeDown >= cell1.Row.Index &&
-                         cell2.Column.Index == rightClmIdx;
+            var rightClmIdx = cell1.Column.Index + cell1.MergeRight + 1;
+            var isNeighbor = cell2.Row.Index <= cell1.Row.Index &&
+                             cell2.Row.Index + cell2.MergeDown >= cell1.Row.Index &&
+                             cell2.Column.Index == rightClmIdx;
             return isNeighbor;
         }
 
-        bool IsNeighborTop(Cell cell1, Cell cell2)
+        /// <summary>
+        /// Returns true, if cell2 is the top neighbor of cell1.
+        /// TopRowIndexOverride may be used to manually override the top neighbor row index determined by cell1.
+        /// For PDF effective border determination in case of heading repetitions the lastHeadingRow index can be used to get a cell
+        /// in the original last heading row as neighbor instead of the last content row on the page before.
+        /// Repetitions of the heading are not managed in MergedCellList (what would be wrong for RTF rendering), therefore jumping to the original header is necessary.
+        /// </summary>
+        bool IsNeighborTop(Cell cell1, Cell cell2, int? topRowIndexOverride = null)
         {
-            int topRowIdx = cell1.Row.Index - 1;
+            var topRowIdx = topRowIndexOverride ?? cell1.Row.Index - 1;
             var c1CI = cell1.Column.Index;
             var c2CI = cell2.Column.Index;
             return cell2.Row.Index + cell2.MergeDown == topRowIdx &&
                              c2CI + cell2.MergeRight >= c1CI &&
                              c2CI <= c1CI;
         }
+
+
+        readonly SortedSet<int> _headerInsertionRowIndices = new();
+
+        /// <summary>
+        /// After a heading has been inserted in PDF rendering, the index of the first following content row should be added here
+        /// to consider this heading when determining the effective borders.
+        /// </summary>
+        public void AddHeaderInsertionRowIndex(int rowIndex)
+        {
+            _headerInsertionRowIndices.Add(rowIndex);
+        }
+
+        int GetLastKnownHeaderInsertionRowIndex()
+        {
+            return _headerInsertionRowIndices.Any() ? _headerInsertionRowIndices.Last() : -1;
+        }
+
     }
 }

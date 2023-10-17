@@ -221,7 +221,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             var chartObject = Parent as Chart;
             Debug.Assert(chartObject != null);
 
-            serializer.WriteLine("\\" + chartObject.CheckAxis(this)); // HACK // BUG: What if Parent is not Chart?
+            serializer.WriteLine("\\" + chartObject.CheckAxis(this)); // Exception if Parent is not Chart. This is by design.
             var pos = serializer.BeginAttributes();
 
             if (Values.MinimumScale is not null)

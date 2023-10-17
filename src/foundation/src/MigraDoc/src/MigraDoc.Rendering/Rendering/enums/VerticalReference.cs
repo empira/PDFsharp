@@ -6,22 +6,22 @@ namespace MigraDoc.Rendering
     enum VerticalReference
     {
         /// <summary>
-        /// TODO
+        /// Vertical reference is the previous element.
         /// </summary>
         PreviousElement = 0, // Default
-        
+
         /// <summary>
-        /// TODO
+        /// Vertical reference is the area boundary.
         /// </summary>
         AreaBoundary,
 
         /// <summary>
-        /// TODO
+        /// Vertical reference is the page margin.
         /// </summary>
         PageMargin,
 
         /// <summary>
-        /// TODO
+        /// Vertical reference is page.
         /// </summary>
         Page
     }

@@ -72,6 +72,8 @@ namespace PdfSharp.Snippets.Font
 
                 new("Lucida Console", "lucon", "LucidaConsole", "DejaVu Sans Mono"),
 
+                new("Segoe UI Emoji", "seguiemj"), // No Linux substitute
+
                 new("Symbol", "symbol", "", "Noto Sans Symbols Regular"), // Noto Symbols may not replace exactly
 
                 new("Wingdings", "wingding"), // No Linux substitute

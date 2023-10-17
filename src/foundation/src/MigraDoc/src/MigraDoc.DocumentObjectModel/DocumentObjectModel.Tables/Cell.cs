@@ -45,9 +45,9 @@ namespace MigraDoc.DocumentObjectModel.Tables
         protected override object DeepCopy()
         {
             var cell = (Cell)base.DeepCopy();
-            // Remove all references to the original object hierarchy.
             cell.ResetCachedValues();
-            // TODO Call ResetCachedValues() for all classes where this is needed!
+
+            // Remove all references to the original object hierarchy.
             if (cell.Values.Format != null)
             {
                 cell.Values.Format = cell.Values.Format.Clone();

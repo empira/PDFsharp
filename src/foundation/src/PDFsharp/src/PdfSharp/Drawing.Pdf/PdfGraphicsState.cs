@@ -417,7 +417,7 @@ namespace PdfSharp.Drawing.Pdf
 
         public void AddTransform(XMatrix value, XMatrixOrder matrixOrder)
         {
-            // TODO: User matrixOrder
+            // TODO: Use matrixOrder
 #if DEBUG
             if (matrixOrder == XMatrixOrder.Append)
                 throw new NotImplementedException("XMatrixOrder.Append");

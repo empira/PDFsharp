@@ -76,7 +76,9 @@ namespace MigraDoc
             public static bool DoNotCreateLastTable { get; set; } = false;
 
             /// <summary>
-            /// NYI
+            /// Gets or sets a flag that defines what LastSection does if no section exists.
+            /// If false, which is the default value, a new section is created and returned.
+            /// If true, no section will be created and null is returned instead.
             /// </summary>
             public static bool DoNotCreateLastSection { get; set; } = false;
 

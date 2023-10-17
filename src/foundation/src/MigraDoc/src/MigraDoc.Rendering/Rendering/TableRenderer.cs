@@ -78,6 +78,10 @@ namespace MigraDoc.Rendering
                 else
                     break; // Exit the loop when we hit the first non-header cell. _mergedCells is sorted.
             }
+
+            // _startRow is the index of the first content row on the page. Add this index as header insertion row index to _mergedCells, 
+            // to enable considering repeated headers on PDF effective border determination in MergedCellList.
+            _mergedCells.AddHeaderInsertionRowIndex(_startRow);
         }
 
         void RenderCell(Cell cell)
@@ -146,7 +150,7 @@ namespace MigraDoc.Rendering
             XUnit rightPos = leftPos + innerRect.Width;
             XUnit topPos = innerRect.Y;
             XUnit bottomPos = innerRect.Y + innerRect.Height;
-            var mergedBorders = _mergedCells.GetEffectiveBorders(cell);
+            var mergedBorders = _mergedCells.GetEffectiveBordersPdf(cell, _lastHeaderRow);
 
             var bordersRenderer = new BordersRenderer(mergedBorders, _gfx);
             XUnit bottomWidth = bordersRenderer.GetWidth(BorderType.Bottom);
@@ -235,7 +239,7 @@ namespace MigraDoc.Rendering
 
         Rectangle GetInnerRect(XUnit startingHeight, Cell cell)
         {
-            var bordersRenderer = new BordersRenderer(_mergedCells.GetEffectiveBorders(cell), _gfx);
+            var bordersRenderer = new BordersRenderer(_mergedCells.GetEffectiveBordersPdf(cell, _lastHeaderRow), _gfx);
             var formattedCell = _formattedCells[cell];
             XUnit width = formattedCell.InnerWidth;
 
@@ -371,7 +375,7 @@ namespace MigraDoc.Rendering
             {
                 var cell = _mergedCells[index];
                 FormattedCell formattedCell = new FormattedCell(cell, _documentRenderer,
-                    _mergedCells.GetEffectiveBorders(cell),
+                    _mergedCells.GetEffectiveBordersPdf(cell, _lastHeaderRow),
                     _fieldInfos, 0, 0);
                 formattedCell.Format(_gfx);
                 _formattedCells.Add(cell, formattedCell);
@@ -530,7 +534,7 @@ namespace MigraDoc.Rendering
                 {
                     if (_table.Rows.Count > 0 && _table.Columns.Count > 0)
                     {
-                        var borders = _mergedCells.GetEffectiveBorders(_table[0, 0]);
+                        var borders = _mergedCells.GetEffectiveBordersPdf(_table[0, 0], _lastHeaderRow);
                         var bordersRenderer = new BordersRenderer(borders, _gfx);
                         _leftBorderOffset = bordersRenderer.GetWidth(BorderType.Left);
                     }
@@ -873,7 +877,7 @@ namespace MigraDoc.Rendering
         /// <returns>The calculated border width.</returns>
         XUnit CalcBottomBorderWidth(Cell cell)
         {
-            var borders = _mergedCells.GetEffectiveBorders(cell);
+            var borders = _mergedCells.GetEffectiveBordersPdf(cell, _lastHeaderRow);
             if (borders != null)
             {
                 BordersRenderer bordersRenderer = new BordersRenderer(borders, _gfx);

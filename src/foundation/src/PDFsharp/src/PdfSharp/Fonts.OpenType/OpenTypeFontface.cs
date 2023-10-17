@@ -359,7 +359,7 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// Creates a new font image that is a subset of this font image containing only the specified glyphs.
         /// </summary>
-        public OpenTypeFontface CreateFontSubSet(Dictionary<int, object> glyphs, bool cidFont)
+        public OpenTypeFontface CreateFontSubSet(Dictionary<uint, object> glyphs, bool cidFont)
         {
             // Create new font image
             var fontData = new OpenTypeFontface(this);
@@ -394,7 +394,7 @@ namespace PdfSharp.Fonts.OpenType
 
             // Create a sorted array of all used glyphs.
             int glyphCount = glyphs.Count;
-            int[] glyphArray = new int[glyphCount];
+            uint[] glyphArray = new uint[glyphCount];
             glyphs.Keys.CopyTo(glyphArray, 0);
             Array.Sort(glyphArray);
 
@@ -414,7 +414,7 @@ namespace PdfSharp.Fonts.OpenType
             // Fill new glyf and loca table.
             int glyphOffset = 0;
             int glyphIndex = 0;
-            for (int idx = 0; idx < numGlyphs; idx++)
+            for (uint idx = 0; idx < numGlyphs; idx++)
             {
                 locaNew.LocaTable[idx] = glyphOffset;
                 if (glyphIndex < glyphCount && glyphArray[glyphIndex] == idx)

@@ -6,27 +6,27 @@ namespace MigraDoc.Rendering
     enum ImageFailure
     {
         /// <summary>
-        /// TODO
+        /// No failure has occurred.
         /// </summary>
         None = 0,
         
         /// <summary>
-        /// TODO
+        /// Image file was not found.
         /// </summary>
         FileNotFound,
 
         /// <summary>
-        /// TODO
+        /// Image type is not supported.
         /// </summary>
         InvalidType,
 
         /// <summary>
-        /// TODO
+        /// Image could not be read.
         /// </summary>
         NotRead,
 
         /// <summary>
-        /// TODO
+        /// Image has empty or invalid size.
         /// </summary>
         EmptySize
     }

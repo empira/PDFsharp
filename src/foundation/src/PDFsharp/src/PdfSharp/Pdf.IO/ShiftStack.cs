@@ -81,7 +81,7 @@ namespace PdfSharp.Pdf.IO
         }
 
         /// <summary>
-        /// Replaces the last 'count' items with the specified item.
+        /// Removes the last 'count' items.
         /// </summary>
         public void Reduce(int count)
         {

@@ -107,14 +107,14 @@ namespace PdfSharp.Pdf.IO
                     // This only happens with corrupt PDF files that have duplicate IDs.
                     if (iref.Value != null!)
                     {
-                        LogHost.Logger.LogWarning($"Another instance of object {iref} was found. Using previously encountered object instead.");
+                        LogHost.Logger.LogWarning("Another instance of object {iref} was found. Using previously encountered object instead.", iref);
                         // Attempt to read an object that was already read. Keep the former object.
                         return iref.Value;
                     }
 
                     if (iref.Position >= 0)
                     {
-                        LogHost.Logger.LogWarning($"Another instance of object {iref} was found. Keeping reference to previously encountered object.");
+                        LogHost.Logger.LogWarning("Another instance of object {iref} was found. Keeping reference to previously encountered object.", iref);
                         // The object ID was already found, but the object was not read yet.
                         // We ignore the object in the object stream and return a dummy object.
                         // Better: Do not call this method in the first place.
@@ -1285,8 +1285,10 @@ namespace PdfSharp.Pdf.IO
             Debug.Assert(w!.Elements.Count == 3);
             int[] wsize = { w.Elements.GetInteger(0), w.Elements.GetInteger(1), w.Elements.GetInteger(2) };
             int wsum = StreamHelper.WSize(wsize);
+#if DEBUG
             if (wsum * subsectionEntryCount != bytes.Length)
                 GetType();
+#endif
             // BUG: This assertion fails with original PDF 2.0 documentation (ISO_32000-2_2020(en).pdf)
             //Debug.Assert(wsum * subsectionEntryCount == bytes.Length, "Check implementation here.");
 #if DEBUG_ && CORE

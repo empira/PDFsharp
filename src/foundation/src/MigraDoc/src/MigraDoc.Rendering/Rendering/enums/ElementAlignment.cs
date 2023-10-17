@@ -9,27 +9,27 @@ namespace MigraDoc.Rendering
     enum ElementAlignment
     {
         /// <summary>
-        /// TODO Default
+        /// Element is aligned near. This is the default.
         /// </summary>
         Near = 0,
 
         /// <summary>
-        /// TODO
+        /// Element is center-aligned.
         /// </summary>
         Center,
 
         /// <summary>
-        /// TODO
+        /// Element is far-aligned.
         /// </summary>
         Far,
 
         /// <summary>
-        /// TODO
+        /// Element is inside-aligned.
         /// </summary>
         Inside,
 
         /// <summary>
-        /// TODO
+        /// Element is outside-aligned.
         /// </summary>
         Outside
     }

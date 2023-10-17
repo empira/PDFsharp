@@ -58,7 +58,7 @@ namespace PdfSharp.Pdf
 
         DateTime IConvertible.ToDateTime(IFormatProvider? provider)
         {
-            // TODO:  Add PdfInteger.ToDateTime implementation
+            // TODO: Add PdfInteger.ToDateTime implementation
             return new DateTime();
         }
 

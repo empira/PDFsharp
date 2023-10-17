@@ -60,14 +60,6 @@ namespace HelloWorld
             gfx.DrawString(GitVersionInformation.BranchName, font, XBrushes.Black,
                 new XRect(0, 50, page.Width, page.Height), XStringFormats.Center);
 
-#if true_
-            // Draw empty path.
-            {
-                XGraphicsPath path = new XGraphicsPath();
-                gfx.DrawPath(XBrushes.Black, path);
-            }
-#endif
-
             // Save the document...
             //const string filename = "HelloWorld.pdf";
             var dir = System.IO.Directory.GetCurrentDirectory();
