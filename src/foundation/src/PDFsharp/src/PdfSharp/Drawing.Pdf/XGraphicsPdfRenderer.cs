@@ -239,8 +239,6 @@ namespace PdfSharp.Drawing.Pdf
             }
 
             Realize(pen, brush);
-            
-#if CORE
             if (brush is XImageBrush xImageBrush)
             {
                 XGraphicsPath xGraphicsPath = new XGraphicsPath();
@@ -253,7 +251,6 @@ namespace PdfSharp.Drawing.Pdf
                 }
                 return;
             }
-#endif
             AppendRectangle();
             AppendStrokeFill(pen, brush, XFillMode.Winding, false);
 
@@ -297,8 +294,6 @@ namespace PdfSharp.Drawing.Pdf
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
             Realize(pen, brush);           
-
-#if CORE
             if (brush is XImageBrush xImageBrush)
             {
                 XGraphicsPath xGraphicsPath = new XGraphicsPath();
@@ -314,7 +309,6 @@ namespace PdfSharp.Drawing.Pdf
 
                 return;
             }
-#endif
             AppendEllipse();
             AppendStrokeFill(pen, brush, XFillMode.Winding, true);
 
@@ -354,7 +348,6 @@ namespace PdfSharp.Drawing.Pdf
 
             Realize(pen, brush);
 
-#if CORE
             if (brush is XImageBrush imageBrush)
             {
                 XGraphicsPath xGraphicsPath = new XGraphicsPath();
@@ -369,7 +362,6 @@ namespace PdfSharp.Drawing.Pdf
                 }
                 return;
             }
-#endif
             AppendPolygon();
             AppendStrokeFill(pen, brush, fillmode, true);
 
@@ -396,7 +388,6 @@ namespace PdfSharp.Drawing.Pdf
 
             Realize(pen, brush);
 
-#if CORE
             if (brush is XImageBrush imageBrush) {
 #if false
                 XGraphicsPath graphicsPath = new XGraphicsPath();
@@ -414,7 +405,6 @@ namespace PdfSharp.Drawing.Pdf
                 }
                 return;
             }
-#endif
             AppendPie();
             AppendStrokeFill(pen, brush, XFillMode.Alternate, true);
 
@@ -443,7 +433,6 @@ namespace PdfSharp.Drawing.Pdf
             tension /= 3;
 
             Realize(pen, brush);
-#if CORE
             if (brush is XImageBrush imageBrush)
             {
 #if false
@@ -462,7 +451,6 @@ namespace PdfSharp.Drawing.Pdf
                 return;
             }
 
-#endif
             AppendClosedCurve();
             AppendStrokeFill(pen, brush, fillmode, true);
 
@@ -496,46 +484,43 @@ namespace PdfSharp.Drawing.Pdf
             if (pen == null && brush == null)
                 throw new ArgumentNullException(nameof(pen));
 
-#if CORE
             Realize(pen, brush);
-            if(brush is XImageBrush imageBrush)
+            if (brush is XImageBrush imageBrush)
             {
                 DrawImageBrush(imageBrush, path);
                 if (pen != null)
                 {
-                    AppendPath(path.CorePath);
+                    appendPath();
                     _content.Append("S\n");
                 }
             }
             else
             {
-                AppendPath(path.CorePath);
+                appendPath();
                 AppendStrokeFill(pen, brush, path.FillMode, false);
             }
+
+            void appendPath()
+            {
+#if CORE
+                AppendPath(path.CorePath);
 #endif
 #if GDI && !WPF
-            Realize(pen, brush);
-            AppendPath(path.GdipPath);
-            AppendStrokeFill(pen, brush, path.FillMode, false);
+                AppendPath(path.GdipPath);
 #endif
 #if WPF && !GDI
-            Realize(pen, brush);
-            AppendPath(path.PathGeometry);
-            AppendStrokeFill(pen, brush, path.FillMode, false);
+                AppendPath(path.PathGeometry);
 #endif
 #if WPF && GDI
-            Realize(pen, brush);
-            if (_gfx.TargetContext == XGraphicTargetContext.GDI)
-                AppendPath(path._gdipPath);
-            else
-                AppendPath(path._pathGeometry);
-            AppendStrokeFill(pen, brush, path.FillMode, false);
+                if (_gfx.TargetContext == XGraphicTargetContext.GDI)
+                    AppendPath(path._gdipPath);
+                else
+                    AppendPath(path._pathGeometry);
 #endif
 #if UWP
-            Realize(pen, brush);
-            AppendPath(path._pathGeometry);
-            AppendStrokeFill(pen, brush, path.FillMode, false);
+                AppendPath(path._pathGeometry);
 #endif
+            }
         }
  
         // ----- DrawString ---------------------------------------------------------------------------
@@ -911,18 +896,23 @@ namespace PdfSharp.Drawing.Pdf
             }
         }
 
-#if CORE
         void DrawImageBrush(XImageBrush imageBrush, XGraphicsPath graphicsPath)
         {
             XImage image = imageBrush._xImage;
 
-            XRect? xRect = GetRectForImageBrush(graphicsPath.CorePath.PathPoints);
+            XPoint[]? xPoints = GetXPoints(graphicsPath);
+            XRect? xRect = GetRectForImageBrush(xPoints);
             if (xRect != null)
             {
                 int xCount = (int)Math.Ceiling(xRect.Value.Width / image.PixelWidth);
                 int yCount = (int)Math.Ceiling(xRect.Value.Height / image.PixelHeight);
 
-                XGraphicsContainer container = new XGraphicsContainer();
+                XGraphicsContainer container;
+#if GDI
+                container = new XGraphicsContainer(_gfx._gfx.Save());
+#else
+                container = new XGraphicsContainer();
+#endif
                 BeginContainer(container, xRect.Value, xRect.Value, XGraphicsUnit.Point);
                 //I think it should be XCombineMode.Intersect
                 SetClip(graphicsPath, XCombineMode.Intersect);
@@ -935,14 +925,81 @@ namespace PdfSharp.Drawing.Pdf
                         DrawImage(image, xPosition, yPosition, image.PixelWidth, image.PixelHeight);
                     }
                 }
-                //TODO:Possible reset another clip. Need a way to reset only our clip
-                //ResetClip();
                 EndContainer(container);
             }
         }
 
+        XPoint[]? GetXPoints(XGraphicsPath? graphicsPath)
+        {
+            if (graphicsPath == null)
+            {
+                return null;
+            }
+#if CORE
+            return graphicsPath.CorePath?.PathPoints;
+#elif WPF
+            List<XPoint>? xPoints = null;
+            foreach (var figures in graphicsPath.PathGeometry.Figures)
+            {
+                if (figures.Segments.Count <= 0)
+                {
+                    continue;
+                }
 
-        XRect? GetRectForImageBrush(XPoint[] points)
+                if (xPoints == null)
+                {
+                    xPoints = new();
+                }
+
+                xPoints.Add(new XPoint(figures.StartPoint.X, figures.StartPoint.Y));
+                foreach (var segment in figures.Segments)
+                {
+                    if (segment is LineSegment lineSegment)
+                    {
+                        xPoints.Add(new XPoint(lineSegment.Point.X, lineSegment.Point.Y));
+                    }
+                    else if (segment is PolyLineSegment polyLineSegment)
+                    {
+                        foreach (SysPoint point in polyLineSegment.Points)
+                        {
+                            xPoints.Add(new XPoint(point.X, point.Y));
+                        }
+                    }
+                    else if (segment is BezierSegment bezierSegment)
+                    {
+                        xPoints.Add(new XPoint(bezierSegment.Point1.X, bezierSegment.Point1.Y));
+                        xPoints.Add(new XPoint(bezierSegment.Point2.X, bezierSegment.Point2.Y));
+                        xPoints.Add(new XPoint(bezierSegment.Point3.X, bezierSegment.Point3.Y));
+                    }
+                    else if (segment is PolyBezierSegment polyBezierSegment)
+                    {
+                        PointCollection pointCollection = polyBezierSegment.Points;
+                        int count = pointCollection.Count;
+                        if (count > 0)
+                        {
+                            Debug.Assert(count % 3 == 0, "Number of Points in PolyBezierSegment are not a multiple of 3.");
+                            for (int idx = 0; idx < count - 2; idx += 3)
+                            {
+                                xPoints.Add(new XPoint(pointCollection[idx].X, pointCollection[idx].Y));
+                                xPoints.Add(new XPoint(pointCollection[idx + 1].X, pointCollection[idx + 1].Y));
+                                xPoints.Add(new XPoint(pointCollection[idx + 2].X, pointCollection[idx + 2].Y));
+                            }
+                        }
+                    }
+                    else if (segment is ArcSegment arcSegment)
+                    {
+                        xPoints.Add(new XPoint(arcSegment.Point.X, arcSegment.Point.Y));
+                    }
+                }
+            }
+            return xPoints?.ToArray();
+#elif GDI
+            
+           return graphicsPath.GdipPath.PathPoints.Select(x => new XPoint(x.X, x.Y)).ToArray();
+#endif
+        }
+
+        XRect? GetRectForImageBrush(XPoint[]? points)
         {
             if (points == null)
             {
@@ -979,7 +1036,6 @@ namespace PdfSharp.Drawing.Pdf
             return new XRect(xMin, yMin, width, height);
         }
 
-#endif
 
 #endregion
 

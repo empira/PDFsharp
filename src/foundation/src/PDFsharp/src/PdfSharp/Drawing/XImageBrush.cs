@@ -1,4 +1,7 @@
-﻿#if WPF
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+#if WPF
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -66,6 +69,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
+        internal XImage _xImage;
         XImageBrush(string path)
         {
 
@@ -82,9 +86,8 @@ namespace PdfSharp.Drawing
             var wpfImage = BitmapFromUri(new Uri(path));
             _imageBrush = new ImageBrush(wpfImage);
 
-#elif CORE
-            _xImage = XImage.FromFile(path);
 #endif
+            _xImage = XImage.FromFile(path);
         }
 
         XImageBrush(Stream stream) {
@@ -105,54 +108,18 @@ namespace PdfSharp.Drawing
             bmi.StreamSource = stream;
             bmi.EndInit();
             _imageBrush = new ImageBrush(bmi);
-#elif CORE
-
-            _xImage = XImage.FromStream(stream);
 #endif
+            _xImage = XImage.FromStream(stream);
         }
 
 
 #if GDI
-
-        /// <summary>
-        /// Creates an bitmap from the TextureBrush.
-        /// </summary>
-        public static XImageBrush FromTextureBrush(TextureBrush textureBrush)
-        {
-            if (textureBrush == null)
-                throw new ArgumentNullException(nameof(textureBrush));
-
-            return new XImageBrush(textureBrush);
-        }
-
         TextureBrush _textureBrush;
-        XImageBrush(TextureBrush textureBrush)
-        {
-            _textureBrush = textureBrush;
-        }
-
         internal override Brush RealizeGdiBrush() => _textureBrush;
 #endif
 
 #if WPF
-
-        /// <summary>
-        /// Creates an bitmap from the TextureBrush.
-        /// </summary>
-        public static XImageBrush FromTextureBrush(ImageBrush imageBrush)
-        {
-            if (imageBrush == null)
-                throw new ArgumentNullException(nameof(imageBrush));
-
-            return new XImageBrush(imageBrush);
-        }
-
         ImageBrush _imageBrush;
-        XImageBrush(ImageBrush imageBrush)
-        {
-            _imageBrush = imageBrush;
-        }
-
         internal override Brush RealizeWpfBrush() => _imageBrush;
 
         /// <summary>
@@ -175,10 +142,6 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if CORE
-        internal XImage _xImage;
-#endif
-
 
 #if UWP
         internal override ICanvasBrush RealizeCanvasBrush()
@@ -187,5 +150,4 @@ namespace PdfSharp.Drawing
         }
 #endif
     }
-
 }
