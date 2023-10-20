@@ -134,6 +134,7 @@
 
         <!--<PackageVersion Include="BioNTech.Extensions.Fakes" Version="1.2102.0-preview.89" />-->
         <PackageVersion Include="FluentAssertions" Version="6.10.0" />
+        <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="7.0.3" />
         <PackageVersion Include="xunit.core" Version="2.4.2" />
         <PackageVersion Include="xunit.assert" Version="2.4.2" />
         <PackageVersion Include="Xunit.Priority" Version="1.1.6" />
