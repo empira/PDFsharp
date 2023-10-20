@@ -1,9 +1,13 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+#if WPF
+using System.IO;
+#endif
+
 namespace PdfSharp.Pdf.Signatures
 {
-    public class RangedStream : Stream
+    internal class RangedStream : Stream
     {
         private Range[] ranges;
 

@@ -5,6 +5,9 @@ using PdfSharp.Drawing;
 using PdfSharp.Pdf.AcroForms;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Annotations;
+#if WPF
+using System.IO;
+#endif
 using System.Text;
 
 namespace PdfSharp.Pdf.Signatures
