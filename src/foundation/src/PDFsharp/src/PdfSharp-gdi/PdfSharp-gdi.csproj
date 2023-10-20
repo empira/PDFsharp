@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>library</OutputType>
@@ -234,6 +234,7 @@
         <Compile Include="..\PdfSharp\Pdf.Annotations\enums\PdfAnnotationFlags.cs" Link="Pdf.Annotations\enums\PdfAnnotationFlags.cs" />
         <Compile Include="..\PdfSharp\Pdf.Annotations\enums\PdfRubberStampAnnotationIcon.cs" Link="Pdf.Annotations\enums\PdfRubberStampAnnotationIcon.cs" />
         <Compile Include="..\PdfSharp\Pdf.Annotations\enums\PdfTextAnnotationIcon.cs" Link="Pdf.Annotations\enums\PdfTextAnnotationIcon.cs" />
+        <Compile Include="..\PdfSharp\Pdf.Annotations\IAnnotationAppearanceHandler.cs" Link="Pdf.Annotations\IAnnotationAppearanceHandler.cs" />
         <Compile Include="..\PdfSharp\Pdf.Annotations\PdfAnnotation.cs" Link="Pdf.Annotations\PdfAnnotation.cs" />
         <Compile Include="..\PdfSharp\Pdf.Annotations\PdfAnnotations.cs" Link="Pdf.Annotations\PdfAnnotations.cs" />
         <Compile Include="..\PdfSharp\Pdf.Annotations\PdfGenericAnnotation.cs" Link="Pdf.Annotations\PdfGenericAnnotation.cs" />

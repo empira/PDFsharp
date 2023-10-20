@@ -1,6 +1,7 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Drawing;
 using PdfSharp.Pdf.Advanced;
 
 namespace PdfSharp.Pdf.Annotations
@@ -73,6 +74,42 @@ namespace PdfSharp.Pdf.Annotations
             }
         }
 
+        public IAnnotationAppearanceHandler CustomAppearanceHandler { get; set; }
+
+        /// <summary>
+        /// Creates the custom appearance form X object for this annotation
+        /// </summary>
+        public void RenderCustomAppearance()
+        {
+            var visible = !(Rectangle.X1 + Rectangle.X2 + Rectangle.Y1 + Rectangle.Y2 == 0);
+
+            if (!visible)
+                return;
+
+            if (CustomAppearanceHandler == null)
+                throw new Exception("AppearanceHandler is null");
+
+            XForm form = new XForm(_document, Rectangle.Size);
+            XGraphics gfx = XGraphics.FromForm(form);
+
+            CustomAppearanceHandler.DrawAppearance(gfx, Rectangle.ToXRect());
+
+            form.DrawingFinished();
+
+            // Get existing or create new appearance dictionary
+            if (Elements[PdfAnnotation.Keys.AP] is not PdfDictionary ap)
+            {
+                ap = new PdfDictionary(_document);
+                Elements[PdfAnnotation.Keys.AP] = ap;
+            }
+
+            // Set XRef to normal state
+            ap.Elements["/N"] = form.PdfForm.Reference;
+
+            form.PdfRenderer.Close();
+
+            Icon = PdfFileAttachmentAnnotationIcon.NoIcon;
+        }
 
         /// <summary>
         /// Predefined keys of this dictionary.
