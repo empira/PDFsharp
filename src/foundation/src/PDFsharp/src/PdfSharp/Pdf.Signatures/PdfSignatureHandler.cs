@@ -12,24 +12,22 @@ using System.Text;
 
 namespace PdfSharp.Pdf.Signatures
 {
-    public class IntEventArgs : EventArgs { public int Value { get; set; } }    
-
     /// <summary>
     /// PdfDocument signature handler.
-    /// Attaches a PKCS#7 signature digest to PdfDocument. PdfSharp currently supports PDF 1.4 documents, so digest algorithm should be SHA1 (supported in every subsequent version anyway):
-    /// adbe.pkcs7.detached supported algorithms: SHA1 (PDF 1.3), SHA256 (PDF 1.6), SHA384/SHA512/RIPEMD160 (PDF 1.7)
+    /// Attaches a PKCS#7 signature digest to PdfDocument.
+    /// Digest algorithm will be either SHA1/SHA256/SHA512 depending on PdfDocument.Version.
     /// </summary>
     public class PdfSignatureHandler
     {
-        const string SupportedDigestAlgorithm = "SHA1"; // adbe.pkcs7.detached supported algorithms: SHA1 (PDF 1.3), SHA256 (PDF 1.6), SHA384/SHA512/RIPEMD160 (PDF 1.7)
-
         private PdfString signatureFieldContents;
         private PdfArray signatureFieldByteRange;
 
-        private int? maximumSignatureLength;
-        private const int byteRangePaddingLength = 36; // place big enough required to replace [0 0 0 0] with the correct value
+        /// <summary>
+        /// Cache signature length (bytes) for each PDF version since digest length depends on digest algorithm that depends on PDF version.
+        /// </summary>
+        private static Dictionary<int, int> maximumSignatureLengthByPdfVersion = new Dictionary<int, int>();
 
-        public event EventHandler<IntEventArgs> SignatureSizeComputed = (s, e) => { };
+        private const int byteRangePaddingLength = 36; // place big enough required to replace [0 0 0 0] with the correct value
 
         public PdfDocument Document { get; private set; }
         public PdfSignatureOptions Options { get; private set; }
@@ -41,17 +39,14 @@ namespace PdfSharp.Pdf.Signatures
             this.Document.BeforeSave += AddSignatureComponents;
             this.Document.AfterSave += ComputeSignatureAndRange;
 
-            if (!maximumSignatureLength.HasValue)
-            {
-                maximumSignatureLength = signer.GetSignedCms(new MemoryStream(new byte[] { 0 }), SupportedDigestAlgorithm).Length;
-                SignatureSizeComputed(this, new IntEventArgs() { Value = maximumSignatureLength.Value });
-            }
+            // estimate signature length by computing signature for a fake byte[]
+            if (!maximumSignatureLengthByPdfVersion.ContainsKey(documentToSign.Version))
+                maximumSignatureLengthByPdfVersion[documentToSign.Version] = signer.GetSignedCms(new MemoryStream(new byte[] { 0 }), documentToSign.Version).Length;
         }
 
-        public PdfSignatureHandler(ISigner signer, int? signatureMaximumLength, PdfSignatureOptions options)
+        public PdfSignatureHandler(ISigner signer, PdfSignatureOptions options)
         {
             this.signer = signer;
-            this.maximumSignatureLength = signatureMaximumLength;
             this.Options = options;
         }
 
@@ -75,8 +70,8 @@ namespace PdfSharp.Pdf.Signatures
 
             var rangeToSign = GetRangeToSign(writer.Stream); // will exclude SignatureField's /Contents from hash computation
 
-            var digest = signer.GetSignedCms(rangeToSign, SupportedDigestAlgorithm);
-            if (digest.Length > maximumSignatureLength)
+            var digest = signer.GetSignedCms(rangeToSign, Document.Version);
+            if (digest.Length > maximumSignatureLengthByPdfVersion[Document.Version])
                 throw new Exception("The digest length is bigger that the approximation made.");
 
             var hexFormatedDigest = Encoding.Default.GetBytes(FormatHex(digest));
@@ -106,7 +101,7 @@ namespace PdfSharp.Pdf.Signatures
 
         private void AddSignatureComponents(object sender, EventArgs e)
         {            
-            var hashPlaceholderValue = new String('0', maximumSignatureLength.Value);
+            var hashPlaceholderValue = new String('0', maximumSignatureLengthByPdfVersion[Document.Version]);
             signatureFieldContents = new PdfString(hashPlaceholderValue, PdfStringFlags.HexLiteral);
             signatureFieldByteRange = new PdfArrayWithPadding(Document, byteRangePaddingLength, new PdfInteger(0), new PdfInteger(0), new PdfInteger(0), new PdfInteger(0));
             //Document.Internals.AddObject(signatureFieldByteRange);

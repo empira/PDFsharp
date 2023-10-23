@@ -9,7 +9,7 @@ namespace PdfSharp.Pdf.Signatures
 {
     public interface ISigner
     {
-        byte[] GetSignedCms(Stream stream, string recommendedDigestAlgorithm);
+        byte[] GetSignedCms(Stream stream, int pdfVersion);
 
         string GetName();
     }

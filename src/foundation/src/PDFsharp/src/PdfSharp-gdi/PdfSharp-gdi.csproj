@@ -297,6 +297,7 @@
         <Compile Include="..\PdfSharp\Pdf.Security\PdfSecurityHandler.cs" Link="Pdf.Security\PdfSecurityHandler.cs" />
         <Compile Include="..\PdfSharp\Pdf.Security\PdfSecuritySettings.cs" Link="Pdf.Security\PdfSecuritySettings.cs" />
         <Compile Include="..\PdfSharp\Pdf.Security\PdfStandardSecurityHandler.cs" Link="Pdf.Security\PdfStandardSecurityHandler.cs" />
+        <Compile Include="..\PdfSharp\Pdf.Signatures\BouncySigner.cs" Link="Pdf.Signatures\BouncySigner.cs" />
         <Compile Include="..\PdfSharp\Pdf.Signatures\DefaultSignatureAppearanceHandler.cs" Link="Pdf.Signatures\DefaultSignatureAppearanceHandler.cs" />
         <Compile Include="..\PdfSharp\Pdf.Signatures\DefaultSigner.cs" Link="Pdf.Signatures\DefaultSigner.cs" />
         <Compile Include="..\PdfSharp\Pdf.Signatures\ISigner.cs" Link="Pdf.Signatures\ISigner.cs" />
@@ -419,6 +420,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BouncyCastle.Cryptography" />
     </ItemGroup>
 
 </Project>

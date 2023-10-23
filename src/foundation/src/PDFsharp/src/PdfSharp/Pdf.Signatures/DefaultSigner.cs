@@ -18,7 +18,7 @@ namespace PdfSharp.Pdf.Signatures
             this.Certificate = Certificate;
         }
 
-        public byte[] GetSignedCms(Stream stream, string recommendedDigestAlgorithm)
+        public byte[] GetSignedCms(Stream stream, int pdfVersion)
         {
             var range = new byte[stream.Length];
 

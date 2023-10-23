@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
+    <PackageReference Include="BouncyCastle.Cryptography" />
   </ItemGroup>
 
 </Project>
