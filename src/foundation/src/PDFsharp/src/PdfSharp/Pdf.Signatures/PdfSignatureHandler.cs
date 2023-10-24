@@ -5,10 +5,10 @@ using PdfSharp.Drawing;
 using PdfSharp.Pdf.AcroForms;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Annotations;
+using PdfSharp.Pdf.Internal;
 #if WPF
 using System.IO;
 #endif
-using System.Text;
 
 namespace PdfSharp.Pdf.Signatures
 {
@@ -19,13 +19,13 @@ namespace PdfSharp.Pdf.Signatures
     /// </summary>
     public class PdfSignatureHandler
     {
-        private PdfString signatureFieldContents;
-        private PdfArray signatureFieldByteRange;
+        private PdfString signatureFieldContentsPdfString;
+        private PdfArray signatureFieldByteRangePdfArray;
 
         /// <summary>
         /// Cache signature length (bytes) for each PDF version since digest length depends on digest algorithm that depends on PDF version.
         /// </summary>
-        private static Dictionary<int, int> maximumSignatureLengthByPdfVersion = new Dictionary<int, int>();
+        private static Dictionary<int, int> knownSignatureLengthInBytesByPdfVersion = new Dictionary<int, int>();
 
         private const int byteRangePaddingLength = 36; // place big enough required to replace [0 0 0 0] with the correct value
 
@@ -40,8 +40,8 @@ namespace PdfSharp.Pdf.Signatures
             this.Document.AfterSave += ComputeSignatureAndRange;
 
             // estimate signature length by computing signature for a fake byte[]
-            if (!maximumSignatureLengthByPdfVersion.ContainsKey(documentToSign.Version))
-                maximumSignatureLengthByPdfVersion[documentToSign.Version] = signer.GetSignedCms(new MemoryStream(new byte[] { 0 }), documentToSign.Version).Length;
+            if (!knownSignatureLengthInBytesByPdfVersion.ContainsKey(documentToSign.Version))
+                knownSignatureLengthInBytesByPdfVersion[documentToSign.Version] = signer.GetSignedCms(new MemoryStream(new byte[] { 0 }), documentToSign.Version).Length;
         }
 
         public PdfSignatureHandler(ISigner signer, PdfSignatureOptions options)
@@ -56,57 +56,47 @@ namespace PdfSharp.Pdf.Signatures
 
             // writing actual ByteRange in place of the placeholder
 
-            var rangeArray = new PdfArray();
-            rangeArray.Elements.Add(new PdfInteger(0));
-            rangeArray.Elements.Add(new PdfInteger(signatureFieldContents.PositionStart));
-            rangeArray.Elements.Add(new PdfInteger(signatureFieldContents.PositionEnd));
-            rangeArray.Elements.Add(new PdfInteger((int)writer.Stream.Length - signatureFieldContents.PositionEnd));
+            var byteRangeArray = new PdfArray();
+            byteRangeArray.Elements.Add(new PdfInteger(0));
+            byteRangeArray.Elements.Add(new PdfInteger(signatureFieldContentsPdfString.PositionStart - PdfSignatureField.Keys.Contents.Length)); // PositionStart actually indicates position of the HexLiteral string right after the /Contents so we need to exclude full /Contents entry
+            byteRangeArray.Elements.Add(new PdfInteger(signatureFieldContentsPdfString.PositionEnd));
+            byteRangeArray.Elements.Add(new PdfInteger((int)writer.Stream.Length - signatureFieldContentsPdfString.PositionEnd));
 
-            writer.Stream.Position = (signatureFieldByteRange as PdfArrayWithPadding).PositionStart;
-            rangeArray.WriteObject(writer);
-
+            writer.Stream.Position = (signatureFieldByteRangePdfArray as PdfArrayWithPadding).PositionStart;
+            byteRangeArray.WriteObject(writer);
 
             // computing and writing document's digest
 
-            var rangeToSign = GetRangeToSign(writer.Stream); // will exclude SignatureField's /Contents from hash computation
+            var rangedStreamToSign = GetRangeToSign(writer.Stream); // will exclude SignatureField's /Contents entry from hash computation
 
-            var digest = signer.GetSignedCms(rangeToSign, Document.Version);
-            if (digest.Length > maximumSignatureLengthByPdfVersion[Document.Version])
-                throw new Exception("The digest length is bigger that the approximation made.");
+            var signature = signer.GetSignedCms(rangedStreamToSign, Document.Version);
+            if (signature.Length != knownSignatureLengthInBytesByPdfVersion[Document.Version])
+                throw new Exception("The digest length is different that the approximation made.");
 
-            var hexFormatedDigest = Encoding.Default.GetBytes(FormatHex(digest));
-
-            writer.Stream.Position = signatureFieldContents.PositionStart + 1/*' '*/ + 1/*'<'*/; // PositionStart starts right after /Contents, so we take into account the space separator and the starting '<' before writing the hash
-            writer.Write(hexFormatedDigest);
-        }
-
-        string FormatHex(byte[] bytes) // starting from .net5, could be replaced by Convert.ToHexString(Byte[]). keeping current method to be ease .net48 compatibility
-        {
-            var retval = new StringBuilder();
-
-            for (int idx = 0; idx < bytes.Length; idx++)
-                retval.AppendFormat("{0:x2}", bytes[idx]);
-
-            return retval.ToString();
+            var signatureAsRawString = PdfEncoders.RawEncoding.GetString(signature, 0, signature.Length);
+            var tempContentsPdfString = new PdfString(signatureAsRawString, PdfStringFlags.HexLiteral); // has to be a hex string
+            writer.Stream.Position = signatureFieldContentsPdfString.PositionStart + 1/*' '*/; // tempContentsPdfString is orphan, so it will not write the space. need to begin write 1 byte further
+            tempContentsPdfString.WriteObject(writer);
         }
 
         private RangedStream GetRangeToSign(Stream stream)
         {
             return new RangedStream(stream, new List<RangedStream.Range>()
             {
-                new RangedStream.Range(0, signatureFieldContents.PositionStart),
-                new RangedStream.Range(signatureFieldContents.PositionEnd, stream.Length - signatureFieldContents.PositionEnd)
+                new RangedStream.Range(0, signatureFieldContentsPdfString.PositionStart - PdfSignatureField.Keys.Contents.Length), // PositionStart actually indicates position of the HexLiteral string right after the /Contents so we need to exclude full /Contents entry
+                new RangedStream.Range(signatureFieldContentsPdfString.PositionEnd, stream.Length - signatureFieldContentsPdfString.PositionEnd)
             });
         }
 
         private void AddSignatureComponents(object sender, EventArgs e)
-        {            
-            var hashPlaceholderValue = new String('0', maximumSignatureLengthByPdfVersion[Document.Version]);
-            signatureFieldContents = new PdfString(hashPlaceholderValue, PdfStringFlags.HexLiteral);
-            signatureFieldByteRange = new PdfArrayWithPadding(Document, byteRangePaddingLength, new PdfInteger(0), new PdfInteger(0), new PdfInteger(0), new PdfInteger(0));
+        {
+            var fakeSignature = Enumerable.Repeat((byte)0x20/*actual value does not matter*/, knownSignatureLengthInBytesByPdfVersion[Document.Version]).ToArray();
+            var fakeSignatureAsRawString = PdfEncoders.RawEncoding.GetString(fakeSignature, 0, fakeSignature.Length);
+            signatureFieldContentsPdfString = new PdfString(fakeSignatureAsRawString, PdfStringFlags.HexLiteral);
+            signatureFieldByteRangePdfArray = new PdfArrayWithPadding(Document, byteRangePaddingLength, new PdfInteger(0), new PdfInteger(0), new PdfInteger(0), new PdfInteger(0));
             //Document.Internals.AddObject(signatureFieldByteRange);
 
-            var signatureDictionary = GetSignatureDictionary(signatureFieldContents, signatureFieldByteRange);
+            var signatureDictionary = GetSignatureDictionary(signatureFieldContentsPdfString, signatureFieldByteRangePdfArray);
             var signatureField = GetSignatureField(signatureDictionary);
             RenderAppearance(signatureField, Options.AppearanceHandler ?? new DefaultSignatureAppearanceHandler()
             {
