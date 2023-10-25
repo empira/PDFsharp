@@ -1,14 +1,16 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+#if WPF
 using System.IO;
+#endif
 //#if NET/FX_CORE || UWP || DNC10
 //using System.Threading.Tasks;
 //using Windows.Foundation;
 //using Windows.Storage;
 //#endif
-#if CORE || GDI
-//using System.Drawing.Imaging;
+#if GDI
+using System.Drawing.Imaging;
 #endif
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
