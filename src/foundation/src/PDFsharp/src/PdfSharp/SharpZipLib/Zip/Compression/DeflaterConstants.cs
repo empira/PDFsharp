@@ -1,4 +1,4 @@
-#if !NET_ZIP
+#if !NET_ZIP || !NET6_0_OR_GREATER
 // DeflaterConstants.cs
 //
 // Copyright (C) 2001 Mike Krueger

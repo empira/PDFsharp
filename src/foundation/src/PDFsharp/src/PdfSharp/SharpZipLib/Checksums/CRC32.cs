@@ -1,4 +1,4 @@
-#if !NET_ZIP
+#if !NET_ZIP || !NET6_0_OR_GREATER
 // CRC32.cs - Computes CRC32 data checksum of a data stream
 // Copyright (C) 2001 Mike Krueger
 //
