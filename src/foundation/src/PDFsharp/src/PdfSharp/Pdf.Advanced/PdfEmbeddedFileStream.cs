@@ -5,8 +5,6 @@
 using System.IO;
 #endif
 
-//using System.Reflection.Metadata;
-
 namespace PdfSharp.Pdf.Advanced
 {
     /// <summary>

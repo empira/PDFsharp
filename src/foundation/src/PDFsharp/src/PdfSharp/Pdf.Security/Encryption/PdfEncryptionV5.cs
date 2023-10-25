@@ -8,7 +8,6 @@ using System.Text;
 using PdfSharp.Internal;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Internal;
-using System.Security.Cryptography.X509Certificates;
 
 namespace PdfSharp.Pdf.Security.Encryption
 {
