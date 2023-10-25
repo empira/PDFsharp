@@ -445,11 +445,9 @@ namespace PdfSharp.Pdf.Security.Encryption
             perms[11] = (byte)'b';
 
             // e) Set bytes 12-15 to 4 bytes of random data, which will be ignored.
-            byte[] randomData = new byte[8];
+            var randomData = new byte[4];
             using (var cryptoProvider = new RNGCryptoServiceProvider())
-            {
                 cryptoProvider.GetBytes(randomData);
-            }
             Array.Copy(randomData, 0, perms, 12, randomData.Length);
 
             // f) Encrypt the block using AES-256 in ECB mode with an initialization vector of zero, using the file encryption key as the key.
