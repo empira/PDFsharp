@@ -75,7 +75,11 @@ namespace PdfSharp.Pdf.Signatures
 
             var signatureAsRawString = PdfEncoders.RawEncoding.GetString(signature, 0, signature.Length);
             var tempContentsPdfString = new PdfString(signatureAsRawString, PdfStringFlags.HexLiteral); // has to be a hex string
-            writer.Stream.Position = signatureFieldContentsPdfString.PositionStart + 1/*' '*/; // tempContentsPdfString is orphan, so it will not write the space. need to begin write 1 byte further
+            var debugAdditionalOffset = 0;
+#if DEBUG
+            debugAdditionalOffset = 1/*' '*/; // in DEBUG mode, a space is added between entry key and entry value. tempContentsPdfString is orphan, so it will not write the space delimiter: need to begin write 1 byte further
+#endif
+            writer.Stream.Position = signatureFieldContentsPdfString.PositionStart + debugAdditionalOffset;
             tempContentsPdfString.WriteObject(writer);
         }
 
