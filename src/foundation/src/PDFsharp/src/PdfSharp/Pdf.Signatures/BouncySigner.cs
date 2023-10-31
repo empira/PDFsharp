@@ -1,4 +1,4 @@
-﻿// PDFsharp - A .NET library for processing PDF
+// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using Org.BouncyCastle.Cms;
@@ -64,7 +64,7 @@ namespace PdfSharp.Pdf.Signatures
                     return CmsSignedDataGenerator.DigestSha256;
                 case int when pdfVersion >= 13:
                 default:
-                    return CmsSignedDataGenerator.DigestSha1;
+                    return CmsSignedDataGenerator.DigestSha256; // SHA1 is obsolete, use at least SHA256
             }
         }
     }
