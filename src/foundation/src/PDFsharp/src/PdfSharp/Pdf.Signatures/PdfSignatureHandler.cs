@@ -117,13 +117,7 @@ namespace PdfSharp.Pdf.Signatures
             //Document.Internals.AddObject(signatureFieldByteRange);
 
             var signatureDictionary = GetSignatureDictionary(signatureFieldContentsPdfString, signatureFieldByteRangePdfArray);
-            var signatureField = GetSignatureField(signatureDictionary);
-            RenderAppearance(signatureField, Options.AppearanceHandler ?? new DefaultSignatureAppearanceHandler()
-            {
-                Location = Options.Location,
-                Reason = Options.Reason,
-                Signer = signer.GetName()
-            });
+            var signatureField = GetSignatureField(signatureDictionary);            
 
             var annotations = Document.Pages[0].Elements.GetArray(PdfPage.Keys.Annots);
             if (annotations == null)
@@ -170,40 +164,17 @@ namespace PdfSharp.Pdf.Signatures
             
             signatureField.Elements.Add("/Rect", new PdfRectangle(Options.Rectangle));
 
+            signatureField.CustomAppearanceHandler = Options.AppearanceHandler ?? new DefaultSignatureAppearanceHandler()
+            {
+                Location = Options.Location,
+                Reason = Options.Reason,
+                Signer = signer.GetName()
+            };
+            signatureField.PrepareForSave(); // TODO: for some reason, PdfSignatureField.PrepareForSave() is not triggered automatically so let's call it manually from here, but it would be better to be called automatically
+
             Document.Internals.AddObject(signatureField);
 
             return signatureField;
-        }
-
-        private void RenderAppearance(PdfSignatureField signatureField, IAnnotationAppearanceHandler appearanceHandler)
-        {
-            PdfRectangle rect = signatureField.Elements.GetRectangle(PdfAnnotation.Keys.Rect);
-
-            var visible = !(rect.X1 + rect.X2 + rect.Y1 + rect.Y2 == 0);
-
-            if (!visible)
-                return;
-
-            if (appearanceHandler == null)
-                throw new Exception("AppearanceHandler is null");
-            
-            XForm form = new XForm(Document, rect.Size);
-            XGraphics gfx = XGraphics.FromForm(form);
-
-            appearanceHandler.DrawAppearance(gfx, rect.ToXRect());
-
-            form.DrawingFinished();
-
-            // Get existing or create new appearance dictionary
-            PdfDictionary ap = signatureField.Elements[PdfAnnotation.Keys.AP] as PdfDictionary;
-            if (ap == null)
-            {
-                ap = new PdfDictionary(Document);
-                signatureField.Elements[PdfAnnotation.Keys.AP] = ap;
-            }
-
-            // Set XRef to normal state
-            ap.Elements["/N"] = form.PdfForm.Reference;
         }
 
         private PdfDictionary GetSignatureDictionary(PdfString contents, PdfArray byteRange)
