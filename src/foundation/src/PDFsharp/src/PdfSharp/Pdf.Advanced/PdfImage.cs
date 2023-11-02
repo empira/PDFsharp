@@ -1046,11 +1046,13 @@ namespace PdfSharp.Pdf.Advanced
                 {
                     throw new NotImplementedException("ReadIndexedMemoryBitmap: unsupported format");
                 }
-#if WPF
-                // TODOWPF: bug with height and width
-                width = ReadDWord(imageBits, 18);
-                height = ReadDWord(imageBits, 22);
-#endif
+
+//#if WPF
+//                // These two lines should be superfluous, otherwise an exception would have been thrown above.
+//                width = ReadDWord(imageBits, 18);
+//                height = ReadDWord(imageBits, 22);
+//#endif
+
                 int fileBits = ReadWord(imageBits, 28);
                 if (fileBits != bits)
                 {

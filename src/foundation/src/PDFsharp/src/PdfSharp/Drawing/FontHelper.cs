@@ -56,6 +56,9 @@ namespace PdfSharp.Drawing
                     if (ch < 32)
                         continue;
 
+                    if (char.IsLowSurrogate(ch))
+                        continue; // Don't process high surrogate. Low will process this char.
+
                     if (symbol)
                     {
                         // Remap ch for symbol fonts.

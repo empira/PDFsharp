@@ -391,7 +391,7 @@ namespace PdfSharp.Pdf
                     if (item is PdfReference iref)
                     {
                         // Case: The item is a reference.
-                        // Does the iref already belongs to the new owner?
+                        // Does the iref already belong to the new owner?
                         if (iref.Document == owner)
                         {
                             // Yes: fine. Happens when an already cloned object is reused.
@@ -546,7 +546,7 @@ namespace PdfSharp.Pdf
         /// Gets the indirect reference of this object. Throws if it is null.
         /// </summary>
         /// <exception cref="System.InvalidOperationException">The indirect reference must be not null here.</exception>
-        public PdfReference ReferenceNotNull // TODO: Name 	in need of improvement.
+        public PdfReference ReferenceNotNull // TODO: Name in need of improvement.
             => _iref ?? throw new InvalidOperationException("The indirect reference must be not null here.");
     }
 }

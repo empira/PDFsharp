@@ -188,9 +188,9 @@ namespace PdfSharp.Pdf
         //internal bool CanModify => true;
         internal bool CanModify => _openMode == PdfDocumentOpenMode.Modify;
 
-        // TODO Explain what Close() actually does.
         /// <summary>
         /// Closes this instance.
+        /// Saves the document if the PdfDocument was created with a filename or a stream.
         /// </summary>
         public void Close()
         {

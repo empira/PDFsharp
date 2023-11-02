@@ -39,6 +39,10 @@ function GetDllInfo($project) {
 
     $debugFolder = Join-Path -Path $projectFolder "bin\debug"
     $dllFile = Get-ChildItem -Path $debugFolder -Filter "$projectName.dll" -Recurse -ErrorAction SilentlyContinue -Force | Select-Object  -first 1
+    
+    if ($dllFile -eq $null) {
+        Write-Error "Could not finde file `"$debugFolder\**\$projectName.dll`". Maybe Debug Build has not been built."
+    }
 
     $dllFolder = $dllFile.Directory.FullName | Resolve-Path -Relative
     $dllFileName = $dllFile.Name

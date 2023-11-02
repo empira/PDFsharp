@@ -42,7 +42,7 @@ namespace PdfSharp.Fonts
                         continue;
                     }
                     char ch = text[idx];
-                    if (!CharacterToGlyphIndex.ContainsKey(ch))
+                    if (!CharacterToGlyphIndex.ContainsKey(ch) || char.IsHighSurrogate(ch))
                     {
                         var ch2 = ch;
                         if (symbol)
@@ -70,7 +70,7 @@ namespace PdfSharp.Fonts
                 int length = glyphIndices.Length;
                 for (int idx = 0; idx < length; idx++)
                 {
-                    int glyphIndex = glyphIndices[idx];
+                    var glyphIndex = glyphIndices[idx];
                     GlyphIndices[glyphIndex] = null!;
                 }
             }
@@ -108,9 +108,9 @@ namespace PdfSharp.Fonts
             }
         }
 
-        public int[] GetGlyphIndices()
+        public uint[] GetGlyphIndices()
         {
-            int[] indices = new int[GlyphIndices.Count];
+            uint[] indices = new uint[GlyphIndices.Count];
             GlyphIndices.Keys.CopyTo(indices, 0);
             Array.Sort(indices);
             return indices;
@@ -118,7 +118,8 @@ namespace PdfSharp.Fonts
 
         public char MinChar = Char.MaxValue;
         public char MaxChar = Char.MinValue;
-        public Dictionary<char, int> CharacterToGlyphIndex = new Dictionary<char, int>();
-        public Dictionary<int, object> GlyphIndices = new Dictionary<int, object>();
+        public Dictionary<char, uint> CharacterToGlyphIndex = new Dictionary<char, uint>();
+        public Dictionary<uint, object> GlyphIndices = new Dictionary<uint, object>();
+        private Dictionary<char, List<char>> SurrogatePairs = new Dictionary<char, List<char>>();
     }
 }

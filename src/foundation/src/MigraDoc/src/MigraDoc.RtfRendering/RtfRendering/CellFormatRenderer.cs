@@ -27,7 +27,7 @@ namespace MigraDoc.RtfRendering
         {
             _useEffectiveValue = true;
             _coveringCell = _cellList.GetCoveringCell(_cell)!;
-            var borders = _cellList.GetEffectiveBorders(_coveringCell);
+            var borders = _cellList.GetEffectiveBordersRtf(_coveringCell);
             if (_cell.Column!.Index != _coveringCell.Column!.Index) // The "!" are needed here as some properties may be null if DOM objects are not added to a document.
                 return;
 

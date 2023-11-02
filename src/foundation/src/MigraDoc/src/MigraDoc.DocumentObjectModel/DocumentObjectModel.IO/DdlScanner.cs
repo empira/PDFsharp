@@ -607,8 +607,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                                 return false;
                             }
 
-                            //TODO NiSc
-                            //NYI
+                            //TODO NiSc NYI
                             //Check.NotImplemented("empty line at non-root level");
                         }
                         break;
@@ -743,7 +742,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                 string number = _token.Substring(2);
                 return Int32.Parse(number, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture);
             }
-            //TODO NiSc
+            //TODO NiSc Check?
             //Check.Assert(false);
             return 0;
         }
@@ -762,7 +761,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                 string number = _token.Substring(2);
                 return UInt32.Parse(number, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture);
             }
-            //TODO NiSc
+            //TODO NiSc Check.
             //Check.Assert(false);
             return 0;
         }
@@ -818,7 +817,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                         }
                         //else
                         //{
-                        //    //TODO NiSc
+                        //    //TOxDO NiSc NYI
                         //    //NYI: MacOS uses CR only
                         //    //Check.NotImplemented();
                         //}

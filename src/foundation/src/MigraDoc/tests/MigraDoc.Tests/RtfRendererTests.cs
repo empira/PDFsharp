@@ -26,9 +26,6 @@ namespace MigraDoc.Tests
         [Fact]
         public void Create_Hello_World_RtfRendererTests()
         {
-            //// TODO Register encoding here or in RtfDocumentRenderer?
-            //System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-
 #if CORE
             GlobalFontSettings.FontResolver = NewFontResolver.Get();
 #endif
@@ -176,8 +173,6 @@ namespace MigraDoc.Tests
 #if CORE
             GlobalFontSettings.FontResolver = NewFontResolver.Get();
 #endif
-            //// TODO Register encoding here or in RtfDocumentRenderer?
-            //System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
             var document = new Document();
 
@@ -589,10 +584,6 @@ namespace MigraDoc.Tests
 
         public void Create_Rtf_with_Image()
         {
-            //// TODO #warning empira Register this in RtfRenderer.
-            //// TODO Register encoding here or in RtfDocumentRenderer?
-            //System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-
 #if CORE
             GlobalFontSettings.FontResolver = NewFontResolver.Get();
 #endif
@@ -635,10 +626,6 @@ namespace MigraDoc.Tests
         [Fact]
         public void Create_Rtf_with_Embedded_Base64Image()
         {
-            //// TODO #warning empira Register this in RtfRenderer.
-            //// TODO Register encoding here or in RtfDocumentRenderer?
-            //System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-
 #if CORE
             GlobalFontSettings.FontResolver = NewFontResolver.Get();
 #endif
@@ -722,7 +709,6 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
             var logo = document.LastSection.AddImage(base64);
         }
 
-        // TODO 2023-05-23 Make tests for all three builds.
 #if !CORE
         // Not supported by Core build.
         [Theory]
@@ -751,10 +737,6 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
         [InlineData(@"Logo landscape 256.png")]
         public void Create_Rtf_with_Base64Image(string assetName)
         {
-            //// TODO #warning empira Register this in RtfRenderer.
-            //// TODO Register encoding here or in RtfDocumentRenderer?
-            //System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-
 #if CORE
             GlobalFontSettings.FontResolver = NewFontResolver.Get();
 #endif
@@ -804,6 +786,104 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
 
             //// ...and start a viewer.
             //PdfFileHelper.StartPdfViewerIfDebugging(filename);
+        }
+
+        [Fact]
+        public void Test_Heading_Border()
+        {
+#if CORE
+            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+#endif
+            var bottomWidth = Unit.FromPoint(2.3);
+            var bottomColor = Colors.Blue;
+            var rtfBottomString = "\\brdrs\\brdrw46\\brdrcf2";
+
+            var headingBottomWidth = Unit.FromPoint(4.6);
+            var headingBottomColor = Colors.Red;
+            var rtfHeadingBottomString = "\\brdrs\\brdrw92\\brdrcf3";
+
+            var document = new Document();
+            var section = document.AddSection();
+
+            var table = section.AddTable();
+            table.Borders.Bottom.Width = bottomWidth;
+            table.Borders.Bottom.Color = bottomColor;
+
+            table.AddColumn(Unit.FromCentimeter(16));
+
+            var headingRow = table.AddRow();
+            headingRow.HeadingFormat = true;
+            headingRow.Cells[0].AddParagraph("Heading");
+            headingRow.Borders.Bottom.Width = headingBottomWidth;
+            headingRow.Borders.Bottom.Color = headingBottomColor;
+
+            // Add 4 rows with a height forcing a page break after the first two rows.
+            for (var rowNr = 1; rowNr <= 4; rowNr++)
+            {
+                var row = table.AddRow();
+                row.Cells[0].AddParagraph($"Row {rowNr}");
+                row.Height = Unit.FromCentimeter(10);
+            }
+            
+            var rtfFilename = PdfFileHelper.CreateTempFileName("Test_Heading_Border") + ".rtf";
+            var rtfRenderer = new RtfDocumentRenderer();
+            rtfRenderer.Render(document, rtfFilename, Environment.CurrentDirectory);
+
+
+            // Analyze rendered RTF.
+            var rtf = File.ReadAllText(rtfFilename);
+
+            // Split by row identifier and skip the first part, which is no row.
+            var splitByRows = rtf.Split("\\trowd").Skip(1).ToArray();
+            splitByRows.Length.Should().Be(5, "as there are 5 rows");
+
+            // Get the part before the padding identifier, split it by border identifier and skip the first part, which is no border.
+            var rowsByBorders = splitByRows
+                .Select(row => row.Split("\\clpad").First()
+                    .Split("\\clbrdr").Skip(1).ToArray()
+                ).ToArray();
+            foreach (var borders in rowsByBorders)
+                borders.Length.Should().Be(4, "as there are 4 borders defined");
+            
+
+            // Heading row.
+            var rowBorderParts = rowsByBorders[0];
+
+            var topBorderPart = rowBorderParts[0];
+            topBorderPart.Should().StartWith("t", "first border should be top border");
+            topBorderPart.Length.Should().Be(1, "heading top border should not be defined and only contain the top identifier");
+
+            var bottomBorderPart = rowBorderParts[3];
+            bottomBorderPart.Should().StartWith("b", "last border should be bottom border");
+            bottomBorderPart[1..].Should().Be(rtfHeadingBottomString, "heading bottom border should be defined heading bottom border");
+
+
+            // Row 1.
+            rowBorderParts = rowsByBorders[1];
+
+            topBorderPart = rowBorderParts[0];
+            topBorderPart.Should().StartWith("t", "first border should be top border");
+            topBorderPart.Length.Should().Be(1, "row 1 top border should not be defined and only contain the top identifier, as the heading bottom border must not affect a content border," +
+                                                "to not copy heading border values when moving or inserting rows in RTF application.");
+
+            bottomBorderPart = rowBorderParts[3];
+            bottomBorderPart.Should().StartWith("b", "last border should be bottom border");
+            bottomBorderPart[1..].Should().Be(rtfBottomString, "row 1 bottom border should be defined content bottom border");
+
+            
+            // Row 2-4.
+            for (var r = 2; r < 5; r++)
+            {
+                rowBorderParts = rowsByBorders[r];
+
+                topBorderPart = rowBorderParts[0];
+                topBorderPart.Should().StartWith("t", "first border should be top border");
+                topBorderPart[1..].Should().Be(rtfBottomString, $"row {r} top border should be the defined content bottom border of the top neighbor row");
+
+                bottomBorderPart = rowBorderParts[3];
+                bottomBorderPart.Should().StartWith("b", "last border should be bottom border");
+                bottomBorderPart[1..].Should().Be(rtfBottomString, $"row {r} bottom border should be defined content bottom border");
+            }
         }
     }
 }

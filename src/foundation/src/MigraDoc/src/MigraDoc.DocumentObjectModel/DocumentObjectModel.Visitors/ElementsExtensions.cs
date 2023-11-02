@@ -112,7 +112,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 yield return element;
 
                 if (element == null) // Null elements have no children.
-                    continue; // BUG Or throw instead?
+                    continue;
 
                 var children = element.GetElementsRecursively(includeHeaderFooter);
                 foreach (var child in children)
@@ -135,7 +135,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             foreach (var element in elements)
             {
                 var type = element?.GetType();
-                var stop = type != null && stopAtElements.Contains(type); // BUG Or throw instead?
+                var stop = type != null && stopAtElements.Contains(type);
 
                 if (stop && !includeStoppingElements)
                     yield break;
@@ -146,7 +146,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                     yield break;
 
                 if (element == null) // Null elements have no children.
-                    continue; // BUG Or throw instead?
+                    continue;
 
                 var children = element.GetElementsRecursively(includeHeaderFooter);
                 foreach (var child in children)

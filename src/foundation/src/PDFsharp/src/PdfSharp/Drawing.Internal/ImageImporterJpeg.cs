@@ -2,6 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 using System;
+using System.Text;
 using PdfSharp.Pdf;
 
 namespace PdfSharp.Drawing.Internal
@@ -67,14 +68,9 @@ namespace PdfSharp.Drawing.Internal
             //var currentOffset = stream.CurrentOffset;
 
             bool header = TestJfifHeaderWorker(stream, ii) ||
-                          TestExifHeaderWorker(stream/*, ii*/);
+                          TestExifHeaderWorker(stream/*, ii*/) ||
+                          TestApp13HeaderWorker(stream);
 
-            //while (!header && MoveToNextHeader(stream))
-            //{
-            //    header = TestJfifHeaderWorker(stream, ii);
-            //}
-
-            //stream.CurrentOffset = currentOffset;
             return header;
         }
 
@@ -141,6 +137,41 @@ namespace PdfSharp.Drawing.Internal
                         // EXIF headers are similar to TIFF.
                         return true;
                     }
+                }
+            }
+            return false;
+        }
+
+        bool TestApp13HeaderWorker(StreamReaderHelper stream)
+        {
+            // Check for APP13 header.
+            if (stream.GetWord(0, true) == 0xffed)
+            {
+                int length = stream.GetWord(2, true);
+
+                StringBuilder identifier = new();
+                int idx = 4;
+                do
+                {
+                    byte c = stream.GetByte(idx);
+                    if (c == 0x00)
+                    {
+                        break;
+                    }
+                    identifier.Append((char)c);
+                    ++idx;
+                } while (idx < length);
+
+                var id = identifier.ToString();
+                if (!id.StartsWith("Photoshop ") && !id.StartsWith("Adobe_Photoshop")) // "Photoshop 3.0", "Adobe_Photoshop2.5:", etc.
+                {
+                    return false;
+                }
+
+                ++idx;
+                if (idx + 3 < length && stream.GetDWord(idx, true) == 0x3842494d) // 8BIM
+                {
+                    return true;
                 }
             }
             return false;

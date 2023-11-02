@@ -139,7 +139,7 @@ namespace MigraDoc.DocumentObjectModel
         /// Adds a text phrase to the formatted text.
         /// </summary>
         /// <param name="text">Content of the new text object.</param>
-        /// <returns>Returns a new Text object.</returns>
+        /// <returns>Returns a new Text object with the last element of text that was added.</returns>
         public Text AddText(string text)
             => Elements.AddText(text);
 

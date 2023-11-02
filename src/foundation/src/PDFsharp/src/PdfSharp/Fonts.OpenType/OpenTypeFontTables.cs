@@ -24,14 +24,18 @@ namespace PdfSharp.Fonts.OpenType
     /// </summary>
     enum WinEncodingId
     {
+#if true
         Symbol = 0,
         UnicodeUSC_2 = 1,
-        ShiftJIS = 2,
-        PRC = 3,
-        Big5 = 4,
-        Wansung = 5,
-        Johab = 6,
+        //ShiftJIS = 2,
+        //PRC = 3,
+        //Big5 = 4,
+        //Wansung = 5,
+        //Johab = 6,
         UnicodeUSC_4 = 10
+#else
+        Symbol, Unicode
+#endif
     }
 
     /// <summary>
@@ -249,10 +253,6 @@ namespace PdfSharp.Fonts.OpenType
 
                 version = _fontData.ReadUShort();
                 numTables = _fontData.ReadUShort();
-#if DEBUG_
-                if (_fontData.Name == "Cambria")
-                    Debug-Break.Break();
-#endif
 
                 bool success = false;
                 for (int idx = 0; idx < numTables; idx++)
@@ -265,26 +265,29 @@ namespace PdfSharp.Fonts.OpenType
 
                     // Just read Windows stuff.
                     if (platformId == PlatformId.Win &&
-                        (encodingId == WinEncodingId.Symbol || encodingId == WinEncodingId.UnicodeUSC_2
-                        || encodingId == WinEncodingId.UnicodeUSC_4))
+                        (encodingId == WinEncodingId.Symbol || 
+                         encodingId == WinEncodingId.UnicodeUSC_2 || 
+                         encodingId == WinEncodingId.UnicodeUSC_4))
                     {
                         symbol = encodingId == WinEncodingId.Symbol;
 
                         _fontData.Position = tableOffset + offset;
+
                         var format = _fontData.ReadUShort();
                         _fontData.Position = tableOffset + offset;
 
                         if (format == 4)
                         {
-                            cmap4 = new CMap4(_fontData, encodingId);
+                            cmap4 = new(_fontData, encodingId);
                         }
                         else if (format == 12)
                         {
-                            cmap12 = new CMap12(_fontData, encodingId);
-
+                            cmap12 = new(_fontData, encodingId);
                         }
+
                         _fontData.Position = currentPosition;
-                        // We have found what we are looking for, so break.
+
+                        // We have found what we are looking for, but we do not break as there may be another hit.
                         success = true;
                         //break;
                     }
@@ -755,7 +758,7 @@ namespace PdfSharp.Fonts.OpenType
         // UNDONE
         public const string Tag = TableTagNames.VMtx;
 
-        // code comes from HorizontalMetricsTable
+        // Code comes from HorizontalMetricsTable.
         public HorizontalMetrics[] metrics;
         public FWord[] leftSideBearing;
 
@@ -782,7 +785,7 @@ namespace PdfSharp.Fonts.OpenType
 
                     metrics = new HorizontalMetrics[numMetrics];
                     for (int idx = 0; idx < numMetrics; idx++)
-                        metrics[idx] = new HorizontalMetrics(_fontData);
+                        metrics[idx] = new(_fontData);
 
                     if (numLsbs > 0)
                     {
@@ -1167,7 +1170,7 @@ namespace PdfSharp.Fonts.OpenType
     /// <summary>
     /// This table contains a list of values that can be referenced by instructions.
     /// They can be used, among other things, to control characteristics for different glyphs.
-    /// The length of the table must be an integral number of FWORD units. 
+    /// The length of the table must be an integral number of FWORD units.
     /// </summary>
     class ControlValueTable : OpenTypeFontTable
     {
@@ -1202,7 +1205,7 @@ namespace PdfSharp.Fonts.OpenType
     /// <summary>
     /// This table is similar to the CVT Program, except that it is only run once, when the font is first used.
     /// It is used only for FDEFs and IDEFs. Thus the CVT Program need not contain function definitions.
-    /// However, the CVT Program may redefine existing FDEFs or IDEFs. 
+    /// However, the CVT Program may redefine existing FDEFs or IDEFs.
     /// </summary>
     class FontProgram : OpenTypeFontTable
     {
@@ -1235,10 +1238,10 @@ namespace PdfSharp.Fonts.OpenType
     }
 
     /// <summary>
-    /// The Control Value Program consists of a set of TrueType instructions that will be executed whenever the font or 
+    /// The Control Value Program consists of a set of TrueType instructions that will be executed whenever the font or
     /// point size or transformation matrix change and before each glyph is interpreted. Any instruction is legal in the
     /// CVT Program but since no glyph is associated with it, instructions intended to move points within a particular
-    /// glyph outline cannot be used in the CVT Program. The name 'prep' is anachronistic. 
+    /// glyph outline cannot be used in the CVT Program. The name 'prep' is anachronistic.
     /// </summary>
     class ControlValueProgram : OpenTypeFontTable
     {
@@ -1261,7 +1264,7 @@ namespace PdfSharp.Fonts.OpenType
                 int length = DirectoryEntry.Length;
                 bytes = new byte[length];
                 for (int idx = 0; idx < length; idx++)
-                    bytes[idx] = _fontData!.ReadByte();  // NRT
+                    bytes[idx] = _fontData!.ReadByte(); // NRT
             }
             catch (Exception ex)
             {
@@ -1272,7 +1275,7 @@ namespace PdfSharp.Fonts.OpenType
 
     /// <summary>
     /// This table contains information that describes the glyphs in the font in the TrueType outline format.
-    /// Information regarding the rasterizer (scaler) refers to the TrueType rasterizer. 
+    /// Information regarding the rasterizer (scaler) refers to the TrueType rasterizer.
     /// </summary>
     class GlyphSubstitutionTable : OpenTypeFontTable
     {

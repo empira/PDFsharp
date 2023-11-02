@@ -74,7 +74,7 @@ namespace PdfSharp.Tests
 
             //var imagePath = @"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\bmp\BlackwhiteA.bmp"; // OK
             //var imagePath = @"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\bmp\BlackwhiteA2.bmp"; // OK
-            var imagePath = @"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\bmp\BlackwhiteTXT.bmp"; // OK
+            //var imagePath = @"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\bmp\BlackwhiteTXT.bmp"; // OK
             //var imagePath = @"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\bmp\Color4A.bmp"; // OK
             //var imagePath = @"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\bmp\Color8A.bmp"; // OK
             //var imagePath = @"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\bmp\GrayscaleA.bmp"; // OK
@@ -100,6 +100,8 @@ namespace PdfSharp.Tests
             //var imagePath = @"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\MigraDoc.png"; // ARGB32
             //var imagePath = @"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\Logo landscape.png"; // RGB24
             //var imagePath = @"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\Logo landscape 256.png"; // Palette8
+
+            var imagePath = @"..\..\..\..\..\..\..\..\..\assets\pdfsharp-6.x\images\jpeg\extern\Zoo_JPEG_8BIM.jpg"; // OK
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 imagePath = imagePath.Replace('\\', '/');

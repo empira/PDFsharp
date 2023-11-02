@@ -111,10 +111,10 @@ namespace MigraDoc.DocumentObjectModel
             else if (font.Values.Superscript is not null)
                 Superscript = font.Superscript;
 
-            if (Values.Underline is not null)
+            if (font.Values.Underline is not null)
                 Underline = font.Underline;
 
-            if (!Values.Color.IsValueNullOrEmpty())
+            if (!font.Values.Color.IsValueNullOrEmpty())
                 Color = font.Color;
         }
 

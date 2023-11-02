@@ -276,7 +276,7 @@ namespace PdfSharp.Pdf.Advanced
 
         /// <summary>
         /// Check whether a resource name is already used in the context of this resource dictionary.
-        /// PDF4NET uses GUIDs as resource names, but I think this weapon is to heavy.
+        /// PDF4NET uses GUIDs as resource names, but I think this weapon is too heavy.
         /// </summary>
         internal bool ExistsResourceName(string name)
         {

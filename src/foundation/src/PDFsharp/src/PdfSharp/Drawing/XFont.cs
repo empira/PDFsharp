@@ -462,7 +462,7 @@ namespace PdfSharp.Drawing
         [Browsable(false)]
         public XFontFamily FontFamily => GlyphTypeface.FontFamily;
 
-        // TODO
+        // TODO XFont.Name
         /// <summary>
         /// WRONG: Gets the face name of this Font object.
         /// Indeed, it returns the font family name.

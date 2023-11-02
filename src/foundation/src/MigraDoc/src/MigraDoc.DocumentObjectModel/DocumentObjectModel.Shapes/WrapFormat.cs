@@ -81,7 +81,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         internal override void Serialize(Serializer serializer)
         {
             if (IsNull())
-                return; // BUG??? Not detected by the caller anymore.
+                return; // IsNull called here so callers must not make this check.
 
             var pos = serializer.BeginContent("WrapFormat");
             if (Values.Style is not null)

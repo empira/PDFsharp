@@ -11,7 +11,7 @@ namespace PdfSharp.Snippets.Font
     // BUG HACK
 
     /// <summary>
-    /// Maps font requests for a SegoeWP font to a bunch of 6 specific font files. These 6 fonts are embedded as resources in the WPFonts assembly.
+    /// Maps font requests for a Segoe WP, Segoe UI, or any other font to a bunch of 6 specific font files. These 6 fonts are embedded as resources in the WPFonts assembly.
     /// </summary>
     public class SegoeUiFontResolver : IFontResolver
     {

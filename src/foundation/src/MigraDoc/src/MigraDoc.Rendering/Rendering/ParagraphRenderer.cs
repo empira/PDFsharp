@@ -199,11 +199,11 @@ namespace MigraDoc.Rendering
             var iter = new ParagraphIterator(_paragraph.Elements);
             iter = iter.GetFirstLeaf();
 
-            bool ignoreBlank = true;
-            string title = "";
+            var ignoreBlank = true;
+            var title = "";
             while (iter != null)
             {
-                DocumentObject current = iter.Current;
+                var current = iter.Current;
                 if (!ignoreBlank && (IsBlank(current) || IsTab(current) || IsLineBreak(current)))
                 {
                     title += " ";
@@ -224,9 +224,6 @@ namespace MigraDoc.Rendering
                     title += GetSymbol((Character)current);
                     ignoreBlank = false;
                 }
-
-                if (title.Length > 64)
-                    break;
                 iter = iter.GetNextLeaf();
             }
             return title;
@@ -1485,6 +1482,9 @@ namespace MigraDoc.Rendering
             if (formatInfo.IsEnding && lastResult != FormatResult.NewLine)
                 StoreLineInformation();
 
+            if (formatInfo.IsEnding)
+                StoreBottomBorderInformation();
+
             formatInfo.ImageRenderInfos = _imageRenderInfos;
             FinishLayoutInfo();
         }
@@ -2239,14 +2239,6 @@ namespace MigraDoc.Rendering
             else
                 contentArea = contentArea.Unite(_formattingArea.GetFittingRect(_currentYPosition, _currentVerticalInfo.Height) ?? NRT.ThrowOnNull<Rectangle>());
 
-            XUnit bottomBorderOffset = BottomBorderOffset;
-            if (bottomBorderOffset > 0)
-            {
-                if (contentArea is null)
-                    NRT.ThrowOnNull();
-                contentArea = contentArea.Unite(_formattingArea.GetFittingRect(_currentYPosition + _currentVerticalInfo.Height, bottomBorderOffset) ?? NRT.ThrowOnNull<Rectangle>());
-            }
-
             var lineInfo = new LineInfo();
             lineInfo.Vertical = _currentVerticalInfo;
 
@@ -2274,6 +2266,20 @@ namespace MigraDoc.Rendering
             _savedWordWidth = 0;
             _reMeasureLine = false;
             ((ParagraphFormatInfo)_renderInfo.FormatInfo).AddLineInfo(lineInfo);
+        }
+
+        /// <summary>
+        /// Adds the BottomBorderOffset to the ContentArea. This should only be called for the last line of a paragraph.
+        /// </summary>
+        void StoreBottomBorderInformation()
+        {
+            var contentArea = _renderInfo.LayoutInfo.ContentArea;
+
+            var bottomBorderOffset = BottomBorderOffset;
+            if (bottomBorderOffset > 0)
+                contentArea = contentArea.Unite(_formattingArea.GetFittingRect(_currentYPosition + _currentVerticalInfo.Height, bottomBorderOffset) ?? NRT.ThrowOnNull<Rectangle>());
+            
+            _renderInfo.LayoutInfo.ContentArea = contentArea;
         }
 
         /// <summary>
