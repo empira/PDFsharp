@@ -4,6 +4,7 @@
 using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Utilities.Collections;
+using System.Security.Cryptography;
 #if WPF
 using System.IO;
 #endif
@@ -34,7 +35,7 @@ namespace PdfSharp.Pdf.Signatures
             CmsSignedDataGenerator signedDataGenerator = new CmsSignedDataGenerator();
 
             var cert = DotNetUtilities.FromX509Certificate(Certificate);
-            var key = DotNetUtilities.GetKeyPair(Certificate.PrivateKey);
+            var key = DotNetUtilities.GetKeyPair(GetAsymmetricAlgorithm(Certificate));
             var allCerts = CertificateChain.OfType<X509Certificate2>().Select(item => DotNetUtilities.FromX509Certificate(item));
 
             var store = CollectionUtilities.CreateStore(allCerts);
@@ -66,6 +67,21 @@ namespace PdfSharp.Pdf.Signatures
                 default:
                     return CmsSignedDataGenerator.DigestSha256; // SHA1 is obsolete, use at least SHA256
             }
+        }
+
+        private AsymmetricAlgorithm? GetAsymmetricAlgorithm(X509Certificate2 cert)
+        {
+            const String RSA = "1.2.840.113549.1.1.1";
+            const String DSA = "1.2.840.10040.4.1";
+            const String ECC = "1.2.840.10045.2.1";
+
+            return cert.PublicKey.Oid.Value switch
+            {
+                RSA => cert.GetRSAPrivateKey(),
+                DSA => cert.GetDSAPrivateKey(),
+                ECC => cert.GetECDsaPrivateKey(),
+                _ => throw new NotImplementedException(),
+            };
         }
     }
 }
