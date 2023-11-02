@@ -265,7 +265,7 @@ namespace PdfSharp.Fonts.OpenType
         /// See OpenType spec "cmap - Character To Glyph Index Mapping Table / Format 4: Segment mapping to delta values"
         /// for details about this a little bit strange looking algorithm.
         /// </summary>
-        public uint CharCodeToGlyphIndex(char value)
+        public int CharCodeToGlyphIndex(char value)
         {
             //try
             //{
@@ -284,7 +284,7 @@ namespace PdfSharp.Fonts.OpenType
                 return 0;
 
             if (cmap.idRangeOffs[seg] == 0)
-                return (value + (uint)cmap.idDelta[seg]) & 0xFFFF;
+                return (value + cmap.idDelta[seg]) & 0xFFFF;
 
             int idx = cmap.idRangeOffs[seg] / 2 + (value - cmap.startCount[seg]) - (segCount - seg);
             Debug.Assert(idx >= 0 && idx < cmap.glyphCount);
@@ -292,7 +292,7 @@ namespace PdfSharp.Fonts.OpenType
             if (cmap.glyphIdArray[idx] == 0)
                 return 0;
 
-            return (cmap.glyphIdArray[idx] + (uint)cmap.idDelta[seg]) & 0xFFFF;
+            return (cmap.glyphIdArray[idx] + cmap.idDelta[seg]) & 0xFFFF;
 
             //}
             //catch
@@ -393,7 +393,7 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// Converts the width of a glyph identified by its index to PDF design units.
         /// </summary>
-        public int GlyphIndexToPdfWidth(uint glyphIndex)
+        public int GlyphIndexToPdfWidth(int glyphIndex)
         {
             try
             {
@@ -402,7 +402,7 @@ namespace PdfSharp.Fonts.OpenType
 
                 // glyphIndex >= numberOfHMetrics means the font is mono-spaced and all glyphs have the same width
                 if (glyphIndex >= numberOfHMetrics)
-                    glyphIndex = numberOfHMetrics - (uint)1;
+                    glyphIndex = numberOfHMetrics - 1;
 
                 int width = FontFace.hmtx.Metrics[glyphIndex].advanceWidth;
 
@@ -453,11 +453,11 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// Converts the width of a glyph identified by its index to PDF design units.
         /// </summary>
-        public int GlyphIndexToWidth(uint glyphIndex)
+        public int GlyphIndexToWidth(int glyphIndex)
         {
             try
             {
-                uint numberOfHMetrics = FontFace.hhea.numberOfHMetrics;
+                var numberOfHMetrics = FontFace.hhea.numberOfHMetrics;
 
                 // glyphIndex >= numberOfHMetrics means the font is mono-spaced and all glyphs have the same width
                 if (glyphIndex >= numberOfHMetrics)

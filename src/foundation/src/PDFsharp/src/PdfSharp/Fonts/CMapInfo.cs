@@ -108,9 +108,9 @@ namespace PdfSharp.Fonts
             }
         }
 
-        public uint[] GetGlyphIndices()
+        public int[] GetGlyphIndices()
         {
-            uint[] indices = new uint[GlyphIndices.Count];
+            var indices = new int[GlyphIndices.Count];
             GlyphIndices.Keys.CopyTo(indices, 0);
             Array.Sort(indices);
             return indices;
@@ -118,8 +118,7 @@ namespace PdfSharp.Fonts
 
         public char MinChar = Char.MaxValue;
         public char MaxChar = Char.MinValue;
-        public Dictionary<char, uint> CharacterToGlyphIndex = new Dictionary<char, uint>();
-        public Dictionary<uint, object> GlyphIndices = new Dictionary<uint, object>();
-        private Dictionary<char, List<char>> SurrogatePairs = new Dictionary<char, List<char>>();
+        public Dictionary<char, int> CharacterToGlyphIndex = new();
+        public Dictionary<int, object> GlyphIndices = new();
     }
 }
