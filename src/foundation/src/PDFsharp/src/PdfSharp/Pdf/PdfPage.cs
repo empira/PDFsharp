@@ -509,7 +509,7 @@ namespace PdfSharp.Pdf
             if (fileSpecification.Reference == null)
                 Owner.Internals.AddObject(fileSpecification);
 
-            var annotation = PdfFileAttachmentAnnotation.CreateFileAttachmentAnnotation(rect, fileSpecification);
+            var annotation = PdfFileAttachmentAnnotation.CreateFileAttachmentAnnotation(rect);
             Annotations.Add(annotation);
             annotation.Elements.SetReference(PdfFileAttachmentAnnotation.Keys.FS, fileSpecification.ReferenceNotNull);
             return annotation;
@@ -526,7 +526,7 @@ namespace PdfSharp.Pdf
             var fileSpecification = new PdfFileSpecification(Owner, fileStream, fileName);
             Owner.Internals.AddObject(fileSpecification);
 
-            var annotation = PdfFileAttachmentAnnotation.CreateFileAttachmentAnnotation(rect, fileSpecification);
+            var annotation = PdfFileAttachmentAnnotation.CreateFileAttachmentAnnotation(rect);
             Annotations.Add(annotation);
             annotation.Elements.SetReference(PdfFileAttachmentAnnotation.Keys.FS, fileSpecification.ReferenceNotNull);
             return annotation;

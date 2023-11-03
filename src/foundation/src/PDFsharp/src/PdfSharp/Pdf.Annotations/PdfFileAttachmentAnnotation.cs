@@ -1,4 +1,4 @@
-﻿// PDFsharp - A .NET library for processing PDF
+// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
@@ -38,11 +38,11 @@ namespace PdfSharp.Pdf.Annotations
         /// <summary>
         /// Creates a file attachment annotation.
         /// </summary>
-        public static PdfFileAttachmentAnnotation CreateFileAttachmentAnnotation(PdfRectangle rect, PdfFileSpecification fileSpecification)
+        public static PdfFileAttachmentAnnotation CreateFileAttachmentAnnotation(PdfRectangle rectangle)
         {
             var annot = new PdfFileAttachmentAnnotation
             {
-                Rectangle = rect,
+                Rectangle = rectangle,
             };
             return annot;
         }
@@ -57,15 +57,17 @@ namespace PdfSharp.Pdf.Annotations
                 string value = Elements.GetName(Keys.Name);
                 if (value == "")
                     return PdfFileAttachmentAnnotationIcon.NoIcon;
+
                 value = value.Substring(1);
                 if (!Enum.IsDefined(typeof(PdfFileAttachmentAnnotationIcon), value))
                     return PdfFileAttachmentAnnotationIcon.NoIcon;
+                
                 return (PdfFileAttachmentAnnotationIcon)Enum.Parse(typeof(PdfFileAttachmentAnnotationIcon), value, false);
             }
             set
             {
-                if (Enum.IsDefined(typeof(PdfFileAttachmentAnnotationIcon), value) &&
-                  PdfFileAttachmentAnnotationIcon.NoIcon != value)
+                if (value != PdfFileAttachmentAnnotationIcon.NoIcon &&
+                    Enum.IsDefined(typeof(PdfFileAttachmentAnnotationIcon), value))
                 {
                     Elements.SetName(Keys.Name, "/" + value.ToString());
                 }
@@ -74,14 +76,14 @@ namespace PdfSharp.Pdf.Annotations
             }
         }
 
-        public IAnnotationAppearanceHandler CustomAppearanceHandler { get; set; }
+        public IAnnotationAppearanceHandler? CustomAppearanceHandler { get; set; }
 
         /// <summary>
         /// Creates the custom appearance form X object for this annotation
         /// </summary>
         public void RenderCustomAppearance()
         {
-            var visible = !(Rectangle.X1 + Rectangle.X2 + Rectangle.Y1 + Rectangle.Y2 == 0);
+            var visible = (Rectangle.X1 + Rectangle.X2 + Rectangle.Y1 + Rectangle.Y2) != 0;
 
             if (!visible)
                 return;
@@ -89,7 +91,7 @@ namespace PdfSharp.Pdf.Annotations
             if (CustomAppearanceHandler == null)
                 throw new Exception("AppearanceHandler is null");
 
-            XForm form = new XForm(_document, Rectangle.Size);
+            XForm form = new(_document, Rectangle.Size);
             XGraphics gfx = XGraphics.FromForm(form);
 
             CustomAppearanceHandler.DrawAppearance(gfx, Rectangle.ToXRect());
