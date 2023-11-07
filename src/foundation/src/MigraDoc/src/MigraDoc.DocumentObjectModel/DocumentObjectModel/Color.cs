@@ -357,9 +357,7 @@ namespace MigraDoc.DocumentObjectModel
                             var r = color[1..2];
                             var g = color[2..3];
                             var b = color[3..4];
-                            number = "ff" + color.Substring(1, 1) + color.Substring(1, 1) +
-                                     color.Substring(2, 1) + color.Substring(2, 1) +
-                                     color.Substring(3, 1) + color.Substring(3, 1);
+                            number = "ff" + r + r + g + g + b + b;
                             break;
                         default:
                             throw new ArgumentException(DomSR.InvalidColorString(color), nameof(color));
@@ -434,7 +432,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public Color GetMixedTransparencyColor()
         {
-            // Think of Empty a the neutral element.
+            // Think of Empty as the neutral element.
             if (IsEmpty)
                 return this;
 
