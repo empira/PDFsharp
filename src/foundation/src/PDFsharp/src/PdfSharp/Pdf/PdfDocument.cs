@@ -298,7 +298,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Saves the document to the specified stream.
         /// The stream is not closed by this function.
-        /// (Older versions of PDFsharp closes the stream. That was not very useful.)
+        /// (Older versions of PDFsharp close the stream. That was not very useful.)
         /// </summary>
         public void Save(Stream stream)
             => Save(stream, false);
@@ -496,19 +496,19 @@ namespace PdfSharp.Pdf
 
         /// <summary>
         /// Adjusts the version if the current version is lower than the required version.
+        /// Version is not adjusted for inconsistent files in ReadOnly mode.
         /// </summary>
         /// <param name="requiredVersion">The minimum version number to set version to.</param>
         /// <returns>True, if Version was modified.</returns>
         public bool SetRequiredVersion(int requiredVersion)
         {
-            if (requiredVersion > Version)
+            if (requiredVersion > Version && CanModify)
             {
                 Version = requiredVersion;
                 return true;
             }
 
             return false;
-
         }
 
         /// <summary>
