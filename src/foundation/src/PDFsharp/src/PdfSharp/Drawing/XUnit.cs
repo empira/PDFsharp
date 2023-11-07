@@ -322,7 +322,7 @@ namespace PdfSharp.Drawing
 
             try
             {
-                unit.Value = Double.Parse(value[..valLen].Trim(), CultureInfo.InvariantCulture);
+                unit.Value = Double.Parse(value.Substring(0, valLen).Trim(), CultureInfo.InvariantCulture);
             }
             catch (Exception ex)
             {
@@ -331,7 +331,7 @@ namespace PdfSharp.Drawing
                 throw new ArgumentException(message, ex);
             }
 
-            string typeStr = value[valLen..].Trim().ToLower();
+            string typeStr = string.Join(string.Empty, value.Skip(valLen)).Trim().ToLower();
             unit.Type = XGraphicsUnit.Point;
             unit.Type = typeStr switch
             {

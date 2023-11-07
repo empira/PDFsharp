@@ -413,10 +413,10 @@ namespace PdfSharp.Drawing
             string name = DisplayName;
             int ich = name.IndexOf("bold", StringComparison.OrdinalIgnoreCase);
             if (ich > 0)
-                name = name[..ich] + name.Substring(ich + 4, name.Length - ich - 4);
+                name = name.Substring(0, ich) + name.Substring(ich + 4, name.Length - ich - 4);
             ich = name.IndexOf("italic", StringComparison.OrdinalIgnoreCase);
             if (ich > 0)
-                name = name[..ich] + name.Substring(ich + 6, name.Length - ich - 6);
+                name = name.Substring(0, ich) + name.Substring(ich + 6, name.Length - ich - 6);
             //name = name.Replace(" ", "");
             name = name.Trim();
             name += GetFaceNameSuffix();

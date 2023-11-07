@@ -1,4 +1,4 @@
-#if !NET_ZIP
+#if !NET_ZIP || !NET6_0_OR_GREATER
 // Adler32.cs - Computes Adler32 data checksum of a data stream
 // Copyright (C) 2001 Mike Krueger
 //

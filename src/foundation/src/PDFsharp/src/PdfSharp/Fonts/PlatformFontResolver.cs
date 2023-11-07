@@ -346,12 +346,25 @@ namespace PdfSharp.Fonts
     /// <seealso cref="PdfSharp.Fonts.IFontResolver" />
     internal class EvenNewerFontResolver : IFontResolver
     {
-        internal record TypefaceInfo(
-            string TypefaceName,
-            string FileName,
-            string LinuxFileName = "",
-            params string[] LinuxSubstituteFaceNames)
-        { }
+        internal class/*record*/ TypefaceInfo
+        {
+            public string TypefaceName { get; private set; }
+            public string FileName { get; private set; }
+            public string LinuxFileName { get; private set; }
+            public string[] LinuxSubstituteFaceNames { get; private set; }
+
+            internal TypefaceInfo(
+            string typefaceName,
+            string fileName,
+            string linuxFileName = "",
+            params string[] linuxSubstituteFaceNames)
+            {
+                TypefaceName = typefaceName;
+                FileName = fileName;
+                LinuxFileName = linuxFileName;
+                LinuxSubstituteFaceNames = linuxSubstituteFaceNames;
+            }
+        }
 
         internal static readonly List<TypefaceInfo> TypefaceInfos = new()
         {
@@ -441,10 +454,10 @@ namespace PdfSharp.Fonts
             var baseFamily = TypefaceInfos.FirstOrDefault();
 
             if (isBold)
-                typefaces = typefaces.Where(f => f.TypefaceName.Contains("bold", StringComparison.OrdinalIgnoreCase) || f.TypefaceName.Contains("heavy", StringComparison.OrdinalIgnoreCase));
+                typefaces = typefaces.Where(f => f.TypefaceName.IndexOf("bold", StringComparison.OrdinalIgnoreCase) > 0 || f.TypefaceName.IndexOf("heavy", StringComparison.OrdinalIgnoreCase) > 0);
 
             if (isItalic)
-                typefaces = typefaces.Where(f => f.TypefaceName.Contains("italic", StringComparison.OrdinalIgnoreCase) || f.TypefaceName.Contains("oblique", StringComparison.OrdinalIgnoreCase));
+                typefaces = typefaces.Where(f => f.TypefaceName.IndexOf("italic", StringComparison.OrdinalIgnoreCase) > 0 || f.TypefaceName.IndexOf("oblique", StringComparison.OrdinalIgnoreCase) > 0);
 
             var family = typefaces.FirstOrDefault();
             if (family is not null)

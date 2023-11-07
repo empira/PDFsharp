@@ -18,17 +18,24 @@
         <repository type="git" url="https://github.com/empira/PDFsharp" branch="master" commit="" />
         <title>$title$</title>
         <dependencies>
-            <group targetFramework="net6.0">
+            <group targetFramework="netstandard2.0">
               <dependency id="Microsoft.Extensions.Logging" version="6.0.0" />
               <dependency id="Microsoft.Extensions.Logging.Console" version="6.0.0" />
             </group>
+            <group targetFramework="net6.0">
+                <dependency id="Microsoft.Extensions.Logging" version="6.0.0" />
+                <dependency id="Microsoft.Extensions.Logging.Console" version="6.0.0" />
+            </group>
         </dependencies>
         <frameworkReferences>
+            <group targetFramework="netstandard2.0">
+            </group>
             <group targetFramework="net6.0">
             </group>
         </frameworkReferences>
     </metadata>
     <files>
+        <file src="bin\$config$\netstandard2.0\**\*.*" target="lib\netstandard2.0\" exclude="**\*NuGet*"/>
         <file src="bin\$config$\net6.0\**\*.*" target="lib\net6.0\" exclude="**\*NuGet*"/>
         <file src="README.md" />
         <file src="..\..\..\..\..\assets\pdfsharp\images\PDFsharp-128x128.png" target="images\" />

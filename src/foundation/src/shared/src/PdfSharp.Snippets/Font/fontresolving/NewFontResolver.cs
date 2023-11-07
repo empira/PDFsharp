@@ -36,12 +36,25 @@ namespace PdfSharp.Snippets.Font
         }
 #endif
 
-        public record Family(
-            string FamilyName,
-            string FaceName,
-            string LinuxFaceName = "",
-            params string[] LinuxSubstituteFamilyNames)
-        { }
+        public class Family 
+        {
+            public string FamilyName;
+            public string FaceName;
+            public string LinuxFaceName;
+            public string[] LinuxSubstituteFamilyNames;
+
+            public Family(
+            string familyName,
+            string faceName,
+            string linuxFaceName = "",
+            params string[] linuxSubstituteFamilyNames)
+            {
+                this.FamilyName = familyName;
+                this.FaceName = faceName;
+                this.LinuxFaceName = linuxFaceName;
+                this.LinuxSubstituteFamilyNames = linuxSubstituteFamilyNames;
+            }
+        }
 
         public static readonly List<Family> Families;
 

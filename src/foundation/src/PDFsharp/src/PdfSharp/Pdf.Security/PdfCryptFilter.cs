@@ -218,12 +218,12 @@ namespace PdfSharp.Pdf.Security
         void SetCryptFilterMethod(CryptFilterMethod cryptFilterMethod)
         {
             _cryptFilterMethod = cryptFilterMethod;
-            Elements.SetName(Keys.CFM, Enum.GetName(cryptFilterMethod) ?? throw TH.InvalidOperationException_InvalidCryptFilterMethod());
+            Elements.SetName(Keys.CFM, Enum.GetName(typeof(CryptFilterMethod), cryptFilterMethod) ?? throw TH.InvalidOperationException_InvalidCryptFilterMethod());
         }
 
         CryptFilterMethod GetCryptFilterMethod()
         {
-            _cryptFilterMethod ??= Enum.Parse<CryptFilterMethod>(PdfName.RemoveSlash(Elements.GetName(Keys.CFM)));
+            _cryptFilterMethod ??= (CryptFilterMethod)Enum.Parse(typeof(CryptFilterMethod), PdfName.RemoveSlash(Elements.GetName(Keys.CFM)));
             return _cryptFilterMethod ?? CryptFilterMethod.None;
         }
         

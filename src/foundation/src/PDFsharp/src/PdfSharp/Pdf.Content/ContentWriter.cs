@@ -65,7 +65,7 @@ namespace PdfSharp.Pdf.Content
             //AppendBlank(rawString[0]);
             byte[] bytes = PdfEncoders.RawEncoding.GetBytes(rawString);
             _stream?.Write(bytes, 0, bytes.Length);
-            _lastCat = GetCategory((char)bytes[^1]);
+            _lastCat = GetCategory((char)bytes[bytes.Length-1]);
         }
 
         public void WriteLineRaw(string rawString)
@@ -76,7 +76,7 @@ namespace PdfSharp.Pdf.Content
             byte[] bytes = PdfEncoders.RawEncoding.GetBytes(rawString);
             _stream?.Write(bytes, 0, bytes.Length);
             _stream?.Write(new byte[] { (byte)'\n' }, 0, 1);
-            _lastCat = GetCategory((char)bytes[^1]);
+            _lastCat = GetCategory((char)bytes[bytes.Length-1]);
         }
 
         public void WriteRaw(char ch)

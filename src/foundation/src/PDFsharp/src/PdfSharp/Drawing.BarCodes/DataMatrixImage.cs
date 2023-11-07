@@ -229,9 +229,9 @@ namespace PdfSharp.Drawing.BarCodes
                                     output[p++] = (char)1;
                                     output[p++] = (char)30;
                                 }
-                                w = e.IndexOf(c, StringComparison.Ordinal) == -1 ? (char)0 : e[e.IndexOf(c, StringComparison.Ordinal)];
+                                w = e.IndexOf(c.ToString(), StringComparison.Ordinal) == -1 ? (char)0 : e[e.IndexOf(c.ToString(), StringComparison.Ordinal)];
                                 if (w != (char)0)
-                                    output[p++] = (char)((e.IndexOf(w, StringComparison.Ordinal) + 3) % 40);
+                                    output[p++] = (char)((e.IndexOf(w.ToString(), StringComparison.Ordinal) + 3) % 40);
                                 else
                                 {
                                     if (newenc == 'x')
@@ -246,7 +246,7 @@ namespace PdfSharp.Drawing.BarCodes
                                     }
                                     else
                                     {
-                                        w = s2.IndexOf(c, StringComparison.Ordinal) == -1 ? (char)0 : (char)s2.IndexOf(c, StringComparison.Ordinal);
+                                        w = s2.IndexOf(c.ToString(), StringComparison.Ordinal) == -1 ? (char)0 : (char)s2.IndexOf(c.ToString(), StringComparison.Ordinal);
                                         if (w != (char)0)
                                         {          // shift 2
                                             output[p++] = (char)1;
@@ -254,7 +254,7 @@ namespace PdfSharp.Drawing.BarCodes
                                         }
                                         else
                                         {
-                                            w = s3.IndexOf(c, StringComparison.Ordinal) == -1 ? (char)0 : (char)s3.IndexOf(c, StringComparison.Ordinal);
+                                            w = s3.IndexOf(c.ToString(), StringComparison.Ordinal) == -1 ? (char)0 : (char)s3.IndexOf(c.ToString(), StringComparison.Ordinal);
                                             if (w != (char)0)
                                             {
                                                 output[p++] = (char)2;

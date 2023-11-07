@@ -615,8 +615,8 @@ namespace PdfSharp.Pdf.IO
         // Phase 2: deal with UTF-16BE if necessary.
         // UTF-16BE Unicode strings start with U+FEFF ("þÿ"). There can be empty strings with UTF-16BE prefix.
         Phase2:
-            //if (_token.Length >= 2 && _token[0] == '\xFE' && _token[1] == '\xFF')
-            if (_token is ['\xFE', '\xFF', ..])
+            if (_token.Length >= 2 && _token[0] == '\xFE' && _token[1] == '\xFF')
+            //if (_token is ['\xFE', '\xFF', ..])
             {
                 // Combine two ANSI characters to get one Unicode character.
                 var temp = new StringBuilder(_token.ToString());
@@ -636,8 +636,8 @@ namespace PdfSharp.Pdf.IO
                 return _symbol = Symbol.UnicodeString;
             }
             // Adobe Reader also supports UTF-16LE.
-            //if (_token.Length >= 2 && _token[0] == '\xFF' && _token[1] == '\xFE')
-            if (_token is ['\xFF', '\xFE', ..])
+            if (_token.Length >= 2 && _token[0] == '\xFF' && _token[1] == '\xFE')
+            //if (_token is ['\xFF', '\xFE', ..])
             {
                 // Combine two ANSI characters to get one Unicode character.
                 var temp = new StringBuilder(_token.ToString());

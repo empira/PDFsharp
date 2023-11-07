@@ -1,4 +1,4 @@
-#if !NET_ZIP
+#if !NET_ZIP || !NET6_0_OR_GREATER
 // IChecksum.cs - Interface to compute a data checksum
 // Copyright (C) 2001 Mike Krueger
 //

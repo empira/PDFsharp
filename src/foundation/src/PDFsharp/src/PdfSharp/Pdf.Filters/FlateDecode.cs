@@ -2,7 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.IO;
-#if NET_ZIP
+#if NET_ZIP && NET6_0_OR_GREATER
 using System.IO.Compression;
 #else
 using PdfSharp.SharpZipLib.Zip.Compression;
@@ -34,12 +34,12 @@ namespace PdfSharp.Pdf.Filters
         {
             var ms = new MemoryStream();
 
-#if NET_ZIP
+#if NET_ZIP && NET6_0_OR_GREATER
             CompressionLevel level;
             switch (mode)
             {
                 case PdfFlateEncodeMode.BestCompression:
-                    level = CompressionLevel.SmallestSize;
+                    level = CompressionLevel.Optimal;
                     break;
                 case PdfFlateEncodeMode.BestSpeed:
                     level = CompressionLevel.Fastest;
@@ -143,7 +143,7 @@ namespace PdfSharp.Pdf.Filters
         {
             var msInput = new MemoryStream(data);
             var msOutput = new MemoryStream();
-#if NET_ZIP
+#if NET_ZIP && NET6_0_OR_GREATER
             // ReSharper disable once RedundantAssignment
             var header = new byte[]
             {

@@ -46,7 +46,7 @@ namespace PdfSharp.Drawing.BarCodes
         /// <param name="ch">The character to represent.</param>
         static bool[] ThickThinLines(char ch)
         {
-            return Lines["0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%*".IndexOf(ch, StringComparison.Ordinal)];
+            return Lines["0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%*".IndexOf(ch.ToString(), StringComparison.Ordinal)];
         }
 
         static readonly bool[][] Lines =
@@ -177,7 +177,7 @@ namespace PdfSharp.Drawing.BarCodes
 
             foreach (char ch in text)
             {
-                if ("0123456789ABCDEFGHIJKLMNOP'QRSTUVWXYZ-. $/+%*".IndexOf(ch, StringComparison.Ordinal) < 0)
+                if ("0123456789ABCDEFGHIJKLMNOP'QRSTUVWXYZ-. $/+%*".IndexOf(ch.ToString(), StringComparison.Ordinal) < 0)
                     throw new ArgumentException(BcgSR.Invalid3Of9Code(text));
             }
         }

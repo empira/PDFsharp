@@ -16,6 +16,9 @@
 //#error MIGRA/D7OC must not be defined anymore.
 //#endif
 
+// take advantage of .net 5+/core's System.IO.Compression new features.
+// if not, use PdfSharp internal SharpZipLib implementation.
+// cannot use with .netstandard/netframework!
 #if NET_ZIP  // not obsolete
 #endif
 

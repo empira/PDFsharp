@@ -28,7 +28,7 @@ namespace PdfSharp.Drawing
         {
             // Make a MoveTo if there is no previous subpath or the previous subpath was closed.
             // Otherwise make a LineTo.
-            if (_types.Count == 0 || (_types[^1] & PathPointTypeCloseSubpath) == PathPointTypeCloseSubpath)
+            if (_types.Count == 0 || (_types[_types.Count-1] & PathPointTypeCloseSubpath) == PathPointTypeCloseSubpath)
                 MoveTo(x, y);
             else
                 LineTo(x, y, false);
@@ -42,7 +42,7 @@ namespace PdfSharp.Drawing
 
         public void LineTo(double x, double y, bool closeSubpath)
         {
-            if (_points.Count > 0 && _points[^1].Equals(new(x, y)))
+            if (_points.Count > 0 && _points[_points.Count-1].Equals(new(x, y)))
                 return;
 
             _points.Add(new(x, y));

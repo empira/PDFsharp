@@ -102,7 +102,7 @@ namespace PdfSharp.Pdf
             if (value.Length == 0 || value[0] != '/')
                 return value;
 
-            return value[1..];
+            return value.TrimStart('/');
         }
 
         /// <summary>
