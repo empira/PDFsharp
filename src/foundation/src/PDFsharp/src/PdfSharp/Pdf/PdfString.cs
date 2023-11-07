@@ -284,7 +284,21 @@ namespace PdfSharp.Pdf
         /// </summary>
         internal override void WriteObject(PdfWriter writer)
         {
+            PositionStart = writer.Position;
+
             writer.Write(this);
+
+            PositionEnd = writer.Position;
         }
+
+        /// <summary>
+        /// Position of the first byte of this string in PdfWriter's Stream
+        /// </summary>
+        public int PositionStart { get; internal set; }
+
+        /// <summary>
+        /// Position of the last byte of this string in PdfWriter's Stream
+        /// </summary>
+        public int PositionEnd { get; internal set; }
     }
 }

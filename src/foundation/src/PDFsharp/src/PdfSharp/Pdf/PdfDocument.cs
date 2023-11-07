@@ -21,12 +21,25 @@ using PdfSharp.UniversalAccessibility;
 
 namespace PdfSharp.Pdf
 {
+    internal class PdfDocumentEventArgs : EventArgs
+    {
+        public PdfDocumentEventArgs(PdfWriter writer)
+        {
+            Writer = writer;
+        }
+
+        public PdfWriter Writer { get; set; }
+    }
+
     /// <summary>
     /// Represents a PDF document.
     /// </summary>
     [DebuggerDisplay("(Name={" + nameof(Name) + "})")] // A name makes debugging easier
     public sealed class PdfDocument : PdfObject, IDisposable
     {
+        internal event EventHandler BeforeSave = (s, e) => { };
+        internal event EventHandler<PdfDocumentEventArgs> AfterSave = (s, e) => { };
+
         internal DocumentState _state;
         internal PdfDocumentOpenMode _openMode;
 
@@ -222,7 +235,7 @@ namespace PdfSharp.Pdf
             if (!CanModify)
                 throw new InvalidOperationException(PSSR.CannotModify);
 
-            using Stream stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
+            using Stream stream = new FileStream(path, FileMode.Create, FileAccess.ReadWrite/*Read access needed for SignatureHandler*/, FileShare.None);
             Save(stream);
         }
 
@@ -308,6 +321,8 @@ namespace PdfSharp.Pdf
         /// </summary>
         void DoSave(PdfWriter writer)
         {
+            BeforeSave(this, EventArgs.Empty);
+
             if (_pages == null || _pages.Count == 0)
             {
                 if (OutStream != null)
@@ -375,6 +390,8 @@ namespace PdfSharp.Pdf
             {
                 if (writer != null)
                 {
+                    AfterSave(this, new PdfDocumentEventArgs(writer));
+
                     writer.Stream.Flush();
                     // DO NOT CLOSE WRITER HERE
                     //writer.Close();

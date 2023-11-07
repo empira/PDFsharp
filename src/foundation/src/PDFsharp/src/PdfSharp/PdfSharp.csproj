@@ -34,4 +34,9 @@
     <EmbeddedResource Include="Resources\Messages.restext" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
+    <PackageReference Include="BouncyCastle.Cryptography" />
+  </ItemGroup>
+
 </Project>
