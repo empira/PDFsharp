@@ -41,11 +41,7 @@ namespace PdfSharp.Drawing.BarCodes
             XPoint pt = position - CodeBase.CalcDistance(AnchorType.TopLeft, Anchor, Size);
             uint value;
             UInt32.TryParse(Text, out value);
-#if true
-            // HACK: Project Wallenwein: set LK
-            value |= 1;
-            _synchronizeCode = true;
-#endif
+
             if (_synchronizeCode)
             {
                 var rect = new XRect(pt.X, pt.Y, _makerThickness, Size.Height);
