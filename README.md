@@ -1,9 +1,9 @@
 ﻿# PDFsharp & MigraDoc 6.0
 
-Version **6.0.0-preview-4**  
-Published **2023-10-11**
+Version **6.0.0**  
+Published **2023-11-07**
 
-This is the third preview of the **PDFsharp** project, the main project of PDFsharp & MigraDoc 6.0 with updates for C# 10 and .NET 6.0.
+This is a stable version of the **PDFsharp** project, the main project of PDFsharp & MigraDoc 6.0 with updates for C# 10 and .NET 6.0.
 
 PDFsharp: Copyright (c) 2005-2023 empira Software GmbH, Troisdorf (Cologne Area, Germany)  
 MigraDoc: Copyright (c) 2001-2023 empira Software GmbH, Troisdorf (Cologne Area, Germany)  
@@ -14,6 +14,8 @@ For more information see [docs.pdfsharp.net](https://docs.pdfsharp.net/)
 ## Read this FIRST
 
 Project documentation can be found on our DOCS site: <https://docs.pdfsharp.net>.
+
+Note: PowerShell 7 or higher is required to execute the PowerShell scripts that come with PDFsharp.
 
 ### Download assets first
 
