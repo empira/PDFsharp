@@ -280,7 +280,7 @@ namespace PdfSharp.Pdf.IO
                 var effectiveSecurityHandler = document.EffectiveSecurityHandler;
                 if (effectiveSecurityHandler != null)
                 {
-                    TryAgain:
+                TryAgain:
                     PasswordValidity validity = effectiveSecurityHandler.ValidatePassword(password);
                     if (validity == PasswordValidity.Invalid)
                     {
@@ -328,50 +328,63 @@ namespace PdfSharp.Pdf.IO
                 PdfReference[] irefs2 = document.IrefTable.AllReferences;
                 int count2 = irefs2.Length;
 
-                // 3rd: Create iRefs for all compressed objects.
-                Dictionary<int, object?> objectStreams = new();
-                for (int idx = 0; idx < count2; idx++)
+                // The Pdf-Reference 1.7 states in chapter 7.5.6 (Incremental Updates):
+                // "When a conforming reader reads the file,
+                //  it shall build its cross-reference information in such a way that the
+                //  most recent copy of each object shall be the one accessed from the file."
+
+                // IrefTable.AllReferences is sorted by ObjectId which gives older objects preference
+                // (as they typically have lower ObjectIds)
+                // for xref-streams, we revert the order, so that the most recent one is read first
+                // this is because Parser.ReadObject does not overwrite an object, that was already collected
+
+                // collect xref streams
+                var xrefStreams = new List<PdfCrossReferenceStream>();
+                for (var idx = 0; idx < count2; idx++)
                 {
                     PdfReference iref = irefs2[idx];
                     if (iref.Value is PdfCrossReferenceStream xrefStream)
+                        xrefStreams.Add(xrefStream);
+                }
+                // sort them so the last xref stream of the file is read first
+                // TODO: is this always sufficient ? (haven't found any issues so far testing with ~1300 pdfs...)
+                // spec states that updates are always appended, so we should be good...
+                xrefStreams.Sort((a, b) => (b.Reference?.Position ?? 0) - (a.Reference?.Position ?? 0));
+
+                // 3rd: Create iRefs for all compressed objects.
+                Dictionary<int, object?> objectStreams = new();
+                foreach (var xrefStream in xrefStreams)
+                {
+                    for (int idx2 = 0; idx2 < xrefStream.Entries.Count; idx2++)
                     {
-                        for (int idx2 = 0; idx2 < xrefStream.Entries.Count; idx2++)
+                        PdfCrossReferenceStream.CrossReferenceStreamEntry item = xrefStream.Entries[idx2];
+                        // Is type xref to compressed object?
+                        if (item.Type == 2)
                         {
-                            PdfCrossReferenceStream.CrossReferenceStreamEntry item = xrefStream.Entries[idx2];
-                            // Is type xref to compressed object?
-                            if (item.Type == 2)
+                            int objectNumber = (int)item.Field2;
+                            if (!objectStreams.ContainsKey(objectNumber))
                             {
-                                //PdfReference irefNew = parser.ReadCompressedObject(new PdfObjectID((int)item.Field2), (int)item.Field3);
-                                //document._irefTable.Add(irefNew);
-                                int objectNumber = (int)item.Field2;
-                                if (!objectStreams.ContainsKey(objectNumber))
-                                {
-                                    objectStreams.Add(objectNumber, null);
-                                    PdfObjectID objectID = new PdfObjectID((int)item.Field2);
-                                    parser.ReadIRefsFromCompressedObject(objectID);
-                                }
+                                objectStreams.Add(objectNumber, null);
+                                var objectID = new PdfObjectID((int)item.Field2);
+                                parser.ReadIRefsFromCompressedObject(objectID);
                             }
                         }
                     }
                 }
 
                 // 4th: Read compressed objects.
-                for (int idx = 0; idx < count2; idx++)
+                foreach (var xrefStream in xrefStreams)
                 {
-                    PdfReference iref = irefs2[idx];
-                    if (iref.Value is PdfCrossReferenceStream xrefStream)
+                    for (int idx2 = 0; idx2 < xrefStream.Entries.Count; idx2++)
                     {
-                        for (int idx2 = 0; idx2 < xrefStream.Entries.Count; idx2++)
+                        PdfCrossReferenceStream.CrossReferenceStreamEntry item = xrefStream.Entries[idx2];
+                        // Is type xref to compressed object?
+                        if (item.Type == 2)
                         {
-                            PdfCrossReferenceStream.CrossReferenceStreamEntry item = xrefStream.Entries[idx2];
-                            // Is type xref to compressed object?
-                            if (item.Type == 2)
-                            {
-                                PdfReference irefNew = parser.ReadCompressedObject(new PdfObjectID((int)item.Field2),
-                                    (int)item.Field3);
-                                Debug.Assert(document.IrefTable.Contains(iref.ObjectID));
-                                //document._irefTable.Add(irefNew);
-                            }
+                            PdfReference irefNew = parser.ReadCompressedObject(new PdfObjectID((int)item.Field2),
+                                (int)item.Field3);
+                            Debug.Assert(document.IrefTable.Contains(xrefStream.ObjectID));
+                            Debug.Assert(document.IrefTable.Contains(irefNew.ObjectID));
                         }
                     }
                 }

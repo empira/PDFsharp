@@ -1204,6 +1204,9 @@ namespace PdfSharp.Pdf.IO
             // Read cross reference stream.
             //Debug.Assert(_lexer.Symbol == Symbol.Integer);
 
+            // remember start-position of xref-stream
+            var xrefStart = _lexer.Position - _lexer.Token.Length;
+
             int number = _lexer.TokenToInteger;
             int generation = ReadInteger();
             // According to specs, generation number "shall not" be "other than zero".
@@ -1227,7 +1230,8 @@ namespace PdfSharp.Pdf.IO
             var iref = new PdfReference(xrefStream)
             {
                 ObjectID = objectID,
-                Value = xrefStream
+                Value = xrefStream,
+                Position = xrefStart
             };
             xrefTable.Add(iref);
 
