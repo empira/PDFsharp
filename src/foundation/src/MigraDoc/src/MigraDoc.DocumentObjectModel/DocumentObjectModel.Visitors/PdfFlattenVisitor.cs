@@ -70,6 +70,11 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 
         internal override void VisitDocumentObjectCollection(DocumentObjectCollection elements)
         {
+            var culture = elements.Document.EffectiveCulture;
+
+            var decimalSeparator = culture.NumberFormat.NumberDecimalSeparator;
+            var decimalSeparatorLength = decimalSeparator.Length;
+            
             List<int> textIndices = new List<int>();
             if (elements is ParagraphElements)
             {
@@ -89,8 +94,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 Text? text = elements[idx + insertedObjects] as Text;
                 string content = text?.Content ?? "";
                 currentString.Clear();
-                foreach (char ch in content)
+                for (var chIdx = 0; chIdx < content.Length; chIdx++)
                 {
+                    var ch = content[chIdx];
                     // TODO Add support for other breaking spaces (en space, em space, &c.).
                     switch (ch)
                     {
@@ -110,9 +116,35 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 
                         case '-': // minus.
                             currentString.Append('-');
-                            elements.InsertObject(idx + insertedObjects, new Text(currentString.ToString()));
-                            ++insertedObjects;
-                            currentString.Clear();
+
+                            // Recognize minus as a sign, if it's the first char of the currently processed string...
+                            bool isSign;
+                            if (currentString.Length != 1)
+                                isSign = false;
+                            else
+                            {
+                                var nextIdx = chIdx + 1;
+                                // ...and if it's followed by a number...
+                                if (nextIdx < content.Length && char.IsNumber(content[nextIdx]))
+                                    isSign = true;
+                                else
+                                {
+                                    // ...or a decimal separator and a number.
+                                    var nextIdxAfterDecimalSeparator = nextIdx + decimalSeparatorLength;
+                                    if (nextIdxAfterDecimalSeparator < content.Length && char.IsNumber(content[nextIdxAfterDecimalSeparator])
+                                                                                      && content.Substring(nextIdx, decimalSeparatorLength) == decimalSeparator)
+                                        isSign = true;
+                                    else
+                                        isSign = false;
+                                }
+                            }
+                            // Only start new Text if minus is not a sign, because numbers like "-5.5" have to be stored in one Text for correct DecimalTab alignment.
+                            if (!isSign)
+                            {
+                                elements.InsertObject(idx + insertedObjects, new Text(currentString.ToString()));
+                                ++insertedObjects;
+                                currentString.Clear();
+                            }
                             break;
 
                         // Characters that allow line breaks without indication.

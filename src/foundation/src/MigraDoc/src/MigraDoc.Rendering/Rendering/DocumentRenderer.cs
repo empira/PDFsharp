@@ -79,7 +79,9 @@ namespace MigraDoc.Rendering
         /// </summary>
         public FormattedDocument FormattedDocument
         {
+#if NET6_0_OR_GREATER
             [return: MaybeNull]
+#endif
             get { return _formattedDocument!; }
         }
         FormattedDocument? _formattedDocument;

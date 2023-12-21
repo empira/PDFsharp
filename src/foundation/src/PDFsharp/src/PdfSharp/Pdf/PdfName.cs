@@ -102,7 +102,7 @@ namespace PdfSharp.Pdf
             if (value.Length == 0 || value[0] != '/')
                 return value;
 
-            return value[1..];
+            return value.Substring(1);
         }
 
         /// <summary>
@@ -111,7 +111,11 @@ namespace PdfSharp.Pdf
         internal override void WriteObject(PdfWriter writer)
         {
             // TODO: what if Unicode character are part of the name?
-            // TODO: 7.3.5 Name objects: "In such situations, the sequence of bytes making up the name object should be interpreted according to UTF-8, a variable-length byte-encoded representation of Unicode in which the printable ASCII characters have the same representations as in ASCII. This enables a name object to represent text virtually in any natural language, subject to the implementation limit on the length of a name."
+            // TODO: 7.3.5 Name objects: "In such situations, the sequence of bytes making up the name
+            //     object should be interpreted according to UTF-8, a variable-length byte-encoded
+            //     representation of Unicode in which the printable ASCII characters have the same
+            //     representations as in ASCII. This enables a name object to represent text virtually
+            //     in any natural language, subject to the implementation limit on the length of a name."
             writer.Write(this);
         }
 

@@ -22,7 +22,7 @@ namespace MigraDoc.Tests
         public void Create_Multiple_Footers()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             // Create a MigraDoc document.

@@ -865,8 +865,8 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
                     // ReSharper disable once PossibleNullReferenceException because the loop is not entered if _sequence is null
                     _sequence[idx].WriteObject(writer);
                 }
-                writer.WriteLineRaw(ToString());
             }
+            writer.WriteLineRaw(ToString());
         }
     }
 }

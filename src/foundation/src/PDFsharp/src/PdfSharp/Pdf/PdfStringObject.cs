@@ -84,6 +84,7 @@ namespace PdfSharp.Pdf
         public string Value
         {
             get => _value;
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
             set => _value = value ?? "";
         }
         string _value = "";

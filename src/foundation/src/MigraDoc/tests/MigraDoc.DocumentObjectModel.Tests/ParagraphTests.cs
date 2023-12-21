@@ -15,7 +15,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Test_Empty_Paragraph()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             var document = new Document();
@@ -36,7 +36,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Test_Empty_FormattedText()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             var document = new Document();
@@ -63,7 +63,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Test_Multiline_Border_Paragraph_PageBreaks()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
             // Create one document containing all results.
             var sumDoc = new PdfDocument(PdfFileHelper.CreateTempFileName("Test_Multiline_Border_Paragraph_PageBreaks"));

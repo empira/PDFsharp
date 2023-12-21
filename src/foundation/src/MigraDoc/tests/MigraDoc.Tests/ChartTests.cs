@@ -21,7 +21,7 @@ namespace MigraDoc.Tests
         public void Create_MigraDoc_Chart_Test()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             // Create a MigraDoc document.

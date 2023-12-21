@@ -213,32 +213,6 @@ namespace PdfSharp.Pdf.Security
         }
 
         /// <summary>
-        /// Decrypts an ObjectStream. ObjectStreams have to be decrypted before document decryption to allow the removing of the compression filter.
-        /// </summary>
-        internal void DecryptObjectStream(PdfObjectStream objectStream)
-        {
-            Debug.Assert(objectStream.Reference != null);
-
-            EnterObject(objectStream.ObjectID);
-
-            DecryptDictionary(objectStream, true);
-
-            LeaveObject();
-        }
-
-        /// <summary>
-        /// Decrypts the whole document (except ObjectStreams which are decrypted once when read in).
-        /// </summary>
-        internal void DecryptDocument()
-        {
-            foreach (var iref in _document.IrefTable.AllReferences)
-            {
-                if (!ReferenceEquals(iref.Value, this))
-                    DecryptObject(iref.Value);
-            }
-        }
-
-        /// <summary>
         /// Has to be called if an indirect PdfObject is entered for encryption/decryption.
         /// </summary>
         internal void EnterObject(PdfObjectID id)
@@ -255,10 +229,37 @@ namespace PdfSharp.Pdf.Security
         }
 
         /// <summary>
+        /// Returns true, if pdfObject is a SecurityHandler used in any PdfTrailer.
+        /// </summary>
+        bool IsSecurityHandler(PdfObject pdfObject)
+        {
+            if (pdfObject is not PdfDictionary pdfDictionary)
+                return false;
+
+            // Incrementally updated PDFs contain multiple trailers. Check the SecurityHandler of each one.
+            var currentTrailer = _document.Trailer;
+            while (currentTrailer != null)
+            {
+                // Compare PdfReference, as currentTrailer.SecurityHandler contains the dictionary converted to PdfStandardSecurityHandler,
+                // while document.IrefTable.AllReferences still references the original PdfDictionary.
+                if (pdfDictionary.Reference == currentTrailer.SecurityHandler.Reference)
+                    return true;
+
+                currentTrailer = currentTrailer.PreviousTrailer;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Decrypts an indirect PdfObject.
         /// </summary>
-        void DecryptObject(PdfObject value)
+        public void DecryptObject(PdfObject value)
         {
+            // PdfStandardSecurityHandler itself is not encrypted.
+            if (IsSecurityHandler(value))
+                return;
+            
             Debug.Assert(value.Reference != null);
 
             EnterObject(value.ObjectID);
@@ -282,12 +283,8 @@ namespace PdfSharp.Pdf.Security
         /// <summary>
         /// Decrypts a dictionary.
         /// </summary>
-        void DecryptDictionary(PdfDictionary dict, bool decryptObjectStream = false)
+        void DecryptDictionary(PdfDictionary dict)
         {
-            // ObjectStreams are decrypted once when read in. They and their contents must not be decrypted again on DecryptDocument.
-            if (!decryptObjectStream && dict.Elements.GetName("/Type") == "/ObjStm")
-                return;
-
             foreach (var item in dict.Elements)
             {
                 switch (item.Value)
@@ -825,6 +822,11 @@ namespace PdfSharp.Pdf.Security
         /// </summary>
         public CryptFilterBase? GetCryptFilter(PdfDictionary dictionary)
         {
+            // The cross-reference stream shall not be encrypted. See Reference PDF 2.0: 7.5.8.2  Cross-reference stream dictionary / Page 80.
+            var type = dictionary.Elements.GetName(PdfCrossReferenceStream.Keys.Type);
+            if (type == "/XRef")
+                return IdentityCryptFilter.Instance;
+
             // If a crypt filter is set for this PdfDictionary, try to return the desired crypt filter.
             var filters = dictionary.Elements.ArrayOrSingleItem.GetAll(PdfStream.Keys.Filter).ToList();
             // ReSharper disable once SuspiciousTypeConversion.Global
@@ -838,8 +840,8 @@ namespace PdfSharp.Pdf.Security
 
                 if (filterDecodeParms is PdfDictionary filterDecodeParmsDict)
                 {
-                    var typeValue = filterDecodeParmsDict.Elements.GetName(CryptFilterConstants.DecodeParmsTypeKey);
-                    if (typeValue == CryptFilterConstants.DecodeParmsTypeValue)
+                    var decodeParmsType = filterDecodeParmsDict.Elements.GetName(CryptFilterConstants.DecodeParmsTypeKey);
+                    if (decodeParmsType == CryptFilterConstants.DecodeParmsTypeValue)
                     {
                         var cryptFilterNameValue = filterDecodeParmsDict.Elements.GetName(CryptFilterConstants.DecodeParmsNameKey);
 
@@ -854,6 +856,9 @@ namespace PdfSharp.Pdf.Security
                     }
 
                 }
+                // Use IdentityCryptFilter (no encryption), if DecodeParms is not defined.
+                else
+                    return IdentityCryptFilter.Instance;
 
                 throw TH.InvalidOperationException_CryptFilterDecodeParmsNotInitializedCorrectly();
             }

@@ -2499,7 +2499,11 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// If cond is evaluated to false, a DdlParserException with the specified error will be thrown.
         /// </summary>
-        void AssertCondition([DoesNotReturnIf(false)] bool cond, DomMsgID error, params object[] args)
+        void AssertCondition(
+#if NET6_0_OR_GREATER
+            [DoesNotReturnIf(false)]
+#endif
+            bool cond, DomMsgID error, params object[] args)
         {
             if (!cond)
                 ThrowParserException(error, args);
@@ -2582,7 +2586,9 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// Creates an ErrorInfo based on the DomMsgID and the specified parameters.
         /// Throws a DdlParserException with that ErrorInfo.
         /// </summary>
+#if NET6_0_OR_GREATER
         [DoesNotReturn]
+#endif
         void ThrowParserException(DomMsgID errorCode, params object[] parms)
         {
             var message = DomSR.FormatMessage(errorCode, parms);
@@ -2596,7 +2602,9 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// Determines the error message based on the DomMsgID and the parameters.
         /// Throws a DdlParserException with that error message and the Exception as the inner exception.
         /// </summary>
+#if NET6_0_OR_GREATER
         [DoesNotReturn]
+#endif
         void ThrowParserException(Exception innerException, DomMsgID errorCode, params object[] parms)
         {
             var message = DomSR.FormatMessage(errorCode, parms);

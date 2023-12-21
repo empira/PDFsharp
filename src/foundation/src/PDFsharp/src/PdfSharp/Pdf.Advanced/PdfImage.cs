@@ -325,7 +325,7 @@ namespace PdfSharp.Pdf.Advanced
             memory = new MemoryStream();
             ownMemory = true;
 #endif
-            // THHO4THHO Use ImageImporterJPEG here to avoid redundant code.
+            // Idea: Use ImageImporterJPEG here to avoid redundant code.
 
             if (imageBits == null)
             {
@@ -825,7 +825,7 @@ namespace PdfSharp.Pdf.Advanced
             encoder.Frames.Add(BitmapFrame.Create(_image._wpfImage));
             encoder.Save(memory);
 #endif
-            // THHO4THHO Use ImageImporterBMP here to avoid redundant code.
+            // Idea: Use ImageImporterBMP here to avoid redundant code.
 
             int streamLength = (int)memory.Length;
             Debug.Assert(streamLength > 0, "Bitmap image encoding failed.");
@@ -1015,7 +1015,7 @@ namespace PdfSharp.Pdf.Advanced
             encoder.Frames.Add(BitmapFrame.Create(_image._wpfImage));
             encoder.Save(memory);
 #endif
-            // THHO4THHO Use ImageImporterBMP here to avoid redundant code.
+            // Idea: Use ImageImporterBMP here to avoid redundant code.
 
             int streamLength = (int)memory.Length;
             Debug.Assert(streamLength > 0, "Bitmap image encoding failed.");

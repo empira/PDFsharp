@@ -60,7 +60,7 @@ namespace PdfSharp.Drawing
                 }
             }
 #endif
-        }
+                }
 
 #if GDI
         FontFamilyInternal(GdiFontFamily gdiFontFamily)

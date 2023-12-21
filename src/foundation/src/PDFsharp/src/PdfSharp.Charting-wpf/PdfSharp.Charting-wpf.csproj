@@ -2,10 +2,11 @@
 
     <PropertyGroup>
         <OutputType>library</OutputType>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <RootNamespace>PdfSharp.Charting</RootNamespace>
         <!--<UseWPF>true</UseWPF> not needed -->
+        <UseWPF>true</UseWPF>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>annotations</Nullable>
     </PropertyGroup>

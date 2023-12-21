@@ -20,7 +20,7 @@ namespace MigraDoc.Tests
         public void Create_Table_Cell_with_Top_Border()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             // Create a MigraDoc document.

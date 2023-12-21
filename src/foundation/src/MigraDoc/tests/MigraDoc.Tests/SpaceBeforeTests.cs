@@ -20,7 +20,7 @@ namespace MigraDoc.Tests
         public void Tests_for_SpaceBefore()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             // Create a MigraDoc document.

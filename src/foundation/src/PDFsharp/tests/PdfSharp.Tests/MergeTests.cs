@@ -18,14 +18,14 @@ namespace PdfSharp.Tests
         {
             var document1 = new PdfDocument();
             var page1 = document1.AddPage();
-            page1.AddDocumentLink(new(new(new(1, 1))), 1);
+            page1.AddDocumentLink(new(new XRect(new(1, 1))), 1);
             var stream1 = new MemoryStream();
             document1.Save(stream1, false);
             stream1.Position = 0;
 
             var document2 = new PdfDocument();
             var page2 = document2.AddPage();
-            page2.AddDocumentLink(new(new(new(1, 1))), 1);
+            page2.AddDocumentLink(new(new XRect(new(1, 1))), 1);
             var stream2 = new MemoryStream();
             document2.Save(stream2, false);
             stream2.Position = 0;

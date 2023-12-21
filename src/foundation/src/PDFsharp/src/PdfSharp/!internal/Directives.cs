@@ -16,9 +16,6 @@
 //#error MIGRA/D7OC must not be defined anymore.
 //#endif
 
-#if NET_ZIP  // not obsolete
-#endif
-
 #if NET_2_0  // obsolete
 #error Undefine 'NET_2_0' because earlier versions are not supported anymore.
 #endif

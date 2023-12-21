@@ -51,7 +51,9 @@ namespace MigraDoc.DocumentObjectModel.Tables
         /// </summary>
         public Table Table
         {
+#if NET6_0_OR_GREATER
             [return: MaybeNull]
+#endif
             get
             {
                 if (_table == null && Parent is Row rw)
@@ -67,7 +69,9 @@ namespace MigraDoc.DocumentObjectModel.Tables
         /// </summary>
         public Row Row
         {
+#if NET6_0_OR_GREATER
             [return: MaybeNull]
+#endif
             get { return _row ??= (Parent as Row)!; }
         }
         Row? _row;

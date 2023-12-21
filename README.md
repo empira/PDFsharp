@@ -1,9 +1,9 @@
 ﻿# PDFsharp & MigraDoc 6.0
 
-Version **6.0.0**  
-Published **2023-11-07**
+Version **6.1.0-preview-1**  
+Published **2023-12-21**
 
-This is a stable version of the **PDFsharp** project, the main project of PDFsharp & MigraDoc 6.0 with updates for C# 10 and .NET 6.0.
+This is a preview version of the **PDFsharp** project, the main project of PDFsharp & MigraDoc 6.0 with updates for C# 10 and .NET 6.0.
 
 PDFsharp: Copyright (c) 2005-2023 empira Software GmbH, Troisdorf (Cologne Area, Germany)  
 MigraDoc: Copyright (c) 2001-2023 empira Software GmbH, Troisdorf (Cologne Area, Germany)  
@@ -31,7 +31,7 @@ Execute `.\dev\download-assets.ps1`
 
 * You need the latest .NET SDK version installed
 * If you got an exception from `GitVersion.MsBuild` let us know.  
-  You can set a tag to define a valid version, e.g.: `git tag v6.0.0` to make it work.
+  You can set a tag to define a valid version, e.g.: `git tag v6.1.0` to make it work.
 
 ### Central package management
 

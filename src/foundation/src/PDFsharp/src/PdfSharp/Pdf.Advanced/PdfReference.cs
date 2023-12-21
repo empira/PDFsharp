@@ -97,11 +97,13 @@ namespace PdfSharp.Pdf.Advanced
             get => _objectID;
             set
             {
-                // Ignore redundant invocations.
-                if (_objectID == value)
-                    return;
+                // Makes no sense anymore.
+                //// Ignore redundant invocations.
+                //if (_objectID == value)
+                //    return;
 
                 _objectID = value;
+#if true_
                 if (Document != null)
                 {
                     //PdfXRefTable table = Document.xrefTable;
@@ -109,6 +111,7 @@ namespace PdfSharp.Pdf.Advanced
                     //objectID = value;
                     //table.Add(this);
                 }
+#endif
             }
         }
 
@@ -134,24 +137,19 @@ namespace PdfSharp.Pdf.Advanced
 #if true
             set
             {
+#if DEBUG_
                 if (value < 0)
                     GetType();
+#endif
                 Debug.Assert(value >= 0);
                 _position = value;
             }
 #else
-            set => _position = value;
+                set => _position = value;
 #endif
         }
 
         int _position;  // I know it should be long, but I have never seen a 2GB PDF file.
-
-        //public bool InUse
-        //{
-        //  get {return inUse;}
-        //  set {inUse = value;}
-        //}
-        //bool inUse;
 
         /// <summary>
         /// Gets or sets the referenced PdfObject.
@@ -200,10 +198,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets a string representing the object identifier.
         /// </summary>
-        public override string ToString()
-        {
-            return _objectID + " R";
-        }
+        public override string ToString() => _objectID + " R";
 
         /// <summary>
         /// Dereferences the specified item. If the item is a PdfReference, the item is set

@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0-windows7.0</TargetFramework>
+        <TargetFrameworks>net6.0-windows7.0;net472-windows</TargetFrameworks>
         <RootNamespace>MigraDoc.GrammarByExample_GDI</RootNamespace>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <UseWindowsForms>true</UseWindowsForms>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
@@ -72,6 +73,7 @@
   </ItemGroup>-->
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper\PdfSharp.TestHelper.csproj" />
         <ProjectReference Include="..\..\src\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
         <ProjectReference Include="..\..\src\MigraDoc.Rendering-gdi\MigraDoc.Rendering-gdi.csproj" />
     </ItemGroup>

@@ -275,8 +275,13 @@ namespace MigraDoc.Rendering
         {
             get
             {
+#if NET6_0_OR_GREATER
                 if (_positionIndices.Count != 0)
                     return _positionIndices[^1];
+#else
+                if (_positionIndices.Count != 0)
+                    return _positionIndices[_positionIndices.Count - 1];
+#endif
                 return -1;
             }
         }

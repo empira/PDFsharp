@@ -189,8 +189,6 @@ namespace PdfSharp.Drawing.Internal
         }
     }
 
-    // THHO4THHO Maybe there will be derived classes for direct bitmaps vs. palettized bitmaps or so. Time will tell.
-
     /// <summary>
     /// Contains data needed for PDF. Will be prepared when needed.
     /// Bitmap refers to the format used in PDF. Will be used for BMP, PNG, TIFF, GIF, and others.

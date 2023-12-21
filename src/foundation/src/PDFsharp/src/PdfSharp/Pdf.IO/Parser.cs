@@ -512,14 +512,14 @@ namespace PdfSharp.Pdf.IO
                                 if (_document.IrefTable.IsUnderConstruction)
                                 {
                                     // XRefTable not complete when trailer is read. Create temporary irefs that are
-                                    // removed later in PdfTrailer.FixXRefs.
+                                    // removed later in PdfTrailer.Finish().
                                     iref = new PdfReference(objectID, 0);
                                     _stack.Reduce(iref, 2);
                                     break;
                                 }
-                                // PDF Reference section 3.2.9:
-                                // An indirect reference to an undefined object is not an error;
-                                // it is simply treated as a reference to the null object.
+                                // PDF Reference 2.0 section 7.3.10:
+                                // An indirect reference to an undefined object shall not be considered an error by a PDF processor;
+                                // it shall be treated as a reference to the null object.
                                 _stack.Reduce(PdfNull.Value, 2);
                                 // Let's see what null objects are good for...
                                 //Debug.Assert(false, "Null object detected!");
@@ -849,25 +849,7 @@ namespace PdfSharp.Pdf.IO
                 throw new NotImplementedException("This case is not coded or something else went wrong");
             }
 
-            // Read in object stream object when we come here for the very first time.
-            if (iref.Value == null!)
-            {
-                try
-                {
-                    Debug.Assert(_document.IrefTable.Contains(iref.ObjectID));
-                    PdfDictionary pdfObject = (PdfDictionary)ReadObject(null, iref.ObjectID, false, false);
-                    PdfObjectStream objectStream = new PdfObjectStream(pdfObject);
-                    Debug.Assert(objectStream.Reference == iref);
-                    // objectStream.Reference = iref; Superfluous, see Assert in line before.
-                    Debug.Assert(objectStream.Reference.Value != null, "Something went wrong.");
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                    throw;
-                }
-            }
-            Debug.Assert(iref.Value != null);
+            Debug.Assert(iref.Value != null, "The object shall be read in by PdfReader.ReadIndirectObjectsFromIrefTable() before accessing it.");
 
             if (iref.Value is not PdfObjectStream objectStreamStream)
             {
@@ -927,25 +909,7 @@ namespace PdfSharp.Pdf.IO
             }
 #endif
 
-            // Read in object stream object when we come here for the very first time.
-            if (iref.Value == null)
-            {
-                try
-                {
-                    Debug.Assert(_document.IrefTable.Contains(iref.ObjectID));
-                    PdfDictionary pdfObject = (PdfDictionary)ReadObject(null, iref.ObjectID, false, false);
-                    PdfObjectStream objectStream = new PdfObjectStream(pdfObject);
-                    Debug.Assert(objectStream.Reference == iref);
-                    // objectStream.Reference = iref; Superfluous, see Assert in line before.
-                    Debug.Assert(objectStream.Reference.Value != null, "Something went wrong.");
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                    throw;
-                }
-            }
-            Debug.Assert(iref.Value != null);
+            Debug.Assert(iref.Value != null, "The object shall be read in by PdfReader.ReadIndirectObjectsFromIrefTable() before accessing it.");
 
             var objectStreamStream = iref.Value as PdfObjectStream;
             if (objectStreamStream == null)
@@ -1051,18 +1015,30 @@ namespace PdfSharp.Pdf.IO
             _lexer.Position = ReadInteger();
 
             // Read all trailers.
+            PdfTrailer? newerTrailer = null;
             while (true)
             {
                 var trailer = ReadXRefTableAndTrailer(_document.IrefTable);
-                // 1st trailer seems to be the best.
+
+                // Return the first found trailer, which is the one startxref points to.
+                // This is the current trailer, even for incrementally updated files.
                 if (_document.Trailer == null!)
                     _document.Trailer = trailer ?? NRT.ThrowOnNull<PdfTrailer>();
+
+                // Add previous trailer to the newerTrailer, if existing.
+                if (newerTrailer != null)
+                    newerTrailer.PreviousTrailer = trailer;
+
+                // Break, if there is no previous trailer.
                 int prev = trailer != null ? trailer.Elements.GetInteger(PdfTrailer.Keys.Prev) : 0;
                 if (prev == 0)
                     break;
                 //if (prev > lexer.PdfLength)
                 //  break;
+
+                // Continue loading previous trailer and cache this one as the newerTrailer to add its previous trailer.
                 _lexer.Position = prev;
+                newerTrailer = trailer;
             }
 
             return _document.Trailer;
@@ -1204,6 +1180,8 @@ namespace PdfSharp.Pdf.IO
             // Read cross reference stream.
             //Debug.Assert(_lexer.Symbol == Symbol.Integer);
 
+            var xrefStart = _lexer.Position - _lexer.Token.Length;
+
             int number = _lexer.TokenToInteger;
             int generation = ReadInteger();
             // According to specs, generation number "shall not" be "other than zero".
@@ -1223,11 +1201,11 @@ namespace PdfSharp.Pdf.IO
             ReadSymbol(Symbol.BeginStream);
             ReadStream(xrefStream);
 
-            //xrefTable.Add(new PdfReference(objectID, position));
             var iref = new PdfReference(xrefStream)
             {
                 ObjectID = objectID,
-                Value = xrefStream
+                Value = xrefStream,
+                Position = xrefStart
             };
             xrefTable.Add(iref);
 

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net6.0;net472</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,10 +9,6 @@
     <EmbeddedResource Remove="TestResults\**" />
     <None Remove="TestResults\**" />
   </ItemGroup>
-
-  <!--<ItemGroup> Warum ist diese Datei eingebunden???
-    <None Include="..\..\..\..\..\..\.editorconfig" Link=".editorconfig" />
-  </ItemGroup>-->
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper\PdfSharp.TestHelper.csproj" />

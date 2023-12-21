@@ -164,45 +164,31 @@ namespace PdfSharp.Pdf
         /// Gets or sets the left position of the page positioned at the left side of the window.
         /// Applies only if PageDestinationType is Xyz, FitV, FitR, or FitBV.
         /// </summary>
-        public double? Left
-        {
-            get => _left;
-            set => _left = value;
-        }
-        double? _left = null;
+        public double? Left { get; set; }
 
         /// <summary>
         /// Gets or sets the top position of the page positioned at the top side of the window.
         /// Applies only if PageDestinationType is Xyz, FitH, FitR, ob FitBH.
         /// </summary>
-        public double? Top
-        {
-            get => _top;
-            set => _top = value;
-        }
-        double? _top = null;
+        public double? Top { get; set; }
 
         /// <summary>
         /// Gets or sets the right position of the page positioned at the right side of the window.
         /// Applies only if PageDestinationType is FitR.
         /// </summary>
-        public double Right  // Cannot be null in a valid PDF.
+        public double Right // Cannot be null in a valid PDF.
         {
-            get => _right;
-            set => _right = value;
-        }
-        double _right = double.NaN;
+            get; set;
+        } = double.NaN;
 
         /// <summary>
         /// Gets or sets the bottom position of the page positioned at the bottom side of the window.
         /// Applies only if PageDestinationType is FitR.
         /// </summary>
-        public double Bottom  // Cannot be null in a valid PDF.
+        public double Bottom // Cannot be null in a valid PDF.
         {
-            get => _bottom;
-            set => _bottom = value;
-        }
-        double _bottom = double.NaN;
+            get; set;
+        } = double.NaN;
 
         /// <summary>
         /// Gets or sets the zoom faction of the page.
@@ -269,12 +255,7 @@ namespace PdfSharp.Pdf
         /// Gets or sets the color of the text.
         /// </summary>
         /// <value>The color of the text.</value>
-        public XColor TextColor
-        {
-            get => _textColor;
-            set => _textColor = value;
-        }
-        XColor _textColor;
+        public XColor TextColor { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether this outline object has child items.
@@ -323,7 +304,7 @@ namespace PdfSharp.Pdf
             var a = Elements.GetValue(Keys.A);
             Debug.Assert(dest == null || a == null, "Either destination or goto action.");
 
-            PdfArray? destArray = null;
+            PdfArray? destArray;
             if (dest != null)
             {
                 destArray = dest as PdfArray;
@@ -442,7 +423,7 @@ namespace PdfSharp.Pdf
         void InitializeChildren()
         {
             var firstRef = Elements.GetReference(Keys.First);
-            var lastRef = Elements.GetReference(Keys.Last);
+            //var lastRef = Elements.GetReference(Keys.Last);
             var current = firstRef;
             while (current != null)
             {
@@ -497,7 +478,7 @@ namespace PdfSharp.Pdf
                     Debug.Assert(index != -1);
 
                     // Has destination?
-                    if (DestinationPage != null)
+                    if (DestinationPage != null!)
                         Elements[Keys.Dest] = CreateDestArray();
 
                     // Not the first element?
@@ -511,14 +492,14 @@ namespace PdfSharp.Pdf
                     if (hasKids && _outlines != null)
                     {
                         Elements[Keys.First] = _outlines[0].Reference;
-                        Elements[Keys.Last] = _outlines[^1].Reference;
+                        Elements[Keys.Last] = _outlines[_outlines.Count - 1].Reference;
                     }
                     // TODO: /Count - the meaning is not completely clear to me
                     if (OpenCount > 0)
                         Elements[Keys.Count] = new PdfInteger((_opened ? 1 : -1) * OpenCount);
 
-                    if (_textColor != XColor.Empty && Owner.HasVersion("1.4"))
-                        Elements[Keys.C] = new PdfLiteral("[{0}]", PdfEncoders.ToString(_textColor, PdfColorMode.Rgb));
+                    if (TextColor != XColor.Empty && Owner.HasVersion("1.4"))
+                        Elements[Keys.C] = new PdfLiteral("[{0}]", PdfEncoders.ToString(TextColor, PdfColorMode.Rgb));
 
                     // if (Style != PdfOutlineStyle.Regular && Document.HasVersion("1.4"))
                     //  //pdf.AppendFormat("/F {0}\n", (int)_style);
@@ -536,13 +517,13 @@ namespace PdfSharp.Pdf
 
         PdfArray CreateDestArray()
         {
-            PdfArray? dest = null;
+            PdfArray? dest;
             switch (PageDestinationType)
             {
                 // [page /XYZ left top zoom]
                 case PdfPageDestinationType.Xyz:
                     dest = new PdfArray(Owner,
-                        DestinationPage.ReferenceNotNull, new PdfLiteral(String.Format("/XYZ {0} {1} {2}", Fd(Left), Fd(Top), Fd(Zoom))));
+                        DestinationPage.ReferenceNotNull, new PdfLiteral($"/XYZ {Fd(Left)} {Fd(Top)} {Fd(Zoom)}"));
                     break;
 
                 // [page /Fit]
@@ -554,19 +535,19 @@ namespace PdfSharp.Pdf
                 // [page /FitH top]
                 case PdfPageDestinationType.FitH:
                     dest = new PdfArray(Owner,
-                        DestinationPage.ReferenceNotNull, new PdfLiteral(String.Format("/FitH {0}", Fd(Top))));
+                        DestinationPage.ReferenceNotNull, new PdfLiteral($"/FitH {Fd(Top)}"));
                     break;
 
                 // [page /FitV left]
                 case PdfPageDestinationType.FitV:
                     dest = new PdfArray(Owner,
-                        DestinationPage.ReferenceNotNull, new PdfLiteral(String.Format("/FitV {0}", Fd(Left))));
+                        DestinationPage.ReferenceNotNull, new PdfLiteral($"/FitV {Fd(Left)}"));
                     break;
 
                 // [page /FitR left bottom right top]
                 case PdfPageDestinationType.FitR:
                     dest = new PdfArray(Owner,
-                        DestinationPage.ReferenceNotNull, new PdfLiteral(String.Format("/FitR {0} {1} {2} {3}", Fd(Left), Fd(Bottom), Fd(Right), Fd(Top))));
+                        DestinationPage.ReferenceNotNull, new PdfLiteral($"/FitR {Fd(Left)} {Fd(Bottom)} {Fd(Right)} {Fd(Top)}"));
                     break;
 
                 // [page /FitB]
@@ -578,13 +559,13 @@ namespace PdfSharp.Pdf
                 // [page /FitBH top]
                 case PdfPageDestinationType.FitBH:
                     dest = new PdfArray(Owner,
-                        DestinationPage.ReferenceNotNull, new PdfLiteral(String.Format("/FitBH {0}", Fd(Top))));
+                        DestinationPage.ReferenceNotNull, new PdfLiteral($"/FitBH {Fd(Top)}"));
                     break;
 
                 // [page /FitBV left]
                 case PdfPageDestinationType.FitBV:
                     dest = new PdfArray(Owner,
-                        DestinationPage.ReferenceNotNull, new PdfLiteral(String.Format("/FitBV {0}", Fd(Left))));
+                        DestinationPage.ReferenceNotNull, new PdfLiteral($"/FitBV {Fd(Left)}"));
                     break;
 
                 default:
