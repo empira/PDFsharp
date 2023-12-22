@@ -20,6 +20,7 @@ using WpfStyleSimulations = System.Windows.Media.StyleSimulations;
 #endif
 using PdfSharp.Drawing;
 using PdfSharp.Fonts.Internal;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 // Re-Sharper disable RedundantNameQualifier
@@ -346,12 +347,34 @@ namespace PdfSharp.Fonts
     /// <seealso cref="PdfSharp.Fonts.IFontResolver" />
     internal class EvenNewerFontResolver : IFontResolver
     {
+#if NET6_0_OR_GREATER
         internal record TypefaceInfo(
             string TypefaceName,
             string FileName,
             string LinuxFileName = "",
             params string[] LinuxSubstituteFaceNames)
         { }
+#else
+        internal class/*record*/ TypefaceInfo
+        {
+            public string TypefaceName { get; private set; }
+            public string FileName { get; private set; }
+            public string LinuxFileName { get; private set; }
+            public string[] LinuxSubstituteFaceNames { get; private set; }
+
+            internal TypefaceInfo(
+                string typefaceName,
+                string fileName,
+                string linuxFileName = "",
+                params string[] linuxSubstituteFaceNames)
+            {
+                TypefaceName = typefaceName;
+                FileName = fileName;
+                LinuxFileName = linuxFileName;
+                LinuxSubstituteFaceNames = linuxSubstituteFaceNames;
+            }
+        }
+#endif
 
         internal static readonly List<TypefaceInfo> TypefaceInfos = new()
         {
@@ -440,11 +463,19 @@ namespace PdfSharp.Fonts
             var typefaces = TypefaceInfos.Where(f => f.TypefaceName.StartsWith(familyName, StringComparison.OrdinalIgnoreCase));
             var baseFamily = TypefaceInfos.FirstOrDefault();
 
+#if NET6_0_OR_GREATER
             if (isBold)
                 typefaces = typefaces.Where(f => f.TypefaceName.Contains("bold", StringComparison.OrdinalIgnoreCase) || f.TypefaceName.Contains("heavy", StringComparison.OrdinalIgnoreCase));
 
             if (isItalic)
                 typefaces = typefaces.Where(f => f.TypefaceName.Contains("italic", StringComparison.OrdinalIgnoreCase) || f.TypefaceName.Contains("oblique", StringComparison.OrdinalIgnoreCase));
+#else
+            if (isBold)
+                typefaces = typefaces.Where(f => f.TypefaceName.IndexOf("bold", StringComparison.OrdinalIgnoreCase) >= 0 || f.TypefaceName.IndexOf("heavy", StringComparison.OrdinalIgnoreCase) >= 0);
+
+            if (isItalic)
+                typefaces = typefaces.Where(f => f.TypefaceName.IndexOf("italic", StringComparison.OrdinalIgnoreCase) >= 0 || f.TypefaceName.IndexOf("oblique", StringComparison.OrdinalIgnoreCase) >= 0);
+#endif
 
             var family = typefaces.FirstOrDefault();
             if (family is not null)
@@ -514,8 +545,9 @@ namespace PdfSharp.Fonts
             "/usr/share/fonts",
             "/usr/share/X11/fonts",
             "/usr/X11R6/lib/X11/fonts",
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "/.fonts"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "/.local/share/fonts"),
+            // TODO Avoid calling Environment.GetFolderPath twice.
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".fonts"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/fonts"),
         };
 
         /// <summary>

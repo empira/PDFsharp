@@ -14,7 +14,9 @@ namespace PdfSharp.Internal
         // But we decided to throw at the position where the problem happens and 
         // therefore we only compose the exception here and return it.
 
+#if NET6_0_OR_GREATER
         [DoesNotReturn]
+#endif
         public static void ThrowInvalidOperationException_ToDo(string? info = null)
         {
             var message = info == null
@@ -24,7 +26,9 @@ namespace PdfSharp.Internal
             throw new InvalidOperationException(message);
         }
 
+#if NET6_0_OR_GREATER
         [DoesNotReturn]
+#endif
         internal static void ThrowInvalidOperationException_HandleIsNotPinned()
         {
             // throw new InvalidOperationException(SR.InvalidOperation_HandleIsNotPinned);

@@ -74,12 +74,7 @@ namespace PdfSharp.Pdf
         /// Gets or sets a user defined object that contains arbitrary information associated with this PDF page.
         /// The tag is not used by PDFsharp.
         /// </summary>
-        public object Tag
-        {
-            get => _tag ?? NRT.ThrowOnNull<object>();
-            set => _tag = value;
-        }
-        object? _tag;
+        public object? Tag { get; set; }
 
         /// <summary>
         /// Closes the page. A closed page cannot be modified anymore, and it is not possible to

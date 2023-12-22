@@ -3,22 +3,24 @@
 
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.Versioning;
 using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
-using PdfSharp.Pdf.IO;
+//using PdfSharp.Pdf.IO;
 using PdfSharp.Snippets.Font;
+using PdfSharp.UniversalAccessibility.Drawing;
 
 namespace HelloWorld
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] _)
         {
-            var targetFrameworkAttribute = Assembly.GetExecutingAssembly()
-                .GetCustomAttributes(typeof(System.Runtime.Versioning.TargetFrameworkAttribute), false)
-                .SingleOrDefault();
+            TargetFrameworkAttribute targetFrameworkAttribute = (TargetFrameworkAttribute)Assembly.GetExecutingAssembly()
+                .GetCustomAttributes(typeof(TargetFrameworkAttribute), false)
+                .SingleOrDefault()!;
 
             // Create a new PDF document.
             var document = new PdfDocument();
@@ -56,27 +58,22 @@ namespace HelloWorld
             gfx.DrawString("Hello, PDFsharp!", font, XBrushes.Black,
                 new XRect(0, 0, page.Width, page.Height), XStringFormats.Center);
 
+            // Draw framework name.
+            gfx.DrawString(targetFrameworkAttribute.FrameworkDisplayName!, font, XBrushes.Black,
+                new XRect(0, 25, page.Width, page.Height), XStringFormats.Center);
+
             // Draw branch.
             gfx.DrawString(GitVersionInformation.BranchName, font, XBrushes.Black,
                 new XRect(0, 50, page.Width, page.Height), XStringFormats.Center);
 
             // Save the document...
-            //const string filename = "HelloWorld.pdf";
             var dir = System.IO.Directory.GetCurrentDirectory();
-            // Following line has worked, but now it caused exception
-            //var filename2 = $"HelloWorld-{Guid.NewGuid():N).ToUpperInvariant()}_tempfile.pdf";
             var filename = $"HelloWorld-{Guid.NewGuid().ToString("N").ToUpperInvariant()}_tempfile.pdf";
             filename = System.IO.Path.Combine(dir, filename);
-            Console.WriteLine($"Filename='{filename}'");
+            //Console.WriteLine($"Filename='{filename}'");
             document.Save(filename);
             // ...and start a viewer.
             Process.Start(new ProcessStartInfo(filename) { UseShellExecute = true });
-            //Process.Start(processStartInfo);
-        }
-
-        static void ProvidePassword(PdfPasswordProviderArgs args)
-        {
-            args.GetType();
         }
     }
 }

@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Newtonsoft.Json.Linq;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
@@ -147,7 +146,7 @@ namespace PdfSharp.Tests
             page = doc2.Pages[0];
             var array2 = page.Resources.Elements["/NumberTest"] as PdfArray;
             Debug.Assert(array2 != null, nameof(array2) + " != null");
-            for (int x = 0; x < array2.Elements.Count; ++x)
+            for (int x = 0; x < array2!.Elements.Count; ++x)
             {
                 var item1 = array.Elements[x];
                 var item2 = array2.Elements[x];

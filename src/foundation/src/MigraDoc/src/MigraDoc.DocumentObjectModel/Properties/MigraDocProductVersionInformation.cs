@@ -62,7 +62,7 @@ namespace MigraDoc
         /// <summary>
         /// The home page of this product.
         /// </summary>
-        public const string Url = "www.migradoc.net";
+        public const string Url = "www.pdfsharp.net";
 
         /// <summary>
         /// Unused.

@@ -329,12 +329,10 @@ namespace PdfSharp.Drawing
                 if (IsTemplate)
                     throw new InvalidOperationException("This XPdfForm is a template and not an imported PDF page; therefore it has no external document.");
 
-                if (_externalDocument == null)
-                    _externalDocument = PdfDocument.Tls.GetDocument(_path);
-                return _externalDocument;
+                return _externalDocument ??= PdfDocument.Tls.GetDocument(_path);
             }
         }
-        internal PdfDocument? _externalDocument;
+        PdfDocument? _externalDocument;
 
         /// <summary>
         /// Extracts the page number if the path has the form 'MyFile.pdf#123' and returns
@@ -358,9 +356,13 @@ namespace PdfSharp.Drawing
                     if (length > 0 && path[length] == '#')
                     {
                         // Must have at least one dot left of number sign to distinguish from e.g. '#123'.
+#if NET6_0_OR_GREATER
                         if (path.IndexOf('.', StringComparison.Ordinal) != -1)
+#else
+                        if (path.IndexOf(".", StringComparison.Ordinal) != -1)
+#endif
                         {
-                            pageNumber = Int32.Parse(path[(length + 1)..]);
+                            pageNumber = Int32.Parse(path.Substring(length + 1));
                             path = path.Substring(0, length);
                         }
                     }

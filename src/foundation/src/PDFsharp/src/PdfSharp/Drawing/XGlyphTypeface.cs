@@ -412,11 +412,19 @@ namespace PdfSharp.Drawing
         {
             string name = DisplayName;
             int ich = name.IndexOf("bold", StringComparison.OrdinalIgnoreCase);
+#if NET6_0_OR_GREATER
             if (ich > 0)
                 name = name[..ich] + name.Substring(ich + 4, name.Length - ich - 4);
             ich = name.IndexOf("italic", StringComparison.OrdinalIgnoreCase);
             if (ich > 0)
                 name = name[..ich] + name.Substring(ich + 6, name.Length - ich - 6);
+#else
+            if (ich > 0)
+                name = name.Substring(0, ich) + name.Substring(ich + 4, name.Length - ich - 4);
+            ich = name.IndexOf("italic", StringComparison.OrdinalIgnoreCase);
+            if (ich > 0)
+                name = name.Substring(0, ich) + name.Substring(ich + 6, name.Length - ich - 6);
+#endif
             //name = name.Replace(" ", "");
             name = name.Trim();
             name += GetFaceNameSuffix();
@@ -511,14 +519,25 @@ namespace PdfSharp.Drawing
             //string key = name + '/' + style + '/' + weight + '/' + stretch + '/' + simulations;
 
             // Consider using StringBuilder.
+#if NET6_0_OR_GREATER
             string key = (KeyPrefix
-                    + name
-                    + '/'
-                    + style[..1]
-                    + '/'
-                    + wpfGlyphTypeface.Weight.ToOpenTypeWeight().ToString(CultureInfo.InvariantCulture)
-                    + '/'
-                    + wpfGlyphTypeface.Stretch.ToOpenTypeStretch().ToString(CultureInfo.InvariantCulture)).ToLowerInvariant();
+                          + name
+                          + '/'
+                          + style[..1]
+                          + '/'
+                          + wpfGlyphTypeface.Weight.ToOpenTypeWeight().ToString(CultureInfo.InvariantCulture)
+                          + '/'
+                          + wpfGlyphTypeface.Stretch.ToOpenTypeStretch().ToString(CultureInfo.InvariantCulture)).ToLowerInvariant();
+#else
+            string key = (KeyPrefix
+                          + name
+                          + '/'
+                          + style.Substring(0, 1)
+                          + '/'
+                          + wpfGlyphTypeface.Weight.ToOpenTypeWeight().ToString(CultureInfo.InvariantCulture)
+                          + '/'
+                          + wpfGlyphTypeface.Stretch.ToOpenTypeStretch().ToString(CultureInfo.InvariantCulture)).ToLowerInvariant();
+#endif
             switch (wpfGlyphTypeface.StyleSimulations)
             {
                 case WpfStyleSimulations.BoldSimulation:

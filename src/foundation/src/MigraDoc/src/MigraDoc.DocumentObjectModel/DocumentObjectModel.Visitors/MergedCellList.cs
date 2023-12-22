@@ -428,7 +428,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                         if (cell2.Row.Index == cell.Row.Index)
                             return cell2;
                     }
-                    for (int index = cellIdx - 1; index >= 0; --index) // THHO4THHO Check this!
+                    for (int index = cellIdx + 1; index < Count; ++index)
                     {
                         var currCell = this[index];
                         if (IsNeighbor(cell, currCell, position))

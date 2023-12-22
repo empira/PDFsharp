@@ -9,10 +9,10 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
     {
         public static void InitializeFontResolver()
         {
-            GlobalFontSettings.FontResolver ??= NewFontResolver.Get();
+            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
         }
 
-        //[Obsolete("Not needed when using NewFontResolver")]
+        //[Obsolete("Not needed when using SnippetsFontResolver")]
         public static void InitializeFontResolverWithSegoeWpAsDefault(Document doc)
         {
             InitializeFontResolver();

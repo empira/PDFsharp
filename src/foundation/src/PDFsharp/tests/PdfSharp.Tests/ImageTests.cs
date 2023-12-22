@@ -50,7 +50,7 @@ namespace PdfSharp.Tests
             var r = width / 5;
             gfx.DrawEllipse(new XPen(XColors.Red, 1.5), XBrushes.White, new XRect(width / 2 - r, height / 2 - r, 2 * r, 2 * r));
 
-            GlobalFontSettings.FontResolver ??= NewFontResolver.Get();
+            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
 
             // Create a font.
             var font = new XFont("Arial", 20, XFontStyleEx.BoldItalic);
@@ -107,7 +107,7 @@ namespace PdfSharp.Tests
                 imagePath = imagePath.Replace('\\', '/');
 
             var assembly = Assembly.GetExecutingAssembly();
-            var dir = Path.GetDirectoryName(assembly.Location)!;
+            var dir = Path.GetDirectoryName(assembly.GetOriginalLocation())!;
 
             var fullName = Path.Combine(dir, imagePath);
             var image = XImage.FromFile(fullName);
@@ -151,7 +151,7 @@ namespace PdfSharp.Tests
             var r = width / 5;
             gfx.DrawEllipse(new XPen(XColors.Red, 1.5), XBrushes.White, new XRect(width / 2 - r, height / 2 - r, 2 * r, 2 * r));
 
-            GlobalFontSettings.FontResolver ??= NewFontResolver.Get();
+            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
 
             // Create a font.
             var font = new XFont("Arial", 20, XFontStyleEx.BoldItalic);
@@ -181,7 +181,7 @@ namespace PdfSharp.Tests
                     imagePaths[i] = imagePaths[i].Replace('\\', '/');
 
             var assembly = Assembly.GetExecutingAssembly();
-            var dir = Path.GetDirectoryName(assembly.Location) ?? throw new Exception();
+            var dir = Path.GetDirectoryName(assembly.GetOriginalLocation()) ?? throw new Exception();
 
             int offset = 0;
             int imageHeight = 800 / imagePaths.Length;

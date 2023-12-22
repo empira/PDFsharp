@@ -81,7 +81,7 @@ namespace PdfSharp.Drawing
         {
             ////// Weird: LastError is always 123 or 127. Comment out Debug.Assert.
             ////// StL/23-01-31 Reactivate assertions because I believe the bugs are already fixed in .NET 6.
-            
+
             ////// First call may get an error from previous calls.
             ////int error = Marshal.GetLastWin32Error();
             //////Debug.Assert(error == 0); May fail with 38
@@ -115,7 +115,12 @@ namespace PdfSharp.Drawing
                 isTtcf = true;
             }
             error = Marshal.GetLastWin32Error();
+#if NET6_0_OR_GREATER
             Debug.Assert(error == 0);
+#else
+            // We ignore error 127 here.
+            Debug.Assert(error == 0 || error == 127, "ReadFontBytesFromGdi failed: " + gdiFont.Name + ": " + error + ", size: " + size + ", isTtcf: " + isTtcf);
+#endif
 
             if (size == 0)
                 throw new InvalidOperationException("Cannot retrieve font data.");
@@ -153,7 +158,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-        static XFontSource GetOrCreateFrom(string typefaceKey, byte[] fontBytes)
+            static XFontSource GetOrCreateFrom(string typefaceKey, byte[] fontBytes)
         {
             ulong key = FontHelper.CalcChecksum(fontBytes);
             if (FontFactory.TryGetFontSourceByKey(key, out var fontSource))

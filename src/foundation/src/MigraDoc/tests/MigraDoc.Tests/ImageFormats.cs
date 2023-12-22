@@ -33,7 +33,7 @@ namespace MigraDoc.Tests
 #endif
         {
 #if CORE
-            GlobalFontSettings.FontResolver ??= NewFontResolver.Get();
+            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
 #endif
 
             // Create a MigraDoc document.
@@ -76,7 +76,7 @@ namespace MigraDoc.Tests
 #if CORE
             // NET6FIX - will be removed
             if (PdfSharp.Capabilities.Build.IsCoreBuild)
-                GlobalFontSettings.FontResolver = NewFontResolver.Get();
+                GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             // Create a MigraDoc document.
@@ -122,7 +122,7 @@ namespace MigraDoc.Tests
 #endif
         {
 #if CORE
-            GlobalFontSettings.FontResolver ??= NewFontResolver.Get();
+            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
 #endif
 
             var options = SecurityTestHelper.TestOptions.ByEnum(optionsEnum);
@@ -181,7 +181,7 @@ namespace MigraDoc.Tests
             var images = _testImages;
             var x = GetType();
             var section = document.LastSection;
-            section.AddParagraph(x.Assembly.Location);
+            section.AddParagraph(x.Assembly.GetOriginalLocation());
             var workingDir = Environment.CurrentDirectory;
             section.AddParagraph(workingDir);
 

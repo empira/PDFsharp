@@ -89,8 +89,13 @@ namespace MigraDoc.Tests
                 public V4() : this(false)
                 { }
 
+#if NET6_0_OR_GREATER
                 protected V4(bool getSkipped) : base(x => Enum.GetName(x)!.StartsWith("V4", StringComparison.OrdinalIgnoreCase), getSkipped)
                 { }
+#else
+                protected V4(bool getSkipped) : base(x => Enum.GetName(typeof(TestOptionsEnum), x)!.StartsWith("V4", StringComparison.OrdinalIgnoreCase), getSkipped)
+                { }
+#endif
             }
             public class V4Skipped : V4
             {
@@ -103,8 +108,13 @@ namespace MigraDoc.Tests
                 public V5() : this(false)
                 { }
 
+#if NET6_0_OR_GREATER
                 protected V5(bool getSkipped) : base(x => Enum.GetName(x)!.StartsWith("V5", StringComparison.OrdinalIgnoreCase), getSkipped)
                 { }
+#else
+                protected V5(bool getSkipped) : base(x => Enum.GetName(typeof(TestOptionsEnum), x)!.StartsWith("V5", StringComparison.OrdinalIgnoreCase), getSkipped)
+                { }
+#endif
             }
             public class V5Skipped : V5
             {
@@ -121,11 +131,25 @@ namespace MigraDoc.Tests
 
                 protected TestDataBase(Func<TestOptionsEnum, bool>? condition = null, bool getSkipped = false)
                 {
+#if NET6_0_OR_GREATER
                     _data = Enum.GetValues<TestOptionsEnum>()
                         .Where(x =>
                             SkippedTestOptions.Contains(x) == getSkipped // Get Skipped or not skipped encryption configurations, like desired.
                             && (condition is null || condition(x))) // Get only the encryption configurations matching the desired condition, if given.
                         .Select(x => new object[] { x }).ToList();
+#else
+                    var enums = Enum.GetValues(typeof(TestOptionsEnum));
+                    var list = new List<TestOptionsEnum>();
+                    foreach (TestOptionsEnum e in enums)
+                    {
+                        list.Add(e);
+                    }
+                    _data = list
+                        .Where(x =>
+                            SkippedTestOptions.Contains(x) == getSkipped // Get Skipped or not skipped encryption configurations, like desired.
+                            && (condition is null || condition(x))) // Get only the encryption configurations matching the desired condition, if given.
+                        .Select(x => new object[] { x }).ToList();
+#endif
                 }
 
                 public IEnumerator<object[]> GetEnumerator() => _data.GetEnumerator();
@@ -133,19 +157,19 @@ namespace MigraDoc.Tests
             }
         }
 
-        
+
         /// <summary>
         /// A class containing the test configuration to avoid multiple parameters in many test methods and reduce refactoring need on changes of test configurations.
         /// Use ByEnum() to create options fromTestOptionsEnum inside the test.
         /// </summary>
         public class TestOptions
         {
-            public PdfStandardSecurityHandler.DefaultEncryption Encryption { get; private init; }
+            public PdfStandardSecurityHandler.DefaultEncryption Encryption { get; private set; }
 
             /// <summary>
             /// Encrypt the Metadata dictionary (default = true). Valid for Version 4 and 5.
             /// </summary>
-            public bool EncryptMetadata { get; private init; } = true;
+            public bool EncryptMetadata { get; private set; } = true;
 
             public string? UserPassword { get; private set; }
             public string? OwnerPassword { get; private set; }
@@ -161,12 +185,12 @@ namespace MigraDoc.Tests
                 UserPassword = userPassword;
                 OwnerPassword = ownerPassword;
             }
-            
+
             public static TestOptions ByEnum(TestOptionsEnum? @enum)
             {
                 return @enum switch
                 {
-                    TestOptionsEnum.None => new () { Encryption = PdfStandardSecurityHandler.DefaultEncryption.None },
+                    TestOptionsEnum.None => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.None },
                     TestOptionsEnum.Default => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.Default },
                     TestOptionsEnum.V1 => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.V1 },
                     TestOptionsEnum.V2With40Bits => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.V2With40Bits },
@@ -186,7 +210,7 @@ namespace MigraDoc.Tests
         {
             var doc = new Document();
 #if CORE
-            GlobalFontSettings.FontResolver ??= NewFontResolver.Get();
+            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
 #endif
             return doc;
         }
@@ -272,7 +296,7 @@ namespace MigraDoc.Tests
         public static string AddSuffixToFilename(string filename, TestOptions? options = null)
         {
             var suffix = GetFilenamePrefix(options);
-            
+
             var extension = Path.GetExtension(filename);
             var filenameWithoutExtension = Path.GetFileNameWithoutExtension(filename);
             return $"{filenameWithoutExtension} {suffix}{extension}";
@@ -289,11 +313,19 @@ namespace MigraDoc.Tests
             // Prefix for encrypted file.
             else
             {
+#if NET6_0_OR_GREATER
                 prefixSuffix += $"{Enum.GetName(options.Encryption)}"
                     .Replace("Default", "Def")
                     .Replace("Using", "_")
                     .Replace("With", "_")
                     .Replace("Bits", "B");
+#else
+                prefixSuffix += $"{Enum.GetName(typeof(PdfStandardSecurityHandler.DefaultEncryption), options.Encryption)}"
+                    .Replace("Default", "Def")
+                    .Replace("Using", "_")
+                    .Replace("With", "_")
+                    .Replace("Bits", "B");
+#endif
 
                 if (!options.EncryptMetadata)
                     prefixSuffix += "_XMeta";

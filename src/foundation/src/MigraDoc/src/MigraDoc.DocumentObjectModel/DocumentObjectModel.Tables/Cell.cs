@@ -155,7 +155,9 @@ namespace MigraDoc.DocumentObjectModel.Tables
         /// </summary>
         public Table Table
         {
+#if NET6_0_OR_GREATER
             [return: MaybeNull]
+#endif
             get
             {
                 // Set in ResetCachedValues.
@@ -169,7 +171,9 @@ namespace MigraDoc.DocumentObjectModel.Tables
         /// </summary>
         public Column Column
         {
+#if NET6_0_OR_GREATER
             [return: MaybeNull]
+#endif
             get
             {
                 if (_clm is not null)
@@ -193,7 +197,9 @@ namespace MigraDoc.DocumentObjectModel.Tables
         /// </summary>
         public Row Row
         {
+#if NET6_0_OR_GREATER
             [return: MaybeNull]
+#endif
             get
             {
                 // Set in ResetCachedValues.

@@ -8,7 +8,9 @@ namespace PdfSharp.Pdf.Internal
     /// <summary>
     /// An encoder for PDF AnsiEncoding.
     /// </summary>
+#if NET6_0_OR_GREATER
     [Obsolete("Use CodePagesEncodingProvider.Instance.GetEncoding(1252)")]
+#endif
     public sealed class AnsiEncoding : Encoding
     {
         /// <summary>

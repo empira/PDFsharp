@@ -3,6 +3,7 @@
 
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.DocumentObjectModel.Tables;
+using System.Text;
 
 namespace MigraDoc.DocumentObjectModel.Visitors
 {
@@ -190,22 +191,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         /// <returns>Text content as string.</returns>
         public static string GetText(this Cell cell)
         {
-            var isFirst = true;
-            var str = "";
-            foreach (var element in cell.Elements)
-            {
-                var p = element as Paragraph;
-                if (p != null)
-                {
-                    if (!isFirst)
-                        str += "\n\n";
-                    str += p.Elements.GetText();
-                }
-
-                if (isFirst)
-                    isFirst = false;
-            }
-            return str;
+            return cell.Elements.GetText();
         }
 
         /// <summary>
@@ -218,25 +204,56 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             return paragraph.Elements.GetText();
         }
 
-        private static string GetText(this ParagraphElements elements)
+        /// <summary>
+        /// Gets the text content of the hyperlinks's elements as a string.
+        /// </summary>
+        /// <param name="hyperlink">The hyperlink.</param>
+        /// <returns>Text content as string.</returns>
+        public static string GetText(this Hyperlink hyperlink)
         {
-            var str = "";
-            foreach (var element in elements)
-            {
-                var t = element as Text;
-                var ft = element as FormattedText;
-                var c = element as Character;
-                if (t != null)
-                    str += t.Content;
-                else if (ft != null)
-                    str += ft.Elements.GetText();
-                else if (c != null)
-                    str += c.GetText();
-            }
-            return str;
+            return hyperlink.Elements.GetText();
         }
 
-        private static string GetText(this Character character)
+        /// <summary>
+        /// Gets the text content of the elements as a string.
+        /// </summary>
+        /// <param name="elements">The elements.</param>
+        /// <returns>Text content as string.</returns>
+        public static string GetText(this IEnumerable<DocumentObject?> elements)
+        {
+            return GetTextAsStringBuilder(elements).ToString();
+        }
+
+        static StringBuilder GetTextAsStringBuilder(IEnumerable<DocumentObject?> elements)
+        {
+            var sb = new StringBuilder();
+            Paragraph? lastAsParagraph = null;
+
+            foreach (var element in elements)
+            {
+                if (element is null)
+                    continue;
+
+                var p = element as Paragraph;
+                if (p != lastAsParagraph && sb.Length > 0)
+                    sb.Append("\n\n");
+
+                if (p != null)
+                    sb.Append(GetTextAsStringBuilder(p.Elements));
+                else if (element is Text t)
+                    sb.Append(t.Content);
+                else if (element is FormattedText ft)
+                    sb.Append(GetTextAsStringBuilder(ft.Elements));
+                else if (element is Character c)
+                    sb.Append(c.GetText());
+
+                lastAsParagraph = p;
+            }
+
+            return sb;
+        }
+
+        static string GetText(this Character character)
         {
             var symbol = character.GetSymbol();
             var result = "";
@@ -247,45 +264,28 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             return result;
         }
 
-        private static string GetSymbol(this Character character)
+        static string GetSymbol(this Character character)
         {
-            switch (character.SymbolName)
+            return character.SymbolName switch
             {
-                case SymbolName.Blank:
-                    return " ";
-                case SymbolName.En:
-                    return "\u2002";
-                case SymbolName.Em:
-                    return "\u2003";
-                case SymbolName.EmQuarter:
-                    return "\u2005";
-                case SymbolName.Tab:
-                    return "\t";
-                case SymbolName.LineBreak:
-                    return "\n";
-                case SymbolName.ParaBreak:
-                    return "\n\n";
-                case SymbolName.Euro:
-                    return "€";
-                case SymbolName.Copyright:
-                    return "©";
-                case SymbolName.Trademark:
-                    return "™";
-                case SymbolName.RegisteredTrademark:
-                    return "®";
-                case SymbolName.Bullet:
-                    return "•";
-                case SymbolName.Not:
-                    return "¬";
-                case SymbolName.EmDash:
-                    return "—";
-                case SymbolName.EnDash:
-                    return "–";
-                case SymbolName.NonBreakableBlank:
-                    return "\u0083";
-                default:
-                    return character.Char.ToString();
-            }
+                SymbolName.Blank => " ",
+                SymbolName.En => "\u2002",
+                SymbolName.Em => "\u2003",
+                SymbolName.EmQuarter => "\u2005",
+                SymbolName.Tab => "\t",
+                SymbolName.LineBreak => "\n",
+                SymbolName.ParaBreak => "\n\n",
+                SymbolName.Euro => "€",
+                SymbolName.Copyright => "©",
+                SymbolName.Trademark => "™",
+                SymbolName.RegisteredTrademark => "®",
+                SymbolName.Bullet => "•",
+                SymbolName.Not => "¬",
+                SymbolName.EmDash => "—",
+                SymbolName.EnDash => "–",
+                SymbolName.NonBreakableBlank => "\u0083",
+                _ => character.Char.ToString()
+            };
         }
 
         /// <summary>
