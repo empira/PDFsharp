@@ -28,7 +28,8 @@ namespace PdfSharp.Pdf.Advanced
 
             var embeddedFileDictionary = new PdfDictionary(Owner);
 
-            Owner.Internals.AddObject(_embeddedFileStream);
+            if(_embeddedFileStream.Reference is null) // 2 or more PdfFileSpecification could reference the same PdfEmbeddedFileStream, so it may not be necessary to add it again to Internals
+                Owner.Internals.AddObject(_embeddedFileStream);
             embeddedFileDictionary.Elements.SetReference(Keys.F, _embeddedFileStream.Reference);
             embeddedFileDictionary.Elements.SetReference(Keys.UF, _embeddedFileStream.Reference);
 
