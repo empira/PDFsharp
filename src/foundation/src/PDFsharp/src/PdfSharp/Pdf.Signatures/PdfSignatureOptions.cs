@@ -13,5 +13,6 @@ namespace PdfSharp.Pdf.Signatures
         public string Location { get; set; }
         public string Reason { get; set; }
         public XRect Rectangle { get; set; }
+        public int PageIndex { get; set; }
     }
 }
