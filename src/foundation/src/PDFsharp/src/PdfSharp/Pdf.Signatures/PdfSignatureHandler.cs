@@ -29,10 +29,21 @@ namespace PdfSharp.Pdf.Signatures
 
         private const int byteRangePaddingLength = 36; // place big enough required to replace [0 0 0 0] with the correct value
 
+        /// <summary>
+        /// Pdf Document signature will be attached to
+        /// </summary>
         public PdfDocument Document { get; private set; }
+
+        /// <summary>
+        /// Signature options
+        /// </summary>
         public PdfSignatureOptions Options { get; private set; }
         private ISigner signer { get; set; }
 
+        /// <summary>
+        /// Attach this signature handler to the given Pdf document
+        /// </summary>
+        /// <param name="documentToSign">Pdf document to sign</param>
         public void AttachToDocument(PdfDocument documentToSign)
         {
             this.Document = documentToSign;
@@ -46,6 +57,12 @@ namespace PdfSharp.Pdf.Signatures
 
         public PdfSignatureHandler(ISigner signer, PdfSignatureOptions options)
         {
+            ArgumentNullException.ThrowIfNull(signer);
+            ArgumentNullException.ThrowIfNull(options);
+
+            if (options.PageIndex < 0)
+                throw new ArgumentOutOfRangeException($"Signature page index cannot be negative.");
+
             this.signer = signer;
             this.Options = options;
         }
@@ -81,7 +98,7 @@ namespace PdfSharp.Pdf.Signatures
         /// <summary>
         /// Get the bytes ranges to sign.
         /// As recommended in PDF specs, whole document will be signed, except for the hexadecimal signature token value in the /Contents entry.
-        /// Example: '/Contents <aaaaa111111>' => '<aaaaa111111>' will be excluded from the bytes to sign.
+        /// Example: '/Contents &lt;aaaaa111111&gt;' => '&lt;aaaaa111111&gt;' will be excluded from the bytes to sign.
         /// </summary>
         /// <param name="stream"></param>
         /// <param name="verboseExtraSpaceSeparatorLength"></param>
@@ -110,10 +127,8 @@ namespace PdfSharp.Pdf.Signatures
 
         private void AddSignatureComponents(object sender, EventArgs e)
         {
-            if (Options.PageIndex < 0 || Options.PageIndex >= Document.PageCount)
-            {
-                throw new Exception($"Signature page doesn't exist, specified page was {Options.PageIndex + 1} but document has only {Document.PageCount} page(s).");
-            }
+            if (Options.PageIndex >= Document.PageCount)
+                throw new ArgumentOutOfRangeException($"Signature page doesn't exist, specified page was {Options.PageIndex + 1} but document has only {Document.PageCount} page(s).");
 
             var fakeSignature = Enumerable.Repeat((byte)0x20/*actual value does not matter*/, knownSignatureLengthInBytesByPdfVersion[Document.Version]).ToArray();
             var fakeSignatureAsRawString = PdfEncoders.RawEncoding.GetString(fakeSignature, 0, fakeSignature.Length);
