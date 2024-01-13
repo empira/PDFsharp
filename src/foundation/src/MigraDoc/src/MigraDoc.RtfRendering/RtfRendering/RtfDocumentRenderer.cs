@@ -39,7 +39,7 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         public void Render(Document doc, string file, string workingDirectory)
         {
-#if true
+#if NET6_0_OR_GREATER
             var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
 #else
             Encoding? ansiEncoding;
@@ -50,8 +50,10 @@ namespace MigraDoc.RtfRendering
             }
             catch (NotSupportedException)
             {
+#if NET6_0_OR_GREATER
                 // Register provider if ANSI encoding is not available.
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+#endif
                 ansiEncoding = Encoding.GetEncoding(1252);
             }
 #endif
@@ -99,7 +101,11 @@ namespace MigraDoc.RtfRendering
             if (document.UseCmykColor)
                 throw new InvalidOperationException("Cannot create RTF document with CMYK colors.");
 
+#if NET6_0_OR_GREATER
             var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
+#else
+            var ansiEncoding = Encoding.GetEncoding(1252);
+#endif
             StreamWriter? streamWriter = null;
             try
             {

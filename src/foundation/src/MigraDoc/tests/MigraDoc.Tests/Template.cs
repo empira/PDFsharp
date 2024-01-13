@@ -20,7 +20,7 @@ namespace MigraDoc.Tests
         public void Create_Hello_World_TemplateMigraDocTests()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             // Create a MigraDoc document.

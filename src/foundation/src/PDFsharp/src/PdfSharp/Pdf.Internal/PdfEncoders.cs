@@ -44,8 +44,12 @@ namespace PdfSharp.Pdf.Internal
 #else
                     //// Use own implementation because there is not ANSI encoding in .NET 6.
                     //_winAnsiEncoding = new AnsiEncoding();
+#if NET6_0_OR_GREATER
                     // There is ANSI encoding available with .NET 6. Use it.
                     _winAnsiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
+#else
+                    _winAnsiEncoding = new AnsiEncoding();
+#endif
 #endif
                 }
                 return _winAnsiEncoding;
@@ -268,7 +272,7 @@ namespace PdfSharp.Pdf.Internal
             byte[]? originalBytes = null;
 
             bool encrypted = false;
-            if (securityHandler != null && !hex)
+            if (securityHandler != null)
             {
                 originalBytes = bytes;
                 bytes = (byte[])bytes.Clone();

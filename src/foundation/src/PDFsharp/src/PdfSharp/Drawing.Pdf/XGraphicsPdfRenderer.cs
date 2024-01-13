@@ -1607,7 +1607,11 @@ namespace PdfSharp.Drawing.Pdf
                         else if (type == typeof(PolyQuadraticBezierSegment))
                         {
                             PolyQuadraticBezierSegment seg = (PolyQuadraticBezierSegment)segment;
+#if NET6_0_OR_GREATER
                             currentPoint = seg.Points[^1];
+#else
+                            currentPoint = seg.Points[seg.Points.Count - 1];
+#endif
                             // IMPROVE: Undone because XGraphics has no such curve type.
                             // Easy to implement, but not worthy enough.
                             throw new NotImplementedException("AppendPath with PolyQuadraticBezierSegment.");
@@ -1620,7 +1624,7 @@ namespace PdfSharp.Drawing.Pdf
         }
 #endif
 
-        internal void Append(string value)
+                            internal void Append(string value)
         {
             _content.Append(value);
         }

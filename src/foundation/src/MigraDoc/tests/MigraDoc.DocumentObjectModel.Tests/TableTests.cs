@@ -5,6 +5,7 @@ using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
+using System.Linq;
 using Xunit;
 
 namespace MigraDoc.DocumentObjectModel.Tests
@@ -15,7 +16,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Create_Hello_World_TableTests()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             // Create a MigraDoc document.
@@ -92,7 +93,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Test_MergeDown_Simple()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             var document = new Document();
@@ -124,7 +125,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Test_KeepWith_MergeDown_PageBreak()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             var document = new Document();
@@ -171,7 +172,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Test_MergeDown_LineBreak_RowHeight()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             var document = new Document();
@@ -213,7 +214,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var contentReference = (PdfReference)page.Contents.Elements.Items[0];
             var content = (PdfDictionary)contentReference.Value;
             var contentStream = content.Stream.ToString();
-            var contentLines = contentStream.Split("\n");
+            var contentLines = contentStream.Split('\n');
             var lineCount = contentLines.Length;
 
             var lineIndex = 0;
@@ -221,8 +222,13 @@ namespace MigraDoc.DocumentObjectModel.Tests
             // Find Cell containing ID#1.
             while (lineIndex < lineCount)
             {
+#if NET6_0_OR_GREATER
                 if (contentLines[lineIndex].Contains("<002C002700060014>", StringComparison.Ordinal)) // Current PdfToUnicodeMap representation of "ID#1".
                     break;
+#else
+                if (contentLines[lineIndex].Contains("<002C002700060014>")) // Current PdfToUnicodeMap representation of "ID#1".
+                    break;
+#endif
                 lineIndex++;
             }
             lineIndex.Should().BeLessThan(lineCount, "Representation of \"ID#1\" shall be found");
@@ -230,7 +236,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             // Check the following lines drawing the borders for the correct values.
             contentLines[++lineIndex].Should().Be("ET", "\"ID#1\" shall be the last text of the cell");
 
-            var positionParts = contentLines[++lineIndex].Split(" ");
+            var positionParts = contentLines[++lineIndex].Split(' ');
             positionParts.Length.Should().Be(3, "a move operator and two operands are expected");
             positionParts[2].Should().Be("m", "a move operator is expected");
             positionParts[1].Should().NotBe("721.0276", "this is the value generated with an incorrect cell height");
@@ -240,7 +246,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
 
             contentLines[++lineIndex].Should().Be("S", "stroking the path is expected");
 
-            positionParts = contentLines[++lineIndex].Split(" ");
+            positionParts = contentLines[++lineIndex].Split(' ');
             positionParts.Length.Should().Be(3, "a move operator and two operands are expected");
             positionParts[2].Should().Be("m", "a move operator is expected");
             positionParts[1].Should().NotBe("721.0276", "this is the value generated with an incorrect cell height");
@@ -250,13 +256,13 @@ namespace MigraDoc.DocumentObjectModel.Tests
 
             contentLines[++lineIndex].Should().Be("S", "stroking the path is expected");
 
-            positionParts = contentLines[++lineIndex].Split(" ");
+            positionParts = contentLines[++lineIndex].Split(' ');
             positionParts.Length.Should().Be(3, "a move operator and two operands are expected");
             positionParts[2].Should().Be("m", "a move operator is expected");
             positionParts[1].Should().NotBe("721.5276", "this is the value generated with an incorrect cell height");
             positionParts[1].Should().Be("733.0266", "this is the value generated with the correct cell height");
 
-            positionParts = contentLines[++lineIndex].Split(" ");
+            positionParts = contentLines[++lineIndex].Split(' ');
             positionParts.Length.Should().Be(3, "a line operator and two operands are expected");
             positionParts[2].Should().Be("l", "a line operator is expected");
             positionParts[1].Should().NotBe("721.5276", "this is the value generated with an incorrect cell height");
@@ -265,8 +271,13 @@ namespace MigraDoc.DocumentObjectModel.Tests
             // Find Cell containing ID#2.
             while (lineIndex < lineCount)
             {
+#if NET6_0_OR_GREATER
                 if (contentLines[lineIndex].Contains("<002C002700060015>", StringComparison.Ordinal)) // Current PdfToUnicodeMap representation of "ID#2".
                     break;
+#else
+                if (contentLines[lineIndex].Contains("<002C002700060015>")) // Current PdfToUnicodeMap representation of "ID#2".
+                    break;
+#endif
                 lineIndex++;
             }
             lineIndex.Should().BeLessThan(lineCount, "Representation of \"ID#2\" shall be found");
@@ -274,7 +285,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             // Check the following lines drawing the borders for the correct values.
             contentLines[++lineIndex].Should().Be("ET", "\"ID#2\" shall be the last text of the cell");
 
-            positionParts = contentLines[++lineIndex].Split(" ");
+            positionParts = contentLines[++lineIndex].Split(' ');
             positionParts.Length.Should().Be(3, "a move operator and two operands are expected");
             positionParts[2].Should().Be("m", "a move operator is expected");
             positionParts[1].Should().NotBe("721.0276", "this is the value generated with an incorrect cell height");
@@ -284,7 +295,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
 
             contentLines[++lineIndex].Should().Be("S", "stroking the path is expected");
 
-            positionParts = contentLines[++lineIndex].Split(" ");
+            positionParts = contentLines[++lineIndex].Split(' ');
             positionParts.Length.Should().Be(3, "a move operator and two operands are expected");
             positionParts[2].Should().Be("m", "a move operator is expected");
             positionParts[1].Should().NotBe("721.0276", "this is the value generated with an incorrect cell height");
@@ -294,13 +305,13 @@ namespace MigraDoc.DocumentObjectModel.Tests
 
             contentLines[++lineIndex].Should().Be("S", "stroking the path is expected");
 
-            positionParts = contentLines[++lineIndex].Split(" ");
+            positionParts = contentLines[++lineIndex].Split(' ');
             positionParts.Length.Should().Be(3, "a move operator and two operands are expected");
             positionParts[2].Should().Be("m", "a move operator is expected");
             positionParts[1].Should().NotBe("721.5276", "this is the value generated with an incorrect cell height");
             positionParts[1].Should().Be("733.0266", "this is the value generated with the correct cell height");
 
-            positionParts = contentLines[++lineIndex].Split(" ");
+            positionParts = contentLines[++lineIndex].Split(' ');
             positionParts.Length.Should().Be(3, "a line operator and two operands are expected");
             positionParts[2].Should().Be("l", "a line operator is expected");
             positionParts[1].Should().NotBe("721.5276", "this is the value generated with an incorrect cell height");
@@ -311,7 +322,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Test_Border_Inheritance()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             var document = new Document();
@@ -352,7 +363,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var contentReference = (PdfReference)page.Contents.Elements.Items[0];
             var content = (PdfDictionary)contentReference.Value;
             var contentStream = content.Stream.ToString();
-            var contentLines = contentStream.Split("\n");
+            var contentLines = contentStream.Split('\n');
 
             // 1.5 is the desired border width. It shall be set only once.
             contentLines.Count(x => x == "1.5 w").Should().Be(1);
@@ -364,7 +375,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Test_Huge_MergeDown_Cell()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             var document = new Document();
@@ -441,7 +452,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Test_Repeated_Heading_Border()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
             var bottomWidth = Unit.FromPoint(2.3);
             var bottomColor = Colors.Blue;
@@ -493,15 +504,25 @@ namespace MigraDoc.DocumentObjectModel.Tests
                 var content = (PdfDictionary)contentReference.Value;
                 var contentStream = content.Stream.ToString();
 
+#if NET6_0_OR_GREATER
                 // Split ContentStream where the "Row" text is rendered.
                 var contentByRows = contentStream.Split("Td <00350052005A> Tj");
-                contentByRows.Length.Should().Be(3, "as \"Row\" occurs twice per page, the stream should be splitted into 3 parts");
+                contentByRows.Length.Should().Be(3, "as \"Row\" occurs twice per page, the stream should be split into 3 parts");
 
                 var rowsByDrawLinesByLines = contentByRows // Content split by "Row" text ...
                     .Select(r => r.Split(" l\n") // ... and that parts split by drawn lines ...
-                        .Select(drawLine => drawLine.Split("\n")).ToArray() // ... and that parts split by line breaks.
+                        .Select(drawLine => drawLine.Split('\n')).ToArray() // ... and that parts split by line breaks.
                     ).ToArray();
+#else
+                // Split ContentStream where the "Row" text is rendered.
+                var contentByRows = contentStream.Splitter("Td <00350052005A> Tj");
+                contentByRows.Length.Should().Be(3, "as \"Row\" occurs twice per page, the stream should be split into 3 parts");
 
+                var rowsByDrawLinesByLines = contentByRows // Content split by "Row" text ...
+                    .Select(r => r.Splitter(" l\n") // ... and that parts split by drawn lines ...
+                            .Select(drawLine => drawLine.Split('\n')).ToArray() // ... and that parts split by line breaks.
+                    ).ToArray();
+#endif
 
                 // Heading row.
                 var contentRowDrawLineParts = rowsByDrawLinesByLines[0];

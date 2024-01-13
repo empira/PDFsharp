@@ -48,12 +48,12 @@ namespace PdfSharp.Pdf.IO
             FileStream? stream = null;
             try
             {
-                string realPath = Drawing.XPdfForm.ExtractPageNumber(path, out var pageNumber);
+                string realPath = Drawing.XPdfForm.ExtractPageNumber(path, out _ /*var pageNumber*/);
                 if (File.Exists(realPath)) // Prevent unwanted exceptions during debugging.
                 {
                     stream = new FileStream(realPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                     byte[] bytes = new byte[1024];
-                    stream.Read(bytes, 0, 1024);
+                    var _ = stream.Read(bytes, 0, 1024);
                     return GetPdfFileVersion(bytes);
                 }
             }
@@ -88,7 +88,7 @@ namespace PdfSharp.Pdf.IO
             {
                 pos = stream.Position;
                 byte[] bytes = new byte[1024];
-                stream.Read(bytes, 0, 1024);
+                var _ = stream.Read(bytes, 0, 1024);
                 return GetPdfFileVersion(bytes);
             }
             // ReSharper disable once EmptyGeneralCatchClause
@@ -182,10 +182,8 @@ namespace PdfSharp.Pdf.IO
             {
                 stream = new FileStream(path, FileMode.Open, FileAccess.Read);
                 document = Open(stream, password, openMode, provider);
-                if (document != null)
-                {
+                if (document != null!)
                     document._fullPath = Path.GetFullPath(path);
-                }
             }
             finally
             {
@@ -251,20 +249,21 @@ namespace PdfSharp.Pdf.IO
                 // Get file version.
                 byte[] header = new byte[1024];
                 stream.Position = 0;
-                stream.Read(header, 0, 1024);
+                var _ = stream.Read(header, 0, 1024);
                 document._version = GetPdfFileVersion(header);
                 if (document._version == 0)
                     throw new InvalidOperationException(PSSR.InvalidPdf);
 
+                // Set IsUnderConstruction for IrefTable to true. This allows Parser.ParseObject() to insert placeholder references for objects not yet known.
+                // This is necessary for documents with objects saved in objects streams, which are read and decoded after reading the file level PdfObjects.
+                // After reading all objects, all documents placeholder references get replaced by references knowing their objects in FinishReferences(),
+                // which finally sets IsUnderConstruction to false.
                 document.IrefTable.IsUnderConstruction = true;
-                Parser parser = new Parser(document);
+                var parser = new Parser(document);
                 // Read all trailers or cross-reference streams, but no objects.
                 document.Trailer = parser.ReadTrailer();
-                if (document.Trailer == null)
+                if (document.Trailer == null!)
                     ParserDiagnostics.ThrowParserException("Invalid PDF file: no trailer found."); // TODO L10N using PSSR.
-
-                Debug.Assert(document.IrefTable.IsUnderConstruction);
-                document.IrefTable.IsUnderConstruction = false;
 
                 // Is document encrypted?
                 if (document.Trailer!.Elements[PdfTrailer.Keys.Encrypt] is PdfReference xrefEncrypt)
@@ -286,7 +285,7 @@ namespace PdfSharp.Pdf.IO
                     {
                         if (passwordProvider != null)
                         {
-                            PdfPasswordProviderArgs args = new PdfPasswordProviderArgs();
+                            var args = new PdfPasswordProviderArgs();
                             passwordProvider(args);
                             if (args.Abort)
                                 return null!; // NRT THROW
@@ -325,119 +324,22 @@ namespace PdfSharp.Pdf.IO
                     }
                 }
 
-                PdfReference[] irefs2 = document.IrefTable.AllReferences;
-                int count2 = irefs2.Length;
+                // Read all file level indirect objects and decrypt them.
+                // Objects stored in object streams are not yet included and must not be decrypted as they are not encrypted.
+                ReadIndirectObjectsFromIrefTable(document, parser, true);
 
-                // The Pdf-Reference 1.7 states in chapter 7.5.6 (Incremental Updates):
-                // "When a conforming reader reads the file,
-                //  it shall build its cross-reference information in such a way that the
-                //  most recent copy of each object shall be the one accessed from the file."
+                // Read all indirect objects stored in object streams.
+                ReadCompressedObjects(document, parser);
 
-                // IrefTable.AllReferences is sorted by ObjectId which gives older objects preference
-                // (as they typically have lower ObjectIds)
-                // for xref-streams, we revert the order, so that the most current object is read first
-                // this is because Parser.ReadObject does not overwrite an object, that was already collected
+                // Read all not yet known indirect objects (the ones that were stored in object streams) and don't decrypt them, as they are not encrypted.
+                ReadIndirectObjectsFromIrefTable(document, parser, false);
 
-                // collect xref streams
-                var xrefStreams = new List<PdfCrossReferenceStream>();
-                for (var idx = 0; idx < count2; idx++)
-                {
-                    PdfReference iref = irefs2[idx];
-                    if (iref.Value is PdfCrossReferenceStream xrefStream)
-                        xrefStreams.Add(xrefStream);
-                }
-                // sort them so the last xref stream is read first
-                // TODO: is this always sufficient ? (haven't found any issues so far testing with ~1300 pdfs...)
-                xrefStreams.Sort((a, b) => (b.Reference?.Position ?? 0) - (a.Reference?.Position ?? 0));
+                // Reset encryption so that it must be redefined to save the document encrypted.
+                effectiveSecurityHandler?.SetEncryptionToNoneAndResetPasswords();
 
-                // 3rd: Create iRefs for all compressed objects.
-                Dictionary<int, object?> objectStreams = new();
-                foreach (var xrefStream in xrefStreams)
-                {
-                    for (int idx2 = 0; idx2 < xrefStream.Entries.Count; idx2++)
-                    {
-                        PdfCrossReferenceStream.CrossReferenceStreamEntry item = xrefStream.Entries[idx2];
-                        // Is type xref to compressed object?
-                        if (item.Type == 2)
-                        {
-                            int objectNumber = (int)item.Field2;
-                            if (!objectStreams.ContainsKey(objectNumber))
-                            {
-                                objectStreams.Add(objectNumber, null);
-                                var objectID = new PdfObjectID((int)item.Field2);
-                                parser.ReadIRefsFromCompressedObject(objectID);
-                            }
-                        }
-                    }
-                }
-
-                // 4th: Read compressed objects.
-                foreach (var xrefStream in xrefStreams)
-                {
-                    for (int idx2 = 0; idx2 < xrefStream.Entries.Count; idx2++)
-                    {
-                        PdfCrossReferenceStream.CrossReferenceStreamEntry item = xrefStream.Entries[idx2];
-                        // Is type xref to compressed object?
-                        if (item.Type == 2)
-                        {
-                            PdfReference irefNew = parser.ReadCompressedObject(new PdfObjectID((int)item.Field2),
-                                (int)item.Field3);
-                            Debug.Assert(document.IrefTable.Contains(xrefStream.ObjectID));
-                            Debug.Assert(document.IrefTable.Contains(irefNew.ObjectID));
-                        }
-                    }
-                }
-
-                PdfReference[] irefs = document.IrefTable.AllReferences;
-                int count = irefs.Length;
-
-                // Read all indirect objects.
-                for (int idx = 0; idx < count; idx++)
-                {
-                    PdfReference iref = irefs[idx];
-                    if (iref.Value == null!)
-                    {
-#if DEBUG_
-                        if (iref.ObjectNumber == 1074)
-                            iref.GetType();
-#endif
-                        try
-                        {
-                            Debug.Assert(document.IrefTable.Contains(iref.ObjectID));
-                            PdfObject pdfObject = parser.ReadObject(null, iref.ObjectID, false, false);
-                            Debug.Assert(pdfObject.Reference == iref);
-                            pdfObject.Reference = iref;
-                            Debug.Assert(pdfObject.Reference.Value != null, "Something went wrong.");
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine(ex.Message);
-                            // 4STLA rethrow exception to notify caller.
-                            throw;
-                        }
-                    }
-                    else
-                    {
-                        Debug.Assert(document.IrefTable.Contains(iref.ObjectID));
-                        //iref.GetType();
-                    }
-                    // Set maximum object number.
-                    document.IrefTable.MaxObjectNumber = Math.Max(document.IrefTable.MaxObjectNumber,
-                        iref.ObjectNumber);
-                }
-
-                // Decrypt all objects.
-                if (effectiveSecurityHandler != null)
-                {
-                    effectiveSecurityHandler.DecryptDocument();
-
-                    // Reset encryption so that it must be redefined to save the document encrypted.
-                    effectiveSecurityHandler.SetEncryptionToNoneAndResetPasswords();
-                }
-
-                // Fix references of trailer values and then objects and irefs are consistent.
-                document.Trailer.Finish();
-
+                // Replace all document's placeholder references by references knowing their objects.
+                // Placeholder references are used, when reading indirect objects referring objects stored in object streams before reading and decoding them.
+                FinishReferences(document);
 #if DEBUG_
     // Some tests...
                 PdfReference[] reachables = document.xrefTable.TransitiveClosure(document.trailer);
@@ -445,7 +347,6 @@ namespace PdfSharp.Pdf.IO
                 reachables = document.xrefTable.AllXRefs;
                 document.xrefTable.CheckConsistence();
 #endif
-
                 if (openMode == PdfDocumentOpenMode.Modify)
                 {
                     // Create new or change existing document IDs.
@@ -466,11 +367,8 @@ namespace PdfSharp.Pdf.IO
                         Debug.WriteLine("Number of deleted unreachable objects: " + removed);
 
                     // Force flattening of page tree.
-                    PdfPages pages = document.Pages;
+                    var pages = document.Pages;
                     Debug.Assert(pages != null);
-
-                    //bool b = document.irefTable.Contains(new PdfObjectID(1108));
-                    //b.GetType();
 
                     document.IrefTable.CheckConsistence();
                     document.IrefTable.Renumber();
@@ -483,6 +381,216 @@ namespace PdfSharp.Pdf.IO
                 throw;
             }
             return document;
+        }
+
+        static void ReadIndirectObjectsFromIrefTable(PdfDocument document, Parser parser, bool decrypt)
+        {
+            var effectiveSecurityHandler = document.EffectiveSecurityHandler;
+
+            foreach (var iref in document.IrefTable.AllReferences)
+            {
+                if (iref.Value == null!)
+                {
+                    try
+                    {
+                        Debug.Assert(document.IrefTable.Contains(iref.ObjectID));
+                        var pdfObject = parser.ReadObject(null, iref.ObjectID, false, false);
+                        Debug.Assert(pdfObject.Reference == iref);
+                        pdfObject.Reference = iref;
+                        Debug.Assert(pdfObject.Reference.Value != null, "Something went wrong.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                        // Rethrow exception to notify caller.
+                        throw;
+                    }
+                }
+                else
+                {
+                    Debug.Assert(document.IrefTable.Contains(iref.ObjectID));
+                }
+
+                // Decrypt object, if needed.
+                if (decrypt && iref.Value is { } pdfObject2)
+                    effectiveSecurityHandler?.DecryptObject(pdfObject2);
+
+                // Set maximum object number.
+                document.IrefTable.MaxObjectNumber = Math.Max(document.IrefTable.MaxObjectNumber, iref.ObjectNumber);
+            }
+        }
+
+        static void ReadCompressedObjects(PdfDocument document, Parser parser)
+        {
+            // The PDF Reference 1.7 states in chapter 7.5.6 (Incremental Updates):
+            // "When a conforming reader reads the file,
+            //  it shall build its cross-reference information in such a way that the
+            //  most recent copy of each object shall be the one accessed from the file."
+
+            // IrefTable.AllReferences is sorted by ObjectId which gives older objects preference
+            // (as they typically have lower ObjectIds).
+            // For xref-streams, we revert the order, so that the most current object is read first.
+            // This is because Parser.ReadObject does not overwrite an object that was already collected.
+
+            // Collect xref streams.
+            var xrefStreams = new List<PdfCrossReferenceStream>();
+            foreach (var iref in document.IrefTable.AllReferences)
+            {
+                if (iref.Value is PdfCrossReferenceStream xrefStream)
+                    xrefStreams.Add(xrefStream);
+            }
+            // Sort them so the last xref stream is read first.
+            // TODO: Is this always sufficient? (haven't found any issues so far testing with ~1300 PDFs...)
+            xrefStreams.Sort((a, b) => (b.Reference?.Position ?? 0) - (a.Reference?.Position ?? 0));
+
+
+
+            Dictionary<int, object?> objectStreams = new();
+            foreach (var xrefStream in xrefStreams)
+            {
+                foreach (var item in xrefStream.Entries)
+                {
+                    // Is type xref to compressed object?
+                    if (item.Type == 2)
+                    {
+                        int objectNumber = (int)item.Field2;
+
+                        if (!objectStreams.ContainsKey(objectNumber))
+                        {
+                            objectStreams.Add(objectNumber, null);
+                            var objectID = new PdfObjectID((int)item.Field2);
+                            parser.ReadIRefsFromCompressedObject(objectID);
+                        }
+
+                        PdfReference irefNew = parser.ReadCompressedObject(new PdfObjectID((int)item.Field2),
+                            (int)item.Field3);
+                        Debug.Assert(document.IrefTable.Contains(xrefStream.ObjectID));
+                        Debug.Assert(document.IrefTable.Contains(irefNew.ObjectID));
+                    }
+                }
+            }
+        }
+
+        static void FinishReferences(PdfDocument document)
+        {
+            Debug.Assert(document.IrefTable.IsUnderConstruction);
+
+            var finishedObjects = new HashSet<PdfObject>();
+
+            foreach (var iref in document.IrefTable.AllReferences)
+            {
+                Debug.Assert(iref.Value != null, "All references saved in IrefTable should have been created when their referred PdfObject has been accessible.");
+
+                // Get and update object's references.
+                FinishItemReferences(iref.Value, document, finishedObjects);
+            }
+
+            document.IrefTable.IsUnderConstruction = false;
+
+            // Fix references of trailer values and then objects and irefs are consistent.
+            document.Trailer.Finish();
+        }
+
+        static void FinishItemReferences(PdfItem? pdfItem, PdfDocument document, HashSet<PdfObject> finishedObjects)
+        {
+            // Only PdfObjects may contain further PdfReferences.
+            if (pdfItem is not PdfObject pdfObject)
+                return;
+
+            // Return, if this object is already processed.
+            if (finishedObjects.Contains(pdfObject))
+                return;
+
+            // Mark object as processed.
+            finishedObjects.Add(pdfObject);
+
+            // For PdfDictionary and PdfArray, get and update child references.
+            if (pdfObject is PdfDictionary childDictionary)
+                FinishChildReferences(childDictionary, document, finishedObjects);
+            if (pdfObject is PdfArray childArray)
+                FinishChildReferences(childArray, document, finishedObjects);
+        }
+
+        static void FinishChildReferences(PdfDictionary dictionary, PdfDocument document, HashSet<PdfObject> finishedObjects)
+        {
+            foreach (var element in dictionary.Elements)
+            {
+                var item = element.Value;
+
+                // For PdfReference: Update reference, if necessary, and continue with referred item.
+                if (item is PdfReference iref)
+                {
+                    if (FinishReference(iref, document, out var newIref, out var value))
+                        dictionary.Elements[element.Key] = newIref;
+                    item = value;
+                }
+
+                // Get and update item's references.
+                FinishItemReferences(item, document, finishedObjects);
+            }
+        }
+
+        static void FinishChildReferences(PdfArray array, PdfDocument document, HashSet<PdfObject> finishedObjects)
+        {
+            var elements = array.Elements;
+            for (var i = 0; i < elements.Count; i++)
+            {
+                var item = elements[i];
+
+                // For PdfReference: Update reference, if necessary, and continue with referred item.
+                if (item is PdfReference iref)
+                {
+                    if (FinishReference(iref, document, out var newIref, out var value))
+                        elements[i] = newIref;
+                    item = value;
+                }
+
+                // Get and update item's references.
+                FinishItemReferences(item, document, finishedObjects);
+            }
+        }
+
+        static bool FinishReference(PdfReference currentReference, PdfDocument document, out PdfItem actualReference, out PdfItem value)
+        {
+            var isChanged = false;
+            PdfItem? reference = currentReference;
+
+            // The value of the reference may be null.
+            // If a file level PdfObject refers object stream level PdfObjects, that were not yet decompressed when reading it,
+            // placeholder references are used. 
+            if (reference is PdfReference { Value: null })
+            {
+                // Read the reference for the ObjectID of the placeholder reference from IrefTable, which should contain the value.
+                var newIref = document.IrefTable[currentReference.ObjectID];
+                reference = newIref;
+                isChanged = true;
+            }
+
+            // PDF Reference 2.0 section 7.3.10:
+            // An indirect reference to an undefined object shall not be considered an error by a PDF processor;
+            // it shall be treated as a reference to the null object.
+            if (reference is PdfReference { Value: null })
+            {
+                reference = PdfNull.Value;
+                isChanged = true;
+            }
+
+            if (reference == null)
+            {
+                reference = PdfNull.Value;
+                isChanged = true;
+            }
+
+            actualReference = reference;
+
+            if (!isChanged)
+                value = currentReference.Value;
+            else if (actualReference is PdfReference r)
+                value = r.Value;
+            else
+                value = PdfNull.Value;
+
+            return isChanged;
         }
 
         /// <summary>

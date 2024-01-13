@@ -3,7 +3,9 @@
 
 using System;
 using System.Diagnostics;
+#if NET6_0_OR_GREATER
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+#endif
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.GrammarByExample;
 using PdfSharp.Fonts;
@@ -67,7 +69,7 @@ namespace GdiGrammarByExample
 
 #if CORE
             //GlobalFontSettings.FontResolver ??= new SegoeUiFontResolver();
-            GlobalFontSettings.FontResolver ??= NewFontResolver.Get();
+            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
 #endif
 
             Environment.CurrentDirectory = WslPathHack(_fixture.TestContext.TempDirectory);
@@ -102,19 +104,23 @@ namespace GdiGrammarByExample
             // Verdana was the default style until about 2012 or so.
             // Since all reference documents created with PDFsharp 1.40 or earlier use Verdana, we change the default to Verdana here for all DLL snippets.
             Debug.Assert(style != null, nameof(style) + " != null");
-            style.Font.Name = "Verdana";
+            style!.Font.Name = "Verdana";
 #endif
 #if CORE
-            // Note: CORE uses NewFontResolver and all required fonts should be available.
+            // Note: CORE uses SnippetsFontResolver and all required fonts should be available.
             var style = document.Styles[Style.DefaultParagraphName];
             Debug.Assert(style != null, nameof(style) + " != null");
             // Since all reference documents created with PDFsharp 1.40 or earlier use Verdana, we change the default to Verdana here for all DLL snippets.
-            style.Font.Name = "Verdana";
+            style!.Font.Name = "Verdana";
 #endif
         }
 
         internal static string WslPathHack(string path)
         {
+#if !NET6_0_OR_GREATER
+            // .NET 4.7.2 or .NETStandard 2.0, for Windows only.
+            return path;
+#else
             if (OperatingSystem.IsWindows())
             {
                 return path;
@@ -126,6 +132,7 @@ namespace GdiGrammarByExample
             }
 
             throw new NotImplementedException($"Platform {Environment.OSVersion} not yet supported.");
+#endif
         }
 
         //const string PathSource = @"D:\MigraDocAssets\GBE\GBE-DDL";

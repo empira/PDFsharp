@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Xunit;
 
+#if NET7_0_OR_GREATER
 namespace MigraDoc.Tests.Experimental.CreateOnRequest
 {
     public class Paragraph
@@ -36,9 +37,9 @@ namespace MigraDoc.Tests.Experimental.CreateOnRequest
         Collection<Paragraph> Paragraphs { get; set; }
 
         Paragraph AddParagraph(Paragraph paragraph);
-        
+
         string ToString();
-        
+
         bool Equals(object o);
 
         static abstract bool operator ==(T c1, T c2);
@@ -326,3 +327,4 @@ namespace MigraDoc.Tests.Experimental.CreateOnRequest
         }
     }
 }
+#endif

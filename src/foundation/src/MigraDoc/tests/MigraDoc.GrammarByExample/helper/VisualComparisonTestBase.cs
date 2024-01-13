@@ -2,6 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.IO;
@@ -66,6 +67,28 @@ namespace GdiGrammarByExample
 
             var document = DdlReaderDocumentFromFile(file);
 
+#if NET6_0_OR_GREATER
+#if CORE
+            document.Info.Author += "[.NET 6.0+ Core build]";
+#elif GDI
+            document.Info.Author += "[.NET 6.0+ GDI build]";
+#elif WPF
+            document.Info.Author += "[.NET 6.0+ WPF build]";
+#else
+            document.Info.Author += "[.NET 6.0+ ??? build]";
+#endif
+#else
+#if CORE
+            document.Info.Author += "[.NET 4.7.2+ Core build]";
+#elif GDI
+            document.Info.Author += "[.NET 4.7.2+ GDI build]";
+#elif WPF
+            document.Info.Author += "[.NET 4.7.2+ WPF build]";
+#else
+            document.Info.Author += "[.NET 4.7.2+ ??? build]";
+#endif
+#endif
+
             return CreatePdfFromDocument(pdfFile, document, testName, mdddlPath, callback);
         }
 
@@ -78,7 +101,11 @@ namespace GdiGrammarByExample
 
         Document DdlReaderDocumentFromFile(string file)
         {
+#if NET6_0_OR_GREATER
             var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
+#else
+            var ansiEncoding = Encoding.GetEncoding(1252);
+#endif
             //Console.WriteLine($"DdlReaderDocumentFromFile(string {file})");
             Document document;
             DdlReader? reader = null;

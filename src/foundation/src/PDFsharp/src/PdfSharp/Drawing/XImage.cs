@@ -320,6 +320,9 @@ namespace PdfSharp.Drawing
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
+            if (PdfReader.TestPdfFile(stream) > 0)
+                return new XPdfForm(stream);
+
             var ii = ImageImporter.GetImageImporter();
             var i = ii.ImportImage(stream);
 
@@ -391,7 +394,7 @@ namespace PdfSharp.Drawing
         /// Creates an image.
         /// </summary>
         /// <param name="image">The imported image.</param>
-        [Obsolete("THHO4THHO Internal test code.")]
+        [Obsolete("For internal tests only. Not available in Release build.")]
         internal static XImage FromImportedImage(ImportedImage image)
         {
             if (image == null)
@@ -939,7 +942,7 @@ namespace PdfSharp.Drawing
                     if (_importedImage.Information.VerticalDPI > 0)
                         return _importedImage.Information.Height * 72 / _importedImage.Information.VerticalDPI;
                     // Assume 72 DPI if information not available.
-                    return _importedImage.Information.Width;
+                    return _importedImage.Information.Height;
                 }
 #endif
 #if CORE

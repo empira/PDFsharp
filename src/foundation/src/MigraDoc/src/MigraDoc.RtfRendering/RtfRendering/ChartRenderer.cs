@@ -5,7 +5,9 @@ using System.Diagnostics;
 using System.IO;
 #if !SILVERLIGHT
 using System.Drawing;
+#if !NETSTANDARD2_0_OR_GREATER
 using System.Drawing.Imaging;
+#endif
 #endif
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Shapes.Charts;

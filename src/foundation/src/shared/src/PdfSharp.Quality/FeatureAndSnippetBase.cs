@@ -8,7 +8,9 @@ using System.IO;
 //using Windows.Storage;
 //#endif
 #if CORE || GDI
+#if !NETSTANDARD2_0_OR_GREATER
 using System.Drawing.Imaging;
+#endif
 #endif
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
@@ -29,7 +31,7 @@ namespace PdfSharp.Quality
         { }
 
         /// <summary>
-        /// Specifies how to draw a fox on the a PDF page.
+        /// Specifies how to draw a box on the PDF page.
         /// </summary>
         protected enum BoxOptions
         {
@@ -470,6 +472,7 @@ namespace PdfSharp.Quality
 #if CORE
 #endif
 #if GDI
+
             var stream = new MemoryStream();
             _image.Save(stream, ImageFormat.Png);
 

@@ -74,7 +74,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
 
                 foreach (var vd in vds)
                 {
-                    Char.IsUpper(vd.ValueName[..1].ToCharArray()[0]).Should().BeTrue();
+                    Char.IsUpper(vd.ValueName[0]).Should().BeTrue();
 
                     switch (vd)
                     {

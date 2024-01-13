@@ -2,15 +2,23 @@
 
     <PropertyGroup>
         <OutputType>library</OutputType>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <RootNamespace>PdfSharp</RootNamespace>
         <UseWPF>true</UseWPF>
-        <DefineConstants>WPF;NET_ZIP</DefineConstants>
+        <DefineConstants>WPF</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472-windows|AnyCPU'">
+      <WarningLevel>0</WarningLevel>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472-windows|AnyCPU'">
+      <WarningLevel>0</WarningLevel>
     </PropertyGroup>
 
     <ItemGroup>
@@ -369,25 +377,6 @@
         <Compile Include="..\PdfSharp\root\PdfSharpException.cs" Link="root\PdfSharpException.cs" />
         <Compile Include="..\PdfSharp\root\PSSR.cs" Link="root\PSSR.cs" />
         <Compile Include="..\PdfSharp\root\VersionInfo.cs" Link="root\VersionInfo.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Checksums\Adler32.cs" Link="SharpZipLib\Checksums\Adler32.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Checksums\CRC32.cs" Link="SharpZipLib\Checksums\CRC32.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Checksums\IChecksum.cs" Link="SharpZipLib\Checksums\IChecksum.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\SharpZipBaseException.cs" Link="SharpZipLib\SharpZipBaseException.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Zip\Compression\Deflater.cs" Link="SharpZipLib\Zip\Compression\Deflater.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Zip\Compression\DeflaterConstants.cs" Link="SharpZipLib\Zip\Compression\DeflaterConstants.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Zip\Compression\DeflaterEngine.cs" Link="SharpZipLib\Zip\Compression\DeflaterEngine.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Zip\Compression\DeflaterHuffman.cs" Link="SharpZipLib\Zip\Compression\DeflaterHuffman.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Zip\Compression\DeflaterPending.cs" Link="SharpZipLib\Zip\Compression\DeflaterPending.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Zip\Compression\Inflater.cs" Link="SharpZipLib\Zip\Compression\Inflater.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Zip\Compression\InflaterDynHeader.cs" Link="SharpZipLib\Zip\Compression\InflaterDynHeader.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Zip\Compression\InflaterHuffmanTree.cs" Link="SharpZipLib\Zip\Compression\InflaterHuffmanTree.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Zip\Compression\PendingBuffer.cs" Link="SharpZipLib\Zip\Compression\PendingBuffer.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Zip\Compression\Streams\DeflaterOutputStream.cs" Link="SharpZipLib\Zip\Compression\Streams\DeflaterOutputStream.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Zip\Compression\Streams\InflaterInputStream.cs" Link="SharpZipLib\Zip\Compression\Streams\InflaterInputStream.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Zip\Compression\Streams\OutputWindow.cs" Link="SharpZipLib\Zip\Compression\Streams\OutputWindow.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Zip\Compression\Streams\StreamManipulator.cs" Link="SharpZipLib\Zip\Compression\Streams\StreamManipulator.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Zip\ZipConstants.cs" Link="SharpZipLib\Zip\ZipConstants.cs" />
-        <Compile Include="..\PdfSharp\SharpZipLib\Zip\ZipException.cs" Link="SharpZipLib\Zip\ZipException.cs" />
         <Compile Include="..\PdfSharp\UniversalAccessibility.Drawing\XGraphicsExtensions.cs" Link="UniversalAccessibility.Drawing\XGraphicsExtensions.cs" />
         <Compile Include="..\PdfSharp\UniversalAccessibility\enums\PdfBlockLevelElementTag.cs" Link="UniversalAccessibility\enums\PdfBlockLevelElementTag.cs" />
         <Compile Include="..\PdfSharp\UniversalAccessibility\enums\PdfGroupingElementTag.cs" Link="UniversalAccessibility\enums\PdfGroupingElementTag.cs" />

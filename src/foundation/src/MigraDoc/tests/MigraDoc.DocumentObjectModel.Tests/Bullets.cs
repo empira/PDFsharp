@@ -13,7 +13,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Create_Bullets()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             // Create a MigraDoc document.

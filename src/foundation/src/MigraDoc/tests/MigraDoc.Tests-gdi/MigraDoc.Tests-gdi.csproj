@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0-windows7.0</TargetFramework>
+        <TargetFrameworks>net6.0-windows7.0;net472-windows</TargetFrameworks>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <Nullable>Enable</Nullable>
     </PropertyGroup>

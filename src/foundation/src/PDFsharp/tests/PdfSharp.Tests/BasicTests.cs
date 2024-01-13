@@ -16,7 +16,7 @@ namespace PdfSharp.Tests
         [Fact]
         public void Create_Hello_World_BasicTests()
         {
-            GlobalFontSettings.FontResolver ??= NewFontResolver.Get();
+            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
 
             // Create a new PDF document.
             var document = new PdfDocument();
@@ -38,10 +38,10 @@ namespace PdfSharp.Tests
             var r = width / 5;
             gfx.DrawEllipse(new XPen(XColors.Red, 1.5), XBrushes.White, new XRect(width / 2 - r, height / 2 - r, 2 * r, 2 * r));
 
-            bool newFontResolver = GlobalFontSettings.FontResolver!.GetType()!.FullName!.EndsWith("NewFontResolver");
+            bool snippetsFontResolver = GlobalFontSettings.FontResolver!.GetType()!.FullName!.EndsWith("SnippetsFontResolver");
 
             // Create a font.
-            var font = new XFont(newFontResolver ? "Times New Roman" : "segoe wp", 20, XFontStyleEx.BoldItalic);
+            var font = new XFont(snippetsFontResolver ? "Times New Roman" : "segoe wp", 20, XFontStyleEx.BoldItalic);
 
             // Draw the text.
             gfx.DrawString("Hello, dotnet 6.0!", font, XBrushes.Black,

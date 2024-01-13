@@ -77,8 +77,8 @@ namespace PdfSharp.Pdf.Advanced
 
             // Sorting seems not necessary. The limit is 100 entries, we will see.
             wrt.WriteLine(String.Format(CultureInfo.InvariantCulture, "{0} beginbfrange", glyphIndexToCharacter.Count));
-            foreach (var (key, value) in glyphIndexToCharacter)
-                wrt.WriteLine(String.Format(CultureInfo.InvariantCulture, "<{0:X4}><{0:X4}><{1:X4}>", key, (int)value));
+            foreach (var item in glyphIndexToCharacter)
+                wrt.WriteLine(String.Format(CultureInfo.InvariantCulture, "<{0:X4}><{0:X4}><{1:X4}>", item.Key, (int)item.Value));
             wrt.WriteLine("endbfrange");
 
             wrt.Write(suffix);

@@ -460,14 +460,22 @@ namespace MigraDoc.DocumentObjectModel
             unit._value = 1;
             try
             {
+#if NET6_0_OR_GREATER
                 unit._value = float.Parse(value[..valLen].Trim(), CultureInfo.InvariantCulture);
+#else
+                unit._value = float.Parse(value.Substring(0, valLen).Trim(), CultureInfo.InvariantCulture);
+#endif
             }
             catch (FormatException ex)
             {
                 throw new ArgumentException(DomSR.InvalidUnitValue(value), ex);
             }
 
+#if NET6_0_OR_GREATER
             var typeStr = value[valLen..].Trim().ToLower();
+#else
+            var typeStr = value.Substring(valLen).Trim().ToLower();
+#endif
             unit._type = UnitType.Point;
             switch (typeStr)
             {

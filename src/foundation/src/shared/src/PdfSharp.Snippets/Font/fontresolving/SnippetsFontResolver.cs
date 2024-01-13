@@ -3,27 +3,33 @@ using System.Runtime.InteropServices;
 
 namespace PdfSharp.Snippets.Font
 {
-    public class NewFontResolver : IFontResolver
+    /// <summary>
+    /// The SnippetsFontResolver is a FontResolver we created for use with our Unit Tests.
+    /// It uses font files installed with the operating system under Windows, WSL, and Linux.
+    /// It only supports certain fonts and may come up with substitute fonts.
+    /// This FontResolver is not meant for use in applications.
+    /// </summary>
+    public class SnippetsFontResolver : IFontResolver
     {
         /// <summary>
-        /// NewFontResolver singleton for use in unit tests.
+        /// SnippetsFontResolver singleton for use in Unit Tests.
         /// </summary>
-        public static NewFontResolver Get()
+        public static SnippetsFontResolver Get()
         {
             try
             {
-                Monitor.Enter(typeof(NewFontResolver));
+                Monitor.Enter(typeof(SnippetsFontResolver));
 
                 if (_singleton != null)
                     return _singleton;
-                return _singleton = new NewFontResolver();
+                return _singleton = new SnippetsFontResolver();
             }
             finally
             {
-                Monitor.Exit(typeof(NewFontResolver));
+                Monitor.Exit(typeof(SnippetsFontResolver));
             }
         }
-        private static NewFontResolver? _singleton;
+        private static SnippetsFontResolver? _singleton;
 
 #if DEBUG
         public override String ToString()
@@ -36,16 +42,40 @@ namespace PdfSharp.Snippets.Font
         }
 #endif
 
+#if NET6_0_OR_GREATER
         public record Family(
             string FamilyName,
             string FaceName,
             string LinuxFaceName = "",
-            params string[] LinuxSubstituteFamilyNames)
-        { }
+            params string[] LinuxSubstituteFamilyNames);
+#else
+      public class Family 
+        {
+            public string FamilyName;
+            public string FaceName;
+            public string LinuxFaceName;
+            public string[] LinuxSubstituteFamilyNames;
+
+            public Family(
+            string familyName,
+            string faceName,
+            string linuxFaceName = "",
+            params string[] linuxSubstituteFamilyNames)
+            {
+                this.FamilyName = familyName;
+                this.FaceName = faceName;
+                this.LinuxFaceName = linuxFaceName;
+                this.LinuxSubstituteFamilyNames = linuxSubstituteFamilyNames;
+            }
+        }
+#endif
 
         public static readonly List<Family> Families;
 
-        static NewFontResolver()
+        /// <summary>
+        /// SnippetsFontResolver for use in Unit Tests.
+        /// </summary>
+        static SnippetsFontResolver()
         {
             Families = new List<Family>
             {
@@ -182,14 +212,16 @@ namespace PdfSharp.Snippets.Font
             // Caveat: some preprocessing/refactoring needed to produce a pattern fc-match can understand.
             // Caveat: fontconfig needs additional configuration to know about WSL having Windows Fonts available at /mnt/c/Windows/Fonts.
 
+            var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
             var fontLocations = new List<string>
             {
                 "/mnt/c/Windows/Fonts", // WSL first or substitutes will be found.
                 "/usr/share/fonts",
                 "/usr/share/X11/fonts",
                 "/usr/X11R6/lib/X11/fonts",
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "/.fonts"),
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "/.local/share/fonts"),
+                Path.Combine(userProfile, ".fonts"),
+                Path.Combine(userProfile, ".local/share/fonts"),
             };
 
             var fcp = Environment.GetEnvironmentVariable("FONTCONFIG_PATH");

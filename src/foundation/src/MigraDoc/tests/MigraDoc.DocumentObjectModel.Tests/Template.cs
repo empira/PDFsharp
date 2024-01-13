@@ -13,7 +13,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Create_Hello_World_TemplateDOM()
         {
 #if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
 
             // Create a MigraDoc document.

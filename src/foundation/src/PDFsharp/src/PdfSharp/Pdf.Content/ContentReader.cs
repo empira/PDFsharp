@@ -15,7 +15,7 @@ namespace PdfSharp.Pdf.Content
         /// Reads the content stream(s) of the specified page.
         /// </summary>
         /// <param name="page">The page.</param>
-        static public CSequence ReadContent(PdfPage page)
+        public static CSequence ReadContent(PdfPage page)
         {
             CParser parser = new CParser(page);
             CSequence sequence = parser.ReadContent();
@@ -27,7 +27,7 @@ namespace PdfSharp.Pdf.Content
         /// Reads the specified content.
         /// </summary>
         /// <param name="content">The content.</param>
-        static public CSequence ReadContent(byte[] content)
+        public static CSequence ReadContent(byte[] content)
         {
             CParser parser = new CParser(content);
             CSequence sequence = parser.ReadContent();
@@ -38,7 +38,7 @@ namespace PdfSharp.Pdf.Content
         /// Reads the specified content.
         /// </summary>
         /// <param name="content">The content.</param>
-        static public CSequence ReadContent(MemoryStream content)
+        public static CSequence ReadContent(MemoryStream content)
         {
             CParser parser = new CParser(content);
             CSequence sequence = parser.ReadContent();

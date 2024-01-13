@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GdiGrammarByExample;
+using PdfSharp.TestHelper;
 
 namespace MigraDoc.GrammarByExample
 {
@@ -15,7 +17,7 @@ namespace MigraDoc.GrammarByExample
         public TestContext()
         {
             var assembly = GetType().Assembly;
-            DeploymentDirectory = Path.GetDirectoryName(assembly.Location)!;
+            DeploymentDirectory = Path.GetDirectoryName(assembly.GetOriginalLocation())!;
             //Console.WriteLine($"DeploymentDirectory {DeploymentDirectory})");
 
             var folder0 = @"D:\GBE-Output\";

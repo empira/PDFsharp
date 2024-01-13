@@ -183,7 +183,7 @@ namespace MigraDoc.Rendering
                     if (dt == DateTime.MinValue)
                         dt = DateTime.Now;
 
-                    return dt.ToString(dateField.Format);
+                    return dt.ToString(GetEffectiveFormat(dateField));
                 }
 
                 if (field is InfoField infoField)
@@ -192,6 +192,18 @@ namespace MigraDoc.Rendering
                 Debug.Assert(false, "Given parameter must be a rendered Field");
             }
             return "";
+        }
+
+        string GetEffectiveFormat(DateField dateField)
+        {
+            var format = dateField.Format;
+            if (!String.IsNullOrEmpty(format))
+                return format;
+
+            var culture = dateField.Document!.EffectiveCulture;
+            var dtfInfo = culture.DateTimeFormat;
+
+            return dtfInfo.ShortDatePattern + " " + dtfInfo.LongTimePattern;
         }
 
         string GetOutlineTitle()
@@ -482,11 +494,64 @@ namespace MigraDoc.Rendering
 
                 if (IsPlainText(_currentLeaf.Current))
                 {
-                    Text text = (Text)_currentLeaf.Current;
+                    var text = (Text)_currentLeaf.Current;
                     string word = text.Content;
-                    int lastIndex = text.Content.LastIndexOfAny(new[] { ',', '.' });
-                    if (lastIndex > 0)
-                        word = word.Substring(0, lastIndex);
+
+                    var culture = text.Document!.EffectiveCulture;
+
+                    var decimalSeparator = culture.NumberFormat.NumberDecimalSeparator;
+                    var decimalSeparatorLength = decimalSeparator.Length;
+                    var groupSeparator = culture.NumberFormat.NumberGroupSeparator;
+                    var groupSeparatorLength = groupSeparator.Length;
+
+                    // Get the index of the decimal position the word should be aligned at. 
+                    var decimalPosIndex = -1;
+                    var hasNumber = false;
+                    for (var i = 0; i < word.Length;)
+                    {
+                        var c = word[i];
+
+                        // Number is always accepted before decimal position.
+                        if (char.IsNumber(c))
+                        {
+                            hasNumber = true;
+                            i++;
+                            continue;
+                        }
+
+                        var restLength = word.Length - i;
+
+                        // Decimal Separator always determines decimal position.
+                        if (decimalSeparatorLength <= restLength && word.Substring(i, decimalSeparatorLength) == decimalSeparator)
+                        {
+                            decimalPosIndex = i;
+                            break;
+                        }
+
+                        // Group Separator is always accepted before decimal position.
+                        if (groupSeparatorLength <= restLength && word.Substring(i, groupSeparatorLength) == groupSeparator)
+                        {
+                            i += groupSeparator.Length;
+                            continue;
+                        }
+
+                        // Other characters determine decimal position, if word contains numbers by now.
+                        if (hasNumber)
+                        {
+                            decimalPosIndex = i;
+                            break;
+                        }
+
+                        // Otherwise other characters are accepted before decimal position.
+                        i++;
+                    }
+
+                    if (decimalPosIndex >= 0)
+#if NET6_0_OR_GREATER
+                        word = word[..decimalPosIndex];
+#else
+                        word = word.Substring(0, decimalPosIndex);
+#endif
 
                     XUnit wordLength = MeasureString(word);
                     notFitting = _currentXPosition + wordLength >= _formattingArea.X + _formattingArea.Width + Tolerance;
@@ -862,7 +927,7 @@ namespace MigraDoc.Rendering
         {
             if (_fieldInfos is null)
                 NRT.ThrowOnNull();
-            RenderWord(_fieldInfos.Date.ToString(dateField.Format));
+            RenderWord(_fieldInfos.Date.ToString(GetEffectiveFormat(dateField)));
         }
 
         void RenderInfoField(InfoField infoField)
@@ -1308,7 +1373,7 @@ namespace MigraDoc.Rendering
             _tabOffsets = new List<TabOffset>();
 
             var prevParaFormatInfo = (ParagraphFormatInfo?)previousFormatInfo;
-            if (previousFormatInfo == null || prevParaFormatInfo?.LineCount == 0)  // BUG prevParaFormatInfo???
+            if (prevParaFormatInfo == null || prevParaFormatInfo.LineCount == 0)
             {
                 ((ParagraphFormatInfo)_renderInfo.FormatInfo)._isStarting = true;
                 ParagraphIterator parIt = new ParagraphIterator(_paragraph.Elements);
@@ -1317,7 +1382,7 @@ namespace MigraDoc.Rendering
             }
             else
             {
-                _currentLeaf = prevParaFormatInfo?.GetLastLineInfo().EndIter?.GetNextLeaf(); // Do not check here. ?? NRT.ThrowOnNull<ParagraphIterator>();
+                _currentLeaf = prevParaFormatInfo.GetLastLineInfo().EndIter?.GetNextLeaf(); // Do not check here. ?? NRT.ThrowOnNull<ParagraphIterator>();
                 _isFirstLine = false;
                 ((ParagraphFormatInfo)_renderInfo.FormatInfo)._isStarting = false;
             }
@@ -1777,7 +1842,7 @@ namespace MigraDoc.Rendering
         FormatResult FormatDateField(DateField dateField)
         {
             _reMeasureLine = true;
-            string estimatedFieldValue = DateTime.Now.ToString(dateField.Format);
+            string estimatedFieldValue = DateTime.Now.ToString(GetEffectiveFormat(dateField));
             return FormatWord(estimatedFieldValue);
         }
 
@@ -2278,7 +2343,7 @@ namespace MigraDoc.Rendering
             var bottomBorderOffset = BottomBorderOffset;
             if (bottomBorderOffset > 0)
                 contentArea = contentArea.Unite(_formattingArea.GetFittingRect(_currentYPosition + _currentVerticalInfo.Height, bottomBorderOffset) ?? NRT.ThrowOnNull<Rectangle>());
-            
+
             _renderInfo.LayoutInfo.ContentArea = contentArea;
         }
 

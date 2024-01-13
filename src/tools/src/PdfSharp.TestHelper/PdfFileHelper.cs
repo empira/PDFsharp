@@ -1,14 +1,19 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace PdfSharp.TestHelper
 {
     public static class PdfFileHelper
     {
-        public static string CreateTempFileName(string suffix)
+        public static string CreateTempFileName(string prefix, string extension = "pdf")
         {
             // ReSharper disable once StringLiteralTypo
-            return $"{suffix}-{Guid.NewGuid().ToString("N").ToUpperInvariant()}_tempfile.pdf";
+            return $"{CreateTempFileNameWithoutExtension(prefix)}.{extension}";
+        }
+
+        public static string CreateTempFileNameWithoutExtension(string prefix)
+        {
+            // ReSharper disable once StringLiteralTypo
+            return $"{prefix}-{Guid.NewGuid().ToString("N").ToUpperInvariant()}_tempfile";
         }
 
         public static void StartPdfViewer(string filename)

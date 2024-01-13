@@ -16,7 +16,9 @@ namespace PdfSharp.Diagnostics
         /// </summary>
         /// <param name="message">The message.</param>
         /// <exception cref="System.InvalidOperationException"></exception>
+#if NET6_0_OR_GREATER
         [DoesNotReturn]
+#endif
         public static void ThrowOnNull(string? message = null)
             => throw new InvalidOperationException(message ?? "Expression must not be null here.");
 
@@ -28,7 +30,9 @@ namespace PdfSharp.Diagnostics
         /// <param name="message">An optional message used for the exception.</param>
         /// <returns>Nothing, always throws.</returns>
         /// <exception cref="System.InvalidOperationException"></exception>
+#if NET6_0_OR_GREATER
         [DoesNotReturn]
+#endif
         public static TResult ThrowOnNull<TResult>(string? message = null)
             => throw new InvalidOperationException(message ?? $"'{typeof(TResult).Name}' must not be null here.");
 
@@ -41,7 +45,9 @@ namespace PdfSharp.Diagnostics
         /// <param name="message">An optional message used for the exception.</param>
         /// <returns>Nothing, always throws.</returns>
         /// <exception cref="System.InvalidOperationException"></exception>
+#if NET6_0_OR_GREATER
         [DoesNotReturn]
+#endif
         public static TResult ThrowOnNull<TResult, TType>(string? message = null)
            => throw new InvalidOperationException(message ?? $"'{typeof(TType).Name}' must not be null here.");
     }

@@ -265,7 +265,11 @@ namespace PdfSharp.Drawing
                 throw new NotImplementedException("Only one family name is supported.");
 
             // Family name starts right of '#'.
+#if NET6_0_OR_GREATER
             int idxHash = familyName.IndexOf('#', StringComparison.Ordinal);
+#else
+            int idxHash = familyName.IndexOf('#'); // Searching for '#' works fine even without "StringComparison.Ordinal".
+#endif
             if (idxHash < 0)
                 throw new ArgumentException("Family name must contain a '#'. Example './#MyFontFamilyName'", nameof(familyName));
 
@@ -311,14 +315,14 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-        //internal static XGlyphTypeface TryGetXGlyphTypeface(string familyName, XFontStyleEx style)
-        //{
-        //    string name = MakeName(familyName, style);
+            //internal static XGlyphTypeface TryGetXGlyphTypeface(string familyName, XFontStyleEx style)
+            //{
+            //    string name = MakeName(familyName, style);
 
-        //    XGlyphTypeface typeface;
-        //    _global._typefaces.TryGetValue(name, out typeface);
-        //    return typeface;
-        //}
+            //    XGlyphTypeface typeface;
+            //    _global._typefaces.TryGetValue(name, out typeface);
+            //    return typeface;
+            //}
 
 #if CORE
         internal static XTypeface? TryCreateTypeface(string name, XFontStyleEx style, out XFontFamily? fontFamily)
@@ -380,7 +384,7 @@ namespace PdfSharp.Drawing
 #endif
 
 #if WPF
-        internal static WpfTypeface TryCreateTypeface(string name, XFontStyleEx style, out WpfFontFamily fontFamily)
+            internal static WpfTypeface TryCreateTypeface(string name, XFontStyleEx style, out WpfFontFamily fontFamily)
         {
             if (Singleton._fontFamilies.TryGetValue(name, out fontFamily!)) // NRT HACK
             {

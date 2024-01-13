@@ -1,6 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Pdf.IO;
+
 namespace PdfSharp.Pdf.AcroForms
 {
     /// <summary>
@@ -18,6 +20,23 @@ namespace PdfSharp.Pdf.AcroForms
         internal PdfSignatureField(PdfDictionary dict)
             : base(dict)
         { }
+
+        /// <summary>
+        /// Writes a key/value pair of this signature field dictionary.
+        /// </summary>
+        internal override void WriteDictionaryElement(PdfWriter writer, PdfName key)
+        {
+            // Don't encrypt Contents key's value (PDF Reference 2.0: 7.6.2, Page 71).
+            if (key.Value == Keys.Contents)
+            {
+                var securityHandler = writer.SecurityHandler;
+                writer.SecurityHandler = null;
+                base.WriteDictionaryElement(writer, key);
+                writer.SecurityHandler = securityHandler;
+            }
+            else
+                base.WriteDictionaryElement(writer, key);
+        }
 
         /// <summary>
         /// Predefined keys of this dictionary.

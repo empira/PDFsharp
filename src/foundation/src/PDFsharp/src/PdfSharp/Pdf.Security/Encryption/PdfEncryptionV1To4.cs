@@ -376,8 +376,18 @@ namespace PdfSharp.Pdf.Security.Encryption
                 // Create the hash 50 times (only for 128 bit).
                 for (var idx = 0; idx < 50; idx++)
                 {
+#if !NET6_0_OR_GREATER
+                    // Complicated code to avoid the "Hash not valid for use in specified state" exception.
+                    using (var md5 = MD5.Create())
+                    {
+                        md5.Initialize();
+                        // Only use hash with a length of keyLength.
+                        hash = md5.ComputeHash(hash, 0, keyLength);
+                    }
+#else
                     // Only use hash with a length of keyLength.
                     hash = _md5.ComputeHash(hash, 0, keyLength);
+#endif
                 }
             }
             else
@@ -660,10 +670,10 @@ namespace PdfSharp.Pdf.Security.Encryption
                 var aesPadding2 = "sAlT"u8.ToArray();
                 Debug.Assert(aesPadding.Length == 4);
                 Debug.Assert(aesPadding2.Length == 4);
-                Debug.Assert(aesPadding[0]  == aesPadding2[0]);
-                Debug.Assert(aesPadding[1]  == aesPadding2[1]);
-                Debug.Assert(aesPadding[2]  == aesPadding2[2]);
-                Debug.Assert(aesPadding[3]  == aesPadding2[3]);
+                Debug.Assert(aesPadding[0] == aesPadding2[0]);
+                Debug.Assert(aesPadding[1] == aesPadding2[1]);
+                Debug.Assert(aesPadding[2] == aesPadding2[2]);
+                Debug.Assert(aesPadding[3] == aesPadding2[3]);
                 _md5.TransformBlock(aesPadding, 0, aesPadding.Length, aesPadding, 0);
             }
 

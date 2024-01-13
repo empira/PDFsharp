@@ -128,6 +128,11 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         /// <summary>
+        /// Gets or sets the PdfTrailer of the previous version in a PDF with incremental updates.
+        /// </summary>
+        public PdfTrailer? PreviousTrailer { get; set; }
+
+        /// <summary>
         /// Gets the standard security handler and creates it, if not existing.
         /// </summary>
         public PdfStandardSecurityHandler SecurityHandler
@@ -161,15 +166,22 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal void Finish()
         {
+            PdfReference? iref;
             // /Root
-            var iref = _document.Trailer.Elements[Keys.Root] as PdfReference;
-            //if (iref != null && iref.Value == null)
-            if (iref is { Value: null })
+            var currentTrailer = _document.Trailer;
+            do
             {
-                iref = _document.IrefTable[iref.ObjectID];
-                Debug.Assert(iref is not null && iref.Value != null);
-                _document.Trailer.Elements[Keys.Root] = iref;
-            }
+                iref = currentTrailer.Elements[Keys.Root] as PdfReference;
+                //if (iref != null && iref.Value == null)
+                if (iref is { Value: null })
+                {
+                    iref = _document.IrefTable[iref.ObjectID];
+                    Debug.Assert(iref is not null && iref.Value != null);
+                    _document.Trailer.Elements[Keys.Root] = iref;
+                }
+
+                currentTrailer = currentTrailer.PreviousTrailer;
+            } while (currentTrailer != null);
 
             // /Info
             iref = _document.Trailer.Elements[Keys.Info] as PdfReference;
