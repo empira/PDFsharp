@@ -152,6 +152,7 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public byte[] ReadStream(int length)
         {
+            // TODO: use "MoveToStartOfStream()"
             int pos;
 
             // Skip illegal blanks behind «stream».
@@ -166,8 +167,10 @@ namespace PdfSharp.Pdf.IO
                 else
                     pos = _idxChar + 1;
             }
-            else
+            else if (_currChar == Chars.LF)
                 pos = _idxChar + 1;
+            else
+                pos = _idxChar;
 
             _pdfStream.Position = pos;
             byte[] bytes = new byte[length];
@@ -182,6 +185,102 @@ namespace PdfSharp.Pdf.IO
             // Synchronize idxChar etc.
             Position = pos + read;
             return bytes;
+        }
+
+        /// <summary>
+        /// Moves the current position to the first byte of a stream-object.<br></br>
+        /// The current position is expected be be located right after the "stream" keyword.
+        /// </summary>
+        /// <returns>The position of the first byte of a stream</returns>
+        private int MoveToStartOfStream()
+        {
+            int pos;
+
+            // Skip illegal blanks behind «stream».
+            while (_currChar == Chars.SP)
+                ScanNextChar(true);
+
+            // Skip new line behind «stream».
+            if (_currChar == Chars.CR)
+            {
+                if (_nextChar == Chars.LF)
+                    pos = _idxChar + 2;
+                else
+                    pos = _idxChar + 1;
+            }
+            else if (_currChar == Chars.LF)
+                pos = _idxChar + 1;
+            else
+                pos = _idxChar;
+            return pos;
+        }
+
+        /// <summary>
+        /// Searches for the end of a stream, starting at the current position.<br></br>
+        /// The current position is expected be be located right after the "stream" keyword.<br></br>
+        /// After the search, the position in the input-stream is the first byte of the stream (if found) or the end of the input-stream.
+        /// </summary>
+        /// <param name="streamLength">Receives the length of the stream, if the end of the stream was found</param>
+        /// <returns><b>true</b> if the end of a stream was found, otherwise <b>false</b></returns>
+        internal bool SearchEndOfStream(out int streamLength)
+        {
+            // locate first byte of the stream
+            Position = MoveToStartOfStream();
+
+            streamLength = 0;
+            var streamStart = Position;
+            // "endstream" shall be preceded by an end-of-line marker according to the spec
+            var marker = PdfEncoders.RawEncoding.GetBytes("\nendstream");
+            if (!SearchForMarker(marker, out var markerPosition))
+                return false;
+
+            // the "endstream" keyword may be preceded by either LF or CR+LF
+            // check the byte right before the marker for CR (LF is already included in the marker)
+            var length = markerPosition - streamStart;
+            _pdfStream.Position = markerPosition - 1;
+            var prefix = _pdfStream.ReadByte();
+            if (prefix == 13)
+                length--;           // exclude CR from stream-data
+            streamLength = length;
+            // reset position to start of stream
+            Position = streamStart;
+            return true;
+        }
+
+        /// <summary>
+        /// Scans the input stream for the specified marker, starting from the current position.<br></br>
+        /// After the search, the position in the input-stream is the byte right after the marker (if found) or the end of the input-stream.
+        /// </summary>
+        /// <param name="marker">The marker to scan for</param>
+        /// <param name="markerPosition">Receives the position of the marker in the input stream (if found)</param>
+        /// <returns><b>true</b> if the marker was found, otherwise <b>false</b></returns>
+        internal bool SearchForMarker(byte[] marker, out int markerPosition)
+        {
+            while (true)
+            {
+                var markerIndex = 0;
+                while (_currChar != Chars.EOF && _currChar != marker[markerIndex])
+                {
+                    ScanNextChar(false);
+                }
+                while (_currChar != Chars.EOF && markerIndex < marker.Length && _currChar == marker[markerIndex])
+                {
+                    markerIndex++;
+                    ScanNextChar(false);
+                }
+                if (_currChar == Chars.EOF || markerIndex == marker.Length)
+                {
+                    if (markerIndex == marker.Length)
+                    {
+                        markerPosition = Position - marker.Length;
+                        return true;
+                    }
+                    break;
+                }
+                // only part of the marker was found, continue
+            }
+            markerPosition = 0;
+            return false;
         }
 
         /// <summary>
