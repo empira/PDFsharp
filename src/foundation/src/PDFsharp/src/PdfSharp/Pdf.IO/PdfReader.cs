@@ -513,15 +513,15 @@ namespace PdfSharp.Pdf.IO
 
         static void FinishChildReferences(PdfDictionary dictionary, PdfDocument document, HashSet<PdfObject> finishedObjects)
         {
-            foreach (var element in dictionary.Elements)
+            foreach (var elementKey in dictionary.Elements.Keys)
             {
-                var item = element.Value;
+                var item = dictionary.Elements[elementKey];
 
                 // For PdfReference: Update reference, if necessary, and continue with referred item.
                 if (item is PdfReference iref)
                 {
                     if (FinishReference(iref, document, out var newIref, out var value))
-                        dictionary.Elements[element.Key] = newIref;
+                        dictionary.Elements[elementKey] = newIref;
                     item = value;
                 }
 
