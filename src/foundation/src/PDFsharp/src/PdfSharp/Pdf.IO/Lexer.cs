@@ -26,7 +26,7 @@ namespace PdfSharp.Pdf.IO
         public Lexer(Stream pdfInputStream)
         {
             _pdfStream = pdfInputStream;
-            _pdfLength = (int)_pdfStream.Length;
+            _pdfLength = _pdfStream.Length;
             _idxChar = 0;
             Position = 0;
         }
@@ -34,7 +34,7 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Gets or sets the position within the PDF stream.
         /// </summary>
-        public int Position
+        public long Position
         {
             get => _idxChar;
             set
@@ -152,13 +152,13 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public byte[] ReadStream(int length)
         {
-            int pos;
+            long pos;
 
-            // Skip illegal blanks behind «stream».
+            // Skip illegal blanks behind Â«streamÂ».
             while (_currChar == Chars.SP)
                 ScanNextChar(true);
 
-            // Skip new line behind «stream».
+            // Skip new line behind Â«streamÂ».
             if (_currChar == Chars.CR)
             {
                 if (_nextChar == Chars.LF)
@@ -187,7 +187,7 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Reads a string in raw encoding.
         /// </summary>
-        public String ReadRawString(int position, int length)
+        public String ReadRawString(long position, int length)
         {
             _pdfStream.Position = position;
             var bytes = new byte[length];
@@ -354,6 +354,9 @@ namespace PdfSharp.Pdf.IO
             if (value is >= Int32.MinValue and < Int32.MaxValue)
                 return Symbol.Integer;
 
+            if (value is >= Int64.MinValue and < Int64.MaxValue)
+                return Symbol.Long;
+
             return Symbol.Real;
         }
 
@@ -422,7 +425,7 @@ namespace PdfSharp.Pdf.IO
 #if true_
             if (result == Symbol.Integer)
             {
-                int pos = Position;
+                long pos = Position;
                 string objectNumber = Token;
             }
 #endif
@@ -613,7 +616,7 @@ namespace PdfSharp.Pdf.IO
             }
 
         // Phase 2: deal with UTF-16BE if necessary.
-        // UTF-16BE Unicode strings start with U+FEFF ("þÿ"). There can be empty strings with UTF-16BE prefix.
+        // UTF-16BE Unicode strings start with U+FEFF ("Ã¾Ã¿"). There can be empty strings with UTF-16BE prefix.
         Phase2:
             //if (_token.Length >= 2 && _token[0] == '\xFE' && _token[1] == '\xFF')
 #if NET6_0_OR_GREATER
@@ -763,7 +766,7 @@ namespace PdfSharp.Pdf.IO
             // A Reference has the form "nnn mmm R". The implementation of the parser used a
             // reduce/shift algorithm in the first place. But this case is the only one we need to
             // look ahead 3 tokens.
-            int position = Position;
+            long position = Position;
 
             // Skip digits.
             while (Char.IsDigit(_currChar))
@@ -851,32 +854,32 @@ namespace PdfSharp.Pdf.IO
             return _currChar;
         }
 
-#if DEBUG
-        public string SurroundingsOfCurrentPosition(bool hex)
-        {
-            const int range = 20;
-            int start = Math.Max(Position - range, 0);
-            int length = Math.Min(2 * range, PdfLength - start);
-            long posOld = _pdfStream.Position;
-            _pdfStream.Position = start;
-            byte[] bytes = new byte[length];
-            _pdfStream.Read(bytes, 0, length);
-            _pdfStream.Position = posOld;
-            string result = "";
-            if (hex)
-            {
-                for (int idx = 0; idx < length; idx++)
-                    result += ((int)bytes[idx]).ToString("x2");
-                //result += String.Format("{0:", (int) bytes[idx]);
-            }
-            else
-            {
-                for (int idx = 0; idx < length; idx++)
-                    result += (char)bytes[idx];
-            }
-            return result;
-        }
-#endif
+// #if DEBUG
+//         public string SurroundingsOfCurrentPosition(bool hex)
+//         {
+//             const int range = 20;
+//             int start = Math.Max(Position - range, 0);
+//             int length = Math.Min(2 * range, PdfLength - start);
+//             long posOld = _pdfStream.Position;
+//             _pdfStream.Position = start;
+//             byte[] bytes = new byte[length];
+//             _pdfStream.Read(bytes, 0, length);
+//             _pdfStream.Position = posOld;
+//             string result = "";
+//             if (hex)
+//             {
+//                 for (int idx = 0; idx < length; idx++)
+//                     result += ((int)bytes[idx]).ToString("x2");
+//                 //result += String.Format("{0:", (int) bytes[idx]);
+//             }
+//             else
+//             {
+//                 for (int idx = 0; idx < length; idx++)
+//                     result += (char)bytes[idx];
+//             }
+//             return result;
+//         }
+// #endif
 
         /// <summary>
         /// Gets the current symbol.
@@ -929,6 +932,8 @@ namespace PdfSharp.Pdf.IO
                 return (UInt32)_tokenAsLong;
             }
         }
+        
+        public long TokenToLong => long.Parse(_token.ToString(), CultureInfo.InvariantCulture);
 
         /// <summary>
         /// Interprets current token as real or integer literal.
@@ -1019,10 +1024,10 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Gets the length of the PDF output.
         /// </summary>
-        public int PdfLength => _pdfLength;
+        public long PdfLength => _pdfLength;
 
-        readonly int _pdfLength;
-        int _idxChar;
+        readonly long _pdfLength;
+        long _idxChar;
         char _currChar;
         char _nextChar;
         readonly StringBuilder _token = new();

@@ -358,7 +358,7 @@ namespace PdfSharp.Pdf
                     iref.Position = writer.Position;
                     iref.Value.WriteObject(writer);
                 }
-                int startxref = writer.Position;
+                long startxref = writer.Position;
                 IrefTable.WriteObject(writer);
                 writer.WriteRaw("trailer\n");
                 Trailer.Elements.SetInteger("/Size", count + 1);

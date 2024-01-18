@@ -344,6 +344,8 @@
         <Compile Include="..\PdfSharp\Pdf\PdfIntegerObject.cs" Link="Pdf\PdfIntegerObject.cs" />
         <Compile Include="..\PdfSharp\Pdf\PdfItem.cs" Link="Pdf\PdfItem.cs" />
         <Compile Include="..\PdfSharp\Pdf\PdfLiteral.cs" Link="Pdf\PdfLiteral.cs" />
+		<Compile Include="..\PdfSharp\Pdf\PdfLong.cs" Link="Pdf\PdfLong.cs" />
+		<Compile Include="..\PdfSharp\Pdf\PdfLongObject.cs" Link="Pdf\PdfLongObject.cs" />
         <Compile Include="..\PdfSharp\Pdf\PdfMetadata.cs" Link="Pdf\PdfMetadata.cs" />
         <Compile Include="..\PdfSharp\Pdf\PdfName.cs" Link="Pdf\PdfName.cs" />
         <Compile Include="..\PdfSharp\Pdf\PdfNameObject.cs" Link="Pdf\PdfNameObject.cs" />

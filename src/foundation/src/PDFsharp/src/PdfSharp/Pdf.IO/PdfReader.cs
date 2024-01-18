@@ -7,6 +7,7 @@ using System.IO;
 using PdfSharp.Internal;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Internal;
+using System.Xml.Linq;
 
 namespace PdfSharp.Pdf.IO
 {
@@ -441,7 +442,7 @@ namespace PdfSharp.Pdf.IO
             }
             // Sort them so the last xref stream is read first.
             // TODO: Is this always sufficient? (haven't found any issues so far testing with ~1300 PDFs...)
-            xrefStreams.Sort((a, b) => (b.Reference?.Position ?? 0) - (a.Reference?.Position ?? 0));
+            xrefStreams.Sort((a, b) => (int)((b.Reference?.Position ?? 0) - (a.Reference?.Position ?? 0)));
 
 
 

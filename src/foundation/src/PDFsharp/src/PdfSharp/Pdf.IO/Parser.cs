@@ -52,9 +52,9 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Sets PDF input stream position to the specified object.
         /// </summary>
-        public int MoveToObject(PdfObjectID objectID)
+        public long MoveToObject(PdfObjectID objectID)
         {
-            int position = _document.IrefTable[objectID]?.Position ?? throw new AggregateException("Invalid object ID.");
+            long position = _document.IrefTable[objectID]?.Position ?? throw new AggregateException("Invalid object ID.");
             if (position < 0)
             {
                 throw new AggregateException($"Invalid position {position} for object ID {objectID}.");
@@ -227,6 +227,13 @@ namespace PdfSharp.Pdf.IO
 
                 case Symbol.UInteger:
                     pdfObject = new PdfUIntegerObject(_document, _lexer.TokenToUInteger);
+                    pdfObject.SetObjectID(objectNumber, generationNumber);
+                    if (!fromObjectStream)
+                        ReadSymbol(Symbol.EndObj);
+                    return pdfObject;
+
+                case Symbol.Long:
+                    pdfObject = new PdfLongObject(_document, _lexer.TokenToLong);
                     pdfObject.SetObjectID(objectNumber, generationNumber);
                     if (!fromObjectStream)
                         ReadSymbol(Symbol.EndObj);
@@ -765,7 +772,7 @@ namespace PdfSharp.Pdf.IO
 
             if (symbol == Symbol.R)
             {
-                int position = _lexer.Position;
+                long position = _lexer.Position;
                 //        MoveToObject(lexer.Token);
                 ReadObjectID(null);
                 int n = ReadInteger();
@@ -780,6 +787,36 @@ namespace PdfSharp.Pdf.IO
         int ReadInteger()
         {
             return ReadInteger(false);
+        }
+
+        private long ReadLong()
+        {
+            return ReadLong(false);
+        }
+
+        /// <summary>
+        /// Reads an integer value directly from the PDF data stream.
+        /// </summary>
+        private long ReadLong(bool canBeIndirect)
+        {
+            Symbol symbol = _lexer.ScanNextToken();
+            if (symbol == Symbol.Long)
+                return _lexer.TokenToLong;
+
+            if (symbol == Symbol.Integer)
+                return _lexer.TokenToInteger;
+
+            if (symbol == Symbol.R)
+            {
+                var position = _lexer.Position;
+                ReadObjectID(null);
+                int n = ReadInteger();
+                ReadSymbol(Symbol.EndObj);
+                _lexer.Position = position;
+                return n;
+            }
+            ParserDiagnostics.HandleUnexpectedToken(_lexer.Token);
+            return 0;
         }
 
         //    /// <summary>
@@ -978,7 +1015,7 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         internal PdfTrailer ReadTrailer()
         {
-            int length = _lexer.PdfLength;
+            long length = _lexer.PdfLength;
 
             // Implementation note 18 Appendix  H:
             // Acrobat viewers require only that the %%EOF marker appear somewhere within the last 1024 bytes of the file.
@@ -1002,7 +1039,11 @@ namespace PdfSharp.Pdf.IO
             if (idx == -1)
             {
                 // If "startxref" was still not found yet, read the file completely.
-                string trail = _lexer.ReadRawString(0, length);
+                if (length > int.MaxValue)
+                    //TODO: Implement chunking to read long files.
+                    throw new NotImplementedException("Reading >2GB files with a 'startxref' in the middle not implemented.");
+                var trail = _lexer.ReadRawString(0, (int)length);
+
                 idx = trail.LastIndexOf("startxref", StringComparison.Ordinal);
 
                 if (idx == -1)
@@ -1012,7 +1053,7 @@ namespace PdfSharp.Pdf.IO
             }
 
             ReadSymbol(Symbol.StartXRef);
-            _lexer.Position = ReadInteger();
+            _lexer.Position = ReadLong();
 
             // Read all trailers.
             PdfTrailer? newerTrailer = null;
@@ -1065,7 +1106,7 @@ namespace PdfSharp.Pdf.IO
                         int length = ReadInteger();
                         for (int id = start; id < start + length; id++)
                         {
-                            int position = ReadInteger();
+                            long position = ReadLong();
                             int generation = ReadInteger();
                             ReadSymbol(Symbol.Keyword);
                             string token = _lexer.Token;
@@ -1137,9 +1178,9 @@ namespace PdfSharp.Pdf.IO
         /// <param name="idChecked">The identifier found in the PDF file.</param>
         /// <param name="generationChecked">The generation found in the PDF file.</param>
         /// <returns></returns>
-        bool CheckXRefTableEntry(int position, int id, int generation, out int idChecked, out int generationChecked)
+        bool CheckXRefTableEntry(long position, int id, int generation, out int idChecked, out int generationChecked)
         {
-            int origin = _lexer.Position;
+            long origin = _lexer.Position;
             idChecked = -1;
             generationChecked = -1;
             try
@@ -1753,7 +1794,7 @@ namespace PdfSharp.Pdf.IO
 
         class ParserState
         {
-            public int Position;
+            public long Position;
             public Symbol Symbol;
         }
 

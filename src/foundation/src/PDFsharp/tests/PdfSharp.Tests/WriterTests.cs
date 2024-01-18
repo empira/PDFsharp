@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FluentAssertions;
-using PdfSharp.Pdf;
-using PdfSharp.Pdf.Advanced;
+﻿using FluentAssertions;
 using PdfSharp.Pdf.IO;
 using Xunit;
 

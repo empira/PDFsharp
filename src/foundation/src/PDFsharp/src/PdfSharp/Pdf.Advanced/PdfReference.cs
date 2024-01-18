@@ -4,12 +4,12 @@
 // With this define each iref object gets a unique number (uid) to make them distinguishable in the debugger
 #define UNIQUE_IREF_
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using PdfSharp.Logging;
 using PdfSharp.Pdf.IO;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PdfSharp.Pdf.Advanced
 {
@@ -55,7 +55,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Initializes a new PdfReference instance from the specified object identifier and file position.
         /// </summary>
-        public PdfReference(PdfObjectID objectID, int position)
+        public PdfReference(PdfObjectID objectID, long position)
         {
             _objectID = objectID;
             _position = position;
@@ -131,7 +131,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets or sets the file position of the related PdfObject.
         /// </summary>
-        public int Position
+        public long Position
         {
             get => _position;
 #if true
@@ -149,7 +149,7 @@ namespace PdfSharp.Pdf.Advanced
 #endif
         }
 
-        int _position;  // I know it should be long, but I have never seen a 2GB PDF file.
+        long _position;
 
         /// <summary>
         /// Gets or sets the referenced PdfObject.

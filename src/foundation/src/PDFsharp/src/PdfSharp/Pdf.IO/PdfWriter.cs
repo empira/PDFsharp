@@ -44,7 +44,7 @@ namespace PdfSharp.Pdf.IO
             Close(true);
         }
 
-        public int Position => (int)_stream.Position;
+        public long Position => _stream.Position;
 
         /// <summary>
         /// Gets or sets the kind of layout.
@@ -96,6 +96,16 @@ namespace PdfSharp.Pdf.IO
             WriteSeparator(CharCat.Character);
             WriteRaw(value.ToString(CultureInfo.InvariantCulture));
             _lastCat = CharCat.Character;
+        }        
+        
+        /// <summary>
+        /// Writes the specified value to the PDF stream.
+        /// </summary>
+        public void Write(long value)
+        {
+            WriteSeparator(CharCat.Character);
+            WriteRaw(value.ToString(CultureInfo.InvariantCulture));
+            _lastCat = CharCat.Character;
         }
 
         /// <summary>
@@ -112,6 +122,16 @@ namespace PdfSharp.Pdf.IO
         /// Writes the specified value to the PDF stream.
         /// </summary>
         public void Write(PdfInteger value)
+        {
+            WriteSeparator(CharCat.Character);
+            _lastCat = CharCat.Character;
+            WriteRaw(value.Value.ToString(CultureInfo.InvariantCulture));
+        }
+        
+        /// <summary>
+        /// Writes the specified value to the PDF stream.
+        /// </summary>
+        public void Write(PdfLong value)
         {
             WriteSeparator(CharCat.Character);
             _lastCat = CharCat.Character;
@@ -428,7 +448,7 @@ namespace PdfSharp.Pdf.IO
 
             if (omitStream)
             {
-                WriteRaw("  «...stream content omitted...»\n");  // useful for debugging only
+                WriteRaw("  Â«...stream content omitted...Â»\n");  // useful for debugging only
             }
             else
             {
@@ -502,12 +522,12 @@ namespace PdfSharp.Pdf.IO
             }
         }
 
-        public void WriteEof(PdfDocument document, int startxref)
+        public void WriteEof(PdfDocument document, long startxref)
         {
             WriteRaw("startxref\n");
             WriteRaw(startxref.ToString(CultureInfo.InvariantCulture));
             WriteRaw("\n%%EOF\n");
-            int fileSize = (int)_stream.Position;
+            long fileSize = _stream.Position;
             if (_layout == PdfWriterLayout.Verbose)
             {
                 TimeSpan duration = DateTime.Now - document._creation;
