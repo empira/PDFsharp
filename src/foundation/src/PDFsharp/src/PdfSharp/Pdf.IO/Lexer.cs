@@ -1036,8 +1036,8 @@ namespace PdfSharp.Pdf.IO
         {
             get
             {
-                // ReSharper disable once CompareOfFloatsByEqualityOperator
-                Debug.Assert(_tokenAsReal == double.Parse(_token.ToString(), CultureInfo.InvariantCulture));
+                // had several documents where the assertion failed with an equality comparision (==)
+                Debug.Assert(Math.Abs(_tokenAsReal - double.Parse(_token.ToString(), CultureInfo.InvariantCulture)) < 0.000000001);
                 return _tokenAsReal;
             }
         }

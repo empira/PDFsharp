@@ -42,10 +42,10 @@ namespace PdfSharp.Pdf.IO
             _stack = new ShiftStack();
         }
 
-        public Parser(PdfDocument document)
+        public Parser(PdfDocument document, Lexer lexer)
         {
-            _document = document;
-            _lexer = document?._lexer ?? throw new ArgumentNullException(nameof(document), "Lexer not defined.");
+            _document = document ?? throw new ArgumentNullException(nameof(document));
+            _lexer = lexer ?? throw new ArgumentNullException(nameof(lexer));
             _stack = new ShiftStack();
         }
 
@@ -106,7 +106,7 @@ namespace PdfSharp.Pdf.IO
                 {
                     // Attempt to read an object that was already registered. Keep the former object.
                     // This only happens with corrupt PDF files that have duplicate IDs.
-                    if (iref.Value != null!)
+                    if (iref is not PdfReferenceToCompressedObject && iref.Value != null!)
                     {
                         LogHost.Logger.LogWarning("Another instance of object {iref} was found. Using previously encountered object instead.", iref);
                         // Attempt to read an object that was already read. Keep the former object.
@@ -259,12 +259,12 @@ namespace PdfSharp.Pdf.IO
 
                 case Symbol.Keyword:
                     // Should not come here anymore.
-                    ParserDiagnostics.HandleUnexpectedToken(_lexer.Token);
+                    ParserDiagnostics.HandleUnexpectedToken(_lexer.Token, _lexer.Position - _lexer.Token.Length);
                     break;
 
                 default:
                     // Should not come here anymore.
-                    ParserDiagnostics.HandleUnexpectedToken(_lexer.Token);
+                    ParserDiagnostics.HandleUnexpectedToken(_lexer.Token, _lexer.Position - _lexer.Token.Length);
                     break;
             }
             symbol = ScanNextToken();
@@ -365,19 +365,10 @@ namespace PdfSharp.Pdf.IO
             {
 #if true
                 object length;
-                if (reference.Position == -1 && reference.Value != null!)
-                {
-                    if (reference.Value is not PdfIntegerObject integer)
-                        throw new InvalidOperationException("Cannot retrieve stream length from stream object.");
+                if (reference.Value is not PdfIntegerObject integer)
+                    throw new InvalidOperationException("Cannot retrieve stream length from stream object.");
 
-                    length = integer;
-                }
-                else
-                {
-                    ParserState state = SaveState();
-                    length = ReadObject(null, reference.ObjectID, false, false);
-                    RestoreState(state);
-                }
+                length = integer;
 #else
                 ParserState state = SaveState();
                 object length = ReadObject(null, reference.ObjectID, false, false);
@@ -579,7 +570,7 @@ namespace PdfSharp.Pdf.IO
                     //case Symbol.StartXRef:
                     //case Symbol.Eof:
                     default:
-                        ParserDiagnostics.HandleUnexpectedToken(_lexer.Token);
+                        ParserDiagnostics.HandleUnexpectedToken(_lexer.Token, _lexer.Position - _lexer.Token.Length);
                         SkipCharsUntil(stop);
                         return;
                 }
@@ -694,7 +685,7 @@ namespace PdfSharp.Pdf.IO
             }
             Symbol current = _lexer.ScanNextToken();
             if (symbol != current)
-                ParserDiagnostics.HandleUnexpectedToken(_lexer.Token);
+                ParserDiagnostics.HandleUnexpectedToken(_lexer.Token, _lexer.Position - _lexer.Token.Length);
             return current;
         }
 
@@ -705,7 +696,7 @@ namespace PdfSharp.Pdf.IO
         {
             Symbol current = _lexer.ScanNextToken();
             if (token != _lexer.Token)
-                ParserDiagnostics.HandleUnexpectedToken(_lexer.Token);
+                ParserDiagnostics.HandleUnexpectedToken(_lexer.Token, _lexer.Position - _lexer.Token.Length);
             return current;
         }
 
@@ -717,7 +708,7 @@ namespace PdfSharp.Pdf.IO
             string name;
             Symbol symbol = ScanNextToken(out name);
             if (symbol != Symbol.Name)
-                ParserDiagnostics.HandleUnexpectedToken(name);
+                ParserDiagnostics.HandleUnexpectedToken(name, _lexer.Position - name.Length);
             return name;
         }
 
@@ -794,7 +785,7 @@ namespace PdfSharp.Pdf.IO
                 _lexer.Position = position;
                 return n;
             }
-            ParserDiagnostics.HandleUnexpectedToken(_lexer.Token);
+            ParserDiagnostics.HandleUnexpectedToken(_lexer.Token, _lexer.Position - _lexer.Token.Length);
             return 0;
         }
 
@@ -845,114 +836,8 @@ namespace PdfSharp.Pdf.IO
         //    }
 
         /// <summary>
-        /// Reads an object from the PDF input stream using the default parser.
-        /// </summary>
-        public static PdfObject ReadObject(PdfDocument owner, PdfObjectID objectID)
-        {
-            if (owner == null)
-                throw new ArgumentNullException(nameof(owner));
-
-            Parser parser = new Parser(owner);
-            return parser.ReadObject(null, objectID, false, false);
-        }
-
-        /// <summary>
-        /// Reads the irefs from the compressed object with the specified index in the object stream
-        /// of the object with the specified object id.
-        /// </summary>
-        internal void ReadIRefsFromCompressedObject(PdfObjectID objectID)
-        {
-            Debug.Assert(_document.IrefTable.ObjectTable.ContainsKey(objectID));
-            if (!_document.IrefTable.ObjectTable.TryGetValue(objectID, out var iref))
-            {
-                // We should never come here because the object stream must be a type 1 entry in the xref stream
-                // and iref was created before.
-                throw new NotImplementedException("This case is not coded or something else went wrong");
-            }
-
-            Debug.Assert(iref.Value != null, "The object shall be read in by PdfReader.ReadIndirectObjectsFromIrefTable() before accessing it.");
-
-            if (iref.Value is not PdfObjectStream objectStreamStream)
-            {
-                Debug.Assert(((PdfDictionary)iref.Value).Elements.GetName("/Type") == "/ObjStm");
-
-                objectStreamStream = new PdfObjectStream((PdfDictionary)iref.Value);
-                Debug.Assert(objectStreamStream.Reference == iref);
-                // objectStream.Reference = iref; Superfluous, see Assert in line before.
-                Debug.Assert(objectStreamStream.Reference.Value != null, "Something went wrong.");
-            }
-            Debug.Assert(objectStreamStream != null);
-
-            //PdfObjectStream objectStreamStream = (PdfObjectStream)iref.Value;
-            if (objectStreamStream == null)
-                throw new Exception("Something went wrong here.");
-            objectStreamStream.ReadReferences(_document.IrefTable);
-        }
-
-        /// <summary>
-        /// Reads the compressed object with the specified index in the object stream
-        /// of the object with the specified object ID.
-        /// </summary>
-        internal PdfReference ReadCompressedObject(PdfObjectID objectID, int index)
-        {
-#if true
-            Debug.Assert(_document.IrefTable.ObjectTable.ContainsKey(objectID));
-            if (!_document.IrefTable.ObjectTable.TryGetValue(objectID, out var iref))
-            {
-                throw new NotImplementedException("This case is not coded or something else went wrong");
-            }
-#else
-            // We should never come here because the object stream must be a type 1 entry in the xref stream
-            // and iref was created before.
-
-            // Has the specified object already an iref in the object table?
-            if (!_document._irefTable.ObjectTable.TryGetValue(objectID, out iref))
-            {
-                try
-                {
-#if true_
-                    iref = new PdfReference(objectID,);
-                    iref.ObjectID = objectID;
-                    _document._irefTable.Add(os);
-#else
-                    PdfDictionary dict = (PdfDictionary)ReadObject(null, objectID, false, false);
-                    PdfObjectStream os = new PdfObjectStream(dict);
-                    iref = new PdfReference(os);
-                    iref.ObjectID = objectID;
-                    _document._irefTable.Add(os);
-#endif
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                    throw;
-                }
-            }
-#endif
-
-            Debug.Assert(iref.Value != null, "The object shall be read in by PdfReader.ReadIndirectObjectsFromIrefTable() before accessing it.");
-
-            var objectStreamStream = iref.Value as PdfObjectStream;
-            if (objectStreamStream == null)
-            {
-                Debug.Assert(((PdfDictionary)iref.Value).Elements.GetName("/Type") == "/ObjStm");
-
-                objectStreamStream = new PdfObjectStream((PdfDictionary)iref.Value);
-                Debug.Assert(objectStreamStream.Reference == iref);
-                // objectStream.Reference = iref; Superfluous, see Assert in line before.
-                Debug.Assert(objectStreamStream.Reference.Value != null, "Something went wrong.");
-            }
-            Debug.Assert(objectStreamStream != null);
-
-            //PdfObjectStream objectStreamStream = (PdfObjectStream)iref.Value;
-            if (objectStreamStream == null)
-                throw new Exception("Something went wrong here.");
-            return objectStreamStream.ReadCompressedObject(index);
-        }
-
-        /// <summary>
         /// Reads the compressed object with the specified number at the given offset.
-        /// The parser must be initialized with the stream an object stream object.
+        /// The parser must be initialized with the stream of an object stream object.
         /// </summary>
         internal PdfReference ReadCompressedObject(int objectNumber, int offset)
         {
@@ -1132,7 +1017,7 @@ namespace PdfSharp.Pdf.IO
                         return trailer;
                     }
                     else
-                        ParserDiagnostics.HandleUnexpectedToken(_lexer.Token);
+                        ParserDiagnostics.HandleUnexpectedToken(_lexer.Token, _lexer.Position - _lexer.Token.Length);
                 }
             }
             // ReSharper disable once RedundantIfElseBlock because of code readability.
@@ -1366,7 +1251,6 @@ namespace PdfSharp.Pdf.IO
 #endif
                                 // Add iref for all uncompressed objects.
                                 xrefTable.Add(new PdfReference(objectID, position));
-
                             }
 #if DEBUG
                             else
@@ -1377,7 +1261,14 @@ namespace PdfSharp.Pdf.IO
                             break;
 
                         case 2:
-                            // Nothing to do yet.
+                            // object-stream number / index in object-stream
+                            // collect irefs for objects stored in object streams
+                            objectID = new PdfObjectID(subsections[ssc][0] + idx, 0);
+                            if (!xrefTable.Contains(objectID))
+                            {
+                                xrefTable.Add(new PdfReferenceToCompressedObject(_document, objectID,
+                                    (int)item.Field2, (int)item.Field3));
+                            }
                             break;
                     }
                 }
@@ -1756,7 +1647,7 @@ namespace PdfSharp.Pdf.IO
             }
         */
 
-        ParserState SaveState()
+        internal ParserState SaveState()
         {
             var state = new ParserState
             {
@@ -1766,13 +1657,13 @@ namespace PdfSharp.Pdf.IO
             return state;
         }
 
-        void RestoreState(ParserState state)
+        internal void RestoreState(ParserState state)
         {
             _lexer.Position = state.Position;
             _lexer.Symbol = state.Symbol;
         }
 
-        class ParserState
+        internal class ParserState
         {
             public int Position;
             public Symbol Symbol;

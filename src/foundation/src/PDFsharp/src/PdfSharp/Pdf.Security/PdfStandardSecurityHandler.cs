@@ -269,7 +269,15 @@ namespace PdfSharp.Pdf.Security
             switch (value)
             {
                 case PdfDictionary vDict:
-                    DecryptDictionary(vDict);
+                    // this check is required for object-streams
+                    // which may be "lazily" loaded and decrypted in PdfReferenceToCompressedObject.ReadValue
+                    // alternatively we could populate a list of already decrypted objects,
+                    // but this would probably required more memory
+                    if (!vDict.AlreadyDecrypted)
+                    {
+                        DecryptDictionary(vDict);
+                        vDict.AlreadyDecrypted = true;
+                    }
                     break;
                 case PdfArray vArray:
                     DecryptArray(vArray);

@@ -17,7 +17,7 @@ namespace PdfSharp.Pdf.Advanced
     /// Represents an indirect reference to a PdfObject.
     /// </summary>
     [DebuggerDisplay("iref({ObjectNumber}, {GenerationNumber})")]
-    public sealed class PdfReference : PdfItem
+    public class PdfReference : PdfItem
     {
         // About PdfReference 
         // 
@@ -154,7 +154,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets or sets the referenced PdfObject.
         /// </summary>
-        public PdfObject Value
+        public virtual PdfObject Value
         {
             get => _value;
             set
@@ -246,5 +246,94 @@ namespace PdfSharp.Pdf.Advanced
         static int s_counter = 0;
         int _uid;
 #endif
+    }
+
+    /// <summary>
+    /// Represents an indirect reference to an object stored in an <see cref="PdfObjectStream"/><br></br>
+    /// The value of this object is "lazily" loaded when first accessed.
+    /// </summary>
+    public sealed class PdfReferenceToCompressedObject : PdfReference
+    {
+        private readonly int _objectStreamNumber;
+        private readonly int _indexInObjectStream;
+
+        internal PdfReferenceToCompressedObject(PdfDocument doc, PdfObjectID objectID,
+            int objectStreamNumber, int indexInObjectStream)
+            : base(objectID, -1)
+        {
+            Document = doc ?? throw new ArgumentNullException(nameof(doc));
+            _objectStreamNumber = objectStreamNumber;
+            _indexInObjectStream = indexInObjectStream;
+        }
+
+        public override PdfObject Value
+        {
+            get
+            {
+                if (base.Value is null)
+                {
+                    ReadValue();
+                }
+                return base.Value!;
+            }
+            set => base.Value = value;
+        }
+
+        /// <summary>
+        /// Reads the value of this object
+        /// </summary>
+        void ReadValue()
+        {
+            PdfObjectStream? ostm = null;
+            var stmObjID = new PdfObjectID(_objectStreamNumber);
+            // reference to object stream
+            var streamRef = Document.IrefTable[stmObjID];
+            if (streamRef is not null)
+            {
+                if (streamRef.Value is null)
+                {
+                    // object stream not yet loaded. do it now
+                    var parser = Document.GetParser()!;
+                    var state = parser.SaveState();
+                    var obj = parser.ReadObject(null, stmObjID, false, false);
+                    if (obj is PdfDictionary ostmDict)
+                    {
+                        // decrypt if necessary
+                        // must be done before type-transformation because PdfObjectStream
+                        // tries to parse the stream-header in the constructor
+                        Document.EffectiveSecurityHandler?.DecryptObject(ostmDict);
+                        ostm = new PdfObjectStream(ostmDict);
+                    }
+                    parser.RestoreState(state);
+                    Debug.Assert(ostm != null, "Object stream should not be null here");
+                }
+                // already transformed ?
+                else if (streamRef.Value is not PdfObjectStream existingOstm)
+                {
+                    if (streamRef.Value is PdfDictionary ostmDict)
+                    {
+                        // decrypt if necessary
+                        Document.EffectiveSecurityHandler?.DecryptObject(ostmDict);
+                        ostm = new PdfObjectStream(ostmDict);
+                    }
+                    Debug.Assert(ostm != null, "Object stream should not be null here");
+                }
+                else
+                    ostm = existingOstm;
+
+                if (ostm is not null)
+                {
+                    // store the loaded and decrypted object-stream
+                    streamRef.Value = ostm;
+                    // read the actual object we're looking for
+                    var iref = ostm.ReadCompressedObject(_indexInObjectStream);
+                    if (iref is not null)
+                    {
+                        Debug.Assert(iref.ObjectID == ObjectID, "ObjectID mismatch");
+                        base.Value = iref.Value;
+                    }
+                }
+            }
+        }
     }
 }

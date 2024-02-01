@@ -52,37 +52,6 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Reads the compressed object with the specified index.
         /// </summary>
-        internal void ReadReferences(PdfCrossReferenceTable xrefTable)
-        {
-            ////// Create parser for stream.
-            ////Parser parser = new Parser(_document, new MemoryStream(Stream.Value));
-            for (int idx = 0; idx < _header.Length; idx++)
-            {
-                int objectNumber = _header[idx][0];
-                int offset = _header[idx][1];
-
-                PdfObjectID objectID = new PdfObjectID(objectNumber);
-
-                // HACK: -1 indicates compressed object.
-                PdfReference iref = new PdfReference(objectID, -1);
-                ////iref.ObjectID = objectID;
-                ////iref.Value = xrefStream;
-                if (!xrefTable.Contains(iref.ObjectID))
-                {
-                    xrefTable.Add(iref);
-                }
-                else
-                {
-#if DEBUG
-                    GetType();
-#endif
-                }
-            }
-        }
-
-        /// <summary>
-        /// Reads the compressed object with the specified index.
-        /// </summary>
         internal PdfReference ReadCompressedObject(int index)
         {
             Parser parser = new Parser(_document, new MemoryStream(Stream.Value));
@@ -108,7 +77,7 @@ namespace PdfSharp.Pdf.Advanced
 
             /// <summary>
             /// (Required) The type of PDF object that this dictionary describes;
-            /// must be ObjStmfor an object stream.
+            /// must be ObjStm for an object stream.
             /// </summary>
             [KeyInfo(KeyType.Name | KeyType.Required, FixedValue = "ObjStm")]
             public const string Type = "/Type";
@@ -130,7 +99,7 @@ namespace PdfSharp.Pdf.Advanced
             /// (Optional) A reference to an object stream, of which the current object
             /// stream is considered an extension. Both streams are considered part of
             /// a collection of object streams (see below). A given collection consists
-            /// of a set of streams whose Extendslinks form a directed acyclic graph.
+            /// of a set of streams whose Extends links form a directed acyclic graph.
             /// </summary>
             [KeyInfo(KeyType.Stream | KeyType.Optional)]
             public const string Extends = "/Extends";

@@ -45,6 +45,12 @@ namespace PdfSharp.Pdf
         // Reference: 3.2.6  Dictionary Objects / Page 59
 
         /// <summary>
+        /// Determines, whether this instance was already decrypted.<br></br>
+        /// (in case the document is protected)
+        /// </summary>
+        internal bool AlreadyDecrypted { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="PdfDictionary"/> class.
         /// </summary>
         public PdfDictionary()

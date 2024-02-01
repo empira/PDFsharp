@@ -120,6 +120,23 @@ namespace PdfSharp.Pdf
             Trailer.CreateNewDocumentIDs();
         }
 
+        /// <summary>
+        /// Gets a <see cref="Parser"/> for an imported document.<br></br>
+        /// Returns null, if the document was not imported.<br></br>
+        /// If this method is called multiple times for the same document,
+        /// the same parser-instance is returned each time.
+        /// </summary>
+        /// <returns>The parser-instance for imported documents or null when the document was not imported</returns>
+        internal Parser? GetParser()
+        {
+            if (_parser == null)
+            {
+                if (_lexer != null)
+                    _parser = new Parser(this, _lexer);
+            }
+            return _parser;
+        }
+
         //~PdfDocument()
         //{
         //  Dispose(false);
@@ -813,6 +830,7 @@ namespace PdfSharp.Pdf
 
         // Imported Document.
         internal Lexer? _lexer;
+        internal Parser? _parser;
 
         internal DateTime _creation;
 
