@@ -69,6 +69,7 @@ namespace PdfSharp.Drawing.Internal
 
             bool header = TestJfifHeaderWorker(stream, ii) ||
                           TestExifHeaderWorker(stream/*, ii*/) ||
+                          TestApp2HeaderWorker(stream) ||
                           TestApp13HeaderWorker(stream);
 
             return header;
@@ -138,6 +139,37 @@ namespace PdfSharp.Drawing.Internal
                         return true;
                     }
                 }
+            }
+            return false;
+        }
+
+        bool TestApp2HeaderWorker(StreamReaderHelper stream)
+        {
+            // Check for APP2 header.
+            if (stream.GetWord(0, true) == 0xffe2)
+            {
+                int length = stream.GetWord(2, true);
+
+                StringBuilder identifier = new();
+                int idx = 4;
+                do
+                {
+                    byte c = stream.GetByte(idx);
+                    if (c == 0x00)
+                    {
+                        break;
+                    }
+                    identifier.Append((char)c);
+                    ++idx;
+                } while (idx < length);
+
+                var id = identifier.ToString();
+                if (!id.Equals("ICC_PROFILE"))
+                {
+                    return false;
+                }
+
+                return true;
             }
             return false;
         }
