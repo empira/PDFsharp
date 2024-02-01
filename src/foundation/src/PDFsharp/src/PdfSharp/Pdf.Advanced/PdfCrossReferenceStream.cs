@@ -12,7 +12,7 @@ namespace PdfSharp.Pdf.Advanced
     sealed class PdfCrossReferenceStream : PdfTrailer  // Reference: 3.4.7  Cross-Reference Streams / Page 106
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PdfObjectStream"/> class.
+        /// Initializes a new instance of the <see cref="PdfCrossReferenceStream"/> class.
         /// </summary>
         public PdfCrossReferenceStream(PdfDocument document)
             : base(document)

@@ -73,11 +73,11 @@ namespace PdfSharp.Internal
                 "If you think this is a bug in PDFsharp, please send us your PDF file.", (int)ch);
             ThrowParserException(message);
         }
-        public static void HandleUnexpectedToken(string token)
+        public static void HandleUnexpectedToken(string token, int position)
         {
             string message = String.Format(CultureInfo.InvariantCulture,
-                "Unexpected token '{0}' in PDF stream. The file may be corrupted. " +
-                "If you think this is a bug in PDFsharp, please send us your PDF file.", token);
+                "Unexpected token '{0}' at position {1} in PDF stream. The file may be corrupted. " +
+                "If you think this is a bug in PDFsharp, please send us your PDF file.", token, position);
             ThrowParserException(message);
         }
     }
