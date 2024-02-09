@@ -607,11 +607,11 @@ namespace PdfSharp.Pdf.Content
                 }
                 if (Char.IsLetterOrDigit(_currChar))
                 {
-                    hex[0] = Char.ToUpper(_currChar);
+                    hex[0] = _currChar;
                     // Second char is optional in PDF spec.
                     if (Char.IsLetterOrDigit(_nextChar))
                     {
-                        hex[1] = Char.ToUpper(_nextChar);
+                        hex[1] = _nextChar;
                         ScanNextChar();
                     }
                     else
