@@ -17,8 +17,8 @@ namespace PdfSharp.Drawing.BarCodes
     {
         private static Dictionary<byte, byte[]> Patterns;
         private const int CODE128_STOPCODE = 106;
-        private byte[] _values = null; 
-        private Code128Type _type = Code128Type.CodeC;
+        private byte[] _values; 
+        private Code128Type _type;
 
         /// <summary>Creates a new instance of the Patterns field and populates it with the appropriate
         /// pattern to draw a code 128 bar code</summary>
@@ -136,7 +136,7 @@ namespace PdfSharp.Drawing.BarCodes
 
         /// <summary>Constructor</summary>
         public Code128()
-            : base("", XSize.Empty, CodeDirection.LeftToRight)
+            : this("", XSize.Empty, CodeDirection.LeftToRight)
         { }
 
         /// <summary>Constructor</summary>
@@ -144,7 +144,7 @@ namespace PdfSharp.Drawing.BarCodes
         /// <param name="size">XSize - The size of the bar code</param>
         /// <param name="direction">CodeDirection - Indicates the direction to draw the bar code</param>
         public Code128(string text, XSize size, CodeDirection direction)
-            : this(text, size, direction, Code128Type.CodeC)
+            : this(text, size, direction, Code128Type.CodeB)
         {
         }
 
@@ -161,11 +161,10 @@ namespace PdfSharp.Drawing.BarCodes
 
         private void GenerateValues()
         {
-            // Create the array to hold the values to be rendered
             if (_type == Code128Type.CodeC)
             {
-                // Ensure that the text is an even length
-                if ((Text.Length % 2) == 1) throw new ArgumentOutOfRangeException("Parameter text (string) must have an even length for Code 128 - Code C");
+                if ((Text.Length % 2) == 1) 
+                    throw new ArgumentOutOfRangeException("Parameter text (string) must have an even length for Code 128 - Code C");
                 _values = new byte[Text.Length / 2];
             }
             else
