@@ -1,11 +1,10 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using PdfSharp.Drawing;
 using PdfSharp.Pdf.AcroForms;
 using PdfSharp.Pdf.Advanced;
-using PdfSharp.Pdf.Annotations;
 using PdfSharp.Pdf.Internal;
+using System.Text;
 #if WPF
 using System.IO;
 #endif
@@ -23,11 +22,14 @@ namespace PdfSharp.Pdf.Signatures
         private PdfArray signatureFieldByteRangePdfArray;
 
         /// <summary>
-        /// Cache signature length (bytes) for each PDF version since digest length depends on digest algorithm that depends on PDF version.
+        /// Cached signature length (in bytes) for each PDF version since digest length depends on digest algorithm that depends on PDF version.
         /// </summary>
-        private static Dictionary<int, int> knownSignatureLengthInBytesByPdfVersion = new Dictionary<int, int>();
+        private static Dictionary<int, int> knownSignatureLengthInBytesByPdfVersion = new();
 
-        private const int byteRangePaddingLength = 36; // place big enough required to replace [0 0 0 0] with the correct value
+        /// <summary>
+        /// (arbitrary) big enough reserved space to replace ByteRange placeholder [0 0 0 0] with the actual computed value of the byte range to sign
+        /// </summary>
+        private const int byteRangePaddingLength = 36;
 
         /// <summary>
         /// Pdf Document signature will be attached to
@@ -52,7 +54,9 @@ namespace PdfSharp.Pdf.Signatures
 
             // estimate signature length by computing signature for a fake byte[]
             if (!knownSignatureLengthInBytesByPdfVersion.ContainsKey(documentToSign.Version))
-                knownSignatureLengthInBytesByPdfVersion[documentToSign.Version] = signer.GetSignedCms(new MemoryStream(new byte[] { 0 }), documentToSign.Version).Length;
+                knownSignatureLengthInBytesByPdfVersion[documentToSign.Version] = 
+                    signer.GetSignedCms(new MemoryStream(new byte[] { 0 }), documentToSign.Version).Length
+                    + 10 /* arbitrary margin added because TSA timestamp response's length seems to vary from a call to another (I saw a variation of 1 byte) */;
         }
 
         public PdfSignatureHandler(ISigner signer, PdfSignatureOptions options)
@@ -82,17 +86,27 @@ namespace PdfSharp.Pdf.Signatures
             writer.Stream.Position = (signatureFieldByteRangePdfArray as PdfArrayWithPadding).PositionStart;
             byteRangeArray.WriteObject(writer);
 
-            // computing and writing document's digest
-
+            // computing signature from document's digest
             var signature = signer.GetSignedCms(rangedStreamToSign, Document.Version);
 
-            if (signature.Length != knownSignatureLengthInBytesByPdfVersion[Document.Version])
-                throw new Exception("The digest length is different that the approximation made.");
+            if (signature.Length > knownSignatureLengthInBytesByPdfVersion[Document.Version])
+                throw new Exception("The actual digest length is bigger that the approximation made. Not enough room in the placeholder to fit the signature.");
 
-            var signatureAsRawString = PdfEncoders.RawEncoding.GetString(signature, 0, signature.Length);
-            var tempContentsPdfString = new PdfString(signatureAsRawString, PdfStringFlags.HexLiteral); // has to be a hex string
-            writer.Stream.Position = signatureFieldContentsPdfString.PositionStart + verboseExtraSpaceSeparatorLength; // tempContentsPdfString is orphan, so it will not write the space delimiter: need to begin write 1 byte further if Verbose
-            tempContentsPdfString.WriteObject(writer);
+            // directly writes document's signature in the /Contents<> entry
+            writer.Stream.Position = signatureFieldContentsPdfString.PositionStart
+                + verboseExtraSpaceSeparatorLength /* tempContentsPdfString is orphan, so it will not write the space delimiter: need to begin write 1 byte further if Verbose */
+                + 1 /* skip the begin-delimiter '<' */;
+            writer.Write(PdfEncoders.RawEncoding.GetBytes(FormatHex(signature)));
+        }
+
+        private string FormatHex(byte[] bytes) // starting from .net5, could be replaced by Convert.ToHexString(Byte[]). keeping current method to be ease .net48/netstandard compatibility
+        {
+            var retval = new StringBuilder();
+
+            for (int idx = 0; idx < bytes.Length; idx++)
+                retval.AppendFormat("{0:X2}", bytes[idx]);
+
+            return retval.ToString();
         }
 
         /// <summary>
@@ -130,9 +144,9 @@ namespace PdfSharp.Pdf.Signatures
             if (Options.PageIndex >= Document.PageCount)
                 throw new ArgumentOutOfRangeException($"Signature page doesn't exist, specified page was {Options.PageIndex + 1} but document has only {Document.PageCount} page(s).");
 
-            var fakeSignature = Enumerable.Repeat((byte)0x20/*actual value does not matter*/, knownSignatureLengthInBytesByPdfVersion[Document.Version]).ToArray();
+            var fakeSignature = Enumerable.Repeat((byte)0x00/*padded with zeros, as recommended (trailing zeros have no incidence on signature decoding)*/, knownSignatureLengthInBytesByPdfVersion[Document.Version]).ToArray();
             var fakeSignatureAsRawString = PdfEncoders.RawEncoding.GetString(fakeSignature, 0, fakeSignature.Length);
-            signatureFieldContentsPdfString = new PdfString(fakeSignatureAsRawString, PdfStringFlags.HexLiteral);
+            signatureFieldContentsPdfString = new PdfString(fakeSignatureAsRawString, PdfStringFlags.HexLiteral); // has to be a hex string
             signatureFieldByteRangePdfArray = new PdfArrayWithPadding(Document, byteRangePaddingLength, new PdfInteger(0), new PdfInteger(0), new PdfInteger(0), new PdfInteger(0));
             //Document.Internals.AddObject(signatureFieldByteRange);
 
