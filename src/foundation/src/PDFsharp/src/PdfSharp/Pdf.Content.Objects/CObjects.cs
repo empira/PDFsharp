@@ -114,11 +114,18 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         /// </summary>
         protected override CObject Copy()
         {
-            CObject obj = base.Copy();
-            _items = new List<CObject>(_items);
+			//Commit note: I may be wrong but this didn't seem right to me.
+			//If we want to make a copy, the clone should contain cloned items, not the original object i.e.
+			//public bool doingSomething(CSequence s) {
+			//	var i = s[0];
+			//	var _ = s.Clone();
+			//	return ReferenceEquals(s[0], i); //this should return true
+			//}
+			var c = (CSequence)base.Copy();
+            c._items = new List<CObject>(_items.Count);
             for (int idx = 0; idx < _items.Count; idx++)
-                _items[idx] = _items[idx].Clone();
-            return obj;
+                c._items.Add(_items[idx].Clone());
+            return c;
         }
 
         /// <summary>
@@ -179,22 +186,6 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
             _items.Insert(index, value);
         }
 
-        /////// <summary>
-        /////// Gets a value indicating whether the sequence has a fixed size.
-        /////// </summary>
-        ////public bool IsFixedSize
-        ////{
-        ////  get { return items.IsFixedSize; }
-        ////}
-
-        /////// <summary>
-        /////// Gets a value indicating whether the sequence is read-only.
-        /////// </summary>
-        ////public bool IsReadOnly
-        ////{
-        ////  get { return items.IsReadOnly; }
-        ////}
-
         /// <summary>
         /// Removes the specified value from the sequence.
         /// </summary>
@@ -236,22 +227,6 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         /// Gets the number of elements contained in the sequence.
         /// </summary>
         public int Count => _items.Count;
-
-        ///// <summary>
-        ///// Gets a value indicating whether access to the sequence is synchronized (thread safe).
-        ///// </summary>
-        //public bool IsSynchronized
-        //{
-        //  get { return items.IsSynchronized; }
-        //}
-
-        ///// <summary>
-        ///// Gets an object that can be used to synchronize access to the sequence.
-        ///// </summary>
-        //public object SyncRoot
-        //{
-        //  get { return items.SyncRoot; }
-        //}
 
         #endregion
 
@@ -318,23 +293,23 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
 
         int IList<CObject>.IndexOf(CObject item)
         {
-            throw new NotImplementedException();
+            return _items.IndexOf(item);
         }
 
         void IList<CObject>.Insert(int index, CObject item)
         {
-            throw new NotImplementedException();
+            _items.Insert(index, item);
         }
 
         void IList<CObject>.RemoveAt(int index)
         {
-            throw new NotImplementedException();
+            _items.RemoveAt(index);
         }
 
         CObject IList<CObject>.this[int index]
         {
-            get => throw new NotImplementedException();
-            set => throw new NotImplementedException();
+            get => _items[index];
+            set => _items[index] = value;
         }
 
         #endregion
@@ -343,31 +318,37 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
 
         void ICollection<CObject>.Add(CObject item)
         {
-            throw new NotImplementedException();
+            Add(item);
         }
 
         void ICollection<CObject>.Clear()
         {
-            throw new NotImplementedException();
+            Clear();
         }
 
         bool ICollection<CObject>.Contains(CObject item)
         {
-            throw new NotImplementedException();
+            return Contains(item);
         }
 
         void ICollection<CObject>.CopyTo(CObject[] array, int arrayIndex)
         {
-            throw new NotImplementedException();
+            array = array ?? throw new ArgumentNullException(nameof(array));
+            if (arrayIndex < 0) throw new ArgumentOutOfRangeException(); 
+            if (_items.Count > array.Length - arrayIndex)
+                throw new ArgumentException("The number of elements in the source System.Collections.Generic.ICollection`1 is greater than the available space from arrayIndex to the end of the destination array.");
+
+            for (int i = arrayIndex; i < _items.Count; i++)
+                array[i] = _items[i];
         }
 
-        int ICollection<CObject>.Count => throw new NotImplementedException();
+        int ICollection<CObject>.Count => _items.Count;
 
-        bool ICollection<CObject>.IsReadOnly => throw new NotImplementedException();
+        bool ICollection<CObject>.IsReadOnly => false;
 
         bool ICollection<CObject>.Remove(CObject item)
         {
-            throw new NotImplementedException();
+            return _items.Remove(item);
         }
 
         #endregion
@@ -376,7 +357,7 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
 
         IEnumerator<CObject> IEnumerable<CObject>.GetEnumerator()
         {
-            throw new NotImplementedException();
+            return _items.GetEnumerator();
         }
 
         #endregion
@@ -790,7 +771,8 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
     /// <summary>
     /// Represents an operator a PDF content stream.
     /// </summary>
-    [DebuggerDisplay("({Name}, operands={Operands.Count})")]
+    [DebuggerDisplay($@"{{{nameof(_debuggerDisplay)},nq}}")]
+    [DebuggerTypeProxy(typeof(COperatorDebuggerDisplay))]
     public class COperator : CObject
     {
         /// <summary>
@@ -855,7 +837,33 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
             return Name;
         }
 
-        internal override void WriteObject(ContentWriter writer)
+		#region Printing/Debugger display
+		/// <summary>Function returning string that will be used to displayed object's value in debugger for this type of objects.</summary>
+		public static Func<COperator, string> debuggerDisplay { get; set; } = o => o.ToString(15);
+        internal string _debuggerDisplay => debuggerDisplay(this);
+
+        /// <summary>Prints longer version of string including name, operands list and operator description.</summary>
+        /// <param name="maxOperandsStringLength">Maximal number of characters in operands portion of the string that could be displayed.
+        /// If printing all operands would require greater number of characters, a sting in form like "15 operands" will be put in the result instead.</param>
+		public string ToString(int maxOperandsStringLength) {
+            if (maxOperandsStringLength < 1) return ToString();
+			
+            var ops = ""; var sep = ", "; //operands, separator
+			foreach (var op in Operands) {
+				var os = op + sep; //this should be optimized and checking the size of before converting to string, I guess some object may be really long...
+				ops += os;
+				if (ops.Length > maxOperandsStringLength + sep.Length) {
+					ops = Operands.Count + " operands" + sep;
+                    break;
+                }
+			}
+            if (ops.Length > 0) ops = ops.Substring(0, ops.Length - sep.Length);
+
+			return $"{Name, -4}({ops})    {OpCode.Description}";
+		}
+		#endregion
+
+		internal override void WriteObject(ContentWriter writer)
         {
             if (_sequence != null)
             {
@@ -869,4 +877,18 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
             writer.WriteLineRaw(ToString());
         }
     }
+
+	internal class COperatorDebuggerDisplay {
+		private readonly COperator o;
+
+        public string Name => $"{o.Name} - {o.OpCode.Description}";
+        public string _Postscript => o.OpCode.Postscript;
+        public OpCodeFlags __Flags => o.OpCode.Flags;
+        
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+		public CObject[] ___Operands => o.Operands.ToArray();
+
+		public COperatorDebuggerDisplay(COperator o) => this.o = o;
+		
+	}
 }
