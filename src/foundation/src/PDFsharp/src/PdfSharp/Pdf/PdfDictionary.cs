@@ -119,10 +119,15 @@ namespace PdfSharp.Pdf
         // ReSharper disable once InconsistentNaming
         internal DictionaryElements? _elements;
 
-        /// <summary>
-        /// Returns an enumerator that iterates through the dictionary elements.
-        /// </summary>
-        public IEnumerator<KeyValuePair<string, PdfItem?>> GetEnumerator()
+        protected override PdfItem getChildByName(String name)
+            => Elements[name];
+		protected override void addChildWithName(String name, PdfItem value)
+            => Elements[name] = value;
+
+		/// <summary>
+		/// Returns an enumerator that iterates through the dictionary elements.
+		/// </summary>
+		public IEnumerator<KeyValuePair<string, PdfItem?>> GetEnumerator()
             => Elements.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()
