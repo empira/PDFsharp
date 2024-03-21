@@ -207,7 +207,7 @@ namespace PdfSharp.Pdf.Security
 
             // Correct permission bits.
             permissionsValue &= 0xfffffffc; // 1... 1111 1111 1100 - Bit 1 & 2 must be 0.
-            permissionsValue |= 0x000002c0; // 0... 0010 1100 0000 - Bit 7 & 8 must be 1. Also Bit 10 is no longer used and shall be always set to 1.
+            permissionsValue |= 0x000002c0; // 0... 0010 1100 0000 - Bit 7 & 8 must be 1. Also, Bit 10 is no longer used and shall be always set to 1.
 
             return permissionsValue;
         }
@@ -258,6 +258,10 @@ namespace PdfSharp.Pdf.Security
         {
             // PdfStandardSecurityHandler itself is not encrypted.
             if (IsSecurityHandler(value))
+                return;
+
+            // Cross-reference streams are not encrypted.
+            if (value is PdfCrossReferenceStream)
                 return;
             
             Debug.Assert(value.Reference != null);
@@ -344,9 +348,9 @@ namespace PdfSharp.Pdf.Security
             if (value.Length == 0)
                 return;
 
-            var bytes = value.EncryptionValue;
+            var bytes = value.GetRawBytes();
             DecryptString(ref bytes);
-            value.EncryptionValue = bytes;
+            value.SetRawBytes(bytes);
 
         }
 
@@ -358,9 +362,9 @@ namespace PdfSharp.Pdf.Security
             if (value.Length == 0)
                 return;
 
-            var bytes = value.EncryptionValue;
+            var bytes = value.GetRawBytes();
             DecryptString(ref bytes);
-            value.EncryptionValue = bytes;
+            value.SetRawBytes(bytes);
         }
 
         /// <summary>

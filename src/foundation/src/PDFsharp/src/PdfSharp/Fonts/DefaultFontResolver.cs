@@ -9,10 +9,6 @@ using GdiFont = System.Drawing.Font;
 using GdiFontStyle = System.Drawing.FontStyle;
 #endif
 #if WPF
-//using System.Windows;
-//using System.Windows.Documents;
-//using System.Windows.Media;
-using System.IO;
 using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfTypeface = System.Windows.Media.Typeface;
 using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;

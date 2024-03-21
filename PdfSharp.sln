@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{18632E7D-54DF-4933-A8DF-A7ECE8666E9B}"
 	ProjectSection(SolutionItems) = preProject
 		src\Directory.Build.props = src\Directory.Build.props
+		src\Directory.Build.targets = src\Directory.Build.targets
 		src\Directory.Packages.props = src\Directory.Packages.props
 		src\dotnet-test.Build.props = src\dotnet-test.Build.props
 	EndProjectSection
@@ -40,6 +41,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{18E75E2F-2
 	ProjectSection(SolutionItems) = preProject
 		src\foundation\src\PDFsharp\docs\AboutFonts.md = src\foundation\src\PDFsharp\docs\AboutFonts.md
 		src\foundation\src\PDFsharp\docs\AboutImages.md = src\foundation\src\PDFsharp\docs\AboutImages.md
+		src\foundation\src\PDFsharp\docs\GlobalStuff.md = src\foundation\src\PDFsharp\docs\GlobalStuff.md
 		src\foundation\src\PDFsharp\docs\Notebook.md = src\foundation\src\PDFsharp\docs\Notebook.md
 		src\foundation\src\PDFsharp\docs\PortingNotes.md = src\foundation\src\PDFsharp\docs\PortingNotes.md
 	EndProjectSection
@@ -206,6 +208,21 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PDFsharp.Features.Runner-gdi", "src\foundation\src\PDFsharp\features\PDFsharp.Features.Runner-gdi\PDFsharp.Features.Runner-gdi.csproj", "{380C02B5-94DC-491C-9458-6F5287698C77}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PDFsharp.Features.Runner-wpf", "src\foundation\src\PDFsharp\features\PDFsharp.Features.Runner-wpf\PDFsharp.Features.Runner-wpf.csproj", "{D0CD20C3-C06B-436E-8C88-E5A608C74AB2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.Tests-gdi", "src\foundation\src\PDFsharp\tests\PdfSharp.Tests-gdi\PdfSharp.Tests-gdi.csproj", "{32402A03-34B2-4DA8-8A55-A4E0FCA4C3B2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.tests-wpf", "src\foundation\src\PDFsharp\tests\PdfSharp.tests-wpf\PdfSharp.tests-wpf.csproj", "{AE89ED51-5A8A-4663-ABBE-2D399C8528F4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E00A1E03-7FB3-4A26-BB33-9BE7AA42CFB7}"
+	ProjectSection(SolutionItems) = preProject
+		src\foundation\src\shared\docs\Notebook.md = src\foundation\src\shared\docs\Notebook.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfFileViewer", "src\tools\src\PdfFileViewer\PdfFileViewer.csproj", "{6B5BAD8B-F029-452D-A721-0CF5F95DA1DC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.TestHelper-gdi", "src\tools\src\PdfSharp.TestHelper-gdi\PdfSharp.TestHelper-gdi.csproj", "{6E63D5DF-CADA-4AD5-8824-F1FB97185A49}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.TestHelper-wpf", "src\tools\src\PdfSharp.TestHelper-wpf\PdfSharp.TestHelper-wpf.csproj", "{284F0281-F283-4EC3-BD60-DD0CD5A5442F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -429,6 +446,26 @@ Global
 		{D0CD20C3-C06B-436E-8C88-E5A608C74AB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0CD20C3-C06B-436E-8C88-E5A608C74AB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0CD20C3-C06B-436E-8C88-E5A608C74AB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32402A03-34B2-4DA8-8A55-A4E0FCA4C3B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32402A03-34B2-4DA8-8A55-A4E0FCA4C3B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32402A03-34B2-4DA8-8A55-A4E0FCA4C3B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32402A03-34B2-4DA8-8A55-A4E0FCA4C3B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE89ED51-5A8A-4663-ABBE-2D399C8528F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE89ED51-5A8A-4663-ABBE-2D399C8528F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE89ED51-5A8A-4663-ABBE-2D399C8528F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE89ED51-5A8A-4663-ABBE-2D399C8528F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E63D5DF-CADA-4AD5-8824-F1FB97185A49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E63D5DF-CADA-4AD5-8824-F1FB97185A49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E63D5DF-CADA-4AD5-8824-F1FB97185A49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E63D5DF-CADA-4AD5-8824-F1FB97185A49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{284F0281-F283-4EC3-BD60-DD0CD5A5442F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{284F0281-F283-4EC3-BD60-DD0CD5A5442F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{284F0281-F283-4EC3-BD60-DD0CD5A5442F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{284F0281-F283-4EC3-BD60-DD0CD5A5442F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B5BAD8B-F029-452D-A721-0CF5F95DA1DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B5BAD8B-F029-452D-A721-0CF5F95DA1DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B5BAD8B-F029-452D-A721-0CF5F95DA1DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B5BAD8B-F029-452D-A721-0CF5F95DA1DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -515,6 +552,12 @@ Global
 		{BA04FBE0-6B97-4D21-9561-91F12906A5F9} = {F6F7E411-5CD0-4507-BF59-70004EDD09DA}
 		{380C02B5-94DC-491C-9458-6F5287698C77} = {F6F7E411-5CD0-4507-BF59-70004EDD09DA}
 		{D0CD20C3-C06B-436E-8C88-E5A608C74AB2} = {F6F7E411-5CD0-4507-BF59-70004EDD09DA}
+		{32402A03-34B2-4DA8-8A55-A4E0FCA4C3B2} = {71BD4587-A8B0-4653-A3B2-93578F71ABB7}
+		{AE89ED51-5A8A-4663-ABBE-2D399C8528F4} = {71BD4587-A8B0-4653-A3B2-93578F71ABB7}
+		{E00A1E03-7FB3-4A26-BB33-9BE7AA42CFB7} = {A484FFA0-1C54-4C5C-B46D-6AB5C05AC5AB}
+		{6B5BAD8B-F029-452D-A721-0CF5F95DA1DC} = {CC13B431-6963-480F-8C21-1F78A220A399}
+		{6E63D5DF-CADA-4AD5-8824-F1FB97185A49} = {CC13B431-6963-480F-8C21-1F78A220A399}
+		{284F0281-F283-4EC3-BD60-DD0CD5A5442F} = {CC13B431-6963-480F-8C21-1F78A220A399}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D5FF5562-3C79-434B-B951-B84542D01625}

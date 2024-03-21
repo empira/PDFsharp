@@ -1,7 +1,10 @@
-﻿using System.Collections.ObjectModel;
-using FluentAssertions;
+﻿// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
+using System.Collections.ObjectModel;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.DocumentObjectModel.Tables;
+using FluentAssertions;
 
 namespace MigraDoc.DocumentObjectModel.Tests.Helper
 {
@@ -28,7 +31,7 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
         /// Elements objects like Document.Sections, Section.Headers and Table.Rows and format objects like Paragraph.Format are automatically created if required as soon as the corresponding property is called.
         /// New DocumentObjectSnapshot() usually evaluates the properties of the Values objects and this way doesn't create the elements objects, while the method to be tested may call the properties directly and this way create the objects.
         /// Snapshots with a missing elements object and an empty one on the other hand can't compare them, as the code cannot recognize if there is simply an empty elements object created or if there are other accidental changes.
-        /// As for the document there should be no difference between e. g. a missing and an empty Sections object, we can enforce to create these objects by setting objectsForAutoCreation for the snapshot.
+        /// As for the document there should be no difference between e.g. a missing and an empty Sections object, we can enforce to create these objects by setting objectsForAutoCreation for the snapshot.
         /// This way the elements objects are called directly on the DocumentObject (and not via the Values object) and are therefore created while taking the snapshot.
         /// DefaultObjectsForAutoCreation contains the objects used for auto creation, if objectsForAutoCreation is not set explicit for the snapshot.
         /// </summary>
@@ -38,7 +41,7 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
         public static readonly Dictionary<Type, List<String>>? DefaultObjectsForAutoCreation = null;
 #endif
 
-        // This properties are used for test debugging and have public getters to allow reading in further tests.
+        // These properties are used for test debugging and have public getters to allow reading in further tests.
         // ReSharper disable MemberCanBePrivate.Local
         // ReSharper disable UnusedAutoPropertyAccessor.Local
         public object? Object { get; }

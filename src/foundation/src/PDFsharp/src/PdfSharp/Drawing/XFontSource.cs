@@ -1,15 +1,15 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.Runtime.InteropServices;
 using PdfSharp.Fonts;
+using PdfSharp.Fonts.Internal;
 #if GDI
+using System.Runtime.InteropServices;
 using PdfSharp.Internal;
 using GdiFont = System.Drawing.Font;
 using GdiFontStyle = System.Drawing.FontStyle;
 #endif
 #if WPF
-using System.IO;
 using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfTypeface = System.Windows.Media.Typeface;
 using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
@@ -27,7 +27,7 @@ namespace PdfSharp.Drawing
         // Implementation Notes
         // 
         // * XFontSource represents a single font (file) in memory.
-        // * An XFontSource holds a reference to its OpenTypeFontface.
+        // * An XFontSource holds a reference to its OpenTypeFontFace.
         // * To prevent large heap fragmentation this class must exist only once.
         // * TODO: ttcf
 
@@ -55,6 +55,19 @@ namespace PdfSharp.Drawing
                 fontSource = FontFactory.CacheFontSource(fontSource);
             }
             return fontSource;
+        }
+
+        /// <summary>
+        /// Creates an XFontSource from a font file.
+        /// </summary>
+        /// <param name="path">The path of the font file.</param>
+        public static XFontSource CreateFromFile(string path)
+        {
+            if (String.IsNullOrEmpty(path))
+                throw new ArgumentNullException(nameof(path));
+
+            var bytes = File.ReadAllBytes(path);
+            return GetOrCreateFrom(bytes);
         }
 
 #if CORE
@@ -119,7 +132,9 @@ namespace PdfSharp.Drawing
             Debug.Assert(error == 0);
 #else
             // We ignore error 127 here.
-            Debug.Assert(error == 0 || error == 127, "ReadFontBytesFromGdi failed: " + gdiFont.Name + ": " + error + ", size: " + size + ", isTtcf: " + isTtcf);
+            // We ignore error 2 here if font data was found.
+            Debug.Assert(error == 0 || error == 127 || error == 2 && size > 10000 && isTtcf == false,
+                "ReadFontBytesFromGdi failed: " + gdiFont.Name + ": " + error + ", size: " + size + ", isTtcf: " + isTtcf);
 #endif
 
             if (size == 0)
@@ -158,7 +173,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-            static XFontSource GetOrCreateFrom(string typefaceKey, byte[] fontBytes)
+        static XFontSource GetOrCreateFrom(string typefaceKey, byte[] fontBytes)
         {
             ulong key = FontHelper.CalcChecksum(fontBytes);
             if (FontFactory.TryGetFontSourceByKey(key, out var fontSource))
@@ -185,18 +200,18 @@ namespace PdfSharp.Drawing
         }
 
         /// <summary>
-        /// Gets or sets the fontface.
+        /// Gets or sets the font face.
         /// </summary>
-        internal OpenTypeFontface Fontface
+        internal OpenTypeFontFace FontFace
         {
-            get => _fontface;
+            get => _fontFace;
             set
             {
-                _fontface = value;
+                _fontFace = value;
                 _fontName = value.name.FullFontName;
             }
         }
-        OpenTypeFontface _fontface = default!; // NRT
+        OpenTypeFontFace _fontFace = default!; // NRT
 
         /// <summary>
         /// Gets the key that uniquely identifies this font source.

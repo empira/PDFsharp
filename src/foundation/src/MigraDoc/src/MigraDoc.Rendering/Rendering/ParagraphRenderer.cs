@@ -106,7 +106,7 @@ namespace MigraDoc.Rendering
         {
             InitRendering();
             if ((int)_paragraph.Format.OutlineLevel >= 1 && _gfx.PdfPage != null) // Don't call GetOutlineTitle() in vain
-                _documentRenderer.AddOutline((int)_paragraph.Format.OutlineLevel, GetOutlineTitle(), _gfx.PdfPage, GetDestinationPosition());
+                DocumentRenderer.AddOutline((int)_paragraph.Format.OutlineLevel, GetOutlineTitle(), _gfx.PdfPage, GetDestinationPosition());
 
             RenderShading();
             RenderBorders();
@@ -125,7 +125,7 @@ namespace MigraDoc.Rendering
             }
         }
 
-        bool IsRenderedField(DocumentObject docObj)
+        static bool IsRenderedField(DocumentObject docObj)
         {
             if (docObj is NumericFieldBase or DocumentInfo or DateField)
                 return true;
@@ -194,7 +194,7 @@ namespace MigraDoc.Rendering
             return "";
         }
 
-        string GetEffectiveFormat(DateField dateField)
+        static string GetEffectiveFormat(DateField dateField)
         {
             var format = dateField.Format;
             if (!String.IsNullOrEmpty(format))
@@ -317,19 +317,19 @@ namespace MigraDoc.Rendering
             return notFitting ? FormatResult.NewLine : FormatResult.Continue;
         }
 
-        bool IsLineBreak(DocumentObject docObj)
+        static bool IsLineBreak(DocumentObject docObj)
         {
             if (docObj is Character { SymbolName: SymbolName.LineBreak })
                 return true;
             return false;
         }
 
-        bool IsBlankOrSoftHyphen(DocumentObject docObj)
+        static bool IsBlankOrSoftHyphen(DocumentObject docObj)
         {
             return docObj is Text { Content: " " or "\u00AD" };
         }
 
-        bool IsBlank(DocumentObject docObj)
+        static bool IsBlank(DocumentObject docObj)
         {
             if (docObj is Text { Content: " " })
                 return true;
@@ -337,14 +337,14 @@ namespace MigraDoc.Rendering
         }
 
         // TODO Make combined predicates for better performance (e.g. IsTabOrLineBreak).
-        bool IsTab(DocumentObject docObj)
+        static bool IsTab(DocumentObject docObj)
         {
             if (docObj is Character { SymbolName: SymbolName.Tab })
                 return true;
             return false;
         }
 
-        bool IsSoftHyphen(DocumentObject docObj)
+        static bool IsSoftHyphen(DocumentObject docObj)
         {
             if (docObj is Text text)
                 return text.Content == "\u00AD";
@@ -547,7 +547,7 @@ namespace MigraDoc.Rendering
                     }
 
                     if (decimalPosIndex >= 0)
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
                         word = word[..decimalPosIndex];
 #else
                         word = word.Substring(0, decimalPosIndex);
@@ -689,7 +689,7 @@ namespace MigraDoc.Rendering
                 else //if (phase == Phase.Rendering)
                 {
                     Area contentArea = _renderInfo.LayoutInfo.ContentArea;
-                    //next lines for non fitting lines that produce an empty fitting rect:
+                    //next lines for non-fitting lines that produce an empty fitting rect:
                     XUnit rectX = contentArea.X;
                     XUnit rectWidth = contentArea.Width;
 
@@ -777,7 +777,7 @@ namespace MigraDoc.Rendering
             _startLeaf = lineInfo.StartIter;
             _endLeaf = lineInfo.EndIter;
             _formattingArea = _renderInfo.LayoutInfo.ContentArea;
-            _tabOffsets = new List<TabOffset>();
+            _tabOffsets = [];
             _currentLineWidth = 0;
             _currentWordsWidth = 0;
 
@@ -915,7 +915,7 @@ namespace MigraDoc.Rendering
             XUnit top = CurrentBaselinePosition;
             var contentArea = renderInfo?.LayoutInfo.ContentArea ?? NRT.ThrowOnNull<Area>();
             top -= contentArea.Height;
-            RenderByInfos(_currentXPosition, top, new[] { renderInfo });
+            RenderByInfos(_currentXPosition, top, [renderInfo]);
 
             RenderUnderline(contentArea.Width, true);
             RealizeHyperlink(contentArea.Width);
@@ -1245,18 +1245,15 @@ namespace MigraDoc.Rendering
             }
         }
 
-        bool? ConvertHyperlinkTargetWindow(HyperlinkTargetWindow hyperlinkTargetWindow)
+        static bool? ConvertHyperlinkTargetWindow(HyperlinkTargetWindow hyperlinkTargetWindow)
         {
-            switch (hyperlinkTargetWindow)
+            return hyperlinkTargetWindow switch
             {
-                case HyperlinkTargetWindow.NewWindow:
-                    return true;
-                case HyperlinkTargetWindow.SameWindow:
-                    return false;
-                case HyperlinkTargetWindow.UserPreference:
-                default:
-                    return null;
-            }
+                HyperlinkTargetWindow.NewWindow => true,
+                HyperlinkTargetWindow.SameWindow => false,
+                HyperlinkTargetWindow.UserPreference => null,
+                _ => null
+            };
         }
 
         void RealizeHyperlink(XUnit width)
@@ -1370,13 +1367,13 @@ namespace MigraDoc.Rendering
         {
             _phase = Phase.Formatting;
 
-            _tabOffsets = new List<TabOffset>();
+            _tabOffsets = [];
 
             var prevParaFormatInfo = (ParagraphFormatInfo?)previousFormatInfo;
             if (prevParaFormatInfo == null || prevParaFormatInfo.LineCount == 0)
             {
                 ((ParagraphFormatInfo)_renderInfo.FormatInfo)._isStarting = true;
-                ParagraphIterator parIt = new ParagraphIterator(_paragraph.Elements);
+                var parIt = new ParagraphIterator(_paragraph.Elements);
                 _currentLeaf = parIt.GetFirstLeaf();
                 _isFirstLine = true;
             }
@@ -1633,56 +1630,84 @@ namespace MigraDoc.Rendering
         /// <returns></returns>
         FormatResult FormatElement(DocumentObject docObj)
         {
+            // Check for available space in the area must be made for each element and explicitly for the last paragraph's element, because in formatting phase,
+            // BottomBorderOffset contains the actual last line's bottom border offset value only for the last paragraph's object.
+            var newVertInfo = CalcVerticalInfo(CurrentFont);
+            var fittingRect = _formattingArea.GetFittingRect(_currentYPosition, newVertInfo.Height + BottomBorderOffset);
+            if (fittingRect == null)
+                return FormatResult.NewArea;
+
+            FormatResult result;
             switch (docObj)
             {
                 case Text obj:
                     if (!IsBlankOrSoftHyphen(obj))
-                        return FormatText(obj);
-                    if (IsBlank(obj))
-                        return FormatBlank();
-                    // if (IsSoftHyphen(docObj))
-                    return FormatSoftHyphen();
+                        result = FormatText(obj, fittingRect);
+                    else if (IsBlank(obj))
+                        result = FormatBlank(fittingRect);
+                    else
+                        //if (IsSoftHyphen(docObj))
+                        result = FormatSoftHyphen();
+                    break;
 
                 case Character obj:
-                    return FormatCharacter(obj);
+                    result = FormatCharacter(obj, fittingRect);
+                    break;
 
                 case DateField obj:
-                    return FormatDateField(obj);
+                    result = FormatDateField(obj, fittingRect);
+                    break;
 
                 case InfoField obj:
-                    return FormatInfoField(obj);
+                    result = FormatInfoField(obj, fittingRect);
+                    break;
 
                 case NumPagesField obj:
-                    return FormatNumPagesField(obj);
+                    result = FormatNumPagesField(obj, fittingRect);
+                    break;
 
                 case PageField obj:
-                    return FormatPageField(obj);
+                    result = FormatPageField(obj, fittingRect);
+                    break;
 
                 case SectionField obj:
-                    return FormatSectionField(obj);
+                    result = FormatSectionField(obj, fittingRect);
+                    break;
 
                 case SectionPagesField obj:
-                    return FormatSectionPagesField(obj);
+                    result = FormatSectionPagesField(obj, fittingRect);
+                    break;
 
                 case BookmarkField obj:
-                    return FormatBookmarkField(obj);
+                    result = FormatBookmarkField(obj);
+                    break;
 
                 case PageRefField obj:
-                    return FormatPageRefField(obj);
+                    result = FormatPageRefField(obj, fittingRect);
+                    break;
 
                 case Image obj:
-                    return FormatImage(obj);
+                    result = FormatImage(obj, fittingRect);
+                    break;
 
                 default:
-                    return FormatResult.Continue;
+                    result = FormatResult.Continue;
+                    break;
             }
+
+            if (result == FormatResult.Continue)
+                _currentVerticalInfo = newVertInfo;
+
+            return result;
         }
 
         // ReSharper disable once UnusedParameter.Local
-        FormatResult FormatImage(Image image)
+#pragma warning disable IDE0060
+        FormatResult FormatImage(Image image, Rectangle fittingRect)
+#pragma warning restore IDE0060
         {
             XUnit width = CurrentImageRenderInfo?.LayoutInfo.ContentArea.Width ?? NRT.ThrowOnNull<XUnit>();
-            return FormatAsWord(width);
+            return FormatAsWord(width, fittingRect);
         }
 
         RenderInfo CalcImageRenderInfo(Image image)
@@ -1693,7 +1718,7 @@ namespace MigraDoc.Rendering
             return renderer.RenderInfo;
         }
 
-        bool IsPlainText(DocumentObject docObj)
+        static bool IsPlainText(DocumentObject docObj)
         {
             if (docObj is Text)
                 return !IsSoftHyphen(docObj) && !IsBlank(docObj);
@@ -1701,16 +1726,15 @@ namespace MigraDoc.Rendering
             return false;
         }
 
-        bool IsSymbol(DocumentObject docObj)
+        static bool IsSymbol(DocumentObject docObj)
         {
             if (docObj is Character)
-            {
                 return !IsSpaceCharacter(docObj) && !IsTab(docObj) && !IsLineBreak(docObj);
-            }
+
             return false;
         }
 
-        bool IsSpaceCharacter(DocumentObject docObj)
+        static bool IsSpaceCharacter(DocumentObject docObj)
         {
             if (docObj is Character character)
             {
@@ -1726,7 +1750,7 @@ namespace MigraDoc.Rendering
             return false;
         }
 
-        bool IsWordLikeElement(DocumentObject docObj)
+        static bool IsWordLikeElement(DocumentObject docObj)
         {
             if (IsPlainText(docObj))
                 return true;
@@ -1746,51 +1770,52 @@ namespace MigraDoc.Rendering
                 NRT.ThrowOnNull();
 
             _fieldInfos.AddBookmark(bookmarkField.Name);
+
             return FormatResult.Ignore;
         }
 
-        FormatResult FormatPageRefField(PageRefField pageRefField)
+        FormatResult FormatPageRefField(PageRefField pageRefField, Rectangle fittingRect)
         {
             _reMeasureLine = true;
             string fieldValue = GetFieldValue(pageRefField);
-            return FormatWord(fieldValue);
+            return FormatWord(fieldValue, fittingRect);
         }
 
-        FormatResult FormatNumPagesField(NumPagesField numPagesField)
+        FormatResult FormatNumPagesField(NumPagesField numPagesField, Rectangle fittingRect)
         {
             _reMeasureLine = true;
             string fieldValue = GetFieldValue(numPagesField);
-            return FormatWord(fieldValue);
+            return FormatWord(fieldValue, fittingRect);
         }
 
-        FormatResult FormatPageField(PageField pageField)
+        FormatResult FormatPageField(PageField pageField, Rectangle fittingRect)
         {
             _reMeasureLine = true;
             string fieldValue = GetFieldValue(pageField);
-            return FormatWord(fieldValue);
+            return FormatWord(fieldValue, fittingRect);
         }
 
-        FormatResult FormatSectionField(SectionField sectionField)
+        FormatResult FormatSectionField(SectionField sectionField, Rectangle fittingRect)
         {
             _reMeasureLine = true;
             string fieldValue = GetFieldValue(sectionField);
-            return FormatWord(fieldValue);
+            return FormatWord(fieldValue, fittingRect);
         }
 
-        FormatResult FormatSectionPagesField(SectionPagesField sectionPagesField)
+        FormatResult FormatSectionPagesField(SectionPagesField sectionPagesField, Rectangle fittingRect)
         {
             _reMeasureLine = true;
             string fieldValue = GetFieldValue(sectionPagesField);
-            return FormatWord(fieldValue);
+            return FormatWord(fieldValue, fittingRect);
         }
 
         /// <summary>
         /// Helper function for formatting word-like elements like text and fields.
         /// </summary>
-        FormatResult FormatWord(string word)
+        FormatResult FormatWord(string word, Rectangle fittingRect)
         {
             XUnit width = MeasureString(word);
-            return FormatAsWord(width);
+            return FormatAsWord(width, fittingRect);
         }
 
         XUnit _savedWordWidth = 0;
@@ -1802,79 +1827,58 @@ namespace MigraDoc.Rendering
             _phase == Phase.Rendering && _paragraph.Format.Alignment == ParagraphAlignment.Justify &&
             !_lastTabPassed;
 
-        FormatResult FormatAsWord(XUnit width)
+        FormatResult FormatAsWord(XUnit width, Rectangle fittingRect)
         {
-            VerticalLineInfo newVertInfo;
-            var currentFont = CurrentFont;
+            _savedWordWidth = width;
 
-            newVertInfo = CalcVerticalInfo(currentFont);
-            var rect = _formattingArea.GetFittingRect(_currentYPosition, newVertInfo.Height + BottomBorderOffset);
-            if (rect == null)
-                return FormatResult.NewArea;
-
-            if (_currentXPosition + width <= rect.X + rect.Width - RightIndent + Tolerance)
-            {
-                _savedWordWidth = width;
-                _currentXPosition += width;
-                // For Tabs in justified context.
-                if (!IgnoreHorizontalGrowth)
-                    _currentWordsWidth += width;
-                if (_savedBlankWidth > 0)
-                {
-                    // For Tabs in justified context.
-                    if (!IgnoreHorizontalGrowth)
-                        ++_currentBlankCount;
-                }
-                // For Tabs in justified context.
-                if (!IgnoreHorizontalGrowth)
-                    _currentLineWidth += width + PopSavedBlankWidth();
-                _currentVerticalInfo = newVertInfo;
-                _minWidth = Math.Max(_minWidth, width);
-                return FormatResult.Continue;
-            }
-            else
-            {
-                _savedWordWidth = width;
+            if (_currentXPosition + width > fittingRect.X + fittingRect.Width - RightIndent + Tolerance)
                 return FormatResult.NewLine;
+
+            _currentXPosition += width;
+            // For Tabs in justified context.
+            if (!IgnoreHorizontalGrowth)
+                _currentWordsWidth += width;
+            if (_savedBlankWidth > 0)
+            {
+                // For Tabs in justified context.
+                if (!IgnoreHorizontalGrowth)
+                    ++_currentBlankCount;
             }
+            // For Tabs in justified context.
+            if (!IgnoreHorizontalGrowth)
+                _currentLineWidth += width + PopSavedBlankWidth();
+            _minWidth = Math.Max(_minWidth, width);
+            return FormatResult.Continue;
         }
 
-        FormatResult FormatDateField(DateField dateField)
+        FormatResult FormatDateField(DateField dateField, Rectangle fittingRect)
         {
             _reMeasureLine = true;
             string estimatedFieldValue = DateTime.Now.ToString(GetEffectiveFormat(dateField));
-            return FormatWord(estimatedFieldValue);
+            return FormatWord(estimatedFieldValue, fittingRect);
         }
 
-        FormatResult FormatInfoField(InfoField infoField)
+        FormatResult FormatInfoField(InfoField infoField, Rectangle fittingRect)
         {
             string fieldValue = GetDocumentInfo(infoField.Name);
-            if (fieldValue != "")
-                return FormatWord(fieldValue);
+            if (fieldValue == "")
+                return FormatResult.Continue;
 
-            return FormatResult.Continue;
+            return FormatWord(fieldValue, fittingRect);
+
         }
 
         string GetDocumentInfo(string name)
         {
             Debug.Assert(_paragraph.Document != null, "_paragraph.Document != null");
-            switch (name.ToLower())
+            return name.ToLower() switch
             {
-                case "title":
-                    return _paragraph.Document.Info.Title;
-
-                case "author":
-                    return _paragraph.Document.Info.Author;
-
-                case "keywords":
-                    return _paragraph.Document.Info.Keywords;
-
-                case "subject":
-                    return _paragraph.Document.Info.Subject;
-
-                default:
-                    return String.Empty;
-            }
+                "title" => _paragraph.Document.Info.Title,
+                "author" => _paragraph.Document.Info.Author,
+                "keywords" => _paragraph.Document.Info.Keywords,
+                "subject" => _paragraph.Document.Info.Subject,
+                _ => ""
+            };
         }
 
         Area GetShadingArea()
@@ -1894,7 +1898,7 @@ namespace MigraDoc.Rendering
             if (_paragraph.Format.Values.Borders is not null && !_paragraph.Format.Values.Borders.IsNull())
             {
                 Borders borders = format.Borders;
-                BordersRenderer bordersRenderer = new BordersRenderer(borders, _gfx);
+                var bordersRenderer = new BordersRenderer(borders, _gfx);
 
                 if (_renderInfo.FormatInfo.IsStarting)
                     top += bordersRenderer.GetWidth(BorderType.Top);
@@ -2007,10 +2011,10 @@ namespace MigraDoc.Rendering
             }
         }
 
-        FormatResult FormatSpace(Character character)
+        FormatResult FormatSpace(Character character, Rectangle fittingRect)
         {
             XUnit width = GetSpaceWidth(character);
-            return FormatAsWord(width);
+            return FormatAsWord(width, fittingRect);
         }
 
         static string GetSymbol(Character character)
@@ -2056,7 +2060,7 @@ namespace MigraDoc.Rendering
 
                 default:
                     char c = character.Char;
-                    char[] chars = Encoding.UTF8.GetChars(new[] { (byte)c });
+                    char[] chars = Encoding.UTF8.GetChars([(byte)c]);
                     ch = chars[0];
                     break;
             }
@@ -2066,55 +2070,49 @@ namespace MigraDoc.Rendering
                 return ch.ToString(); // Return a single character.
 
             // Possibly return more characters.
-            StringBuilder returnString = new StringBuilder(ch.ToString());
+            var returnString = new StringBuilder(ch.ToString());
             while (--count > 0)
                 returnString.Append(ch);
             return returnString.ToString();
         }
 
-        FormatResult FormatSymbol(Character character)
+        FormatResult FormatSymbol(Character character, Rectangle fittingRect)
         {
-            return FormatWord(GetSymbol(character));
+            return FormatWord(GetSymbol(character), fittingRect);
         }
 
         /// <summary>
         /// Processes (measures) a special character within text.
         /// </summary>
         /// <param name="character">The character to process.</param>
+        /// <param name="fittingRect">The rect defining the space that is still available on the area to render the character.</param>
         /// <returns>True if the character should start at a new line.</returns>
-        FormatResult FormatCharacter(Character character)
+        FormatResult FormatCharacter(Character character, Rectangle fittingRect)
         {
-            switch (character.SymbolName)
+            return character.SymbolName switch
             {
-                case SymbolName.Blank:
-                case SymbolName.Em:
-                case SymbolName.Em4:
-                case SymbolName.En:
-                    return FormatSpace(character);
-
-                case SymbolName.LineBreak:
-                    return FormatLineBreak();
-
-                case SymbolName.Tab:
-                    return FormatTab();
-
-                default:
-                    return FormatSymbol(character);
-            }
+                SymbolName.Blank => FormatSpace(character, fittingRect),
+                SymbolName.Em => FormatSpace(character, fittingRect),
+                SymbolName.Em4 => FormatSpace(character, fittingRect),
+                SymbolName.En => FormatSpace(character, fittingRect),
+                SymbolName.LineBreak => FormatLineBreak(),
+                SymbolName.Tab => FormatTab(),
+                _ => FormatSymbol(character, fittingRect)
+            };
         }
 
         /// <summary>
         /// Processes (measures) a blank.
         /// </summary>
         /// <returns>True if the blank causes a line break.</returns>
-        FormatResult FormatBlank()
+        FormatResult FormatBlank(Rectangle fittingRect)
         {
+
             if (IgnoreBlank())
                 return FormatResult.Ignore;
 
             _savedWordWidth = 0;
             XUnit width;
-            VerticalLineInfo newVertInfo;
             var currentFont = CurrentFont;
             if (_lastFont == currentFont)
             {
@@ -2131,19 +2129,12 @@ namespace MigraDoc.Rendering
                 _lastFont = currentFont;
             }
 
-            newVertInfo = CalcVerticalInfo(currentFont);
-            var rect = _formattingArea.GetFittingRect(_currentYPosition, newVertInfo.Height + BottomBorderOffset);
-            if (rect == null)
-                return FormatResult.NewArea;
-
-            if (width + _currentXPosition <= rect.X + rect.Width + Tolerance)
-            {
-                _currentXPosition += width;
-                _currentVerticalInfo = newVertInfo;
-                SaveBlankWidth(width);
-                return FormatResult.Continue;
-            }
-            return FormatResult.NewLine;
+            if (_currentXPosition + width > fittingRect.X + fittingRect.Width - RightIndent + Tolerance)
+                return FormatResult.NewLine;
+            
+            _currentXPosition += width;
+            SaveBlankWidth(width);
+            return FormatResult.Continue;
         }
 
         XUnit _blankWidth;
@@ -2162,9 +2153,10 @@ namespace MigraDoc.Rendering
         /// Processes a text element during formatting.
         /// </summary>
         /// <param name="text">The text element to measure.</param>
-        FormatResult FormatText(Text text)
+        /// <param name="fittingRect">The available space for the text on the area.</param>
+        FormatResult FormatText(Text text, Rectangle fittingRect)
         {
-            return FormatWord(text.Content);
+            return FormatWord(text.Content, fittingRect);
         }
 
         FormatResult FormatSoftHyphen()
@@ -2267,7 +2259,7 @@ namespace MigraDoc.Rendering
         /// <returns>True if the new line may fit the formatting area.</returns>
         bool StartNewLine()
         {
-            _tabOffsets = new List<TabOffset>();
+            _tabOffsets = [];
             _lastTab = null;
             _lastTabPosition = 0;
             _currentYPosition += _currentVerticalInfo.Height;
@@ -2304,8 +2296,10 @@ namespace MigraDoc.Rendering
             else
                 contentArea = contentArea.Unite(_formattingArea.GetFittingRect(_currentYPosition, _currentVerticalInfo.Height) ?? NRT.ThrowOnNull<Rectangle>());
 
-            var lineInfo = new LineInfo();
-            lineInfo.Vertical = _currentVerticalInfo;
+            var lineInfo = new LineInfo
+            {
+                Vertical = _currentVerticalInfo
+            };
 
             if (_startLeaf != null && _startLeaf == _currentLeaf)
                 HandleNonFittingLine();
@@ -2360,7 +2354,7 @@ namespace MigraDoc.Rendering
                     offset += _paragraph.Format.Borders.DistanceFromTop;
                     if (_paragraph.Format.Values.Borders is not null && !_paragraph.Format.Values.Borders.IsNull())
                     {
-                        BordersRenderer bordersRenderer = new BordersRenderer(_paragraph.Format.Borders, _gfx);
+                        var bordersRenderer = new BordersRenderer(_paragraph.Format.Borders, _gfx);
                         offset += bordersRenderer.GetWidth(BorderType.Top);
                     }
                 }
@@ -2368,39 +2362,30 @@ namespace MigraDoc.Rendering
             }
         }
 
-        bool IsLastVisibleLeaf
-        {
-            get
-            {
-                if (_currentLeaf is null)
-                    NRT.ThrowOnNull();
-
-                // REM: Code is missing here for blanks, bookmarks etc. which might be invisible.
-                if (_currentLeaf.IsLastLeaf)
-                    return true;
-
-                return false;
-            }
-        }
         /// <summary>
         /// Gets the bottom border offset for the last line, else 0.
+        /// While formatting, the actual border offset for the last line is only returned for the last paragraph's element.
         /// </summary>
         XUnit BottomBorderOffset
         {
             get
             {
-                XUnit offset = 0;
-                // While formatting, it is impossible to determine whether we are in the last line until the last visible leaf is reached.
-                if ((_phase == Phase.Formatting && (_currentLeaf == null || IsLastVisibleLeaf))
-                  || (_phase == Phase.Rendering && (_isLastLine)))
-                {
-                    if (_paragraph.Format.Values.Borders is not null && !_paragraph.Format.Values.Borders.IsNull())
-                    {
-                        offset += _paragraph.Format.Borders.DistanceFromBottom;
-                        BordersRenderer bordersRenderer = new BordersRenderer(_paragraph.Format.Borders, _gfx);
-                        offset += bordersRenderer.GetWidth(BorderType.Bottom);
-                    }
-                }
+                bool considerAsLastLine;
+                // While formatting, it is impossible to determine whether we are in the last line until the last leaf is reached.
+                if (_phase == Phase.Formatting)
+                    considerAsLastLine = _currentLeaf == null || _currentLeaf.IsLastLeaf;
+                else
+                    considerAsLastLine = _isLastLine;
+
+                if (!considerAsLastLine)
+                    return 0;
+
+                if (_paragraph.Format.Values.Borders is null || _paragraph.Format.Values.Borders.IsNull())
+                    return 0;
+
+                var offset = new XUnit(_paragraph.Format.Borders.DistanceFromBottom);
+                var bordersRenderer = new BordersRenderer(_paragraph.Format.Borders, _gfx);
+                offset += bordersRenderer.GetWidth(BorderType.Bottom);
                 return offset;
             }
         }
@@ -2540,7 +2525,9 @@ namespace MigraDoc.Rendering
         /// <param name="format">The format.</param>
         /// <param name="gfx">The GFX.</param>
         /// <param name="renderer">The renderer.</param>
+#pragma warning disable IDE0060
         internal static XUnit GetLineHeight(ParagraphFormat format, XGraphics gfx, DocumentRenderer renderer)
+#pragma warning restore IDE0060
         {
             var font = FontHandler.FontToXFont(format.Font);
             XUnit singleLineSpace = font.GetHeight();
@@ -2625,19 +2612,16 @@ namespace MigraDoc.Rendering
         {
             get
             {
-                if (_currentLeaf != null && _currentLeaf.Current is Image)
+                if (_currentLeaf is { Current: Image image })
                 {
-                    var image = (Image)_currentLeaf.Current;
-                    if (_imageRenderInfos != null! && _imageRenderInfos.ContainsKey(image))
-                        return _imageRenderInfos[image];
-                    else
-                    {
-                        _imageRenderInfos ??= new Dictionary<Image, RenderInfo>();
+                    if (_imageRenderInfos != null! && _imageRenderInfos.TryGetValue(image, out var info))
+                        return info;
 
-                        var renderInfo = CalcImageRenderInfo(image);
-                        _imageRenderInfos.Add(image, renderInfo);
-                        return renderInfo;
-                    }
+                    _imageRenderInfos ??= [];
+
+                    var renderInfo = CalcImageRenderInfo(image);
+                    _imageRenderInfos.Add(image, renderInfo);
+                    return renderInfo;
                 }
                 return null;
             }

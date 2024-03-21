@@ -9,10 +9,6 @@ using GdiFont = System.Drawing.Font;
 using GdiFontStyle = System.Drawing.FontStyle;
 #endif
 #if WPF
-//using System.Windows;
-//using System.Windows.Documents;
-//using System.Windows.Media;
-using System.IO;
 using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfTypeface = System.Windows.Media.Typeface;
 using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
@@ -41,7 +37,7 @@ namespace PdfSharp.Fonts
         public static FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
         {
             var fontResolvingOptions = new FontResolvingOptions(FontHelper.CreateStyle(isBold, isItalic));
-            return ResolveTypeface(familyName, fontResolvingOptions, XGlyphTypeface.ComputeKey(familyName, fontResolvingOptions));
+            return ResolveTypeface(familyName, fontResolvingOptions, XGlyphTypeface.ComputeGtfKey(familyName, fontResolvingOptions));
         }
 
         /// <summary>
@@ -51,7 +47,7 @@ namespace PdfSharp.Fonts
         {
             // Internally we often have the typeface key already.
             if (String.IsNullOrEmpty(typefaceKey))
-                typefaceKey = XGlyphTypeface.ComputeKey(familyName, fontResolvingOptions);
+                typefaceKey = XGlyphTypeface.ComputeGtfKey(familyName, fontResolvingOptions);
 
             // The user may call ResolveTypeface anytime from anywhere, so check cache in FontFactory in the first place.
             if (FontFactory.TryGetFontResolverInfoByTypefaceKey(typefaceKey, out var fontResolverInfo))
@@ -105,8 +101,8 @@ namespace PdfSharp.Fonts
             else
             {
 #if GDI && !WPF
-                bool mustSimulateBold = gdiFont.Bold && !fontSource.Fontface.os2.IsBold;
-                bool mustSimulateItalic = gdiFont.Italic && !fontSource.Fontface.os2.IsItalic;
+                bool mustSimulateBold = gdiFont.Bold && !fontSource.FontFace.os2.IsBold;
+                bool mustSimulateItalic = gdiFont.Italic && !fontSource.FontFace.os2.IsItalic;
                 fontResolverInfo = new PlatformFontResolverInfo(typefaceKey, mustSimulateBold, mustSimulateItalic, gdiFont);
 #endif
 #if WPF
@@ -122,7 +118,7 @@ namespace PdfSharp.Fonts
                 if (fontResolvingOptions.IsBoldItalic && mustSimulateBold && !mustSimulateItalic)
                 {
                     // Try to get the bold typeface.
-                    string typefaceKeyBold = XGlyphTypeface.ComputeKey(familyName, true, false);
+                    string typefaceKeyBold = XGlyphTypeface.ComputeGtfKey(familyName, true, false);
                     FontResolverInfo? infoBold = ResolveTypeface(familyName,
                         new FontResolvingOptions(FontHelper.CreateStyle(true, false)), typefaceKeyBold);
                     // Use it if it does not base on simulation.
@@ -164,7 +160,7 @@ namespace PdfSharp.Fonts
             out XFontFamily? fontFamily, out XTypeface? typeface, out XGlyphTypeface? glyphTypeface, string typefaceKey)
         {
             if (String.IsNullOrEmpty(typefaceKey))
-                typefaceKey = XGlyphTypeface.ComputeKey(familyName, fontResolvingOptions);
+                typefaceKey = XGlyphTypeface.ComputeGtfKey(familyName, fontResolvingOptions);
             var style = fontResolvingOptions.FontStyle;
 
 #if DEBUG_
@@ -211,7 +207,7 @@ namespace PdfSharp.Fonts
         internal static XFontSource CreateFontSource(string familyName, FontResolvingOptions fontResolvingOptions, out GdiFont font, string typefaceKey)
         {
             if (String.IsNullOrEmpty(typefaceKey))
-                typefaceKey = XGlyphTypeface.ComputeKey(familyName, fontResolvingOptions);
+                typefaceKey = XGlyphTypeface.ComputeGtfKey(familyName, fontResolvingOptions);
 #if true_
             if (familyName == "Cambria")
                 Debug-Break.Break();
@@ -293,7 +289,7 @@ namespace PdfSharp.Fonts
             out WpfFontFamily wpfFontFamily, out WpfTypeface wpfTypeface, out WpfGlyphTypeface wpfGlyphTypeface, string typefaceKey)
         {
             if (String.IsNullOrEmpty(typefaceKey))
-                typefaceKey = XGlyphTypeface.ComputeKey(familyName, fontResolvingOptions);
+                typefaceKey = XGlyphTypeface.ComputeGtfKey(familyName, fontResolvingOptions);
             XFontStyleEx style = fontResolvingOptions.FontStyle;
 
 #if DEBUG_
@@ -347,7 +343,7 @@ namespace PdfSharp.Fonts
     /// <seealso cref="PdfSharp.Fonts.IFontResolver" />
     internal class EvenNewerFontResolver : IFontResolver
     {
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER_
         internal record TypefaceInfo(
             string TypefaceName,
             string FileName,
@@ -357,10 +353,13 @@ namespace PdfSharp.Fonts
 #else
         internal class/*record*/ TypefaceInfo
         {
-            public string TypefaceName { get; private set; }
-            public string FileName { get; private set; }
-            public string LinuxFileName { get; private set; }
-            public string[] LinuxSubstituteFaceNames { get; private set; }
+            public string TypefaceName { get; init; }
+            
+            public string FileName { get; init; }
+            
+            public string LinuxFileName { get; init; }
+            
+            public string[] LinuxSubstituteFaceNames { get; init; }
 
             internal TypefaceInfo(
                 string typefaceName,
@@ -463,7 +462,7 @@ namespace PdfSharp.Fonts
             var typefaces = TypefaceInfos.Where(f => f.TypefaceName.StartsWith(familyName, StringComparison.OrdinalIgnoreCase));
             var baseFamily = TypefaceInfos.FirstOrDefault();
 
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
             if (isBold)
                 typefaces = typefaces.Where(f => f.TypefaceName.Contains("bold", StringComparison.OrdinalIgnoreCase) || f.TypefaceName.Contains("heavy", StringComparison.OrdinalIgnoreCase));
 

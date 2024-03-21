@@ -436,7 +436,7 @@ namespace MigraDoc.DocumentObjectModel
                 {
                     if (!fSerialized[index])
                     {
-                        var style = this[index];  // Code not used??
+                        //var style = this[index];  // Code not used??
                         SerializeStyle(serializer, index, ref fSerialized, ref fSerializePending, ref newLine);
                     }
                 }
@@ -452,7 +452,7 @@ namespace MigraDoc.DocumentObjectModel
         {
             var style = this[index];
 
-            // It is not possible to modify the default paragraph font
+            // It is not possible to modify the default paragraph font.
             if (style.Name == Style.DefaultParagraphFontName)
                 return;
 
@@ -502,7 +502,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Ensures that base styles are visited first.
         /// </summary>
-        void VisitStyle(Dictionary<Style, object> visitedStyles, Style style, DocumentObjectVisitor visitor, bool visitChildren)
+        static void VisitStyle(Dictionary<Style, object> visitedStyles, Style style, DocumentObjectVisitor visitor, bool visitChildren)
         {
             if (!visitedStyles.ContainsKey(style))
             {
@@ -515,10 +515,10 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Gets the styles that are built in in MigraDoc. The collection is for reference only
+        /// Gets the built-in styles of MigraDoc. The collection is for reference only
         /// and must not be changed.
         /// </summary>
-        public static Styles BuiltInStyles { get; } = new();
+        public static Styles BuiltInStyles { get; } = [];
 
         /// <summary>
         /// Returns the meta object of this instance.

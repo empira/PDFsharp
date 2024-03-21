@@ -7,10 +7,24 @@ using System.Threading.Tasks;
 
 namespace Shared.TestApp
 {
+    public class Ids
+    {
+        public const int IdXxxx = 7000;
+        public const int IdYyyy = 7010;
+
+    };
+    
+    public static partial class TestAppLogMessages
+    {
+        [LoggerMessage(EventId = Ids.IdYyyy, Level = LogLevel.Warning, Message = "This is a warning: `{someText}`")]
+        public static partial void WarningMessage(this ILogger logger, string someText);
+    }
+    
+    
     public static partial class TestAppLogMessages
     {
         [LoggerMessage(
-            EventId = 33,
+            EventId = Ids.IdXxxx,
             //Level = LogLevel.Information,
             Message = "This is a test: `{someText}`")]
         public static partial void TestMessage(
@@ -19,7 +33,7 @@ namespace Shared.TestApp
             string someText);
 
         [LoggerMessage(
-            EventId = 42,
+            EventId = 45, //new EventId(234),
             Level = LogLevel.Information,
             Message = "This is a test: `{someText}`")]
         public static partial void TestMessage(

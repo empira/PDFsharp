@@ -1,4 +1,8 @@
-﻿using System;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+using System;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using PdfSharp.Logging;
 
@@ -6,19 +10,24 @@ namespace Shared.TestApp
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main(/*string[] args*/)
         {
+            var frameworkDescription = RuntimeInformation.FrameworkDescription;
             using var loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder
-                    .AddFilter("Microsoft", LogLevel.Warning)
-                    .AddFilter("System", LogLevel.Warning)
-                    .AddFilter("LoggingConsoleApp.Program", LogLevel.Debug)
+                    //.AddFilter("Microsoft", LogLevel.Warning)
+                    //.AddFilter("System", LogLevel.Warning)
+                    //.AddFilter("LoggingConsoleApp.Program", LogLevel.Debug)
+                    //.AddFilter("", LogLevel.None)
+                    //.AddFilter("PDFsharp", LogLevel.Critical)
                     .AddConsole();
             });
 
             ILogger logger = loggerFactory.CreateLogger<Program>();
-            logger.LogInformation("Example log message");
+            logger.LogInformation("Example log message 1");
+
+            LogHost.Logger.LogInformation("Example log message 2");
 
             LogHost.Factory = loggerFactory;
 

@@ -39,19 +39,19 @@ namespace PdfSharp.Internal
         Throw
     }
 
-    /// <summary>
-    /// A bunch of internal helper functions.
-    /// </summary>
-    static class Diagnostics
-    {
-        // ReSharper disable once ConvertToAutoProperty
-        public static NotImplementedBehavior NotImplementedBehavior
-        {
-            get => _notImplementedBehavior;
-            set => _notImplementedBehavior = value;
-        }
-        static NotImplementedBehavior _notImplementedBehavior;
-    }
+    ///// <summary>
+    ///// A bunch of internal helper functions.
+    ///// </summary>
+    //static class Diagnostics
+    //{
+    //    // ReSharper disable once ConvertToAutoProperty
+    //    public static NotImplementedBehavior NotImplementedBehavior
+    //    {
+    //        get => _notImplementedBehavior;
+    //        set => _notImplementedBehavior = value;
+    //    }
+    //    static NotImplementedBehavior _notImplementedBehavior;
+    //}
 
     static class ParserDiagnostics
     {
@@ -65,19 +65,20 @@ namespace PdfSharp.Internal
             throw new PdfReaderException(message, innerException);
         }
 
-        public static void HandleUnexpectedCharacter(char ch)
+        public static void HandleUnexpectedCharacter(char ch, string dump)
         {
             // Hex formatting does not work with type Char. It must be cast to integer.
             string message = String.Format(CultureInfo.InvariantCulture,
-                "Unexpected character '0x{0:x4}' in PDF stream. The file may be corrupted. " +
-                "If you think this is a bug in PDFsharp, please send us your PDF file.", (int)ch);
+                $"Unexpected character '0x{ch:x4}' in PDF stream. The file may be corrupted. " +
+                "If you think this is a bug in PDFsharp, please send us your PDF file.\n");
             ThrowParserException(message);
         }
-        public static void HandleUnexpectedToken(string token)
+        public static void HandleUnexpectedToken(string token, string dump)
         {
             string message = String.Format(CultureInfo.InvariantCulture,
-                "Unexpected token '{0}' in PDF stream. The file may be corrupted. " +
-                "If you think this is a bug in PDFsharp, please send us your PDF file.", token);
+                $"Unexpected token '{token}' in PDF stream. The file may be corrupted. " +
+                "If you think this is a bug in PDFsharp, please send us your PDF file.\n" +
+                $"{dump}");
             ThrowParserException(message);
         }
     }

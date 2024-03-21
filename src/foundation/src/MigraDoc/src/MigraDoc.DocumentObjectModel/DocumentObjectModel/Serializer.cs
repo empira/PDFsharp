@@ -3,6 +3,8 @@
 
 using System.Text;
 
+#pragma warning disable IDE0057  // because we still use .NET Framework
+
 namespace MigraDoc.DocumentObjectModel
 {
     /// <summary>
@@ -148,7 +150,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         internal void WriteLine()
         {
-            WriteLine(String.Empty);
+            WriteLine("");
         }
 
         /// <summary>
@@ -164,7 +166,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         internal void WriteLineNoCommit()
         {
-            WriteLineNoCommit(String.Empty);
+            WriteLineNoCommit("");
         }
 
         /// <summary>
@@ -175,7 +177,7 @@ namespace MigraDoc.DocumentObjectModel
             if (String.IsNullOrEmpty(comment))
                 return;
 
-            // if string contains CR/LF, split up recursively
+            // If string contains CR/LF, split up recursively.
             int crlf = comment.IndexOf("\x0D\x0A", StringComparison.Ordinal);
             if (crlf != -1)
             {
@@ -191,8 +193,8 @@ namespace MigraDoc.DocumentObjectModel
                 string wrt;
                 if (len <= chopBeyond)
                 {
-                    wrt = "// " + comment;
-                    comment = String.Empty;
+                    wrt = $"// {comment}";
+                    comment = "";
                 }
                 else
                 {
@@ -200,12 +202,12 @@ namespace MigraDoc.DocumentObjectModel
                     if ((idxChop = comment.LastIndexOf(' ', chopBeyond)) == -1 &&
                         (idxChop = comment.IndexOf(' ', chopBeyond)) == -1)
                     {
-                        wrt = "// " + comment;
-                        comment = String.Empty;
+                        wrt = $"// {comment}";
+                        comment = "";
                     }
                     else
                     {
-                        wrt = "// " + comment.Substring(0, idxChop);
+                        wrt = $"// {comment.Substring(0, idxChop)}";
                         comment = comment.Substring(idxChop + 1);
                     }
                 }
@@ -231,7 +233,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         void WriteToStream(string text, bool fLineBreak, bool fAutoIndent)
         {
-            // if string contains CR/LF, split up recursively
+            // If string contains CR/LF, split up recursively.
             int crlf = text.IndexOf("\x0D\x0A", StringComparison.Ordinal);
             if (crlf != -1)
             {
@@ -245,7 +247,7 @@ namespace MigraDoc.DocumentObjectModel
             {
                 if (_linePos > 0)
                 {
-                    // does not work
+                    // Does not work.
                     // if (IsBlankRequired(this .lastChar, _text[0]))
                     //   _text = "·" + _text;
                 }
@@ -259,7 +261,7 @@ namespace MigraDoc.DocumentObjectModel
                 }
                 _textWriter.Write(text);
                 _linePos += len;
-                // wordwrap required?
+                // Wordwrap required?
                 if (_linePos > LineBreakBeyond)
                 {
                     fLineBreak = true;
@@ -271,7 +273,7 @@ namespace MigraDoc.DocumentObjectModel
 
             if (fLineBreak)
             {
-                _textWriter.WriteLine(String.Empty);  // what a line break is may depend on encoding
+                _textWriter.WriteLine("");  // what a line break is may depend on encoding
                 _linePos = 0;
                 _lastChar = '\x0A';
             }
@@ -363,8 +365,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         internal void WriteSimpleAttribute(string valueName, object value)
         {
-            INullableValue? ival = value as INullableValue;
-            if (ival != null)
+            if (value is INullableValue ival)
                 value = ival.GetValue();
 
             Type type;
@@ -392,7 +393,7 @@ namespace MigraDoc.DocumentObjectModel
             }
             else if (value is string)
             {
-                StringBuilder sb = new StringBuilder(value.ToString());
+                var sb = new StringBuilder(value.ToString());
                 sb.Replace("\\", "\\\\");
                 sb.Replace("\"", "\\\"");
                 WriteLine(valueName + " = \"" + sb + "\"");
@@ -554,7 +555,9 @@ namespace MigraDoc.DocumentObjectModel
 
         int _linePos;
         const int LineBreakBeyond = 200;
+#pragma warning disable IDE0052
         char _lastChar;
-        bool _fWriteStamp = false;
+#pragma warning restore IDE0052
+        readonly bool _fWriteStamp = false;
     }
 }

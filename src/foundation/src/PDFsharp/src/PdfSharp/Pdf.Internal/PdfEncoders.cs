@@ -5,28 +5,30 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using PdfSharp.Drawing;
+using PdfSharp.Logging;
 using PdfSharp.Pdf.Security;
 
 namespace PdfSharp.Pdf.Internal
 {
     /// <summary>
     /// Groups a set of static encoding helper functions.
+    /// The class is intended for internal use only and public only
+    /// for being used in unit tests.
     /// </summary>
-    static class PdfEncoders
+    public static class PdfEncoders
     {
         /// <summary>
         /// Gets the raw encoding.
         /// </summary>
         public static Encoding RawEncoding => _rawEncoding ??= new RawEncoding();
-
         static Encoding? _rawEncoding;
 
         /// <summary>
         /// Gets the raw Unicode encoding.
         /// </summary>
         public static Encoding RawUnicodeEncoding => _rawUnicodeEncoding ??= new RawUnicodeEncoding();
-
         static Encoding? _rawUnicodeEncoding;
 
         /// <summary>
@@ -38,18 +40,14 @@ namespace PdfSharp.Pdf.Internal
             {
                 if (_winAnsiEncoding == null)
                 {
-#if false && !UWP
-                    // Use .net encoder if available.
-                    _winAnsiEncoding = Encoding.GetEncoding(1252);  // 
-#else
-                    //// Use own implementation because there is not ANSI encoding in .NET 6.
+                    //// Use own implementation because there is no ANSI encoding in .NET 6.
                     //_winAnsiEncoding = new AnsiEncoding();
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER___ //
                     // There is ANSI encoding available with .NET 6. Use it.
                     _winAnsiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
 #else
+                    // StL 24-02-24: We are consistent on all platforms.
                     _winAnsiEncoding = new AnsiEncoding();
-#endif
 #endif
                 }
                 return _winAnsiEncoding;
@@ -61,14 +59,12 @@ namespace PdfSharp.Pdf.Internal
         /// Gets the PDF DocEncoding encoding.
         /// </summary>
         public static Encoding DocEncoding => _docEncoding ??= new DocEncoding();
-
         static Encoding? _docEncoding;
 
         /// <summary>
         /// Gets the UNICODE little-endian encoding.
         /// </summary>
         public static Encoding UnicodeEncoding => _unicodeEncoding ??= Encoding.Unicode;
-
         static Encoding? _unicodeEncoding;
 
         ///// <summary>
@@ -194,7 +190,7 @@ namespace PdfSharp.Pdf.Internal
         }
 
         /// <summary>
-        /// Converts a raw string into a raw string literal, possibly encrypted.
+        /// Converts a raw string into a PDF raw string literal, possibly encrypted.
         /// </summary>
         public static string ToStringLiteral(byte[]? bytes, bool unicode, PdfStandardSecurityHandler? securityHandler)
         {
@@ -244,12 +240,12 @@ namespace PdfSharp.Pdf.Internal
         /// <summary>
         /// Converts a raw string into a raw hexadecimal string literal, possibly encrypted.
         /// </summary>
-        public static string ToHexStringLiteral(byte[]? bytes, bool unicode, PdfStandardSecurityHandler? securityHandler)
+        public static string ToHexStringLiteral(byte[]? bytes, bool unicode, bool prefix, PdfStandardSecurityHandler? securityHandler)
         {
             if (bytes == null || bytes.Length == 0)
                 return "<>";
 
-            byte[] agTemp = FormatStringLiteral(bytes, unicode, true, true, securityHandler);
+            byte[] agTemp = FormatStringLiteral(bytes, unicode, prefix, true, securityHandler);
             return RawEncoding.GetString(agTemp, 0, agTemp.Length);
         }
 
@@ -265,33 +261,44 @@ namespace PdfSharp.Pdf.Internal
         public static byte[] FormatStringLiteral(byte[]? bytes, bool unicode, bool prefix, bool hex, PdfStandardSecurityHandler? securityHandler)
         {
             if (bytes == null || bytes.Length == 0)
-                return hex ? new byte[] { (byte)'<', (byte)'>' } : new byte[] { (byte)'(', (byte)')' };
+                return hex ? [(byte)'<', (byte)'>'] : [(byte)'(', (byte)')'];
 
             Debug.Assert(!unicode || bytes.Length % 2 == 0, "Odd number of bytes in Unicode string.");
 
-            byte[]? originalBytes = null;
+            // Add unicode BOM, if needed.
+            if (unicode && prefix)
+            {
+                var bytes2 = new byte[bytes.Length + 2];
+                // Add BOM.
+                bytes2[0] = 0xfe;
+                bytes2[1] = 0xff;
+                // Copy bytes.
+                Array.Copy(bytes, 0, bytes2, 2, bytes.Length);
+                bytes = bytes2;
+            }
 
-            bool encrypted = false;
+            var encrypted = false;
+            // Encrypt, if needed.
             if (securityHandler != null)
             {
-                originalBytes = bytes;
-                bytes = (byte[])bytes.Clone();
                 securityHandler.EncryptString(ref bytes);
                 encrypted = true;
             }
 
-            int count = bytes.Length;
+            var count = bytes.Length;
             var pdf = new StringBuilder();
             if (!unicode)
             {
+                // Case: ANSI
                 if (!hex)
                 {
-                    pdf.Append("(");
-                    for (int idx = 0; idx < count; idx++)
+                    pdf.Append('(');
+                    for (var idx = 0; idx < count; idx++)
                     {
                         char ch = (char)bytes[idx];
-                        if (ch < 32)
+                        if ((int)ch is < 32 or 127)
                         {
+                            // Case: Not printable ASCII character
                             switch (ch)
                             {
                                 case '\n':
@@ -310,40 +317,44 @@ namespace PdfSharp.Pdf.Internal
                                     pdf.Append("\\b");
                                     break;
 
-                                // Corrupts encrypted text.
-                                //case '\f':
-                                //  pdf.Append("\\f");
-                                //  break;
+                                case '\f':
+                                    pdf.Append("\\f");
+                                    break;
 
                                 default:
-                                    // Don't escape characters less than 32 if the string is encrypted, because it is
-                                    // unreadable anyway.
-                                    encrypted = true;
                                     if (!encrypted)
                                     {
-                                        pdf.Append("\\0");
-                                        pdf.Append((char)(ch % 8 + '0'));
-                                        pdf.Append((char)(ch / 8 + '0'));
+                                        // Escape not encrypted not printable character in octal format "\ddd" to be printable.
+                                        pdf.Append(@"\");
+                                        var div = Math.DivRem(ch, 64, out var remainder); // Math.DivRem is faster than running '/' and '%' operation.
+                                        pdf.Append((char)(div + '0'));
+                                        div = Math.DivRem(remainder, 8, out remainder);
+                                        pdf.Append((char)(div + '0'));
+                                        pdf.Append((char)(remainder + '0'));
                                     }
                                     else
+                                    {
+                                        // Don't escape encrypted not printable characters to reduce file size (the string is unreadable anyway).
                                         pdf.Append(ch);
+                                    }
                                     break;
                             }
                         }
                         else
                         {
+                            // Case: Printable ANSI character
                             switch (ch)
                             {
                                 case '(':
-                                    pdf.Append("\\(");
+                                    pdf.Append(@"\(");
                                     break;
 
                                 case ')':
-                                    pdf.Append("\\)");
+                                    pdf.Append(@"\)");
                                     break;
 
                                 case '\\':
-                                    pdf.Append("\\\\");
+                                    pdf.Append(@"\\");
                                     break;
 
                                 default:
@@ -356,67 +367,25 @@ namespace PdfSharp.Pdf.Internal
                 }
                 else
                 {
+                    // Case: Hex
                     pdf.Append('<');
-                    for (int idx = 0; idx < count; idx++)
-                        pdf.AppendFormat("{0:X2}", bytes[idx]);
+                    for (var idx = 0; idx < count; idx++)
+                        pdf.Append($"{bytes[idx]:X2}");
                     pdf.Append('>');
                 }
             }
             else
             {
-                //Hex:
-                if (hex)
+                // Case: Unicode
+                // No check for hex: All unicode literals are saved as hex values.
+                pdf.Append('<');
+                for (var idx = 0; idx < count; idx += 2)
                 {
-                    if (securityHandler != null && prefix)
-                    {
-                        // TODO Reduce redundancy.
-                        // Encrypt data after padding BOM.
-                        var bytes2 = new byte[bytes.Length + 2];
-                        // Add BOM.
-                        bytes2[0] = 0xfe;
-                        bytes2[1] = 0xff;
-                        // Copy bytes.
-                        Array.Copy(bytes, 0, bytes2, 2, bytes.Length);
-                        // Encryption.
-                        securityHandler.EncryptString(ref bytes2);
-                        encrypted = true;
-                        pdf.Append("<");
-                        var count2 = bytes2.Length;
-                        for (int idx = 0; idx < count2; idx += 2)
-                        {
-                            pdf.AppendFormat("{0:X2}{1:X2}", bytes2[idx], bytes2[idx + 1]);
-                            if (idx != 0 && (idx % 48) == 0)
-                                pdf.Append("\n");
-                        }
-                        pdf.Append(">");
-                    }
-                    else
-                    {
-                        // No prefix or no encryption.
-                        pdf.Append(prefix ? "<FEFF" : "<");
-                        for (int idx = 0; idx < count; idx += 2)
-                        {
-                            pdf.AppendFormat("{0:X2}{1:X2}", bytes[idx], bytes[idx + 1]);
-                            if (idx != 0 && (idx % 48) == 0)
-                                pdf.Append("\n");
-                        }
-                        pdf.Append(">");
-                    }
+                    pdf.Append($"{bytes[idx]:X2}{bytes[idx + 1]:X2}");
+                    if (idx != 0 && (idx % 48) == 0)
+                        pdf.Append('\n');
                 }
-                else
-                {
-                    // TODO non hex literals... not sure how to treat linefeeds, '(', '\' etc.
-                    if (encrypted)
-                    {
-                        // Hack: Call self with hex := true.
-                        return FormatStringLiteral(originalBytes, unicode, prefix, true, securityHandler);
-                    }
-                    else
-                    {
-                        // Hack: Call self with hex := true.
-                        return FormatStringLiteral(bytes, true, prefix, true, null);
-                    }
-                }
+                pdf.Append('>');
             }
             return RawEncoding.GetBytes(pdf.ToString());
         }
@@ -580,7 +549,7 @@ namespace PdfSharp.Pdf.Internal
         /// </summary>
         public static string ToString(double val)
         {
-            return val.ToString(Config.SignificantFigures3, CultureInfo.InvariantCulture);
+            return val.ToString(Config.SignificantDecimalPlaces3, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -588,30 +557,51 @@ namespace PdfSharp.Pdf.Internal
         /// </summary>
         public static string ToString(XColor color, PdfColorMode colorMode)
         {
-            const string format = Config.SignificantFigures3;
+            const string format = Config.SignificantDecimalPlaces3;
 
-            // If not defined let color decide
+            // If not defined let color decide.
             if (colorMode == PdfColorMode.Undefined)
                 colorMode = color.ColorSpace == XColorSpace.Cmyk ? PdfColorMode.Cmyk : PdfColorMode.Rgb;
 
             switch (colorMode)
             {
+                case PdfColorMode.Rgb:
+                {
+                    s_formatRGB ??= "{0:" + format + "} {1:" + format + "} {2:" + format + "}";
+                    // earlier:
+                    // return String.Format(CultureInfo.InvariantCulture, "{0:" + format + "} {1:" + format + "} {2:" + format + "}",
+                    //    color.R / 255.0, color.G / 255.0, color.B / 255.0);
+                    return String.Format(CultureInfo.InvariantCulture, s_formatRGB, color.R / 255.0, color.G / 255.0, color.B / 255.0);
+                }
+
                 case PdfColorMode.Cmyk:
-                    return String.Format(CultureInfo.InvariantCulture, "{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "}",
-                      color.C, color.M, color.Y, color.K);
+                    {
+                        s_formatCMYK ??= "{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "}";
+                        // earlier:
+                        // return String.Format(CultureInfo.InvariantCulture,
+                        //     "{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "}",
+                        //     color.C, color.M, color.Y, color.K);
+                        return String.Format(CultureInfo.InvariantCulture, s_formatCMYK, color.C, color.M, color.Y, color.K);
+                    }
 
                 default:
-                    return String.Format(CultureInfo.InvariantCulture, "{0:" + format + "} {1:" + format + "} {2:" + format + "}",
-                      color.R / 255.0, color.G / 255.0, color.B / 255.0);
+                    Debug.Assert(false,"Cannot come here.");
+                    LogHost.Logger.LogError("Render a color with invalid color mode.");
+                    goto case PdfColorMode.Rgb;
             }
         }
+        // ReSharper disable InconsistentNaming
+        static string? s_formatRGB;
+        static string? s_formatCMYK;
+        // ReSharper restore InconsistentNaming
+
 
         /// <summary>
         /// Converts an XMatrix into a string with up to 4 decimal digits and a decimal point.
         /// </summary>
         public static string ToString(XMatrix matrix)
         {
-            const string format = Config.SignificantFigures4;
+            const string format = Config.SignificantDecimalPlaces4;
             return String.Format(CultureInfo.InvariantCulture,
                 "{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "}",
                 matrix.M11, matrix.M12, matrix.M21, matrix.M22, matrix.OffsetX, matrix.OffsetY);

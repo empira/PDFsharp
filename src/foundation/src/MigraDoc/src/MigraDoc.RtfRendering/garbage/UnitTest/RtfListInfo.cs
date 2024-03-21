@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.IO;
 
@@ -88,7 +87,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       docRenderer.Render(doc, "RtfListInfo.txt", null);
       DdlWriter.WriteToFile(doc, "RtfListInfo.mdddl");
       System.IO.File.Copy("RtfListInfo.txt", "RtfListInfo.rtf", true);
-      System.Diagnostics.Process.Start("RtfListInfo.txt");
+      System.Diagnostics.Process.Sta/rt("RtfListInfo.txt");
     }
   }
 }

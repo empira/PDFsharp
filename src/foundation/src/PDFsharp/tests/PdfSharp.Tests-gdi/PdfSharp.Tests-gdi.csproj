@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <UseWindowsForms>true</UseWindowsForms>
+    <!--
+    PDFsharp internal class RuntimeHelpers is visible in this assembly because of InternalsVisibleTo.
+    This conflics with mscorlib. -->
+   <NoWarn>CS1685,CS0436</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);TRACE;GDI</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants);TRACE;GDI</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="TestResults\**" />
+    <EmbeddedResource Remove="TestResults\**" />
+    <None Remove="TestResults\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
+    <Compile Include="..\PdfSharp.Tests\Build\CSharpFeaturesTests.cs" Link="Build\CSharpFeaturesTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Build\ReleaseBuildTests.cs" Link="Build\ReleaseBuildTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\ImageTests.cs" Link="ImageTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Drawing\text\MeasurementTests.cs" Link="Drawing\text\MeasurementTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper-gdi\PdfSharp.TestHelper-gdi.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets-gdi\PdfSharp.Snippets-gdi.csproj" />
+    <ProjectReference Include="..\..\src\PdfSharp.Charting-gdi\PdfSharp.Charting-gdi.csproj" />
+    <ProjectReference Include="..\..\src\PdfSharp-gdi\PdfSharp-gdi.csproj" />
+  </ItemGroup>
+
+</Project>

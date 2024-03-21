@@ -159,7 +159,7 @@ namespace PdfSharp.UniversalAccessibility
             => _elementStack.MostInnerStructureElement;
 
         /// <summary>
-        /// Sets the content of the "/Alt" (alternative text) key. Used e. g. for illustrations.
+        /// Sets the content of the "/Alt" (alternative text) key. Used e.g. for illustrations.
         /// </summary>
         /// <param name="altText">The alternative text.</param>
         public void SetAltText(string altText)
@@ -233,7 +233,7 @@ namespace PdfSharp.UniversalAccessibility
         }
 
         /// <summary>
-        /// The next marked content with id to be assigned.
+        /// The next marked content with ID to be assigned.
         /// </summary>
         // ReSharper disable once IdentifierTypo
         internal int NextMcid { get; set; }

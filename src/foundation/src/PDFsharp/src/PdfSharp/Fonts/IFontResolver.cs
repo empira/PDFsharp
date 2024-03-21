@@ -20,8 +20,8 @@ namespace PdfSharp.Fonts
         /// Converts specified information about a required typeface into a specific font.
         /// </summary>
         /// <param name="familyName">Name of the font family.</param>
-        /// <param name="isBold">Set to <c>true</c> when a bold fontface is required.</param>
-        /// <param name="isItalic">Set to <c>true</c> when an italic fontface is required.</param>
+        /// <param name="isBold">Set to <c>true</c> when a bold font face is required.</param>
+        /// <param name="isItalic">Set to <c>true</c> when an italic font face is required.</param>
         /// <returns>Information about the physical font, or null if the request cannot be satisfied.</returns>
         FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic);
 

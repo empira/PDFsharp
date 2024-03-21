@@ -53,7 +53,7 @@ namespace PdfSharp.Charting.Renderers
                     {
                         SeriesRendererInfo = sri,
                         LegendRendererInfo = lri,
-                        EntryText = String.Empty
+                        EntryText = ""
                     };
                     if (xseries != null)
                     {

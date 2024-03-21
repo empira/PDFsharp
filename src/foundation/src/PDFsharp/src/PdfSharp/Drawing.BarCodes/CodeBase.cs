@@ -45,7 +45,7 @@ namespace PdfSharp.Drawing.BarCodes
 
         //public static CodeBase FromType(CodeType type)
         //{
-        //  return FromType(type, String.Empty, XSize.Empty, CodeDirection.LeftToRight);
+        //  return FromType(type, "", XSize.Empty, CodeDirection.LeftToRight);
         //}
 
         /// <summary>
@@ -115,7 +115,9 @@ namespace PdfSharp.Drawing.BarCodes
 
         struct Delta
         {
+#pragma warning disable IDE0290 // Use primary constructor
             public Delta(int x, int y)
+#pragma warning restore IDE0290 // Use primary constructor
             {
                 X = x;
                 Y = y;

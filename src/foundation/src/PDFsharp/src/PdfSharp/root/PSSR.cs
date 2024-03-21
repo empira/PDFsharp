@@ -111,29 +111,22 @@ namespace PdfSharp
 
         // ----- XGraphics ----------------------------------------------------------------------------
 
-        public static string PointArrayEmpty => "The PointF array must not be empty.";
+        public static string PointArrayEmpty 
+            => "The PointF array must not be empty.";
 
-        public static string PointArrayAtLeast(int count)
-        {
-            return Format("The point array must contain {0} or more points.", count);
-        }
+        public static string PointArrayAtLeast(int count) 
+            => Format("The point array must contain {0} or more points.", count);
 
         public static string NeedPenOrBrush => "XPen or XBrush or both must not be null.";
 
-        public static string CannotChangeImmutableObject(string typename)
-        {
-            return $"You cannot change this immutable {typename} object.";
-        }
+        public static string CannotChangeImmutableObject(string typename) 
+            => $"You cannot change this immutable {typename} object.";
 
-        public static string FontAlreadyAdded(string fontname)
-        {
-            return $"Fontface with the name '{fontname}' already added to font collection.";
-        }
+        public static string FontAlreadyAdded(string fontName) 
+            => $"FontFace with the name '{fontName}' already added to font collection.";
 
-        public static string NotImplementedForFontsRetrievedWithFontResolver(string name)
-        {
-            return $"Not implemented for font '{name}', because it was retrieved with font resolver.";
-        }
+        public static string NotImplementedForFontsRetrievedWithFontResolver(string name) 
+            => $"Not implemented for font '{name}', because it was retrieved with font resolver.";
 
         #endregion
 

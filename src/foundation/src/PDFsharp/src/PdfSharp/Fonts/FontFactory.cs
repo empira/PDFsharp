@@ -21,12 +21,12 @@ using PdfSharp.Fonts.OpenType;
 using PdfSharp.Internal;
 using System.Diagnostics.CodeAnalysis;
 
-// ReSharper disable RedundantNameQualifier
+// Re-Sharper disable RedundantNameQualifier
 
 namespace PdfSharp.Fonts
 {
     /// <summary>
-    /// Provides functionality to map a fontface request to a physical font.
+    /// Provides functionality to map a font face request to a physical font.
     /// </summary>
     static class FontFactory
     {
@@ -42,13 +42,16 @@ namespace PdfSharp.Fonts
         public static FontResolverInfo? ResolveTypeface(string familyName, FontResolvingOptions fontResolvingOptions, string typefaceKey)
         {
             if (String.IsNullOrEmpty(typefaceKey))
-                typefaceKey = XGlyphTypeface.ComputeKey(familyName, fontResolvingOptions);
+                typefaceKey = XGlyphTypeface.ComputeGtfKey(familyName, fontResolvingOptions);
 
             try
             {
+                var fontResolverInfosByName = Globals.Global.FontResolverInfosByName;
+                var fontSourcesByName = Globals.Global.FontSourcesByName;
+
                 Lock.EnterFontFactory();
                 // Was this typeface requested before?
-                if (FontResolverInfosByName.TryGetValue(typefaceKey, out var fontResolverInfo))
+                if (fontResolverInfosByName.TryGetValue(typefaceKey, out var fontResolverInfo))
                     return fontResolverInfo;
 
                 // Case: This typeface was not yet resolved before.
@@ -71,28 +74,28 @@ namespace PdfSharp.Fonts
                         }
 
                         string resolverInfoKey = fontResolverInfo.Key;
-                        if (FontResolverInfosByName.TryGetValue(resolverInfoKey, out var existingFontResolverInfo))
+                        if (fontResolverInfosByName.TryGetValue(resolverInfoKey, out var existingFontResolverInfo))
                         {
                             // Case: A new typeface was resolved with the same info as a previous one.
-                            // Discard new object an reuse previous one.
+                            // Discard new object and reuse previous one.
                             fontResolverInfo = existingFontResolverInfo;
                             // Associate with typeface key.
-                            FontResolverInfosByName.Add(typefaceKey, fontResolverInfo);
-#if DEBUG
+                            fontResolverInfosByName.Add(typefaceKey, fontResolverInfo);
+#if DEBUG_
                             // The font source should exist.
-                            Debug.Assert(FontSourcesByName.ContainsKey(fontResolverInfo.FaceName));
+                            Debug.Assert(fontResolverInfosByName.ContainsKey(fontResolverInfo.FaceName));
 #endif
                         }
                         else
                         {
                             // Case: No such font resolver info exists.
                             // Add to both dictionaries.
-                            FontResolverInfosByName.Add(typefaceKey, fontResolverInfo);
+                            fontResolverInfosByName.Add(typefaceKey, fontResolverInfo);
                             Debug.Assert(resolverInfoKey == fontResolverInfo.Key);
-                            FontResolverInfosByName.Add(resolverInfoKey, fontResolverInfo);
+                            fontResolverInfosByName.Add(resolverInfoKey, fontResolverInfo);
 
                             // Create font source if not yet exists.
-                            if (FontSourcesByName.TryGetValue(fontResolverInfo.FaceName, out _))
+                            if (fontSourcesByName.TryGetValue(fontResolverInfo.FaceName, out _))
                             {
                                 // Case: The font source exists, because a previous font resolver info comes
                                 // with the same face name, but was different in style simulation flags.
@@ -106,7 +109,7 @@ namespace PdfSharp.Fonts
 
                                 // Add font source's font resolver name if it is different to the face name.
                                 if (string.Compare(fontResolverInfo.FaceName, fontSource.FontName, StringComparison.OrdinalIgnoreCase) != 0)
-                                    FontSourcesByName.Add(fontResolverInfo.FaceName, fontSource);
+                                    fontSourcesByName.Add(fontResolverInfo.FaceName, fontSource);
                             }
                         }
                     }
@@ -136,22 +139,25 @@ namespace PdfSharp.Fonts
         {
             try
             {
+                var fontSourcesByName = Globals.Global.FontSourcesByName;
+                var fontSourcesByKey = Globals.Global.FontSourcesByKey;
+
                 Lock.EnterFontFactory();
                 ulong key = FontHelper.CalcChecksum(fontBytes);
-                if (FontSourcesByKey.TryGetValue(key, out var fontSource))
+                if (fontSourcesByKey.TryGetValue(key, out var fontSource))
                 {
                     throw new InvalidOperationException("Font face already registered.");
                 }
                 fontSource = XFontSource.GetOrCreateFrom(fontBytes);
-                Debug.Assert(FontSourcesByKey.ContainsKey(key));
-                Debug.Assert(fontSource.Fontface != null);
+                Debug.Assert(fontSourcesByKey.ContainsKey(key));
+                Debug.Assert(fontSource.FontFace != null);
 
-                //fontSource.Fontface = new OpenTypeFontface(fontSource);
+                //fontSource.FontFace = new OpenTypeFontFace(fontSource);
                 //FontSourcesByKey.Add(checksum, fontSource);
                 //FontSourcesByFontName.Add(fontSource.FontName, fontSource);
 
                 XGlyphTypeface glyphTypeface = new XGlyphTypeface(fontSource);
-                FontSourcesByName.Add(glyphTypeface.Key, fontSource);
+                fontSourcesByName.Add(glyphTypeface.Key, fontSource);
                 GlyphTypefaceCache.AddGlyphTypeface(glyphTypeface);
                 return fontSource;
             }
@@ -164,7 +170,7 @@ namespace PdfSharp.Fonts
         /// </summary>
         public static XFontSource GetFontSourceByFontName(string fontName)
         {
-            if (FontSourcesByName.TryGetValue(fontName, out var fontSource))
+            if (Globals.Global.FontSourcesByName.TryGetValue(fontName, out var fontSource))
                 return fontSource;
 
             Debug.Assert(false, $"An XFontSource with the name '{fontName}' does not exist.");
@@ -176,43 +182,31 @@ namespace PdfSharp.Fonts
         /// </summary>
         public static XFontSource GetFontSourceByTypefaceKey(string typefaceKey)
         {
-            if (FontSourcesByName.TryGetValue(typefaceKey, out var fontSource))
+            if (Globals.Global.FontSourcesByName.TryGetValue(typefaceKey, out var fontSource))
                 return fontSource;
 
             Debug.Assert(false, $"An XFontSource with the typeface key '{typefaceKey}' does not exist.");
             return null;
         }
 
-        public static bool TryGetFontSourceByKey(ulong key,
-#if NET6_0_OR_GREATER
-            [MaybeNullWhen(false)]
-#endif
-            out XFontSource fontSource)
+        public static bool TryGetFontSourceByKey(ulong key, [MaybeNullWhen(false)] out XFontSource fontSource)
         {
-            return FontSourcesByKey.TryGetValue(key, out fontSource);
+            return Globals.Global.FontSourcesByKey.TryGetValue(key, out fontSource);
         }
 
         /// <summary>
         /// Gets a value indicating whether at least one font source was created.
         /// </summary>
-        public static bool HasFontSources => FontSourcesByName.Count > 0;
+        public static bool HasFontSources => Globals.Global.FontSourcesByName.Count > 0;
 
-        public static bool TryGetFontResolverInfoByTypefaceKey(string typeFaceKey,
-#if NET6_0_OR_GREATER
-            [MaybeNullWhen(false)]
-#endif
-            out FontResolverInfo info)
+        public static bool TryGetFontResolverInfoByTypefaceKey(string typeFaceKey, [MaybeNullWhen(false)] out FontResolverInfo info)
         {
-            return FontResolverInfosByName.TryGetValue(typeFaceKey, out info);
+            return Globals.Global.FontResolverInfosByName.TryGetValue(typeFaceKey, out info);
         }
 
-        public static bool TryGetFontSourceByTypefaceKey(string typefaceKey,
-#if NET6_0_OR_GREATER
-            [MaybeNullWhen(false)]
-#endif
-            out XFontSource source)
+        public static bool TryGetFontSourceByTypefaceKey(string typefaceKey, [MaybeNullWhen(false)] out XFontSource source)
         {
-            return FontSourcesByName.TryGetValue(typefaceKey, out source);
+            return Globals.Global.FontSourcesByName.TryGetValue(typefaceKey, out source);
         }
 
         //public static bool TryGetFontSourceByFaceName(string faceName, out XFontSource source)
@@ -222,20 +216,21 @@ namespace PdfSharp.Fonts
 
         internal static void CacheFontResolverInfo(string typefaceKey, FontResolverInfo fontResolverInfo)
         {
+            var fontResolverInfosByName = Globals.Global.FontResolverInfosByName;
             // Check whether identical font is already registered.
-            if (FontResolverInfosByName.TryGetValue(typefaceKey, out _))
+            if (fontResolverInfosByName.TryGetValue(typefaceKey, out _))
             {
                 // Should never come here.
                 throw new InvalidOperationException($"A font file with different content already exists with the specified face name '{typefaceKey}'.");
             }
-            if (FontResolverInfosByName.TryGetValue(fontResolverInfo.Key, out _))
+            if (fontResolverInfosByName.TryGetValue(fontResolverInfo.Key, out _))
             {
                 // Should never come here.
                 throw new InvalidOperationException($"A font resolver already exists with the specified key '{fontResolverInfo.Key}'.");
             }
             // Add to both dictionaries.
-            FontResolverInfosByName.Add(typefaceKey, fontResolverInfo);
-            FontResolverInfosByName.Add(fontResolverInfo.Key, fontResolverInfo);
+            fontResolverInfosByName.Add(typefaceKey, fontResolverInfo);
+            fontResolverInfosByName.Add(fontResolverInfo.Key, fontResolverInfo);
         }
 
         /// <summary>
@@ -247,7 +242,7 @@ namespace PdfSharp.Fonts
             {
                 Lock.EnterFontFactory();
                 // Check whether an identical font source with a different face name already exists.
-                if (FontSourcesByKey.TryGetValue(fontSource.Key, out var existingFontSource))
+                if (Globals.Global.FontSourcesByKey.TryGetValue(fontSource.Key, out var existingFontSource))
                 {
 #if DEBUG
                     // Fonts have same length and check sum. Now check byte by byte identity.
@@ -261,7 +256,7 @@ namespace PdfSharp.Fonts
                             //goto FontsAreNotIdentical;
                         }
                     }
-                    Debug.Assert(existingFontSource.Fontface != null);
+                    Debug.Assert(existingFontSource.FontFace != null);
 #endif
                     return existingFontSource;
 
@@ -272,14 +267,14 @@ namespace PdfSharp.Fonts
                     //    fontSource.IncrementKey();
                 }
 
-                OpenTypeFontface? fontface = fontSource.Fontface;
-                if (fontface == null)
+                OpenTypeFontFace? fontFace = fontSource.FontFace;
+                if (fontFace == null!)
                 {
-                    // Create OpenType fontface for this font source.
-                    fontSource.Fontface = new OpenTypeFontface(fontSource);
+                    // Create OpenType font face for this font source.
+                    fontSource.FontFace = new OpenTypeFontFace(fontSource);
                 }
-                FontSourcesByKey.Add(fontSource.Key, fontSource);
-                FontSourcesByName.Add(fontSource.FontName, fontSource);
+                Globals.Global.FontSourcesByKey.Add(fontSource.Key, fontSource);
+                Globals.Global.FontSourcesByName.Add(fontSource.FontName, fontSource);
                 return fontSource;
             }
             finally { Lock.ExitFontFactory(); }
@@ -293,7 +288,7 @@ namespace PdfSharp.Fonts
             // Debug.Assert(!FontSourcesByFaceName.ContainsKey(fontSource.FaceName));
 
             // Check whether an identical font source with a different face name already exists.
-            if (FontSourcesByKey.TryGetValue(fontSource.Key, out var existingFontSource))
+            if (Globals.Global.FontSourcesByKey.TryGetValue(fontSource.Key, out var existingFontSource))
             {
                 //// Fonts have same length and check sum. Now check byte by byte identity.
                 //int length = fontSource.Bytes.Length;
@@ -318,16 +313,16 @@ namespace PdfSharp.Fonts
                 //    fontSource.IncrementKey();
             }
 
-            OpenTypeFontface fontface = fontSource.Fontface;
-            if (fontface == null)
+            OpenTypeFontFace fontFace = fontSource.FontFace;
+            if (fontFace == null!)
             {
-                fontface = new OpenTypeFontface(fontSource);
-                fontSource.Fontface = fontface;  // Also sets the font name in fontSource
+                fontFace = new OpenTypeFontFace(fontSource);
+                fontSource.FontFace = fontFace;  // Also sets the font name in fontSource
             }
 
-            FontSourcesByName.Add(typefaceKey, fontSource);
-            FontSourcesByName.Add(fontSource.FontName, fontSource);
-            FontSourcesByKey.Add(fontSource.Key, fontSource);
+            Globals.Global.FontSourcesByName.Add(typefaceKey, fontSource);
+            Globals.Global.FontSourcesByName.Add(fontSource.FontName, fontSource);
+            Globals.Global.FontSourcesByKey.Add(fontSource.Key, fontSource);
 
             return fontSource;
         }
@@ -337,88 +332,85 @@ namespace PdfSharp.Fonts
             try
             {
                 Lock.EnterFontFactory();
-                FontSourcesByName.Add(typefaceKey, fontSource);
+                Globals.Global.FontSourcesByName.Add(typefaceKey, fontSource);
             }
             finally { Lock.ExitFontFactory(); }
         }
 
         internal static void Reset()
         {
-            FontResolverInfosByName.Clear();
-            FontSourcesByName.Clear();
-            FontSourcesByKey.Clear();
+            Globals.Global.FontResolverInfosByName.Clear();
+            Globals.Global.FontSourcesByName.Clear();
+            Globals.Global.FontSourcesByKey.Clear();
         }
 
         internal static string GetFontCachesState()
         {
-            StringBuilder state = new StringBuilder();
+            var state = new StringBuilder();
             string[] keys;
             int count;
 
             // FontResolverInfo by name.
             state.Append("====================\n");
             state.Append("Font resolver info by name\n");
-            Dictionary<string, FontResolverInfo>.KeyCollection keyCollection = FontResolverInfosByName.Keys;
+            Dictionary<string, FontResolverInfo>.KeyCollection keyCollection = Globals.Global.FontResolverInfosByName.Keys;
             count = keyCollection.Count;
             keys = new string[count];
             keyCollection.CopyTo(keys, 0);
             Array.Sort(keys, StringComparer.OrdinalIgnoreCase);
             foreach (string key in keys)
-                state.AppendFormat("  {0}: {1}\n", key, FontResolverInfosByName[key].DebuggerDisplay);
-            state.Append("\n");
+                state.AppendFormat("  {0}: {1}\n", key, Globals.Global.FontResolverInfosByName[key].DebuggerDisplay);
+            state.Append('\n');
 
             // FontSource by key.
             state.Append("Font source by key and name\n");
-            Dictionary<ulong, XFontSource>.KeyCollection fontSourceKeys = FontSourcesByKey.Keys;
+            Dictionary<ulong, XFontSource>.KeyCollection fontSourceKeys = Globals.Global.FontSourcesByKey.Keys;
             count = fontSourceKeys.Count;
             ulong[] ulKeys = new ulong[count];
             fontSourceKeys.CopyTo(ulKeys, 0);
             Array.Sort(ulKeys, (x, y) => x == y ? 0 : (x > y ? 1 : -1));
             foreach (ulong ul in ulKeys)
-                state.AppendFormat("  {0}: {1}\n", ul, FontSourcesByKey[ul].DebuggerDisplay);
-            Dictionary<string, XFontSource>.KeyCollection fontSourceNames = FontSourcesByName.Keys;
+                state.AppendFormat("  {0}: {1}\n", ul, Globals.Global.FontSourcesByKey[ul].DebuggerDisplay);
+            Dictionary<string, XFontSource>.KeyCollection fontSourceNames = Globals.Global.FontSourcesByName.Keys;
             count = fontSourceNames.Count;
             keys = new string[count];
             fontSourceNames.CopyTo(keys, 0);
             Array.Sort(keys, StringComparer.OrdinalIgnoreCase);
             foreach (string key in keys)
-                state.AppendFormat("  {0}: {1}\n", key, FontSourcesByName[key].DebuggerDisplay);
+                state.AppendFormat("  {0}: {1}\n", key, Globals.Global.FontSourcesByName[key].DebuggerDisplay);
             state.Append("--------------------\n\n");
 
             // FontFamilyInternal by name.
             state.Append(FontFamilyCache.GetCacheState());
             // XGlyphTypeface by name.
             state.Append(GlyphTypefaceCache.GetCacheState());
-            // OpenTypeFontface by name.
-            state.Append(OpenTypeFontfaceCache.GetCacheState());
+            // OpenTypeFontFace by name.
+            state.Append(OpenTypeFontFaceCache.GetCacheState());
             return state.ToString();
         }
+    }
+}
 
+namespace PdfSharp.Internal
+{
+    using Fonts;
+
+    partial class Globals
+    {
         /// <summary>
         /// Maps font typeface key to font resolver info.
         /// </summary>
-        //static readonly Dictionary<string, FontResolverInfo> FontResolverInfosByTypefaceKey = new Dictionary<string, FontResolverInfo>(StringComparer.OrdinalIgnoreCase);
-        static Dictionary<string, FontResolverInfo> FontResolverInfosByName { get; } = new(StringComparer.OrdinalIgnoreCase);
-
-        ///// <summary>
-        ///// Maps font resolver info key to font resolver info.
-        ///// </summary>
-        //static readonly Dictionary<string, FontResolverInfo> FontResolverInfosByKey = new Dictionary<string, FontResolverInfo>();
+        public readonly Dictionary<string, FontResolverInfo> FontResolverInfosByName = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Maps typeface key or font name to font source.
         /// </summary>
-        //static readonly Dictionary<string, XFontSource> FontSourcesByTypefaceKey = new Dictionary<string, XFontSource>(StringComparer.OrdinalIgnoreCase);
-        static Dictionary<string, XFontSource> FontSourcesByName { get; } = new(StringComparer.OrdinalIgnoreCase);
-
-        ///// <summary>
-        ///// Maps font name to font source.
-        ///// </summary>
-        //static readonly Dictionary<string, XFontSource> FontSourcesByFontName = new Dictionary<string, XFontSource>();
+        public readonly Dictionary<string, XFontSource> FontSourcesByName = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Maps font source key to font source.
+        /// The key is a hash code of the font face data.
         /// </summary>
-        static Dictionary<ulong, XFontSource> FontSourcesByKey { get; } = new();
+        public readonly Dictionary<ulong, XFontSource> FontSourcesByKey = [];
     }
 }

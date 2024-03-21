@@ -29,6 +29,7 @@ namespace PdfSharp.Pdf.Advanced
             : base(trailer._document)
         {
             _document = trailer._document;
+            SecurityHandlerInternal = trailer.SecurityHandlerInternal;
 
             // /ID [<09F877EBF282E9408ED1882A9A21D9F2><2A4938E896006F499AC1C2EA7BFB08E4>]
             // /Info 7 0 R
@@ -197,7 +198,7 @@ namespace PdfSharp.Pdf.Advanced
             if (iref != null)
             {
                 iref = _document.IrefTable[iref.ObjectID];
-                Debug.Assert(iref is not null && iref.Value != null);
+                Debug.Assert(iref?.Value != null);
                 _document.Trailer.Elements[Keys.Encrypt] = iref;
 
                 // The encryption dictionary (security handler) was read in before the XRefTable construction 

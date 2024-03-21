@@ -1,18 +1,17 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.Security;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.Rendering;
-using PdfSharp.Diagnostics;
-using PdfSharp.Pdf.Security;
 #if CORE
 using PdfSharp.Fonts;
 using PdfSharp.Snippets.Font;
+#endif
+#if WPF
+using System.IO;
 #endif
 
 namespace MigraDoc.Tests
@@ -236,9 +235,14 @@ namespace MigraDoc.Tests
             var pdfRenderer = new PdfDocumentRenderer { Document = document };
             pdfRenderer.RenderDocument();
 
+            SecureDocument(pdfRenderer.PdfDocument, options);
+
+            return pdfRenderer;
+        }
+        public static void SecureDocument(PdfDocument pdfDoc, TestOptions options)
+        {
             if (options.Encryption != PdfStandardSecurityHandler.DefaultEncryption.None)
             {
-                var pdfDoc = pdfRenderer.PdfDocument;
                 if (options.UserPassword is not null)
                     pdfDoc.SecuritySettings.UserPassword = options.UserPassword;
                 if (options.OwnerPassword is not null)
@@ -257,10 +261,14 @@ namespace MigraDoc.Tests
                 else if (options.Encryption != PdfStandardSecurityHandler.DefaultEncryption.Default)
                     securityHandler.SetEncryption(options.Encryption);
             }
-
-            return pdfRenderer;
         }
 
+        public static void WriteSecuredTestDocument(Document document, string filename, TestOptions options)
+        {
+            var pdfRenderer = RenderSecuredDocument(document, options);
+            pdfRenderer.Save(filename);
+        }
+        
         public static PdfDocumentRenderer RenderSecuredStandardTestDocument(TestOptions options)
         {
             return RenderSecuredDocument(CreateStandardTestDocument(), options);

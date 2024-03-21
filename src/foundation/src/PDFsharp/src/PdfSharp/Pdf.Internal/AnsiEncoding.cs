@@ -2,24 +2,20 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
+using PdfSharp.Fonts.Internal;
 
 namespace PdfSharp.Pdf.Internal
 {
     /// <summary>
-    /// An encoder for PDF AnsiEncoding.
+    /// An encoder use for PDF WinAnsi encoding.
+    /// It is by design not to use CodePagesEncodingProvider.Instance.GetEncoding(1252).
     /// </summary>
-#if NET6_0_OR_GREATER
-    [Obsolete("Use CodePagesEncodingProvider.Instance.GetEncoding(1252)")]
-#endif
     public sealed class AnsiEncoding : Encoding
     {
         /// <summary>
         /// Gets the byte count.
         /// </summary>
-        public override int GetByteCount(char[] chars, int index, int count)
-        {
-            return count;
-        }
+        public override int GetByteCount(char[] chars, int index, int count) => count;
 
         /// <summary>
         /// Gets the bytes.
@@ -28,7 +24,10 @@ namespace PdfSharp.Pdf.Internal
         {
             int count = charCount;
             for (; charCount > 0; byteIndex++, charIndex++, charCount--)
-                bytes[byteIndex] = (byte)UnicodeToAnsi(chars[charIndex]);
+            {
+                var ch = chars[charIndex];
+                bytes[byteIndex] = (byte)UnicodeToAnsi(ch/*, ch*/);
+            }
             return count;
         }
 
@@ -66,64 +65,180 @@ namespace PdfSharp.Pdf.Internal
         public override int GetMaxCharCount(int byteCount) => byteCount;
 
         /// <summary>
-        /// Indicates whether the specified Unicode character is available in the ANSI code page 1252.
+        /// Indicates whether the specified Unicode BMP character is available in the ANSI code page 1252.
         /// </summary>
-        public static bool IsAnsi1252Char(char ch)
+        public static bool IsAnsi(char ch)
         {
             if (ch is < '\u0080' or >= '\u00A0' and <= '\u00FF')
                 return true;
 
-            switch (ch)
+            return ch switch
             {
-                case '\u20AC':
-                case '\u0081':
-                case '\u201A':
-                case '\u0192':
-                case '\u201E':
-                case '\u2026':
-                case '\u2020':
-                case '\u2021':
-                case '\u02C6':
-                case '\u2030':
-                case '\u0160':
-                case '\u2039':
-                case '\u0152':
-                case '\u008D':
-                case '\u017D':
-                case '\u008F':
-                case '\u0090':
-                case '\u2018':
-                case '\u2019':
-                case '\u201C':
-                case '\u201D':
-                case '\u2022':
-                case '\u2013':
-                case '\u2014':
-                case '\u02DC':
-                case '\u2122':
-                case '\u0161':
-                case '\u203A':
-                case '\u0153':
-                case '\u009D':
-                case '\u017E':
-                case '\u0178':
-                    return true;
+                '\u20AC' => true,
+                '\u0081' => false,
+                '\u201A' => true,
+                '\u0192' => true,
+                '\u201E' => true,
+                '\u2026' => true,
+                '\u2020' => true,
+                '\u2021' => true,
+                '\u02C6' => true,
+                '\u2030' => true,
+                '\u0160' => true,
+                '\u2039' => true,
+                '\u0152' => true,
+                '\u008D' => false,
+                '\u017D' => true,
+                '\u008F' => false,
+                '\u0090' => false,
+                '\u2018' => true,
+                '\u2019' => true,
+                '\u201C' => true,
+                '\u201D' => true,
+                '\u2022' => true,
+                '\u2013' => true,
+                '\u2014' => true,
+                '\u02DC' => true,
+                '\u2122' => true,
+                '\u0161' => true,
+                '\u203A' => true,
+                '\u0153' => true,
+                '\u009D' => false,
+                '\u017E' => true,
+                '\u0178' => true,
+                _ => false
+            };
+        }
+
+        /// <summary>
+        /// Indicates whether the specified string is available in the ANSI code page 1252.
+        /// </summary>
+        public static bool IsAnsi(string s)
+        {
+            var length = s.Length;
+            for (int idx = 0; idx < length; idx++)
+            {
+                char ch = s[idx];
+
+                if (ch is < '\u0080' or >= '\u00A0' and <= '\u00FF')
+                    continue;
+
+                if (ch switch
+                {
+                    '\u20AC' => true,
+                    '\u0081' => false,  // undefined
+                    '\u201A' => true,
+                    '\u0192' => true,
+                    '\u201E' => true,
+                    '\u2026' => true,
+                    '\u2020' => true,
+                    '\u2021' => true,
+                    '\u02C6' => true,
+                    '\u2030' => true,
+                    '\u0160' => true,
+                    '\u2039' => true,
+                    '\u0152' => true,
+                    '\u008D' => false,  // undefined
+                    '\u017D' => true,
+                    '\u008F' => false,  // undefined
+                    '\u0090' => false,  // undefined
+                    '\u2018' => true,
+                    '\u2019' => true,
+                    '\u201C' => true,
+                    '\u201D' => true,
+                    '\u2022' => true,
+                    '\u2013' => true,
+                    '\u2014' => true,
+                    '\u02DC' => true,
+                    '\u2122' => true,
+                    '\u0161' => true,
+                    '\u203A' => true,
+                    '\u0153' => true,
+                    '\u009D' => false,  // undefined
+                    '\u017E' => true,
+                    '\u0178' => true,
+                    _ => false
+                } is false)
+                    return false;
             }
-            return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Indicates whether all code points in the specified array are available in the ANSI code page 1252.
+        /// </summary>
+        public static bool IsAnsi(int[] codePoints)  // #RENAME IsWinAnsi? IsPdfAnsi?
+        {
+            var length = codePoints.Length;
+            for (int idx = 0; idx < length; idx++)
+            {
+                //int ch = codePoints[idx].Character;
+                int ch = codePoints[idx];
+
+                if (ch is < '\u0080' or >= '\u00A0' and <= '\u00FF')
+                    continue;
+
+                // There are 6 values between 128 and 255 that are not part of the original ANSI character set.
+                // U+00AD was later added for the soft hyphen. The remaining 5 undefined values (see below) are
+                // no valid ANSI characters. All of them are control characters (from U+0080 to U+009F) in
+                // Unicode. Therefore, we return false here.
+                if (ch switch
+                {
+                    '\u20AC' => true,
+                    '\u0081' => false,  // undefined
+                    '\u201A' => true,
+                    '\u0192' => true,
+                    '\u201E' => true,
+                    '\u2026' => true,
+                    '\u2020' => true,
+                    '\u2021' => true,
+                    '\u02C6' => true,
+                    '\u2030' => true,
+                    '\u0160' => true,
+                    '\u2039' => true,
+                    '\u0152' => true,
+                    '\u008D' => false,  // undefined
+                    '\u017D' => true,
+                    '\u008F' => false,  // undefined
+                    '\u0090' => false,  // undefined
+                    '\u2018' => true,
+                    '\u2019' => true,
+                    '\u201C' => true,
+                    '\u201D' => true,
+                    '\u2022' => true,
+                    '\u2013' => true,
+                    '\u2014' => true,
+                    '\u02DC' => true,
+                    '\u2122' => true,
+                    '\u0161' => true,
+                    '\u203A' => true,
+                    '\u0153' => true,
+                    '\u009D' => false,  // undefined
+                    '\u017E' => true,
+                    '\u0178' => true,
+                    _ => false
+                } is false)
+                    return false;
+            }
+            return true;
         }
 
         /// <summary>
         /// Maps Unicode to ANSI code page 1252.
+        /// Return an ANSI code in a char or U-FFFF if Unicode
+        /// value has no ANSI counterpart.
         /// </summary>
-        public static char UnicodeToAnsi(char ch)
+        public static char UnicodeToAnsi(char ch, char nonAnsi = '\u003F')
         {
             if (ch is < '\u0080' or >= '\u00A0' and <= '\u00FF')
                 return ch;
 
+            // Unicode code points from U-0080 to U-009F are no
+            // valid ANSI characters in a PDF file.
             return ch switch
             {
                 '\u20AC' => '\u0080',
-                '\u0081' => '\u0081',
+                '\u0081' => '\u0081',  // undefined, but in ANSI range.
                 '\u201A' => '\u0082',
                 '\u0192' => '\u0083',
                 '\u201E' => '\u0084',
@@ -135,10 +250,10 @@ namespace PdfSharp.Pdf.Internal
                 '\u0160' => '\u008A',
                 '\u2039' => '\u008B',
                 '\u0152' => '\u008C',
-                '\u008D' => '\u008D',
+                '\u008D' => '\u008D',  // undefined, but in ANSI range.
                 '\u017D' => '\u008E',
-                '\u008F' => '\u008F',
-                '\u0090' => '\u0090',
+                '\u008F' => '\u008F',  // undefined, but in ANSI range.
+                '\u0090' => '\u0090',  // undefined, but in ANSI range.
                 '\u2018' => '\u0091',
                 '\u2019' => '\u0092',
                 '\u201C' => '\u0093',
@@ -151,10 +266,10 @@ namespace PdfSharp.Pdf.Internal
                 '\u0161' => '\u009A',
                 '\u203A' => '\u009B',
                 '\u0153' => '\u009C',
-                '\u009D' => '\u009D',
+                '\u009D' => '\u009D',  // undefined, but in ANSI range.
                 '\u017E' => '\u009E',
                 '\u0178' => '\u009F',
-                _ => '\u00A4' // Char 164 is ANSI value of '¤'.
+                _ =>   nonAnsi
             };
         }
 
@@ -185,6 +300,7 @@ namespace PdfSharp.Pdf.Internal
 #if true_  // Keep for reference to proof that this implementation is correct.
         public static void ProofImplementation()
         {
+#if NET6_0_OR_GREATER || true
             // Implementation was verified with .NET Ansi encoding.
             Encoding dotnetImplementation = CodePagesEncodingProvider.Instance.GetEncoding(1252);
             Encoding thisImplementation = new AnsiEncoding();
@@ -222,6 +338,7 @@ namespace PdfSharp.Pdf.Internal
                 if (ch1[0] != ch2[0])
                     Debug.Print("Error");
             }
+#endif
         }
 #endif
     }

@@ -399,7 +399,7 @@ namespace PdfSharp.Pdf.Security.Encryption
                 var k1 = k1Enumerable.ToArray();
 
                 // b): Create e: Encrypt k1 using AES-128 (CBC, no padding), with the first 16 bytes of k as the key and the second 16 bytes of k as the initialization vector.
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
                 var aesKey = k[..16];
                 var aesIV = k[16..32];
 #else
@@ -410,12 +410,15 @@ namespace PdfSharp.Pdf.Security.Encryption
                 var e = encryptor.TransformFinalBlock(k1, 0, k1.Length);
 
                 // c) + d): Take the first 16 bytes of e as an unsigned big-endian integer.
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
                 var e16 = e[..16];
-                var e16BigEndianUnsigned = new BigInteger(e16, true, true);
 #else
                 var e16 = e.Take(16).ToArray();
-                var e16BigEndianUnsigned = new BigInteger(e16.Reverse().ToArray());
+#endif
+#if NET6_0_OR_GREATER
+                var e16BigEndianUnsigned = new BigInteger(e16, true, true);
+#else
+                var e16BigEndianUnsigned = DotNetHelper.CreateBigInteger(e16, true, true);
 #endif
                 // Calculate the remainder of the result by modulo 3
                 // and according to that result choose the SHA algorithm to calculate the new k from e.
@@ -440,7 +443,7 @@ namespace PdfSharp.Pdf.Security.Encryption
             }
 
             // The first 32 bytes of the final K are the output of the algorithm.
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
             var result = k[..32];
 #else
             var result = k.Take(32).ToArray();
@@ -610,7 +613,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerHashValue(byte[] userOwnerValue)
         {
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
             return userOwnerValue[..32];
 #else
             return userOwnerValue.Take(32).ToArray();
@@ -622,7 +625,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerValidationSalt(byte[] userOwnerValue)
         {
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
             return userOwnerValue[32..40];
 #else
             return userOwnerValue.Skip(32).Take(8).ToArray();
@@ -634,7 +637,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerKeySalt(byte[] userOwnerValue)
         {
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
             return userOwnerValue[40..48];
 #else
             return userOwnerValue.Skip(40).Take(8).ToArray();
@@ -697,8 +700,8 @@ namespace PdfSharp.Pdf.Security.Encryption
                 return false;
 
             // Bytes 0-3 of the decrypted Perms entry, treated as a little-endian integer, are the user permissions. They should match the value in the P key.
-#if NET6_0_OR_GREATER
-            var pFromPerms = BitConverter.ToUInt32(permsDecrypted[..4]); // Little-endian is default, so we don't have to change the order.
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE_
+            var pFromPerms = BitConverter.ToUInt32(permsDecrypted[..4]);  // Little-endian is default, so we don't have to change the order.
 #else
             var pFromPerms = BitConverter.ToUInt32(permsDecrypted.Take(4).ToArray(), 0); // Little-endian is default, so we don't have to change the order.
 #endif

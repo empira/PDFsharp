@@ -142,7 +142,7 @@ namespace MigraDoc.DocumentObjectModel
                 // TODO: LastTable, etc., docu
                 var sections = Values.Sections;
                 if (sections is { Count: > 0 })
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
                     return sections[^1];
 #else
                     return sections[sections.Count - 1];

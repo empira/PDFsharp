@@ -1,9 +1,6 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-#if WPF
-using System.IO;
-#endif
 using System.Text;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Security;
@@ -39,12 +36,9 @@ namespace PdfSharp.Pdf.IO
             _stream = null!;
         }
 
-        public void Close()
-        {
-            Close(true);
-        }
+        public void Close() => Close(true);
 
-        public int Position => (int)_stream.Position;
+        public SizeType Position => (SizeType)_stream.Position;
 
         /// <summary>
         /// Gets or sets the kind of layout.
@@ -54,7 +48,6 @@ namespace PdfSharp.Pdf.IO
             get => _layout;
             set => _layout = value;
         }
-
         PdfWriterLayout _layout;
 
         public PdfWriterOptions Options
@@ -62,7 +55,6 @@ namespace PdfSharp.Pdf.IO
             get => _options;
             set => _options = value;
         }
-
         PdfWriterOptions _options;
 
         // -----------------------------------------------------------
@@ -98,6 +90,13 @@ namespace PdfSharp.Pdf.IO
             _lastCat = CharCat.Character;
         }
 
+        public void Write(long value)
+        {
+            WriteSeparator(CharCat.Character);
+            WriteRaw(value.ToString(CultureInfo.InvariantCulture));
+            _lastCat = CharCat.Character;
+        }
+
         /// <summary>
         /// Writes the specified value to the PDF stream.
         /// </summary>
@@ -121,7 +120,19 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Writes the specified value to the PDF stream.
         /// </summary>
+#pragma warning disable CS0618 // Type or member is obsolete
         public void Write(PdfUInteger value)
+#pragma warning restore CS0618 // Type or member is obsolete
+        {
+            WriteSeparator(CharCat.Character);
+            _lastCat = CharCat.Character;
+            WriteRaw(value.Value.ToString(CultureInfo.InvariantCulture));
+        }
+
+        /// <summary>
+        /// Writes the specified value to the PDF stream.
+        /// </summary>
+        public void Write(PdfLongInteger value)
         {
             WriteSeparator(CharCat.Character);
             _lastCat = CharCat.Character;
@@ -134,7 +145,7 @@ namespace PdfSharp.Pdf.IO
         public void Write(double value)
         {
             WriteSeparator(CharCat.Character);
-            WriteRaw(value.ToString(Config.SignificantFigures7, CultureInfo.InvariantCulture));
+            WriteRaw(value.ToString(Config.SignificantDecimalPlaces7, CultureInfo.InvariantCulture));
             _lastCat = CharCat.Character;
         }
 
@@ -144,7 +155,7 @@ namespace PdfSharp.Pdf.IO
         public void Write(PdfReal value)
         {
             WriteSeparator(CharCat.Character);
-            WriteRaw(value.Value.ToString(Config.SignificantFigures7, CultureInfo.InvariantCulture));
+            WriteRaw(value.Value.ToString(Config.SignificantDecimalPlaces7, CultureInfo.InvariantCulture));
             _lastCat = CharCat.Character;
         }
 
@@ -273,7 +284,7 @@ namespace PdfSharp.Pdf.IO
 
         public void Write(PdfRectangle rect)
         {
-            const string format = Config.SignificantFigures3;
+            const string format = Config.SignificantDecimalPlaces3;
             WriteSeparator(CharCat.Delimiter, '/');
             WriteRaw(PdfEncoders.Format("[{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "}]", rect.X1, rect.Y1, rect.X2, rect.Y2));
             _lastCat = CharCat.Delimiter;
@@ -473,11 +484,14 @@ namespace PdfSharp.Pdf.IO
         void WriteObjectAddress(PdfObject value)
         {
             if (_layout == PdfWriterLayout.Verbose)
-                WriteRaw(String.Format("{0} {1} obj   % {2}\n",
-                    value.ObjectID.ObjectNumber, value.ObjectID.GenerationNumber,
-                    value.GetType().FullName));
+            {
+                string comment = value.Comment;
+                if (!String.IsNullOrEmpty(comment))
+                    comment = $" -- {value.Comment}";
+                WriteRaw(Invariant($"{value.ObjectID.ObjectNumber} {value.ObjectID.GenerationNumber} obj   % {value.GetType().FullName}{comment}\n"));
+            }
             else
-                WriteRaw(String.Format("{0} {1} obj\n", value.ObjectID.ObjectNumber, value.ObjectID.GenerationNumber));
+                WriteRaw(Invariant($"{value.ObjectID.ObjectNumber} {value.ObjectID.GenerationNumber} obj\n"));
         }
 
         public void WriteFileHeader(PdfDocument document)
@@ -490,7 +504,7 @@ namespace PdfSharp.Pdf.IO
 
             if (_layout == PdfWriterLayout.Verbose)
             {
-                WriteRaw(String.Format("% PDFsharp Version {0} (verbose mode)\n", PdfSharpProductVersionInformation.Version));
+                WriteRaw($"% PDFsharp Version {PdfSharpProductVersionInformation.Version} (verbose mode)\n");
                 // Keep some space for later fix-up.
                 _commentPosition = (int)_stream.Position + 2;
                 WriteRaw("%                                                \n");
@@ -498,16 +512,19 @@ namespace PdfSharp.Pdf.IO
                 WriteRaw("%                                                \n");
                 WriteRaw("%                                                \n");
                 WriteRaw("%                                                \n");
+#if DEBUG
+                WriteRaw("% This document is created from a DEBUG build. Do not use a DEBUG build of PDFsharp for production.\n");
+#endif
                 WriteRaw("%--------------------------------------------------------------------------------------------------\n");
             }
         }
 
-        public void WriteEof(PdfDocument document, int startxref)
+        public void WriteEof(PdfDocument document, SizeType startxref)
         {
             WriteRaw("startxref\n");
             WriteRaw(startxref.ToString(CultureInfo.InvariantCulture));
             WriteRaw("\n%%EOF\n");
-            int fileSize = (int)_stream.Position;
+            SizeType fileSize = (SizeType)_stream.Position;
             if (_layout == PdfWriterLayout.Verbose)
             {
                 TimeSpan duration = DateTime.Now - document._creation;

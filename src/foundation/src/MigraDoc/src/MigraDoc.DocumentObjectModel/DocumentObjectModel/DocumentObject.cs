@@ -37,8 +37,8 @@ namespace MigraDoc.DocumentObjectModel
         protected virtual object DeepCopy()
         {
             var value = (DocumentObject)MemberwiseClone();
-            value.ResetCachedValues();
-            value.Parent = null;
+            // value.ResetCachedValues();
+            value.Parent = null; // Calls ResetCachedValues().
             value.BaseValues = (Values)BaseValues.Clone();
             value.BaseValues.Owner = value;
             return value;
@@ -71,9 +71,7 @@ namespace MigraDoc.DocumentObjectModel
         public Document Document
         {
             // Note: Parent cannot change once it was set.
-#if NET6_0_OR_GREATER
             [return: MaybeNull]
-#endif
             get
             {
                 if (_document != null)
@@ -94,9 +92,7 @@ namespace MigraDoc.DocumentObjectModel
         public Section? Section
         {
             // Note: Parent cannot change once it was set.
-#if NET6_0_OR_GREATER
             [return: MaybeNull]
-#endif
             get
             {
                 if (_section != null)

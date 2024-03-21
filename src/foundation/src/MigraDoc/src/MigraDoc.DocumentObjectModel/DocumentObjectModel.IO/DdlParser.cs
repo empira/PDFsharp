@@ -8,6 +8,9 @@ using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.DocumentObjectModel.Shapes.Charts;
 using System.Diagnostics.CodeAnalysis;
 
+// ReSharper disable CommentTypo because of too much token strings in comments
+// ReSharper disable GrammarMistakeInComment
+
 namespace MigraDoc.DocumentObjectModel.IO
 {
     /// <summary>
@@ -19,7 +22,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// Initializes a new instance of the DdlParser class.
         /// </summary>
         internal DdlParser(string ddl, DdlReaderErrors? errors)
-            : this(String.Empty, ddl, errors)
+            : this("", ddl, errors)
         { }
 
         /// <summary>
@@ -80,15 +83,15 @@ namespace MigraDoc.DocumentObjectModel.IO
                     break;
 
                 case Symbol.EmbeddedFile:
-                    obj = ParseEmbeddedFiles(new EmbeddedFiles());
+                    obj = ParseEmbeddedFiles([] /*new EmbeddedFiles()*/);
                     break;
 
                 case Symbol.Styles:
-                    obj = ParseStyles(new Styles());
+                    obj = ParseStyles([] /*new Styles()*/);
                     break;
 
                 case Symbol.Section:
-                    obj = ParseSection(new Sections());
+                    obj = ParseSection([] /*new Sections()*/);
                     break;
 
                 case Symbol.Table:
@@ -220,10 +223,10 @@ namespace MigraDoc.DocumentObjectModel.IO
         bool IsHeaderFooter()
         {
             var sym = Symbol;
-            return sym == Symbol.Header || sym == Symbol.Footer ||
-              sym == Symbol.PrimaryHeader || sym == Symbol.PrimaryFooter ||
-              sym == Symbol.EvenPageHeader || sym == Symbol.EvenPageFooter ||
-              sym == Symbol.FirstPageHeader || sym == Symbol.FirstPageFooter;
+            return sym is Symbol.Header or Symbol.Footer
+                or Symbol.PrimaryHeader or Symbol.PrimaryFooter 
+                or Symbol.EvenPageHeader or Symbol.EvenPageFooter
+                or Symbol.FirstPageHeader or Symbol.FirstPageFooter;
         }
 
         /// <summary>
@@ -337,7 +340,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         void ParseHeaderFooter(Section section)
         {
             if (section == null)
-                throw new ArgumentNullException("section");
+                throw new ArgumentNullException(nameof(section));
 
             try
             {
@@ -349,8 +352,8 @@ namespace MigraDoc.DocumentObjectModel.IO
 
                 // Recall that the styles "Header" resp. "Footer" are used as default if
                 // no other style was given. But this belongs to the rendering process,
-                // not to the DDL parser. Therefore no code here belongs to that.
-                HeaderFooter headerFooter = new HeaderFooter();
+                // not to the DDL parser. Therefore, no code here belongs to that.
+                var headerFooter = new HeaderFooter();
                 ReadCode(); // read '[' or '{'
                 if (Symbol == Symbol.BracketLeft)
                     ParseAttributes(headerFooter);
@@ -374,7 +377,7 @@ namespace MigraDoc.DocumentObjectModel.IO
 #endif
 
                 HeadersFooters headersFooters = isHeader ? section.Headers : section.Footers;
-                if (hdrFtrSym == Symbol.Header || hdrFtrSym == Symbol.Footer)
+                if (hdrFtrSym is Symbol.Header or Symbol.Footer)
                 {
                     headersFooters.Primary = headerFooter.Clone();
                     headersFooters.EvenPage = headerFooter.Clone();
@@ -418,26 +421,25 @@ namespace MigraDoc.DocumentObjectModel.IO
                 if (_scanner.Char == Chars.BackSlash)
                 {
                     Symbol symbol = _scanner.PeekKeyword();
-                    switch (symbol)
+                    return symbol switch
                     {
-                        case Symbol.Bold:
-                        case Symbol.Italic:
-                        case Symbol.Underline:
-                        case Symbol.Field:
-                        case Symbol.Font:
-                        case Symbol.FontColor:
-                        case Symbol.FontSize:
-                        case Symbol.Footnote:
-                        case Symbol.Hyperlink:
-                        case Symbol.Symbol:
-                        case Symbol.Chr:
-                        case Symbol.Tab:
-                        case Symbol.LineBreak:
-                        case Symbol.Space:
-                        case Symbol.SoftHyphen:
-                            return true;
-                    }
-                    return false;
+                        Symbol.Bold => true,
+                        Symbol.Italic => true,
+                        Symbol.Underline => true,
+                        Symbol.Field => true,
+                        Symbol.Font => true,
+                        Symbol.FontColor => true,
+                        Symbol.FontSize => true,
+                        Symbol.Footnote => true,
+                        Symbol.Hyperlink => true,
+                        Symbol.Symbol => true,
+                        Symbol.Chr => true,
+                        Symbol.Tab => true,
+                        Symbol.LineBreak => true,
+                        Symbol.Space => true,
+                        Symbol.SoftHyphen => true,
+                        _ => false
+                    };
                 }
                 return true;
             }
@@ -447,7 +449,9 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Parses the document elements of a «\paragraph», «\cell» or comparable.
         /// </summary>
+#pragma warning disable IDE0060
         DocumentElements ParseDocumentElements(DocumentElements elements, Symbol context)
+#pragma warning restore IDE0060
         {
             //
             // This is clear:
@@ -557,7 +561,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// Removes the last blank from the text. Used before a tab, a line break or a space will be
         /// added to the text.
         /// </summary>
-        void RemoveTrailingBlank(ParagraphElements elements)
+        static void RemoveTrailingBlank(ParagraphElements elements)
         {
             var dom = elements.LastObject;
             if (dom is Text text)
@@ -794,7 +798,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             AssertSymbol(Symbol.ParenLeft);
 
             const char ch = (char)0;
-            SymbolName symtype = 0;
+            SymbolName symType = 0;
             int count = 1;
 
             ReadCode();  // read name
@@ -805,7 +809,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                     if (Enum.IsDefined(typeof(SymbolName), Token))
                     {
                         AssertCondition(IsSymbolType(Token), DomMsgID.InvalidSymbolType, Token);
-                        symtype = (SymbolName)Enum.Parse(typeof(SymbolName), Token, true);
+                        symType = (SymbolName)Enum.Parse(typeof(SymbolName), Token, true);
                     }
                 }
                 catch (Exception ex)
@@ -829,8 +833,8 @@ namespace MigraDoc.DocumentObjectModel.IO
 
             AssertSymbol(Symbol.ParenRight);
 
-            if (symtype != 0)
-                elements.AddCharacter(symtype, count);
+            if (symType != 0)
+                elements.AddCharacter(symType, count);
             else
                 elements.AddCharacter(ch, count);
         }
@@ -846,14 +850,14 @@ namespace MigraDoc.DocumentObjectModel.IO
             AssertSymbol(Symbol.ParenLeft);
 
             char ch = (char)0;
-            SymbolName symtype = 0;
+            SymbolName symType = 0;
             int count = 1;
 
             ReadCode();  // read integer
             if (TokenType == TokenType.IntegerLiteral)
             {
                 int val = _scanner.GetTokenValueAsInt();
-                if (val >= 1 && val < 256)
+                if (val is >= 1 and <= 255)
                     ch = (char)val;
                 else
                     ThrowParserException(DomMsgID.OutOfRange, "1 - 255");
@@ -874,8 +878,8 @@ namespace MigraDoc.DocumentObjectModel.IO
 
             AssertSymbol(Symbol.ParenRight);
 
-            if (symtype != 0)
-                elements.AddCharacter(symtype, count);
+            if (symType != 0)
+                elements.AddCharacter(symType, count);
             else
                 elements.AddCharacter(ch, count);
         }
@@ -883,7 +887,9 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Parses the keyword «\field».
         /// </summary>
+#pragma warning disable IDE0060
         void ParseField(ParagraphElements elements, int nestingLevel)
+#pragma warning restore IDE0060
         {
             AssertSymbol(Symbol.Field);
 
@@ -944,7 +950,9 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Parses the keyword «\footnote».
         /// </summary>
+#pragma warning disable IDE0060
         void ParseFootnote(ParagraphElements elements, int nestingLevel)
+#pragma warning restore IDE0060
         {
             AssertSymbol(Symbol.Footnote);
             ReadCode();
@@ -990,7 +998,9 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Parses the keyword «\space».
         /// </summary>
+#pragma warning disable IDE0060
         void ParseSpace(ParagraphElements elements, int nestingLevel)
+#pragma warning restore IDE0060
         {
             // Samples
             // \space
@@ -1523,7 +1533,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                             break;
 
                         default:
-                            // Alles ignorieren? Warnung ausgeben?
+                            // Ignore all? Issue warning?
                             break;
                     }
                 }
@@ -1592,7 +1602,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                                 break;
 
                             case Symbol.Image:
-                                Image image = new Image();
+                                var image = new Image();
                                 ParseImage(image, false);
                                 area.Elements.Add(image);
                                 break;
@@ -1688,7 +1698,7 @@ namespace MigraDoc.DocumentObjectModel.IO
 
                         case Symbol.Point:
                             AssertCondition(fFoundComma, DomMsgID.MissingComma);
-                            ParsePoint(series.Add(0.0));
+                            ParsePoint(series.Add(0));
                             fFoundComma = false;
                             break;
 
@@ -1883,7 +1893,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             // Parser of rhs depends on the type of the l-value.
 
             if (doc == null)
-                throw new ArgumentNullException("doc");
+                throw new ArgumentNullException(nameof(doc));
             var valueName = "";
             try
             {
@@ -1936,7 +1946,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                     case Symbol.PlusAssign:
                     case Symbol.MinusAssign:
                         // Hard-coded for TabStops only...
-                        if (!(doc is ParagraphFormat))
+                        if (doc is not ParagraphFormat)
                             ThrowParserException(DomMsgID.SymbolNotAllowed, _scanner.Token);
                         if (String.Compare(valueName, "TabStops", StringComparison.OrdinalIgnoreCase) != 0)
                             ThrowParserException(DomMsgID.InvalidValueForOperation, valueName, _scanner.Token);
@@ -1947,7 +1957,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                         if (true) // HACK in ParseAttributeStatement       // BUG THHO4STLA Already existed in 2019.
                         {
                             bool fAddItem = Symbol == Symbol.PlusAssign;
-                            TabStop tabStop = new TabStop();
+                            var tabStop = new TabStop();
 
                             ReadCode();
 
@@ -1955,7 +1965,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                             {
                                 ParseAttributeBlock(tabStop);
                             }
-                            else if (Symbol == Symbol.StringLiteral || Symbol == Symbol.RealLiteral || Symbol == Symbol.IntegerLiteral)
+                            else if (Symbol is Symbol.StringLiteral or Symbol.RealLiteral or Symbol.IntegerLiteral)
                             {
                                 // Special hack for tab stops...
                                 Unit unit = Token;
@@ -2069,7 +2079,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// </summary>
         void ParseBoolAssignment(DocumentObject dom, ValueDescriptor vd)
         {
-            AssertCondition(Symbol == Symbol.True || Symbol == Symbol.False, DomMsgID.BoolExpected,
+            AssertCondition(Symbol is Symbol.True or Symbol.False, DomMsgID.BoolExpected,
               _scanner.Token);
 
             dom.SetValue(vd.ValueName, Symbol == Symbol.True);
@@ -2081,7 +2091,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// </summary>
         void ParseIntegerAssignment(DocumentObject dom, ValueDescriptor vd)
         {
-            AssertCondition(Symbol == Symbol.IntegerLiteral || Symbol == Symbol.HexIntegerLiteral || Symbol == Symbol.StringLiteral,
+            AssertCondition(Symbol is Symbol.IntegerLiteral or Symbol.HexIntegerLiteral or Symbol.StringLiteral,
               DomMsgID.IntegerExpected, Token);
 
             int n = Int32.Parse(_scanner.Token, CultureInfo.InvariantCulture);
@@ -2095,7 +2105,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// </summary>
         void ParseRealAssignment(DocumentObject dom, ValueDescriptor vd)
         {
-            AssertCondition(Symbol == Symbol.RealLiteral || Symbol == Symbol.IntegerLiteral || Symbol == Symbol.StringLiteral,
+            AssertCondition(Symbol is Symbol.RealLiteral or Symbol.IntegerLiteral or Symbol.StringLiteral,
               DomMsgID.RealExpected, _scanner.Token);
 
             double r = double.Parse(_scanner.Token, CultureInfo.InvariantCulture);
@@ -2109,7 +2119,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// </summary>
         void ParseUnitAssignment(DocumentObject dom, ValueDescriptor vd)
         {
-            AssertCondition(Symbol == Symbol.RealLiteral || Symbol == Symbol.IntegerLiteral || Symbol == Symbol.StringLiteral,
+            AssertCondition(Symbol is Symbol.RealLiteral or Symbol.IntegerLiteral or Symbol.StringLiteral,
               DomMsgID.RealExpected, _scanner.Token);
 
             Unit unit = Token;
@@ -2231,7 +2241,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// </summary>
         void ParseColorAssignment(DocumentObject dom, ValueDescriptor vd)
         {
-            var val = vd.GetValue(dom, GV.ReadWrite);
+            var _ = vd.GetValue(dom, GV.ReadWrite);
             var color = ParseColor();
             dom.SetValue(vd.ValueName, color);
         }
@@ -2279,7 +2289,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                         break;
                 }
             }
-            else if (Symbol == Symbol.IntegerLiteral || Symbol == Symbol.HexIntegerLiteral)
+            else if (Symbol is Symbol.IntegerLiteral or Symbol.HexIntegerLiteral)
             {
                 color = new Color(_scanner.GetTokenValueAsUInt());
                 ReadCode(); // read beyond literal
@@ -2299,32 +2309,31 @@ namespace MigraDoc.DocumentObjectModel.IO
         // ReSharper disable once InconsistentNaming
         Color ParseRGB()
         {
-            uint r, g, b;
             ReadCode();  // read '('
             AssertSymbol(Symbol.ParenLeft);
 
             ReadCode();  // read red value
-            AssertCondition(Symbol == Symbol.IntegerLiteral || Symbol == Symbol.HexIntegerLiteral,
+            AssertCondition(Symbol is Symbol.IntegerLiteral or Symbol.HexIntegerLiteral,
               DomMsgID.IntegerExpected, _scanner.Token);
-            r = _scanner.GetTokenValueAsUInt();
-            AssertCondition(r >= 0 && r <= 255, DomMsgID.InvalidRange, "0 - 255");
+            var r = _scanner.GetTokenValueAsUInt();
+            AssertCondition(r is >= 0 and <= 255, DomMsgID.InvalidRange, "0 - 255");
 
             ReadCode();  // read ','
             AssertSymbol(Symbol.Comma);
 
             ReadCode();  // read green value
-            AssertCondition(Symbol == Symbol.IntegerLiteral || Symbol == Symbol.HexIntegerLiteral,
+            AssertCondition(Symbol is Symbol.IntegerLiteral or Symbol.HexIntegerLiteral,
               DomMsgID.IntegerExpected, _scanner.Token);
-            g = _scanner.GetTokenValueAsUInt();
+            var g = _scanner.GetTokenValueAsUInt();
             AssertCondition(g is >= 0 and <= 255, DomMsgID.InvalidRange, "0 - 255");
 
             ReadCode();  // read ','
             AssertSymbol(Symbol.Comma);
 
             ReadCode();  // read blue value
-            AssertCondition(Symbol == Symbol.IntegerLiteral || Symbol == Symbol.HexIntegerLiteral,
+            AssertCondition(Symbol is Symbol.IntegerLiteral or Symbol.HexIntegerLiteral,
               DomMsgID.IntegerExpected, _scanner.Token);
-            b = _scanner.GetTokenValueAsUInt();
+            var b = _scanner.GetTokenValueAsUInt();
             AssertCondition(b is >= 0 and <= 255, DomMsgID.InvalidRange, "0 - 255");
 
             ReadCode();  // read ')'
@@ -2344,37 +2353,37 @@ namespace MigraDoc.DocumentObjectModel.IO
             AssertSymbol(Symbol.ParenLeft);
 
             ReadCode();  // read v1 value
-            AssertCondition(Symbol == Symbol.IntegerLiteral || Symbol == Symbol.RealLiteral,
+            AssertCondition(Symbol is Symbol.IntegerLiteral or Symbol.RealLiteral,
               DomMsgID.NumberExpected, _scanner.Token);
             double v1 = _scanner.GetTokenValueAsReal();
-            AssertCondition(v1 >= 0.0f && v1 <= 100.0f, DomMsgID.InvalidRange, "0.0 - 100.0");
+            AssertCondition(v1 is >= 0 and <= 100, DomMsgID.InvalidRange, "0..100");
 
             ReadCode();  // read ','
             AssertSymbol(Symbol.Comma);
 
             ReadCode();  // read v2 value
-            AssertCondition(Symbol == Symbol.IntegerLiteral || Symbol == Symbol.RealLiteral,
+            AssertCondition(Symbol is Symbol.IntegerLiteral or Symbol.RealLiteral,
               DomMsgID.NumberExpected, _scanner.Token);
             double v2 = _scanner.GetTokenValueAsReal();
-            AssertCondition(v2 >= 0.0f && v2 <= 100.0f, DomMsgID.InvalidRange, "0.0 - 100.0");
+            AssertCondition(v2 is >= 0 and <= 100, DomMsgID.InvalidRange, "0..100");
 
             ReadCode();  // read ','
             AssertSymbol(Symbol.Comma);
 
             ReadCode();  // read v3 value
-            AssertCondition(Symbol == Symbol.IntegerLiteral || Symbol == Symbol.RealLiteral,
+            AssertCondition(Symbol is Symbol.IntegerLiteral or Symbol.RealLiteral,
               DomMsgID.NumberExpected, _scanner.Token);
             double v3 = _scanner.GetTokenValueAsReal();
-            AssertCondition(v3 >= 0.0f && v3 <= 100.0f, DomMsgID.InvalidRange, "0.0 - 100.0");
+            AssertCondition(v3 is >= 0 and <= 100, DomMsgID.InvalidRange, "0..100");
 
             ReadCode();  // read ','
             AssertSymbol(Symbol.Comma);
 
             ReadCode();  // read v4 value
-            AssertCondition(Symbol == Symbol.IntegerLiteral || Symbol == Symbol.RealLiteral,
+            AssertCondition(Symbol is Symbol.IntegerLiteral or Symbol.RealLiteral,
               DomMsgID.NumberExpected, _scanner.Token);
             double v4 = _scanner.GetTokenValueAsReal();
-            AssertCondition(v4 >= 0.0f && v4 <= 100.0, DomMsgID.InvalidRange, "0.0 - 100.0");
+            AssertCondition(v4 is >= 0 and <= 100, DomMsgID.InvalidRange, "0..100");
 
             ReadCode();  // read ')' or ','
             bool hasAlpha = false;
@@ -2383,10 +2392,10 @@ namespace MigraDoc.DocumentObjectModel.IO
             {
                 hasAlpha = true;
                 ReadCode();  // read v5 value
-                AssertCondition(Symbol == Symbol.IntegerLiteral || Symbol == Symbol.RealLiteral,
+                AssertCondition(Symbol is Symbol.IntegerLiteral or Symbol.RealLiteral,
                   DomMsgID.NumberExpected, _scanner.Token);
                 v5 = _scanner.GetTokenValueAsReal();
-                AssertCondition(v5 >= 0.0f && v5 <= 100.0, DomMsgID.InvalidRange, "0.0 - 100.0");
+                AssertCondition(v5 is >= 0 and <= 100, DomMsgID.InvalidRange, "0..100");
 
                 ReadCode();  // read ')'
             }
@@ -2401,7 +2410,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             }
             else
             {
-                a = 100.0; c = v1; m = v2; y = v3; k = v4;
+                a = 100; c = v1; m = v2; y = v3; k = v4;
             }
             return Color.FromCmyk(a, c, m, y, k);
         }
@@ -2415,24 +2424,24 @@ namespace MigraDoc.DocumentObjectModel.IO
             AssertSymbol(Symbol.ParenLeft);
 
             ReadCode();  // read gray value
-            AssertCondition(Symbol == Symbol.IntegerLiteral || Symbol == Symbol.HexIntegerLiteral,
+            AssertCondition(Symbol is Symbol.IntegerLiteral or Symbol.HexIntegerLiteral,
               DomMsgID.IntegerExpected, _scanner.Token);
             double gray = _scanner.GetTokenValueAsReal();
-            AssertCondition(gray >= 0.0f && gray <= 100.0f, DomMsgID.InvalidRange, "0.0 - 100.0");
+            AssertCondition(gray is >= 0 and <= 100, DomMsgID.InvalidRange, "0..100");
 
             ReadCode();  // read ')'
             AssertSymbol(Symbol.ParenRight);
 
             ReadCode();  // read next token
 
-            uint g = (uint)((1 - gray / 100.0) * 255 + 0.5);
+            uint g = (uint)((1 - gray / 100) * 255 + 0.5);
             return new Color(0xff000000 + (g << 16) + (g << 8) + g);
         }
 
         /// <summary>
         /// Determines the name/text of the given symbol.
         /// </summary>
-        string GetSymbolText(Symbol docSym)
+        static string GetSymbolText(Symbol docSym)
         {
             return KeyWords.NameFromSymbol(docSym);
         }
@@ -2440,12 +2449,12 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Returns whether the specified type is a valid SpaceType.
         /// </summary>
-        bool IsSpaceType(string type)
+        static bool IsSpaceType(string type)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
             if (type == "")
-                throw new ArgumentException("type");
+                throw new ArgumentException("Type is empty.", nameof(type));
 
             if (Enum.IsDefined(typeof(SymbolName), type))
             {
@@ -2467,12 +2476,12 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Returns whether the specified type is a valid enum for \symbol.
         /// </summary>
-        bool IsSymbolType(string type)
+        static bool IsSymbolType(string type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             if (type == "")
-                throw new ArgumentException("type");
+                throw new ArgumentException("Type is empty.", nameof(type));
 
             if (Enum.IsDefined(typeof(SymbolName), type))
             {
@@ -2605,7 +2614,7 @@ namespace MigraDoc.DocumentObjectModel.IO
 #if NET6_0_OR_GREATER
         [DoesNotReturn]
 #endif
-        void ThrowParserException(Exception innerException, DomMsgID errorCode, params object[] parms)
+        static void ThrowParserException(Exception innerException, DomMsgID errorCode, params object[] parms)
         {
             var message = DomSR.FormatMessage(errorCode, parms);
             throw new DdlParserException(message, innerException);

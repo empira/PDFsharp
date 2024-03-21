@@ -65,7 +65,7 @@
 //              if (_openedDirectories.Contains(directory))
 //                  return;
 
-//              Process.Start(directory);
+//              Process.Sta7rt(directory);
 //              _openedDirectories.Add(directory);
 //            }
 
@@ -153,9 +153,9 @@
 
 //            // ... and start a viewer.
 //            if (startViewer)
-//                Process.Start(filepath);
+//                Process.St/art(filepath);
 //            else
-//                Process.Start(TestDocumentsDirectory);
+//                Process.Sta/rt(TestDocumentsDirectory);
 //            // return filename;
 //        }
 

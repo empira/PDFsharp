@@ -1,5 +1,8 @@
 ﻿using PdfSharp.Fonts;
 using System.Runtime.InteropServices;
+#if WPF
+using System.IO;
+#endif
 
 namespace PdfSharp.Snippets.Font
 {
@@ -29,7 +32,7 @@ namespace PdfSharp.Snippets.Font
                 Monitor.Exit(typeof(SnippetsFontResolver));
             }
         }
-        private static SnippetsFontResolver? _singleton;
+        static SnippetsFontResolver? _singleton;  // #STATIC
 
 #if DEBUG
         public override String ToString()
@@ -42,33 +45,14 @@ namespace PdfSharp.Snippets.Font
         }
 #endif
 
-#if NET6_0_OR_GREATER
-        public record Family(
-            string FamilyName,
-            string FaceName,
-            string LinuxFaceName = "",
-            params string[] LinuxSubstituteFamilyNames);
-#else
-      public class Family 
-        {
-            public string FamilyName;
-            public string FaceName;
-            public string LinuxFaceName;
-            public string[] LinuxSubstituteFamilyNames;
-
-            public Family(
-            string familyName,
-            string faceName,
-            string linuxFaceName = "",
+        public class Family(string familyName, string faceName, string linuxFaceName = "",
             params string[] linuxSubstituteFamilyNames)
-            {
-                this.FamilyName = familyName;
-                this.FaceName = faceName;
-                this.LinuxFaceName = linuxFaceName;
-                this.LinuxSubstituteFamilyNames = linuxSubstituteFamilyNames;
-            }
+        {
+            public string FamilyName = familyName;        // StL: no, this is the face name
+            public string FaceName = faceName;            // StL: no, this is the file name
+            public string LinuxFaceName = linuxFaceName;  // StL: no, this is the Linux file name
+            public string[] LinuxSubstituteFamilyNames = linuxSubstituteFamilyNames; // StL: no, this is the Linux alternative face name
         }
-#endif
 
         public static readonly List<Family> Families;
 
@@ -176,10 +160,10 @@ namespace PdfSharp.Snippets.Font
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 return GetFontWindows(faceName);
-            
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 return GetFontLinux(faceName);
-            
+
             return null;
         }
 
@@ -249,12 +233,12 @@ namespace PdfSharp.Snippets.Font
             var filenameCandidates = FaceNameToFilenameCandidates(faceName);
 
             foreach (var file in Directory.GetFiles(basepath).Select(Path.GetFileName))
-            foreach (var filenameCandidate in filenameCandidates)
-            {
-                // Most programs treat fonts case-sensitive on Linux. We ignore case because we also target WSL.
-                if (!String.IsNullOrEmpty(file) && file.Equals(filenameCandidate, StringComparison.OrdinalIgnoreCase))
-                    return Path.Combine(basepath, filenameCandidate);
-            }
+                foreach (var filenameCandidate in filenameCandidates)
+                {
+                    // Most programs treat fonts case-sensitive on Linux. We ignore case because we also target WSL.
+                    if (!String.IsNullOrEmpty(file) && file.Equals(filenameCandidate, StringComparison.OrdinalIgnoreCase))
+                        return Path.Combine(basepath, filenameCandidate);
+                }
 
             // Linux allows arbitrary subdirectories for organizing fonts.
             foreach (var directory in Directory.GetDirectories(basepath).Select(Path.GetFileName))

@@ -11,7 +11,6 @@ using System.Drawing.Imaging;
 using PdfSharp.Internal;
 #endif
 #if WPF
-using System.IO;
 using System.Text;
 using System.Windows.Media.Imaging;
 #endif

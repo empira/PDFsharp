@@ -345,7 +345,7 @@ namespace MigraDoc.DocumentObjectModel
                 if (number.StartsWith("0x", StringComparison.Ordinal))
                 {
                     numberStyle = NumberStyles.HexNumber;
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
                     number = color[2..];
 #else
                     number = color.Substring(2);
@@ -356,7 +356,7 @@ namespace MigraDoc.DocumentObjectModel
                     numberStyle = NumberStyles.HexNumber;
                     switch (color.Length)
                     {
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
                         case 9: // Format "#aarrggbb".
                             number = color[1..];
                             break;

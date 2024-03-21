@@ -2,6 +2,8 @@
 // See the LICENSE file in the solution root for more information.
 
 using System;
+using System.Text;
+using PdfSharp.Fonts;
 using PdfSharp.Fonts.OpenType;
 
 namespace PdfSharp.Pdf.Advanced
@@ -73,35 +75,37 @@ namespace PdfSharp.Pdf.Advanced
     /// </summary>
     public sealed class PdfFontDescriptor : PdfDictionary
     {
-        internal PdfFontDescriptor(PdfDocument document, OpenTypeDescriptor descriptor)
+        internal PdfFontDescriptor(PdfDocument document, OpenTypeDescriptor otDescriptor)
             : base(document)
         {
-            _descriptor = descriptor;
+            Descriptor = otDescriptor;
+            _cmapInfo = new CMapInfo(otDescriptor);
+
             Elements.SetName(Keys.Type, "/FontDescriptor");
 
-            Elements.SetInteger(Keys.Ascent, _descriptor.DesignUnitsToPdf(_descriptor.Ascender));
-            Elements.SetInteger(Keys.CapHeight, _descriptor.DesignUnitsToPdf(_descriptor.CapHeight));
-            Elements.SetInteger(Keys.Descent, _descriptor.DesignUnitsToPdf(_descriptor.Descender));
-            Elements.SetInteger(Keys.Flags, (int)FlagsFromDescriptor(_descriptor));
+            Elements.SetInteger(Keys.Ascent, Descriptor.DesignUnitsToPdf(Descriptor.Ascender));
+            Elements.SetInteger(Keys.CapHeight, Descriptor.DesignUnitsToPdf(Descriptor.CapHeight));
+            Elements.SetInteger(Keys.Descent, Descriptor.DesignUnitsToPdf(Descriptor.Descender));
+            Elements.SetInteger(Keys.Flags, (int)FlagsFromDescriptor(Descriptor));
             Elements.SetRectangle(Keys.FontBBox, new PdfRectangle(
-              _descriptor.DesignUnitsToPdf(_descriptor.XMin),
-              _descriptor.DesignUnitsToPdf(_descriptor.YMin),
-              _descriptor.DesignUnitsToPdf(_descriptor.XMax),
-              _descriptor.DesignUnitsToPdf(_descriptor.YMax)));
+              Descriptor.DesignUnitsToPdf(Descriptor.XMin),
+              Descriptor.DesignUnitsToPdf(Descriptor.YMin),
+              Descriptor.DesignUnitsToPdf(Descriptor.XMax),
+              Descriptor.DesignUnitsToPdf(Descriptor.YMax)));
             // not here, done in PdfFont later... 
             //Elements.SetName(Keys.FontName, "abc"); //descriptor.FontName);
-            Elements.SetReal(Keys.ItalicAngle, _descriptor.ItalicAngle);
-            Elements.SetInteger(Keys.StemV, _descriptor.StemV);
-            Elements.SetInteger(Keys.XHeight, _descriptor.DesignUnitsToPdf(_descriptor.XHeight));
+            Elements.SetReal(Keys.ItalicAngle, Descriptor.ItalicAngle);
+            Elements.SetInteger(Keys.StemV, Descriptor.StemV);
+            Elements.SetInteger(Keys.XHeight, Descriptor.DesignUnitsToPdf(Descriptor.XHeight));
         }
 
         //HACK OpenTypeDescriptor descriptor
-        internal OpenTypeDescriptor _descriptor;
+        internal OpenTypeDescriptor Descriptor { get; }
 
         /// <summary>
         /// Gets or sets the name of the font.
         /// </summary>
-        public string FontName
+        public string FontName2
         {
             get => Elements.GetName(Keys.FontName);
             set => Elements.SetName(Keys.FontName, value);
@@ -110,18 +114,82 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets a value indicating whether this instance is symbol font.
         /// </summary>
-        public bool IsSymbolFont => _isSymbolFont;
-
-        bool _isSymbolFont;
+        public bool IsSymbolFont { get; private set; }
 
         // HACK FlagsFromDescriptor(OpenTypeDescriptor descriptor)
         PdfFontDescriptorFlags FlagsFromDescriptor(OpenTypeDescriptor descriptor)
         {
             PdfFontDescriptorFlags flags = 0;
-            _isSymbolFont = descriptor.FontFace.cmap.symbol;
-            flags |= descriptor.FontFace.cmap.symbol ? PdfFontDescriptorFlags.Symbolic : PdfFontDescriptorFlags.Nonsymbolic;
+            IsSymbolFont = descriptor.IsSymbolFont;
+            flags |= descriptor.IsSymbolFont ? PdfFontDescriptorFlags.Symbolic : PdfFontDescriptorFlags.Nonsymbolic;
             return flags;
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the cmap table must be added to the
+        /// font subset.
+        /// </summary>
+        internal bool AddCmapTable { get; set; }
+        
+        /// <summary>
+        /// Gets the CMapInfo for PDF font descriptor.
+        /// It contains all characters, ANSI and Unicode.
+        /// </summary>
+        internal CMapInfo CMapInfo2  // #NFM
+        {
+            get => _cmapInfo ?? NRT.ThrowOnNull<CMapInfo>();
+            //set => _cmapInfo2 = value;
+        }
+        CMapInfo _cmapInfo;
+
+        internal override void PrepareForSave()
+        {
+            // Shared by ANSI and Unicode encoded PDF fonts. So we maybe get called twice.
+            if (_prepared)
+                return;
+            _prepared = true;
+            
+#if SHARED_FONTDESCRIPTOR
+            var pdfFontFile = new PdfFontProgram(Owner);
+            pdfFontFile.CreateFontFileAndAddToDescriptor(this, _cmapInfo, !AddCmapTable);
+
+            // Next lines are already done in CreateFontFileAndAddToDescriptor(
+            //Owner.Internals.AddObject(pdfFontFile);
+            //FontDescriptor.Elements[PdfFontDescriptor.Keys.FontFile2] = pdfFontFile.Reference;
+#endif
+        }
+        bool _prepared;
+
+        /// <summary>
+        /// Adds a tag of exactly six uppercase letters to the font name 
+        /// according to PDF Reference Section 5.5.3 'Font Subsets'.
+        /// </summary>
+        internal string CreateEmbeddedFontSubsetName(string name)
+        {
+        TryAgain:
+            var s = new StringBuilder(64);
+            byte[] bytes = Guid.NewGuid().ToByteArray();
+            for (int idx = 0; idx < 6; idx++)
+                s.Append((char)('A' + bytes[idx] % 26));
+            s.Append('+');
+            if (name.StartsWith("/", StringComparison.Ordinal))
+                s.Append(name.Substring(1));
+            else
+                s.Append(name);
+            var newName = s.ToString();
+            // The probability is low for a single document
+            // with a handful of fonts, but it is better to check.
+#if NET6_0_OR_GREATER_
+            if (!_fontSubsetNames.TryAdd(newName, null))
+                goto TryAgain;
+#else
+            if (_fontSubsetNames.ContainsKey(newName))
+                goto TryAgain;
+            _fontSubsetNames.Add(newName, null);
+#endif
+            return newName;
+        }
+        readonly Dictionary<string, object?> _fontSubsetNames = [];
 
         /// <summary>
         /// Predefined keys of this dictionary.

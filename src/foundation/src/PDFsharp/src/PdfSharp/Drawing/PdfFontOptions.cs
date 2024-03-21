@@ -28,6 +28,9 @@ namespace PdfSharp.Drawing
         public XPdfFontOptions(PdfFontEncoding encoding, PdfFontEmbedding embedding)
         {
             FontEncoding = encoding;
+            FontEmbedding = PdfFontEmbedding.Automatic;
+            FontEncoding = PdfFontEncoding.Automatic;
+
         }
 
         /// <summary>
@@ -42,22 +45,27 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Initializes a new instance of the <see cref="XPdfFontOptions"/> class.
         /// </summary>
-        [Obsolete("Must not specify an embedding option anymore. Fonts get always embedded.")]
+        [Obsolete("Must not specify an embedding option anymore. Fonts get always embedded as subsets.")]
         public XPdfFontOptions(PdfFontEmbedding embedding)
         {
-            FontEncoding = PdfFontEncoding.WinAnsi;
+            FontEmbedding = PdfFontEmbedding.Automatic;
+            FontEncoding = PdfFontEncoding.Automatic;
         }
 
         /// <summary>
         /// Gets a value indicating the font embedding.
         /// </summary>
-        [Obsolete("Fonts are always embedded.")]
-        public PdfFontEmbedding FontEmbedding => PdfFontEmbedding.Always;
+        public PdfFontEmbedding FontEmbedding { get; }
 
         /// <summary>
         /// Gets a value indicating how the font is encoded.
         /// </summary>
         public PdfFontEncoding FontEncoding { get; }
+
+        /// <summary>
+        /// Gets the default options with WinAnsi encoding and always font embedding.
+        /// </summary>
+        public static XPdfFontOptions AutomaticEncoding => new(PdfFontEncoding.Automatic);
 
         /// <summary>
         /// Gets the default options with WinAnsi encoding and always font embedding.

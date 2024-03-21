@@ -4,7 +4,6 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
-using System.IO;
 #if true || GDI || WPF
 using PdfSharp.Drawing;
 #endif

@@ -111,7 +111,7 @@ namespace MigraDoc.Rendering
             }
         }
 
-        FieldInfos IAreaProvider.AreaFieldInfos => _fieldInfos ?? NRT.ThrowOnNull<FieldInfos>();
+        FieldInfos IAreaProvider.AreaFieldInfos => _fieldInfos!; // Can be null when RenderObject is used instead of RenderDocument.
 
         void IAreaProvider.StoreRenderInfos(List<RenderInfo> renderInfos)
             => _renderInfos = renderInfos;

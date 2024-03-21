@@ -15,6 +15,23 @@ namespace PdfSharp.Internal
         public static InvalidOperationException InvalidOperationException_CouldNotFindMetadataDictionary() =>
             new("Could not find document's metadata dictionary.");
 
+        #region Reader Messages
+        public static ObjectNotAvailableException ObjectNotAvailableException_CannotRetrieveStreamLengthByNow(Exception? innerException = null)
+        {
+            const string message = "Cannot retrieve stream length from stream object by now.";
+            return innerException != null ? new(message, innerException) : new(message);
+        }
+
+        public static ObjectNotAvailableException ObjectNotAvailableException_CannotRetrieveStreamLength() =>
+            new("Cannot retrieve stream length.");
+
+        public static InvalidOperationException InvalidOperationException_ReferencesOfObjectStreamNotYetRead() =>
+            new("References of object stream are not yet read.");
+
+        public static PdfReaderException PdfReaderException_ObjectCouldNotBeFoundInObjectStreams() =>
+            new("Object could not be found in object streams.");
+        #endregion
+
         #region Encryption Messages
 
         #region Common
@@ -116,11 +133,11 @@ namespace PdfSharp.Internal
         public static ArgumentException ArgumentException_WrappingSASLprepException(Exception innerException) =>
             new("An error occurred while processing the password.", innerException);
 
-        public static ArgumentException ArgumentException_SASLprepProhibitedCharacter(int codepoint, int position) =>
-            new($"Prohibited character '0x{codepoint:X}' at position {position}.");
+        public static ArgumentException ArgumentException_SASLprepProhibitedCharacter(int codePoint, int position) =>
+            new($"Prohibited character '0x{codePoint:X}' at position {position}.");
 
-        public static ArgumentException ArgumentException_SASLprepProhibitedUnassignedCodepoint(int codepoint, int position) =>
-            new($"Prohibited unassigned code point '0x{codepoint:X}' at position {position}.");
+        public static ArgumentException ArgumentException_SASLprepProhibitedUnassignedCodepoint(int codePoint, int position) =>
+            new($"Prohibited unassigned code point '0x{codePoint:X}' at position {position}.");
 
         public static ArgumentException ArgumentException_SASLprepRandALCatAndLCatCharacters() =>
             new("Violation of bidirectional character requirements. String contains RandALCat characters, but also LCat characters.");

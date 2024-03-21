@@ -3,12 +3,13 @@
 
 using System.IO;
 using PdfSharp.Drawing;
+using PdfSharp.Events;
 using PdfSharp.Quality;
 
 namespace PdfSharp.Features.Drawing
 {
     /// <summary>
-    /// Drawing in a image. CGI and WPF only.
+    /// Drawing in an image. CGI and WPF only.
     /// </summary>
     public class GraphicsFromImage : Feature
     {
@@ -19,7 +20,7 @@ namespace PdfSharp.Features.Drawing
         {
             var image = XBitmapImage.CreateBitmap(400, 300);
 
-            var gfx = XGraphics.FromImage(image);
+            var gfx = XGraphics.FromImage(image, new RenderEvents());
             if (gfx == null)
                 return;
 

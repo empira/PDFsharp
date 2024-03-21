@@ -2,9 +2,6 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics;
-#if WPF
-using System.IO;
-#endif
 using PdfSharp.Drawing;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.Rendering.Resources;

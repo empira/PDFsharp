@@ -1,9 +1,10 @@
-using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
+// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
+using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
 using Xunit;
@@ -47,10 +48,10 @@ namespace PdfSharp.Tests
                 new XRect(0, 0, page.Width, page.Height), XStringFormats.Center);
 
             // Save the document...
-            string filename = PdfFileHelper.CreateTempFileName("HelloWorld");
+            string filename = PdfFileUtility.GetTempPdfFileName("HelloWorld");
             document.Save(filename);
             // ...and start a viewer.
-            PdfFileHelper.StartPdfViewerIfDebugging(filename);
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
     }
 }

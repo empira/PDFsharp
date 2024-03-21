@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0-windows7.0;net472-windows</TargetFrameworks>
+        <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
         <RootNamespace>MigraDoc.GrammarByExample_WPF</RootNamespace>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <UseWPF>true</UseWPF>
@@ -17,6 +17,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Using Include="System.IO" />
       <Compile Remove="TestResults\**" />
       <EmbeddedResource Remove="TestResults\**" />
       <None Remove="TestResults\**" />
@@ -73,7 +74,7 @@
   </ItemGroup>-->
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper\PdfSharp.TestHelper.csproj" />
+        <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper-wpf\PdfSharp.TestHelper-wpf.csproj" />
         <ProjectReference Include="..\..\src\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
         <ProjectReference Include="..\..\src\MigraDoc.Rendering-wpf\MigraDoc.Rendering-wpf.csproj" />
     </ItemGroup>

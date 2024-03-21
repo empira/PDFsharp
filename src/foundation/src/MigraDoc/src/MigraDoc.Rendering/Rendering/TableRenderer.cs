@@ -32,13 +32,15 @@ namespace MigraDoc.Rendering
         {
             get
             {
-                var layoutInfo = new LayoutInfo();
-                layoutInfo.KeepTogether = _table.KeepTogether;
-                layoutInfo.KeepWithNext = false;
-                layoutInfo.MarginBottom = 0;
-                layoutInfo.MarginLeft = 0;
-                layoutInfo.MarginTop = 0;
-                layoutInfo.MarginRight = 0;
+                var layoutInfo = new LayoutInfo
+                {
+                    KeepTogether = _table.KeepTogether,
+                    KeepWithNext = false,
+                    MarginBottom = 0,
+                    MarginLeft = 0,
+                    MarginTop = 0,
+                    MarginRight = 0
+                };
                 return layoutInfo;
             }
         }
@@ -92,7 +94,7 @@ namespace MigraDoc.Rendering
             RenderBorders(cell, innerRect);
         }
 
-        void EqualizeRoundedCornerBorders(Cell cell)
+        static void EqualizeRoundedCornerBorders(Cell cell)
         {
             // If any of a corner relevant border is set, we want to copy its values to the second corner relevant border, 
             // to ensure the innerWidth of the cell is the same, regardless of which border is used.
@@ -374,7 +376,7 @@ namespace MigraDoc.Rendering
             for (var index = 0; index < count; index++)
             {
                 var cell = _mergedCells[index];
-                FormattedCell formattedCell = new FormattedCell(cell, _documentRenderer,
+                var formattedCell = new FormattedCell(cell, _documentRenderer,
                     _mergedCells.GetEffectiveBordersPdf(cell, _lastHeaderRow),
                     _fieldInfos, 0, 0);
                 formattedCell.Format(_gfx);
@@ -459,15 +461,12 @@ namespace MigraDoc.Rendering
 
         /// <summary>
         /// Updates the bookmarks in the given rows.
-        /// Otherwise each BookmarkField will refer to the first page of the table, because initially they are set before the table gets split over the pages.
+        /// Otherwise, each BookmarkField will refer to the first page of the table, because initially they are set before the table gets split over the pages.
         /// </summary>
         void UpdateThisPagesBookmarks(int startRow, int endRow)
         {
             if (_table.Rows.Count == 0)
                 return;
-
-            if (_fieldInfos == null)
-                NRT.ThrowOnNull();
 
             for (var r = startRow; r <= endRow; r++)
             {
@@ -475,6 +474,9 @@ namespace MigraDoc.Rendering
 
                 foreach (var bookmark in row.GetElementsRecursively<BookmarkField>())
                 {
+                    // _fieldInfos can be null when RenderObject is used instead of RenderDocument.
+                    if (_fieldInfos == null)
+                        NRT.ThrowOnNull();
                     _fieldInfos.AddBookmark(bookmark.Name);
                 }
             }
@@ -713,8 +715,7 @@ namespace MigraDoc.Rendering
                         // !!!new 18-03-09 Attempt to fix an exception. end
 #if true
                         // !!!new 18-03-09 Attempt to fix an exception. begin
-                        XUnit topBorderPos = maxBottomBorderPosition;
-                        if (!_bottomBorderMapOld.TryGetValue(cell.Row.Index, out topBorderPos))
+                        if (!_bottomBorderMapOld.TryGetValue(cell.Row.Index, out var topBorderPos))
                         {
                             //GetType();
                         }
@@ -878,7 +879,7 @@ namespace MigraDoc.Rendering
         XUnit CalcBottomBorderWidth(Cell cell)
         {
             var borders = _mergedCells.GetEffectiveBordersPdf(cell, _lastHeaderRow);
-            if (borders != null)
+            if (borders != null!)
             {
                 BordersRenderer bordersRenderer = new BordersRenderer(borders, _gfx);
                 return bordersRenderer.GetWidth(BorderType.Bottom);
@@ -973,7 +974,7 @@ namespace MigraDoc.Rendering
             var cellRow = _table.Rows[row];
             var cells = cellRow.Cells;
             var count = cells.Count;
-            bool finished = false;
+            bool finished;
             do
             {
                 finished = false;

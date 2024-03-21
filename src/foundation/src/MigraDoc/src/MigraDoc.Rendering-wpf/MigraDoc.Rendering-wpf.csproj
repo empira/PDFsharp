@@ -22,6 +22,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Compile Include="..\MigraDoc.Rendering\Properties\GlobalDeclarations.cs">
             <Link>Properties\GlobalDeclarations.cs</Link>
         </Compile>
@@ -60,6 +64,9 @@
         </Compile>
         <Compile Include="..\MigraDoc.Rendering\Rendering.ChartMapper\XValuesMapper.cs">
             <Link>Rendering.ChartMapper\XValuesMapper.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.Internals\ErrorHelpers.cs">
+            <Link>Rendering.Internals\ErrorHelpers.cs</Link>
         </Compile>
         <Compile Include="..\MigraDoc.Rendering\Rendering.Windows\DocumentPreview.xaml.cs" Link="Rendering.Windows\DocumentPreview.xaml.cs" />
         <Compile Include="..\MigraDoc.Rendering\Rendering.Windows\enums\Zoom.cs" Link="Rendering.Windows\enums\Zoom.cs" />
@@ -246,8 +253,8 @@
         <ProjectReference Include="..\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
+    <!--<ItemGroup>
         <PackageReference Include="System.Reflection.MetadataLoadContext" />
-    </ItemGroup>
+    </ItemGroup>-->
 
 </Project>

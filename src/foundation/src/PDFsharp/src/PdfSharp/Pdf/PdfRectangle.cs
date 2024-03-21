@@ -313,7 +313,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public override string ToString()
         {
-            const string format = Config.SignificantFigures3;
+            const string format = Config.SignificantDecimalPlaces3;
             return PdfEncoders.Format("[{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "}]", _x1, _y1, _x2, _y2);
         }
 
@@ -334,7 +334,7 @@ namespace PdfSharp.Pdf
         {
             get
             {
-                const string format = Config.SignificantFigures10;
+                const string format = Config.SignificantDecimalPlaces10;
                 return String.Format(CultureInfo.InvariantCulture,
                     "X1={0:" + format + "}, Y1={1:" + format + "}, X2={2:" + format + "}, Y2={3:" + format + "}", _x1, _y1, _x2, _y2);
             }

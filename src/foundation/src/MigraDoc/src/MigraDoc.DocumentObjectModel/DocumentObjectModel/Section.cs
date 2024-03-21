@@ -256,9 +256,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public Paragraph LastParagraph
         {
-#if NET6_0_OR_GREATER
             [return: MaybeNull]
-#endif
             get
             {
                 // _elements is created when needed and can be null.
@@ -280,9 +278,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public Table LastTable
         {
-#if NET6_0_OR_GREATER
             [return: MaybeNull]
-#endif
             get
             {
                 // _elements is created when needed and can be null.

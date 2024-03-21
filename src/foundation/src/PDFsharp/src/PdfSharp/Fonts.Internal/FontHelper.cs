@@ -21,23 +21,50 @@ using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
 using Windows.UI.Text;
 using Windows.UI.Xaml.Media;
 #endif
+//using System.Drawing;
+//using Microsoft.Extensions.Logging;
+//using PdfSharp.Events;
+//using PdfSharp.Fonts;
+using PdfSharp.Drawing;
 using PdfSharp.Fonts;
-using PdfSharp.Fonts.OpenType;
+//using PdfSharp.Fonts.OpenType;
+//using PdfSharp.Logging;
 
-namespace PdfSharp.Drawing
+namespace PdfSharp.Fonts.Internal
 {
     /// <summary>
     /// A bunch of internal functions that do not have a better place.
     /// </summary>
     static class FontHelper
     {
+#if true_ // #DELETE 24-12-31
         /// <summary>
         /// Measure string directly from font data.
         /// </summary>
-        public static XSize MeasureString(string text, XFont font, XStringFormat stringFormat_notyetused)
+        public static XSize MeasureString(string text, XFont font)
         {
-            var size = new XSize();
+            Debug.Assert(false, "Use the new version with code run parameter.");
+            
+            if (String.IsNullOrEmpty(text))
+                return new(); // not XSize.Empty !
 
+            var cp = UnicodeHelper.Utf32FromString2(text);
+            var codePoints = font.OpenTypeDescriptor.GlyphIndicessFromCodepoints(cp);
+            //var codeRun = new CharacterCodeRun(codePoints);
+
+            //// Invoke RenderEvent.
+            //var args = new RenderCodeRunEventArgs(Owner)
+            //{
+            //    Font = font,
+            //    CodeRun = codeRun
+            //};
+            //Owner.RenderEvents.OnRenderCodeRun(this, args);
+            //codeRun = args.CodeRun;
+            //codePoints = codeRun.Items;
+
+            return MeasureString(codePoints, font);
+#if true_  // Keep until 2024-12-31 for reference
+            var size = new XSize();
             var descriptor = FontDescriptorCache.GetOrCreateDescriptorFor(font) as OpenTypeDescriptor;
             if (descriptor != null)
             {
@@ -45,7 +72,7 @@ namespace PdfSharp.Drawing
                 size.Height = (descriptor.Ascender + descriptor.Descender) * font.Size / font.UnitsPerEm;
                 Debug.Assert(descriptor.Ascender > 0, "Ascender must be greater than 0.");
 
-                bool symbol = descriptor.FontFace.cmap.symbol;
+                bool isSymbolFont = descriptor.IsSymbolFont;
                 int length = text.Length;
                 int width = 0;
                 for (int idx = 0; idx < length; idx++)
@@ -55,25 +82,46 @@ namespace PdfSharp.Drawing
                     if (ch < 32)
                         continue;
 
-                    if (char.IsLowSurrogate(ch))
-                        continue; // Don't process high surrogate. Low will process this char.
-
-                    if (symbol)
+                    if (Char.IsLowSurrogate(ch))
                     {
-                        // Remap ch for symbol fonts.
-                        ch = (char)(ch | (descriptor.FontFace.os2.usFirstCharIndex & 0xFF00));  // @@@ refactor
-                        // Used | instead of + because of: http://pdfsharp.codeplex.com/workitem/15954
+                        // We only come here when the text contains a low surrogate not preceded by a high surrogate.
+                        // This is an error in the UTF-32 text and therefore ignored.
+                        LogHost.FontManagementLogger.LogWarning("Unexpected low surrogate found: 0x{Char:X2}", ch);
+                        continue;
                     }
 
-                    uint glyphIndex;
-                    if (char.IsHighSurrogate(ch))
-                        glyphIndex = descriptor.CharCodeToGlyphIndex(ch, text[idx + 1]);
+                    int glyphIndex;
+                    if (isSymbolFont)
+                    {
+                        ch = descriptor.RemapSymbolChar(ch);
+                        glyphIndex = descriptor.BmpCodepointToGlyphIndex(ch);
+                    }
+                    else if (Char.IsHighSurrogate(ch))
+                    {
+                        // UTF16 surrogate pair expected.
+                        if (++idx < length)
+                        {
+                            var ch2 = text[idx];
+                            if (Char.IsLowSurrogate(ch2) is false)
+                            {
+                                LogHost.FontManagementLogger.LogWarning("High surrogate 0x{Char:X2} not followed by low surrogate.", ch);
+                                continue;
+                            }
+                            glyphIndex = descriptor.SurrogatePairToGlyphIndex(ch, ch2);
+                        }
+                        else
+                        {
+                            LogHost.FontManagementLogger.LogWarning("High surrogate 0x{Char:X2} found at end of string.", ch);
+                            continue;
+                        }
+                    }
                     else
-                        glyphIndex = descriptor.CharCodeToGlyphIndex(ch);
-
-                    width += descriptor.GlyphIndexToWidth(glyphIndex);
+                    {
+                        // BMP character.
+                        glyphIndex = descriptor.BmpCodepointToGlyphIndex(ch);
+                    }
+                    width += descriptor.GlyphIDToWidth(glyphIndex);
                 }
-                // What? size.Width = width * font.Size * (font.Italic ? 1 : 1) / descriptor.UnitsPerEm;
                 size.Width = width * font.Size / descriptor.UnitsPerEm;
 
                 // Adjust bold simulation.
@@ -84,9 +132,49 @@ namespace PdfSharp.Drawing
                     size.Width += length * font.Size * Const.BoldEmphasis;
                 }
             }
-            // BUG: Is it correct to return an empty size if we have no constructor?
+            // BUG: Is it correct to return an empty size if we have no descriptor?
             Debug.Assert(descriptor != null, "No OpenTypeDescriptor.");
 
+            return size;
+#endif
+        }
+#endif
+
+        /// <summary>
+        /// Measure string directly from font data.
+        /// This function expects that the code run is ready to be measured.
+        /// The RenderEvent is not invoked.
+        /// </summary>
+        public static XSize MeasureString(CodePointGlyphIndexPair[] codeRun, XFont font)
+        {
+            var length = codeRun.Length;
+            if (length == 0)
+                return new(); // not XSize.Empty !
+
+            var descriptor = font.OpenTypeDescriptor;
+            var size = new XSize
+            {
+                // Height is the sum of ascender and descender.
+                Height = (descriptor.Ascender + descriptor.Descender) * font.Size / font.UnitsPerEm
+            };
+            Debug.Assert(descriptor.Ascender > 0, "Ascender must be greater than 0.");
+
+            int width = 0;
+            //var items = codeRun..Items;
+            for (int idx = 0; idx < length; idx++)
+            {
+                var glyphIndex = codeRun[idx].GlyphIndex;
+                width += descriptor.GlyphIndexToWidth(glyphIndex);
+            }
+            size.Width = width * font.Size / descriptor.UnitsPerEm;
+
+            // Adjust bold simulation.
+            if ((font.GlyphTypeface.StyleSimulations & XStyleSimulations.BoldSimulation) == XStyleSimulations.BoldSimulation)
+            {
+                // Add 2% of the em-size for each character.
+                // Unsure how to deal with white space. Currently count as regular character.
+                size.Width += length * font.Size * Const.BoldEmphasis;
+            }
             return size;
         }
 
@@ -182,7 +270,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Simple hack to make it work...
         /// </summary>
-        public static FontWeight FontWeightFromStyle(XFontStyleEx style)
+        public static WpfFontWeight FontWeightFromStyle(XFontStyleEx style)
         {
             // Mask out Underline, Strikeout, etc.
             return (style & XFontStyleEx.BoldItalic) switch
@@ -205,9 +293,11 @@ namespace PdfSharp.Drawing
             // FontDescriptor descriptor = FontDescriptorCache.GetOrCreateDescriptor(family.Name, style);
             //XFontMetrics metrics = descriptor.FontMetrics;
 
-            // style &= XFontStyleEx.Regular | XFontStyleEx.Bold | XFontStyleEx.Italic | XFontStyleEx.BoldItalic; // same as XFontStyleEx.BoldItalic
-            List<WpfTypeface> typefaces = new(family.WpfFamily.GetTypefaces());
-            foreach (WpfTypeface typeface in typefaces)
+            // Must only be called if font is not created by a font resolver.
+            var wpfFamily = family.WpfFamily;
+            Debug.Assert(wpfFamily != null);
+            var typefaces = new List<WpfTypeface>(wpfFamily.GetTypefaces());
+            foreach (var typeface in typefaces)
             {
                 bool bold = typeface.Weight == FontWeights.Bold;
                 bool italic = typeface.Style == FontStyles.Italic;
@@ -233,18 +323,6 @@ namespace PdfSharp.Drawing
                             return true;
                         break;
                 }
-                //////                typeface.sty
-                //////                bool available = false;
-                //////                GlyphTypeface glyphTypeface;
-                //////                if (typeface.TryGetGlyphTypeface(out glyphTypeface))
-                //////                {
-                //////#if DEBUG_
-                //////                    glyphTypeface.GetType();
-                //////#endif
-                //////                    available = true;
-                //////                }
-                //////                if (available)
-                //////                    return true;
             }
             return false;
         }
@@ -273,16 +351,16 @@ namespace PdfSharp.Drawing
                 while (--n >= 0)
                 {
                     s1 += buffer[offset++];
-                    s2 = s2 + s1;
+                    s2 += s1;
                 }
                 s1 %= prime;
                 s2 %= prime;
             }
             //return ((ulong)((ulong)(((ulong)s2 << 16) | (ulong)s1)) << 32) | (ulong)buffer.Length;
-            ulong ul1 = (ulong)s2 << 16;
-            ul1 = ul1 | s1;
-            ulong ul2 = (ulong)buffer.Length;
-            return (ul1 << 32) | ul2;
+            ulong ul1 = ((ulong)s2 << 16) | s1;
+            //ul1 |= s1;
+            uint ui2 = (uint)buffer.Length;
+            return (ul1 << 32) | ui2;
         }
 
         public static XFontStyleEx CreateStyle(bool isBold, bool isItalic)

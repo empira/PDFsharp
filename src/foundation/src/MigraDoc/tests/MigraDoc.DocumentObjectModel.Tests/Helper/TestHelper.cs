@@ -1,7 +1,10 @@
-﻿using FluentAssertions;
-using MigraDoc.DocumentObjectModel.Tables;
+﻿// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
 using PdfSharp.Fonts;
 using PdfSharp.Snippets.Font;
+using MigraDoc.DocumentObjectModel.Tables;
+using FluentAssertions;
 
 namespace MigraDoc.DocumentObjectModel.Tests.Helper
 {

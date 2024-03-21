@@ -27,7 +27,7 @@ namespace PdfSharp.Drawing
         public void MoveOrLineTo(double x, double y)
         {
             // Make a MoveTo if there is no previous subpath or the previous subpath was closed.
-            // Otherwise make a LineTo.
+            // Otherwise, make a LineTo.
             // ReSharper disable once UseIndexFromEndExpression
             if (_types.Count == 0 || (_types[_types.Count - 1] & PathPointTypeCloseSubpath) == PathPointTypeCloseSubpath)
                 MoveTo(x, y);

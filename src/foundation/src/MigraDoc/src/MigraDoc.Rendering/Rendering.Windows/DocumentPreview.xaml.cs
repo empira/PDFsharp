@@ -9,6 +9,7 @@ using PdfSharp.Drawing;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.IO;
 using System.Windows.Markup;
+using PdfSharp.Events;
 
 namespace MigraDoc.Rendering.Windows
 {
@@ -29,18 +30,95 @@ namespace MigraDoc.Rendering.Windows
         }
 
         /// <summary>
-        /// Gets or sets a DDL string or file.
+        /// Gets a DDL string or file.
         /// </summary>
-        public string Ddl
+        public string Ddl { get; private set; } = "";
+
+        /// <summary>
+        /// Sets a DDL string or file.
+        /// Commit renderEvents to allow RenderTextEvent calls.
+        /// </summary>
+        public void SetDdl(string ddl, RenderEvents renderEvents)
         {
-            get { return _ddl; }
-            set
+            Ddl = ddl;
+            RenderEvents = renderEvents;
+
+            if (Ddl != null)
             {
-                _ddl = value;
-                DdlUpdated();
+                Document = DdlReader.DocumentFromString(Ddl);
+                Renderer = new DocumentRenderer(Document);
+
+                //this.renderer.PrivateFonts = this.privateFonts;
+                Renderer.PrepareDocument(RenderEvents);
+
+                //IDocumentPaginatorSource source = this.documentViewer.Document;
+
+                //IDocumentPaginatorSource source = this.documentViewer.Document;
+
+                int pageCount = Renderer.FormattedDocument.PageCount;
+                if (pageCount == 0)
+                    return;
+
+                // HA/CK: hardcoded A4 size
+                //double pageWidth = XUnit.FromMillimeter(210).Presentation;
+                //double pageHeight = XUnit.FromMillimeter(297).Presentation;
+                //Size a4 = new Size(pageWidth, pageHeight);
+
+                XUnit pageWidth, pageHeight;
+                Size size96 = GetSizeOfPage(1, out pageWidth, out pageHeight);
+
+                FixedDocument fixedDocument = new FixedDocument();
+                fixedDocument.DocumentPaginator.PageSize = size96;
+
+                for (int pageNumber = 1; pageNumber <= pageCount; pageNumber++)
+                {
+                    try
+                    {
+                        size96 = GetSizeOfPage(pageNumber, out pageWidth, out pageHeight);
+
+                        DrawingVisual dv = new DrawingVisual();
+                        DrawingContext dc = dv.RenderOpen();
+                        //XGraphics gfx = XGraphics.FromDrawingContext(dc, new XSize(XUnit.FromMillimeter(210).Point, XUnit.FromMillimeter(297).Point), XGraphicsUnit.Point);
+                        XGraphics gfx = XGraphics.FromDrawingContext(dc, new XSize(pageWidth.Point, pageHeight.Presentation), XGraphicsUnit.Point, RenderEvents);
+                        Renderer.RenderPage(gfx, pageNumber, PageRenderOptions.All);
+                        dc.Close();
+
+                        // Create page content
+                        PageContent pageContent = new PageContent();
+                        pageContent.Width = size96.Width;
+                        pageContent.Height = size96.Height;
+                        FixedPage fixedPage = new FixedPage();
+                        fixedPage.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFE, 0xFE, 0xFE));
+
+                        UIElement visual = new DrawingVisualPresenter(dv);
+                        visual.IsHitTestVisible = false; // Without this line scrolling by mouse wheel is not possible if the cursor is over page content.
+                        FixedPage.SetLeft(visual, 0);
+                        FixedPage.SetTop(visual, 0);
+
+                        fixedPage.Width = size96.Width;
+                        fixedPage.Height = size96.Height;
+
+                        fixedPage.Children.Add(visual);
+
+                        fixedPage.Measure(size96);
+                        fixedPage.Arrange(new Rect(new Point(), size96));
+                        fixedPage.UpdateLayout();
+
+                        ((IAddChild)pageContent).AddChild(fixedPage);
+
+                        fixedDocument.Pages.Add(pageContent);
+                    }
+                    catch (Exception)
+                    {
+                        // eat exception
+                    }
+
+                    viewer.Document = fixedDocument;
+                }
             }
+            else
+                viewer.Document = null;
         }
-        string _ddl = "";
 
         ///////// <summary>
         ///////// Sets a delegate that is invoked when the preview needs to be painted.
@@ -147,88 +225,6 @@ namespace MigraDoc.Rendering.Windows
             }
         }
 
-        /// <summary>
-        /// Called when the Ddl property has changed.
-        /// </summary>
-        void DdlUpdated()
-        {
-            if (_ddl != null)
-            {
-                _document = DdlReader.DocumentFromString(_ddl);
-                Renderer = new DocumentRenderer(_document);
-
-                //this.renderer.PrivateFonts = this.privateFonts;
-                Renderer.PrepareDocument();
-
-                //IDocumentPaginatorSource source = this.documentViewer.Document;
-
-                //IDocumentPaginatorSource source = this.documentViewer.Document;
-
-                int pageCount = Renderer.FormattedDocument.PageCount;
-                if (pageCount == 0)
-                    return;
-
-                // HA/CK: hardcoded A4 size
-                //double pageWidth = XUnit.FromMillimeter(210).Presentation;
-                //double pageHeight = XUnit.FromMillimeter(297).Presentation;
-                //Size a4 = new Size(pageWidth, pageHeight);
-
-                XUnit pageWidth, pageHeight;
-                Size size96 = GetSizeOfPage(1, out pageWidth, out pageHeight);
-
-                FixedDocument fixedDocument = new FixedDocument();
-                fixedDocument.DocumentPaginator.PageSize = size96;
-
-                for (int pageNumber = 1; pageNumber <= pageCount; pageNumber++)
-                {
-                    try
-                    {
-                        size96 = GetSizeOfPage(pageNumber, out pageWidth, out pageHeight);
-
-                        DrawingVisual dv = new DrawingVisual();
-                        DrawingContext dc = dv.RenderOpen();
-                        //XGraphics gfx = XGraphics.FromDrawingContext(dc, new XSize(XUnit.FromMillimeter(210).Point, XUnit.FromMillimeter(297).Point), XGraphicsUnit.Point);
-                        XGraphics gfx = XGraphics.FromDrawingContext(dc, new XSize(pageWidth.Point, pageHeight.Presentation), XGraphicsUnit.Point);
-                        Renderer.RenderPage(gfx, pageNumber, PageRenderOptions.All);
-                        dc.Close();
-
-                        // Create page content
-                        PageContent pageContent = new PageContent();
-                        pageContent.Width = size96.Width;
-                        pageContent.Height = size96.Height;
-                        FixedPage fixedPage = new FixedPage();
-                        fixedPage.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFE, 0xFE, 0xFE));
-
-                        UIElement visual = new DrawingVisualPresenter(dv);
-                        visual.IsHitTestVisible = false; // Without this line scrolling by mouse wheel is not possible if the cursor is over page content.
-                        FixedPage.SetLeft(visual, 0);
-                        FixedPage.SetTop(visual, 0);
-
-                        fixedPage.Width = size96.Width;
-                        fixedPage.Height = size96.Height;
-
-                        fixedPage.Children.Add(visual);
-
-                        fixedPage.Measure(size96);
-                        fixedPage.Arrange(new Rect(new Point(), size96));
-                        fixedPage.UpdateLayout();
-
-                        ((IAddChild)pageContent).AddChild(fixedPage);
-
-                        fixedDocument.Pages.Add(pageContent);
-                    }
-                    catch (Exception)
-                    {
-                        // eat exception
-                    }
-
-                    viewer.Document = fixedDocument;
-                }
-            }
-            else
-                viewer.Document = null;
-        }
-
         Size GetSizeOfPage(int page, out XUnit width, out XUnit height)
         {
             if (Renderer == null)
@@ -252,30 +248,41 @@ namespace MigraDoc.Rendering.Windows
         }
 
         /// <summary>
-        /// Gets or sets the MigraDoc document that is previewed in this control.
+        /// Gets the MigraDoc document that is previewed in this control.
         /// </summary>
-        public Document? Document
+        public Document? Document { get; private set; }
+
+        /// <summary>
+        /// Sets the MigraDoc document that is previewed in this control.
+        /// Commit renderEvents to allow RenderTextEvent calls.
+        /// </summary>
+        public void SetDocument(Document document, RenderEvents renderEvents)
         {
-            get => _document;
-            set
-            {
-                if (value != null)
-                {
-                    _document = value;
-                    Renderer = new DocumentRenderer(value);
-                    Renderer.PrepareDocument();
-                    Page = 1;
-                    //this.preview.Invalidate();
-                }
-                else
-                {
-                    _document = null;
-                    Renderer = null;
-                    //this.preview.Invalidate();
-                }
-            }
+            Document = document;
+            RenderEvents = renderEvents;
+
+            Renderer = new DocumentRenderer(Document);
+            Renderer.PrepareDocument(RenderEvents);
+            Page = 1;
+            //this.preview.Invalidate();
         }
-        Document? _document;
+
+        /// <summary>
+        /// Clears the MigraDoc document that is previewed in this control.
+        /// </summary>
+        public void ClearDocument()
+        {
+            Document = null;
+            RenderEvents = null;
+
+            Renderer = null;
+            //this.preview.Invalidate();
+        }
+
+        /// <summary>
+        /// Encapsulates the document's render events.
+        /// </summary>
+        public RenderEvents? RenderEvents { get; private set; }
 
         /// <summary>
         /// Gets the underlying DocumentRenderer of the document currently in preview, or null if no renderer exists.

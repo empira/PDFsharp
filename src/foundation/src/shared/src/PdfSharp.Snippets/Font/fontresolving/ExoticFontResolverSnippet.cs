@@ -21,13 +21,14 @@ namespace PdfSharp.Snippets.Font
 
             // Create a font.
             const double fontSize = 16;
-            XFont times = new XFont("Times New Roman", fontSize, XFontStyleEx.Regular, options);
+            var times = new XFont("Times New Roman", fontSize, XFontStyleEx.Regular, options);
+            _ = times;
 
-            XFont obliviousFont = new XFont("Oblivious", fontSize, XFontStyleEx.Regular, options);
-            XFont xFilesFont = new XFont("XFiles", fontSize, XFontStyleEx.Regular, options);
+            var obliviousFont = new XFont("Oblivious", fontSize, XFontStyleEx.Regular, options);
+            var xFilesFont = new XFont("XFiles", fontSize, XFontStyleEx.Regular, options);
 
-            XFont obliviousItalicFont = new XFont("Oblivious", fontSize, XFontStyleEx.Italic, options);
-            XFont xFilesItalicFont = new XFont("XFiles", fontSize, XFontStyleEx.Italic, options);
+            var obliviousItalicFont = new XFont("Oblivious", fontSize, XFontStyleEx.Italic, options);
+            var xFilesItalicFont = new XFont("XFiles", fontSize, XFontStyleEx.Italic, options);
 
             // Draw the text.
             string text = "Sphinx ";
@@ -45,7 +46,7 @@ namespace PdfSharp.Snippets.Font
             y += dy;
 
             gfx.DrawString(text + "(X-Files - italic simulated)", xFilesItalicFont, XBrushes.Black, x, y);
-            y += dy;
+            //y += dy;
         }
     }
 }

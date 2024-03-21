@@ -1,14 +1,20 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Linq;
-using FluentAssertions;
-using MigraDoc.Rendering;
+using System.Runtime.InteropServices;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Security;
+using MigraDoc.Rendering;
 using Xunit;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using MigraDoc.DocumentObjectModel;
+using PdfSharp;
+using PdfSharp.Drawing;
+using PdfSharp.Logging;
+using PdfSharp.TestHelper;
+using PdfSharp.TestHelper.Analysis.ContentStream;
 using static MigraDoc.Tests.SecurityTestHelper;
 
 namespace MigraDoc.Tests
@@ -67,7 +73,7 @@ namespace MigraDoc.Tests
         static void OpenPdf(string filename)
         {
 #if true_ // Should be "true_" by default and in source control. Change to "true" to enable automatic PDF starting for testing purposes.
-            Process.Start(new ProcessStartInfo(filename) { UseShellExecute = true });
+            Process.Sta/rt(new ProcessStartInfo(filename) { UseShellExecute = true });
 #endif
         }
 
@@ -677,7 +683,7 @@ namespace MigraDoc.Tests
             pdfRendererRead.Save(filenameRead);
             OpenPdf(filenameRead);
         }
-        
+
         [Theory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
@@ -721,6 +727,190 @@ namespace MigraDoc.Tests
                     var permissionProperty = permissionProperties[i];
                     permissionProperty.GetValue(pdfDocRead.SecuritySettings).Should().Be(true, $"{permissionProperty.Name} was not set to 'false'.");
                 }
+            }
+        }
+
+#if true
+        [Fact]
+        public void Test_Strings()
+        {
+            var optionsEnum = TestOptionsEnum.V5; // Encryption V5 should be sufficient, as it even crashes on wrong encrypted string length.
+#else
+        [Theory]
+        [ClassData(typeof(TestData.AllVersions))]
+        [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
+        public void Test_Strings(TestOptionsEnum optionsEnum)
+        {
+#endif
+            // Cache old logger factory.
+            var oldLoggerFactory = LogHost.Factory;
+
+            try
+            {
+                // Add ListLoggerProvider to inspect log entries later.
+                var listLoggerProvider = new MemoryLoggerProvider(LogLevel.Warning);
+                using var loggerFactory = LoggerFactory.Create(builder =>
+                {
+                    builder
+                        .AddFilter("PDFsharp", LogLevel.Warning)
+                        .AddFilter(level => true)
+                        .AddProvider(listLoggerProvider)
+                        .AddConsole();
+                });
+                LogHost.Factory = loggerFactory;
+
+                // The randomizedTestStringCount should be big enough for a good chance to create encrypted strings that seem to begin with a Unicode BOM.
+                // These strings are an important test case to ensure reread as unicode is done after decryption.
+                const int randomizedTestStringCount = 100000; 
+
+
+                // Define test strings. Avoid spaces, hyphens or other characters that may split the strings in two objects in the page content stream.
+                var testStrings = new List<string>
+                {
+                    "1234567890",
+                    "!\"§$%&/()=",
+                    "abcdefghijklmnopqrstuvwxyz",
+                    "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+                    "^°³{[]}\\`´@€+*~#'<>|µ,;.:_",
+                    "äöüÄÖÜ",
+                    "áàâéèêíìîóòôúùûÁÀÂÉÈÊÍÌÎÓÒÔÚÙÛ",
+                    "😢😞💪",
+                    "\ud83d\udca9\ud83d\udca9\ud83d\udca9\u2713\u2714\u2705\ud83d\udc1b\ud83d\udc4c\ud83c\udd97\ud83d\udd95",
+                    "D:20240312161031+01'00'",
+                    "()\\(\\)\\" // Attention: This line has an additional check below in paragraphs.
+                };
+
+                // Add lots of randomized test strings to encourage the generation of encrypted strings, that seem to begin with a Unicode BOM.
+                for (var i = 0; i < randomizedTestStringCount; i++)
+                    testStrings.Add(Guid.NewGuid().ToString("N"));
+
+                const int linesPerPage = 50;
+
+                var date = DateTime.Now;
+
+                var options = TestOptions.ByEnum(optionsEnum);
+                options.SetDefaultPasswords(true);
+
+                var doc = CreateEmptyTestDocument();
+
+                var font = new XFont("Segoe UI Emoji", 10);
+
+                var normalStyle = doc.Styles.Normal;
+                normalStyle.ParagraphFormat.TabStops.AddTabStop(Unit.FromCentimeter(2));
+                normalStyle.Font.Name = font.Name;
+                normalStyle.Font.Size = font.Size;
+
+                var section = doc.AddSection();
+
+                // Add all test strings as paragraphs.
+                var pageLineCount = 0;
+                for (var i = 0; i < testStrings.Count; i++)
+                {
+                    var testString = testStrings[i];
+
+                    var p = section.AddParagraph(i + ".");
+                    p.AddTab();
+                    p.AddText(testString);
+
+                    pageLineCount++;
+                    if (pageLineCount > linesPerPage)
+                    {
+                        pageLineCount = 0;
+                        section.AddPageBreak();
+                    }
+                }
+
+                // Render the document.
+                var pdfRenderer = new PdfDocumentRenderer { Document = doc };
+                pdfRenderer.RenderDocument();
+
+                var pdfDocument = pdfRenderer.PdfDocument;
+
+                // Add all test strings to CustomValues dictionary. This ensures Lexer scanning is also tested with the test strings.
+                var dict = pdfDocument.CustomValues;
+                for (var i = 0; i < testStrings.Count; i++)
+                {
+                    var testString = testStrings[i];
+                    var key = "/text" + i;
+                    dict!.Elements.Add(key, new PdfString(testString));
+                }
+
+                // Secure and save the document.
+                SecureDocument(pdfDocument, options);
+                var encryptedFile = AddPrefixToFilename("Test_Strings w U.pdf", options);
+                pdfRenderer.Save(encryptedFile);
+
+
+                // Open the saved file
+                pdfDocument = PdfReader.Open(encryptedFile, PasswordUserDefault);
+
+                // Ensure entries in DocumentInformation have not changed.
+                var documentInfo = pdfDocument.Info;
+                // We don't know the saved CreationDate exactly, but it should be less than 5 seconds ago.
+                (documentInfo.CreationDate - date).TotalMilliseconds.Should().BeLessThan(5000, "PDF CreationDate should be less than 5 seconds ago.");
+                documentInfo.Creator.Should().Be(MigraDocProductVersionInformation.Creator, "PDF Creator should match");
+                documentInfo.Producer.Should().Be($"{PdfSharpProductVersionInformation.Creator} under {RuntimeInformation.OSDescription}", "PDF Producer should match");
+
+
+                // Analyze the drawn text in the PDF's content stream.
+                pageLineCount = 0;
+                var pageIdx = 0;
+                ContentStreamEnumerator? streamEnumerator = null;
+
+                // Check the test strings of the paragraphs.
+                for (var i = 0; i < testStrings.Count; i++)
+                {
+                    var testString = testStrings[i];
+
+                    if (pageLineCount == 0)
+                        streamEnumerator = PdfFileHelper.GetPageContentStreamEnumerator(pdfDocument, pageIdx);
+
+                    streamEnumerator!.Text.MoveAndGetNext(true, out var textInfo).Should().BeTrue();
+                    textInfo!.Text.Should().Be(i + ".");
+
+                    streamEnumerator.Text.MoveAndGetNext(true, out textInfo).Should().BeTrue();
+                    textInfo!.TextEquals(testString, font, out var encodedText).Should().BeTrue($"encoded test string {i} (\"{encodedText}\") should match in paragraphs");
+
+                    if (i == 10)
+                        textInfo.Text.Should().Be(@"\(\)\\\(\\\)\\", "test string {i} should match in paragraphs");
+
+                    pageLineCount++;
+                    if (pageLineCount > linesPerPage)
+                    {
+                        streamEnumerator.Text.MoveAndGetNext(true, out _).Should().BeFalse();
+                        pageLineCount = 0;
+                        pageIdx++;
+                    }
+                }
+                streamEnumerator!.Text.MoveAndGetNext(true, out _).Should().BeFalse();
+
+
+                // Check the test strings saved in CustomValues dictionary.
+                dict = pdfDocument.CustomValues;
+                for (var i = 0; i < testStrings.Count; i++)
+                {
+                    var testString = testStrings[i];
+
+                    var value = dict!.Elements["/text" + i];
+                    value.Should().NotBeNull();
+                    var pdfString = value as PdfString;
+                    pdfString.Should().NotBeNull();
+                    pdfString!.Value.Should().Be(testString, $"test string {i} should match in CustomValues dictionary");
+                }
+
+
+                // Inspect log entries for not containing cryptographic exception entries.
+                var pdfSharpLogger = listLoggerProvider.GetLogger("PDFsharp");
+                pdfSharpLogger.Should().NotBeNull();
+
+                foreach (var logEntry in pdfSharpLogger!.GetLogEntries())
+                    logEntry.Message.Should().NotContain("A cryptographic exception occurred");
+
+            }
+            finally
+            {
+                // Restore old logger factory to not disturb other tests.
+                LogHost.Factory = oldLoggerFactory;
             }
         }
     }

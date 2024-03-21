@@ -1,8 +1,12 @@
-using MigraDoc.DocumentObjectModel.Fields;
-using MigraDoc.Rendering;
+// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
 using PdfSharp.Fonts;
+using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
+using MigraDoc.DocumentObjectModel.Fields;
+using MigraDoc.Rendering;
 using Xunit;
 
 namespace MigraDoc.DocumentObjectModel.Tests
@@ -37,10 +41,10 @@ namespace MigraDoc.DocumentObjectModel.Tests
             pdfRenderer.RenderDocument();
 
             // Save the document...
-            var filename = PdfFileHelper.CreateTempFileName("HelloWorld");
+            var filename = PdfFileUtility.GetTempPdfFileName("HelloWorld");
             pdfRenderer.PdfDocument.Save(filename);
             // ...and start a viewer.
-            PdfFileHelper.StartPdfViewerIfDebugging(filename);
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
         /// <summary>
@@ -64,7 +68,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             // Add some text to the paragraph.
             paragraph.AddFormattedText("Hello, World!", TextFormat.Bold);
 
-            var img = section.AddImage(@"../../../../../../../../../assets/archives/grammar-by-example/GBE/GBE-DDL/SquareWithColorGradient.png");
+            var img = section.AddImage(IOUtility.GetAssetsPath("archives/grammar-by-example/GBE/GBE-DDL/SquareWithColorGradient.png")!);
 
             // Create the primary footer.
             var footer = section.Footers.Primary;

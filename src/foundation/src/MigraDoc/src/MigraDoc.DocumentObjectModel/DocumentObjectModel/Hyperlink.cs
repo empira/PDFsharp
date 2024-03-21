@@ -452,7 +452,7 @@ namespace MigraDoc.DocumentObjectModel
 
         /// <summary>
         /// If set to true, the Hyperlink shall look like the surrounding text without using the Hyperlink Style.
-        /// May be used for text references, e. g. in tables, which shall not be rendered as links. 
+        /// May be used for text references, e.g. in tables, which shall not be rendered as links. 
         /// </summary>
         public bool NoHyperlinkStyle
         {

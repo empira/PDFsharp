@@ -204,7 +204,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public static XColor FromArgb(int alpha, XColor color)
         {
-            color.A = ((byte)alpha) / 255.0;
+            color.A = (byte)alpha / 255.0;
             return color;
         }
 

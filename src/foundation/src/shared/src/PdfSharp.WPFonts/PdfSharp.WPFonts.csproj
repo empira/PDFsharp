@@ -2,8 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0;netstandard2.0;net472-windows</TargetFrameworks>
-      <!--<TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>-->
-      <ImplicitUsings>disable</ImplicitUsings>
+    <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

@@ -89,14 +89,19 @@ namespace PdfSharp.Pdf
         }
         string _value = "";
 
-        /// <summary>
-        /// Gets or sets the string value for encryption purposes.
-        /// </summary>
-        internal byte[] EncryptionValue
+        internal byte[] GetRawBytes() => PdfString.ToRawBytes(_value);
+
+        internal void SetRawBytes(byte[] value, PdfStringEncoding? encoding = null)
         {
-            // TODO: Unicode case is not handled!
-            get => /*_value == null ? Array.Empty<byte>() :*/ PdfEncoders.RawEncoding.GetBytes(_value);
-            set => _value = PdfEncoders.RawEncoding.GetString(value, 0, value.Length);
+            _value = PdfString.FromRawBytes(value, ref _flags, encoding);
+        }
+
+        /// <summary>
+        /// Checks this PdfStringObject for valid BOMs and rereads it with the specified Unicode encoding.
+        /// </summary>
+        internal bool TryRereadAsUnicode()
+        {
+            return PdfString.TryRereadAsUnicode(ref _value!, ref _flags);
         }
 
         /// <summary>

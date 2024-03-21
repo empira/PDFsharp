@@ -6,7 +6,7 @@ This folder contains dummy C# projects for the generation of the PDFsharp and Mi
 
 * The description and release notes are single text files read by MSBUILD and put to the nuspec files.
   This is done because putting the text directly in XML is very cumbersome.
-* The description and release notes should worded such that it is not necessary to revise them on every new release.
+* The description and release notes should be worded such that it is not necessary to revise them on every new release.
 * For inspecting NuGet packages the **NuGet Package Explorer** is a nice app.
 
 ## Descriptions

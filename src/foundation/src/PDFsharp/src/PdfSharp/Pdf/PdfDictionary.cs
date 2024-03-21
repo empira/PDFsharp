@@ -66,7 +66,7 @@ namespace PdfSharp.Pdf
         {
             if (dict._elements != null)
                 dict._elements.ChangeOwner(this);
-            if (dict.Stream != null)
+            if (dict.Stream != null!)
                 dict.Stream.ChangeOwner(this);
         }
 
@@ -462,11 +462,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Tries to get the string. TODO: more TryGet...
             /// </summary>
-            public bool TryGetString(string key,
-#if NET6_0_OR_GREATER
-                [MaybeNullWhen(false)]
-#endif
-                out string value)
+            public bool TryGetString(string key, [MaybeNullWhen(false)] out string value)
             {
                 value = null;
                 var obj = this[key];
@@ -512,7 +508,7 @@ namespace PdfSharp.Pdf
                 {
                     //if (create)
                     //  this[key] = new Pdf();
-                    return String.Empty;
+                    return "";
                 }
 
                 if (obj is PdfReference reference)
@@ -1025,7 +1021,7 @@ namespace PdfSharp.Pdf
                 // HACK?
                 _elements[key] = value;
             }
-            
+
             /// <summary>
             /// Gets the PdfObject with the specified key, or null if no such object exists. If the key refers to
             /// a reference, the referenced PdfObject is returned.
@@ -1349,7 +1345,7 @@ namespace PdfSharp.Pdf
             /// Access a key that may contain an array or a single item for working with its value(s).
             /// </summary>
             public ArrayOrSingleItemHelper ArrayOrSingleItem => new(this); // TODO PDFsharp6: Naming.
-            
+
             /// <summary>
             /// Gets the DebuggerDisplayAttribute text.
             /// </summary>

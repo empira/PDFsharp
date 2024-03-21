@@ -186,10 +186,7 @@ namespace MigraDoc.DocumentObjectModel
             // ReSharper disable ConvertIfStatementToNullCoalescingExpression
             get
             {
-                if (_resmngr == null)
-                {
-                    _resmngr = new ResourceManager("MigraDoc.DocumentObjectModel.Resources.Messages", Assembly.GetExecutingAssembly());
-                }
+                _resmngr ??= new ResourceManager("MigraDoc.DocumentObjectModel.Resources.Messages", Assembly.GetExecutingAssembly());
                 return _resmngr;
             }
             // ReSharper restore ConvertIfStatementToNullCoalescingExpression

@@ -6,7 +6,7 @@ namespace PdfSharp
     /// <summary>
     /// Version information for all PDFsharp related assemblies.
     /// </summary>
-    // TODO: These literals are not in sync with the NuGet meta data. Should be fixed.
+    // TODO: These literals are not in sync with the NuGet metadata. Should be fixed.
     public static class PdfSharpProductVersionInformation
     {
         // Cannot use const string anymore because GitVersionInformation used static string.
@@ -31,12 +31,6 @@ namespace PdfSharp
         /// The minor version number of the product.
         /// </summary>
         public static readonly string VersionMinor = GitVersionInformation.Minor;
-
-        ///// <summary>
-        ///// The build number of the product.
-        ///// </summary>
-        //[Obsolete("Build version is not used anymore because we switched to Semantic Versioning. Use VersionPatch instead.")]
-        //public const string VersionBuild = "xxxxx";  // DELETE
 
         /// <summary>
         /// The patch number of the product.
@@ -87,7 +81,7 @@ namespace PdfSharp
         /// <summary>
         /// The copyright information.
         /// </summary>
-        public const string Copyright = "Copyright © 2005-2023 empira Software GmbH.";
+        public const string Copyright = "Copyright © 2005-2024 empira Software GmbH.";
 
         /// <summary>
         /// The trademark of the product.

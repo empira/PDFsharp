@@ -339,13 +339,12 @@ namespace MigraDoc.DocumentObjectModel
             else
             {
                 // case: user-defined style. Base style always exists.
-
                 string name = DdlEncoder.QuoteIfNameContainsBlanks(Name);
                 string baseName = DdlEncoder.QuoteIfNameContainsBlanks(BaseStyle);
                 serializer.WriteLine(name + " : " + baseName);
 
 #if true
-                var refStyle0 = Document.Styles[Document.Styles.GetIndex(Values.BaseStyle!)];  // BUG: Base style can be null
+                //var refStyle0 = Document.Styles[Document.Styles.GetIndex(Values.BaseStyle!)];  // BUG: Base style can be null
                 refStyle = Document.Styles[Values.BaseStyle!];  // BUG: Base style can be null
                 refFormat = refStyle?.ParagraphFormat;
 #else
@@ -358,7 +357,7 @@ namespace MigraDoc.DocumentObjectModel
             if (!ParagraphFormat.IsValueNullOrEmpty())
             {
                 if (!ParagraphFormat.Values.Font.IsValueNullOrEmpty())
-                    Font.Serialize(serializer, refFormat != null ? refFormat.Font : null);
+                    Font.Serialize(serializer, refFormat?.Font);
 
                 if (Type == StyleType.Paragraph)
                     ParagraphFormat.Serialize(serializer, "ParagraphFormat", refFormat);

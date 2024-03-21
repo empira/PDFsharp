@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+using System.Runtime.InteropServices;
 using FluentAssertions;
-using PdfSharp.Pdf;
-using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
+using PdfSharp.Quality;
 using Xunit;
 
 namespace PdfSharp.Tests
@@ -19,7 +14,11 @@ namespace PdfSharp.Tests
         [Fact]
         public void Write_import_file()
         {
-            var testFile = @"..\..\..\..\..\..\..\..\..\assets\archives\samples-1.5\PDFs\SomeLayout.pdf";
+            var testFile = IOUtility.GetAssetsPath(@"archives\samples-1.5\PDFs\SomeLayout.pdf")!;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                testFile = testFile.Replace('\\', '/');
+
             var outFile = @"SomeLayout_temp.pdf";
 
             var doc = PdfReader.Open(testFile, PdfDocumentOpenMode.Import);

@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <UseWindowsForms>true</UseWindowsForms>
+    <DefineConstants>GDI</DefineConstants>
+    <!--
+    PDFsharp internal class RuntimeHelpers is visible in this assembly because of InternalsVisibleTo.
+    This conflics with mscorlib. -->
+   <NoWarn>CS1685</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);TRACE;GDI</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants);TRACE;GDI</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- May cause build/test errors under Linux. -->
+    <Using Remove="System.Net.Http" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Include="..\PdfSharp.TestHelper\Analysis\ContentStream\ContentStreamEnumerator.cs" Link="Analysis\ContentStream\ContentStreamEnumerator.cs" />
+    <Compile Include="..\PdfSharp.TestHelper\Analysis\ContentStream\GetLine.cs" Link="Analysis\ContentStream\GetLine.cs" />
+    <Compile Include="..\PdfSharp.TestHelper\Analysis\ContentStream\GetObjectBase.cs" Link="Analysis\ContentStream\GetObjectBase.cs" />
+    <Compile Include="..\PdfSharp.TestHelper\Analysis\ContentStream\GetText.cs" Link="Analysis\ContentStream\GetText.cs" />
+    <Compile Include="..\PdfSharp.TestHelper\MemoryLogger.cs" Link="MemoryLogger.cs" />
+    <Compile Include="..\PdfSharp.TestHelper\PdfFileHelper.cs" Link="PdfFileHelper.cs" />
+    <Compile Include="..\PdfSharp.TestHelper\TestHelperExtensions.cs" Link="TestHelperExtensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\foundation\src\PDFsharp\src\PdfSharp-gdi\PdfSharp-gdi.csproj" />
+    <ProjectReference Include="..\..\..\foundation\src\shared\src\PdfSharp.Quality-gdi\PdfSharp.Quality-gdi.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,167 +1,676 @@
-﻿#Requires -Version 7
+﻿<#
+.SYNOPSIS
+    This script runs 'dotnet test' in all available environments for the solution found in the script's root parent folder.
+
+.DESCRIPTION
+    The script runs 'dotnet test' for all libraries to test, that are found via the projects in the solution located in the script's root parent folder.
+    These tests are run in the following environment, as far as available: Windows with net6, Windows with net472 and Linux/WSL (net6).
+    For each environment libraries not to be run (like WPF in Linux or Linux-targeting DLLs in Windows) are excluded from testing.
+    The test results are displayed in tables per library / code base comparing the test results in the different environments.
+
+    Possible test results are:
+    --------------------------
+
+    Passed:           The test ran successfully.
+
+    Failed:           The test has failed.
+
+    Skipped:          The test was marked to be skipped (or another circumstance resulting in 'NotExecuted' in the trx file occurred).
+
+    Not implemented:  The test result was found for another environment, but not for this one.
+
+    Not Applicable:   The test library was not expected to be executed, as it is not intended to be run in this environment or as this environment is not available.
+
+    No trx file:      The test library was expected to be executed, but no trx file was found. Maybe an error occurred in this script or in the 'dotnet test' call.
+
+    Calling the script:
+    -------------------
+
+    If started in Windows, tests are executed in Windows and WSL:
+
+      > .\dev\run-tests.ps1
+
+    If started from Windows in WSL, tests are executed in WSL only:
+
+      > wsl -e pwsh -c .\dev\run-tests.ps1
+
+    If started in Linux / WSL, tests are executed in Linux / WSL only:
+
+      > pwsh -c ./dev/run-tests.ps1
+
+    Changing the script:
+    --------------------
+
+    The master version of this script is maintained in the PDFsharp repository. Copies may be distributed to other repositories.
+    If changes to the script are needed, implement them in the PDFsharp repository and update all copies of the script in other repositories.
+#>
+
+#Requires -Version 7
 #Requires -PSEdition Core
 
-# Gets DllInfo objects for all DLLs of the solution to run dotnet test in WSL for.
-function GetWslTestDllInfos($solution) {
-    $dllInfos = GetDllInfos $solution
+$script:SystemNameWindows = "Windows"
+$script:SystemNameLinux = "Linux"
+$script:SystemNameWsl = "WSL"
+$script:NetName472 = "net472"
+$script:NetName6 = "net6"
 
-    $testDllInfos = $dllInfos | Where-Object { $_.IsTestDll -eq $true }
-    $testDllsOutput = $testDllInfos | Select-Object -Property DllFileName, DllFolder
 
+$script:Solution
+$script:TimeStart
+$script:ConsoleWidth
+
+# Current system information.
+$script:SystemNameCurrentLinux
+$script:SystemNameHost
+$script:RunOnWindowsHost
+$script:RunOnLinuxHost
+$script:RunOnHostedWsl
+
+# Information for DLLs to test in Windows/Linux.
+$script:TestDllInfosWindows
+$script:TestDllInfosLinux
+
+
+function InitializeScript()
+{
+    SaveForegroundColor
+
+    $script:Solution = GetSolutionFileName
     Write-Host
-    Write-Host "DLLs to test found in `"$solution`""
-    Write-Host "(only used to determine DLLs to test in WSL; in Windows dotnet test is run for the solution):"
-    Write-Host ----------------------------------------
-    Write-Host ($testDllsOutput | Format-Table | Out-String)
+    Write-Host "Started run-tests for solution `"$script:Solution`"."
 
-    $wslTestDllInfos = $testDllInfos | Where-Object {$_.DllFileName.EndsWith("-gdi.dll", "OrdinalIgnoreCase") -eq $false -and $_.DllFileName.EndsWith("-wpf.dll", "OrdinalIgnoreCase") -eq $false}
-    $wslTestDllsOutput = $wslTestDllInfos | Select-Object -Property DllFileName, DllFolder
-
-    Write-Host "DLLs to test in WSL found in `"$solution`":"
-    Write-Host ----------------------------------------
-    Write-Host ($wslTestDllsOutput | Format-Table | Out-String)
-
-    return $wslTestDllInfos
-}
-
-# Gets DllInfo objects for all DLLs of the solution.
-function GetDllInfos($solution) {
-    $projects = GetSolutionProjects $Solution
-    $dllInfos = $projects | ForEach-Object {GetDllInfo $_}
-
-    return $dllInfos
-}
-
-# Creates a DllInfo object for a project.
-function GetDllInfo($project) {
-    $projectFolder = Split-Path -Path $project | Resolve-Path -Relative
-    $projectName = Split-Path -LeafBase $project
-
-    $debugFolder = Join-Path -Path $projectFolder "bin\debug"
-    $dllFile = Get-ChildItem -Path $debugFolder -Filter "$projectName.dll" -Recurse -ErrorAction SilentlyContinue -Force | Select-Object  -first 1
-    
-    if ($dllFile -eq $null) {
-        Write-Error "Could not finde file `"$debugFolder\**\$projectName.dll`". Maybe Debug Build has not been built."
+    $script:TimeStart = Get-Date
+    $script:ConsoleWidth = $Host.UI.RawUI.WindowSize.Width
+    if ($script:ConsoleWidth -lt 80)
+    {
+        Write-Warning "Low console width recognized ($script:ConsoleWidth)!"
+        Write-Warning "A width of at least 80 characters is recommended to ensure a good presentation. For lower widths result columns may be omitted."
     }
 
-    $dllFolder = $dllFile.Directory.FullName | Resolve-Path -Relative
-    $dllFileName = $dllFile.Name
+    # Pre-set current system information.
+    $script:SystemNameCurrentLinux = "none"
+    $script:SystemNameHost = "unknown"
+    $script:RunOnWindowsHost = $false
+    $script:RunOnLinuxHost = $false
+    $script:RunOnHostedWsl = $false
 
-    $isTestDll = ContainsTestPlatformDll $dllFolder
+    # Set current system information.
+    if ($IsWindows)
+    {
+        $script:RunOnWindowsHost = $true
+        $script:SystemNameHost = $script:SystemNameWindows
 
-    $info = New-Object -TypeName psobject
-    $info | Add-Member -MemberType NoteProperty -Name ProjectName -Value $projectName
-    $info | Add-Member -MemberType NoteProperty -Name ProjectFolder -Value $projectFolder
-    $info | Add-Member -MemberType NoteProperty -Name DllFileName -Value $dllFileName
-    $info | Add-Member -MemberType NoteProperty -Name DllFolder -Value $dllFolder
-    $info | Add-Member -MemberType NoteProperty -Name IsTestDll -Value $isTestDll
+        # Check if WSL is installed.
+        try
+        {
+            wslconfig /l | Out-Null
 
-    return $info
+            $script:RunOnHostedWsl = $true
+            $script:SystemNameCurrentLinux = $script:SystemNameWsl
+        }
+        catch
+        {
+            #$script:RunOnHostedWsl remains false.
+        }
+    }
+    elseif ($IsLinux)
+    {
+        $script:RunOnLinuxHost = $true
+
+        # Check if Linux is WSL.
+        if (Test-Path "/proc/sys/fs/binfmt_misc/WSLInterop" -PathType Leaf)
+        {
+            $script:SystemNameCurrentLinux = $script:SystemNameWsl
+        }
+        else
+        {
+            $script:SystemNameCurrentLinux = $script:SystemNameLinux
+        }
+        $script:SystemNameHost = $script:SystemNameCurrentLinux
+    }
+
+    # Output current system information.
+    Write-Host
+    Write-Host "Started script in $script:SystemNameHost."
+    if ($script:RunOnHostedWsl)
+    {
+        Write-Host "Tests will be run on $script:SystemNameHost host and hosted $script:SystemNameCurrentLinux."
+    }
+    else
+    {
+        Write-Host "Tests will be run on $script:SystemNameHost host only."
+    }
+    Write-Host
+    Write-Host
 }
 
-# Examines if $path contains "Microsoft.TestPlatform.CommunicationUtilities.dll".
-# If so, we can assume that the project DLL in $path contains unit tests to be run.
-# This information is useful because starting non test projects in dotnet test may return errors.
-function ContainsTestPlatformDll($path) {
-    $testDlls = Get-ChildItem -Path $path -Filter "Microsoft.TestPlatform.CommunicationUtilities.dll" -Recurse -ErrorAction SilentlyContinue -Force
-    $result = ($testDlls | measure | Select-Object -ExpandProperty Count) -gt 0
-
-    return $result
-}
-
-# Gets the projects of a solution.
-function GetSolutionProjects($solutionFileName) {
-    $entries = dotnet sln $solutionFileName list
-    $projects = $entries | Where-Object {$_.EndsWith(".csproj") -eq $true}
-    return $projects
-}
-
-# Gets the only solution in the current folder.
+# Gets the first solution in the current folder. There should be only one.
 function GetSolutionFileName() {
     $solutionFile = Get-ChildItem -Filter "*.sln" -Recurse -ErrorAction SilentlyContinue -Force | Select-Object -first 1
     $solutionFileName = $solutionFile.Name
     return $solutionFileName
 }
 
-function AddTestResultsForEnvironment([ref]$testResults, [ref]$environmentNames, $timeStart, $testResultsFilename, $environmentName) {
-    AddEnvironment $environmentNames $environmentName
 
-    $testResultFiles = GetTestResultFiles $testResultsFilename $environmentName $timeStart
+# Loads DllInfo objects for all DLLs of the solution to run dotnet test for and saves the Windows and Linux specific lists.
+function LoadTestDllInfos()
+{
+    $dllInfos = GetDllInfos
 
-    foreach ($testResultFile in $testResultFiles) {
-        AddTestResultsFromFile $testResults $environmentNames $testResultFile $environmentName
+    $testDllInfos = $dllInfos | Where-Object { $_.IsTestDll }
+
+    # Test-HACK: Only include explicit projects.
+    #$testDllInfos = $testDllInfos | Where-Object {$_.DllFileName.EndsWith("PdfSharp.Tests.dll", "OrdinalIgnoreCase") -or $_.DllFileName.EndsWith("Shared.Tests.dll", "OrdinalIgnoreCase")}
+
+    # Set $script:TestDllInfosWindows list if running on Windows host.
+    if ($script:RunOnWindowsHost)
+    {
+        # Exclude Linux target frameworks for Windows.
+        $script:TestDllInfosWindows = $testDllInfos | Where-Object `
+        {
+            $_.TargetFramework.Contains("linux") -eq $false
+        }
+
+        OutputTestDlls $script:TestDllInfosWindows $script:SystemNameWindows
+    }
+
+    # Set $script:TestDllInfosLinux list if running on Linux host or if tests will run in hosted WSL.
+    if ($script:RunOnLinuxHost -or $script:RunOnHostedWsl)
+    {
+        # Exclude WPF and GDI projects and net472 and Windows target frameworks for Linux.
+        $script:TestDllInfosLinux = $testDllInfos | Where-Object `
+        {
+            $_.DllFileName.EndsWith("-gdi.dll", "OrdinalIgnoreCase") -eq $false -and `
+            $_.DllFileName.EndsWith("-wpf.dll", "OrdinalIgnoreCase") -eq $false -and `
+            $_.TargetFramework.Contains("net472") -eq $false -and `
+            $_.TargetFramework.Contains("windows") -eq $false
+        }
+
+        OutputTestDlls $script:TestDllInfosLinux $script:SystemNameCurrentLinux
     }
 }
 
-function AddTestResultsFromFile([ref]$testResults, [ref]$environmentNames, $path, $environmentName) {
-    $environmentResults = GetTestResults $path $environmentName
-    $testResults.Value += $environmentResults
-    AddEnvironment $environmentNames $environmentName
+function OutputTestDlls($testDllInfos, $systemName)
+{
+    $testDllsOutput = $testDllInfos | Select-Object -Property DllFileName, DllFolder
+
+    Write-Host "DLLs to test in $systemName found in `"$script:Solution`":"
+    Write-Host ----------------------------------------
+    Write-Host ($testDllsOutput | Format-Table | Out-String)
 }
 
-function AddEnvironment([ref]$environmentNames, $environmentName) {
-    if ($environmentNames.Value -notcontains $environmentName) {
-        $environmentNames.Value += $environmentName
+# Gets DllInfo objects for all DLLs of the solution.
+function GetDllInfos() {
+    $projects = GetSolutionProjects $script:Solution
+
+    $dllInfos = New-Object System.Collections.Generic.List[System.Object]
+    $exeGenericCodeBases = New-Object System.Collections.Generic.List[System.Object]
+
+    # Add dllInfo for each target framework of each project to $dllInfos.
+    foreach($project in $projects)
+    {
+        $projectFolder = Split-Path -Path $project | Resolve-Path -Relative
+        $projectName = Split-Path -LeafBase $project
+
+        $debugFolder = Join-Path -Path $projectFolder "bin\Debug"
+
+        $debugFolderExists = Test-Path $debugFolder
+        if ($debugFolderExists -eq $false)
+        {
+            Write-Error "Missing Debug folder `"$debugFolder`". Maybe Debug build has not been built."
+        }
+
+        $targetFrameworkPaths = Get-ChildItem -Path $debugFolder -Directory
+        if (($targetFrameworkPaths | Measure-Object | Select-Object -ExpandProperty Count) -eq 0)
+        {
+            Write-Error "No target framework folders found in Debug folder `"$debugFolder`". Maybe Debug build has not been built."
+        }
+
+        foreach($targetFrameworkPath in $targetFrameworkPaths)
+        {
+            $targetFrameworkFolder = Split-Path -Leaf $targetFrameworkPath
+            $targetFramework = $targetFrameworkFolder
+
+            # Get DLL or, if not found, exe file belonging to the project.
+            $dllFile = Get-ChildItem -Path $targetFrameworkPath -Filter "$projectName.dll" -Recurse -ErrorAction SilentlyContinue -Force
+            if ($null -ne $dllFile)
+            {
+                $isExeFile = $false
+            }
+            else
+            {
+                $dllFile = Get-ChildItem -Path $targetFrameworkPath -Filter "$projectName.exe" -Recurse -ErrorAction SilentlyContinue -Force
+                if ($null -ne $dllFile)
+                {
+                    $isExeFile = $true
+                }
+            }
+
+            if ($null -eq $dllFile)
+            {
+                Write-Error "Could not find file `"$targetFrameworkPath\**\$projectName.dll`". Maybe Debug build has not been built."
+            }
+            else
+            {
+                $codeBase = $dllFile | Resolve-Path -Relative
+                $genericCodeBase = GetGenericCodeBase $codeBase
+
+                $dllFolder = Split-Path -Parent $codeBase
+                $dllFileName = $dllFile.Name
+                $fileExtension = Split-Path -Extension $dllFileName
+
+                $isTestDll = ContainsTestPlatformDll $dllFolder
+
+                $info = New-Object -TypeName psobject
+                $info | Add-Member -MemberType NoteProperty -Name ProjectName -Value $projectName # The project name without file extension
+                $info | Add-Member -MemberType NoteProperty -Name ProjectFolder -Value $projectFolder # The relative path to the project folder
+                $info | Add-Member -MemberType NoteProperty -Name DllFileName -Value $dllFileName # The name of the DLL or exe file with extension
+                $info | Add-Member -MemberType NoteProperty -Name DllFolder -Value $dllFolder # The relative path to the folder of the DLL or exe file
+                $info | Add-Member -MemberType NoteProperty -Name CodeBase -Value $codeBase # The relative path to DLL or exe file (called CodeBase in trx files)
+                $info | Add-Member -MemberType NoteProperty -Name GenericCodeBase -Value $genericCodeBase # The relative path to DLL or exe file with wildcarded framework folder name and without extension
+                $info | Add-Member -MemberType NoteProperty -Name GenericCodeBaseExtension -Value $fileExtension # The extension of the DLL or exe file
+                $info | Add-Member -MemberType NoteProperty -Name TargetFramework -Value $targetFramework # The target framework currently processed by inspecting the according folder in the Debug folder
+                $info | Add-Member -MemberType NoteProperty -Name IsTestDll -Value $isTestDll # True, if the DLL/exe is recognized as a test library
+
+                $dllInfos.Add($info)
+                # For exe files a special treatment is needed below - so add them to $exeGenericCodeBases.
+                if ($isExeFile)
+                {
+                    $exeGenericCodeBases.Add($genericCodeBase)
+                }
+            }
+        }
+    }
+
+    # Replace GenericCodeBase filename extensions with ".dll|exe" for matches containing DLL and exe.
+    # This way we allow grouping by code base for projects that produce a exe file for one target framework and a DLL file for another one.
+    foreach ($exeGenericCodeBase in $exeGenericCodeBases)
+    {
+        $fileMatches = $dllInfos | Where-Object {$_.GenericCodeBase -eq $exeGenericCodeBase}
+        $hasDllMatch = ($fileMatches | Where-Object {$_.GenericCodeBaseExtension -eq ".dll"} | Measure-Object | Select-Object -ExpandProperty Count) -gt 0
+
+        if ($hasDllMatch)
+        {
+            foreach ($match in $fileMatches)
+            {
+                $match.GenericCodeBaseExtension = ".dll|exe"
+            }
+        }
+
+    }
+
+    return $dllInfos
+}
+
+# Gets the projects of the solution.
+function GetSolutionProjects() {
+    $entries = dotnet sln $script:Solution list
+    $projects = $entries | Where-Object {$_.EndsWith(".csproj")}
+    return $projects
+}
+
+# Examines if $path contains "xunit.*.dll".
+# If so, we can assume that the project DLL in $path contains unit tests to be run.
+# This information is needed because starting non test projects in dotnet test may return errors.
+function ContainsTestPlatformDll($path) {
+    $testDlls = Get-ChildItem -Path $path -Filter "xunit.*.dll" -Recurse -ErrorAction SilentlyContinue -Force
+    $result = ($testDlls | Measure-Object | Select-Object -ExpandProperty Count) -gt 0
+
+    return $result
+}
+
+# Gets the relative path to DLL or exe file with wildcarded framework folder name and without extension.
+function GetGenericCodeBase($codeBase)
+{
+    $genericCodeBase = $codeBase
+
+    $codeBaseFrameworkPath = Split-Path -Parent $codeBase
+    $codeBaseDebugPath = Split-Path -Parent $codeBaseFrameworkPath
+    $codeBaseDebugFolder = Split-Path -Leaf $codeBaseDebugPath
+    $codeBaseFileNameWithoutExtension = Split-Path -LeafBase $codeBase
+
+    # Wildcard framework folder located in Debug folder.
+    if ($codeBaseDebugFolder.EndsWith("Debug"))
+    {
+        $genericCodeBase = Join-Path -Path $codeBaseDebugPath "*" $codeBaseFileNameWithoutExtension
+    }
+
+    return $genericCodeBase
+}
+
+# Checks if $checkCodeBase matches $genericCodeBase and $genericCodeBaseExtension
+function MatchesGenericCodeBase($checkCodeBase, $genericCodeBase, $genericCodeBaseExtension)
+{
+    $checkGenericCodeBase = GetGenericCodeBase $checkCodeBase
+    $checkExtension = Split-Path -Extension $checkCodeBase
+
+    # If generic code bases match...
+    if ($genericCodeBase -eq $checkGenericCodeBase)
+    {
+        # ... and extension too, return true.
+        if ($genericCodeBaseExtension -eq $checkExtension)
+        {
+            return $true
+        }
+
+        # ... and extension not, check if $genericCodeBaseExtension, which may be ".dll|exe", contains $checkExtension and return the result
+        $genericCodeBaseExtensions = $genericCodeBaseExtension -split "|"
+        $hasMatch = $genericCodeBaseExtensions | Where-Object {$_.TrimStart(".") -eq $checkExtension.TrimStart(".")}
+        return $hasMatch
+    }
+
+    return $false
+}
+
+
+# Runs dotnet test for all needed DLL/system combinations.
+function RunTests()
+{
+    if ($script:RunOnWindowsHost)
+    {
+        RunTestsForSystem $script:TestDllInfosWindows $script:SystemNameWindows $false
+    }
+
+    if ($script:RunOnLinuxHost)
+    {
+        RunTestsForSystem $script:TestDllInfosLinux $script:SystemNameCurrentLinux $false
+    }
+
+    if ($script:RunOnHostedWsl)
+    {
+        RunTestsForSystem $script:TestDllInfosLinux $script:SystemNameCurrentLinux $true
     }
 }
 
-function GetTestResultFiles($testResultsFilename, $environmentName, $timeStart) {
-    $testResultFiles = Get-ChildItem -Filter $testResultsFilename -Recurse -ErrorAction SilentlyContinue -Force | Where-Object LastWriteTime -gt $timeStart
-
+# Runs dotnet test for all needed DLLs for the given $systemName.
+function RunTestsForSystem($testDllInfos, $systemName, $isHostedWsl)
+{
     Write-Host
-    Write-Host "$environmentName test files:"
-    if (($testResultFiles | measure).Count -eq 0) {
-        Write-Host "No test results found."
-        return $testResultFiles
+    Write-Host Running tests on $systemName
+    Write-Host ==================================================
+    foreach ($testDllInfo in $testDllInfos)
+    {
+        # Work with absolute DLL path here to avoid errors.
+        $testDll = Join-Path $testDllInfo.DllFolder $testDllInfo.DllFileName
+        $testDllAbsolute = Resolve-Path $testDll
+
+        # For WSL get the according WSL path.
+        if ($isHostedWsl)
+        {
+            # $testDllExecutionPath = wsl wslpath -u $testDllAbsolute
+            $testDllExecutionPath = WslPath $testDllAbsolute
+        }
+        else
+        {
+            $testDllExecutionPath = $testDllAbsolute
+        }
+
+        # Get the environment name and the trx filename by $systemName and the target framework of the $testDllInfo.
+        $environmentName = GetEnvironmentName $systemName $testDllInfo.TargetFramework
+        $TestResultsFilename = GetTestResultsFilename $environmentName
+
+        Write-Host
+        Write-Host ($systemName): dotnet test $testDllInfo.DllFileName ("(" + $testDllInfo.TargetFramework + ")")...
+        Write-Host ----------------------------------------
+        Write-Host
+
+        # Change current location to store the trx file in the default "TestResults" folder inside the project folder.
+        Push-Location $testDllInfo.ProjectFolder
+        try
+        {
+            # Execute dotnet test on the host or hosted system for the DLL in its target framework.
+            if ($isHostedWsl)
+            {
+                wsl -e dotnet test $testDllExecutionPath -l "trx;LogFileName=./$TestResultsFilename" --framework $testDllInfo.TargetFramework
+            }
+            else
+            {
+                dotnet test $testDllExecutionPath -l "trx;LogFileName=./$TestResultsFilename" --framework $testDllInfo.TargetFramework
+            }
+            RestoreForegroundColor # The dotnet call may change the foreground color, e. g. when displaying test result exceptions.
+        }
+        finally
+        {
+            Pop-Location
+        }
     }
-
-    $testResultFiles = ($testResultFiles).FullName | Resolve-Path -Relative
-
-    foreach ($testResultFile in $testResultFiles) {
-        Write-Host ($testResultFile)
-    }
-
-    return $testResultFiles
+    Write-Host
+    Write-Host
 }
 
-function GetTestResults($path, $environmentName) {
-    $fileContent = ReadTestResultXml $path
-
-    $nameSpace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010"
-    $nameSpaceManager = new-object Xml.XmlNamespaceManager $fileContent.NameTable
-    $nameSpaceManager.AddNamespace("ns", $nameSpace)
-
-    $testResults = @()
-    foreach($unitTestResult in $fileContent.SelectNodes('//ns:UnitTestResult', $nameSpaceManager)) {
-        $testResult = New-Object -TypeName PsObject
-
-        $testResult | Add-Member -MemberType NoteProperty -Name ExecutionId -Value $unitTestResult.executionId
-        $testResult | Add-Member -MemberType NoteProperty -Name TestName -Value $unitTestResult.testName
-        $testResult | Add-Member -MemberType NoteProperty -Name Outcome -Value $unitTestResult.outcome
-
-        # Not used:
-        #$testResult | Add-Member -MemberType NoteProperty -Name Duration -Value $unitTestResult.duration
-        #$testResult | Add-Member -MemberType NoteProperty -Name Message -Value $unitTestResult.Output.ErrorInfo.Message
-        #$testResult | Add-Member -MemberType NoteProperty -Name StackTrace -Value $unitTestResult.Output.ErrorInfo.StackTrace
-
-        $testResult | Add-Member -MemberType NoteProperty -Name Environment -Value $environmentName
-
-        $testResults += $testResult
+# Gets the name of the environment for the given system and framework.
+function GetEnvironmentName($systemName, $targetFramework)
+{
+    # HACK: Some projects use net7.0 instead of net6.0, but we don't want differentiate it in the environment names which define the test result columns.
+    if ($targetFramework.Contains("net6") -or $targetFramework.Contains("net7"))
+    {
+        $frameworkName = $script:NetName6
+    }
+    elseif ($targetFramework.Contains("net472"))
+    {
+        $frameworkName = $script:NetName472
+    }
+    else
+    {
+        Write-Error ("Framework `"" + $targetFramework + "`" is not yet supported by test script.")
     }
 
-    foreach($testResult in $testResults){
-        $testDefinition = $fileContent.SelectNodes("//ns:UnitTest/ns:Execution[@id='" + $testResult.ExecutionId + "']", $nameSpaceManager)
-
-        $codeBase = GetWindowsPath $testDefinition.NextSibling.codeBase | Resolve-Path -Relative
-
-        $testResult | Add-Member -MemberType NoteProperty -Name CodeBase -Value $codeBase
+    # HACK: For Linux the frameworkName shall not be shown.
+    if ($systemName -eq $script:SystemNameCurrentLinux)
+    {
+        if ($frameworkName -ne "net6")
+        {
+            Write-Error ("For Linux there's only one column supported for net6 by test script.")
+        }
+        return "$systemName"
     }
 
-    return $testResults
+    return "$systemName-$frameworkName"
 }
 
+# Gets the name of the trx file for the given environment.
+function GetTestResultsFilename($environmentName)
+{
+    $TestResultsFilename = "test-$environmentName.trx"
+    return $TestResultsFilename
+}
+
+
+# Loads the trx files and displays the test results.
+function LoadAndShowTestResults()
+{
+    Write-Host
+    Write-Host
+    Write-Host "TestResults" -ForegroundColor Green # Green color is used to make it the same conspicuity like the given green Format-Table header output.
+    Write-Host "==================================================" -ForegroundColor Green
+
+    # Environment names to be displayed in separate columns.
+    $environmentNameWindowsNet6 = GetEnvironmentName $script:SystemNameWindows $script:NetName6
+    $environmentNameWindowsNet472 = GetEnvironmentName $script:SystemNameWindows $script:NetName472
+    $environmentNameLinuxNet6 = GetEnvironmentName $script:SystemNameCurrentLinux $script:NetName6
+
+    $environmentNames = @($environmentNameWindowsNet6, $environmentNameWindowsNet472, $environmentNameLinuxNet6)
+
+    # Get unique GenericCodeBaseinformation for all Windows and Linux test DLLs.
+    $genericCodeBaseInfos = ($script:TestDllInfosWindows + $script:TestDllInfosLinux) | Select-Object -Property GenericCodeBase, GenericCodeBaseExtension, ProjectFolder -Unique
+
+
+    # Define formats for Format-Table
+    $totalWidth = $script:ConsoleWidth - 2 # Subtract 2 characters of width Format-Table will not use.
+
+    # Define the widths of the result columns
+    $resultColumnWidth = 17
+    $firstResultColumnLeftPadding = 2 # The test column wraps at the first result column with almost no padding. Add a manual left padding for the first result column as there is no way to define column padding.
+    $firstResultColumnLeftPaddingStr = " " * $firstResultColumnLeftPadding
+
+    # The test column gets the rest of the available width.
+    $testColumnWidth = $totalWidth - $firstResultColumnLeftPadding - 3 * $resultColumnWidth
+
+    # Cannot generate $formats automatically, as Expression is executed later.
+    # In a loop generating the formats, all Expressions would get only the last assigned value of the loop variable.
+    $formats = @(
+        @{
+            Label = "Test"
+            Expression = { $_.TestName }
+            Width = $testColumnWidth
+            },
+        @{
+            Label = $firstResultColumnLeftPaddingStr + "$environmentNameWindowsNet6"
+            Expression = { ColorizedCellFormatExpressionResult($firstResultColumnLeftPaddingStr + $_.($environmentNameWindowsNet6)) }
+            Width = $firstResultColumnLeftPadding + $resultColumnWidth
+        },
+        @{
+            Label = "$environmentNameWindowsNet472"
+            Expression = { ColorizedCellFormatExpressionResult($_.($environmentNameWindowsNet472)) }
+            Width = $resultColumnWidth
+        },
+        @{
+            Label = "$environmentNameLinuxNet6"
+            Expression = { ColorizedCellFormatExpressionResult($_.($environmentNameLinuxNet6)) }
+            Width = $resultColumnWidth
+        }
+    )
+
+
+    # Load and group all test result.
+    $allGroupedResults = @() # Collects all results grouped by test names.
+
+    # Use a padding to display CodeBase and the environment's trx files.
+    $padValue = (($environmentNames | Select-Object -ExpandProperty Length | Measure-Object -Maximum).Maximum)
+
+    # Loop all GenericCodeBases. For each GenericCodeBase a separate table containing the according test results is outputted.
+    foreach ($genericCodeBaseInfo in $genericCodeBaseInfos)
+    {
+        $genericCodeBaseWithExtension = $genericCodeBaseInfo.GenericCodeBase + $genericCodeBaseInfo.GenericCodeBaseExtension
+
+        Write-Host
+        Write-Host
+        $title = ("CodeBase:").PadRight($padValue + 1, ' ')
+        Write-Host $title $genericCodeBaseWithExtension -ForegroundColor Green # Green color is used to make it the same conspicuity like the given green Format-Table header output.
+        Write-Host "----------------------------------------------------------------------------------------------------" -ForegroundColor Green
+        Write-Host Test files:
+
+
+        $codeBaseResults = @() # Collects all results for this GenericCodeBase.
+        $testResultsFiles = @() # Collects information for the environment specific trx files for this GenericCodeBase.
+
+        # Loop environments to load the according trx file for the code base.
+        foreach ($environmentName in $environmentNames)
+        {
+            $environmentResults = @() # Collects all results for this GenericCodeBase and environment.
+
+            $testResultsFilename = GetTestResultsFilename $environmentName
+            $testResultsFile = Join-Path -Path $genericCodeBaseInfo.ProjectFolder "TestResults" $testResultsFilename
+            $testResultsFileExists = Test-Path $testResultsFile
+            $testResultsFileOutdated = $testResultsFileExists -and (Get-Item $testResultsFile).LastWriteTime -le $script:TimeStart
+
+            $title = ($environmentName + ":").PadRight($padValue + 1, ' ')
+            # if trx file is not found or outdated, output "No test results found" and continue loop.
+            if ($testResultsFileExists -eq $false -or $testResultsFileOutdated)
+            {
+                $testResultsFile = $null
+                Write-Host $title No test results found.
+            }
+            # if trx file is found and from this test run, collect results from the file.
+            else
+            {
+                Write-Host $title $testResultsFile
+
+                # Read trx content.
+                [xml]$fileContent = Get-Content -Path $testResultsFile
+                $nameSpace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010"
+                $nameSpaceManager = new-object Xml.XmlNamespaceManager $fileContent.NameTable
+                $nameSpaceManager.AddNamespace("ns", $nameSpace)
+
+                # Get all test definitions from trx file.
+                $testDefinitions = $fileContent.SelectNodes("//ns:UnitTest/ns:Execution", $nameSpaceManager)
+
+                # Get all unique code bases from test definitions.
+                $codeBases = $testDefinitions | ForEach-Object {
+                    $value = $_.NextSibling.codeBase
+                    # If started in Windows convert path to Windows path. This way even the results of hosted WSL test get the Windows code bases to provide a uniform output.
+                    if ($script:RunOnWindowsHost)
+                    {
+                        $value = GetWindowsPath $value
+                    }
+                    return $value | Resolve-Path -Relative
+                } | Select-Object -Unique
+
+                # Check if all code bases in the trx file match the GenericCodeBase the trx file was found for.
+                foreach ($codeBase in $codeBases)
+                {
+                    $matchesGenericCodeBase = MatchesGenericCodeBase $codeBase $genericCodeBaseInfo.GenericCodeBase $genericCodeBaseInfo.GenericCodeBaseExtension
+                    if ($matchesGenericCodeBase -eq $false)
+                    {
+                        Write-Error "Differing CodeBase found in `"$testResultsFile`": $codeBase"
+                    }
+                }
+
+                # Add test results from the trx file.
+                foreach ($unitTestResult in $fileContent.SelectNodes('//ns:UnitTestResult', $nameSpaceManager))
+                {
+                    $testResult = New-Object -TypeName PsObject
+
+                    $testResult | Add-Member -MemberType NoteProperty -Name ExecutionId -Value $unitTestResult.executionId
+                    $testResult | Add-Member -MemberType NoteProperty -Name TestName -Value $unitTestResult.testName
+                    $testResult | Add-Member -MemberType NoteProperty -Name Outcome -Value $unitTestResult.outcome # The test result.
+
+                    # Not used:
+                    #$testResult | Add-Member -MemberType NoteProperty -Name Duration -Value $unitTestResult.duration
+                    #$testResult | Add-Member -MemberType NoteProperty -Name Message -Value $unitTestResult.Output.ErrorInfo.Message
+                    #$testResult | Add-Member -MemberType NoteProperty -Name StackTrace -Value $unitTestResult.Output.ErrorInfo.StackTrace
+
+                    $testResult | Add-Member -MemberType NoteProperty -Name Environment -Value $environmentName
+
+                    # Save the GenericCodeBase instead of the not generic code base value from the trx file in the test result object to make the test results comparable and groupable.
+                    $testResult | Add-Member -MemberType NoteProperty -Name GenericCodeBase -Value $genericCodeBaseInfo.GenericCodeBase
+
+                    # Add test result for this environment.
+                    $environmentResults += $testResult
+                }
+            }
+            # Add environment test results for this GenericCodeBase.
+            $codeBaseResults += $environmentResults
+
+            # Add information for trx file.
+            $testResultsFileData = New-Object -TypeName PsObject
+            $testResultsFileData | Add-Member -MemberType NoteProperty -Name Environment -Value $environmentName
+            $testResultsFileData | Add-Member -MemberType NoteProperty -Name TestResultsFile -Value $testResultsFile
+            $testResultsFiles += $testResultsFileData
+        }
+
+        # Group test results for the GenericCodeBase by test name.
+        $groupedResults = GroupTestResults $codeBaseResults $environmentNames $testResultsFiles $genericCodeBaseInfo.GenericCodeBase
+
+        # Output grouped GenericCodeBase test results.
+        $groupedResults | Format-Table $formats -Wrap
+
+        # Add grouped test results for this GenericCodeBase.
+        $allGroupedResults += $groupedResults
+    }
+
+
+    # Add summary for all grouped test results.
+    Write-Host
+    Write-Host
+    Write-Host
+    Write-Host Summary -ForegroundColor Green # Green color is used to make it the same conspicuity like the given green Format-Table header output.
+    Write-Host "----------------------------------------------------------------------------------------------------" -ForegroundColor Green
+
+    # Create test summary from grouped test results.
+    $summary = CreateTestSummary $allGroupedResults $environmentNames
+
+    # Change test column header for summary output.
+    $formats[0].Label = "Total:"
+
+    # Output test results summary.
+    $summary | Format-Table $formats -Wrap
+}
+
+# Gets the Windows path according to a WSL path.
 function GetWindowsPath($path) {
-    if ($path -match "^/mnt/(?<drive>\w)/") {
+    if ($path -match "^/mnt/(?<drive>\w)/")
+    {
         #$path = wsl -e wslpath -w $path
         # Do manual folder conversion as calling wslpath is very very slow.
         $path = -join($Matches.drive.ToUpper(), ":\", $path.Substring(7).Replace('/', '\'))
@@ -169,91 +678,131 @@ function GetWindowsPath($path) {
     return $path
 }
 
-function ReadTestResultXml($path) {
-    Write-Debug "Reading $path and parse as XML"
-    [xml]$fileContent = Get-Content -Path $path
-    return $fileContent
-}
+# Group test results by test name.
+function GroupTestResults($testResults, $environmentNames, $testResultsFiles, $genericCodeBase)
+{
+    $groupedResults = @() # Collects all test results grouped by test name.
 
-function GroupTestResults($testResults, $environmentNames) {
-    $codeBaseGroups = $testResults | Group-Object CodeBase | Sort-Object Name
+    # Group test results by test name.
+    $testNameGroups = $testResults | Group-Object TestName | Sort-Object Name
 
-    $groupedResults = @()
-    foreach ($codeBaseGroup in $codeBaseGroups) {
-        $testNameGroups = $codeBaseGroup.Group | Group-Object TestName | Sort-Object Name
-        foreach ($testNameGroup in $testNameGroups) {
-            $groupedResult = New-Object -TypeName PsObject
+    # For each test name...
+    foreach ($testNameGroup in $testNameGroups)
+    {
+        # ...create an object containing the test name...
+        $groupedResult = New-Object -TypeName PsObject
+        $groupedResult | Add-Member -MemberType NoteProperty -Name TestName -Value $testNameGroup.Name
 
-            $groupedResult | Add-Member -MemberType NoteProperty -Name TestName -Value $testNameGroup.Name
-            $groupedResult | Add-Member -MemberType NoteProperty -Name CodeBase -Value $codeBaseGroup.Name
-            foreach ($environmentName in $environmentNames) {
-                $testResult = $testNameGroup.Group | Where-Object Environment -EQ $environmentName | Select-Object -First 1
-                $outcome = $testResult.Outcome
-                if ($null -eq $outcome) {
-                    $outcome = "Not found"
-                }
-                $groupedResult | Add-Member -MemberType NoteProperty -Name $environmentName -Value $outcome
+        # ...and a member for each environment.
+        foreach ($environmentName in $environmentNames)
+        {
+            # Get the system specific $dllInfos for this environment.
+            if ($environmentName.StartsWith($script:SystemNameWindows))
+            {
+                $dllInfos = $script:TestDllInfosWindows
+            }
+            elseif ($environmentName.StartsWith($script:SystemNameCurrentLinux))
+            {
+                $dllInfos = $script:TestDllInfosLinux
+            }
+            else
+            {
+                Write-Error "Could not determine environment system for `"$environmentName`""
             }
 
-            $groupedResults += $GroupedResult
+            # If the GenericCodeBase, these test results belong to, is not found in this system $dllInfos, the GenericCodeBase is not applicable for this environment (they where intended not to run).
+            $isNotApplicable = ($dllInfos | Where-Object GenericCodeBase -eq $genericCodeBase | Measure-Object | Select-Object -ExpandProperty Count) -eq 0
+
+            # Get the test result of this group (test name) for this environment.
+            $testResult = $testNameGroup.Group | Where-Object Environment -eq $environmentName | Select-Object -First 1
+
+            # If the GenericCodeBase is not applicable, $outcome shall be "not applicable".
+            if ($isNotApplicable)
+            {
+                # DLL was not included in environment TestDllInfos.
+                $outcome = "Not applicable"
+            }
+            # If the GenericCodeBase is applicable, but no test result is found...
+            elseif ($null -eq $testResult)
+            {
+                # ...check, if a trx file was found for this environment.
+                $testResultsFile = $testResultsFiles | Where-Object Environment -eq $environmentName | Select-Object -ExpandProperty TestResultsFile
+                if ($null -eq $testResultsFile)
+                {
+                    # Trx file is not found. Maybe the test project is only implemented for other environments, but not excluded in environment TestDllInfos?
+                    $outcome = "No trx file"
+                }
+                else
+                {
+                    # Test is not found in the trx file, so we assume that it's only implemented for other environments.
+                    $outcome = "Not implemented"
+                }
+            }
+            # If the GenericCodeBase is applicable, and the test result is found, set $outcome shall be taken from the test result.
+            else
+            {
+                $outcome = $testResult.Outcome
+
+                # For "NotExecuted" "Skipped" shall be returned. Attention: Maybe other circumstances than "Skipped" could result in "NotExecuted" in the trx file.
+                if ($outcome -eq "NotExecuted")
+                {
+                    $outcome = "Skipped"
+                }
+                elseif ($null -eq $outcome)
+                {
+                    $outcome = "???"
+                }
+            }
+
+            # For this environment add the calculated $outcome / test result.
+            $groupedResult | Add-Member -MemberType NoteProperty -Name $environmentName -Value $outcome
         }
+
+        $groupedResults += $groupedResult
     }
 
     return $groupedResults
 }
 
-function AddTestSummary($groupedResults, $environmentNames) {
-    $groupedResultsWithSummary = @()
-    foreach ($groupedResult in $groupedResults) {
-        $groupedResultsWithSummary += $groupedResult
-    }
-
-    $emptyLine = New-Object -TypeName PsObject
-    $groupedResultsWithSummary += $emptyLine
-
-    $emptyLine = New-Object -TypeName PsObject
-    $groupedResultsWithSummary += $emptyLine
-
-    $emptyLine = New-Object -TypeName PsObject
-    $emptyLine | Add-Member -MemberType NoteProperty -Name TestName -Value "========================================"
-    foreach ($environmentName in $environmentNames) {
-        $emptyLine | Add-Member -MemberType NoteProperty -Name $environmentName -Value "=============="
-    }
-    $groupedResultsWithSummary += $emptyLine
+# Creates a test summary from the grouped test results.
+function CreateTestSummary($allGroupedResults, $environmentNames)
+{
+    $summary = @()
 
     $passedLine = New-Object -TypeName PsObject
-    $passedLine | Add-Member -MemberType NoteProperty -Name TestName -Value "    Total:"
-    foreach ($environmentName in $environmentNames) {
-        $count = ($groupedResults | Where-Object $environmentName -EQ "Passed" | Measure-Object).Count
+    foreach ($environmentName in $environmentNames)
+    {
+        $count = ($allGroupedResults | Where-Object $environmentName -EQ "Passed" | Measure-Object).Count
         $passedLine | Add-Member -MemberType NoteProperty -Name $environmentName -Value "Passed:    $count"
     }
-    $groupedResultsWithSummary += $passedLine
+    $summary += $passedLine
 
 
     $failedLine = New-Object -TypeName PsObject
-    foreach ($environmentName in $environmentNames) {
-        $count = ($groupedResults | Where-Object $environmentName -EQ "Failed" | Measure-Object).Count
+    foreach ($environmentName in $environmentNames)
+    {
+        $count = ($allGroupedResults | Where-Object $environmentName -EQ "Failed" | Measure-Object).Count
         $failedLine | Add-Member -MemberType NoteProperty -Name $environmentName -Value "Failed:    $count"
     }
-    $groupedResultsWithSummary += $failedLine
+    $summary += $failedLine
 
 
-    $notFoundLine = New-Object -TypeName PsObject
-    foreach ($environmentName in $environmentNames) {
-        $count = ($groupedResults | Where-Object $environmentName -EQ "Not found" | Measure-Object).Count
-        $notFoundLine | Add-Member -MemberType NoteProperty -Name $environmentName -Value "Not found: $count"
+    $notImplementedLine = New-Object -TypeName PsObject
+    foreach ($environmentName in $environmentNames)
+    {
+        $count = ($allGroupedResults | Where-Object $environmentName -EQ "Not implemented" | Measure-Object).Count
+        $notImplementedLine | Add-Member -MemberType NoteProperty -Name $environmentName -Value "Not impl:  $count"
     }
-    $groupedResultsWithSummary += $notFoundLine
+    $summary += $notImplementedLine
 
-    return $groupedResultsWithSummary
+    return $summary
 }
 
-
-
-function ColorizedCellFormatExpressionResult($property) {
-    $isLine = $property -match "[=]"
-
-    $split = $property.Split()
+# Gets the expression for Format-Table $format, that formats $value in value-dependent color.
+function ColorizedCellFormatExpressionResult($value)
+{
+    # Try to extract a count integer value from $value.
+    $split = $value.Split()
     $count = $null;
     if ($split.Length -ge 2) {
         $split2 = $split[$split.Length - 1]
@@ -264,127 +813,92 @@ function ColorizedCellFormatExpressionResult($property) {
     }
 
     # Color codes see https://duffney.io/usingansiescapesequencespowershell/#basic-foreground-background-colors
+    # Noticeable default value that should not occur.
     $color = "33" # Orange
 
-    if ($isLine -or $count -eq 0) { # Don't change color, if a count of 0 is given.
+    # White color for "not applicable" and summary lines with a count of 0.
+    if ($count -eq 0 -or $value.ToLower().Contains("not applicable"))
+    {
         $color = "37" # White
     }
-    elseif ($property.ToLower().Contains("failed")) {
+    elseif ($value.ToLower().Contains("failed"))
+    {
         $color = "31" # Red
     }
-    elseif ($property.ToLower().Contains("passed")) {
+    elseif ($value.ToLower().Contains("passed"))
+    {
         $color = "32" # Green
     }
 
+    # Magic to output $value in the color.
     $e = [char]27
-    "$e[${color}m$($property)${e}[0m"
+    "$e[${color}m$($value)${e}[0m"
 }
 
-function SaveForegroundColor() {
+function SaveForegroundColor()
+{
     $script:foregroundColorBackup = $host.UI.RawUI.ForegroundColor
 }
 
-function RestoreForegroundColor() {
+function RestoreForegroundColor()
+{
     $host.UI.RawUI.ForegroundColor = $script:foregroundColorBackup
+}
+
+
+<#
+.SYNOPSIS
+Converts Windows path into a Linux path and vice versa.
+.DESCRIPTION
+Converts Windows path into a Linux path and vice versa. Uses WSL under the hood, so needs to be installed.
+See wslpath docs for more information.
+.PARAMETER path
+The path to convert.
+.PARAMETER conversion
+The direction of conversion Windows->Linux by default ('-u'). See wslpath docs for other options.
+.EXAMPLE
+wslpath $Profile
+wslpath $Profile '-w'
+#>
+function WslPath(
+    [Parameter(Mandatory)]
+    [string]
+    $path,
+
+    [ValidateSet('-u', '-w', '-m')]
+    $conversion = '-u'
+)
+{
+    wsl 'wslpath' $conversion $path.Replace('\', '\\');
 }
 
 
 # ***** Main *****
 
-$TestResultsFilenameWindows = "test-windows.trx"
-$TestResultsFilenameWSL = "test-wsl.trx"
-
-$TimeStart = Get-Date
-#$TimeStart = Get-Date -Year 1900 # Hack for loading all found test result files and not only the ones created in this run.
-
-# TODO Add try/finally for each Push-Location.
 Push-Location $PSScriptRoot
-Push-Location ..
+try
+{
+    # Execute script content in the parent folder of the script root.
+    Push-Location ..
+    try
+    {
+        InitializeScript
 
-SaveForegroundColor
+        # Test-HACK for loading all found test result files and not only the ones created in this run.
+        #$script:TimeStart = Get-Date -Year 1900
 
-Write-Host
-$Solution = GetSolutionFileName
-Write-Host "Started run-tests for solution `"$Solution`"."
+        LoadTestDllInfos
 
-$wslTestDllInfos = GetWslTestDllInfos $Solution
+        RunTests
 
-Write-Host Running tests under local Windows
-Write-Host ==================================================
-Write-Host
-Write-Host dotnet test $Solution...
-Write-Host ----------------------------------------
-Write-Host
-dotnet test $Solution --no-build -l "trx;LogFileName=.\$TestResultsFilenameWindows"
-RestoreForegroundColor # The dotnet call may change the foreground color, e. g. when displaying test result exceptions.
-
-
-Write-Host
-Write-Host Running tests under WSL
-Write-Host ==================================================
-foreach ($wslTestDllInfo in $wslTestDllInfos) {
-    $wslTestDll = Join-Path $wslTestDllInfo.DllFolder $wslTestDllInfo.DllFileName
-    $wslTestDllAbsolute = Resolve-Path $wslTestDll
-    $wslTestDllLinux = wsl wslpath -u $wslTestDllAbsolute
-
-    Write-Host
-    Write-Host WSL: dotnet test $wslTestDllInfo.DllFileName...
-    Write-Host ----------------------------------------
-    Write-Host
-
-    # Change current location to get the log file stored in the default "TestResults" folder inside the project folder.
-    Push-Location $wslTestDllInfo.ProjectFolder
-
-    wsl -e dotnet test $wslTestDllLinux -l "trx;LogFileName=./$TestResultsFilenameWSL"
-    RestoreForegroundColor # The dotnet call may change the foreground color, e. g. when displaying test result exceptions.
-
+        LoadAndShowTestResults
+    }
+    finally
+    {
+        Pop-Location
+    }
+}
+finally
+{
     Pop-Location
 }
-
-
-# Load and prepare the created TRX test result files.
-Write-Host
-Write-Host Preparing test results
-Write-Host =========================
-Write-Host
-
-$EnvironmentNameWindows = "Windows"
-$EnvironmentNameWSL = "WSL"
-
-$Results = @()
-$EnvironmentNames = @()
-AddTestResultsForEnvironment ([ref]$Results) ([ref]$EnvironmentNames) $TimeStart $TestResultsFilenameWindows $EnvironmentNameWindows
-AddTestResultsForEnvironment ([ref]$Results) ([ref]$EnvironmentNames) $TimeStart $TestResultsFilenameWSL $EnvironmentNameWSL
-
-$GroupedResults = GroupTestResults $Results $EnvironmentNames
-
-$GroupResultsWithSummary = AddTestSummary $GroupedResults $EnvironmentNames
-
-Write-Host
-Write-Host "TestResults" -ForegroundColor Green
-Write-Host "==================================================" -ForegroundColor Green
-
-# Cannot generate $formats automatically, as Expression is executed later.
-# In a loop generating the formats, all Expressions would get only the last assigned value of the loop variable.
-$formats = @(
-    @{
-        Label = "Test"
-        Expression = { $_.TestName }
-        Width = 86
-        },
-    @{
-        Label = $EnvironmentNameWindows
-        Expression = { ColorizedCellFormatExpressionResult($_.Windows) }
-        Width = 17
-    },
-    @{
-        Label = $EnvironmentNameWSL
-        Expression = { ColorizedCellFormatExpressionResult($_.WSL) }
-        Width = 17
-    }
-)
-
-$GroupResultsWithSummary | Format-Table $formats -Wrap -GroupBy CodeBase
-
-Pop-Location
-Pop-Location

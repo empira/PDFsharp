@@ -1,10 +1,15 @@
-﻿using MigraDoc.DocumentObjectModel.Shapes;
-using PdfSharp.Snippets.Font;
-using PdfSharp.TestHelper;
-using MigraDoc.Rendering;
-using PdfSharp.Fonts;
+﻿// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
+using PdfSharp.Fonts;
+using PdfSharp.Snippets.Font;
+using PdfSharp.TestHelper;
+using PdfSharp.Quality;
+using MigraDoc.DocumentObjectModel.Fields;
+using MigraDoc.DocumentObjectModel.Shapes;
+using MigraDoc.Rendering;
 using Xunit;
 
 namespace MigraDoc.DocumentObjectModel.Tests
@@ -27,9 +32,9 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var pdfRenderer = new PdfDocumentRenderer { Document = document };
             pdfRenderer.RenderDocument();
 
-            var filename = PdfFileHelper.CreateTempFileName("Test_Empty_Paragraph");
+            var filename = PdfFileUtility.GetTempPdfFileName("Test_Empty_Paragraph");
             pdfRenderer.PdfDocument.Save(filename);
-            PdfFileHelper.StartPdfViewerIfDebugging(filename);
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
         [Fact]
@@ -49,9 +54,9 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var pdfRenderer = new PdfDocumentRenderer { Document = document };
             pdfRenderer.RenderDocument();
 
-            var filename = PdfFileHelper.CreateTempFileName("Test_Empty_FormattedText");
+            var filename = PdfFileUtility.GetTempPdfFileName("Test_Empty_FormattedText");
             pdfRenderer.PdfDocument.Save(filename);
-            PdfFileHelper.StartPdfViewerIfDebugging(filename);
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
         /// <summary>
@@ -66,10 +71,10 @@ namespace MigraDoc.DocumentObjectModel.Tests
             GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
 #endif
             // Create one document containing all results.
-            var sumDoc = new PdfDocument(PdfFileHelper.CreateTempFileName("Test_Multiline_Border_Paragraph_PageBreaks"));
+            var sumDoc = new PdfDocument();
             var exceptions = new List<Exception>();
 
-            
+
             // Create documents for different offsets.
             for (var offset = 15; offset <= 95; offset += 5)
             {
@@ -206,9 +211,174 @@ namespace MigraDoc.DocumentObjectModel.Tests
             }
 
             // Save sumDoc.
-            var filename = PdfFileHelper.CreateTempFileName("Test_Multiline_Border_Paragraph_PageBreaks");
+            var filename = PdfFileUtility.GetTempPdfFileName("Test_Multiline_Border_Paragraph_PageBreaks");
+            sumDoc.PageLayout = PdfPageLayout.TwoPageLeft;
             sumDoc.Save(filename);
-            PdfFileHelper.StartPdfViewerIfDebugging(filename);
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
+
+            // Finally throw occurred exceptions.
+            if (exceptions.Any())
+                throw new AggregateException(exceptions);
+        }
+
+        /// <summary>
+        /// Creates a series of documents with a bordered paragraph, that is positioned to force a page break at the height of its DistanceFromBottom spacing.
+        /// The paragraph ends with different objects, that partly caused exceptions before.
+        /// </summary>
+        [Fact]
+        public void Test_Trailing_Objects_Border_Paragraph_PageBreak()
+        {
+#if CORE
+            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
+#endif
+            var trailingObjects = new Dictionary<DocumentObject, string>
+            {
+                { new Text(" "), "Text with one space only" },
+                { new Character { SymbolName = SymbolName.Blank }, "Blank Character"},
+                { new Character { SymbolName = SymbolName.Em }, "Em blank Character"},
+                { new Character { SymbolName = SymbolName.Em4 }, "Quarter Em blank Character"},
+                { new Character { SymbolName = SymbolName.En }, "En blank Character"},
+                { new Character { SymbolName = SymbolName.NonBreakableBlank }, "No break space Character"},
+                { new Character { SymbolName = SymbolName.Tab }, "Tab Character"},
+                { new InfoField { Name = "Title" }, "Empty InfoField"},
+                { new BookmarkField("bookmarkName") , "BookmarkField"},
+                { new Text("\u00AD"), "Text with one soft hyphen only" },
+                { new Character { SymbolName = SymbolName.LineBreak }, "Line break Character"}
+            };
+
+
+            // Create one document containing all results.
+            var sumDoc = new PdfDocument();
+            var exceptions = new List<Exception>();
+
+
+            // Create documents for different trailing objects.
+            foreach (var trailingObject in trailingObjects)
+            {
+                try
+                {
+                    var document = new Document();
+
+                    var style = document.Styles[StyleNames.Heading1];
+                    style!.Font.Size = Unit.FromPoint(14);
+                    style.Font.Bold = true;
+
+                    var section = document.AddSection();
+
+                    // Leave 20 cm for content.
+                    section.PageSetup.TopMargin = Unit.FromMillimeter(70);
+                    section.PageSetup.BottomMargin = Unit.FromMillimeter(27);
+
+                    // Add informational content.
+                    var tf = section.AddTextFrame();
+                    tf.RelativeHorizontal = RelativeHorizontal.Margin;
+                    tf.RelativeVertical = RelativeVertical.Margin;
+                    tf.Top = Unit.FromCentimeter(-1.5);
+                    tf.Left = 0;
+                    tf.Height = Unit.FromCentimeter(1);
+                    tf.Width = Unit.FromCentimeter(16);
+                    tf.FillFormat.Color = Colors.LightGreen;
+                    var p = tf.AddParagraph($"Trailing object: {trailingObject.Value}");
+                    p.Style = StyleNames.Heading1;
+
+                    tf = section.AddTextFrame();
+                    tf.RelativeHorizontal = RelativeHorizontal.Margin;
+                    tf.RelativeVertical = RelativeVertical.Margin;
+                    tf.Top = 0;
+                    tf.Left = Unit.FromCentimeter(-1.5);
+                    tf.Height = Unit.FromCentimeter(20);
+                    tf.Width = Unit.FromCentimeter(0.5);
+                    tf.FillFormat.Color = Colors.LightGreen;
+                    tf.Orientation = TextOrientation.Upward;
+                    p = tf.AddParagraph("20 cm space for content");
+                    p.Format.Alignment = ParagraphAlignment.Center;
+
+                    // Add offset inserting paragraph.
+                    p = section.AddParagraph("Paragraph to achieve an offset of 175 mm.");
+                    p.Format.LineSpacingRule = LineSpacingRule.Exactly;
+                    p.Format.LineSpacing = Unit.FromMillimeter(175);
+                    p.Format.Shading.Color = Colors.LightGray;
+
+                    // Add test paragraph.
+                    p = section.AddParagraph("Text");
+                    p.Format.LineSpacingRule = LineSpacingRule.Exactly;
+                    p.Format.LineSpacing = Unit.FromCentimeter(1);
+                    p.Format.Shading.Color = Colors.LightBlue;
+
+                    // Add trailing object that may have caused exceptions before.
+                    p.Elements.Add(trailingObject.Key);
+
+                    // Set test paragraph borders.
+                    var borders = p.Format.Borders;
+                    borders.Visible = true;
+                    borders.DistanceFromTop = Unit.FromMillimeter(10);
+                    borders.DistanceFromBottom = Unit.FromMillimeter(10);
+
+
+                    // Render document and add it to sumDoc.
+                    var pdfRenderer = new PdfDocumentRenderer { Document = document };
+                    pdfRenderer.RenderDocument();
+
+                    var stream = new MemoryStream();
+                    pdfRenderer.PdfDocument.Save(stream);
+
+                    var pdfDocument = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
+
+                    foreach (var page in pdfDocument.Pages)
+                        sumDoc.AddPage(page);
+
+                    // Always add an even count of pages for better comparability in PDF reader.
+                    if (pdfDocument.PageCount % 2 == 1)
+                        sumDoc.AddPage();
+
+                }
+                catch (Exception e)
+                {
+                    var message = $"Exception while generating test document with trailing object {trailingObject.Value}.";
+
+                    // Add exception to list to continue tests and throw one AggregatedException at the end.
+                    exceptions.Add(new Exception(message, e));
+
+                    // Create temporary document with the exception and stacktrace.
+                    var document = new Document();
+
+                    var style = document.Styles[StyleNames.Normal];
+                    style!.Font.Color = Colors.Red;
+                    style.ParagraphFormat.SpaceAfter = Unit.FromMillimeter(5);
+
+                    style = document.Styles[StyleNames.Heading1];
+                    style!.Font.Size = Unit.FromPoint(14);
+                    style.Font.Bold = true;
+
+                    var section = document.AddSection();
+                    var p = section.AddParagraph(message);
+                    p.Style = StyleNames.Heading1;
+                    section.AddParagraph(e.Message);
+                    section.AddParagraph(e.StackTrace ?? "Empty stacktrace");
+
+                    // Render document and add it to sumDoc.
+                    var pdfRenderer = new PdfDocumentRenderer { Document = document };
+                    pdfRenderer.RenderDocument();
+
+                    var stream = new MemoryStream();
+                    pdfRenderer.PdfDocument.Save(stream);
+
+                    var pdfDocument = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
+
+                    foreach (var page in pdfDocument.Pages)
+                        sumDoc.AddPage(page);
+
+                    // Always add an even count of pages for better comparability in PDF reader.
+                    if (pdfDocument.PageCount % 2 == 1)
+                        sumDoc.AddPage();
+                }
+            }
+
+            // Save sumDoc.
+            var filename = PdfFileUtility.GetTempPdfFileName("Test_Trailing_Objects_Border_Paragraph_PageBreak");
+            sumDoc.PageLayout = PdfPageLayout.TwoPageLeft;
+            sumDoc.Save(filename);
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
 
             // Finally throw occurred exceptions.
             if (exceptions.Any())

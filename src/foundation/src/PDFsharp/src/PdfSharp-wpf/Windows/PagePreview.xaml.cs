@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using PdfSharp.Drawing;
+using PdfSharp.Events;
 
 namespace PdfSharp.Windows
 {
@@ -71,12 +72,12 @@ namespace PdfSharp.Windows
         /// <summary>
         /// Sets the render function.
         /// </summary>
-        public void SetRenderFunction(Action<XGraphics> renderFunction)
+        public void SetRenderFunction(Action<XGraphics> renderFunction, RenderEvents renderEvents)
         {
             if (canvas.Children.Count > 0)
                 canvas.Children.Clear();
 
-            XGraphics gfx = XGraphics.FromCanvas(canvas, new XSize(100, 100), XGraphicsUnit.Presentation);
+            XGraphics gfx = XGraphics.FromCanvas(canvas, new XSize(100, 100), XGraphicsUnit.Presentation, renderEvents);
             renderFunction(gfx);
             gfx.Dispose();  // necessary in WPF
         }

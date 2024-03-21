@@ -1,22 +1,22 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.IO;
+using System.Runtime.InteropServices;
+using PdfSharp.Pdf.IO;
+using PdfSharp.TestHelper;
+using PdfSharp.Pdf;
+using PdfSharp.Quality;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Rendering;
-using PdfSharp.Pdf.IO;
+using Xunit;
 #if CORE
 using PdfSharp.Fonts;
 using PdfSharp.Snippets.Font;
 #endif
-using PdfSharp.TestHelper;
-using Xunit;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
-using PdfSharp.Pdf;
-using PdfSharp.Quality;
+#if WPF
+using System.IO;
+#endif
 
 namespace MigraDoc.Tests
 {
@@ -41,12 +41,6 @@ namespace MigraDoc.Tests
 
             // ----- Unicode encoding in MigraDoc is demonstrated here. -----
 
-            // DELETE
-            //// A flag indicating whether to create a Unicode PDF or a WinAnsi PDF file.
-            //// This setting applies to all fonts used in the PDF document.
-            //// This setting has no effect on the RTF renderer.
-            //const bool unicode = false;
-
             // Create a renderer for the MigraDoc document.
             var pdfRenderer = new PdfDocumentRenderer()
             {
@@ -58,10 +52,10 @@ namespace MigraDoc.Tests
             pdfRenderer.RenderDocument();
 
             // Save the document...
-            var filename = PdfFileHelper.CreateTempFileName("HelloWorld");
+            var filename = PdfFileUtility.GetTempPdfFileName("HelloWorld");
             pdfRenderer.PdfDocument.Save(filename);
             // ...and start a viewer.
-            PdfFileHelper.StartPdfViewerIfDebugging(filename);
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
         [Fact]
@@ -86,7 +80,7 @@ namespace MigraDoc.Tests
             var pdfRenderer = new PdfDocumentRenderer
             {
                 Document = document,
-                PdfDocument = new PdfDocument
+                PdfDocument =
                 {
                     PageLayout = PdfPageLayout.SinglePage
                 }
@@ -104,10 +98,10 @@ namespace MigraDoc.Tests
             pdfRenderer.RenderDocument();
 
             // Save the document...
-            var filename = IOHelper.CreateTemporaryPdfFileName("IssueTemplate");
+            var filename = PdfFileUtility.GetTempPdfFileName("IssueTemplate");
             pdfRenderer.PdfDocument.Save(filename);
             // ...and start a viewer.
-            PdfFileHelper.StartPdfViewerIfDebugging(filename);
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
         [Theory]
@@ -125,28 +119,42 @@ namespace MigraDoc.Tests
             GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
 #endif
 
-            var options = SecurityTestHelper.TestOptions.ByEnum(optionsEnum);
-            options.SetDefaultPasswords(true, true);
+            // Attempt to avoid "image file locked" under .NET 4.7.2.
+            GC.Collect();
+            GC.WaitForFullGCComplete();
 
-            // Write encrypted file.
-            var filename = SecurityTestHelper.AddSuffixToFilename("Image_Formats_write.pdf", options);
+            {
+                var options = SecurityTestHelper.TestOptions.ByEnum(optionsEnum);
+                options.SetDefaultPasswords(true, true);
 
-            var document = CreateDocument(true);
+                // Write encrypted file.
+                var filename = SecurityTestHelper.AddSuffixToFilename("Image_Formats_write.pdf", options);
 
-            var pdfRenderer = SecurityTestHelper.RenderSecuredDocument(document, options);
-            pdfRenderer.Save(filename);
+                var document = CreateDocument(true);
 
-            PdfFileHelper.StartPdfViewerIfDebugging(filename);
+                var pdfRenderer = SecurityTestHelper.RenderSecuredDocument(document, options);
+                pdfRenderer.Save(filename);
+                // ReSharper disable once RedundantAssignment
+                pdfRenderer = null;
 
-            // Read encrypted file and write it without encryption.
-            var pdfDocRead = PdfReader.Open(filename, SecurityTestHelper.PasswordOwnerDefault);
+                PdfFileUtility.ShowDocumentIfDebugging(filename);
 
-            var pdfRendererRead = new PdfDocumentRenderer { PdfDocument = pdfDocRead };
+                // Read encrypted file and write it without encryption.
+                var pdfDocRead = PdfReader.Open(filename, SecurityTestHelper.PasswordOwnerDefault);
 
-            var filenameRead = SecurityTestHelper.AddSuffixToFilename("Image_Formats_read.pdf", options);
-            pdfRendererRead.Save(filenameRead);
+                var pdfRendererRead = new PdfDocumentRenderer { PdfDocument = pdfDocRead };
 
-            PdfFileHelper.StartPdfViewerIfDebugging(filenameRead);
+                var filenameRead = SecurityTestHelper.AddSuffixToFilename("Image_Formats_read.pdf", options);
+                pdfRendererRead.Save(filenameRead);
+                // ReSharper disable once RedundantAssignment
+                pdfRendererRead = null;
+
+                PdfFileUtility.ShowDocumentIfDebugging(filenameRead);
+            }
+
+            // Attempt to avoid "image file locked" under .NET 4.7.2.
+            GC.Collect();
+            GC.WaitForFullGCComplete();
         }
 
         /// <summary>

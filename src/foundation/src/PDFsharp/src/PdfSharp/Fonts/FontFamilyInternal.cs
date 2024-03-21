@@ -1,6 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Drawing;
+using PdfSharp.Fonts.Internal;
 using PdfSharp.Internal;
 #if GDI
 using GdiFontFamily = System.Drawing.FontFamily;
@@ -12,13 +14,13 @@ using WpfFontFamily = System.Windows.Media.FontFamily;
 // ReSharper disable ConvertToAutoProperty
 // ReSharper disable ConvertPropertyToExpressionBody
 
-namespace PdfSharp.Drawing
+namespace PdfSharp.Fonts
 {
     /// <summary>
     /// Internal implementation class of XFontFamily.
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
-    class FontFamilyInternal
+    public sealed class FontFamilyInternal
     {
         // Implementation Notes
         // FontFamilyInternal implements an XFontFamily.
@@ -60,7 +62,7 @@ namespace PdfSharp.Drawing
                 }
             }
 #endif
-                }
+        }
 
 #if GDI
         FontFamilyInternal(GdiFontFamily gdiFontFamily)
@@ -155,10 +157,8 @@ namespace PdfSharp.Drawing
         /// Gets the underlying WPF font family object.
         /// Is null if the font was created by a font resolver.
         /// </summary>
-        public WpfFontFamily WpfFamily
-        {
-            get { return _wpfFontFamily; }
-        }
+        public WpfFontFamily WpfFamily => _wpfFontFamily;
+
         readonly WpfFontFamily _wpfFontFamily = null!;
 #endif
 

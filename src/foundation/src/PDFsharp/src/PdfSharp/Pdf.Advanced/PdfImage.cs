@@ -5,7 +5,6 @@
 using System.Drawing.Imaging;
 #endif
 #if WPF
-using System.IO;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 #endif
@@ -300,22 +299,54 @@ namespace PdfSharp.Pdf.Advanced
             }
 #endif
 #if WPF
-            if (imageBits == null)
+            if (!_image._path.StartsWith("*", StringComparison.Ordinal))
             {
-                // Use ImageImporterJpeg to read the image.
-                string filename = XImage.GetImageFilename(_image._wpfImage);
-                ImageImporter ii = ImageImporter.GetImageImporter();
-                var i = ii.ImportImage(filename);
+                // Image does not come from a stream, so we have the path to the file - just use the path.
+                // If the image was modified in memory, those changes will be lost and the original image, as it was read from the file, will be added to the PDF.
+                if (imageBits == null)
+                {
+                    // Use ImageImporterJpeg to read the image.
+                    string filename = XImage.GetImageFilename(_image._wpfImage);
+                    ImageImporter ii = ImageImporter.GetImageImporter();
+                    var i = ii.ImportImage(filename);
 
-                ImageDataDct idd2 = (ImageDataDct)i!.ImageData(options);
-                imageBits = idd2.Data;
-                streamLength = idd2.Length;
+                    ImageDataDct idd2 = (ImageDataDct)i!.ImageData(options);
+                    imageBits = idd2.Data;
+                    streamLength = idd2.Length;
 
-                if (_image._importedImage == null)
-                    _image._importedImage = i;
+                    if (_image._importedImage == null)
+                        _image._importedImage = i;
+                }
+                
+                memory = _image.Memory;
+            }
+            else
+            {
+                // If we have a stream, copy data from the stream.
+                if (_image._stream != null && _image._stream.CanSeek)
+                {
+                    memory = new MemoryStream();
+                    ownMemory = true;
+                    Stream stream = _image._stream;
+                    stream.Seek(0, SeekOrigin.Begin);
+                    byte[] buffer = new byte[32 * 1024]; // 32K buffer.
+                    int bytesRead;
+                    while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        memory.Write(buffer, 0, bytesRead);
+                    }
+                }
+                else
+                {
+                    // TODO Anything we can do here?
+                    //#if CORE _WITH _GDI
+                    //                        // No stream, no filename, get image data.
+                    //                        // Save the image to a memory stream.
+                    //                        _image._gdiImage.Save(memory, ImageFormat.Jpeg);
+                    //#endif
+                }
             }
 
-            memory = _image.Memory;
             if (imageBits == null && memory == null && _image._wpfImage != null)
             {
                 Debug.Assert(false, "Internal error? JPEG image, but file not read!");
@@ -545,9 +576,9 @@ namespace PdfSharp.Pdf.Advanced
                     break;
 
                 default:
-//#if DEBUGxxx
-//                    image.image.Save("$$$.bmp", ImageFormat.Bmp);
-//#endif
+#if DEBUG_
+                    image.image.Save("$$$.bmp", ImageFormat.Bmp);
+#endif
                     throw new NotImplementedException("Image format \"" + format + "\" not supported.");
             }
 #endif

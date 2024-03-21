@@ -10,6 +10,7 @@ using FWord = System.Int16;
 using UFWord = System.UInt16;
 
 // ReSharper disable InconsistentNaming
+// ReSharper disable IdentifierTypo
 
 namespace PdfSharp.Fonts.OpenType
 {
@@ -45,8 +46,8 @@ namespace PdfSharp.Fonts.OpenType
     {
         public WinEncodingId encodingId; // Windows encoding ID.
         public ushort format; // Format number is set to 4.
-        public ushort length; // This is the length in bytes of the subtable. 
-        public ushort language; // This field must be set to zero for all cmap subtables whose platform IDs are other than Macintosh (platform ID 1). 
+        public ushort length; // This is the length in bytes of the sub-table. 
+        public ushort language; // This field must be set to zero for all cmap sub-tables whose platform IDs are other than Macintosh (platform ID 1). 
         public ushort segCountX2; // 2 x segCount.
         public ushort searchRange; // 2 x (2**floor(log2(segCount)))
         public ushort entrySelector; // log2(searchRange/2)
@@ -58,7 +59,7 @@ namespace PdfSharp.Fonts.OpenType
         public int glyphCount; // = (length - (16 + 4 * 2 * segCount)) / 2;
         public ushort[] glyphIdArray = null!;     // Glyph index array (arbitrary length)
 
-        public CMap4(OpenTypeFontface fontData, WinEncodingId encodingId)
+        public CMap4(OpenTypeFontFace fontData, WinEncodingId encodingId)
             : base(fontData, "----")
         {
             this.encodingId = encodingId;
@@ -128,7 +129,7 @@ namespace PdfSharp.Fonts.OpenType
         {
             public UInt32 startCharCode;// First character code in this group.
             public UInt32 endCharCode; // Last character code in this group.
-            public UInt32 startGlyphID; // Glyph index corresponding to the starting character code.
+            public UInt32 startGlyphIndex; // Glyph index corresponding to the starting character code.
         }
 
         public WinEncodingId encodingId; // Windows encoding ID.
@@ -139,7 +140,7 @@ namespace PdfSharp.Fonts.OpenType
 
         public SequentialMapGroup[] groups = null!;
 
-        public CMap12(OpenTypeFontface fontData, WinEncodingId encodingId)
+        public CMap12(OpenTypeFontFace fontData, WinEncodingId encodingId)
             : base(fontData, "----")
         {
             this.encodingId = encodingId;
@@ -165,7 +166,7 @@ namespace PdfSharp.Fonts.OpenType
                     ref var group = ref groups[i];
                     group.startCharCode = _fontData.ReadULong();
                     group.endCharCode = _fontData.ReadULong();
-                    group.startGlyphID = _fontData.ReadULong();
+                    group.startGlyphIndex = _fontData.ReadULong();
                 }
             }
             catch (Exception ex)
@@ -197,7 +198,7 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// Initializes a new instance of the <see cref="CMapTable"/> class.
         /// </summary>
-        public CMapTable(OpenTypeFontface fontData)
+        public CMapTable(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             Read();
@@ -223,9 +224,7 @@ namespace PdfSharp.Fonts.OpenType
 
                     // Just read Windows stuff.
                     if (platformId == PlatformId.Win &&
-                        (encodingId == WinEncodingId.Symbol || 
-                         encodingId == WinEncodingId.UnicodeUSC_2 || 
-                         encodingId == WinEncodingId.UnicodeUSC_4))
+                        encodingId is WinEncodingId.Symbol or WinEncodingId.UnicodeUSC_2 or WinEncodingId.UnicodeUSC_4)
                     {
                         symbol = encodingId == WinEncodingId.Symbol;
 
@@ -284,7 +283,7 @@ namespace PdfSharp.Fonts.OpenType
         public short indexToLocFormat; // 0 for short offsets, 1 for long
         public short glyphDataFormat; // 0 for current format
 
-        public FontHeaderTable(OpenTypeFontface fontData)
+        public FontHeaderTable(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             Read();
@@ -347,7 +346,7 @@ namespace PdfSharp.Fonts.OpenType
         public short metricDataFormat;
         public ushort numberOfHMetrics;
 
-        public HorizontalHeaderTable(OpenTypeFontface fontData)
+        public HorizontalHeaderTable(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             Read();
@@ -389,7 +388,7 @@ namespace PdfSharp.Fonts.OpenType
         public ushort advanceWidth;
         public short lsb;
 
-        public HorizontalMetrics(OpenTypeFontface fontData)
+        public HorizontalMetrics(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             Read();
@@ -421,7 +420,7 @@ namespace PdfSharp.Fonts.OpenType
         public HorizontalMetrics[] Metrics = default!;
         public FWord[] LeftSideBearing = default!;
 
-        public HorizontalMetricsTable(OpenTypeFontface fontData)
+        public HorizontalMetricsTable(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             Read();
@@ -484,7 +483,7 @@ namespace PdfSharp.Fonts.OpenType
         public short metricDataFormat;
         public ushort numberOfHMetrics;
 
-        public VerticalHeaderTable(OpenTypeFontface fontData)
+        public VerticalHeaderTable(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             Read();
@@ -527,7 +526,7 @@ namespace PdfSharp.Fonts.OpenType
         public ushort advanceWidth;
         public short lsb;
 
-        public VerticalMetrics(OpenTypeFontface fontData)
+        public VerticalMetrics(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             Read();
@@ -562,7 +561,7 @@ namespace PdfSharp.Fonts.OpenType
         public HorizontalMetrics[] metrics;
         public FWord[] leftSideBearing;
 
-        public VerticalMetricsTable(OpenTypeFontface fontData)
+        public VerticalMetricsTable(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             Read();
@@ -629,7 +628,7 @@ namespace PdfSharp.Fonts.OpenType
         public ushort maxComponentElements;
         public ushort maxComponentDepth;
 
-        public MaximumProfileTable(OpenTypeFontface fontData)
+        public MaximumProfileTable(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             Read();
@@ -675,7 +674,7 @@ namespace PdfSharp.Fonts.OpenType
     /// For historical reasons, some applications which install fonts perform Version control using Macintosh
     /// platform (platform ID 1) strings from the 'name' table. Because of this, we strongly recommend that
     /// the 'name' table of all fonts include Macintosh platform strings and that the syntax of the Version
-    /// number (name id 5) follows the guidelines given in this document.
+    /// number (name ID 5) follows the guidelines given in this document.
     /// </summary>
     class NameTable : OpenTypeFontTable
     {
@@ -702,7 +701,7 @@ namespace PdfSharp.Fonts.OpenType
 
         byte[] bytes = default!;
 
-        public NameTable(OpenTypeFontface fontData)
+        public NameTable(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             Read();
@@ -855,7 +854,7 @@ namespace PdfSharp.Fonts.OpenType
         public ushort usBreakChar;
         public ushort usMaxContext;
 
-        public OS2Table(OpenTypeFontface fontData)
+        public OS2Table(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             Read();
@@ -940,7 +939,7 @@ namespace PdfSharp.Fonts.OpenType
         public ulong minMemType1;
         public ulong maxMemType1;
 
-        public PostScriptTable(OpenTypeFontface fontData)
+        public PostScriptTable(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             Read();
@@ -976,9 +975,9 @@ namespace PdfSharp.Fonts.OpenType
     {
         public const string Tag = TableTagNames.Cvt;
 
-        FWord[] array = null!; // List of n values referenceable by instructions. n is the number of FWORD items that fit in the size of the table.
+        FWord[] array = default!; // List of n values referenceable by instructions. n is the number of FWORD items that fit in the size of the table.
 
-        public ControlValueTable(OpenTypeFontface fontData)
+        public ControlValueTable(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             DirectoryEntry.Tag = TableTagNames.Cvt;
@@ -1004,7 +1003,7 @@ namespace PdfSharp.Fonts.OpenType
 
     /// <summary>
     /// This table is similar to the CVT Program, except that it is only run once, when the font is first used.
-    /// It is used only for FDEFs and IDEFs. Thus the CVT Program need not contain function definitions.
+    /// It is used only for FDEFs and IDEFs. Thus, the CVT Program need not contain function definitions.
     /// However, the CVT Program may redefine existing FDEFs or IDEFs.
     /// </summary>
     class FontProgram : OpenTypeFontTable
@@ -1013,7 +1012,7 @@ namespace PdfSharp.Fonts.OpenType
 
         byte[] bytes = null!; // Instructions. n is the number of BYTE items that fit in the size of the table.
 
-        public FontProgram(OpenTypeFontface fontData)
+        public FontProgram(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             DirectoryEntry.Tag = TableTagNames.Fpgm;
@@ -1049,7 +1048,7 @@ namespace PdfSharp.Fonts.OpenType
 
         byte[] bytes = null!; // Set of instructions executed whenever point size or font or transformation change. n is the number of BYTE items that fit in the size of the table.
 
-        public ControlValueProgram(OpenTypeFontface fontData)
+        public ControlValueProgram(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             DirectoryEntry.Tag = TableTagNames.Prep;
@@ -1081,7 +1080,7 @@ namespace PdfSharp.Fonts.OpenType
     {
         public const string Tag = TableTagNames.GSUB;
 
-        public GlyphSubstitutionTable(OpenTypeFontface fontData)
+        public GlyphSubstitutionTable(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             DirectoryEntry.Tag = TableTagNames.GSUB;

@@ -14,11 +14,11 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472-windows|AnyCPU'">
-      <WarningLevel>0</WarningLevel>
+        <WarningLevel>0</WarningLevel>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472-windows|AnyCPU'">
-      <WarningLevel>0</WarningLevel>
+        <WarningLevel>0</WarningLevel>
     </PropertyGroup>
 
     <ItemGroup>
@@ -28,9 +28,9 @@
     </ItemGroup>
 
     <ItemGroup>
-	    <Compile Include="..\MigraDoc.Rendering\Properties\GlobalDeclarations.cs">
-		    <Link>Properties\GlobalDeclarations.cs</Link>
-	    </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Properties\GlobalDeclarations.cs">
+            <Link>Properties\GlobalDeclarations.cs</Link>
+        </Compile>
         <Compile Include="..\MigraDoc.Rendering\Rendering.Resources\Messages2.cs">
             <Link>Rendering.Resources\Messages2.cs</Link>
         </Compile>
@@ -66,6 +66,9 @@
         </Compile>
         <Compile Include="..\MigraDoc.Rendering\Rendering.ChartMapper\XValuesMapper.cs">
             <Link>Rendering.ChartMapper\XValuesMapper.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.Internals\ErrorHelpers.cs">
+            <Link>Rendering.Internals\ErrorHelpers.cs</Link>
         </Compile>
         <Compile Include="..\MigraDoc.Rendering\Rendering\Area.cs">
             <Link>Rendering\Area.cs</Link>
@@ -224,6 +227,9 @@
         <Compile Include="..\MigraDoc.Rendering\Rendering\TopDownFormatter.cs">
             <Link>Rendering\TopDownFormatter.cs</Link>
         </Compile>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="..\MigraDoc.Rendering\Rendering.Resources\Messages.de.restext">

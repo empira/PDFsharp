@@ -12,16 +12,16 @@ namespace PdfSharp.Pdf
             : base(document)
         { }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PdfViewerPreferences"/> class.
-        /// </summary>
-        PdfViewerPreferences(PdfDictionary dict)
-            : base(dict)
-        { }
+        ///// <summary>
+        ///// Initializes a new instance of the <see cref="PdfViewerPreferences"/> class.
+        ///// </summary>
+        //PdfViewerPreferences(PdfDictionary dict)
+        //    : base(dict)
+        //{ }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to hide the viewer application’s tool
-        /// bars when the document is active.
+        /// Gets or sets a value indicating whether to hide the viewer application’s
+        /// tool bars when the document is active.
         /// </summary>
         public bool HideToolbar
         {
@@ -93,15 +93,12 @@ namespace PdfSharp.Pdf
         {
             get
             {
-                switch (Elements.GetName(Keys.Direction))
+                return Elements.GetName(Keys.Direction) switch
                 {
-                    case "L2R":
-                        return PdfReadingDirection.LeftToRight;
-
-                    case "R2L":
-                        return PdfReadingDirection.RightToLeft;
-                }
-                return null;
+                    "L2R" => PdfReadingDirection.LeftToRight,
+                    "R2L" => PdfReadingDirection.RightToLeft,
+                    _ => null
+                };
             }
             set
             {

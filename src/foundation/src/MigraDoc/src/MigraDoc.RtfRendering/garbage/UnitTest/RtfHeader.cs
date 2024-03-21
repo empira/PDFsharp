@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using MigraDoc.DocumentObjectModel;
 
 #if UNITTEST
@@ -40,7 +39,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       styleB.ParagraphFormat.TabStops.RemoveTabStop(100);
       docRenderer.Render(doc, "RtfHeader.txt", null);
       System.IO.File.Copy("RtfHeader.txt", "RtfHeader.rtf", true);
-      System.Diagnostics.Process.Start("RtfHeader.txt");
+      System.Diagnostics.Process.Sta/rt("RtfHeader.txt");
     }
   }
 }

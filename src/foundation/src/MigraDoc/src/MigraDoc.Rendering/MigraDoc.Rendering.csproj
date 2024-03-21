@@ -30,6 +30,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Rendering.Resources\Messages.de.restext" />
     <None Remove="Rendering.Resources\Messages.restext" />
   </ItemGroup>

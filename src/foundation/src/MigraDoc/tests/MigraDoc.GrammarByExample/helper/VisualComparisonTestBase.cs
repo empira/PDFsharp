@@ -112,11 +112,9 @@ namespace GdiGrammarByExample
             try
             {
                 // The Grammar By Example files still have ANSI encoding.
-                using (var streamReader = new StreamReader(DdlGbeTestBase.WslPathHack(file), ansiEncoding))
-                {
-                    reader = new DdlReader(streamReader); //, _errorManager);
-                    document = reader.ReadDocument();
-                }
+                using var streamReader = new StreamReader(DdlGbeTestBase.WslPathHack(file), ansiEncoding);
+                reader = new DdlReader(streamReader); //, _errorManager);
+                document = reader.ReadDocument();
             }
             finally
             {

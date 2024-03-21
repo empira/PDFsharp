@@ -13,6 +13,7 @@ using System.Drawing.Imaging;
 #endif
 #endif
 using PdfSharp.Drawing;
+using PdfSharp.Events;
 using PdfSharp.Pdf;
 
 // ReSharper disable ConvertToAutoProperty
@@ -307,24 +308,11 @@ namespace PdfSharp.Quality
 #if true //GDI || WPF
             // ... and start a viewer.
             if (startViewer)
-                Process.Start(new ProcessStartInfo(filepath) { UseShellExecute = true });
+                PdfFileUtility.ShowDocument(filepath);
+
 #endif
             return filepath;
         }
-
-        //#if UWP
-        //        public async void UwpSaveAndShowFile(byte[] sourceBytes, string filepath = "", bool startViewer = false)
-        //        {
-        //            filepath = CompleteFilePath(sourceBytes, filepath);
-
-        //            var localFolder = ApplicationData.Current.LocalFolder;
-        //            StorageFile file = await localFolder.CreateFileAsync(filepath, CreationCollisionOption.ReplaceExisting);
-        //            var stream = await file.OpenStreamForWriteAsync();
-        //            stream.Write(sourceBytes, 0, sourceBytes.Length);
-        //            stream.Flush();
-        //            stream.Dispose();
-        //        }
-        //#endif
 
         string CompleteFilePath(byte[]? sourceBytes, string filepath)
         {
@@ -414,7 +402,7 @@ namespace PdfSharp.Quality
             var image = new Bitmap(width, height);
 
             var gfx = Graphics.FromImage(image);
-            var xgfx = XGraphics.FromGraphics(gfx, new XSize(width, height), XGraphicsUnit.Presentation);
+            var xgfx = XGraphics.FromGraphics(gfx, new XSize(width, height), XGraphicsUnit.Presentation, new RenderEvents());
             //xgfx.DrawLine(XPens.Blue, 10, 10, 100, 100);
             xgfx.ScaleTransform(factor);
             XGraphics = xgfx;

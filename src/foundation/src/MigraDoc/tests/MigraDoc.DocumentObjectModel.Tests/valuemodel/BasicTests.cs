@@ -1,6 +1,9 @@
-using FluentAssertions;
+// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
 using MigraDoc.DocumentObjectModel.Tables;
 using Xunit;
+using FluentAssertions;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {

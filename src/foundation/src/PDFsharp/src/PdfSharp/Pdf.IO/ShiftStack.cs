@@ -4,6 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using PdfSharp.Pdf.Advanced;
+
+#if true_ // #DELETE
 
 namespace PdfSharp.Pdf.IO
 {
@@ -13,16 +16,15 @@ namespace PdfSharp.Pdf.IO
     /// </summary>
     class ShiftStack
     {
-        // TODO: make Lexer.PeekChars(20) and scan for 'R' to detect indirect references
-
+#if DEBUG_
         public ShiftStack()
         {
-            _items = new List<PdfItem>();
+            GetType();
         }
-
+#endif
         public PdfItem[] ToArray(int start, int length)
         {
-            PdfItem[] items = new PdfItem[length];
+            var items = new PdfItem[length];
             for (int i = 0, j = start; i < length; i++, j++)
                 items[i] = _items[j];
             return items;
@@ -34,8 +36,7 @@ namespace PdfSharp.Pdf.IO
         // ReSharper disable InconsistentNaming
         public int SP
         // ReSharper restore InconsistentNaming
-            =>
-                _sp;
+            => _sp;
 
         /// <summary>
         /// Gets the value at the specified index. Valid index is in range 0 up to sp-1.
@@ -75,6 +76,10 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public void Shift(PdfItem item)
         {
+#if DEBUG_
+            if (item is PdfReference reference)
+                reference.GetType();
+#endif
             Debug.Assert(item != null);
             _items.Add(item);
             _sp++;
@@ -96,6 +101,10 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public void Reduce(PdfItem item, int count)
         {
+#if DEBUG_
+            if (item is PdfReference reference)
+                reference.GetType();
+#endif
             Debug.Assert(item != null);
             Reduce(count);
             _items.Add(item);
@@ -110,6 +119,7 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// An array representing the stack.
         /// </summary>
-        readonly List<PdfItem> _items;
+        readonly List<PdfItem> _items = [];
     }
 }
+#endif

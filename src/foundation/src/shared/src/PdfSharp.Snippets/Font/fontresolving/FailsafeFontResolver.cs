@@ -24,7 +24,7 @@ namespace PdfSharp.Snippets.Font
             var result = PlatformFontResolver.ResolveTypeface(familyName, isBold, isItalic);
             if (result != null)
             {
-                logger.LogInformation($"{typefaceName} resolved by PlatformFontResolver.");
+                logger.LogWarning($"{typefaceName} resolved by PlatformFontResolver.");
                 return result;
             }
 
@@ -32,7 +32,7 @@ namespace PdfSharp.Snippets.Font
             result = SegoeWpFontResolver.ResolveTypeface(familyName, isBold, isItalic);
             if (result != null)
             {
-                logger.LogInformation($"{typefaceName} resolved by SegoeWpFontResolver.");
+                logger.LogWarning($"{typefaceName} resolved by SegoeWpFontResolver.");
                 return result;
             }
 
@@ -44,7 +44,7 @@ namespace PdfSharp.Snippets.Font
             Debug.Assert(result != null);
 
             // No use of LoggerMessages here because this code is only for development.
-            logger.LogInformation($"{typefaceName} was substituted by a SegoeWP font.");
+            logger.LogWarning($"{typefaceName} was substituted by a SegoeWP font.");
 
             return result;
         }

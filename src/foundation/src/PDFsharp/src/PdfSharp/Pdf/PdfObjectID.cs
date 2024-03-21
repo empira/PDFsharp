@@ -79,19 +79,19 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Returns the hash code for this instance.
         /// </summary>
-        public override int GetHashCode() 
+        public override int GetHashCode()
             => _objectNumber ^ _generationNumber;
 
         /// <summary>
         /// Determines whether the two objects are equal.
         /// </summary>
-        public static bool operator ==(PdfObjectID left, PdfObjectID right) 
+        public static bool operator ==(PdfObjectID left, PdfObjectID right)
             => left.Equals(right);
 
         /// <summary>
         /// Determines whether the two objects are not equal.
         /// </summary>
-        public static bool operator !=(PdfObjectID left, PdfObjectID right) 
+        public static bool operator !=(PdfObjectID left, PdfObjectID right)
             => !left.Equals(right);
 
         /// <summary>
@@ -104,10 +104,10 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Creates an empty object identifier.
         /// </summary>
-        public static PdfObjectID Empty => new PdfObjectID();
+        public static PdfObjectID Empty => new();
 
         /// <summary>
-        /// Compares the current object id with another object.
+        /// Compares the current object ID with another object.
         /// </summary>
         public int CompareTo(object? obj)
         {

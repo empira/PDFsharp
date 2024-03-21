@@ -12,14 +12,6 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472-windows|AnyCPU'">
-      <WarningLevel>0</WarningLevel>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472-windows|AnyCPU'">
-      <WarningLevel>0</WarningLevel>
-    </PropertyGroup>
-
     <ItemGroup>
         <Compile Include="..\PdfSharp.Charting\Charting.Renderers\AreaChartRenderer.cs">
             <Link>Charting.Renderers\AreaChartRenderer.cs</Link>
@@ -288,7 +280,7 @@
         <Compile Include="..\PdfSharp.Charting\Properties\GlobalDeclarations.cs">
             <Link>Properties\GlobalDeclarations.cs</Link>
         </Compile>
-        <Compile Include="..\pdfsharp\root\VersionInfo.cs">
+        <Compile Include="..\PdfSharp\root\VersionInfo.cs">
             <Link>root\VersionInfo.cs</Link>
         </Compile>
     </ItemGroup>

@@ -1,8 +1,12 @@
-using MigraDoc.DocumentObjectModel.Fields;
-using MigraDoc.Rendering;
+// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
 using PdfSharp.Fonts;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
+using MigraDoc.DocumentObjectModel.Fields;
+using MigraDoc.Rendering;
+using PdfSharp.Quality;
 using Xunit;
 
 namespace MigraDoc.DocumentObjectModel.Tests
@@ -42,10 +46,10 @@ namespace MigraDoc.DocumentObjectModel.Tests
             pdfRenderer.RenderDocument();
 
             // Save the document...
-            var filename = PdfFileHelper.CreateTempFileName("HelloWorld");
+            var filename = PdfFileUtility.GetTempPdfFileName("HelloWorld");
             pdfRenderer.PdfDocument.Save(filename);
             // ...and start a viewer.
-            PdfFileHelper.StartPdfViewerIfDebugging(filename);
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
         /// <summary>

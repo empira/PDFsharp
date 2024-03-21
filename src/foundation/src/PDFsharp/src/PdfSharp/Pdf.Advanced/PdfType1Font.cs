@@ -6,7 +6,6 @@
 using System;
 using System.Collections;
 using System.Text;
-using System.IO;
 using PdfSharp.Internal;
 
 namespace PdfSharp.Pdf.Advanced

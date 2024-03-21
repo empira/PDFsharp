@@ -10,6 +10,9 @@ using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Internal;
 
+#pragma warning disable IDE0056
+#pragma warning disable IDE0057
+
 namespace PdfSharp.Pdf
 {
     /// <summary>
@@ -351,9 +354,6 @@ namespace PdfSharp.Pdf
 
         void SplitDestinationPage(PdfArray destination)  // Reference: 8.2  Destination syntax / Page 582
         {
-            // ReSharper disable HeuristicUnreachableCode
-#pragma warning disable 162
-
             // The destination page may not yet have been transformed to PdfPage.
             var destPage = (PdfDictionary)((PdfReference)destination.Elements[0]).Value;
             if (destPage is not PdfPage page)
@@ -362,7 +362,9 @@ namespace PdfSharp.Pdf
             DestinationPage = page;
             if (destination.Elements[1] is PdfName type)
             {
+#pragma warning disable CA1846
                 PageDestinationType = (PdfPageDestinationType)Enum.Parse(typeof(PdfPageDestinationType), type.Value.Substring(1), true);
+#pragma warning restore CA1846
                 switch (PageDestinationType)
                 {
                     // [page /XYZ left top zoom] -- left, top, and zoom can be null.
@@ -412,12 +414,11 @@ namespace PdfSharp.Pdf
                         break;
 
                     default:
-                        throw new ArgumentOutOfRangeException();
+#pragma warning disable CA2208
+                        throw new ArgumentOutOfRangeException(nameof(PageDestinationType));
+#pragma warning restore CA2208
                 }
             }
-
-#pragma warning restore 162
-            // ReSharper restore HeuristicUnreachableCode
         }
 
         void InitializeChildren()
@@ -458,7 +459,7 @@ namespace PdfSharp.Pdf
                 {
                     // Case: This is the outline dictionary (the root).
                     // Reference: TABLE 8.3  Entries in the outline dictionary / Page 585
-                    Debug.Assert(_outlines != null && _outlines.Count > 0 && _outlines[0] != null);
+                    Debug.Assert(_outlines is { Count: > 0 } && _outlines[0] != null);
                     Elements[Keys.First] = _outlines[0].Reference;
                     Elements[Keys.Last] = _outlines[_outlines.Count - 1].Reference;
 
@@ -517,67 +518,49 @@ namespace PdfSharp.Pdf
 
         PdfArray CreateDestArray()
         {
-            PdfArray? dest;
-            switch (PageDestinationType)
+            PdfArray? dest = PageDestinationType switch
             {
                 // [page /XYZ left top zoom]
-                case PdfPageDestinationType.Xyz:
-                    dest = new PdfArray(Owner,
-                        DestinationPage.ReferenceNotNull, new PdfLiteral($"/XYZ {Fd(Left)} {Fd(Top)} {Fd(Zoom)}"));
-                    break;
+                PdfPageDestinationType.Xyz => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                    new PdfLiteral($"/XYZ {Fd(Left)} {Fd(Top)} {Fd(Zoom)}")),
 
                 // [page /Fit]
-                case PdfPageDestinationType.Fit:
-                    dest = new PdfArray(Owner,
-                        DestinationPage.ReferenceNotNull, new PdfLiteral("/Fit"));
-                    break;
+                PdfPageDestinationType.Fit => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                    new PdfLiteral("/Fit")),
 
                 // [page /FitH top]
-                case PdfPageDestinationType.FitH:
-                    dest = new PdfArray(Owner,
-                        DestinationPage.ReferenceNotNull, new PdfLiteral($"/FitH {Fd(Top)}"));
-                    break;
+                PdfPageDestinationType.FitH => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                    new PdfLiteral($"/FitH {Fd(Top)}")),
 
                 // [page /FitV left]
-                case PdfPageDestinationType.FitV:
-                    dest = new PdfArray(Owner,
-                        DestinationPage.ReferenceNotNull, new PdfLiteral($"/FitV {Fd(Left)}"));
-                    break;
+                PdfPageDestinationType.FitV => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                    new PdfLiteral($"/FitV {Fd(Left)}")),
 
                 // [page /FitR left bottom right top]
-                case PdfPageDestinationType.FitR:
-                    dest = new PdfArray(Owner,
-                        DestinationPage.ReferenceNotNull, new PdfLiteral($"/FitR {Fd(Left)} {Fd(Bottom)} {Fd(Right)} {Fd(Top)}"));
-                    break;
+                PdfPageDestinationType.FitR => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                    new PdfLiteral($"/FitR {Fd(Left)} {Fd(Bottom)} {Fd(Right)} {Fd(Top)}")),
 
                 // [page /FitB]
-                case PdfPageDestinationType.FitB:
-                    dest = new PdfArray(Owner,
-                        DestinationPage.ReferenceNotNull, new PdfLiteral("/FitB"));
-                    break;
+                PdfPageDestinationType.FitB => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                    new PdfLiteral("/FitB")),
 
                 // [page /FitBH top]
-                case PdfPageDestinationType.FitBH:
-                    dest = new PdfArray(Owner,
-                        DestinationPage.ReferenceNotNull, new PdfLiteral($"/FitBH {Fd(Top)}"));
-                    break;
+                PdfPageDestinationType.FitBH => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                    new PdfLiteral($"/FitBH {Fd(Top)}")),
 
                 // [page /FitBV left]
-                case PdfPageDestinationType.FitBV:
-                    dest = new PdfArray(Owner,
-                        DestinationPage.ReferenceNotNull, new PdfLiteral($"/FitBV {Fd(Left)}"));
-                    break;
+                PdfPageDestinationType.FitBV => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                    new PdfLiteral($"/FitBV {Fd(Left)}")),
 
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                _ => throw new ArgumentOutOfRangeException()
+            };
             return dest;
         }
 
         /// <summary>
         /// Format double.
         /// </summary>
-        string Fd(double value)
+        static string Fd(double value)
         {
             if (Double.IsNaN(value))
                 throw new InvalidOperationException("Value is not a valid Double.");
@@ -589,7 +572,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Format nullable double.
         /// </summary>
-        string Fd(double? value)
+        static string Fd(double? value)
         {
             return value.HasValue ? value.Value.ToString("#.##", CultureInfo.InvariantCulture) : "null";
         }
@@ -617,9 +600,9 @@ namespace PdfSharp.Pdf
         }
 
 #if DEBUG
-        string FilterUnicode(string text)
+        static string FilterUnicode(string text)
         {
-            StringBuilder result = new StringBuilder();
+            var result = new StringBuilder();
             foreach (char ch in text)
                 result.Append((uint)ch < 256 ? (ch != '\r' && ch != '\n' ? ch : ' ') : '?');
             return result.ToString();

@@ -12,19 +12,14 @@ using GdiFont = System.Drawing.Font;
 using GdiFontStyle = System.Drawing.FontStyle;
 #endif
 #if WPF
-using System.IO;
-//using System.Windows;
-//using System.Windows.Documents;
-//using System.Windows.Media;
 using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfTypeface = System.Windows.Media.Typeface;
 using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
 #endif
-//using PdfSharp.Fonts;
-#if !EDF_CORE
 using PdfSharp.Drawing;
 //using PdfSharp.Internal;
-#endif
+//using PdfSharp.Fonts;
+using PdfSharp.Fonts.Internal;
 
 using Fixed = System.Int32;
 using FWord = System.Int16;
@@ -35,36 +30,36 @@ using UFWord = System.UInt16;
 namespace PdfSharp.Fonts.OpenType
 {
     /// <summary>
-    /// Represents an OpenType fontface in memory.
+    /// Represents an OpenType font face in memory.
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
-    sealed class OpenTypeFontface
+    sealed class OpenTypeFontFace  // Note: In english, it's spelled 'typeface', but 'font face'.
     {
         // Implementation Notes
-        // OpenTypeFontface represents a 'decompiled' font file in memory.
+        // OpenTypeFontFace represents a 'decompiled' font file in memory.
         //
-        // * An OpenTypeFontface can belong to more than one 
+        // * An OpenTypeFontFace can belong to more than one 
         //   XGlyphTypeface because of StyleSimulations.
         //
-        // * Currently there is a one to one relationship to XFontSource.
+        // * Currently there is a one-to-one relationship to XFontSource.
         // 
-        // * Consider OpenTypeFontface as an decompiled XFontSource.
+        // * Consider OpenTypeFontFace as a decompiled XFontSource.
         //
         // http://www.microsoft.com/typography/otspec/
 
         /// <summary>
         /// Shallow copy for font subset.
         /// </summary>
-        OpenTypeFontface(OpenTypeFontface fontface)
+        OpenTypeFontFace(OpenTypeFontFace fontFace)
         {
-            _offsetTable = fontface._offsetTable;
-            _fullFaceName = fontface._fullFaceName;
+            _offsetTable = fontFace._offsetTable;
+            _fullFaceName = fontFace._fullFaceName;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OpenTypeFontface"/> class.
+        /// Initializes a new instance of the <see cref="OpenTypeFontFace"/> class.
         /// </summary>
-        public OpenTypeFontface(byte[] data, string faceName)
+        public OpenTypeFontFace(byte[] data, string faceName)
         {
             _fullFaceName = faceName;
             // Always save a copy of the font bytes.
@@ -74,23 +69,23 @@ namespace PdfSharp.Fonts.OpenType
             Read();
         }
 
-        public OpenTypeFontface(XFontSource fontSource)
+        public OpenTypeFontFace(XFontSource fontSource)
         {
             FontSource = fontSource;
             Read();
             _fullFaceName = name.FullFontName;
         }
 
-        public static OpenTypeFontface CetOrCreateFrom(XFontSource fontSource)
+        public static OpenTypeFontFace CetOrCreateFrom(XFontSource fontSource)
         {
-            if (OpenTypeFontfaceCache.TryGetFontface(fontSource.Key, out var fontface))
-                return fontface;
+            if (OpenTypeFontFaceCache.TryGetFontFace(fontSource.Key, out var fontFace))
+                return fontFace;
 
-            //  Each font source already contains its OpenTypeFontface.
-            Debug.Assert(fontSource.Fontface != null);
-            fontface = OpenTypeFontfaceCache.AddFontface(fontSource.Fontface);
-            Debug.Assert(ReferenceEquals(fontSource.Fontface, fontface));
-            return fontface;
+            //  Each font source already contains its OpenTypeFontFace.
+            Debug.Assert(fontSource.FontFace != null);
+            fontFace = OpenTypeFontFaceCache.AddFontFace(fontSource.FontFace);
+            Debug.Assert(ReferenceEquals(fontSource.FontFace, fontFace));
+            return fontFace;
         }
 
         /// <summary>
@@ -359,10 +354,17 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// Creates a new font image that is a subset of this font image containing only the specified glyphs.
         /// </summary>
-        public OpenTypeFontface CreateFontSubSet(Dictionary<uint, object> glyphs, bool cidFont)
+        public OpenTypeFontFace CreateFontSubSet(Dictionary<int, object?> glyphs, bool cidFont)
         {
+            // if (postscript outline)  // same as loca == null???
+            //    return this;
+
+            // Can we create a sub set?
+            if (loca == null!)
+                return this;
+
             // Create new font image
-            var fontData = new OpenTypeFontface(this);
+            var fontData = new OpenTypeFontFace(this);
 
             // Create new loca and glyf table
             var locaNew = new IndexToLocationTable();
@@ -390,11 +392,11 @@ namespace PdfSharp.Fonts.OpenType
 
             // Get closure of used glyphs.
             Debug.Assert(glyphs != null);
-            glyf.CompleteGlyphClosure(glyphs!);
+            glyf.CompleteGlyphClosure(glyphs);
 
             // Create a sorted array of all used glyphs.
             int glyphCount = glyphs.Count;
-            uint[] glyphArray = new uint[glyphCount];
+            int[] glyphArray = new int[glyphCount];
             glyphs.Keys.CopyTo(glyphArray, 0);
             Array.Sort(glyphArray);
 
@@ -414,7 +416,7 @@ namespace PdfSharp.Fonts.OpenType
             // Fill new glyf and loca table.
             int glyphOffset = 0;
             int glyphIndex = 0;
-            for (uint idx = 0; idx < numGlyphs; idx++)
+            for (int idx = 0; idx < numGlyphs; idx++)
             {
                 locaNew.LocaTable[idx] = glyphOffset;
                 if (glyphIndex < glyphCount && glyphArray[glyphIndex] == idx)
@@ -503,9 +505,9 @@ namespace PdfSharp.Fonts.OpenType
 
         public int Seek(string tag)
         {
-            if (TableDictionary.ContainsKey(tag))
+            if (TableDictionary.TryGetValue(tag, out var entry))
             {
-                _pos = TableDictionary[tag].Offset;
+                _pos = entry.Offset;
                 return _pos;
             }
             return -1;

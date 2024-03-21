@@ -12,26 +12,27 @@ namespace PdfSharp.Pdf
     public enum PdfFontEmbedding
     {
         /// <summary>
-        /// All fonts are embedded.
+        /// OpenType font programs with TrueType outline are embedded as a font subset.
+        /// OpenType font programs with PostScript outline are embedded as they are.
         /// </summary>
-        Always,
+        Automatic,
+        
+        /// <summary>
+        /// All fonts are embedded as they are.
+        /// </summary>
+        Always_,
 
         /// <summary>
         /// Fonts are not embedded. This is not an option anymore.
+        /// Treated as Default.
         /// </summary>
-        [Obsolete("Fonts must always be embedded.")]
+        [Obsolete("Fonts must always be embedded. Treated as Automatic.")]
         None,
 
         /// <summary>
-        /// Unicode fonts are embedded, WinAnsi fonts are not embedded.
+        /// Not yet implemented. Treated as Default.
         /// </summary>
-        [Obsolete("Fonts must always be embedded.")]
-        Default,
-
-        /// <summary>
-        /// Not yet implemented.
-        /// </summary>
-        [Obsolete("Fonts must always be embedded.")]
-        Automatic,
+        [Obsolete("Treated as Automatic.")]
+        Default_
     }
 }

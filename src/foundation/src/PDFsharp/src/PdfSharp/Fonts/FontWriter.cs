@@ -1,7 +1,7 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.IO;
+#pragma warning disable IDE0290
 
 namespace PdfSharp.Fonts
 {

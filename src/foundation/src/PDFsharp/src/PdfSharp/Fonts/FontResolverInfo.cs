@@ -1,18 +1,15 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Diagnostics;
-using System.Globalization;
 using PdfSharp.Drawing;
 #if CORE
-using System.Drawing;
+//using System.Drawing;
 #endif
 #if GDI
-using System.Drawing;
+//using System.Drawing;
 #endif
 #if WPF
-using System.Windows.Media;
+//using System.Windows.Media;
 #endif
 
 namespace PdfSharp.Fonts
@@ -30,7 +27,7 @@ namespace PdfSharp.Fonts
     // It seems that typeface and font family are synonyms in English.
     // In WPF a family name is used as a term for a bunch of fonts that share the same
     // characteristics, like Univers or Times New Roman.
-    // In WPF a fontface describes a request of a font of a particular font family, e.g.
+    // In WPF a font face describes a request of a font of a particular font family, e.g.
     // Univers medium bold italic.
     // In WPF a glyph typeface is the result of requesting a typeface, i.e. a physical font
     // plus the information whether bold and/or italic should be simulated.
@@ -60,12 +57,12 @@ namespace PdfSharp.Fonts
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public class FontResolverInfo
     {
-        const string KeyPrefix = "frik:";  // Font Resolver Info Key
+        const string KeySuffix = ":frik";  // Font Resolver Info Key
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FontResolverInfo"/> struct.
         /// </summary>
-        /// <param name="faceName">The name that uniquely identifies the fontface.</param>
+        /// <param name="faceName">The name that uniquely identifies the font face.</param>
         public FontResolverInfo(string faceName) :
             this(faceName, false, false, 0)
         { }
@@ -73,13 +70,13 @@ namespace PdfSharp.Fonts
         /// <summary>
         /// Initializes a new instance of the <see cref="FontResolverInfo"/> struct.
         /// </summary>
-        /// <param name="faceName">The name that uniquely identifies the fontface.</param>
+        /// <param name="faceName">The name that uniquely identifies the font face.</param>
         /// <param name="mustSimulateBold">Set to <c>true</c> to simulate bold when rendered. Not implemented and must be false.</param>
         /// <param name="mustSimulateItalic">Set to <c>true</c> to simulate italic when rendered.</param>
         /// <param name="collectionNumber">Index of the font in a true type font collection.
         /// Not yet implemented and must be zero.
         /// </param>
-        internal FontResolverInfo(string faceName, bool mustSimulateBold, bool mustSimulateItalic, int collectionNumber)
+        internal FontResolverInfo(string faceName, bool mustSimulateBold, bool mustSimulateItalic, int collectionNumber = 0)
         {
             if (String.IsNullOrEmpty(faceName))
                 throw new ArgumentNullException(nameof(faceName));
@@ -89,12 +86,13 @@ namespace PdfSharp.Fonts
             FaceName = faceName;
             MustSimulateBold = mustSimulateBold;
             MustSimulateItalic = mustSimulateItalic;
+            CollectionNumber = collectionNumber;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FontResolverInfo"/> struct.
         /// </summary>
-        /// <param name="faceName">The name that uniquely identifies the fontface.</param>
+        /// <param name="faceName">The name that uniquely identifies the font face.</param>
         /// <param name="mustSimulateBold">Set to <c>true</c> to simulate bold when rendered. Not implemented and must be false.</param>
         /// <param name="mustSimulateItalic">Set to <c>true</c> to simulate italic when rendered.</param>
         public FontResolverInfo(string faceName, bool mustSimulateBold, bool mustSimulateItalic)
@@ -104,7 +102,7 @@ namespace PdfSharp.Fonts
         /// <summary>
         /// Initializes a new instance of the <see cref="FontResolverInfo" /> struct.
         /// </summary>
-        /// <param name="faceName">The name that uniquely identifies the fontface.</param>
+        /// <param name="faceName">The name that uniquely identifies the font face.</param>
         /// <param name="styleSimulations">The style simulation flags.</param>
         public FontResolverInfo(string faceName, XStyleSimulations styleSimulations)
             : this(faceName,
@@ -116,15 +114,16 @@ namespace PdfSharp.Fonts
         /// Gets the font resolver info key for this object.
         /// </summary>
         internal string Key =>
-            _key ??= KeyPrefix
-                     + FaceName.ToLowerInvariant()
-                     + '/'
-                     + (MustSimulateBold ? "b+" : "b-")
-                     + (MustSimulateItalic ? "i+" : "i-");
+            _key ??= //KeyPrefix
+                FaceName.ToLowerInvariant()
+                + '/'
+                + (MustSimulateBold ? 'B' : 'b')
+                + (MustSimulateItalic ? 'I' : 'i')
+                + KeySuffix;
         string? _key;
 
         /// <summary>
-        /// A name that uniquely identifies the font (not the family), e.g. the file name of the font. PDFsharp does not use this
+        /// A name that uniquely identifies the font face (not the family), e.g. the file name of the font. PDFsharp does not use this
         /// name internally, but passes it to the GetFont function of the IFontResolver interface to retrieve the font data.
         /// </summary>
         public string FaceName { get; }
@@ -142,14 +141,14 @@ namespace PdfSharp.Fonts
         /// <summary>
         /// Gets the style simulation flags.
         /// </summary>
-        public XStyleSimulations StyleSimulations 
+        public XStyleSimulations StyleSimulations
             => (MustSimulateBold ? XStyleSimulations.BoldSimulation : 0) | (MustSimulateItalic ? XStyleSimulations.ItalicSimulation : 0);
 
         /// <summary>
         /// The number of the font in a TrueType font collection file. The number of the first font is 0.
         /// NOT YET IMPLEMENTED. Must be zero.
         /// </summary>
-        internal int CollectionNumber { get; } = 0;
+        internal int CollectionNumber { get; }
 
         /// <summary>
         /// Gets the DebuggerDisplayAttribute text.

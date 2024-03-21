@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <!-- USE_LONG_SIZE: Read/write PDF files larger than 2 GiB -->
+    <!-- USE_INDEX_AND_RANGE - experimental: Use Index and Range in .NET Standard and .NET 4.72 -->
+    <!-- SHARED_FONTDESCRIPTOR - temporary during development -->
+    <DefineConstants>$(DefineConstants);USE_LONG_SIZE;USE_INDEX_AND_RANGE;SHARED_FONTDESCRIPTOR</DefineConstants>
+  </PropertyGroup>
+</Project>

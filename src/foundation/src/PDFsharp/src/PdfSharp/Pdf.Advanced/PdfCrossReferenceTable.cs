@@ -10,7 +10,7 @@ namespace PdfSharp.Pdf.Advanced
     /// Represents the cross-reference table of a PDF document. 
     /// It contains all indirect objects of a document.
     /// </summary>
-    sealed class PdfCrossReferenceTable  // Must not be derive from PdfObject.
+    sealed class PdfCrossReferenceTable  // Must not be derived from PdfObject.
     {
         public PdfCrossReferenceTable(PdfDocument document)
         {
@@ -21,12 +21,12 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Represents the relation between PdfObjectID and PdfReference for a PdfDocument.
         /// </summary>
-        public Dictionary<PdfObjectID, PdfReference> ObjectTable = new Dictionary<PdfObjectID, PdfReference>();
+        public Dictionary<PdfObjectID, PdfReference> ObjectTable = [];
 
         internal bool IsUnderConstruction { get; set; }
 
         /// <summary>
-        /// Adds a cross reference entry to the table. Used when parsing the trailer.
+        /// Adds a cross-reference entry to the table. Used when parsing the trailer.
         /// </summary>
         public void Add(PdfReference iref)
         {
@@ -62,13 +62,27 @@ namespace PdfSharp.Pdf.Advanced
             ObjectTable.Add(value.ObjectID, value.ReferenceNotNull);
         }
 
+        /// <summary>
+        /// Adds a PdfObject to the table if it was not already in.
+        /// Return true if it was added, false otherwise.
+        /// </summary>
+        public bool TryAdd(PdfObject value)
+        {
+            if (value.ObjectID.IsEmpty || !ObjectTable.ContainsKey(value.ObjectID))
+            {
+                Add(value);
+                return true;
+            }
+            return false;
+        }
+
         public void Remove(PdfReference iref)
         {
             ObjectTable.Remove(iref.ObjectID);
         }
 
         /// <summary>
-        /// Gets a cross reference entry from an object identifier.
+        /// Gets a cross-reference entry from an object identifier.
         /// Returns null if no object with the specified ID exists in the object table.
         /// </summary>
         public PdfReference? this[PdfObjectID objectID]
@@ -154,7 +168,7 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         /// <summary>
-        /// Gets an array of all cross references in ascending order by their object identifier.
+        /// Gets an array of all cross-references in ascending order by their object identifier.
         /// </summary>
         internal PdfReference[] AllReferences
         {
@@ -511,7 +525,7 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         /// <summary>
-        /// Gets the cross reference to an object used for undefined indirect references.
+        /// Gets the cross-reference to an object used for undefined indirect references.
         /// </summary>
         public PdfReference DeadObject
         {

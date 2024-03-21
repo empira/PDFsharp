@@ -447,40 +447,6 @@ namespace PdfSharp.Quality
         }
 #endif
 
-#if true_ && (CORE || GDI || WPF)
-        protected async Task<string> SaveAndShowDocumentAsync(PdfDocument document, string filenameTag)
-        {
-            // Save the PDF document...
-            var filename = await SaveDocumentAsync(document, filenameTag);
-
-            // ... and start a viewer.
-            Process.Start(filename);
-
-            return filename;
-        }
-#endif
-
-        //#if NET/FX_CORE
-        //        protected async Task<string> SaveAndShowDocumentAsync(PdfDocument document, string filenameTag)
-        //        {
-        //            // Save the PDF document...
-        //            string filename = await SaveDocumentAsync(document, filenameTag);
-
-        //            // ... and start a viewer.
-        //            //Process.Start(filename);
-        //            return filename;
-        //        }
-        //#endif
-
-        //#if NET/FX_CORE
-        //        protected async Task<string> SaveDocumentAsync(PdfDocument document, string filenameTag)
-        //        {
-        //            var filename = String.Format("{0:N}_{1}_tempfile.pdf", Guid.NewGuid(), filenameTag);
-        //            document.Save(filename);
-        //            await Task.Factory.StartNew(() => { });
-        //            return filename;
-        //        }
-        //#endif
 
         /// <summary>
         /// Creates a HelloWorld document, optionally with custom message.
@@ -518,7 +484,7 @@ namespace PdfSharp.Quality
         /// <param name="doc">The PDF document.</param>
         public static XGraphics GfxForLastPage(PdfDocument doc)
         {
-            XGraphics gfx = XGraphics.FromPdfPage(doc.Pages[doc.Pages.Count - 1]);
+            XGraphics gfx = XGraphics.FromPdfPage(doc.Pages[^1]);
             return gfx;
         }
 

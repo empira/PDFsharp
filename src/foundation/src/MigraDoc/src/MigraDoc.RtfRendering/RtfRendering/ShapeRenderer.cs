@@ -634,7 +634,7 @@ namespace MigraDoc.RtfRendering
                 else if (val is Color col)
                 {
                     col = col.GetMixedTransparencyColor();
-                    valueStr = (col.R + (col.G * 256) + (col.B * 65536)).ToString();
+                    valueStr = (col.R + (col.G << 8) + (col.B << 16)).ToString();
                 }
                 else if (val is Enum)
                     valueStr = _enumTranslationTable[val].ToString()!;

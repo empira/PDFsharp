@@ -52,8 +52,8 @@ namespace PdfSharp.Snippets.Font
         /// Converts specified information about a required typeface into a specific font.
         /// </summary>
         /// <param name="familyName">Name of the font family.</param>
-        /// <param name="isBold">Set to <c>true</c> when a bold fontface is required.</param>
-        /// <param name="isItalic">Set to <c>true</c> when an italic fontface is required.</param>
+        /// <param name="isBold">Set to <c>true</c> when a bold font face is required.</param>
+        /// <param name="isItalic">Set to <c>true</c> when an italic font face is required.</param>
         /// <returns>
         /// Information about the physical font, or null if the request cannot be satisfied.
         /// </returns>
@@ -68,8 +68,8 @@ namespace PdfSharp.Snippets.Font
 
             string? faceName = null;
 
-            // In this sample family names are case sensitive. You can relax this in your own implementation
-            // and make them case insensitive.
+            // In this sample family names are case-sensitive. You can relax this in your own implementation
+            // and make them case-insensitive.
             switch (familyName.ToLower())
             {
                 case FamilyNames.Oblivious:
@@ -101,18 +101,15 @@ namespace PdfSharp.Snippets.Font
             // Note: PDFsharp never calls GetFont twice with the same face name.
 
             // Return the bytes of a font.
-            switch (faceName)
+            return faceName switch
             {
-                case FaceNames.Oblivious:
-                    return ExoticFontsDataHelper.Oblivious;
-
-                case FaceNames.XFiles:
-                    return ExoticFontsDataHelper.XFiles;
-            }
-            // PDFsharp never calls GetFont with a face name that was not returned by ResolveTypeface.
-            return FailsafeFontResolver.GetFont(faceName);
+                FaceNames.Oblivious => ExoticFontsDataHelper.Oblivious,
+                FaceNames.XFiles => ExoticFontsDataHelper.XFiles,
+                // PDFsharp never calls GetFont with a face name that was not returned by ResolveTypeface.
+                _ => FailsafeFontResolver.GetFont(faceName)
+            };
         }
 
-        static readonly FailsafeFontResolver FailsafeFontResolver = new FailsafeFontResolver();
+        static readonly FailsafeFontResolver FailsafeFontResolver = new();
     }
 }

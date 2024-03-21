@@ -1,7 +1,29 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netstandard2.0;net472-windows</TargetFrameworks>
+    <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
+    <!--
+    PDFsharp internal class RuntimeHelpers is visible in this assembly because of InternalsVisibleTo.
+    This conflics with mscorlib. -->
+    <NoWarn>CS1685</NoWarn>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);TRACE;CORE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants);TRACE;CORE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- May cause build/test errors under Linux. -->
+    <Using Remove="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\foundation\src\PDFsharp\src\PdfSharp\PdfSharp.csproj" />
+    <ProjectReference Include="..\..\..\foundation\src\shared\src\PdfSharp.Quality\PdfSharp.Quality.csproj" />
+  </ItemGroup>
 
 </Project>

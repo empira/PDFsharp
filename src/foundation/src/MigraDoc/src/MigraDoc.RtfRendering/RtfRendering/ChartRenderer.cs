@@ -2,17 +2,14 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics;
-using System.IO;
-#if !SILVERLIGHT
 using System.Drawing;
 #if !NETSTANDARD2_0_OR_GREATER
 using System.Drawing.Imaging;
 #endif
-#endif
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Shapes.Charts;
-//using MigraDoc.Rendering;
 using MigraDoc.RtfRendering.Resources;
+using PdfSharp.Events;
 #if WPF
 using PdfSharp.Drawing;
 using MigraDoc.Rendering;
@@ -187,7 +184,7 @@ namespace MigraDoc.RtfRendering
                 Bitmap bmp = new Bitmap(horzPixels, vertPixels);
 #if true
                 XGraphics gfx =
-                    XGraphics.CreateMeasureContext(new XSize(horzPixels, vertPixels), XGraphicsUnit.Point, XPageDirection.Downwards);
+                    XGraphics.CreateMeasureContext(new XSize(horzPixels, vertPixels), XGraphicsUnit.Point, XPageDirection.Downwards, new RenderEvents());
 #else
 #if GDI
                 XGraphics gfx = XGraphics.FromGraphics(Graphics.FromImage(bmp), new XSize(horzPixels, vertPixels));

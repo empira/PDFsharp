@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Compile Include="..\HelloWorld\Program.cs" Link="Program.cs" />
+    <!--<Compile Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />-->
   </ItemGroup>
 
   <ItemGroup>

@@ -94,7 +94,7 @@ namespace PdfSharp.Pdf.Advanced
                 y2 = pt2.Y;
             }
 
-            const string format = Config.SignificantFigures3;
+            const string format = Config.SignificantDecimalPlaces3;
             Elements[Keys.Coords] = new PdfLiteral("[{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "}]", x1, y1, x2, y2);
 
             //Elements[Keys.Background] = new PdfRawItem("[0 1 1]");

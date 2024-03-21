@@ -7,8 +7,8 @@
         <RootNamespace>PdfSharp.Charting</RootNamespace>
         <!--<UseWPF>true</UseWPF> not needed -->
         <UseWPF>true</UseWPF>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>annotations</Nullable>
+        <!--<ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>annotations</Nullable>-->
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -283,7 +283,7 @@
         <Compile Include="..\PdfSharp.Charting\Properties\GlobalDeclarations.cs">
             <Link>Properties\GlobalDeclarations.cs</Link>
         </Compile>
-        <Compile Include="..\pdfsharp\root\VersionInfo.cs">
+        <Compile Include="..\PdfSharp\root\VersionInfo.cs">
             <Link>root\VersionInfo.cs</Link>
         </Compile>
     </ItemGroup>

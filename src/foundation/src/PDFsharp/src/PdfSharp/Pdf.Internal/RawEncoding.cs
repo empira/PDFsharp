@@ -11,7 +11,7 @@ namespace PdfSharp.Pdf.Internal
     /// byte arrays because strings are much more handy than byte arrays.
     /// </summary>
     /// <remarks>
-    /// Raw encoded strings represent an array of bytes. Therefore a character greater than
+    /// Raw encoded strings represent an array of bytes. Therefore, a character greater than
     /// 255 is not valid in a raw encoded string.
     /// </remarks>
     public sealed class RawEncoding : Encoding
@@ -33,10 +33,7 @@ namespace PdfSharp.Pdf.Internal
         /// <returns>
         /// The number of bytes produced by encoding the specified characters.
         /// </returns>
-        public override int GetByteCount(char[] chars, int index, int count)
-        {
-            return count;
-        }
+        public override int GetByteCount(char[] chars, int index, int count) => count;
 
         /// <summary>
         /// When overridden in a derived class, encodes a set of characters from the specified character array into the specified byte array.
@@ -75,10 +72,7 @@ namespace PdfSharp.Pdf.Internal
         /// <returns>
         /// The number of characters produced by decoding the specified sequence of bytes.
         /// </returns>
-        public override int GetCharCount(byte[] bytes, int index, int count)
-        {
-            return count;
-        }
+        public override int GetCharCount(byte[] bytes, int index, int count) => count;
 
         /// <summary>
         /// When overridden in a derived class, decodes a sequence of bytes from the specified byte array into the specified character array.
@@ -105,10 +99,7 @@ namespace PdfSharp.Pdf.Internal
         /// <returns>
         /// The maximum number of bytes produced by encoding the specified number of characters.
         /// </returns>
-        public override int GetMaxByteCount(int charCount)
-        {
-            return charCount;
-        }
+        public override int GetMaxByteCount(int charCount) => charCount;
 
         /// <summary>
         /// When overridden in a derived class, calculates the maximum number of characters produced by decoding the specified number of bytes.
@@ -117,9 +108,6 @@ namespace PdfSharp.Pdf.Internal
         /// <returns>
         /// The maximum number of characters produced by decoding the specified number of bytes.
         /// </returns>
-        public override int GetMaxCharCount(int byteCount)
-        {
-            return byteCount;
-        }
+        public override int GetMaxCharCount(int byteCount) => byteCount;
     }
 }

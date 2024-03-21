@@ -1,39 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <OutputType>library</OutputType>
-        <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
-        <LangVersion>11.0</LangVersion>
-        <RootNamespace>PdfSharp</RootNamespace>
-        <DefineConstants>CORE</DefineConstants>
-    </PropertyGroup>
+  <PropertyGroup>
+    <OutputType>library</OutputType>
+    <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
+    <RootNamespace>PdfSharp</RootNamespace>
+    <DefineConstants>CORE</DefineConstants>
+  </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
-      <WarningLevel>0</WarningLevel>
-    </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
-      <WarningLevel>0</WarningLevel>
-    </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <Compile Remove="Forms\**" />
-        <Compile Remove="Windows\**" />
-        <EmbeddedResource Remove="Forms\**" />
-        <EmbeddedResource Remove="Windows\**" />
-        <None Remove="Forms\**" />
-        <None Remove="Windows\**" />
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Forms\**" />
+    <Compile Remove="Windows\**" />
+    <EmbeddedResource Remove="Forms\**" />
+    <EmbeddedResource Remove="Windows\**" />
+    <None Remove="Forms\**" />
+    <None Remove="Windows\**" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+    <InternalsVisibleTo Include="$(AssemblyName).TestHelper" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,9 +41,13 @@
     <None Remove="Resources\Messages.restext" />
   </ItemGroup>
 
-    <ItemGroup>
-        <EmbeddedResource Include="Resources\Messages.de.restext" />
-        <EmbeddedResource Include="Resources\Messages.restext" />
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="root\CompilerServices.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Messages.de.restext" />
+    <EmbeddedResource Include="Resources\Messages.restext" />
+  </ItemGroup>
 
 </Project>

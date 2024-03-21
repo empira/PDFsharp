@@ -64,41 +64,41 @@ namespace PdfSharp.Pdf.Security.Encryption
             {
                 // ... and get its code points.
                 var c = normalized[i];
-                int codepoint;
+                int codePoint;
                 int charCount;
                 if (Char.IsHighSurrogate(c))
                 {
-                    // Found a codepoint defined by two chars, the high surrogate and the following low surrogate.
-                    codepoint = Char.ConvertToUtf32(c, normalized[c + 1]);
+                    // Found a code point defined by two chars, the high surrogate and the following low surrogate.
+                    codePoint = Char.ConvertToUtf32(c, normalized[c + 1]);
                     charCount = 2;
                 }
                 else
                 {
-                    // Found a codepoint defined by one Char.
-                    codepoint = c;
+                    // Found a code point defined by one Char.
+                    codePoint = c;
                     charCount = 1;
                 }
 
                 // Step 3. Prohibit: SASLprep "2.3. Prohibited Output".
-                if (IsProhibited(codepoint))
-                    throw TH.ArgumentException_SASLprepProhibitedCharacter(codepoint, i);
+                if (IsProhibited(codePoint))
+                    throw TH.ArgumentException_SASLprepProhibitedCharacter(codePoint, i);
 
                 // Check for unassigned code points, if desired.
-                if (!allowUnassignedCodepoints && IsUnassignedCodePoint(codepoint))
-                    throw TH.ArgumentException_SASLprepProhibitedUnassignedCodepoint(codepoint, i);
+                if (!allowUnassignedCodepoints && IsUnassignedCodePoint(codePoint))
+                    throw TH.ArgumentException_SASLprepProhibitedUnassignedCodepoint(codePoint, i);
 
                 // Step 4. Check bidi: SASLprep "2.4. Bidirectional Characters" and stringprep "6. Bidirectional Characters"
                 // Check if the current code point is RandAlCat (stringprep "D.1 Characters with bidirectional property "R" or "AL")
                 // or LCat (stringprep "D.2 Characters with bidirectional property "L").
                 // To check bidirectional requirements determine if the string contains RandAlCat or LCat code points
                 // and if the first and the last code point is RandAlCat.
-                lastCodepointIsRandALCat = IsRandAlCat(codepoint);
+                lastCodepointIsRandALCat = IsRandAlCat(codePoint);
                 if (i == 0)
                     firstCodepointIsRandALCat = lastCodepointIsRandALCat;
 
                 containsRandALCat |= lastCodepointIsRandALCat;
 
-                containsLCat |= IsLCat(codepoint);
+                containsLCat |= IsLCat(codePoint);
 
                 // Increase i by the char count of the current code point and precede.
                 i += charCount;
@@ -153,20 +153,20 @@ namespace PdfSharp.Pdf.Security.Encryption
         }
 
         /// <summary>
-        /// Checks if a Unicode codepoint is prohibited in SASLprep.
+        /// Checks if a Unicode code point is prohibited in SASLprep.
         /// </summary>
-        static bool IsProhibited(int codepoint)
+        static bool IsProhibited(int codePoint)
         {
-            return IsNonAsciiSpace((char)codepoint)
-                   || IsAsciiControlCharacter((char)codepoint)
-                   || IsNonAsciiControlCharacter(codepoint)
-                   || IsPrivateUseCharacter(codepoint)
-                   || IsNonCharacterCodePoint(codepoint)
-                   || IsSurrogateCodePoint(codepoint)
-                   || IsInappropriateForPlainTextCharacter(codepoint)
-                   || IsInappropriateForCanonicalRepresentationCharacter(codepoint)
-                   || IsChangeDisplayPropertyDeprecatedCharacter(codepoint)
-                   || IsTaggingCharacter(codepoint);
+            return IsNonAsciiSpace((char)codePoint)
+                   || IsAsciiControlCharacter((char)codePoint)
+                   || IsNonAsciiControlCharacter(codePoint)
+                   || IsPrivateUseCharacter(codePoint)
+                   || IsNonCharacterCodePoint(codePoint)
+                   || IsSurrogateCodePoint(codePoint)
+                   || IsInappropriateForPlainTextCharacter(codePoint)
+                   || IsInappropriateForCanonicalRepresentationCharacter(codePoint)
+                   || IsChangeDisplayPropertyDeprecatedCharacter(codePoint)
+                   || IsTaggingCharacter(codePoint);
         }
 
         /// <summary>
@@ -179,11 +179,11 @@ namespace PdfSharp.Pdf.Security.Encryption
         }
 
         /// <summary>
-        /// Checks if a Unicode codepoint is part of stringprep "C.2.2 Non-ASCII control characters".
+        /// Checks if a Unicode code point is part of stringprep "C.2.2 Non-ASCII control characters".
         /// </summary>
-        static bool IsNonAsciiControlCharacter(int codepoint)
+        static bool IsNonAsciiControlCharacter(int codePoint)
         {
-            return codepoint is >= 0x0080 and <= 0x009F
+            return codePoint is >= 0x0080 and <= 0x009F
                 or 0x06DD
                 or 0x070F
                 or 0x180E
@@ -199,21 +199,21 @@ namespace PdfSharp.Pdf.Security.Encryption
         }
 
         /// <summary>
-        /// Checks if a Unicode codepoint is part of stringprep "C.3 Private use".
+        /// Checks if a Unicode code point is part of stringprep "C.3 Private use".
         /// </summary>
-        static bool IsPrivateUseCharacter(int codepoint)
+        static bool IsPrivateUseCharacter(int codePoint)
         {
-            return codepoint is >= 0xE000 and <= 0xF8FF 
+            return codePoint is >= 0xE000 and <= 0xF8FF 
                 or >= 0xF0000 and <= 0xFFFFD 
                 or >= 0x100000 and <= 0x10FFFD;
         }
 
         /// <summary>
-        /// Checks if a Unicode codepoint is part of stringprep "C.4 Non-character code points".
+        /// Checks if a Unicode code point is part of stringprep "C.4 Non-character code points".
         /// </summary>
-        static bool IsNonCharacterCodePoint(int codepoint)
+        static bool IsNonCharacterCodePoint(int codePoint)
         {
-            return codepoint is >= 0xFDD0 and <= 0xFDEF
+            return codePoint is >= 0xFDD0 and <= 0xFDEF
                 or >= 0xFFFE and <= 0xFFFF
                 or >= 0x1FFFE and <= 0x1FFFF
                 or >= 0x2FFFE and <= 0x2FFFF
@@ -234,35 +234,35 @@ namespace PdfSharp.Pdf.Security.Encryption
         }
 
         /// <summary>
-        /// Checks if a Unicode codepoint is part of stringprep "C.5 Surrogate codes".
+        /// Checks if a Unicode code point is part of stringprep "C.5 Surrogate codes".
         /// </summary>
-        static bool IsSurrogateCodePoint(int codepoint)
+        static bool IsSurrogateCodePoint(int codePoint)
         {
-            return codepoint is >= 0xD800 and <= 0xDFFF;
+            return codePoint is >= 0xD800 and <= 0xDFFF;
         }
 
         /// <summary>
-        /// Checks if a Unicode codepoint is part of stringprep "C.6 Inappropriate for plain text".
+        /// Checks if a Unicode code point is part of stringprep "C.6 Inappropriate for plain text".
         /// </summary>
-        static bool IsInappropriateForPlainTextCharacter(int codepoint)
+        static bool IsInappropriateForPlainTextCharacter(int codePoint)
         {
-            return codepoint is >= 0xFFF9 and <= 0xFFFD;
+            return codePoint is >= 0xFFF9 and <= 0xFFFD;
         }
 
         /// <summary>
-        /// Checks if a Unicode codepoint is part of stringprep "C.7 Inappropriate for canonical representation".
+        /// Checks if a Unicode code point is part of stringprep "C.7 Inappropriate for canonical representation".
         /// </summary>
-        static bool IsInappropriateForCanonicalRepresentationCharacter(int codepoint)
+        static bool IsInappropriateForCanonicalRepresentationCharacter(int codePoint)
         {
-            return codepoint is >= 0x2FF0 and <= 0x2FFB;
+            return codePoint is >= 0x2FF0 and <= 0x2FFB;
         }
 
         /// <summary>
-        /// Checks if a Unicode codepoint is part of stringprep "C.8 Change display properties or are deprecated".
+        /// Checks if a Unicode code point is part of stringprep "C.8 Change display properties or are deprecated".
         /// </summary>
-        static bool IsChangeDisplayPropertyDeprecatedCharacter(int codepoint)
+        static bool IsChangeDisplayPropertyDeprecatedCharacter(int codePoint)
         {
-            return codepoint is 0x0340
+            return codePoint is 0x0340
                 or 0x0341
                 or 0x200E
                 or 0x200F
@@ -271,20 +271,20 @@ namespace PdfSharp.Pdf.Security.Encryption
         }
 
         /// <summary>
-        /// Checks if a Unicode codepoint is part of stringprep "C.9 Tagging characters".
+        /// Checks if a Unicode code point is part of stringprep "C.9 Tagging characters".
         /// </summary>
-        static bool IsTaggingCharacter(int codepoint)
+        static bool IsTaggingCharacter(int codePoint)
         {
-            return codepoint is 0xE0001 
+            return codePoint is 0xE0001 
                 or >= 0xE0020 and <= 0xE007F;
         }
 
         /// <summary>
-        /// Checks if a Unicode codepoint is part of stringprep "D.1 Characters with bidirectional property "R" or "AL"".
+        /// Checks if a Unicode code point is part of stringprep "D.1 Characters with bidirectional property "R" or "AL"".
         /// </summary>
-        static bool IsRandAlCat(int codepoint)
+        static bool IsRandAlCat(int codePoint)
         {
-            return codepoint
+            return codePoint
                 is 0x05BE
                 or 0x05C0
                 or 0x05C3
@@ -322,11 +322,11 @@ namespace PdfSharp.Pdf.Security.Encryption
         }
 
         /// <summary>
-        /// Checks if a Unicode codepoint is part of stringprep "D.2 Characters with bidirectional property "L"".
+        /// Checks if a Unicode code point is part of stringprep "D.2 Characters with bidirectional property "L"".
         /// </summary>
-        static bool IsLCat(int codepoint)
+        static bool IsLCat(int codePoint)
         {
-            return codepoint
+            return codePoint
                 is >= 0x0041 and <= 0x005A
                 or >= 0x0061 and <= 0x007A
                 or 0x00AA
@@ -690,11 +690,11 @@ namespace PdfSharp.Pdf.Security.Encryption
         }
 
         /// <summary>
-        /// Checks if a Unicode codepoint is part of stringprep "A.1 Unassigned code points in Unicode 3.2".
+        /// Checks if a Unicode code point is part of stringprep "A.1 Unassigned code points in Unicode 3.2".
         /// </summary>
-        static bool IsUnassignedCodePoint(int codepoint)
+        static bool IsUnassignedCodePoint(int codePoint)
         {
-            return codepoint is 0x0221
+            return codePoint is 0x0221
                 or >= 0x0234 and <= 0x024F
                 or >= 0x02AE and <= 0x02AF
                 or >= 0x02EF and <= 0x02FF

@@ -2,7 +2,6 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics;
-using System.IO;
 using MigraDoc.DocumentObjectModel;
 using PdfSharp.Diagnostics;
 

@@ -1,7 +1,6 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.IO;
 using PdfSharp.Pdf;
 
 namespace PdfSharp.Drawing
@@ -72,15 +71,15 @@ namespace PdfSharp.Drawing
         internal ushort GetWord(int offset, bool bigEndian)
         {
             return (ushort)(bigEndian ?
-                GetByte(offset) * 256 + GetByte(offset + 1) :
-                GetByte(offset) + GetByte(offset + 1) * 256);
+                (GetByte(offset) << 8) + GetByte(offset + 1) :
+                GetByte(offset) + (GetByte(offset + 1) << 8));
         }
 
         internal uint GetDWord(int offset, bool bigEndian)
         {
             return (uint)(bigEndian ?
-                GetWord(offset, true) * 65536 + GetWord(offset + 2, true) :
-                GetWord(offset, false) + GetWord(offset + 2, false) * 65536);
+                (GetWord(offset, true) << 16) + GetWord(offset + 2, true) :
+                GetWord(offset, false) + (GetWord(offset + 2, false) << 16));
         }
 
         //static void CopyStream(Stream input, Stream output)

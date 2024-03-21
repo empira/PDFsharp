@@ -1,12 +1,12 @@
-﻿# PDFsharp & MigraDoc 6.0
+﻿# PDFsharp & MigraDoc 6
 
-Version **6.1.0-preview-1**  
-Published **2023-12-21**
+Version **6.1.0-preview-2**  
+Published **2024-03-21**
 
-This is a preview version of the **PDFsharp** project, the main project of PDFsharp & MigraDoc 6.0 with updates for C# 10 and .NET 6.0.
+This is a preview version of the **PDFsharp** project, the main project of PDFsharp & MigraDoc 6 with updates for C# 12 and .NET 6.
 
-PDFsharp: Copyright (c) 2005-2023 empira Software GmbH, Troisdorf (Cologne Area, Germany)  
-MigraDoc: Copyright (c) 2001-2023 empira Software GmbH, Troisdorf (Cologne Area, Germany)  
+PDFsharp: Copyright (c) 2005-2024 empira Software GmbH, Troisdorf (Cologne Area), Germany
+MigraDoc: Copyright (c) 2001-2024 empira Software GmbH, Troisdorf (Cologne Area), Germany
 Published Open Source under the [MIT License](https://docs.pdfsharp.net/LICENSE.html)
 
 For more information see [docs.pdfsharp.net](https://docs.pdfsharp.net/)
@@ -15,7 +15,7 @@ For more information see [docs.pdfsharp.net](https://docs.pdfsharp.net/)
 
 Project documentation can be found on our DOCS site: <https://docs.pdfsharp.net>.
 
-Note: PowerShell 7 or higher is required to execute the PowerShell scripts that come with PDFsharp.
+Note: PowerShell 7 is required to execute the PowerShell scripts that come with PDFsharp.
 
 ### Download assets first
 
@@ -23,7 +23,10 @@ Assets like bitmaps, fonts, or PDF files are not part of the repository anymore.
 You must download them before compiling the solution for the first time.
 Use `download-assets.ps1` in the `dev` folder to create `assets` folder required for some unit tests and needed by some projects.
 
-Execute `.\dev\download-assets.ps1`
+Execute 
+```ps
+.\dev\download-assets.ps1
+```
 
 ### Build the solution
 

@@ -31,6 +31,10 @@ namespace MigraDoc.DocumentObjectModel.Internals
         {
 #if NET6_0_OR_GREATER
             int dot = name.IndexOf('.', StringComparison.Ordinal);
+#else
+            int dot = name.IndexOf(".", StringComparison.Ordinal);
+#endif
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
             if (dot == 0)
                 throw new ArgumentException(DomSR.InvalidValueName(name));
             string? trail = null;
@@ -40,7 +44,6 @@ namespace MigraDoc.DocumentObjectModel.Internals
                 name = name[..dot];
             }
 #else
-            int dot = name.IndexOf(".", StringComparison.Ordinal);
             if (dot == 0)
                 throw new ArgumentException(DomSR.InvalidValueName(name));
             string? trail = null;
@@ -87,7 +90,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
             string? trail = null;
             if (dot > 0)
             {
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
                 trail = name[(dot + 1)..];
                 name = name[..dot];
 #else
@@ -160,7 +163,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
             string? trail = null;
             if (dot > 0)
             {
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
                 trail = name[(dot + 1)..];
                 name = name[..dot];
 #else

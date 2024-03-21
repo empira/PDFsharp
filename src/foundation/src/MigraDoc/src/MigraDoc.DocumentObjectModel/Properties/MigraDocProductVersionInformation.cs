@@ -32,19 +32,13 @@ namespace MigraDoc
         /// </summary>
         public static readonly string VersionMinor = GitVersionInformation.Minor;
 
-        ///// <summary>
-        ///// The build number of the product.
-        ///// </summary>
-        //[Obsolete("Build version is not used anymore because we switched to Semantic Versioning. Use VersionPatch instead.")]
-        //public const string VersionBuild = "xxxxx";  // DELETE
-
         /// <summary>
         /// The patch number of the product.
         /// </summary>
         public static readonly string VersionPatch = GitVersionInformation.Patch;
 
         /// <summary>
-        /// The Version Prerelease String for NuGet.
+        /// The Version pre-release string for NuGet.
         /// </summary>
         public static readonly string VersionPreRelease = GitVersionInformation.NuGetPreReleaseTagV2;
 
@@ -82,7 +76,7 @@ namespace MigraDoc
         /// <summary>
         /// The copyright information.
         /// </summary>
-        public const string Copyright = "Copyright © 2001-2023 empira Software GmbH."; // Also used as NuGet Copyright.
+        public const string Copyright = "Copyright © 2001-2024 empira Software GmbH."; // Also used as NuGet Copyright.
 
         /// <summary>
         /// The trademark of the product.

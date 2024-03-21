@@ -5,8 +5,6 @@
 using PdfSharp.Pdf.Filters;
 #endif
 #if WPF
-using System.IO;
-//using System.Windows.Media;
 #endif
 using PdfSharp.Drawing.Pdf;
 using PdfSharp.Pdf;
@@ -59,9 +57,9 @@ namespace PdfSharp.Drawing
         public XForm(XGraphics gfx, XSize size)
         {
             if (gfx == null)
-                throw new ArgumentNullException("gfx");
+                throw new ArgumentNullException(nameof(gfx));
             if (size.Width < 1 || size.Height < 1)
-                throw new ArgumentNullException("size", "The size of the XPdfForm is to small.");
+                throw new ArgumentNullException(nameof(size), "The size of the XPdfForm is to small.");
 
             _formState = FormState.Created;
             //templateSize = size;
@@ -186,6 +184,7 @@ namespace PdfSharp.Drawing
         }
         internal XGraphics Gfx = default!;
 
+#if true_
         /// <summary>
         /// Disposes this instance.
         /// </summary>
@@ -193,6 +192,7 @@ namespace PdfSharp.Drawing
         {
             base.Dispose(disposing);
         }
+#endif
 
         /// <summary>
         /// Sets the form in the state FormState.Finished.
@@ -200,18 +200,18 @@ namespace PdfSharp.Drawing
         internal virtual void Finish()
         {
 #if GDI
-            if (_formState == FormState.NotATemplate || _formState == FormState.Finished)
+            if (_formState is FormState.NotATemplate or FormState.Finished)
                 return;
 
             if (Gfx.Metafile != null)
                 _gdiImage = Gfx.Metafile;
 
-            Debug.Assert(_formState == FormState.Created || _formState == FormState.UnderConstruction);
+            Debug.Assert(_formState is FormState.Created or FormState.UnderConstruction);
             _formState = FormState.Finished;
             Gfx.Dispose();
             Gfx = null!;
 
-            if (PdfRenderer != null)
+            if (PdfRenderer != null!)
             {
                 //pdfForm.CreateStream(PdfEncoders.RawEncoding.GetBytes(PdfRenderer.GetContent()));
                 PdfRenderer.Close();
@@ -227,6 +227,7 @@ namespace PdfSharp.Drawing
             }
 #endif
 #if WPF
+            // Nothing to do in WPF case.
 #endif
         }
 
@@ -235,7 +236,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         internal PdfDocument Owner => _document;
 
-        PdfDocument _document = null!;
+        readonly PdfDocument _document = null!;
 
         /// <summary>
         /// Gets the color model used in the underlying PDF document.
@@ -358,19 +359,17 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Gets the resource name of the specified font within this form.
         /// </summary>
-        internal string GetFontName(XFont font, out PdfFont pdfFont)
+        internal string GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont)
         {
             Debug.Assert(IsTemplate, "This function is for form templates only.");
-            pdfFont = _document.FontTable.GetFont(font);
+            pdfFont = _document.FontTable.GetOrCreateFont(glyphTypeface, fontType);
             Debug.Assert(pdfFont != null);
             string name = Resources.AddFont(pdfFont);
             return name;
         }
 
-        string IContentStream.GetFontName(XFont font, out PdfFont pdfFont)
-        {
-            return GetFontName(font, out pdfFont);
-        }
+        string IContentStream.GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont) 
+            => GetFontName(glyphTypeface, fontType, out pdfFont);
 
         /// <summary>
         /// Tries to get the resource name of the specified font data within this form.
@@ -400,10 +399,8 @@ namespace PdfSharp.Drawing
             return name;
         }
 
-        string IContentStream.GetFontName(string idName, byte[] fontData, out PdfFont pdfFont)
-        {
-            return GetFontName(idName, fontData, out pdfFont);
-        }
+        string IContentStream.GetFontName(string idName, byte[] fontData, out PdfFont pdfFont) 
+            => GetFontName(idName, fontData, out pdfFont);
 
         /// <summary>
         /// Gets the resource name of the specified image within this form.
@@ -420,10 +417,8 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Implements the interface because the primary function is internal.
         /// </summary>
-        string IContentStream.GetImageName(XImage image)
-        {
-            return GetImageName(image);
-        }
+        string IContentStream.GetImageName(XImage image) 
+            => GetImageName(image);
 
         internal PdfFormXObject PdfForm
         {
@@ -451,10 +446,8 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Implements the interface because the primary function is internal.
         /// </summary>
-        string IContentStream.GetFormName(XForm form)
-        {
-            return GetFormName(form);
-        }
+        string IContentStream.GetFormName(XForm form) 
+            => GetFormName(form);
 
         /// <summary>
         /// The PdfFormXObject gets invalid when PageNumber or transform changed. This is because a modification

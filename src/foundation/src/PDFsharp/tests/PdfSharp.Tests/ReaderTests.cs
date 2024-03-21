@@ -1,4 +1,7 @@
-﻿using System;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -131,7 +134,7 @@ namespace PdfSharp.Tests
             //array.Elements.Add(new PdfStringObject("Foo_äöüß", PdfStringEncoding.Unicode));
             //page.Resources.Elements["/ReferenceTest"] = array;
 
-#if true
+#if true_
             doc.Save("temp.pdf");
 #endif
 
@@ -151,13 +154,17 @@ namespace PdfSharp.Tests
                 var item1 = array.Elements[x];
                 var item2 = array2.Elements[x];
                 var num2 = Double.Parse(item1.ToString()!, CultureInfo.InvariantCulture);
-                if (item2 is PdfInteger int2)
+                if (item2 is PdfInteger intValue)
                 {
-                    num2.Should().Be(int2.Value);
+                    num2.Should().Be(intValue.Value);
                 }
-                else if (item2 is PdfReal real2)
+                else if (item2 is PdfLongInteger longValue)
                 {
-                    num2.Should().Be(real2.Value);
+                    num2.Should().Be(longValue.Value);
+                }
+                else if (item2 is PdfReal realValue)
+                {
+                    num2.Should().Be(realValue.Value);
                 }
                 else
                 {

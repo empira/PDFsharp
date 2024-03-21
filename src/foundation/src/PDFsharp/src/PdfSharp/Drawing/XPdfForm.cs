@@ -7,7 +7,6 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 #endif
 #if WPF
-using System.IO;
 #endif
 using PdfSharp.Internal;
 using PdfSharp.Pdf;

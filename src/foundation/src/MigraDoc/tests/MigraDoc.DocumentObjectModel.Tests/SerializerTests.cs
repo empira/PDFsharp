@@ -1,8 +1,11 @@
-﻿using MigraDoc.DocumentObjectModel.IO;
-using FluentAssertions;
-using Xunit;
+﻿// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
 using MigraDoc.Rendering;
+using MigraDoc.DocumentObjectModel.IO;
 using MigraDoc.DocumentObjectModel.Tests.Helper;
+using Xunit;
+using FluentAssertions;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
@@ -1308,7 +1311,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var mdddl = DdlWriter.WriteToString(doc);
             mdddl.Should().NotBeNullOrEmpty();
 
-            mdddl = """" 
+            mdddl = """ 
                 \document
                 {
                     \section
@@ -1319,7 +1322,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
                       //}
                     }
                 }
-                """";
+                """;
 
             //GetType();
 

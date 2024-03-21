@@ -8,6 +8,19 @@ namespace PdfSharp.Pdf
     /// </summary>
     public abstract class PdfNumber : PdfItem
     {
-        // No code in base class.
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is a 32-bit signed integer.
+        /// </summary>
+        public bool IsInteger { get; protected set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is a 64-bit signed integer.
+        /// </summary>
+        public bool IsLongInteger { get; protected set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is a floating point number.
+        /// </summary>
+        public bool IsReal { get; protected set; }
     }
 }

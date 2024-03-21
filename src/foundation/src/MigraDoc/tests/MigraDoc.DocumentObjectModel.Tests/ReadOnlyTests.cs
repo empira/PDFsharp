@@ -1,8 +1,11 @@
-﻿using MigraDoc.DocumentObjectModel.Visitors;
-using Xunit;
-using FluentAssertions;
+﻿// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
+using MigraDoc.DocumentObjectModel.Visitors;
 using MigraDoc.DocumentObjectModel.IO;
 using MigraDoc.DocumentObjectModel.Tests.Helper;
+using Xunit;
+using FluentAssertions;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
@@ -17,7 +20,8 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var snapshot1 = new DocumentObjectSnapshot(doc);
 
             // Run the method which shall be tested to not change the document.
-            // If this Test fails, check which Property has not the expected value and set breakpoints while these lines are executed to examine if e. g. the property is accessed and created accidentally.
+            // If this Test fails, check which Property has not the expected value and set breakpoints
+            // while these lines are executed to examine if e.g. the property is accessed and created accidentally.
             var docClone = doc.Clone();
 
             // Create second snapshot and compare both snapshots.
@@ -34,7 +38,8 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var snapshot1 = new DocumentObjectSnapshot(doc);
 
             // Run the method which shall be tested to not change the document.
-            // If this Test fails, check which Property has not the expected value and set breakpoints while these lines are executed to examine if e. g. the property is accessed and created accidentally.
+            // If this Test fails, check which Property has not the expected value and set breakpoints
+            // while these lines are executed to examine if e.g. the property is accessed and created accidentally.
             // ReSharper disable once UnusedVariable
             var mdddl = DdlWriter.WriteToString(doc);
 
@@ -59,7 +64,8 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var snapshot1 = new DocumentObjectSnapshot(doc);
 
             // Run the method which shall be tested to not change the document.
-            // If this Test fails, check which Property has not the expected value and set breakpoints while these lines are executed to examine if e. g. the property is accessed and created accidentally.
+            // If this Test fails, check which Property has not the expected value and set breakpoints
+            // while these lines are executed to examine if e.g. the property is accessed and created accidentally.
             var elements = doc.GetElementsRecursively(true);
             // ReSharper disable once UnusedVariable
             var elementCount = elements.Count(); // Here GetElementsRecursively() is executed.
@@ -92,7 +98,8 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var snapshot1 = new DocumentObjectSnapshot(doc);
 
             // Run the method which shall be tested to not change the document.
-            // If this Test fails, check which Property has not the expected value and set breakpoints while these lines are executed to examine if e. g. the property is accessed and created accidentally.
+            // If this Test fails, check which Property has not the expected value and set breakpoints
+            // while these lines are executed to examine if e.g. the property is accessed and created accidentally.
             // ReSharper disable once UnusedVariable
             var text = cell.GetText();
 
@@ -125,9 +132,10 @@ namespace MigraDoc.DocumentObjectModel.Tests
             p.Format.Font.Size = 14;
 
             var snapshot1 = new DocumentObjectSnapshot(doc);
-            
+
             // Run the method which shall be tested to not change the document.
-            // If this Test fails, check which Property has not the expected value and set breakpoints while these lines are executed to examine if e. g. the property is accessed and created accidentally.
+            // If this Test fails, check which Property has not the expected value and set breakpoints
+            // while these lines are executed to examine if e.g. the property is accessed and created accidentally.
             var fontSize = p.GetUsedFormatValue(font => font.Size);
             var leftIndent = p.GetUsedFormatValue(format => format.LeftIndent);
             var fontColor = p.GetUsedFormatValue(format => format.Color, color => color == Color.Empty, Color.Empty);

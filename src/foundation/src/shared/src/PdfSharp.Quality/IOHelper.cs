@@ -1,50 +1,21 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+#if WPF
 using System.IO;
-using System.Text;
-//#if NET/FX_CORE || UWP || DNC10
-//using System.Threading.Tasks;
-//#endif
-using PdfSharp;
-using PdfSharp.Drawing;
+#endif
+using System.Reflection;
 using PdfSharp.Pdf;
 
 namespace PdfSharp.Quality
 {
     /// <summary>
-    /// Static helper functions for IO.
+    /// Static helper functions for file IO.
     /// </summary>
-    // ReSharper disable InconsistentNaming
-    public static class IOHelper
+    public static class IOHelper  // #RENAME IOUtility, PdfDocumentUtility, FontUtility
     // ReSharper restore InconsistentNaming
     {
-        /// <summary>
-        /// Creates a PDF test document.
-        /// </summary>
-        public static PdfDocument CreateNewPdfDocument()
-        {
-            var document = new PdfDocument();
-            document.Info.Title = "Created with PDFsharp";
-            document.Info.Subject = $"OS: {Environment.OSVersion}";
-            document.PageLayout = PdfPageLayout.SinglePage;
-            return document;
-        }
 
-        /// <summary>
-        /// Creates the name of a temporary PDF file.
-        /// The name ends with '_tempfile.pdf' to make it easy to delete it using the pattern '*_tempile.pdf'.
-        /// </summary>
-        public static string CreateTemporaryPdfFileName(string? namePrefix)
-        {
-            var uuid = Guid.NewGuid().ToString("N").ToUpperInvariant();
-            return String.IsNullOrEmpty(namePrefix)
-                ? $"{uuid}_tempfile.pdf"
-                : $"{namePrefix}-{uuid}_tempfile.pdf";
-        }
 
 #if true_
         protected async Task<string> SaveToStreamOrSaveToFileAsync(PdfDocument document, Stream stream, string filenameTag, bool show)
@@ -76,7 +47,7 @@ namespace PdfSharp.Quality
             var filename = await SaveDocumentAsync(document, filenameTag);
 
             // ... and start a viewer.
-            Process.Start(filename);
+            Process.St7art(filename);
 
             return filename;
         }
@@ -89,7 +60,7 @@ namespace PdfSharp.Quality
         //            string filename = await SaveDocumentAsync(document, filenameTag);
 
         //            // ... and start a viewer.
-        //            //Process.Start(filename);
+        //            //Process.St7art(filename);
         //            return filename;
         //        }
         //#endif

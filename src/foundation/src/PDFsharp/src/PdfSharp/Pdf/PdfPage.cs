@@ -4,6 +4,8 @@
 using System.ComponentModel;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Drawing;
+using PdfSharp.Internal.Logging;
+using PdfSharp.Logging;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Annotations;
 
@@ -531,19 +533,20 @@ namespace PdfSharp.Pdf
         /// </summary>
         PdfResources IContentStream.Resources => Resources;
 
+
         /// <summary>
         /// Gets the resource name of the specified font within this page.
         /// </summary>
-        internal string GetFontName(XFont font, out PdfFont pdfFont)
+        internal string GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont)
         {
-            pdfFont = _document.FontTable.GetFont(font);
+            pdfFont = _document.FontTable.GetOrCreateFont(glyphTypeface, fontType);
             Debug.Assert(pdfFont != null);
             string name = Resources.AddFont(pdfFont);
             return name;
         }
 
-        string IContentStream.GetFontName(XFont font, out PdfFont pdfFont)
-            => GetFontName(font, out pdfFont);
+        string IContentStream.GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont)
+            => GetFontName(glyphTypeface, fontType, out pdfFont);
 
         /// <summary>
         /// Tries to get the resource name of the specified font data within this page.
@@ -571,10 +574,8 @@ namespace PdfSharp.Pdf
             return name;
         }
 
-        string IContentStream.GetFontName(string idName, byte[] fontData, out PdfFont pdfFont)
-        {
-            return GetFontName(idName, fontData, out pdfFont);
-        }
+        string IContentStream.GetFontName(string idName, byte[] fontData, out PdfFont pdfFont) 
+            => GetFontName(idName, fontData, out pdfFont);
 
         /// <summary>
         /// Gets the resource name of the specified image within this page.

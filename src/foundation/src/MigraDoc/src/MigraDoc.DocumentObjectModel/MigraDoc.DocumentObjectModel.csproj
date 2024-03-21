@@ -29,7 +29,11 @@
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
 
-  <ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
     <None Remove="DocumentObjectModel.Resources\Messages.de.restext" />
     <None Remove="DocumentObjectModel.Resources\Messages.restext" />
   </ItemGroup>
@@ -47,4 +51,7 @@
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+  </ItemGroup>
 </Project>

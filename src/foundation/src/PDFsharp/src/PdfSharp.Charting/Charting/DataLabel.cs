@@ -47,7 +47,7 @@ namespace PdfSharp.Charting
         /// <summary>
         /// Gets or sets a numeric format string for the DataLabel.
         /// </summary>
-        public string Format { get; set; } = String.Empty;
+        public string Format { get; set; } = "";
 
         /// <summary>
         /// Gets the Font for the DataLabel.

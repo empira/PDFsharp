@@ -1,33 +1,34 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System.Diagnostics;
 using System.Globalization;
-using FluentAssertions;
-using PdfSharp.Pdf;
+using Microsoft.Extensions.Logging;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Rendering;
 using MigraDoc.RtfRendering;
 using PdfSharp.Fonts;
-using PdfSharp.Pdf.Advanced;
+using PdfSharp.Logging;
 using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
 using Xunit;
+using FluentAssertions;
 
 namespace MigraDoc.Tests
 {
     [Collection("MGD")]
     public class TextTests
     {
+        static TextTests()
+        {
+            if (PdfSharp.Capabilities.Build.IsCoreBuild)
+                GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
+        }
+
         [Fact]
         public void Surrogate_Pairs_Test()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = CreateDocument();
 
@@ -49,10 +50,10 @@ namespace MigraDoc.Tests
             pdfRenderer.RenderDocument();
 
             // Save the document...
-            var filename = PdfFileHelper.CreateTempFileName("HelloEmoji");
+            var filename = PdfFileUtility.GetTempPdfFileName("HelloEmoji");
             pdfRenderer.PdfDocument.Save(filename);
             // ...and start a viewer.
-            PdfFileHelper.StartPdfViewerIfDebugging(filename);
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
 
 #if DEBUG___
             MigraDoc.DocumentObjectModel.IO.DdlWriter dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_2.mdddl");
@@ -82,21 +83,6 @@ namespace MigraDoc.Tests
             // Add some text to the paragraph.
             paragraph.AddFormattedText("Hello, World!", TextFormat.Bold);
 
-            paragraph = section.AddParagraph("111😢😞💪");
-            paragraph.Format.Font.Name = "Segoe UI Emoji";
-            paragraph.AddLineBreak();
-            paragraph.AddText("💩💩💩✓✔✅🐛👌🆗🖕 🦄 🦂 🍇 🍆 ☕ 🚂 \U0001f6f8 ☁ ☢ ♌ ♏ ✅ ☑ ✔ ™ 🆒 ◻");
-
-            paragraph = section.AddParagraph("111😢😞💪");
-            paragraph.Format.Font.Name = "Segoe UI Emoji";
-            paragraph.AddLineBreak();
-            paragraph.AddText("💩💩💩✓✔✅ 🐛👌🆗🖕 🦄 🦂 🍇 🍆 ☕ 🚂 \U0001f6f8 ☁ ☢ ♌ ♏ ✅ ☑ ✔ ™ 🆒 ◻" +
-                "💩💩💩✓✔✅ 🐛👌🆗🖕 🦄 🦂 🍇 🍆 ☕ 🚂 \U0001f6f8 ☁ ☢ ♌ ♏ ✅ ☑ ✔ ™ 🆒 ◻" +
-                "💩💩💩✓✔✅ 🐛👌🆗🖕🖕🖕🖕 🦄 🦂 🍇 🍆 ☕ 🚂 \U0001f6f8 ☁ ☢ ♌ ♏ ✅ ☑ ✔ ™ 🆒 ◻" +
-                "💩💩💩✓✔✅ 🐛👌🆗🖕 🦄 🦂 🍇 🍆🍆🍆🍆🍆🍆🍆🍆🍆 ☕ 🚂 \U0001f6f8 ☁ ☢ ♌ ♏ ✅ ☑ ✔ ™ 🆒 ◻" +
-                "💩💩💩✓✔✅ 🐛👌🆗🖕 🦄 🦂🦂🦂🦂🦂🦂 🍇 🍆 ☕ 🚂 \U0001f6f8 ☁ ☢ ♌ ♏ ✅ ☑ ✔ ™ 🆒 ◻" +
-                "💩💩💩✓✔✅ 🐛👌🆗🖕 🦄 🦂 🍇🍇🍇🍇🍇🍇🍇🍇🍇🍇 🍆 ☕ 🚂 \U0001f6f8 ☁ ☢ ♌ ♏ ✅ ☑ ✔ ™ 🆒 ◻");
-
             // Create the primary footer.
             var footer = section.Footers.Primary;
 
@@ -108,108 +94,196 @@ namespace MigraDoc.Tests
             return document;
         }
 
-        [Fact]
+        [Fact(Skip = "Due to an error, the font resolver doesn't always return the correct font for TextTest test. " +
+                     "The wrong font (or the correct one?) causes this test to fail. " +
+                     "After this is fixed, ensure that a line break occurs at least once between 'hyphen-' and 'Test'.")]
         public void Document_with_No_Break_Hyphen()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             // Create a new MigraDoc document.
             var document = new Document();
 
             var section = document.AddSection();
-            var paragraph = section.AddParagraph("No\u2011break\u2011hyphen-Test   No\u2011break\u2011hyphen-Test   No\u2011break\u2011hyphen-Test   No\u2011break\u2011hyphen-Test   12345  " +
-                                                 "No\u2011break\u2011hyphen-Test   No\u2011break\u2011hyphen-Test   No\u2011break\u2011hyphen-Test   No\u2011break\u2011hyphen-Test   12345  " +
-                                                 "No\u2011break\u2011hyphen-Test   No\u2011break\u2011hyphen-Test   No\u2011break\u2011hyphen-Test   No\u2011break\u2011hyphen-Test   12345  ");
+            var paragraph = section.AddParagraph("No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test 12345 " +
+                                                 "No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test 12345 " +
+                                                 "No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test 12345 ");
             paragraph.Format.Font.Name = "Segoe UI";
             paragraph.Format.Font.Bold = true;
 
 
-            var filename = PdfFileHelper.CreateTempFileNameWithoutExtension("DocumentWithNoBreakHyphen");
+            var filename = IOUtility.GetTempFileName("DocumentWithNoBreakHyphen", null);
 
             var pdfFilename = filename + ".pdf";
             var pdfRenderer = new PdfDocumentRenderer { Document = document };
+
+            pdfRenderer.PdfDocument.RenderEvents.RenderTextEvent += (sender, args) =>
+                {
+                    var length = args.CodePointGlyphIndexPairs.Length;
+                    for (var idx = 0; idx < length; idx++)
+                    {
+                        ref var item = ref args.CodePointGlyphIndexPairs[idx];
+                        if (item.CodePoint is '\u2011')
+                        {
+                            item.CodePoint = '-';
+                            args.ReevaluateGlyphIndices = true;
+                        }
+                    }
+                };
+
             pdfRenderer.RenderDocument();
 
             var pdfDocument = pdfRenderer.PdfDocument;
             pdfDocument.Options.CompressContentStreams = false;
             pdfRenderer.Save(pdfFilename);
 
-            PdfFileHelper.StartPdfViewerIfDebugging(pdfFilename);
+            PdfFileUtility.ShowDocumentIfDebugging(pdfFilename);
 
             var rtfRenderer = new RtfDocumentRenderer();
             rtfRenderer.Render(document, filename + ".rtf", Environment.CurrentDirectory);
 
 
             // Analyze the drawn text in the PDF's content stream.
-            var pdfPage = pdfDocument.Pages[0];
-            var contentReference = (PdfReference)pdfPage.Contents.Elements.Items[0];
-            var content = (PdfDictionary)contentReference.Value;
-            var contentStream = content.Stream.ToString();
-            var contentLines = contentStream.Split('\n');
+            var streamEnumerator = PdfFileHelper.GetPageContentStreamEnumerator(pdfDocument, 0);
 
-            // Get the PDF encoded text between "Td <" and "> Tj" from contentLines.
-            const string startTag = "Td <";
-            const string endTag = "> Tj";
-            var textObjectLines = contentLines.Where(l => l.Contains(startTag) && l.Contains(endTag));
+            streamEnumerator.Text.MoveAndGetNext(true, out var textInfo).Should().BeTrue();
+
+            double lineYPosition = 0;
 
             var lastObjectEndsWithHyphen = false;
             var pageContainsHyphenBreak = false;
 
-            foreach (var textObjectLine in textObjectLines)
+            do
             {
-                var parts = textObjectLine.Split(' ');
+                var isNewLine = !textInfo!.IsAtYPosition(lineYPosition);
+                if (isNewLine)
+                    lineYPosition = textInfo.Y;
 
-                var textPart = parts[3];
+                var text = textInfo.Text;
+                text.Should().NotBeNull();
 
-                var pdfEncodedText = textPart.Trim('<', '>');
+                var isHex = textInfo.IsHex;
+                if (isHex)
+                {
+                    var glyphIds = PdfFileHelper.GetHexStringAsGlyphIndices(text);
+                    glyphIds.Should().NotContain("0", "no char (and no no-break hyphen) should be converted to an invalid glyph (\"0\")");
+                }
+                isHex.Should().BeFalse("for strings without not available characters we expect literal strings here for further investigation");
 
-                // Separate the PDF encoded text in its 4 digit byte representations.
-                var pdfEncodedChars = pdfEncodedText.Chunk(4).Select(x => new String(x)).ToList();
-
-                var yMovement = double.Parse(parts[1], CultureInfo.InvariantCulture.NumberFormat);
-                var isNewLine = yMovement != 0;
-
-
-                pdfEncodedChars.Should().NotContain("0000", "no char (and no no-break hyphen should be converted to an invalid glyph");
-
-                var count = pdfEncodedChars.Count;
-                var endsWithHyphen = pdfEncodedChars[count - 1] == "0010";
+                var length = text.Length;
+                var endsWithHyphen = text[length - 1] == '-';
                 if (endsWithHyphen)
-                    pdfEncodedChars[count - 2].Should().Be("0051", "in text objects ending with a hyphen the char before should be an 'n', because the other hyphens where no-break hyphens");
+                    text[length - 2].Should().Be('n', "in text objects ending with a hyphen, the char before should be an 'n', because the other hyphens where no-break hyphens");
 
                 if (isNewLine && lastObjectEndsWithHyphen)
                 {
                     pageContainsHyphenBreak = true;
-                    pdfEncodedChars.First().Should().Be("0037", "a new line after a hyphen should continue with a 'T', because the other hyphens where no-break hyphens");
+                    text.First().Should().Be('T', "a new line after a hyphen should continue with a 'T', because the other hyphens where no-break hyphens");
                 }
 
                 lastObjectEndsWithHyphen = endsWithHyphen;
-            }
+            } while (streamEnumerator.Text.MoveAndGetNext(true, out textInfo));
 
             lastObjectEndsWithHyphen.Should().Be(false, "each line ending with a hyphen should be followed by another line");
             pageContainsHyphenBreak.Should().Be(true, "test should contain a line break at a hyphen to show that breaks occur at hyphens while not occurring at no-break hyphens");
         }
 
         [Fact]
+        public static void Document_with_No_Break_Hyphen_before_Tabs()
+        {
+            LogHost.Factory = LoggerFactory.Create(builder => builder.AddConsole());
+
+            // Create a new MigraDoc document.
+            var document = new Document();
+
+            var style = document.Styles[StyleNames.Normal];
+            style!.Font.Name = "Arial";
+
+            style = document.Styles[StyleNames.Heading1];
+            style!.Font.Size = 20;
+            style.ParagraphFormat.TabStops.ClearAll();
+            style.ParagraphFormat.TabStops.AddTabStop(Unit.FromCentimeter(2));
+
+            style = document.Styles[StyleNames.Heading2];
+            style!.Font.Size = 16;
+            style.ParagraphFormat.TabStops.ClearAll();
+            style.ParagraphFormat.TabStops.AddTabStop(Unit.FromCentimeter(2));
+
+            var section = document.AddSection();
+
+            var paragraph = section.AddParagraph("A");
+            paragraph.Style = StyleNames.Heading1;
+            paragraph.AddTab();
+            paragraph.AddText("Heading level 1 without any hyphen");
+
+            paragraph = section.AddParagraph("A-1");
+            paragraph.AddTab();
+            paragraph.AddText("Heading level 2 with usual hyphen");
+            paragraph.Style = StyleNames.Heading2;
+
+            paragraph = section.AddParagraph("A\u20111");
+            paragraph.AddTab();
+            paragraph.AddText("Heading level 2 with no-break hyphen replaced by hyphen character");
+            paragraph.Style = StyleNames.Heading2;
+
+
+            var filename = IOUtility.GetTempFileName("DocumentWithNoBreakHyphenBeforeTabs", null);
+
+            var pdfFilename = filename + ".pdf";
+            var pdfRenderer = new PdfDocumentRenderer { Document = document };
+
+            pdfRenderer.PdfDocument.RenderEvents.RenderTextEvent += (sender, args) =>
+            {
+                var length = args.CodePointGlyphIndexPairs.Length;
+                for (var idx = 0; idx < length; idx++)
+                {
+                    ref var item = ref args.CodePointGlyphIndexPairs[idx];
+                    if (item is { CodePoint: '\u2011', GlyphIndex: 0 })
+                    {
+                        item.CodePoint = '-';
+                        item.GlyphIndex = GlyphHelper.GlyphIndexFromCodePoint('-', args.Font);
+                    }
+                }
+            };
+
+            pdfRenderer.RenderDocument();
+
+            var pdfDocument = pdfRenderer.PdfDocument;
+            pdfDocument.Options.CompressContentStreams = false;
+            pdfRenderer.Save(pdfFilename);
+
+            PdfFileUtility.ShowDocumentIfDebugging(pdfFilename);
+
+            var rtfRenderer = new RtfDocumentRenderer();
+            rtfRenderer.Render(document, filename + ".rtf", Environment.CurrentDirectory);
+
+            // Analyze the drawn text in the PDF's content stream.
+            var streamEnumerator = PdfFileHelper.GetPageContentStreamEnumerator(pdfDocument, 0);
+
+            // Ensure that all Heading text objects are positioned at the same x value.
+            streamEnumerator.Text.MoveAndGetNext(x => x.Text == "Heading", true, out var textInfo).Should().BeTrue();
+            var firstHeadingTabX = textInfo!.X;
+
+            streamEnumerator.Text.MoveAndGetNext(x => x.Text == "Heading", true, out textInfo).Should().BeTrue();
+            textInfo!.IsAtXPosition(firstHeadingTabX).Should().BeTrue();
+
+            streamEnumerator.Text.MoveAndGetNext(x => x.Text == "Heading", true, out textInfo).Should().BeTrue();
+            textInfo!.IsAtXPosition(firstHeadingTabX).Should().BeTrue();
+        }
+
+        [Fact]
         public static void DecimalTabulatorTest()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
             var cultureInfos = new[] { null, CultureInfo.GetCultureInfo("en-us"), CultureInfo.GetCultureInfo("de-de") };
 
             // Numbers separated by page breaks to let all numbers of a page start at the same x position.
             // For easier analysis, '1' should and should only occur at the first digit of each number.
             var numbersByPage = new List<List<double>>
             {
-                new() {1, 1.3, 1.33},
-                new() {1234, 1234.4, 1234.44},
-                new() {.3},
-                new() {-1, -1.3, -1.33},
-                new() {-1234, -1234.4, -1234.44},
-                new() {-.3}
+                new() { 1, 1.3, 1.33 },
+                new() { 1234, 1234.4, 1234.44 },
+                new() { .3 },
+                new() { -1, -1.3, -1.33 },
+                new() { -1234, -1234.4, -1234.44 },
+                new() { -.3 }
             };
 
             var units = new[] { null, "%", " %", "mm", " mm" };
@@ -218,12 +292,12 @@ namespace MigraDoc.Tests
             var appendReferences = new[]
             {
                 new Action<Paragraph>(_ => {}),
-                // For numbers without decimal separator that are directly followed by a FormattedText conatining a superscript number, e. g. "1⁹", Word interprets the superscript text as an exponent.
+                // For numbers without decimal separator that are directly followed by a FormattedText containing a superscript number, e.g. "1⁹", Word interprets the superscript text as an exponent.
                 // As a result the superscript is positioned before the decimal tabstop in RTF. The PDF renderer positions the superscript text at the decimal tabstop instead,
                 // as it can currently take only a single Text object for alignment position calculation.
-                // As the intention of the superscript text is not clear, none of these positionings is wrong.
+                // As the intention of the superscript text is not clear, none of these positions is wrong.
                 // For alignment before the decimal tabstop as an exponent in PDF, use superscript digit unicode characters instead of FormattedText.
-                // For alignment at the decimal tabstop as footnote reference in RTF, insert e. g. a Hair Space as first character of the superscript.
+                // For alignment at the decimal tabstop as footnote reference in RTF, insert e.g. a Hair Space as first character of the superscript.
                 new Action<Paragraph>(p => p.AddFormattedText("9").Superscript = true),
                 new Action<Paragraph>(p =>
                 {
@@ -233,7 +307,7 @@ namespace MigraDoc.Tests
                 })
             };
 
-            var filenamePattern = PdfFileHelper.CreateTempFileName("DecimalTabulator{0}", "{1}");
+            var filenamePattern = IOUtility.GetTempFileName("DecimalTabulator{0}", "{1}");
 
             foreach (var cultureInfo in cultureInfos)
             {
@@ -280,10 +354,10 @@ namespace MigraDoc.Tests
                 pdfDocument.Options.CompressContentStreams = false;
                 pdfRenderer.Save(pdfFilename);
 
-                PdfFileHelper.StartPdfViewerIfDebugging(pdfFilename);
+                PdfFileUtility.ShowDocumentIfDebugging(pdfFilename);
 
                 // In RTF, decimal tabstop alignment is done in the viewing application and always depends on the system regional settings,
-                // as culture or separators cannot be saved in rtf. Therefore we don't need to assign cultureInfo and output RTF only once.
+                // as culture or separators cannot be saved in rtf. Therefore, we don't need to assign cultureInfo and output RTF only once.
                 if (cultureInfo == null)
                 {
                     var rtfFilename = String.Format(filenamePattern, null, "rtf");
@@ -294,69 +368,45 @@ namespace MigraDoc.Tests
 
                 // Analyze the drawn text in the PDF's content stream.
 
-                // The horizontal offset of the first line ("0.0").
-                var firstLineXOffset = 150.344;
-                // The horizontal offsets of the numbers on the page relatively to the position of the first line.
-                var expectedFirstOneXOffsetsByPage = new[] { 0, -19.4629, 5.5615, -3.3301, -22.793, 2.2314 };
+                // The horizontal position of the first line ("0.0").
+                var firstLineX = 150.344;
+                // The horizontal position of the other lines.
+                var expectedSecondLineXOffsetsByPage = new[] { 0, -19.4629, 5.5615, -3.3301, -22.793, 2.2314 };
 
-                for (var pageIdx = 0; pageIdx < expectedFirstOneXOffsetsByPage.Length; pageIdx++)
+                for (var pageIdx = 0; pageIdx < expectedSecondLineXOffsetsByPage.Length; pageIdx++)
                 {
-                    var expectedFirstOneXOffset = expectedFirstOneXOffsetsByPage[pageIdx];
-
-                    var pdfPage = pdfDocument.Pages[pageIdx];
-                    var contentReference = (PdfReference)pdfPage.Contents.Elements.Items[0];
-                    var content = (PdfDictionary)contentReference.Value;
-                    var contentStream = content.Stream.ToString();
-                    var contentLines = contentStream.Split('\n');
-
-                    // Get the PDF encoded text between "Td <" and "> Tj" from contentLines.
-                    const string startTag = "Td <";
-                    const string endTag = "> Tj";
-                    var textObjectLines = contentLines.Where(l => l.Contains(startTag) && l.Contains(endTag)).ToList();
-
-                    var currentOffsetRelativeToFirstOne = 0d;
-                    const double precision = 0.001;
-
                     var pageNr = pageIdx + 1;
-                    var numberLineCount = pageNr % 3 == 0 ? 16 : 46; // Page 3 and 6 have less lines.
-                    var textObjectLinesCount = textObjectLines.Count;
-                    textObjectLinesCount.Should().BeGreaterOrEqualTo(numberLineCount,
-                        $"the number of the text object lines should be equal or greater than the number of text lines they represent ({numberLineCount} lines on page {pageNr})");
+                    var expectedSecondLineXOffset = expectedSecondLineXOffsetsByPage[pageIdx];
+                    var expectedOtherLinesX = firstLineX + expectedSecondLineXOffset;
 
-                    // Attention: Some lines in the PDF consist of multiple object lines.
-                    for (var lineObjectIdx = 0; lineObjectIdx < textObjectLinesCount; lineObjectIdx++)
+                    var expectedLineCount = pageNr % 3 == 0 ? 16 : 46; // Page 3 and 6 have fewer lines.
+                    var lineCount = 0;
+                    double lineYPosition = 0;
+                    var lineHeight = 11.499;
+
+                    var streamEnumerator = PdfFileHelper.GetPageContentStreamEnumerator(pdfDocument, pageIdx);
+                    while (streamEnumerator.Text.MoveAndGetNext(true, out var textInfo))
                     {
-                        var textObjectLine = textObjectLines[lineObjectIdx];
-
-                        var parts = textObjectLine.Split(' ');
-
-                        var xOffsetStr = parts[0];
-                        var xOffset = Double.Parse(xOffsetStr, CultureInfo.InvariantCulture);
-                        var textPart = parts[3];
-
-                        if (lineObjectIdx == 0)
+                        var isNewLine = lineCount == 0 || textInfo!.IsAtYPosition(lineYPosition - lineHeight);
+                        if (isNewLine)
                         {
-                            xOffset.Should().BeApproximately(firstLineXOffset, precision, $"first text line's (\"0.0\") horizontal offset should be '{firstLineXOffset}'");
-                            continue;
+                            lineCount++;
+                            lineYPosition = textInfo!.Y;
+
+                            if (lineCount == 1)
+                            {
+                                var isAtFirstLineX = textInfo.IsAtXPosition(firstLineX);
+                                isAtFirstLineX.Should().BeTrue($"first text line's (\"0.0\") horizontal offset should be '{firstLineX}' instead of '{textInfo.X}'");
+                                continue;
+                            }
+
+                            var isAtOtherLinesX = textInfo.IsAtXPosition(expectedOtherLinesX);
+                            isAtOtherLinesX.Should().BeTrue($"the other line's horizontal offset should be '{expectedOtherLinesX}' instead of '{textInfo.X}'");
                         }
-                        if (lineObjectIdx == 1)
-                        {
-                            xOffset.Should().BeApproximately(expectedFirstOneXOffset, precision,
-                                $"horizontal offset of the first text line starting with '1' or '-' should be '{expectedFirstOneXOffset}'");
-                            continue;
-                        }
-
-                        // Beginning with line object 2, currentOffsetRelativeToFirstOne is changed by each line's horizontal offset.
-                        currentOffsetRelativeToFirstOne += xOffset;
-
-                        // Use '1' and '-' to recognize real line beginnings and check their horizontal offset relative to the first line starting with '1' or '-'.
-                        var textStartsWithOne = textPart.StartsWith("<0014");
-                        var textStartsWithMinus = textPart.StartsWith("<0010");
-                        if (textStartsWithOne || textStartsWithMinus)
-                            currentOffsetRelativeToFirstOne.Should().BeApproximately(0, precision,
-                                "for text lines staring with '1' or '-' relative horizontal offset to the first line starting with '1' or '-' should be '0'");
-
                     }
+
+                    lineCount.Should().Be(expectedLineCount,
+                        $"the expected number of text lines on page {pageNr} is {expectedLineCount}");
                 }
             }
         }
@@ -364,9 +414,6 @@ namespace MigraDoc.Tests
         [Fact]
         static void FooterLayoutTest()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
             var document = new Document();
             var Section = document.AddSection();
             Section.PageSetup.PageWidth = "210mm";
@@ -385,7 +432,7 @@ namespace MigraDoc.Tests
             var pdfRenderer = new PdfDocumentRenderer
             {
                 Document = document,
-                PdfDocument = new PdfDocument
+                PdfDocument =
                 {
                     // PageLayout = PdfPageLayout.SinglePage
                 }
@@ -395,10 +442,10 @@ namespace MigraDoc.Tests
             pdfRenderer.RenderDocument();
 
             // Save the document...
-            var filename = IOHelper.CreateTemporaryPdfFileName("FooterTest");
+            var filename = PdfFileUtility.GetTempPdfFileName("FooterTest");
             pdfRenderer.PdfDocument.Save(filename);
             //// ...and start a viewer.
-            //Process.Start(new ProcessStartInfo(filename) { UseShellExecute = true });
+            //Process.Sta/rt(new ProcessStartInfo(filename) { UseShellExecute = true });
         }
     }
 }

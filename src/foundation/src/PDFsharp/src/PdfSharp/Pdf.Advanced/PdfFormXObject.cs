@@ -35,19 +35,9 @@ namespace PdfSharp.Pdf.Advanced
             //{ }
         }
 
-        internal double DpiX
-        {
-            get => _dpiX;
-            set => _dpiX = value;
-        }
-        double _dpiX = 72;
+        internal double DpiX { get; set; } = 72;
 
-        internal double DpiY
-        {
-            get => _dpiY;
-            set => _dpiY = value;
-        }
-        double _dpiY = 72;
+        internal double DpiY { get; set; } = 72;
 
         internal PdfFormXObject(PdfDocument thisDocument, PdfImportedObjectTable importedObjectTable, XPdfForm form)
             : base(thisDocument)
@@ -244,18 +234,16 @@ namespace PdfSharp.Pdf.Advanced
 
         PdfResources IContentStream.Resources => Resources;
 
-        internal string GetFontName(XFont font, out PdfFont pdfFont)
+        internal string GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont)
         {
-            pdfFont = _document.FontTable.GetFont(font);
+            pdfFont = _document.FontTable.GetOrCreateFont(glyphTypeface, fontType);
             Debug.Assert(pdfFont != null);
             string name = Resources.AddFont(pdfFont);
             return name;
         }
 
-        string IContentStream.GetFontName(XFont font, out PdfFont pdfFont)
-        {
-            return GetFontName(font, out pdfFont);
-        }
+        string IContentStream.GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont) 
+            => GetFontName(glyphTypeface, fontType, out pdfFont);
 
         /// <summary>
         /// Gets the resource name of the specified font data within this form XObject.

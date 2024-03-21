@@ -76,7 +76,7 @@ namespace MigraDoc.DocumentObjectModel
                         if (path.IndexOf(".", StringComparison.Ordinal) != -1)
 #endif
                         {
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
                             pageNumber = Int32.Parse(path[(length + 1)..]);
                             path = path[..length];
 #else

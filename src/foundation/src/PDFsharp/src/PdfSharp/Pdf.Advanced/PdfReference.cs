@@ -55,7 +55,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Initializes a new PdfReference instance from the specified object identifier and file position.
         /// </summary>
-        public PdfReference(PdfObjectID objectID, int position)
+        public PdfReference(PdfObjectID objectID, SizeType position)
         {
             _objectID = objectID;
             _position = position;
@@ -73,11 +73,6 @@ namespace PdfSharp.Pdf.Advanced
 
             // Each line must be exactly 20 bytes long, otherwise Acrobat repairs the file.
             writer.WriteRaw(Invariant($"{_position:0000000000} {_objectID.GenerationNumber:00000} n \n"));
-
-            // DELETE
-            //string text = String.Format(CultureInfo.InvariantCulture, "{0:0000000000} {1:00000} n\n",
-            //  _position, _objectID.GenerationNumber); // InUse ? 'n' : 'f');
-            //writer.WriteRaw(text);
         }
 
         /// <summary>
@@ -131,7 +126,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets or sets the file position of the related PdfObject.
         /// </summary>
-        public int Position
+        public SizeType Position
         {
             get => _position;
 #if true
@@ -148,8 +143,7 @@ namespace PdfSharp.Pdf.Advanced
                 set => _position = value;
 #endif
         }
-
-        int _position;  // I know it should be long, but I have never seen a 2GB PDF file.
+        SizeType _position;  // I know it should be long, but I have never seen a 2GB PDF file.
 
         /// <summary>
         /// Gets or sets the referenced PdfObject.
@@ -202,7 +196,7 @@ namespace PdfSharp.Pdf.Advanced
 
         /// <summary>
         /// Dereferences the specified item. If the item is a PdfReference, the item is set
-        /// to the referenced value. Otherwise no action is taken.
+        /// to the referenced value. Otherwise, no action is taken.
         /// </summary>
         public static void Dereference(ref object item)
         {

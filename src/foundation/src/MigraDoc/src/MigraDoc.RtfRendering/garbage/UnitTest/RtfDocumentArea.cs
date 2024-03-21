@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.IO;
 
@@ -36,7 +35,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       docRndrr.Render(doc, "RtfDocumentArea.txt", null);
 
       File.Copy("RtfDocumentArea.txt", "RtfDocumentArea.rtf", true);
-      System.Diagnostics.Process.Start("RtfDocumentArea.txt");
+      System.Diagnostics.Process.St/art("RtfDocumentArea.txt");
     }
 
 //   [UnitTestFunction]
@@ -63,7 +62,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       docRndrr.Render(doc, "RtfParagraph.txt", null);
 
       File.Copy("RtfParagraph.txt", "RtfParagraph.rtf", true);
-      System.Diagnostics.Process.Start("RtfParagraph.rtf");
+      System.Diagnostics.Process.St/art("RtfParagraph.rtf");
     }
 
 //    [UnitTestFunction]
@@ -94,7 +93,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       docRndrr.Render(doc, "RtfSpecialChars.txt", null);
 
       File.Copy("RtfSpecialChars.txt", "RtfSpecialChars.rtf", true);
-      System.Diagnostics.Process.Start("RtfSpecialChars.txt");
+      System.Diagnostics.Process.S/tart("RtfSpecialChars.txt");
     }
 
   //  [UnitTestFunction]
@@ -135,7 +134,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       docRndrr.Render(doc, "RtfFields.txt", null);
 
       File.Copy("RtfFields.txt", "RtfFields.rtf", true);
-      System.Diagnostics.Process.Start("RtfFields.txt");
+      System.Diagnostics.Process.Sta/rt("RtfFields.txt");
     }
 
 //    [UnitTestFunction]
@@ -163,7 +162,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       docRndrr.Render(doc, "RtfHyperlinks.txt", null);
 
       File.Copy("RtfHyperlinks.txt", "RtfHyperlinks.rtf", true);
-      System.Diagnostics.Process.Start("RtfHyperlinks.txt");
+      System.Diagnostics.Process.Sta/rt("RtfHyperlinks.txt");
     }
 
  //   [UnitTestFunction]
@@ -200,7 +199,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       docRndrr.Render(doc, "RtfTable.txt", null);
 
       File.Copy("RtfTable.txt", "RtfTable.rtf", true);
-      System.Diagnostics.Process.Start("RtfTable.rtf");
+      System.Diagnostics.Process.Sta/rt("RtfTable.rtf");
     }
 
 //    [UnitTestFunction]
@@ -212,7 +211,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfParagraphLayout.txt", null);
       File.Copy("RtfParagraphLayout.txt", "RtfParagraphLayout.rtf", true);
-      System.Diagnostics.Process.Start("RtfParagraphLayout.txt", null);
+      System.Diagnostics.Process.Sta/rt("RtfParagraphLayout.txt", null);
       DdlWriter.WriteToFile(doc, "RtfParagraphLayout.mdddl");
       */
     }
@@ -226,7 +225,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfRechnung.txt", null);
       File.Copy("RtfRechnung.txt", "RtfRechnung.rtf", true);
-      System.Diagnostics.Process.Start("RtfRechnung.txt");
+      System.Diagnostics.Process.Sta/rt("RtfRechnung.txt");
       DdlWriter.WriteToFile(doc, "RtfRechnung.mdddl");
       */
     }
@@ -240,7 +239,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfHeaderFooterTest.txt", null);
       File.Copy("RtfHeaderFooterTest.txt", "RtfHeaderFooterTest.rtf", true);
-      System.Diagnostics.Process.Start("RtfHeaderFooterTest.txt");
+      System.Diagnostics.Process.Star/t("RtfHeaderFooterTest.txt");
       DdlWriter.WriteToFile(doc, "RtfHeaderFooterTest.mdddl");
       */
     }
@@ -264,7 +263,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfSection.txt", null);
       File.Copy("RtfSection.txt", "RtfSection.rtf", true);
-      System.Diagnostics.Process.Start("RtfSection.txt");
+      System.Diagnostics.Process.Sta/rt("RtfSection.txt");
       DdlWriter.WriteToFile(doc, "RtfSection.mdddl");
     }
 
@@ -276,7 +275,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfTableLayout.txt", null);
       File.Copy("RtfTableLayout.txt", "RtfTableLayout.rtf", true);
-      System.Diagnostics.Process.Start("RtfTableLayout.txt");
+      System.Diagnostics.Process.Sta/rt("RtfTableLayout.txt");
       DdlWriter.WriteToFile(doc, "RtfTableLayout.mdddl");
       */
     }
@@ -295,7 +294,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfPageFormat.txt", null);
       File.Copy("RtfPageFormat.txt", "RtfPageFormat.rtf", true);
-      System.Diagnostics.Process.Start("RtfPageFormat.txt");
+      System.Diagnostics.Process.St/art("RtfPageFormat.txt");
       DdlWriter.WriteToFile(doc, "RtfPageFormat.mdddl");
     }
 
@@ -313,7 +312,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfRowHeight.txt", null);
       File.Copy("RtfRowHeight.txt", "RtfRowHeight.rtf", true);
-      System.Diagnostics.Process.Start("RtfRowHeight.txt");
+      System.Diagnostics.Process.Sta/rt("RtfRowHeight.txt");
       DdlWriter.WriteToFile(doc, "RtfRowHeight.mdddl");
     }
 //    [UnitTestFunction]
@@ -331,7 +330,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfVerticalAlign.txt", null);
       File.Copy("RtfVerticalAlign.txt", "RtfVerticalAlign.rtf", true);
-      System.Diagnostics.Process.Start("RtfVerticalAlign.txt");
+      System.Diagnostics.Process.St/art("RtfVerticalAlign.txt");
       DdlWriter.WriteToFile(doc, "RtfVerticalAlign.mdddl");
     }
     //[UnitTestFunction]
@@ -345,7 +344,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfBorderDistances.txt", null);
       File.Copy("RtfBorderDistances.txt", "RtfBorderDistances.rtf", true);
-      System.Diagnostics.Process.Start("RtfBorderDistances.txt");
+      System.Diagnostics.Process.Sta/rt("RtfBorderDistances.txt");
       DdlWriter.WriteToFile(doc, "RtfBorderDistances.mdddl");
     }
 
@@ -360,7 +359,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfInvalidStyle.txt", null);
       File.Copy("RtfInvalidStyle.txt", "RtfInvalidStyle.rtf", true);
-      System.Diagnostics.Process.Start("RtfInvalidStyle.txt", null);
+      System.Diagnostics.Process.Sta/rt("RtfInvalidStyle.txt", null);
       DdlWriter.WriteToFile(doc, "RtfInvalidStyle.mdddl");
     }
 
@@ -372,7 +371,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfShapeLayout.txt", null);
       File.Copy("RtfShapeLayout.txt", "RtfShapeLayout.rtf", true);
-      System.Diagnostics.Process.Start("RtfShapeLayout.txt");
+      System.Diagnostics.Process.Sta/rt("RtfShapeLayout.txt");
       DdlWriter.WriteToFile(doc, "RtfShapeLayout.mdddl");
       */
     }
@@ -393,7 +392,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfTextFramePos.txt", null);
       File.Copy("RtfTextFramePos.txt", "RtfTextFramePos.rtf", true);
-      System.Diagnostics.Process.Start("RtfTextFramePos.txt");
+      System.Diagnostics.Process.Sta/rt("RtfTextFramePos.txt");
       DdlWriter.WriteToFile(doc, "RtfTextFramePos.mdddl");
     }
 
@@ -409,7 +408,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfCharacterStyleAsParagraphStyle.txt", null);
       File.Copy("RtfCharacterStyleAsParagraphStyle.txt", "RtfCharacterStyleAsParagraphStyle.rtf", true);
-      System.Diagnostics.Process.Start("RtfCharacterStyleAsParagraphStyle.txt");
+      System.Diagnostics.Process.S/tart("RtfCharacterStyleAsParagraphStyle.txt");
       DdlWriter.WriteToFile(doc, "RtfCharacterStyleAsParagraphStyle.mdddl");
     }
 
@@ -422,7 +421,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfDummyChart.txt", null);
       File.Copy("RtfDummyChart.txt", "RtfDummyChart.rtf", true);
-      System.Diagnostics.Process.Start("RtfDummyChart.txt");
+      System.Diagnostics.Process.St/art("RtfDummyChart.txt");
       DdlWriter.WriteToFile(doc, "RtfDummyChart.mdddl");
       */
     }
@@ -434,7 +433,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfVermögensverwaltung.txt", null);
       File.Copy("RtfVermögensverwaltung.txt", "RtfVermögensverwaltung.rtf", true);
-      System.Diagnostics.Process.Start("RtfVermögensverwaltung.txt");
+      System.Diagnostics.http://localhost:8093/link/download-assets.html("RtfVermögensverwaltung.txt");
       DdlWriter.WriteToFile(doc, "RtfVermögensverwaltung.mdddl");
     }
 
@@ -446,7 +445,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfKnowledgeBase.txt", null);
       File.Copy("RtfKnowledgeBase.txt", "RtfKnowledgeBase.rtf", true);
-      System.Diagnostics.Process.Start("RtfKnowledgeBase.txt");
+      System.Diagnostics.http://localhost:8093/link/download-assets.html("RtfKnowledgeBase.txt");
       DdlWriter.WriteToFile(doc, "RtfKnowledgeBase.mdddl");
       */
     }
@@ -459,7 +458,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfFootnote.txt", null);
       File.Copy("RtfFootnote.txt", "RtfFootnote.rtf", true);
-      System.Diagnostics.Process.Start("RtfFootnote.txt");
+      System.Diagnostics.http://localhost:8093/link/download-assets.html("RtfFootnote.txt");
       DdlWriter.WriteToFile(doc, "RtfFootnote.mdddl");
       */
     }
@@ -472,7 +471,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfImage.txt", null);
       File.Copy("RtfImage.txt", "RtfImage.rtf", true);
-      System.Diagnostics.Process.Start("RtfImage.txt");
+      System.Diagnostics.http://localhost:8093/link/download-assets.html("RtfImage.txt");
       DdlWriter.WriteToFile(doc, "RtfImage.mdddl");
     }
 
@@ -490,7 +489,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfHeaderParagraphStyle.txt", null);
       File.Copy("RtfHeaderParagraphStyle.txt", "RtfHeaderParagraphStyle.rtf", true);
-      System.Diagnostics.Process.Start("RtfHeaderParagraphStyle.txt");
+      System.Diagnostics.http://localhost:8093/link/download-assets.html("RtfHeaderParagraphStyle.txt");
       DdlWriter.WriteToFile(doc, "RtfHeaderParagraphStyle.mdddl");
     }
 
@@ -502,7 +501,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfDiagrammBroschüre.txt", null);
       File.Copy("RtfDiagrammBroschüre.txt", "RtfDiagrammBroschüre.rtf", true);
-      System.Diagnostics.Process.Start("RtfDiagrammBroschüre.txt");
+      System.Diagnostics.http://localhost:8093/link/download-assets.html("RtfDiagrammBroschüre.txt");
       DdlWriter.WriteToFile(doc, "RtfDiagrammBroschüre.mdddl");
       */
     }
@@ -516,7 +515,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfImagePath.txt", null);
       File.Copy("RtfImagePath.txt", "RtfImagePath.rtf", true);
-      System.Diagnostics.Process.Start("RtfImagePath.txt");
+      System.Diagnostics.http://localhost:8093/link/download-assets.html("RtfImagePath.txt");
       DdlWriter.WriteToFile(doc, "RtfImagePath.mdddl");
     }
 
@@ -528,7 +527,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfIndex.txt", null);
       File.Copy("RtfIndex.txt", "RtfIndex.rtf", true);
-      System.Diagnostics.Process.Start("RtfIndex.txt");
+      System.Diagnostics.http://localhost:8093/link/download-assets.html("RtfIndex.txt");
       DdlWriter.WriteToFile(doc, "RtfIndex.mdddl");
       */
     }
@@ -541,7 +540,7 @@ namespace MigraDoc.RtfRendering.UnitTest
       DocumentRenderer docRndrr = new DocumentRenderer();
       docRndrr.Render(doc, "RtfKlPo.txt", null);
       File.Copy("RtfKlPo.txt", "RtfKlPo.rtf", true);
-      System.Diagnostics.Process.Start("RtfKlPo.txt");
+      System.Diagnostics.http://localhost:8093/link/download-assets.html("RtfKlPo.txt");
       DdlWriter.WriteToFile(doc, "RtfKlPo.mdddl");
       */
     }
