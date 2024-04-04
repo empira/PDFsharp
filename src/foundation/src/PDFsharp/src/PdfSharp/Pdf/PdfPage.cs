@@ -403,9 +403,10 @@ namespace PdfSharp.Pdf
         /// </summary>
         /// <param name="rect">The link area in default page coordinates.</param>
         /// <param name="destinationPage">The destination page.</param>
-        public PdfLinkAnnotation AddDocumentLink(PdfRectangle rect, int destinationPage)
+        /// <param name="point">The position in the destination page.</param>
+        public PdfLinkAnnotation AddDocumentLink(PdfRectangle rect, int destinationPage, XPoint? point = null)
         {
-            var annotation = PdfLinkAnnotation.CreateDocumentLink(rect, destinationPage);
+            var annotation = PdfLinkAnnotation.CreateDocumentLink(rect, destinationPage, point);
             Annotations.Add(annotation);
             return annotation;
         }
