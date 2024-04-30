@@ -39,7 +39,7 @@ namespace PdfSharp.Internal
         //        ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
         //}
 
-        //private static ArgumentException GetArgumentException(ExceptionResource resource)
+        //static ArgumentException GetArgumentException(ExceptionResource resource)
         //{
         //    return new ArgumentException(GetResourceString(resource));
         //}

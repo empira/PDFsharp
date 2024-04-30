@@ -82,3 +82,47 @@ namespace PdfSharp.Drawing
         string DebuggerDisplay => String.Format(CultureInfo.InvariantCulture, "XTypeface");
     }
 }
+
+/*
+   Properties of WPF
+ 
+   CapsHeight	
+   Gets the distance from the baseline to the top of an English capital letter for the typeface.
+   
+   FaceNames	
+   Gets a collection of culture-specific names for the Typeface.
+   
+   FontFamily	
+   Gets the name of the font family from which the typeface was constructed.
+   
+   IsBoldSimulated	
+   Determines whether to simulate a bold weight for the glyphs represented by the Typeface.
+   
+   IsObliqueSimulated	
+   Determines whether to simulate an italic style for the glyphs represented by the Typeface.
+   
+   Stretch	
+   Gets the stretch value for the Typeface. The stretch value determines whether a typeface is expanded or condensed when it is displayed.
+   
+   StrikethroughPosition	
+   Gets a value that indicates the distance from the baseline to the strikethrough for the typeface.
+   
+   StrikethroughThickness	
+   Gets a value that indicates the thickness of the strikethrough relative to the font em size.
+   
+   Style	
+   Gets the style of the Typeface.
+   
+   UnderlinePosition	
+   Gets a value that indicates the distance of the underline from the baseline for the typeface.
+   
+   UnderlineThickness	
+   Gets a value that indicates the thickness of the underline relative to the font em size for the typeface.
+   
+   Weight	
+   Gets the relative weight of the typeface.
+   
+   XHeight	
+   Gets the distance from the baseline to the top of an English lowercase letter for a typeface. The distance excludes ascenders.
+
+*/

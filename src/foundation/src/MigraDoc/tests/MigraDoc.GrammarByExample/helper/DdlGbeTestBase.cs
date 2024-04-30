@@ -64,11 +64,6 @@ namespace GdiGrammarByExample
 
         void DoTest()
         {
-#if CORE
-            //GlobalFontSettings.FontResolver ??= new SegoeUiFontResolver();
-            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
-#endif
-
             Environment.CurrentDirectory = WslPathHack(_fixture.TestContext.TempDirectory);
 
             var workingDir = Environment.CurrentDirectory;
@@ -133,21 +128,21 @@ namespace GdiGrammarByExample
         }
 
         //const string PathSource = @"D:\MigraDocAssets\GBE\GBE-DDL";
-        const string PathSourceX = @"archives\grammar-by-example\GBE\GBE-DDL";
+        const string PathSourceX = @"archives/grammar-by-example/GBE/GBE-DDL";
 
         // ***** Select the reference for comparison *****
         // Legacy (the old C++ build):
-        //const string ReferenceSource = @"archives\grammar-by-example\GBE\ReferencePDFs\CPP 1.10";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/CPP 1.10";
 
         // GDI+:
-        //const string ReferenceSource = @"archives\grammar-by-example\GBE\ReferencePDFs\GDI 1.30";
-        //const string ReferenceSource = @"archives\grammar-by-example\GBE\ReferencePDFs\GDI 1.31";
-        //const string ReferenceSource = @"archives\grammar-by-example\GBE\ReferencePDFs\GDI 1.40";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/GDI 1.30";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/GDI 1.31";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/GDI 1.40";
 
         // WPF:
-        //const string ReferenceSource = @"archives\grammar-by-example\GBE\ReferencePDFs\WPF 1.30";
-        const string ReferenceSourceX = @"archives\grammar-by-example\GBE\ReferencePDFs\WPF 1.31";
-        //const string ReferenceSource = @"archives\grammar-by-example\GBE\ReferencePDFs\WPF 1.40";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/WPF 1.30";
+         const string ReferenceSourceX = "archives/grammar-by-example/GBE/ReferencePDFs/WPF 1.31";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/WPF 1.40";
 
         GbeFixture _fixture = null!;
         string? _testName;

@@ -9,15 +9,11 @@ using Xunit;
 
 namespace PdfSharp.Tests.Drawing
 {
+    [Collection("PDFsharp")]
     public class UnicodeHelperTests
     {
-        static UnicodeHelperTests()
-        {
-            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
-        }
-
-        const int Euro = '€';
-        const int SmilingFaceWithHearts = 0x_0001_F970;  // 😍
+        //const int Euro = '€';
+        //const int SmilingFaceWithHearts = 0x_0001_F970;  // 😍
         const int RedRose = 0x_0001_F339;  // 🌹
 
         const char SomeHighSurrogate = '\uD842';

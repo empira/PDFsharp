@@ -2,6 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 #if GDI
+using PdfSharp.Logging;
 using GdiFontFamily = System.Drawing.FontFamily;
 using GdiFont = System.Drawing.Font;
 using GdiFontStyle = System.Drawing.FontStyle;
@@ -25,6 +26,7 @@ using Windows.UI.Xaml.Media;
 //using Microsoft.Extensions.Logging;
 //using PdfSharp.Events;
 //using PdfSharp.Fonts;
+using Microsoft.Extensions.Logging;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 //using PdfSharp.Fonts.OpenType;
@@ -86,7 +88,7 @@ namespace PdfSharp.Fonts.Internal
                     {
                         // We only come here when the text contains a low surrogate not preceded by a high surrogate.
                         // This is an error in the UTF-32 text and therefore ignored.
-                        LogHost.FontManagementLogger.LogWarning("Unexpected low surrogate found: 0x{Char:X2}", ch);
+                        PdfSharpLogHost.FontManagementLogger.LogWarning("Unexpected low surrogate found: 0x{Char:X2}", ch);
                         continue;
                     }
 
@@ -104,14 +106,14 @@ namespace PdfSharp.Fonts.Internal
                             var ch2 = text[idx];
                             if (Char.IsLowSurrogate(ch2) is false)
                             {
-                                LogHost.FontManagementLogger.LogWarning("High surrogate 0x{Char:X2} not followed by low surrogate.", ch);
+                                PdfSharpLogHost.FontManagementLogger.LogWarning("High surrogate 0x{Char:X2} not followed by low surrogate.", ch);
                                 continue;
                             }
                             glyphIndex = descriptor.SurrogatePairToGlyphIndex(ch, ch2);
                         }
                         else
                         {
-                            LogHost.FontManagementLogger.LogWarning("High surrogate 0x{Char:X2} found at end of string.", ch);
+                            PdfSharpLogHost.FontManagementLogger.LogWarning("High surrogate 0x{Char:X2} found at end of string.", ch);
                             continue;
                         }
                     }
@@ -192,14 +194,14 @@ namespace PdfSharp.Fonts.Internal
         }
 #endif
 #if GDI
-        public static GdiFont CreateFont(string familyName, double emSize, GdiFontStyle style, out XFontSource? fontSource)
+        public static GdiFont? CreateFont(string familyName, double emSize, GdiFontStyle style, out XFontSource? fontSource)
         {
             fontSource = null;
             // ReSharper disable once JoinDeclarationAndInitializer
             GdiFont? font;
 
             // Use font resolver in CORE build. XPrivateFontCollection exists only in GDI and WPF build.
-#if GDI
+#if GDI_  // No XPrivateFontCollection anymore.
             // Try private font collection first.
             font = XPrivateFontCollection.TryCreateFont(familyName, emSize, style, out fontSource);
             if (font != null)
@@ -210,6 +212,25 @@ namespace PdfSharp.Fonts.Internal
 #endif
             // Create ordinary Win32 font.
             font = new GdiFont(familyName, (float)emSize, style, GraphicsUnit.World);
+
+            // var name = font.Name; same as family name.
+            var gdiFamilyName = font.FontFamily.Name;
+#if true
+            // Check for substitution if font is 'Microsoft Sans Serif'.
+            if (gdiFamilyName.Equals("Microsoft Sans Serif"))
+            {
+                // Is this the family we indeed requested?
+                if (!gdiFamilyName.Equals(familyName, StringComparison.OrdinalIgnoreCase))
+                    return null;
+            }
+#else
+            if (!gdiFamilyName.Equals(familyName, StringComparison.OrdinalIgnoreCase))
+            {
+                var message = Invariant($"GDI request for font '' returns ''.");
+                PdfSharpLogHost.Logger.LogError(message);
+                return null;
+            }
+#endif
             return font;
         }
 #endif
@@ -328,11 +349,11 @@ namespace PdfSharp.Fonts.Internal
         }
 #endif
 
-        /// <summary>
-        /// Calculates an Adler32 checksum combined with the buffer length
-        /// in a 64-bit unsigned integer.
-        /// </summary>
-        public static ulong CalcChecksum(byte[] buffer)
+            /// <summary>
+            /// Calculates an Adler32 checksum combined with the buffer length
+            /// in a 64-bit unsigned integer.
+            /// </summary>
+            public static ulong CalcChecksum(byte[] buffer)
         {
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
@@ -365,5 +386,21 @@ namespace PdfSharp.Fonts.Internal
 
         public static XFontStyleEx CreateStyle(bool isBold, bool isItalic)
             => (isBold ? XFontStyleEx.Bold : 0) | (isItalic ? XFontStyleEx.Italic : 0);
+
+        public static int CountGlyphs(XFont font)
+        {
+            int counter = 0;
+            for (int codePoint = 0; codePoint < 0x10FFFF; codePoint++)
+            {
+                // Skip surrogates.
+                if (codePoint is >= 0xD000 and <= 0xDFFF)
+                    continue;
+
+                var glyphIndex = GlyphHelper.GlyphIndexFromCodePoint(codePoint, font);
+                if (glyphIndex != 0)
+                    counter++;
+            }
+            return counter;
+        }
     }
 }

@@ -208,9 +208,6 @@ namespace MigraDoc.Tests
         public static Document CreateEmptyTestDocument()
         {
             var doc = new Document();
-#if CORE
-            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
-#endif
             return doc;
         }
 
@@ -290,7 +287,7 @@ namespace MigraDoc.Tests
         /// Adds a prefix to the filename, depending on the options Encryption and EncryptMetadata properties.
         /// Other information must be added manually to the filename parameter (this applies also to the use of user and/or owner password).
         /// </summary>
-        public static String AddPrefixToFilename(string filename, TestOptions? options = null)
+        public static string AddPrefixToFilename(string filename, TestOptions? options = null)
         {
             var prefix = GetFilenamePrefix(options);
 
@@ -310,7 +307,7 @@ namespace MigraDoc.Tests
             return $"{filenameWithoutExtension} {suffix}{extension}";
         }
 
-        private static string GetFilenamePrefix(TestOptions? options)
+        static string GetFilenamePrefix(TestOptions? options)
         {
             // mor information to file name scheme in SecurityTests class.
             var prefixSuffix = "S_";

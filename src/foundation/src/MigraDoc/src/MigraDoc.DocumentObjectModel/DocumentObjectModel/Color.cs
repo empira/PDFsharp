@@ -16,9 +16,9 @@ namespace MigraDoc.DocumentObjectModel
     {
         // Breaking change: Color.Empty was defined as RGB black with opacity of 0.
         // Sine v6.0 Color.Empty is a special value where _isCmyk is null and all other fields are 0.
-        // Therefore it depends now what 'new Color(0)' means. Set Capabilities.BackwardCompatibility.TreatArgbZeroAsEmpty
-        // to false and the constructor creates a an RGB black with opacity of 0 or set it
-        // to true and it creates an Color.Empty as in versions prior to v6.0.
+        // Therefore, it now depends on what 'new Color(0)' means. Set Capabilities.BackwardCompatibility.TreatArgbZeroAsEmpty
+        // to false and the constructor creates an RGB black with opacity of 0, or set it
+        // to true and it creates a Color.Empty as in versions prior to v6.0.
 
         /// <summary>
         /// Initializes a new instance of the Color class.
@@ -172,7 +172,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Resets this instance, i.e. IsNull() will return true afterwards.
+        /// Resets this instance, i.e. IsNull() will return true afterward.
         /// </summary>
         void INullableValue.SetNull() => this = Empty;
 
@@ -345,7 +345,7 @@ namespace MigraDoc.DocumentObjectModel
                 if (number.StartsWith("0x", StringComparison.Ordinal))
                 {
                     numberStyle = NumberStyles.HexNumber;
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
                     number = color[2..];
 #else
                     number = color.Substring(2);
@@ -356,7 +356,7 @@ namespace MigraDoc.DocumentObjectModel
                     numberStyle = NumberStyles.HexNumber;
                     switch (color.Length)
                     {
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
                         case 9: // Format "#aarrggbb".
                             number = color[1..];
                             break;
@@ -504,8 +504,8 @@ namespace MigraDoc.DocumentObjectModel
             }
             else
             {
-                if (StandardColors.ContainsKey(_argb))
-                    return StandardColors[_argb];
+                if (StandardColors.TryGetValue(_argb, out var c))
+                    return c;
                 if ((_argb & 0xFF000000) == 0xFF000000)
                     return "RGB(" +
                            ((_argb & 0xFF0000) >> 16) + "," +

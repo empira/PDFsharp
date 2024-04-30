@@ -240,7 +240,7 @@ namespace PdfSharp.Pdf
         static bool TryRereadAsUnicode(ref string? value)
         {
             // UTF-16BE Unicode strings start with U+FEFF ("þÿ"). There can be empty strings with UTF-16BE prefix.
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
             // Check for UTF-16BE encoding.
             // ---
             // Fun fact (Jan 2024): The following line of code was originally suggested by ReSharper, but the new
@@ -251,7 +251,7 @@ namespace PdfSharp.Pdf
             if (value.Length >= 2 && value[0] == '\xFE' && value[1] == '\xFF')
 #endif
             {
-#if DEBUG && USE_INDEX_AND_RANGE
+#if DEBUG && true
                 // Q: Does this code compile on every target framework?
                 // A: No, System.Index is missing. But we can add the source code in PdfSharp.System to make it work.
                 _ = value is ['\xFE', '\xFF', ..];
@@ -279,7 +279,7 @@ namespace PdfSharp.Pdf
 
 #if false // UTF-16LE is not defined as valid text string encoding in PDF reference.
             // Adobe Reader also supports UTF-16LE.
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
             if (value is ['\xFF', '\xFE', ..])
 #else
             if (value.Length >= 2 && value[0] == '\xFF' && value[1] == '\xFE')
@@ -307,7 +307,7 @@ namespace PdfSharp.Pdf
 #endif
 
             // UTF-8 Unicode strings start with U+EFBBBF ("ï»¿").
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
             if (value is ['\xEF', '\xBB', '\xBF', ..])
 #else
             if (value.Length >= 3 && value[0] == '\xEF' && value[1] == '\xBB' && value[2] == '\xBF')

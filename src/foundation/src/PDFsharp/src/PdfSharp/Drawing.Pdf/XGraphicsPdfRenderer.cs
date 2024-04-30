@@ -26,6 +26,7 @@ using PdfSharp.Logging;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Internal;
 using PdfSharp.Pdf.Advanced;
+using PdfSharp.Pdf.IO;
 
 // ReSharper disable RedundantNameQualifier
 // ReSharper disable CompareOfFloatsByEqualityOperator
@@ -241,7 +242,7 @@ namespace PdfSharp.Drawing.Pdf
                 throw new ArgumentNullException("pen and brush");
             }
 
-            const string format = Config.SignificantDecimalPlaces3;
+            const string format = Config.SignificantDecimalPlaces4;
 
             Realize(pen, brush);
             //AppendFormat123("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} re\n", x, y, width, -height);
@@ -433,6 +434,8 @@ namespace PdfSharp.Drawing.Pdf
             if (Owner._uaManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.DrawString });  // @PDF/UA
 
+            font.CheckVersion();
+
             double x = rect.X;
             double y = rect.Y;
 
@@ -448,7 +451,9 @@ namespace PdfSharp.Drawing.Pdf
             //var otDescriptor = font.OpenTypeDescriptor;
             //var ids = otDescriptor.GlyphIndicesFromCodepoints(codePoints);
             //var codeRun = new CharacterCodeRun(ids);
-            var codePoints = UnicodeHelper.Utf32FromString(s /*, font.AnsiEncoding*/);
+            var codePoints = font.IsSymbolFont
+                ? UnicodeHelper.SymbolCodePointsFromString(s, font.OpenTypeDescriptor)
+                : UnicodeHelper.Utf32FromString(s /*, font.AnsiEncoding*/);
             var glyphTypeface = font.GlyphTypeface;
             var otDescriptor = font.OpenTypeDescriptor;
             var codePointsWithGlyphIndices = otDescriptor.GlyphIndicesFromCodePoints(codePoints);
@@ -471,16 +476,25 @@ namespace PdfSharp.Drawing.Pdf
             // Decide text encoding.
             FontType fontType;
             bool isAnsi;
-            if (font.AutoEncoding)
+            if (font.IsSymbolFont)
             {
-                // Can we use WinAnsi encoding?
-                isAnsi = AnsiEncoding.IsAnsi(codePoints);
-                fontType = isAnsi ? FontType.TrueTypeWinAnsi : FontType.Type0Unicode;
+                // For the sake of simplicity we use glyph encoding for symbol fonts.
+                fontType = FontType.Type0Unicode;
+                isAnsi = false;
             }
             else
             {
-                fontType = font.FontTypeFromUnicodeFlag;
-                isAnsi = fontType == FontType.TrueTypeWinAnsi;
+                if (font.AutoEncoding)
+                {
+                    // Can we use WinAnsi encoding?
+                    isAnsi = AnsiEncoding.IsAnsi(codePoints);
+                    fontType = isAnsi ? FontType.TrueTypeWinAnsi : FontType.Type0Unicode;
+                }
+                else
+                {
+                    fontType = font.FontTypeFromUnicodeFlag;
+                    isAnsi = fontType == FontType.TrueTypeWinAnsi;
+                }
             }
 
             //Realize(font, brush, boldSimulation ? 2 : 0);
@@ -554,7 +568,6 @@ namespace PdfSharp.Drawing.Pdf
             }
 
             string? text;
-#if true
             if (isAnsi)
             {
                 // Use ANSI character encoding.
@@ -581,93 +594,9 @@ namespace PdfSharp.Drawing.Pdf
                     bytes[idx * 2] = (byte)((item.GlyphIndex & 0xFF00) >>> 8);
                     bytes[idx * 2 + 1] = (byte)(item.GlyphIndex & 0xFF);
                 }
-#if true
                 text = PdfEncoders.ToHexStringLiteral(bytes, true, false, null);
-#else
-                var bytes2 = PdfEncoders.FormatStringLiteral(bytes, true, false, true, null);
-                text = PdfEncoders.RawEncoding.GetString(bytes2, 0, bytes2.Length);
-#endif
             }
-#else
-            if (font.Unicode)
-            {
-                var sb = new StringBuilder();
-                bool isSymbolFont = descriptor.IsSymbolFont;
-                int length = s.Length;
-                for (int idx = 0; idx < length; idx++)
-                {
-                    char ch = s[idx];
-                    if (Char.IsLowSurrogate(ch))
-                    {
-                        // We only come here when the text contains a low surrogate not preceded by a high surrogate.
-                        // This is an error in the UTF-32 text and therefore ignored.
-                        LogHost.FontManagementLogger.LogWarning("Unexpected low surrogate found: 0x{Char:X2}", ch);
-                        continue;
-                    }
 
-                    if (isSymbolFont)
-                    {
-                        // ch must be fit in one byte.
-                        if ((ch & 0xFF00) != 0)
-                        {
-                            LogHost.FontManagementLogger.LogWarning("Unexpected character found for symbol font: 0x{Char:X2}", ch);
-                            continue;
-                        }
-
-                        // Remap ch for symbol fonts.
-                        ch = descriptor.RemapSymbolChar(ch);
-                        var glyphIndex = descriptor.BmpCodepointToGlyphIndex(ch);
-                        sb.Append((char)glyphIndex);
-
-                    }
-                    else if (Char.IsHighSurrogate(ch))
-                    {
-                        // UTF16 surrogate pair expected.
-                        char ch2;
-                        if (++idx < length)
-                        {
-                            ch2 = s[idx];
-                            if (Char.IsLowSurrogate(ch2) is false)
-                            {
-                                LogHost.FontManagementLogger.LogWarning("High surrogate 0x{Char:X2} not followed by low surrogate.", ch);
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            LogHost.FontManagementLogger.LogWarning("High surrogate 0x{Char:X2} found at end of string.", ch);
-                            break;
-                        }
-
-                        var glyphIndex = descriptor.SurrogatePairToGlyphIndex(ch, ch2);
-                        sb.Append((char)glyphIndex);
-                    }
-                    else
-                    {
-                        // BMP character.
-                        var glyphIndex = descriptor.BmpCodepointToGlyphIndex(ch);
-#if DEBUG_
-                        // Are BMP characters also in cmap 12?
-                        // => No
-                        var altID = descriptor.CodepointToGlyphIndex_cmap12_only(ch);
-                        if (glyphIndex != altID)
-                            _ = typeof(int);
-#endif
-                        sb.Append((char)glyphIndex);
-                    }
-                }
-                s = sb.ToString();
-
-                byte[] bytes = PdfEncoders.RawUnicodeEncoding.GetBytes(s);
-                bytes = PdfEncoders.FormatStringLiteral(bytes, true, false, true, null);
-                text = PdfEncoders.RawEncoding.GetString(bytes, 0, bytes.Length);
-            }
-            else
-            {
-                byte[] bytes = PdfEncoders.WinAnsiEncoding.GetBytes(s);
-                text = PdfEncoders.ToStringLiteral(bytes, false, null);
-            }
-#endif
             // Map absolute position to PDF world space.
             var pos = new XPoint(x, y);
             pos = WorldToView(pos);
@@ -681,7 +610,7 @@ namespace PdfSharp.Drawing.Pdf
             }
 
             // Select the number of decimal places used for the relative text positioning.
-            const string formatTj = Config.SignificantDecimalPlaces3;
+            const string formatTj = Config.SignificantDecimalPlaces4;
 #if ITALIC_SIMULATION
             if (italicSimulation)
             {
@@ -1270,7 +1199,7 @@ namespace PdfSharp.Drawing.Pdf
             sinβ = Math.Sin(β);
             double cosβ = Math.Cos(β);
 
-            const string format = Config.SignificantDecimalPlaces3;
+            const string format = Config.SignificantDecimalPlaces4;
             XPoint pt1, pt2, pt3;
             if (!reflect)
             {
@@ -1589,16 +1518,17 @@ namespace PdfSharp.Drawing.Pdf
             foreach (PathFigure figure in geometry.Figures)
             {
 #if DEBUG
-                //#warning For DdlGBE_Chart_Layout (WPF) execution sticks at this Assertion.
+                //#war/ning For DdlGBE_Chart_Layout (WPF) execution sticks at this Assertion.
                 // The empty Figure is added via XGraphicsPath.CurrentPathFigure Getter.
                 // Some methods like XGraphicsPath.AddRectangle() or AddLine() use this empty Figure to add Segments, others like AddEllipse() don't.
                 // Here, _pathGeometry.AddGeometry() of course ignores this first Figure and adds a second.
-                // Encapsulate relevant Add methods to delete a first empty Figure or move the Addition of an first empty Figure to a GetOrCreateCurrentPathFigure() or simply remove Assertion?
+                // Encapsulate relevant Add methods to delete a first empty Figure or move the Addition of a first empty Figure to a GetOrCreateCurrentPathFigure()
+                // or simply remove Assertion?
                 // Look for:
                 // MAOS4STLA: CurrentPathFigure.
 
                 if (figure.Segments.Count == 0)
-                    42.GetType();
+                    _ = typeof(int);
                 Debug.Assert(figure.Segments.Count > 0);
 #endif
                 // Skip the Move if the segment is empty. Workaround for empty segments.
@@ -1606,85 +1536,142 @@ namespace PdfSharp.Drawing.Pdf
                 if (figure.Segments.Count > 0)
                 {
                     // Move to start point.
-                    SysPoint currentPoint = figure.StartPoint;
+                    var currentPoint = figure.StartPoint;
                     AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", currentPoint.X, currentPoint.Y);
 
                     foreach (PathSegment segment in figure.Segments)
                     {
-                        Type type = segment.GetType();
-                        if (type == typeof(LineSegment))
+                        switch (segment)
                         {
-                            // Draw a single line.
-                            SysPoint point = ((LineSegment)segment).Point;
-                            currentPoint = point;
-                            AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", point.X, point.Y);
-                        }
-                        else if (type == typeof(PolyLineSegment))
-                        {
-                            // Draw connected lines.
-                            PointCollection points = ((PolyLineSegment)segment).Points;
-                            foreach (SysPoint point in points)
-                            {
-                                currentPoint = point;
-                                AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", point.X, point.Y);
-                            }
-                        }
-                        else if (type == typeof(BezierSegment))
-                        {
-                            // Draw Bézier curve.
-                            BezierSegment seg = (BezierSegment)segment;
-                            SysPoint point1 = seg.Point1;
-                            SysPoint point2 = seg.Point2;
-                            SysPoint point3 = seg.Point3;
-                            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
-                                point1.X, point1.Y, point2.X, point2.Y, point3.X, point3.Y);
-                            currentPoint = point3;
-                        }
-                        else if (type == typeof(PolyBezierSegment))
-                        {
-                            // Draw connected Bézier curves.
-                            PointCollection points = ((PolyBezierSegment)segment).Points;
-                            int count = points.Count;
-                            if (count > 0)
-                            {
-                                Debug.Assert(count % 3 == 0, "Number of Points in PolyBezierSegment are not a multiple of 3.");
-                                for (int idx = 0; idx < count - 2; idx += 3)
+                            case LineSegment lineSegment:
                                 {
-                                    SysPoint point1 = points[idx];
-                                    SysPoint point2 = points[idx + 1];
-                                    SysPoint point3 = points[idx + 2];
+                                    // Draw a single line.
+                                    var point = lineSegment.Point;
+                                    AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", point.X, point.Y);
+                                    currentPoint = point;
+                                }
+                                break;
+
+                            case PolyLineSegment polyLineSegment:
+                                {
+                                    // Draw connected lines.
+                                    var points = polyLineSegment.Points;
+                                    foreach (SysPoint point in points)
+                                    {
+                                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", point.X, point.Y);
+                                    }
+                                    currentPoint = points[^1];
+                                }
+                                break;
+
+                            case BezierSegment bezierSegment:
+                                {
+                                    // Draw Bézier curve.
+                                    var point1 = bezierSegment.Point1;
+                                    var point2 = bezierSegment.Point2;
+                                    var point3 = bezierSegment.Point3;
                                     AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
                                         point1.X, point1.Y, point2.X, point2.Y, point3.X, point3.Y);
+                                    currentPoint = point3;
                                 }
-                                currentPoint = points[count - 1];
-                            }
+                                break;
+
+                            case PolyBezierSegment polyBezierSegment:
+                                {
+                                    // Draw connected Bézier curves.
+                                    var points = polyBezierSegment.Points;
+                                    int count = points.Count;
+                                    if (count > 0)
+                                    {
+                                        Debug.Assert(count % 3 == 0, "Number of points in PolyBezierSegment are not a multiple of 3.");
+                                        for (int idx = 0; idx < count - 2; idx += 3)
+                                        {
+                                            var point1 = points[idx];
+                                            var point2 = points[idx + 1];
+                                            var point3 = points[idx + 2];
+                                            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                                                point1.X, point1.Y, point2.X, point2.Y, point3.X, point3.Y);
+                                        }
+                                        currentPoint = points[count - 1];
+                                    }
+                                }
+                                break;
+
+                            case ArcSegment arcSegment:
+                                {
+                                    // Draw partial arc.
+                                    AppendPartialArc(currentPoint, arcSegment.Point, arcSegment.RotationAngle, arcSegment.Size,
+                                        arcSegment.IsLargeArc, arcSegment.SweepDirection, PathStart.Ignore1st);
+                                    currentPoint = arcSegment.Point;
+                                }
+                                break;
+
+                            case QuadraticBezierSegment quadraticBezierSegment:
+                                {
+                                    /*
+                                        For PDF and GDI+ it must be converted to a cubic Bézier curve. I.e. the one control point
+                                        from the quadratic curve must be converted into the 2 control points of the cubic curve.
+
+                                        Here is how to do it from GPT 4:
+
+                                        To convert a quadratic Bézier curve to a cubic one, you need to adjust the control points of the
+                                        cubic curve so that it mimics the shape of the original quadratic curve. Here's how to do it:
+
+                                        Assume that your quadratic Bézier curve is defined by the points P0, P1, and P2, where P0 and P2
+                                        are the endpoints and P1 is the control point.
+
+                                        The cubic Bézier curve is defined by four points: C0, C1, C2, and C3. C0 is identical to P0,
+                                        and C3 is identical to P2. That is, the endpoints of the curves remain the same.
+
+                                        The two new control points, C1 and C2, need to be calculated. You can find them using the following formulas:
+                                    
+                                        C1 = (2/3) * P1 + (1/3) * P0
+                                        C2 = (2/3) * P1 + (1/3) * P2
+
+                                        These calculations position the control points C1 and C2 so that the cubic curve retains the same shape as the original quadratic curve.
+                                    */
+
+                                    // Draw Bézier curve from quadratic Bézier curve.
+                                    var point1 = quadraticBezierSegment.Point1;
+                                    var point2 = quadraticBezierSegment.Point2;
+                                    var controlPoints = QuadraticToCubic(currentPoint.X, currentPoint.Y, point1.X, point1.Y, point2.X, point2.Y);
+                                    AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                                        controlPoints.C1X, controlPoints.C1Y, controlPoints.C2X, controlPoints.C2Y, point2.X, point2.Y);
+                                    currentPoint = point2;
+                                }
+                                break;
+
+                            case PolyQuadraticBezierSegment polyQuadraticBezierSegment:
+                                {
+                                    // Draw connected Bézier curves from quadratic Bézier curves.
+                                    var points = polyQuadraticBezierSegment.Points;
+
+                                    int count = points.Count;
+                                    if (count > 0)
+                                    {
+                                        Debug.Assert(count % 2 == 0, "Number of points in PolyQuadraticBezierSegment are not a multiple of 2.");
+                                        for (int idx = 0; idx < count - 1; idx += 2)
+                                        {
+                                            var point1 = points[idx];
+                                            var point2 = points[idx + 1];
+                                            var controlPoints = QuadraticToCubic(currentPoint.X, currentPoint.Y, point1.X, point1.Y, point2.X, point2.Y);
+
+                                            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                                                controlPoints.C1X, controlPoints.C1Y, controlPoints.C2X, controlPoints.C2Y, point2.X, point2.Y);
+                                            currentPoint = point2;
+                                        }
+                                    }
+                                }
+                                break;
                         }
-                        else if (type == typeof(ArcSegment))
+                        continue;
+
+                        (double C1X, double C1Y, double C2X, double C2Y) QuadraticToCubic(double p0X, double p0Y, double p1X, double p1Y, double p2X, double p2Y)
                         {
-                            // Draw arc.
-                            ArcSegment seg = (ArcSegment)segment;
-                            AppendPartialArc(currentPoint, seg.Point, seg.RotationAngle, seg.Size, seg.IsLargeArc, seg.SweepDirection, PathStart.Ignore1st);
-                            currentPoint = seg.Point;
-                        }
-                        else if (type == typeof(QuadraticBezierSegment))
-                        {
-                            QuadraticBezierSegment seg = (QuadraticBezierSegment)segment;
-                            currentPoint = seg.Point2;
-                            // IMPROVE: Undone because XGraphics has no such curve type.
-                            // Easy to implement, but not worthy enough.
-                            throw new NotImplementedException("AppendPath with QuadraticBezierSegment.");
-                        }
-                        else if (type == typeof(PolyQuadraticBezierSegment))
-                        {
-                            PolyQuadraticBezierSegment seg = (PolyQuadraticBezierSegment)segment;
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
-                            currentPoint = seg.Points[^1];
-#else
-                            currentPoint = seg.Points[seg.Points.Count - 1];
-#endif
-                            // IMPROVE: Undone because XGraphics has no such curve type.
-                            // Easy to implement, but not worthy enough.
-                            throw new NotImplementedException("AppendPath with PolyQuadraticBezierSegment.");
+                            const double oneThird = 1 / 3d;
+                            const double twoThirds = 2 / 3d;
+                            return (twoThirds * p1X + oneThird * p0X, twoThirds * p1Y + oneThird * p0Y,
+                                twoThirds * p1X + oneThird * p2X, twoThirds * p1Y + oneThird * p2Y);
                         }
                     }
                     if (figure.IsClosed)
@@ -1920,7 +1907,7 @@ namespace PdfSharp.Drawing.Pdf
         }
 
         /// <summary>
-        /// Ends the content stream, i.e. ends the text mode and balances the graphic state stack.
+        /// Ends the content stream, i.e. ends the text mode, balances the graphic state stack and removes the trailing line feed.
         /// </summary>
         void EndPage()
         {
@@ -1932,6 +1919,15 @@ namespace PdfSharp.Drawing.Pdf
 
             while (_gfxStateStack.Count != 0)
                 RestoreState();
+
+            // Remove the trailing line feed. The stream content shall end with the last line without entering a new one,
+            // while adding the end-of-line marker before the 'endstream' keyword is the job of PdfWriter.
+            if (_content.Length > 0)
+            {
+                var lastIdx = _content.Length - 1;
+                if (_content[^1] == Chars.LF)
+                    _content.Remove(lastIdx, 1);
+            }
         }
 
         /// <summary>
@@ -1995,25 +1991,21 @@ namespace PdfSharp.Drawing.Pdf
         /// <summary>
         /// Makes the specified pen the current graphics object.
         /// </summary>
-        void Realize(XPen pen)
-            => Realize(pen, null);
+        void Realize(XPen pen) => Realize(pen, null);
 
         /// <summary>
         /// Makes the specified brush the current graphics object.
         /// </summary>
-        void Realize(XBrush brush)
-            => Realize(null, brush);
+        void Realize(XBrush brush) => Realize(null, brush);
 
         /// <summary>
         /// Makes the specified font and brush the current graphics objects.
         /// </summary>
-        //void Realize(XFont font, XBrush brush, int renderingMode, FontType fontType)
         void Realize(XGlyphTypeface glyphTypeface, double emSize, XBrush brush, int renderingMode, FontType fontType)
         {
             BeginPage();
             RealizeTransform();
             BeginTextMode();
-            //_gfxState.RealizeFont(new XFontSurro(font), font.Size, brush, renderingMode, fontType);
             _gfxState.RealizeFont(glyphTypeface, emSize, brush, renderingMode, fontType);
         }
 
@@ -2179,7 +2171,7 @@ namespace PdfSharp.Drawing.Pdf
             get
             {
                 if (_page != null!)
-                    return new XSize(_page.Width, _page.Height);
+                    return new XSize(_page.Width.Point, _page.Height.Point);
                 return _form.Size;
             }
         }

@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using PdfSharp.Internal;
 using PdfSharp.Logging;
 using PdfSharp.Pdf.Internal;
-using PdfSharp.Internal.Logging;
 
 namespace PdfSharp.Pdf.IO
 {
@@ -25,14 +24,22 @@ namespace PdfSharp.Pdf.IO
         public Lexer(Stream pdfInputStream, ILogger? logger)
         {
             _pdfStream = pdfInputStream;
+            // ReSharper disable once RedundantCast because SizeType can be 32 bit depending on build.
             _pdfLength = (SizeType)_pdfStream.Length;
             _idxChar = 0;
             Position = 0;
-            _logger = logger ?? LogHost.CreateLogger(LogCategory.PdfReading);
+            _logger = logger ?? PdfSharpLogHost.PdfReadingLogger;
         }
 
         /// <summary>
-        /// Gets or sets the position within the PDF stream.
+        /// Gets or sets the logical current position within the PDF stream.<br/>
+        /// When got, the logical position of the stream pointer is returned.
+        /// The actual position in the .NET Stream is two bytes more, because the
+        /// reader has a look-ahead of two bytes (_currChar and _nextChar).<br/>
+        /// When set, the logical position is set and 2 bytes of look-ahead are red
+        /// into _currChar and _nextChar.<br/>
+        /// This ensures that immediately getting and setting or setting and getting
+        /// is idempotent.
         /// </summary>
         public SizeType Position
         {
@@ -84,7 +91,7 @@ namespace PdfSharp.Pdf.IO
                     return Symbol = ScanNumber(false);
 
                 case '(':
-                    return Symbol = ScanLiteralString();
+                    return Symbol = ScanStringLiteral();
 
                 case '[':
                     ScanNextChar(true);
@@ -140,69 +147,21 @@ namespace PdfSharp.Pdf.IO
                     return Symbol = Symbol.Eof;
 
                 default:
-                    Debug.Assert(!Char.IsLetter(ch), "I did something wrong. See code below.");
+                    Debug.Assert(!Char.IsLetter(ch), "PDFsharp did something wrong. See code below.");
                     ParserDiagnostics.HandleUnexpectedCharacter(ch, DumpNeighborhoodOfPosition());
                     return Symbol = Symbol.None;
             }
         }
 
         /// <summary>
-        /// Reads the raw content of a stream.
-        /// A stream longer than 2 GiB is not implemented by design.
+        /// Reads a string in 'raw' encoding without changing the state of the lexer.
         /// </summary>
-        public byte[] ReadStream(int length)
+        public string RandomReadRawString(SizeType position, int length)
         {
-            SizeType pos;
-
-            // Skip illegal blanks behind «stream».
-            int blanks = 0;
-            while (_currChar == Chars.SP)
-            {
-                blanks++;
-                ScanNextChar(true);
-            }
-            if (blanks > 0)
-            {
-                // #PRD
-                //DiagnosticsHelper.xxx ("Skipped {blanks}x} superfluous blanks behind 'stream' at position xxxx", ...)
-            }
-
-            // Skip new line behind «stream».
-            if (_currChar == Chars.CR)
-            {
-                if (_nextChar == Chars.LF)
-                    pos = _idxChar + 2;
-                else
-                    pos = _idxChar + 1;
-            }
-            else
-                pos = _idxChar + 1;
-
-            _pdfStream.Position = pos;
-            byte[] bytes = new byte[length];
-            int read = _pdfStream.Read(bytes, 0, length);
-            Debug.Assert(read == length);
-            // With corrupted files, read could be different from length.
-            if (bytes.Length != read)
-            {
-                Array.Resize(ref bytes, read);
-            }
-
-            // Synchronize idxChar etc.
-            Position = pos + read;
-            return bytes;
-        }
-
-        /// <summary>
-        /// Reads a string in 'raw' encoding.
-        /// </summary>
-        public string ReadRawString(SizeType position, int length)
-        {
-            _pdfStream.Position = position;
-            var bytes = new byte[length];
-            var readBytes = _pdfStream.Read(bytes, 0, length);
-            Debug.Assert(readBytes == length);
-            return PdfEncoders.RawEncoding.GetString(bytes, 0, bytes.Length);
+            var oldPosition = _pdfStream.Position;
+            var str = ScanRawString(position, length);
+            _pdfStream.Position = oldPosition;
+            return str;
         }
 
         /// <summary>
@@ -237,32 +196,7 @@ namespace PdfSharp.Pdf.IO
             {
                 var ch = AppendAndScanNextChar();
                 if (IsWhiteSpace(ch) || IsDelimiter(ch) || ch == Chars.EOF)
-                {
                     break;
-
-                    // DELETE
-                    //// Name objects use UTF-8 encoding. We have to decode it here.
-                    //var name = Token;
-
-                    //for (int idx = 0; idx < name.Length; ++idx)
-                    //{
-                    //    // If MSB is set, we need UTF-8 decoding.
-                    //    if (name[idx] > 127)
-                    //    {
-                    //        // Special characters in Name objects use UTF-8 encoding.
-                    //        var bytes = new byte[name.Length];
-                    //        for (int idx2 = 0; idx2 < name.Length; ++idx2)
-                    //        {
-                    //            bytes[idx2] = (byte)name[idx2];
-                    //        }
-                    //        var decodedName = Encoding.UTF8.GetString(bytes);
-                    //        _token.Clear();
-                    //        _token.Append(decodedName);
-                    //        break;
-                    //    }
-                    //}
-                    //return Symbol = Symbol.Name;
-                }
 
                 if (ch == '#')
                 {
@@ -285,7 +219,7 @@ namespace PdfSharp.Pdf.IO
 
                     static char LogError(char ch)
                     {
-                        LogHost.Logger.LogError("Illegal character {char} in hex string.", ch);
+                        PdfSharpLogHost.Logger.LogError("Illegal character {char} in hex string.", ch);
                         return '\0';
                     }
                 }
@@ -366,7 +300,7 @@ namespace PdfSharp.Pdf.IO
                 // Never saw this in any PDF file, but possible.
                 if (ch is not ('.' or >= '0' and <= '9'))
                 {
-                    LogHost.Logger.LogError("+/- not followed by a number.");
+                    PdfSharpLogHost.Logger.LogError("+/- not followed by a number.");
                 }
             }
 
@@ -541,6 +475,7 @@ namespace PdfSharp.Pdf.IO
             // Check known tokens.
             return _token.ToString() switch
             {
+                // ReSharper disable StringLiteralTypo
                 "obj" => Symbol = Symbol.Obj,
                 "endobj" => Symbol = Symbol.EndObj,
                 "null" => Symbol = Symbol.Null,
@@ -552,6 +487,7 @@ namespace PdfSharp.Pdf.IO
                 "xref" => Symbol = Symbol.XRef,
                 "trailer" => Symbol = Symbol.Trailer,
                 "startxref" => Symbol = Symbol.StartXRef,
+                // ReSharper restore StringLiteralTypo
 
                 // Anything else is treated as a general keyword. Samples are f or n in iref.
                 _ => Symbol = Symbol.Keyword
@@ -559,9 +495,9 @@ namespace PdfSharp.Pdf.IO
         }
 
         /// <summary>
-        /// Scans a literal string, contained between "(" and ")".
+        /// Scans a string literal, contained between "(" and ")".
         /// </summary>
-        public Symbol ScanLiteralString()
+        public Symbol ScanStringLiteral()
         {
             // Reference: 3.2.3  String Objects / Page 53
             // Reference: TABLE 3.32  String Types / Page 157
@@ -571,7 +507,7 @@ namespace PdfSharp.Pdf.IO
             int parenLevel = 0;
         RetryAfterSkipIllegalCharacter:
             char ch = ScanNextChar(true); // Inside of a string \r, \n and \r\n without preceding \\ shall be treated as \n.
-            
+
             // Deal with escape characters.
             while (ch != Chars.EOF)
             {
@@ -689,17 +625,11 @@ namespace PdfSharp.Pdf.IO
                             }
                             break;
                         }
-
-                    default:
-                        break;
                 }
-
                 _token.Append(ch);
                 ch = ScanNextChar(true); // Inside of a string \r, \n and \r\n without preceding \\ shall be treated as \n.
             }
-
-
-            End:
+        End:
             return Symbol = Symbol.String;
         }
 
@@ -720,7 +650,7 @@ namespace PdfSharp.Pdf.IO
                     ScanNextChar(true);
                     break;
                 }
-#if true
+
                 var hex = _currChar switch
                 {
                     >= '0' and <= '9' => _currChar - '0',
@@ -747,38 +677,225 @@ namespace PdfSharp.Pdf.IO
                 };
                 _token.Append((char)hex);
                 ScanNextChar(true);
-#else  // DELETE
-                if (Char.IsLetterOrDigit(_currChar))
-                {
-                    hex[0] = Char.ToUpper(_currChar);
-                    // Second char is optional in PDF spec.
-                    if (Char.IsLetterOrDigit(_nextChar))
-                    {
-                        hex[1] = Char.ToUpper(_nextChar);
-                        ScanNextChar(true);
-                    }
-                    else
-                    {
-                        // We could check for ">" here and throw if we find anything else. The throw comes after the next iteration anyway.
-                        hex[1] = '0';
-                    }
-                    ScanNextChar(true);
-
-                    int ch = Int32.Parse(new string(hex), NumberStyles.AllowHexSpecifier);
-                    _token.Append(Convert.ToChar(ch));
-                }
-                else
-                    ParserDiagnostics.HandleUnexpectedCharacter(_currChar, DumpNeighborhoodOfPosition());
-#endif
             }
 
             return Symbol = Symbol.HexString;
 
             static char LogError(char ch)
             {
-                LogHost.Logger.LogError("Illegal character {char} in hex string.", ch);
+                PdfSharpLogHost.Logger.LogError("Illegal character {char} in hex string.", ch);
                 return '\0';
             }
+        }
+
+        /// <summary>
+        /// Tries to scan the specified literal from the current stream position.
+        /// </summary>
+        public bool TryScanLiterally(string literal)
+        {
+            var initialPosition = Position;
+
+            foreach (var expectedChar in literal)
+            {
+                if (_currChar != expectedChar)
+                {
+                    // Restore initial position, if no success.
+                    Position = initialPosition;
+                    return false;
+                }
+                ScanNextChar(false);
+            }
+            return true;
+        }
+
+        ///// <summary>
+        ///// Tries to scan "\n", "\r" or "\r\n" and moves the Position to the next line.
+        ///// </summary>
+        //public bool TryScanEndOfLine() => TryScanEndOfLine(true, true, true);
+
+        ///// <summary>
+        ///// Tries to scan the accepted end-of-line markers and moves the Position to the next line.
+        ///// </summary>
+        //public bool TryScanEndOfLine(bool acceptCR, bool acceptLF, bool acceptCRLF)
+        //{
+        //    if (acceptCRLF && _currChar == Chars.CR && _nextChar == Chars.LF)
+        //    {
+        //        Position += 2;
+        //        return true;
+        //    }
+        //    if (acceptCR && _currChar == Chars.CR || acceptLF && _currChar == Chars.LF)
+        //    {
+        //        Position += 1;
+        //        return true;
+        //    }
+        //    return false;
+        //}
+
+        /// <summary>
+        /// Return the exact position where the content of the stream starts.
+        /// The logical position is also set to this value when the function returns.<br/>
+        /// Reference:     3.2.7  Stream Objects / Page 60
+        /// Reference 2.0: 7.3.8  Stream objects / Page 31
+        /// </summary>
+        public SizeType FindStreamStartPosition(PdfObjectID id)
+        {
+            // Quote from Reference 2.0:
+            // The keyword stream that follows the stream dictionary shall be followed by an
+            // end-of-line marker consisting of either a CARRIAGE RETURN and a LINE FEED
+            // or just a LINE FEED, and not by a CARRIAGE RETURN alone.
+
+            // The byte behind 'stream'.
+            SizeType currentPosition = Position;
+
+            // Most PDF files are well-formatted, so check this first.
+
+            // Check first correct case.
+            if (_currChar == Chars.LF)
+            {
+                Position += 1;
+                return Position;
+            }
+
+            // Check second correct case.
+            if (_currChar == Chars.CR && _nextChar == Chars.LF)
+            {
+                Position += 2;
+                return Position;
+            }
+
+            // OK, stream is ill-formatted.
+            // We saw PDF files with blanks behind 'stream'.
+            int skip = 0;
+            while (_currChar == Chars.SP)
+            {
+                skip++;
+                ScanNextChar(true);
+            }
+
+            string message;
+            if (skip > 0 || true)
+            {
+                if (_logger.IsEnabled(LogLevel.Warning))
+                {
+                    message = Invariant($"Skipped {skip} illegal blanks behind keyword 'stream' at position {currentPosition} in object {id}.");
+                    _logger.LogWarning(message);
+                }
+            }
+
+            // Single LF.
+            if (_currChar == Chars.LF)
+            {
+                Position += 1;
+                return Position;
+            }
+
+            // CRLF.
+            if (_currChar == Chars.CR && _nextChar == Chars.LF)
+            {
+                Position += 2;
+                return Position;
+            }
+
+            // Single CR is illegal according to spec.
+            if (_currChar == Chars.CR)
+            {
+                if (_logger.IsEnabled(LogLevel.Warning))
+                {
+                    message = Invariant($"Keyword 'stream' followed by single CR is illegal at position {currentPosition} in object {id}.");
+                    _logger.LogWarning(message);
+                }
+                Position += 1;
+                return Position;
+            }
+
+            if (_logger.IsEnabled(LogLevel.Warning))
+            {
+                message = Invariant($"Keyword 'stream' followed by illegal bytes at position {currentPosition} in object {id}.");
+                _logger.LogWarning(message);
+            }
+
+            // Best we can do here is to define content starts immediately behind 'stream' or behind the last blank, respectively.
+            return Position;
+        }
+
+        /// <summary>
+        /// Reads the raw content of a stream.
+        /// A stream longer than 2 GiB is not intended by design.
+        /// </summary>
+        public byte[] ScanStream(SizeType position, int length)
+        {
+            Debug.Assert(Position == position);
+            // Set physical stream position because this is not the logical position.
+            _pdfStream.Position = position;
+
+            byte[] bytes = new byte[length];
+            int read = _pdfStream.Read(bytes, 0, length);
+            if (read != length)
+            {
+                throw new InvalidOperationException("Stream cannot be read. Please send us the PDF file so that we can fix this.");
+            }
+
+            // Note: Position += length cannot be used here.
+            Position = position + length;
+            return bytes;
+        }
+
+        /// <summary>
+        /// Gets the effective length of a stream on the basis of the position of 'endstream'.
+        /// Call this function if 'endstream' was not found at the end of a stream content after
+        /// it is parsed.
+        /// </summary>
+        /// <param name="start">The position behind 'stream' symbol in dictionary.</param>
+        /// <param name="searchLength">The range to search for 'endstream'.</param>
+        /// <returns>The real length of the stream when 'endstream' was found.</returns>
+        public int DetermineStreamLength(SizeType start, int searchLength)
+        {
+#if DEBUG_
+            if (start == 144848)
+                _ = sizeof(int);
+#endif
+            var rawString = RandomReadRawString(start, searchLength);
+
+            // When we come here, we have either an invalid or no \Length entry.
+            // Best we can do is to consider all byte before 'endstream' are part of the stream content.
+            // In case the stream is zipped, this is no problem. In case the stream is encrypted
+            // it would be a serious problem. But we wait if this really happens.
+            int idxEndStream = rawString.LastIndexOf("endstream", StringComparison.Ordinal);
+            if (idxEndStream == -1)
+                throw TH.ObjectNotAvailableException_CannotRetrieveStreamLength();
+            return idxEndStream;
+        }
+
+        /// <summary>
+        /// Tries to scan 'endstream' after reading the stream content with a logical position
+        /// on the first byte behind the read stream content.
+        /// Returns true if success. The logical position is then immediately behind 'endstream'.
+        /// In case of false the logical position is not well-defined.
+        /// </summary>
+        public bool TryScanEndStreamSymbol()
+        {
+            return _currChar switch
+            {
+                // This case is not recommended by specs, but valid PDF.
+                'e' when _nextChar == 'n' => TryScanLiterally("endstream"),
+                // These are the valid by specs cases.
+                Chars.CR when _nextChar == 'e' => TryScanLiterally("\rendstream"),
+                Chars.LF when _nextChar == 'e' => TryScanLiterally("\nendstream"),
+                Chars.CR when _nextChar == Chars.LF => TryScanLiterally("\r\nendstream"),
+                _ => false
+            };
+        }
+
+        /// <summary>
+        /// Reads a string in 'raw' encoding.
+        /// </summary>
+        public string ScanRawString(SizeType position, int length)
+        {
+            _pdfStream.Position = position;
+            var bytes = new byte[length];
+            var readBytes = _pdfStream.Read(bytes, 0, length);
+            Debug.Assert(readBytes == length);
+            return PdfEncoders.RawEncoding.GetString(bytes, 0, bytes.Length);
         }
 
         /// <summary>
@@ -855,13 +972,6 @@ namespace PdfSharp.Pdf.IO
                         ScanNextChar(true);
                         break;
 
-                    //                    case (char)11:
-                    //                    case (char)173:
-                    //#warning "Must not be ignored"
-                    //                        throw null;
-                    //                        ScanNextChar(true);
-                    //                        break;
-
                     default:
                         return _currChar;
                 }
@@ -880,6 +990,7 @@ namespace PdfSharp.Pdf.IO
         public string DumpNeighborhoodOfPosition(SizeType position = -1, bool hex = false, int range = 25)
         {
             // Do not use or change the Lexer Position property.
+            // ReSharper disable once RedundantCast because SizeType can be 32 bit depending on build.
             SizeType originalPosition = (SizeType)_pdfStream.Position;
 
             // Test edge case calculation.
@@ -952,7 +1063,7 @@ namespace PdfSharp.Pdf.IO
                         //Chars.SP => "・",  // U+30FB
 
                         //<= ' ' => $"⁌((int)ch).ToString(\"X2\")⁍",
-                        <= ' ' => $"⟬((int)ch).ToString(\"X2\")⟭",
+                        <= ' ' => $"""⟬{(((int)ch).ToString("X2"))}⟭""",
 
                         _ => ch.ToString()
                     };
@@ -1090,10 +1201,8 @@ namespace PdfSharp.Pdf.IO
         (int, int) _tokenAsObjectID;
         readonly Stream _pdfStream;
         ILogger _logger;
-
     }
 
-    //#pragma warning disable CS1591 // DELETE
 #if DEBUG
     public class LexerHelper
     {

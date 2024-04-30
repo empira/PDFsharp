@@ -146,10 +146,9 @@ namespace PdfSharp.Snippets.Drawing
 
             BeginBox(gfx, 8, BoxOptions.Tile);
             {
-//#warning TODO Duplicate test.
-                // GIF test.
+                // Same GIF test as in box 7.
                 var img = ImageHelper.GetGifImage(ImageHelper.GifImages.Image009);
-                gfx.DrawImage(img, 28, 18, 152, 152 * 82 / 683);
+                gfx.DrawImage(img, 28, 18, 152, 152 * 82 / 683d);
             }
             EndBox(gfx);
         }

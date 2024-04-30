@@ -2,23 +2,39 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Fonts;
+using PdfSharp.Internal;
 using PdfSharp.Logging;
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member because it is for internal use only.
 
 namespace PdfSharp.Diagnostics
 {
     /// <summary>
-    /// A helper class that is UNDER CONSTRUCTION.
-    /// DO NOT USE IT.
+    /// A helper class for central configuration.
     /// </summary>
     public static class PdfSharpCore
     {
+        /// <summary>
+        /// Resets PDFsharp to a state equivalent to the state after
+        /// the assemblies are loaded.
+        /// </summary>
         public static void ResetAll()
         {
             Capabilities.ResetAll();
-            GlobalFontSettings.ResetFontResolvers();
-            LogHost.ResetLogging();
+            GlobalFontSettings.ResetAll();
+            PdfSharpLogHost.ResetLogging();
+            Globals.Global.RecreateGlobals();
+
+            if (FontFactory.HasFontSources)
+                throw new InvalidOperationException("Internal error.");
+        }
+
+        /// <summary>
+        /// Resets the font management equivalent to the state after
+        /// the assemblies are loaded.
+        /// </summary>
+        public static void ResetFontManagement()
+        {
+            GlobalFontSettings.ResetAll(true);
+            Globals.Global.IncrementVersion();
         }
     }
 }

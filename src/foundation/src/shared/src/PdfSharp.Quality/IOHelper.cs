@@ -12,11 +12,10 @@ namespace PdfSharp.Quality
     /// <summary>
     /// Static helper functions for file IO.
     /// </summary>
-    public static class IOHelper  // #RENAME IOUtility, PdfDocumentUtility, FontUtility
+    [Obsolete("Use IOUtility.")]
+    public static class IOHelper  // #DELETE
     // ReSharper restore InconsistentNaming
     {
-
-
 #if true_
         protected async Task<string> SaveToStreamOrSaveToFileAsync(PdfDocument document, Stream stream, string filenameTag, bool show)
         {

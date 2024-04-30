@@ -44,7 +44,7 @@ foreach ($asset in $assetList) {
 
     $idx = $asset.LastIndexOf("/")
     $assetFolder = $asset.Substring(0, $idx)
-    Expand-Archive "$destination/$asset" -DestinationPath "$destination/$assetFolder" -Force
+    Expand-Archive -Force "$destination/$asset" -DestinationPath "$destination/$assetFolder"
 
     Remove-Item "$destination/$asset"
     # Not all ZIP files contain compress.ps1. Suppress error messages.
@@ -53,17 +53,17 @@ foreach ($asset in $assetList) {
 
 # Part 2: Download fonts
 
-$source = "https://fonts.google.com/"
+$source = "https://assets.pdfsharp.net/"
 $destination = "$PSScriptRoot/../assets/fonts/Noto/Noto_Sans/static/"
 
 New-Item -ItemType Directory -Path $destination
 New-Item -ItemType Directory -Path "$destination/temp/"
 
-$url = $source + "download?family=Noto%20Sans"
+$url = $source + "fonts/Noto/Noto_Sans.zip"
 $dest = $destination
 
 Invoke-WebRequest $url -OutFile "$dest/temp/noto_sans_temp.zip"
-Expand-Archive "$destination/temp/noto_sans_temp.zip" -DestinationPath "$destination/temp/" -Force
+Expand-Archive -Force "$destination/temp/noto_sans_temp.zip" -DestinationPath "$destination/temp/"
 
 # Successfully extracted. Now move the fonts files.
 [string[]]$folderList = @(

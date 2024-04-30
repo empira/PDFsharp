@@ -1,4 +1,7 @@
-﻿#nullable enable annotations
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+#nullable enable annotations
 
 // ReSharper disable once CheckNamespace
 namespace PdfSharp.BigGustave
@@ -288,7 +291,7 @@ namespace PdfSharp.BigGustave
             if (!hasTooManyColorsForPalette && !hasAlphaChannel)
             {
                 var paletteColors = colorCounts.OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
-                bitDepth = paletteColors.Count >= 128 ? 8 : 4;
+                bitDepth = paletteColors.Count > 16 ? 8 : 4;
                 var samplesPerByte = bitDepth == 8 ? 1 : 2;
                 var applyShift = samplesPerByte == 2;
 
@@ -425,7 +428,7 @@ namespace PdfSharp.BigGustave
             stream.WriteCrc();
         }
 
-        private static byte[] Compress(byte[] data, int dataLength, SaveOptions options)
+        static byte[] Compress(byte[] data, int dataLength, SaveOptions options)
         {
             const int headerLength = 2;
             const int checksumLength = 4;
@@ -508,13 +511,13 @@ namespace PdfSharp.BigGustave
             }
         }
 
-        private static int PixelToColorInt(Pixel p) => PixelToColorInt(p.R, p.G, p.B, p.A);
-        private static int PixelToColorInt(byte r, byte g, byte b, byte a = 255)
+        static int PixelToColorInt(Pixel p) => PixelToColorInt(p.R, p.G, p.B, p.A);
+        static int PixelToColorInt(byte r, byte g, byte b, byte a = 255)
         {
             return (a << 24) + (r << 16) + (g << 8) + b;
         }
 
-        private static (byte r, byte g, byte b, byte a) ColorIntToPixel(int i) => ((byte)(i >> 16), (byte)(i >> 8), (byte)i, (byte)(i >> 24));
+        static (byte r, byte g, byte b, byte a) ColorIntToPixel(int i) => ((byte)(i >> 16), (byte)(i >> 8), (byte)i, (byte)(i >> 24));
 
         /// <summary>
         /// Options for configuring generation of PNGs from a <see cref="PngBuilder"/>.

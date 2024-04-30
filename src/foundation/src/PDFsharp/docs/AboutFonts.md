@@ -46,7 +46,7 @@ cerates in his mind. A font is what was created from the typeface to actually pr
 of wood or lead (plumbum), while todays computer fonts are mostly OpenType fonts with e.g. TrueType outlines.
 The following example may clarify the difference absed on **Arial**.
 
-*A lot of font desingers consider **Arial** a poor typeface, because it is (or at least looks like as) just an unambitious copy of **Helvetica**.
+*A lot of font designers consider **Arial** a poor typeface, because it is (or at least looks like as) just an unambitious copy of **Helvetica**.
 On the other hand Arial is a high value font, because it comes with Windows in 9 different styles with more than 50,000 glyphs
 for a lot of languages.*
 
@@ -144,23 +144,32 @@ Font related classes that start with the `Pdf` prefix represents objects used by
 PDF files. Each instance of such a class belongs to one and only one **PdfDocumnet** object.
 
 ### PdfFont : PdfDictionary
+
 The class **PdfFont** is the base class for PDF specific font objects.
 Holds a reference ...
+
 ### PdfCIDFont : PdfFont
+
 The class **PdfCIDFont** represents character encoded PDF fonts.
 It is used together with **PdfType0Font** to represent text in a content by a sequence of the 
 glyph ids of the Unicode code points of the original UTF-32 encoded text.
+
 ### PdfTrueTypeFont : PdfFont
+
 The class **PdPdfTrueTypeFontfFont** is used by PDFsharp to represent TrueType fonts in a PDF
 document that use the WinAnsiEncoding string representation.
 It uses lesser space for text in PDF file than the CID (character id) glyph encoded text representation,
 but the character set is limited to (roughly) ANSI characters (codepage 1252).
+
 ### PdfType0Font : PdfFont
+
 The class **PdfType0Font** represents a PDF font dictionary derived from **PdfCIDFont**.
 Together with **PdfCIDFont** t is used to represent text in a content stream by a sequende of 
 glyph ids of the Unicode code points of the original text. This class hold the reference to the
 ToUnicode map.
+
 ### sealed PdfFontDescriptor : PdfDictionary
+
 The class **PdfFontDescriptor** holds document specific information about a font face used in this document.
 Each PDF document owns one PdfFontDescriptor for each font face used in the document.
 Both PDF fonts objects used in PDFsharp (**PdfTrueTypeFont** and **PdfCIDFont**) shares, when both are crated,

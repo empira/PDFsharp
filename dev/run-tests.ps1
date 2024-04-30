@@ -45,6 +45,12 @@
     If changes to the script are needed, implement them in the PDFsharp repository and update all copies of the script in other repositories.
 #>
 
+<#
+BUG: Run with release build not implemented.
+BUG: After .\dev\run-tests.ps1 script runs in an endless error loop.
+BUG: Allow to run all tests, including GBE.
+#>
+
 #Requires -Version 7
 #Requires -PSEdition Core
 

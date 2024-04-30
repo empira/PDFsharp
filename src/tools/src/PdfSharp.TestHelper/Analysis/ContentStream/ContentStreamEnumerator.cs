@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+using System.Collections;
 using System.Diagnostics;
 using PdfSharp.Pdf;
 
@@ -285,6 +288,10 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
             // If we have to move by one white space, return false, if it was not found.
             if (moveByOneNecessaryWhiteSpace)
             {
+                // There is no white space after the last character.
+                if (position >= _contentStreamLength)
+                    return false;
+
                 var isWhiteSpace = IsWhiteSpace(_contentStream[position]);
                 if (isWhiteSpace)
                     position++;
@@ -376,6 +383,10 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
                         // Other elements are separated by white spaces.
                         if (IsWhiteSpace(c))
                             return position - startPosition;
+
+                        // Reached the end of the string. There is no white space after the last character.
+                        if (position + 1 >= _contentStreamLength)
+                            return position - startPosition + 1;
 
                         c = _contentStream[++position];
                     }

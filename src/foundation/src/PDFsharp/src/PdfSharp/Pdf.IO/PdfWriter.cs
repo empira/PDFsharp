@@ -439,19 +439,17 @@ namespace PdfSharp.Pdf.IO
 
             if (omitStream)
             {
-                WriteRaw("  «...stream content omitted...»\n");  // useful for debugging only
+                WriteRaw("  «…stream content omitted…»\n");  // useful for debugging only
             }
             else
             {
+                // Earlier versions of PDFsharp skipped the '\n' before 'endstream' if the last byte of
+                // the stream is a linefeed. This was wrong and now fixed.
                 var bytes = value.Stream.Value;
                 if (bytes.Length != 0)
-                {
                     Write(bytes);
-                    if (_lastCat != CharCat.NewLine)
-                        WriteRaw('\n');
-                }
             }
-            WriteRaw("endstream\n");
+            WriteRaw("\nendstream\n");
         }
 
         public void WriteRaw(string rawString)
@@ -507,11 +505,11 @@ namespace PdfSharp.Pdf.IO
                 WriteRaw($"% PDFsharp Version {PdfSharpProductVersionInformation.Version} (verbose mode)\n");
                 // Keep some space for later fix-up.
                 _commentPosition = (int)_stream.Position + 2;
-                WriteRaw("%                                                \n");
-                WriteRaw("%                                                \n");
-                WriteRaw("%                                                \n");
-                WriteRaw("%                                                \n");
-                WriteRaw("%                                                \n");
+                WriteRaw("%                                                \n");  // Creation date placeholder
+                WriteRaw("%                                                \n");  // Creation time placeholder
+                WriteRaw("%                                                \n");  // File size placeholder
+                WriteRaw("%                                                \n");  // Pages placeholder
+                WriteRaw("%                                                \n");  // Objects placeholder
 #if DEBUG
                 WriteRaw("% This document is created from a DEBUG build. Do not use a DEBUG build of PDFsharp for production.\n");
 #endif
@@ -521,6 +519,7 @@ namespace PdfSharp.Pdf.IO
 
         public void WriteEof(PdfDocument document, SizeType startxref)
         {
+            WriteRaw($"% Created with PDFsharp {PdfSharpProductVersionInformation.SemanticVersion} ({Capabilities.Build.BuildName}) under .NET {Capabilities.Build.Framework}\n");
             WriteRaw("startxref\n");
             WriteRaw(startxref.ToString(CultureInfo.InvariantCulture));
             WriteRaw("\n%%EOF\n");
@@ -533,15 +532,15 @@ namespace PdfSharp.Pdf.IO
                 // Without InvariantCulture parameter the following line fails if the current culture is e.g.
                 // a Far East culture, because the date string contains non-ASCII characters.
                 // So never never never never use ToString without a culture info.
-                WriteRaw("Creation date: " + document._creation.ToString("G", CultureInfo.InvariantCulture));
+                WriteRaw(Invariant($"Creation date: {document._creation:G}"));
                 _stream.Position = _commentPosition + 50;
-                WriteRaw("Creation time: " + duration.TotalSeconds.ToString("0.000", CultureInfo.InvariantCulture) + " seconds");
+                WriteRaw(Invariant($"Creation time: {duration.TotalSeconds:0.000} seconds"));
                 _stream.Position = _commentPosition + 100;
-                WriteRaw("File size: " + fileSize.ToString(CultureInfo.InvariantCulture) + " bytes");
+                WriteRaw(Invariant($"File size: {fileSize:#,###} bytes"));
                 _stream.Position = _commentPosition + 150;
-                WriteRaw("Pages: " + document.Pages.Count.ToString(CultureInfo.InvariantCulture));
+                WriteRaw(Invariant($"Pages: {document.Pages.Count:#}"));  // No thousands separator here.
                 _stream.Position = _commentPosition + 200;
-                WriteRaw("Objects: " + document.IrefTable.ObjectTable.Count.ToString(CultureInfo.InvariantCulture));
+                WriteRaw(Invariant($"Objects: {document.IrefTable.ObjectTable.Count:#,###}"));
             }
         }
 

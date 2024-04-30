@@ -18,10 +18,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
         [Fact]
         public void Create_Hello_World_TableTests()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = CreateDocument();
 
@@ -94,10 +90,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
         [Fact]
         public void Test_MergeDown_Simple()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             var document = new Document();
             var section = document.AddSection();
 
@@ -126,10 +118,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
         [Fact]
         public void Test_KeepWith_MergeDown_PageBreak()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             var document = new Document();
             var section = document.AddSection();
 
@@ -165,7 +153,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var pdfRenderer = CreateReadablePdfDocumentRenderer(document);
             pdfRenderer.RenderDocument();
 
-            var filename = PdfFileUtility.GetTempPdfFileName("Test_MergeDown");
+            var filename = PdfFileUtility.GetTempPdfFileName("Test_MergeDown_PageBreak");
             pdfRenderer.PdfDocument.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
@@ -173,9 +161,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
         [Fact/*(Skip = "Fails - cause has to be found and fixed.")*/]
         public void Test_MergeDown_LineBreak_RowHeight()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
             var document = new Document();
             var section = document.AddSection();
 
@@ -273,10 +258,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
         [Fact]
         public void Test_Border_Inheritance()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             var document = new Document();
             var section = document.AddSection();
 
@@ -326,10 +307,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
         [Fact]
         public void Test_Huge_MergeDown_Cell()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             var document = new Document();
             var section = document.AddSection();
 
@@ -403,9 +380,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
         [Fact]
         public void Test_Repeated_Heading_Border()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
             var bottomWidth = Unit.FromPoint(2.3);
             var bottomColor = Colors.Blue;
             var contentStreamBottomWidth = "2.3 w";

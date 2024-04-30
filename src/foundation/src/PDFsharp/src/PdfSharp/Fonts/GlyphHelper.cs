@@ -21,12 +21,12 @@ namespace PdfSharp.Fonts
     public static class GlyphHelper
     {
         /// <summary>
-        /// Returns the glyph ID for the specified code points,
+        /// Returns the glyph ID for the specified code point,
         /// or 0, if the specified font has no glyph for this code point.
         /// </summary>
         /// <param name="codePoint">The code point the glyph ID is requested for.</param>
         /// <param name="font">The font to be used.</param>
-        public static int GlyphIndexFromCodePoint(int codePoint, XFont font)
+        public static ushort GlyphIndexFromCodePoint(int codePoint, XFont font)
         {
             // BMP code points are in cmap table type 4 and the rest in type 12.
             return codePoint < UnicodeHelper.UnicodePlane01Start

@@ -35,7 +35,6 @@ namespace PdfSharp.Pdf.Advanced
 
             FontDescriptor = fontDescriptor;
             // ReSharper disable once DoNotCallOverridableMethodsInConstructor
-            //Owner.IrefTable.Add(fontDescriptor);
             Owner.IrefTable.TryAdd(fontDescriptor);
             Elements[Keys.FontDescriptor] = fontDescriptor.Reference;
 
@@ -79,42 +78,9 @@ namespace PdfSharp.Pdf.Advanced
             base.PrepareForSave();
 #if DEBUG_
             if (FontDescriptor._descriptor.FontFace.loca == null)
-            {
-                GetType();
-            }
+                _ = typeof(int);
 #endif
-#if SHARED_FONTDESCRIPTOR
             FontDescriptor.PrepareForSave();
-#else
-#if true
-            var pdfFontFile = new PdfFontFile(Owner);
-            pdfFontFile.CreateFontFileAndAddToDescriptor(FontDescriptor, _cmapInfo0, true);
-
-            // Next lines are already done in CreateFontFileAndAddToDescriptor(
-            //Owner.Internals.AddObject(pdfFontFile);
-            //FontDescriptor.Elements[PdfFontDescriptor.Keys.FontFile2] = pdfFontFile.Reference;
-#else
-            // CID fonts must always be embedded. PDFsharp automatically embeds a subset.
-            OpenTypeFontFace? subSet = null;
-            if (FontDescriptor.Descriptor.FontFace.loca == null!)
-                subSet = FontDescriptor.Descriptor.FontFace;
-            else
-                subSet = FontDescriptor.Descriptor.FontFace.CreateFontSubSet(_cmapInfo0!.GlyphIndices, true);
-            byte[] fontData = subSet.FontSource!.Bytes;
-            var fontStream = new PdfDictionary(Owner);
-            Owner.Internals.AddObject(fontStream);
-            FontDescriptor.Elements[PdfFontDescriptor.Keys.FontFile2] = fontStream.Reference;
-
-            fontStream.Elements["/Length1"] = new PdfInteger(fontData.Length);
-            if (!Owner.Options.NoCompression)
-            {
-                fontData = Filtering.FlateDecode.Encode(fontData, _document.Options.FlateEncodeMode);
-                fontStream.Elements["/Filter"] = new PdfName("/FlateDecode");
-            }
-            fontStream.Elements["/Length"] = new PdfInteger(fontData.Length);
-            fontStream.CreateStream(fontData);
-#endif
-#endif
         }
 
         /// <summary>

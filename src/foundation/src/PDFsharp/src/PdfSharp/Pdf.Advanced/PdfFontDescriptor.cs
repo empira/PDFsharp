@@ -105,7 +105,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets or sets the name of the font.
         /// </summary>
-        public string FontName2
+        public string FontName
         {
             get => Elements.GetName(Keys.FontName);
             set => Elements.SetName(Keys.FontName, value);
@@ -135,7 +135,7 @@ namespace PdfSharp.Pdf.Advanced
         /// Gets the CMapInfo for PDF font descriptor.
         /// It contains all characters, ANSI and Unicode.
         /// </summary>
-        internal CMapInfo CMapInfo2  // #NFM
+        internal CMapInfo CMapInfo
         {
             get => _cmapInfo ?? NRT.ThrowOnNull<CMapInfo>();
             //set => _cmapInfo2 = value;
@@ -149,14 +149,8 @@ namespace PdfSharp.Pdf.Advanced
                 return;
             _prepared = true;
             
-#if SHARED_FONTDESCRIPTOR
             var pdfFontFile = new PdfFontProgram(Owner);
             pdfFontFile.CreateFontFileAndAddToDescriptor(this, _cmapInfo, !AddCmapTable);
-
-            // Next lines are already done in CreateFontFileAndAddToDescriptor(
-            //Owner.Internals.AddObject(pdfFontFile);
-            //FontDescriptor.Elements[PdfFontDescriptor.Keys.FontFile2] = pdfFontFile.Reference;
-#endif
         }
         bool _prepared;
 

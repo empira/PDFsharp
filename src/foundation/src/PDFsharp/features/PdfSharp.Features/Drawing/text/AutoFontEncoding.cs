@@ -16,11 +16,6 @@ namespace PdfSharp.Features.Drawing
 {
     public class AutoFontEncoding : Feature
     {
-        static AutoFontEncoding()
-        {
-            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
-        }
-
         public void Ensure_one_PdfFontDescriptor_per_FontFace()
         {
             var doc = new PdfDocument();

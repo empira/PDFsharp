@@ -26,6 +26,8 @@
 
     <ItemGroup>
         <Compile Include="..\MigraDoc.Tests\ChartTests.cs" Link="ChartTests.cs" />
+        <Compile Include="..\MigraDoc.Tests\CultureAndRegionTests.cs" Link="CultureAndRegionTests.cs" />
+        <Compile Include="..\MigraDoc.Tests\Extensions\XunitHelper.cs" Link="Extensions\XunitHelper.cs" />
         <Compile Include="..\MigraDoc.Tests\Helper\TestHelper.cs" Link="Helper\TestHelper.cs" />
         <Compile Include="..\MigraDoc.Tests\ImageFormats.cs" Link="ImageFormats.cs" />
         <Compile Include="..\MigraDoc.Tests\MultipleFooters.cs" Link="MultipleFooters.cs" />
@@ -33,6 +35,7 @@
         <Compile Include="..\MigraDoc.Tests\SecurityTestHelper.cs" Link="SecurityTestHelper.cs" />
         <Compile Include="..\MigraDoc.Tests\SecurityTests.cs" Link="SecurityTests.cs" />
         <Compile Include="..\MigraDoc.Tests\SpaceBeforeTests.cs" Link="SpaceBeforeTests.cs" />
+        <Compile Include="..\MigraDoc.Tests\TableTests.cs" Link="TableTests.cs" />
         <Compile Include="..\MigraDoc.Tests\TextTests.cs" Link="TextTests.cs" />
     </ItemGroup>
 
@@ -52,6 +55,12 @@
 
     <ItemGroup>
         <Folder Include="Helper\" />
+        <Folder Include="Extensions\" />
+        <Folder Include="Helper\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Xunit.SkippableFact" />
     </ItemGroup>
 
 </Project>

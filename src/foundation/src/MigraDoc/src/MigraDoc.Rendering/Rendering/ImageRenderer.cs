@@ -45,7 +45,7 @@ namespace MigraDoc.Rendering
             base.Format(area, previousFormatInfo);
         }
 
-        protected override XUnit ShapeHeight
+        protected override XUnitPt ShapeHeight
         {
             get
             {
@@ -54,7 +54,7 @@ namespace MigraDoc.Rendering
             }
         }
 
-        protected override XUnit ShapeWidth
+        protected override XUnitPt ShapeWidth
         {
             get
             {
@@ -150,15 +150,15 @@ namespace MigraDoc.Rendering
                 {
                     try
                     {
-                        XUnit usrWidth = _image.Width.Point;
-                        XUnit usrHeight = _image.Height.Point;
+                        XUnitPt usrWidth = _image.Width.Point;
+                        XUnitPt usrHeight = _image.Height.Point;
                         //var usrWidthSet = _image.Values.Width is not null;
                         //var usrHeightSet = _image.Values.Height is not null;
                         var usrWidthSet = !_image.Values.Width.IsValueNullOrEmpty();
                         var usrHeightSet = !_image.Values.Height.IsValueNullOrEmpty();
 
-                        XUnit resultWidth = usrWidth;
-                        XUnit resultHeight = usrHeight;
+                        XUnitPt resultWidth = usrWidth;
+                        XUnitPt resultHeight = usrHeight;
 
                         Debug.Assert(xImage != null);
                         double xPixels = xImage.PixelWidth;
@@ -185,9 +185,9 @@ namespace MigraDoc.Rendering
                         }
                         // ReSharper restore CompareOfFloatsByEqualityOperator
 
-                        XUnit inherentWidth = XUnit.FromInch(xPixels / horzRes);
+                        XUnitPt inherentWidth = XUnitPt.FromInch(xPixels / horzRes);
                         double yPixels = xImage.PixelHeight;
-                        XUnit inherentHeight = XUnit.FromInch(yPixels / vertRes);
+                        XUnitPt inherentHeight = XUnitPt.FromInch(yPixels / vertRes);
 
                         //bool lockRatio = _image.IsNull("LockAspectRatio") ? true : _image.LockAspectRatio;
                         bool lockRatio = _image.Values.LockAspectRatio is null || _image.LockAspectRatio;
@@ -249,14 +249,14 @@ namespace MigraDoc.Rendering
                         {
                             PictureFormat picFormat = _image.PictureFormat;
                             //Cropping in pixels.
-                            XUnit cropLeft = picFormat.CropLeft.Point;
-                            XUnit cropRight = picFormat.CropRight.Point;
-                            XUnit cropTop = picFormat.CropTop.Point;
-                            XUnit cropBottom = picFormat.CropBottom.Point;
+                            XUnitPt cropLeft = picFormat.CropLeft.Point;
+                            XUnitPt cropRight = picFormat.CropRight.Point;
+                            XUnitPt cropTop = picFormat.CropTop.Point;
+                            XUnitPt cropBottom = picFormat.CropBottom.Point;
                             formatInfo.CropX = (int)(horzRes * cropLeft.Inch);
                             formatInfo.CropY = (int)(vertRes * cropTop.Inch);
-                            formatInfo.CropWidth -= (int)(horzRes * ((XUnit)(cropLeft + cropRight)).Inch);
-                            formatInfo.CropHeight -= (int)(vertRes * ((XUnit)(cropTop + cropBottom)).Inch);
+                            formatInfo.CropWidth -= (int)(horzRes * (cropLeft + cropRight).Inch);
+                            formatInfo.CropHeight -= (int)(vertRes * (cropTop + cropBottom).Inch);
 
                             //Scaled cropping of the height and width.
                             double xScale = resultWidth / inherentWidth;
@@ -272,8 +272,8 @@ namespace MigraDoc.Rendering
                         }
                         if (resultHeight <= 0 || resultWidth <= 0)
                         {
-                            formatInfo.Width = XUnit.FromCentimeter(2.5);
-                            formatInfo.Height = XUnit.FromCentimeter(2.5);
+                            formatInfo.Width = XUnitPt.FromCentimeter(2.5);
+                            formatInfo.Height = XUnitPt.FromCentimeter(2.5);
                             Debug.WriteLine(Messages2.EmptyImageSize);
                             _failure = ImageFailure.EmptySize;
                         }
@@ -290,8 +290,7 @@ namespace MigraDoc.Rendering
                     }
                     finally
                     {
-                        if (xImage != null)
-                            xImage.Dispose();
+                        xImage?.Dispose();
                     }
                 }
             }
@@ -301,13 +300,13 @@ namespace MigraDoc.Rendering
                 if (!_image.Values.Width.IsValueNullOrEmpty())
                     formatInfo.Width = _image.Width.Point;
                 else
-                    formatInfo.Width = XUnit.FromCentimeter(2.5);
+                    formatInfo.Width = XUnitPt.FromCentimeter(2.5);
 
                 //if (_image.Values.Height is not null)
                 if (!_image.Values.Height.IsValueNullOrEmpty())
                     formatInfo.Height = _image.Height.Point;
                 else
-                    formatInfo.Height = XUnit.FromCentimeter(2.5);
+                    formatInfo.Height = XUnitPt.FromCentimeter(2.5);
             }
         }
 

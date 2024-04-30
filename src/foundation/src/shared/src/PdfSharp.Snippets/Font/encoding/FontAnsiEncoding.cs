@@ -24,6 +24,12 @@ namespace PdfSharp.Snippets.Font
 {
     public class FontAnsiEncoding : Snippet
     {
+        public FontAnsiEncoding()
+        {
+            Title = "Font ANSI encoding";
+            PathName = "snippets/drawing/text/encoding/FontAnsiEncoding";
+        }
+
         public override void RenderSnippet(XGraphics gfx)
         {
             //var font = new XFont("Segoe UI Emoji", 10);

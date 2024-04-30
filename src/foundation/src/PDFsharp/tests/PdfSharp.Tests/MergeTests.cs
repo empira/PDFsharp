@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ using Xunit;
 
 namespace PdfSharp.Tests
 {
+    [Collection("PDFsharp")]
     public class MergeTests
     {
         [Fact(Skip = "Disabled until /Annots bug is fixed")]
@@ -21,14 +23,14 @@ namespace PdfSharp.Tests
         {
             var document1 = new PdfDocument();
             var page1 = document1.AddPage();
-            page1.AddDocumentLink(new(new XRect(new(1, 1))), 1);
+            page1.AddDocumentLink(new(new XRect(new XSize(1, 1))), 1);
             var stream1 = new MemoryStream();
             document1.Save(stream1, false);
             stream1.Position = 0;
 
             var document2 = new PdfDocument();
             var page2 = document2.AddPage();
-            page2.AddDocumentLink(new(new XRect(new(1, 1))), 1);
+            page2.AddDocumentLink(new(new XRect(new XSize(1, 1))), 1);
             var stream2 = new MemoryStream();
             document2.Save(stream2, false);
             stream2.Position = 0;

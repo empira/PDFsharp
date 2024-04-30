@@ -7,6 +7,8 @@
         <UseWPF>true</UseWPF>
         <!--<DefineConstants>WPF</DefineConstants> technically not needed, but needs some work -->
         <DefineConstants>WPF</DefineConstants>
+        <SignAssembly>True</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -64,6 +66,9 @@
         </Compile>
         <Compile Include="..\MigraDoc.Rendering\Rendering.ChartMapper\XValuesMapper.cs">
             <Link>Rendering.ChartMapper\XValuesMapper.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.Extensions\UnitConversions.cs">
+            <Link>Rendering.Extensions\UnitConversions.cs</Link>
         </Compile>
         <Compile Include="..\MigraDoc.Rendering\Rendering.Internals\ErrorHelpers.cs">
             <Link>Rendering.Internals\ErrorHelpers.cs</Link>

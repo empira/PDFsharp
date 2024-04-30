@@ -27,7 +27,7 @@ namespace PdfSharp.Features.Drawing
             // TODO: Save state in bitmap and fail here
             //var gfx2 = XGraphics.FromImage(image);
 
-            gfx.DrawLine(XPens.DarkBlue, XUnit.FromMillimeter(0), XUnit.FromMillimeter(150), XUnit.FromMillimeter(210), XUnit.FromMillimeter(150));
+            gfx.DrawLine(XPens.DarkBlue, XUnit.FromMillimeter(0).Point, XUnit.FromMillimeter(150).Point, XUnit.FromMillimeter(210).Point, XUnit.FromMillimeter(150).Point);
 
             gfx.DrawLine(XPens.DarkBlue, 0, 0, 400, 300);
             gfx.DrawLine(XPens.DarkBlue, 0, 300, 400, 0);
@@ -39,7 +39,8 @@ namespace PdfSharp.Features.Drawing
             // Should not be required.
             gfx.Dispose();
 
-            using (var fs = new FileStream(@".\testpng.png", FileMode.Create))
+            var filename = IOUtility.GetTempFileName("testpng", "png", true);
+            using (var fs = new FileStream(filename, FileMode.Create))
             {
                 // Automatically disposes gfx.
                 encoder.Save(fs);

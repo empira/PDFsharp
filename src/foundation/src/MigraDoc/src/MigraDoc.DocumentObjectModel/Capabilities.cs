@@ -5,7 +5,6 @@ namespace MigraDoc
 {
 
     /// <summary>
-    /// UNDER CONSTRUCTION #RENAME Capabilities
     /// Capabilities.Fonts.IsAvailable.GlyphToPath
     /// </summary>
     public static class Capabilities

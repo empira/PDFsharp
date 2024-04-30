@@ -16,10 +16,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
         [Fact]
         public void Create_TextFrames()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = CreateDocument();
 
@@ -46,7 +42,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             pdfRenderer.RenderDocument();
 
             // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("HelloWorld");
+            var filename = PdfFileUtility.GetTempPdfFileName("Create_TextFrames");
             pdfRenderer.PdfDocument.Save(filename);
             // ...and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);

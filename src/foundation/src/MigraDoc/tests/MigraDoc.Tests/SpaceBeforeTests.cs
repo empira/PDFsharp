@@ -12,16 +12,12 @@ using Xunit;
 
 namespace MigraDoc.Tests
 {
-    [Collection("MGD")]
+    [Collection("PDFsharp")]
     public class SpaceBeforeTests
     {
         [Fact]
         public void Tests_for_SpaceBefore()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = CreateDocument();
 
@@ -43,7 +39,7 @@ namespace MigraDoc.Tests
             pdfRenderer.RenderDocument();
 
             // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("HelloWorld");
+            var filename = PdfFileUtility.GetTempPdfFileName("SpaceBefore");
             pdfRenderer.PdfDocument.Save(filename);
             // ...and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);

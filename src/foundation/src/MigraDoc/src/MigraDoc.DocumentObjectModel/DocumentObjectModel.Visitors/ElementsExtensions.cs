@@ -391,7 +391,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             if (parent != null)
                 return GetUsedFormatValue(parent, getValue, isEmpty, emptyValue);
 
-            Debug.Assert(false);
+            Debug.Assert(documentObject is Document, "parent of documentObject should not be null, except for Document.");
             return emptyValue;
         }
 
@@ -440,8 +440,8 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             var parent = documentObject.Parent;
             if (parent != null)
                 return GetUsedFormatValue(parent, getValue, isEmpty, emptyValue);
-
-            Debug.Assert(false);
+            
+            Debug.Assert(documentObject is Document, "parent of documentObject should not be null, except for Document.");
             return emptyValue;
         }
     }

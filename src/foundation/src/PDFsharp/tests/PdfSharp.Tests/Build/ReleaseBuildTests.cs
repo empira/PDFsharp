@@ -11,13 +11,14 @@ using Xunit;
 
 namespace PdfSharp.Tests.Build
 {
+    [Collection("PDFsharp")]
     public class ReleaseBuildTests
     {
         [Fact]
         public void Check_renamed_identifiers()
         {
             // Check to undo some temporary renames.
-            const string automatic = nameof(PdfFontEmbedding.Automatic);
+            const string automatic = nameof(PdfFontEmbedding.TryComputeSubset);
 #if !DEBUG
             (!automatic.EndsWith("_")).Should().BeTrue("some identifiers must be re-renamed before release.");
 #endif

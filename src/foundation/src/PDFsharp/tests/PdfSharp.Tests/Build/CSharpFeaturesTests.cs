@@ -19,6 +19,7 @@ namespace PdfSharp.Tests.Build
     /// Test what features of C# 11 to C# 12 can be used with
     /// .NET 6 and C# 11 to C# 12 with .NET 4.72 / .NET Standard 2.0.
     /// </summary>
+    [Collection("PDFsharp")]
     public class CSharpFeaturesTests
     {
         [Fact]

@@ -123,7 +123,7 @@ namespace PdfSharp.Pdf.Advanced
         double _strokeAlpha;
 
         /// <summary>
-        /// Sets the alpha value for nonstroking operations.
+        /// Sets the alpha value for non-stroking operations.
         /// </summary>
         public double NonStrokeAlpha
         {
@@ -153,7 +153,7 @@ namespace PdfSharp.Pdf.Advanced
         bool _strokeOverprint;
 
         /// <summary>
-        /// Sets the overprint value for nonstroking operations.
+        /// Sets the overprint value for non-stroking operations.
         /// </summary>
         public bool NonStrokeOverprint
         {
@@ -342,7 +342,7 @@ namespace PdfSharp.Pdf.Advanced
             public const string CA = "/CA";
 
             /// <summary>
-            /// (Optional; PDF 1.4) Same as CA, but for nonstroking operations.
+            /// (Optional; PDF 1.4) Same as CA, but for non-stroking operations.
             /// </summary>
             [KeyInfo(KeyType.Real | KeyType.Optional)]
             public const string ca = "/ca";

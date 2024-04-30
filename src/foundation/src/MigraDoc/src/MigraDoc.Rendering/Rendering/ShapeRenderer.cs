@@ -49,7 +49,7 @@ namespace MigraDoc.Rendering
                 };
 
                 if (layoutInfo.Floating == Floating.TopBottom && !_shape.Top.Position.IsEmpty)
-                    layoutInfo.MarginTop = Math.Max(layoutInfo.MarginTop, _shape.Top.Position);
+                    layoutInfo.MarginTop = Math.Max(layoutInfo.MarginTop, _shape.Top.Position.Point);
                 return layoutInfo;
             }
         }
@@ -71,12 +71,12 @@ namespace MigraDoc.Rendering
         /// <summary>
         /// Gets the shape width including line width.
         /// </summary>
-        protected virtual XUnit ShapeWidth => _shape.Width + _lineFormatRenderer.GetWidth();
+        protected virtual XUnitPt ShapeWidth => _shape.Width.Point + _lineFormatRenderer.GetWidth();
 
         /// <summary>
         /// Gets the shape height including line width.
         /// </summary>
-        protected virtual XUnit ShapeHeight => _shape.Height + _lineFormatRenderer.GetWidth();
+        protected virtual XUnitPt ShapeHeight => _shape.Height.Point + _lineFormatRenderer.GetWidth();
 
         /// <summary>
         /// Formats the shape.
@@ -152,7 +152,7 @@ namespace MigraDoc.Rendering
         protected void RenderFilling()
         {
             var contentArea = _renderInfo.LayoutInfo.ContentArea;
-            XUnit lineWidth = _lineFormatRenderer.GetWidth();
+            XUnitPt lineWidth = _lineFormatRenderer.GetWidth();
             // Half of the line is drawn outside the shape, the other half inside the shape.
             // Therefore we have to reduce the position of the filling by 0.5 lineWidth and width and height by 2 lineWidth.
             _fillFormatRenderer.Render(contentArea.X + lineWidth / 2, contentArea.Y + lineWidth / 2,
@@ -162,9 +162,9 @@ namespace MigraDoc.Rendering
         protected void RenderLine()
         {
             var contentArea = _renderInfo.LayoutInfo.ContentArea;
-            XUnit lineWidth = _lineFormatRenderer.GetWidth();
-            XUnit width = contentArea.Width - lineWidth;
-            XUnit height = contentArea.Height - lineWidth;
+            XUnitPt lineWidth = _lineFormatRenderer.GetWidth();
+            XUnitPt width = contentArea.Width - lineWidth;
+            XUnitPt height = contentArea.Height - lineWidth;
             _lineFormatRenderer.Render(contentArea.X, contentArea.Y, width, height);
         }
 

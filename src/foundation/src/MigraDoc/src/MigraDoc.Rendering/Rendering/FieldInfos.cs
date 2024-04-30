@@ -27,19 +27,17 @@ namespace MigraDoc.Rendering
 
         internal int GetShownPageNumber(string bookmarkName)
         {
-            if (_bookmarks.ContainsKey(bookmarkName))
+            if (_bookmarks.TryGetValue(bookmarkName, out var bm))
             {
-                var bi = _bookmarks[bookmarkName];
-                return bi.ShownPageNumber;
+                return bm.ShownPageNumber;
             }
             return -1;
         }
 
         internal int GetPhysicalPageNumber(string bookmarkName)
         {
-            if (_bookmarks.ContainsKey(bookmarkName))
+            if (_bookmarks.TryGetValue(bookmarkName, out var bi))
             {
-                var bi = _bookmarks[bookmarkName];
                 return bi.DisplayPageNumber;
             }
             return -1;

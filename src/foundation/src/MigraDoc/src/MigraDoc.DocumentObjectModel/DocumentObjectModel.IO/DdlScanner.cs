@@ -431,14 +431,11 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// </summary>
         bool IgnoreLineBreak()
         {
-            switch (_prevSymbol)
+            return _prevSymbol switch
             {
-                case Symbol.LineBreak:
-                case Symbol.Space:
-                case Symbol.Tab:
-                    return true;
-            }
-            return false;
+                Symbol.LineBreak or Symbol.Space or Symbol.Tab => true,
+                _ => false
+            };
         }
 
         /// <summary>

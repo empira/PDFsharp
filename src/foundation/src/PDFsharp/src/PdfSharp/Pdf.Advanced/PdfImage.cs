@@ -478,6 +478,10 @@ namespace PdfSharp.Pdf.Advanced
                         CreateTrueColorMemoryBitmap(3, 8, false, options);
                         break;
 
+                    case ImageInformation.ImageFormats.Grayscale8:
+                        CreateTrueColorMemoryBitmap(1, 8, false, options);
+                        break;
+
                     case ImageInformation.ImageFormats.Palette8:
                         CreateIndexedMemoryBitmap(8, options);
                         break;
@@ -807,7 +811,7 @@ namespace PdfSharp.Pdf.Advanced
             Elements[Keys.Height] = new PdfInteger((int)ii.Height);
             Elements[Keys.BitsPerComponent] = new PdfInteger(8);
             // Anything needed for CMYK? Do we have sample images?
-            Elements[Keys.ColorSpace] = new PdfName("/DeviceRGB");
+            Elements[Keys.ColorSpace] = new PdfName(components == 1 ? "/DeviceGray" : "/DeviceRGB");
             if (_image.Interpolate)
                 Elements[Keys.Interpolate] = PdfBoolean.True;
         }
@@ -1484,7 +1488,7 @@ namespace PdfSharp.Pdf.Advanced
             /// <summary>
             /// (Optional) A flag indicating whether the image is to be treated as an image mask.
             /// If this flag is true, the value of BitsPerComponent must be 1 and Mask and ColorSpace should
-            /// not be specified; unmasked areas are painted using the current nonstroking color.
+            /// not be specified; unmasked areas are painted using the current non-stroking color.
             /// Default value: false.
             /// </summary>
             [KeyInfo(KeyType.Boolean | KeyType.Optional)]

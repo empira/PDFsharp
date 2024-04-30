@@ -13,16 +13,12 @@ using Xunit;
 
 namespace MigraDoc.Tests
 {
-    [Collection("MGD")]
+    [Collection("PDFsharp")]
     public class ChartTests
     {
         [Fact]
         public void Create_MigraDoc_Chart_Test()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = CreateDocument();
 

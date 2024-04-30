@@ -24,7 +24,7 @@ namespace PdfSharp.Pdf.Advanced
         {
             var x = pdfFontDescriptor.Elements[PdfFontDescriptor.Keys.FontFile2];
                 
-            OpenTypeFontFace subSet = pdfFontDescriptor.Descriptor.FontFace.CreateFontSubSet(cmapInfo.GlyphIndices, cidFont);
+            OpenTypeFontFace subSet = pdfFontDescriptor.Descriptor.FontFace.CreateFontSubset(cmapInfo.GlyphIndices, cidFont);
             byte[] fontData = subSet.FontSource.Bytes;
 
             Owner.Internals.AddObject(this);

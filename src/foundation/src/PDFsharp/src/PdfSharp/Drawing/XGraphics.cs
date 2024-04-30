@@ -113,19 +113,19 @@ namespace PdfSharp.Drawing  // #??? Clean up
                     break;
 
                 case XGraphicsUnit.Inch:
-                    _pageSizePoints = new XSize(XUnit.FromInch(size.Width), XUnit.FromInch(size.Height));
+                    _pageSizePoints = new XSize(XUnitPt.FromInch(size.Width), XUnitPt.FromInch(size.Height));
                     break;
 
                 case XGraphicsUnit.Millimeter:
-                    _pageSizePoints = new XSize(XUnit.FromMillimeter(size.Width), XUnit.FromMillimeter(size.Height));
+                    _pageSizePoints = new XSize(XUnitPt.FromMillimeter(size.Width), XUnitPt.FromMillimeter(size.Height));
                     break;
 
                 case XGraphicsUnit.Centimeter:
-                    _pageSizePoints = new XSize(XUnit.FromCentimeter(size.Width), XUnit.FromCentimeter(size.Height));
+                    _pageSizePoints = new XSize(XUnitPt.FromCentimeter(size.Width), XUnitPt.FromCentimeter(size.Height));
                     break;
 
                 case XGraphicsUnit.Presentation:
-                    _pageSizePoints = new XSize(XUnit.FromPresentation(size.Width), XUnit.FromPresentation(size.Height));
+                    _pageSizePoints = new XSize(XUnitPt.FromPresentation(size.Width), XUnitPt.FromPresentation(size.Height));
                     break;
 
                 default:
@@ -166,13 +166,10 @@ namespace PdfSharp.Drawing  // #??? Clean up
             _pageSizePoints = pageUnit switch
             {
                 XGraphicsUnit.Point => new XSize(size.Width, size.Height),
-                XGraphicsUnit.Inch => new XSize(XUnit.FromInch(size.Width), XUnit.FromInch(size.Height)),
-                XGraphicsUnit.Millimeter => new XSize(XUnit.FromMillimeter(size.Width),
-                    XUnit.FromMillimeter(size.Height)),
-                XGraphicsUnit.Centimeter => new XSize(XUnit.FromCentimeter(size.Width),
-                    XUnit.FromCentimeter(size.Height)),
-                XGraphicsUnit.Presentation => new XSize(XUnit.FromPresentation(size.Width),
-                    XUnit.FromPresentation(size.Height)),
+                XGraphicsUnit.Inch => new XSize(XUnitPt.FromInch(size.Width), XUnitPt.FromInch(size.Height)),
+                XGraphicsUnit.Millimeter => new XSize(XUnitPt.FromMillimeter(size.Width), XUnitPt.FromMillimeter(size.Height)),
+                XGraphicsUnit.Centimeter => new XSize(XUnitPt.FromCentimeter(size.Width), XUnitPt.FromCentimeter(size.Height)),
+                XGraphicsUnit.Presentation => new XSize(XUnitPt.FromPresentation(size.Width), XUnitPt.FromPresentation(size.Height)),
                 _ => throw new NotImplementedException("unit")
             };
 
@@ -228,19 +225,19 @@ namespace PdfSharp.Drawing  // #??? Clean up
                     break;
 
                 case XGraphicsUnit.Inch:
-                    _pageSizePoints = new XSize(XUnit.FromInch(size.Width), XUnit.FromInch(size.Height));
+                    _pageSizePoints = new XSize(XUnitPt.FromInch(size.Width), XUnitPt.FromInch(size.Height));
                     break;
 
                 case XGraphicsUnit.Millimeter:
-                    _pageSizePoints = new XSize(XUnit.FromMillimeter(size.Width), XUnit.FromMillimeter(size.Height));
+                    _pageSizePoints = new XSize(XUnitPt.FromMillimeter(size.Width), XUnitPt.FromMillimeter(size.Height));
                     break;
 
                 case XGraphicsUnit.Centimeter:
-                    _pageSizePoints = new XSize(XUnit.FromCentimeter(size.Width), XUnit.FromCentimeter(size.Height));
+                    _pageSizePoints = new XSize(XUnitPt.FromCentimeter(size.Width), XUnitPt.FromCentimeter(size.Height));
                     break;
 
                 case XGraphicsUnit.Presentation:
-                    _pageSizePoints = new XSize(XUnit.FromPresentation(size.Width), XUnit.FromPresentation(size.Height));
+                    _pageSizePoints = new XSize(XUnitPt.FromPresentation(size.Width), XUnitPt.FromPresentation(size.Height));
                     break;
 
                 default:
@@ -309,6 +306,8 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// </summary>
         XGraphics(PdfPage page, XGraphicsPdfPageOptions options, XGraphicsUnit pageUnit, XPageDirection pageDirection)
         {
+            page.Owner.EnsureNotYetSaved();
+
             if (page == null)
                 throw new ArgumentNullException(nameof(page));
 
@@ -361,27 +360,27 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             _owner = page.Owner;
             _renderer = new XGraphicsPdfRenderer(page, this, options);
-            _pageSizePoints = new XSize(page.Width, page.Height);
+            _pageSizePoints = new(page.Width.Point, page.Height.Point);
             switch (pageUnit)
             {
                 case XGraphicsUnit.Point:
-                    _pageSize = new XSize(page.Width, page.Height);
+                    _pageSize = new(page.Width.Point, page.Height.Point);
                     break;
 
                 case XGraphicsUnit.Inch:
-                    _pageSize = new XSize(XUnit.FromPoint(page.Width).Inch, XUnit.FromPoint(page.Height).Inch);
+                    _pageSize = new(page.Width.Inch, page.Height.Inch);
                     break;
 
                 case XGraphicsUnit.Millimeter:
-                    _pageSize = new XSize(XUnit.FromPoint(page.Width).Millimeter, XUnit.FromPoint(page.Height).Millimeter);
+                    _pageSize = new(page.Width.Millimeter, page.Height.Millimeter);
                     break;
 
                 case XGraphicsUnit.Centimeter:
-                    _pageSize = new XSize(XUnit.FromPoint(page.Width).Centimeter, XUnit.FromPoint(page.Height).Centimeter);
+                    _pageSize = new(page.Width.Centimeter, page.Height.Centimeter);
                     break;
 
                 case XGraphicsUnit.Presentation:
-                    _pageSize = new XSize(XUnit.FromPoint(page.Width).Presentation, XUnit.FromPoint(page.Height).Presentation);
+                    _pageSize = new(page.Width.Presentation, page.Height.Presentation);
                     break;
 
                 default:
@@ -538,8 +537,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// Drawing on a measure context has no effect.
         /// Commit renderEvents to allow RenderTextEvent calls.
         /// </summary>
-        public static XGraphics CreateMeasureContext(XSize size, XGraphicsUnit pageUnit, XPageDirection pageDirection,
-            RenderEvents renderEvents)
+        public static XGraphics CreateMeasureContext(XSize size, XGraphicsUnit pageUnit, XPageDirection pageDirection, RenderEvents renderEvents)
         {
 #if CORE
             //var dummy = new PdfDocument();
@@ -548,7 +546,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             //var gfx = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Append, pageUnit, pageDirection, renderEvents);
             var gfx = new XGraphics(pageUnit, pageDirection, renderEvents);
 
-            //LogHost.Logger.XGraphicsCreated("dummy page in dummy document used as measure context");
+            //PdfSharpLogHost.Logger.XGraphicsCreated("dummy page in dummy document used as measure context");
 
             return gfx;
 #endif
@@ -556,14 +554,14 @@ namespace PdfSharp.Drawing  // #??? Clean up
             //XGraphics gfx = new XGraphics((System.Drawing.Graphics)null, size, pageUnit, pageDirection);
             var gfx = new XGraphics(null, size, pageUnit, pageDirection, renderEvents);
 
-            LogHost.Logger.XGraphicsCreated("dummy GDI+ Graphics object used as measure context");
+            PdfSharpLogHost.Logger.XGraphicsCreated("dummy GDI+ Graphics object used as measure context");
 
             return gfx;
 #endif
 #if WPF
             var gfx = new XGraphics((DrawingContext?)null, size, pageUnit, pageDirection, renderEvents);
 
-            LogHost.Logger.XGraphicsCreated("dummy WPF DrawingContext object used as measure context");
+            PdfSharpLogHost.Logger.XGraphicsCreated("dummy WPF DrawingContext object used as measure context");
 
             return gfx;
 #endif
@@ -581,7 +579,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             // Creating a new instance is by design.
             var gfx = new XGraphics(graphics, size, XGraphicsUnit.Point, XPageDirection.Downwards, renderEvents);
 
-            LogHost.Logger.XGraphicsCreated("GDI+ Graphics object");
+            PdfSharpLogHost.Logger.XGraphicsCreated("GDI+ Graphics object");
 
             return gfx;
         }
@@ -594,7 +592,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             // Creating a new instance is by design.
             var gfx = new XGraphics(graphics, size, unit, XPageDirection.Downwards, renderEvents);
 
-            LogHost.Logger.XGraphicsCreated("GDI+ Graphics object");
+            PdfSharpLogHost.Logger.XGraphicsCreated("GDI+ Graphics object");
 
             return gfx;
 
@@ -627,7 +625,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         {
             var gfx = new XGraphics(drawingContext, size, unit, XPageDirection.Downwards, renderEvents);
 
-            LogHost.Logger.XGraphicsCreated("WPF DrawingContext object");
+            PdfSharpLogHost.Logger.XGraphicsCreated("WPF DrawingContext object");
 
             return gfx;
         }
@@ -641,7 +639,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         {
             var gfx = new XGraphics(canvas, size, unit, XPageDirection.Downwards, renderEvents);
 
-            LogHost.Logger.XGraphicsCreated("WPF Canvas object");
+            PdfSharpLogHost.Logger.XGraphicsCreated("WPF Canvas object");
 
             return gfx;
         }
@@ -653,7 +651,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// </summary>
         public static XGraphics FromCanvasDrawingSession(CanvasDrawingSession drawingSession, XSize size, XGraphicsUnit unit)
         {
-            LogHost.Logger.XGraphicsCreated -- TODO
+            PdfSharpLogHost.Logger.XGraphicsCreated -- TODO
             return new XGraphics(drawingSession, size, unit, XPageDirection.Downwards);
         }
 #endif
@@ -667,7 +665,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             if (page.Owner._uaManager != null)
                 page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });  // @PDF/UA
 
-            LogHost.Logger.XGraphicsCreated("PDF page");
+            PdfSharpLogHost.Logger.XGraphicsCreated("PDF page");
 
             return gfx;
         }
@@ -681,7 +679,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             if (page.Owner._uaManager != null)
                 page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });  // @PDF/UA
 
-            LogHost.Logger.XGraphicsCreated("PDF page");
+            PdfSharpLogHost.Logger.XGraphicsCreated("PDF page");
 
             return gfx;
         }
@@ -695,7 +693,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             if (page.Owner._uaManager != null)
                 page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });  // @PDF/UA
 
-            LogHost.Logger.XGraphicsCreated("PDF page");
+            PdfSharpLogHost.Logger.XGraphicsCreated("PDF page");
 
             return gfx;
         }
@@ -709,7 +707,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             if (page.Owner._uaManager != null)
                 page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });  // @PDF/UA
 
-            LogHost.Logger.XGraphicsCreated("PDF page");
+            PdfSharpLogHost.Logger.XGraphicsCreated("PDF page");
 
             return gfx;
         }
@@ -723,7 +721,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             if (page.Owner._uaManager != null)
                 page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });  // @PDF/UA
 
-            LogHost.Logger.XGraphicsCreated("PDF page");
+            PdfSharpLogHost.Logger.XGraphicsCreated("PDF page");
 
             return gfx;
         }
@@ -737,7 +735,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             if (page.Owner._uaManager != null)
                 page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });  // @PDF/UA
 
-            LogHost.Logger.XGraphicsCreated("PDF page");
+            PdfSharpLogHost.Logger.XGraphicsCreated("PDF page");
 
             return gfx;
         }
@@ -751,7 +749,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             if (page.Owner._uaManager != null)
                 page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });  // @PDF/UA
 
-            LogHost.Logger.XGraphicsCreated("PDF page");
+            PdfSharpLogHost.Logger.XGraphicsCreated("PDF page");
 
             return gfx;
         }
@@ -766,7 +764,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 
             var gfx = new XGraphics(form, form.Owner.RenderEvents);
 
-            LogHost.Logger.XGraphicsCreated("XPdfForm");
+            PdfSharpLogHost.Logger.XGraphicsCreated("XPdfForm");
 
             return gfx;
         }
@@ -781,7 +779,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 
             var gfx = new XGraphics(form, form.Owner.RenderEvents);
 
-            LogHost.Logger.XGraphicsCreated("XForm");
+            PdfSharpLogHost.Logger.XGraphicsCreated("XForm");
 
             return gfx;
         }
@@ -810,7 +808,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 image.XImageState = image.XImageState | XImageState.UsedInDrawingContext;
                 var gfx = new XGraphics(gdiGfx, new XSize(image.PixelWidth, image.PixelHeight), unit, XPageDirection.Downwards, renderEvents);
 
-                LogHost.Logger.XGraphicsCreated("XImage");
+                PdfSharpLogHost.Logger.XGraphicsCreated("XImage");
 
                 return gfx;
 #endif
@@ -927,10 +925,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// <summary>
         /// Releases all resources used by this object.
         /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-        }
+        public void Dispose() => Dispose(true);
 
         void Dispose(bool disposing)
         {
@@ -983,20 +978,6 @@ namespace PdfSharp.Drawing  // #??? Clean up
         }
         bool _disposed;
 
-        //// CLEANUP
-        ///// <summary>
-        ///// Internal hack for MigraDoc. Will be removed in further releases.
-        ///// Unicode support requires a global refactoring of MigraDoc and will be done in further releases.
-        ///// </summary>
-        //// ReSharper disable once InconsistentNaming
-        //// ReSharper disable once ConvertToAutoProperty
-        //public PdfFontEncoding M/UH  // MigraDoc Unicode Hack...
-        //{
-        //    get => _muh;
-        //    set => _muh = value;
-        //}
-        //PdfFontEncoding _muh;
-
         /// <summary>
         /// A value indicating whether GDI+ or WPF is used as context.
         /// </summary>
@@ -1006,15 +987,8 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// Gets or sets the unit of measure used for page coordinates.
         /// CURRENTLY ONLY POINT IS IMPLEMENTED.
         /// </summary>
-        public XGraphicsUnit PageUnit
-        {
-            get { return _pageUnit; }
-            //set
-            //{
-            //  if (value != XGraphicsUnit.Point)
-            //    throw new NotImplementedException("PageUnit must be XGraphicsUnit.Point in current implementation.");
-            //}
-        }
+        public XGraphicsUnit PageUnit => _pageUnit;
+
         readonly XGraphicsUnit _pageUnit;
 
         /// <summary>
@@ -1022,7 +996,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// </summary>
         public XPageDirection PageDirection
         {
-            get { return _pageDirection; }
+            get => _pageDirection;
             set
             {
                 // Is there really anybody who needs the concept of XPageDirection.Upwards?
@@ -1037,7 +1011,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// </summary>
         public XPoint PageOrigin
         {
-            get { return _pageOrigin; }
+            get => _pageOrigin;
             set
             {
                 // Is there really anybody who needs to set the page origin?
@@ -1048,7 +1022,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         XPoint _pageOrigin;
 
         /// <summary>
-        /// Gets the current size of the page.
+        /// Gets the current size of the page in the current page units.
         /// </summary>
         public XSize PageSize
         {
@@ -1152,7 +1126,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
             }
 
-            _renderer?.DrawLines(pen, new[] { new XPoint(x1, y1), new XPoint(x2, y2) });
+            _renderer?.DrawLines(pen, [new(x1, y1), new(x2, y2)]);
         }
 
         // ----- DrawLines ----------------------------------------------------------------------------
@@ -3733,7 +3707,11 @@ namespace PdfSharp.Drawing  // #??? Clean up
             if (stringFormat == null)
                 throw new ArgumentNullException(nameof(stringFormat));
 #if true
-            var codePoints = UnicodeHelper.Utf32FromString(text /*, font.AnsiEncoding*/);
+            //var codePoints = UnicodeHelper.Utf32FromString(text /*, font.AnsiEncoding*/);
+            var codePoints = font.IsSymbolFont
+                ? UnicodeHelper.SymbolCodePointsFromString(text, font.OpenTypeDescriptor)
+                : UnicodeHelper.Utf32FromString(text /*, font.AnsiEncoding*/);
+
             var otDescriptor = font.OpenTypeDescriptor;
             var codePointsWithGlyphIndices = otDescriptor.GlyphIndicesFromCodePoints(codePoints);
 
@@ -3760,7 +3738,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             {
                 // We always need a target for RenderEvent.
                 // TODO: Check whether this can happen.
-                LogHost.FontManagementLogger.LogCritical(
+                PdfSharpLogHost.FontManagementLogger.LogCritical(
                     "MeasureString could not invoke OnRenderTextEvent because we have no owning PDF document in the current context and no renderEvent parameter.");
                 throw new InvalidOperationException("No owning document or valid renderEvent.");
             }
@@ -3808,17 +3786,17 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #if DEBUG
 #if GDI
                 {
-                    //Debug.WriteLine(gdiSize);
+                    //De/bug.WriteLine(gdiSize);
                     XSize edfSize = FontHelper14.MeasureStringGdi(_gfx, text, font, XStringFormats.Default);
-                    //Debug.WriteLine(edfSize);
+                    //De/bug.WriteLine(edfSize);
                     //Debug.Assert(gdiSize == edfSize, "Measure string failed.");
                     if (gdiSize.Width != edfSize.Width)
                     {
-                        Debug.WriteLine(String.Format("Width: {0}, {1} : {2}", gdiSize.Width, edfSize.Width, gdiSize.Width / edfSize.Width));
+                        De/bug.WriteLine(String.Format("Width: {0}, {1} : {2}", gdiSize.Width, edfSize.Width, gdiSize.Width / edfSize.Width));
                     }
                     if (gdiSize.Height != edfSize.Height)
                     {
-                        Debug.WriteLine(String.Format("Height: {0}, {1}", gdiSize.Height, edfSize.Height));
+                        De/bug.WriteLine(String.Format("Height: {0}, {1}", gdiSize.Height, edfSize.Height));
                     }
 
                     //double lineSpace = font.GetHeight(this);
@@ -3831,17 +3809,17 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
 #if WPF
                 {
-                    //Debug.WriteLine(gdiSize);
+                    //De/bug.WriteLine(gdiSize);
                     XSize edfSize = FontHelper14.MeasureStringWpf(text, font, XStringFormats.Default);
-                    //Debug.WriteLine(edfSize);
+                    //De/bug.WriteLine(edfSize);
                     //Debug.Assert(gdiSize == edfSize, "Measure string failed.");
                     if (gdiSize.Width != edfSize.Width)
                     {
-                        Debug.WriteLine(String.Format("Width: {0}, {1} : {2}", gdiSize.Width, edfSize.Width, gdiSize.Width / edfSize.Width));
+                        De/bug.WriteLine(String.Format("Width: {0}, {1} : {2}", gdiSize.Width, edfSize.Width, gdiSize.Width / edfSize.Width));
                     }
                     if (gdiSize.Height != edfSize.Height)
                     {
-                        Debug.WriteLine(String.Format("Height: {0}, {1}", gdiSize.Height, edfSize.Height));
+                        De/bug.WriteLine(String.Format("Height: {0}, {1}", gdiSize.Height, edfSize.Height));
                     }
 
                     //double lineSpace = font.GetHeight(this);
@@ -3863,7 +3841,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 FormattedText formattedText = FontHelper.CreateFormattedText(text, font.Typeface, font.Size, WpfBrushes.Black);
                 XSize wpfSize = new XSize(formattedText.WidthIncludingTrailingWhitespace, formattedText.Height);
 #if DEBUG
-                Debug.WriteLine(wpfSize);
+                De/bug.WriteLine(wpfSize);
 #endif
                 return wpfSize;
             }

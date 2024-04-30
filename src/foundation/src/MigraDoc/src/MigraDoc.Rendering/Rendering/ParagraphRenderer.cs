@@ -8,6 +8,7 @@ using PdfSharp.Pdf;
 using PdfSharp.Drawing;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.DocumentObjectModel.Shapes;
+using MigraDoc.Rendering.Extensions;
 using MigraDoc.Rendering.Resources;
 using PdfSharp.Pdf.Advanced;
 
@@ -15,13 +16,13 @@ namespace MigraDoc.Rendering
 {
     struct TabOffset
     {
-        internal TabOffset(TabLeader leader, XUnit offset)
+        internal TabOffset(TabLeader leader, XUnitPt offset)
         {
             Leader = leader;
             Offset = offset;
         }
         internal TabLeader Leader;
-        internal XUnit Offset;
+        internal XUnitPt Offset;
     }
 
     /// <summary>
@@ -284,7 +285,7 @@ namespace MigraDoc.Rendering
                 return FormatResult.NewLine;
 
             bool notFitting = false;
-            XUnit xPositionBeforeTab = _currentXPosition;
+            XUnitPt xPositionBeforeTab = _currentXPosition;
             switch (nextTabStop.Alignment)
             {
                 case TabAlignment.Left:
@@ -358,13 +359,13 @@ namespace MigraDoc.Rendering
         /// <param name="tabStopPosition">Position of the tab to probe.</param>
         /// <param name="notFitting">Out parameter determining whether the tab causes a line break.</param>
         /// <returns>The new x-position to restart behind the tab.</returns>
-        XUnit ProbeAfterLeftAlignedTab(XUnit tabStopPosition, out bool notFitting)
+        XUnitPt ProbeAfterLeftAlignedTab(XUnitPt tabStopPosition, out bool notFitting)
         {
             //--- Save ---------------------------------
             SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth);
             //------------------------------------------
 
-            XUnit xPositionAfterTab = xPosition;
+            XUnitPt xPositionAfterTab = xPosition;
             _currentXPosition = _formattingArea.X + tabStopPosition.Point;
 
             notFitting = ProbeAfterTab();
@@ -383,13 +384,13 @@ namespace MigraDoc.Rendering
         /// <param name="tabStopPosition">Position of the tab to probe.</param>
         /// <param name="notFitting">Out parameter determining whether the tab causes a line break.</param>
         /// <returns>The new x-position to restart behind the tab.</returns>
-        XUnit ProbeAfterRightAlignedTab(XUnit tabStopPosition, out bool notFitting)
+        XUnitPt ProbeAfterRightAlignedTab(XUnitPt tabStopPosition, out bool notFitting)
         {
             //--- Save ---------------------------------
             SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth);
             //------------------------------------------
 
-            XUnit xPositionAfterTab = xPosition;
+            XUnitPt xPositionAfterTab = xPosition;
 
             notFitting = ProbeAfterTab();
             if (!notFitting && xPosition + _currentLineWidth <= _formattingArea.X + tabStopPosition)
@@ -426,13 +427,13 @@ namespace MigraDoc.Rendering
         /// <param name="tabStopPosition">Position of the tab to probe.</param>
         /// <param name="notFitting">Out parameter determining whether the tab causes a line break.</param>
         /// <returns>The new x-position to restart behind the tab.</returns>
-        XUnit ProbeAfterCenterAlignedTab(XUnit tabStopPosition, out bool notFitting)
+        XUnitPt ProbeAfterCenterAlignedTab(XUnitPt tabStopPosition, out bool notFitting)
         {
             //--- Save ---------------------------------
             SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth);
             //------------------------------------------
 
-            XUnit xPositionAfterTab = xPosition;
+            XUnitPt xPositionAfterTab = xPosition;
             notFitting = ProbeAfterTab();
 
             if (!notFitting)
@@ -467,7 +468,7 @@ namespace MigraDoc.Rendering
         /// <param name="tabStopPosition">Position of the tab to probe.</param>
         /// <param name="notFitting">Out parameter determining whether the tab causes a line break.</param>
         /// <returns>The new x-position to restart behind the tab.</returns>
-        XUnit ProbeAfterDecimalAlignedTab(XUnit tabStopPosition, out bool notFitting)
+        XUnitPt ProbeAfterDecimalAlignedTab(XUnitPt tabStopPosition, out bool notFitting)
         {
             notFitting = false;
 
@@ -547,13 +548,13 @@ namespace MigraDoc.Rendering
                     }
 
                     if (decimalPosIndex >= 0)
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
                         word = word[..decimalPosIndex];
 #else
                         word = word.Substring(0, decimalPosIndex);
 #endif
 
-                    XUnit wordLength = MeasureString(word);
+                    XUnitPt wordLength = MeasureString(word);
                     notFitting = _currentXPosition + wordLength >= _formattingArea.X + _formattingArea.Width + Tolerance;
                     if (!notFitting)
                         return _formattingArea.X + tabStopPosition - wordLength;
@@ -571,7 +572,7 @@ namespace MigraDoc.Rendering
             return ProbeAfterRightAlignedTab(tabStopPosition, out notFitting);
         }
 
-        void SaveBeforeProbing(out ParagraphIterator? paragraphIter, out int blankCount, out XUnit wordsWidth, out XUnit xPosition, out XUnit lineWidth, out XUnit blankWidth)
+        void SaveBeforeProbing(out ParagraphIterator? paragraphIter, out int blankCount, out XUnitPt wordsWidth, out XUnitPt xPosition, out XUnitPt lineWidth, out XUnitPt blankWidth)
         {
             paragraphIter = _currentLeaf;
             blankCount = _currentBlankCount;
@@ -581,7 +582,7 @@ namespace MigraDoc.Rendering
             blankWidth = _savedBlankWidth;
         }
 
-        void RestoreAfterProbing(ParagraphIterator? paragraphIter, int blankCount, XUnit wordsWidth, XUnit xPosition, XUnit lineWidth, XUnit blankWidth)
+        void RestoreAfterProbing(ParagraphIterator? paragraphIter, int blankCount, XUnitPt wordsWidth, XUnitPt xPosition, XUnitPt lineWidth, XUnitPt blankWidth)
         {
             _currentLeaf = paragraphIter;
             _currentBlankCount = blankCount;
@@ -628,7 +629,7 @@ namespace MigraDoc.Rendering
         {
             var format = _paragraph.Format;
             var tabStops = format.TabStops;
-            XUnit lastPosition = 0;
+            XUnitPt lastPosition = 0;
 
             foreach (var tabStop in tabStops.Cast<TabStop>())
             {
@@ -649,11 +650,11 @@ namespace MigraDoc.Rendering
             if (format.FirstLineIndent < 0 ||
                 (format.Values.ListInfo is not null && !format.Values.ListInfo.IsNull() && format.ListInfo.NumberPosition < format.LeftIndent))
             {
-                XUnit leftIndent = format.LeftIndent.Point;
+                XUnitPt leftIndent = format.LeftIndent.Point;
                 if (_isFirstLine && _currentXPosition < leftIndent + _formattingArea.X)
                     return new TabStop(leftIndent.Point);
             }
-            XUnit defaultTabStop = "1.25cm";
+            XUnitPt defaultTabStop = "1.25cm";
             //if (!_paragraph.Document._defaultTabStop.IsNull)
             //if (_paragraph.Document.Values.DefaultTabStop is not null)
             Debug.Assert(_paragraph.Document != null, "_paragraph.Document != null");
@@ -675,23 +676,23 @@ namespace MigraDoc.Rendering
         /// Gets the horizontal position to start a new line.
         /// </summary>
         /// <returns>The position to start the line.</returns>
-        XUnit StartXPosition
+        XUnitPt StartXPosition
         {
             get
             {
-                XUnit xPos = 0;
+                XUnitPt xPos = 0;
 
                 if (_phase == Phase.Formatting)
                 {
-                    xPos = _formattingArea.GetFittingRect(_currentYPosition, _currentVerticalInfo.Height)?.X ?? NRT.ThrowOnNull<XUnit>();
+                    xPos = _formattingArea.GetFittingRect(_currentYPosition, _currentVerticalInfo.Height)?.X ?? NRT.ThrowOnNull<XUnitPt>();
                     xPos += LeftIndent;
                 }
                 else //if (phase == Phase.Rendering)
                 {
                     Area contentArea = _renderInfo.LayoutInfo.ContentArea;
                     //next lines for non-fitting lines that produce an empty fitting rect:
-                    XUnit rectX = contentArea.X;
-                    XUnit rectWidth = contentArea.Width;
+                    XUnitPt rectX = contentArea.X;
+                    XUnitPt rectWidth = contentArea.Width;
 
                     var fittingRect = contentArea.GetFittingRect(_currentYPosition, _currentVerticalInfo.Height);
                     if (fittingRect != null)
@@ -810,7 +811,7 @@ namespace MigraDoc.Rendering
             RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth);
         }
 
-        XUnit CurrentWordDistance
+        XUnitPt CurrentWordDistance
         {
             get
             {
@@ -820,7 +821,7 @@ namespace MigraDoc.Rendering
                     if (_currentBlankCount >= 1 && !(_isLastLine && _renderInfo.FormatInfo.IsEnding))
                     {
                         var contentArea = _renderInfo.LayoutInfo.ContentArea;
-                        XUnit width = contentArea.GetFittingRect(_currentYPosition, _currentVerticalInfo.Height)?.Width ?? NRT.ThrowOnNull<XUnit>();
+                        XUnitPt width = contentArea.GetFittingRect(_currentYPosition, _currentVerticalInfo.Height)?.Width ?? NRT.ThrowOnNull<XUnitPt>();
                         if (_lastTabPosition > 0)
                         {
                             width -= (_lastTabPosition -
@@ -912,7 +913,7 @@ namespace MigraDoc.Rendering
         void RenderImage(Image _)
         {
             var renderInfo = CurrentImageRenderInfo;
-            XUnit top = CurrentBaselinePosition;
+            XUnitPt top = CurrentBaselinePosition;
             var contentArea = renderInfo?.LayoutInfo.ContentArea ?? NRT.ThrowOnNull<Area>();
             top -= contentArea.Height;
             RenderByInfos(_currentXPosition, top, [renderInfo]);
@@ -980,7 +981,7 @@ namespace MigraDoc.Rendering
         /// </summary>
         XPoint GetDestinationPosition()
         {
-            //var margin = XUnit.FromCentimeter(0.5);
+            //var margin = XUnitPt.FromCentimeter(0.5);
             var x = _currentXPosition > _margin ? _currentXPosition - _margin : 0;
             var y = _currentYPosition > _margin ? _currentYPosition - _margin : 0;
             var destinationPosition = new XPoint(x, y);
@@ -989,7 +990,7 @@ namespace MigraDoc.Rendering
             return pdfPosition;
         }
         // ReSharper disable once InconsistentNaming
-        static readonly XUnit _margin = XUnit.FromCentimeter(0.5);
+        static readonly XUnitPt _margin = XUnitPt.FromCentimeter(0.5);
 
         void RenderPageRefField(PageRefField pageRefField)
         {
@@ -1022,7 +1023,7 @@ namespace MigraDoc.Rendering
 
         void RenderSpace(Character character)
         {
-            XUnit width = GetSpaceWidth(character);
+            XUnitPt width = GetSpaceWidth(character);
             RenderUnderline(width, false);
             RealizeHyperlink(width);
             _currentXPosition += width;
@@ -1082,8 +1083,8 @@ namespace MigraDoc.Rendering
                 default:
                     return;
             }
-            XUnit leaderWidth = MeasureString(leaderString);
-            XUnit xPosition = _currentXPosition;
+            XUnitPt leaderWidth = MeasureString(leaderString);
+            XUnitPt xPosition = _currentXPosition;
             string drawString = "";
 
             while (xPosition + leaderWidth <= _currentXPosition + tabOffset.Offset)
@@ -1151,7 +1152,7 @@ namespace MigraDoc.Rendering
         {
             if (!IgnoreBlank())
             {
-                XUnit wordDistance = CurrentWordDistance;
+                XUnitPt wordDistance = CurrentWordDistance;
                 RenderUnderline(wordDistance, false);
                 RealizeHyperlink(wordDistance);
                 _currentXPosition += wordDistance;
@@ -1186,18 +1187,18 @@ namespace MigraDoc.Rendering
 
             if (CurrentBrush != null)
                 _gfx.DrawString(word, xFont, CurrentBrush, _currentXPosition, CurrentBaselinePosition);
-            XUnit wordWidth = MeasureString(word);
+            XUnitPt wordWidth = MeasureString(word);
             RenderUnderline(wordWidth, true);
             RealizeHyperlink(wordWidth);
             _currentXPosition += wordWidth;
         }
 
-        void StartHyperlink(XUnit left, XUnit top)
+        void StartHyperlink(XUnitPt left, XUnitPt top)
         {
             _hyperlinkRect = new XRect(left, top, 0, 0);
         }
 
-        void EndHyperlink(Hyperlink hyperlink, XUnit right, XUnit bottom)
+        void EndHyperlink(Hyperlink hyperlink, XUnitPt right, XUnitPt bottom)
         {
             _hyperlinkRect.Width = right - _hyperlinkRect.X;
             _hyperlinkRect.Height = bottom - _hyperlinkRect.Y;
@@ -1256,12 +1257,12 @@ namespace MigraDoc.Rendering
             };
         }
 
-        void RealizeHyperlink(XUnit width)
+        void RealizeHyperlink(XUnitPt width)
         {
-            XUnit top = _currentYPosition;
-            XUnit left = _currentXPosition;
-            XUnit bottom = top + _currentVerticalInfo.Height;
-            XUnit right = left + width;
+            XUnitPt top = _currentYPosition;
+            XUnitPt left = _currentXPosition;
+            XUnitPt bottom = top + _currentVerticalInfo.Height;
+            XUnitPt right = left + width;
             var hyperlink = GetHyperlink();
 
             bool hyperlinkChanged = _currentHyperlink != hyperlink;
@@ -1291,12 +1292,12 @@ namespace MigraDoc.Rendering
         Hyperlink? _currentHyperlink;
         XRect _hyperlinkRect;
 
-        XUnit CurrentBaselinePosition
+        XUnitPt CurrentBaselinePosition
         {
             get
             {
                 VerticalLineInfo verticalInfo = _currentVerticalInfo;
-                XUnit position = _currentYPosition;
+                XUnitPt position = _currentYPosition;
 
                 Font font = CurrentDomFont;
                 XFont xFont = CurrentFont;
@@ -1416,39 +1417,39 @@ namespace MigraDoc.Rendering
                 if (format.Values.ListInfo is not null && !format.Values.ListInfo.IsNull())
                 {
                     var listInfo = format.ListInfo;
-                    double size = format.Font.Size;
+                    double size = format.Font.Size.Point;
                     var style = FontHandler.GetXStyle(format.Font);
 
                     switch (listInfo.ListType)
                     {
                         case ListType.BulletList1:
-                            symbol = "·";
-                            font = new XFont("Symbol", size, style);
+                            symbol = "●";
+                            font = new XFont("Courier New", size, style);
                             break;
 
                         case ListType.BulletList2:
-                            symbol = "o";
+                            symbol = "○";
                             font = new XFont("Courier New", size, style);
                             break;
 
                         case ListType.BulletList3:
-                            symbol = "§";
-                            font = new XFont("Wingdings", size, style);
+                            symbol = "▪";
+                            font = new XFont("Courier New", size, style);
                             break;
 
                         case ListType.NumberList1:
                             symbol = _documentRenderer.NextListNumber(listInfo) + ".";
-                            font = FontHandler.FontToXFont(format.Font/*, _gfx.M/UH*/);  // CLEANUP
+                            font = FontHandler.FontToXFont(format.Font);
                             break;
 
                         case ListType.NumberList2:
                             symbol = NumberFormatter.Format(_documentRenderer.NextListNumber(listInfo), "alphabetic") + ".";
-                            font = FontHandler.FontToXFont(format.Font/*, _gfx.M/UH*/);
+                            font = FontHandler.FontToXFont(format.Font);
                             break;
 
                         case ListType.NumberList3:
                             symbol = NumberFormatter.Format(_documentRenderer.NextListNumber(listInfo), "roman") + ".";
-                            font = FontHandler.FontToXFont(format.Font/*, _gfx.M/UH*/);
+                            font = FontHandler.FontToXFont(format.Font);
                             break;
                         default:
                             throw new InvalidOperationException("Invalid list type.");
@@ -1470,12 +1471,12 @@ namespace MigraDoc.Rendering
             return false;
         }
 
-        XUnit LeftIndent
+        XUnitPt LeftIndent
         {
             get
             {
                 ParagraphFormat format = _paragraph.Format;
-                XUnit leftIndent = format.LeftIndent.Point;
+                XUnitPt leftIndent = format.LeftIndent.Point;
                 if (_isFirstLine)
                 {
                     if (format.Values.ListInfo is not null && !format.Values.ListInfo.IsNull())
@@ -1492,7 +1493,7 @@ namespace MigraDoc.Rendering
             }
         }
 
-        XUnit RightIndent => _paragraph.Format.RightIndent.Point;
+        XUnitPt RightIndent => _paragraph.Format.RightIndent.Point;
 
         /// <summary>
         /// Formats the paragraph by performing line breaks etc.
@@ -1594,13 +1595,13 @@ namespace MigraDoc.Rendering
             }
             if (parInfo.LineCount > 0)
             {
-                XUnit startingHeight = parInfo.GetFirstLineInfo().Vertical.Height;
+                XUnitPt startingHeight = parInfo.GetFirstLineInfo().Vertical.Height;
                 if (parInfo._isStarting && _paragraph.Format.WidowControl && parInfo.LineCount >= 2)
                     startingHeight += parInfo.GetLineInfo(1).Vertical.Height;
 
                 layoutInfo.StartingHeight = startingHeight;
 
-                XUnit trailingHeight = parInfo.GetLastLineInfo().Vertical.Height;
+                XUnitPt trailingHeight = parInfo.GetLastLineInfo().Vertical.Height;
 
                 if (parInfo.IsEnding && _paragraph.Format.WidowControl && parInfo.LineCount >= 2)
                     trailingHeight += parInfo.GetLineInfo(parInfo.LineCount - 2).Vertical.Height;
@@ -1609,19 +1610,19 @@ namespace MigraDoc.Rendering
             }
         }
 
-        XUnit PopSavedBlankWidth()
+        XUnitPt PopSavedBlankWidth()
         {
-            XUnit width = _savedBlankWidth;
+            XUnitPt width = _savedBlankWidth;
             _savedBlankWidth = 0;
             return width;
         }
 
-        void SaveBlankWidth(XUnit blankWidth)
+        void SaveBlankWidth(XUnitPt blankWidth)
         {
             _savedBlankWidth = blankWidth;
         }
 
-        XUnit _savedBlankWidth = 0;
+        XUnitPt _savedBlankWidth = 0;
 
         /// <summary>
         /// Processes the elements when formatting.
@@ -1706,7 +1707,7 @@ namespace MigraDoc.Rendering
         FormatResult FormatImage(Image image, Rectangle fittingRect)
 #pragma warning restore IDE0060
         {
-            XUnit width = CurrentImageRenderInfo?.LayoutInfo.ContentArea.Width ?? NRT.ThrowOnNull<XUnit>();
+            XUnitPt width = CurrentImageRenderInfo?.LayoutInfo.ContentArea.Width ?? NRT.ThrowOnNull<XUnitPt>();
             return FormatAsWord(width, fittingRect);
         }
 
@@ -1814,11 +1815,11 @@ namespace MigraDoc.Rendering
         /// </summary>
         FormatResult FormatWord(string word, Rectangle fittingRect)
         {
-            XUnit width = MeasureString(word);
+            XUnitPt width = MeasureString(word);
             return FormatAsWord(width, fittingRect);
         }
 
-        XUnit _savedWordWidth = 0;
+        XUnitPt _savedWordWidth = 0;
 
         /// <summary>
         /// When rendering a justified paragraph, only the part after the last tab stop needs remeasuring.
@@ -1827,7 +1828,7 @@ namespace MigraDoc.Rendering
             _phase == Phase.Rendering && _paragraph.Format.Alignment == ParagraphAlignment.Justify &&
             !_lastTabPassed;
 
-        FormatResult FormatAsWord(XUnit width, Rectangle fittingRect)
+        FormatResult FormatAsWord(XUnitPt width, Rectangle fittingRect)
         {
             _savedWordWidth = width;
 
@@ -1885,15 +1886,15 @@ namespace MigraDoc.Rendering
         {
             var contentArea = _renderInfo.LayoutInfo.ContentArea;
             var format = _paragraph.Format;
-            XUnit left = contentArea.X;
-            left += format.LeftIndent;
+            XUnitPt left = contentArea.X;
+            left += format.LeftIndent.Point;
             if (format.FirstLineIndent < 0)
-                left += format.FirstLineIndent;
+                left += format.FirstLineIndent.Point;
 
-            XUnit top = contentArea.Y;
-            XUnit bottom = contentArea.Y + contentArea.Height;
-            XUnit right = contentArea.X + contentArea.Width;
-            right -= format.RightIndent;
+            XUnitPt top = contentArea.Y;
+            XUnitPt bottom = contentArea.Y + contentArea.Height;
+            XUnitPt right = contentArea.X + contentArea.Width;
+            right -= format.RightIndent.Point;
 
             if (_paragraph.Format.Values.Borders is not null && !_paragraph.Format.Values.Borders.IsNull())
             {
@@ -1905,8 +1906,8 @@ namespace MigraDoc.Rendering
                 if (_renderInfo.FormatInfo.IsEnding)
                     bottom -= bordersRenderer.GetWidth(BorderType.Bottom);
 
-                left -= borders.DistanceFromLeft;
-                right += borders.DistanceFromRight;
+                left -= borders.DistanceFromLeft.Point;
+                right += borders.DistanceFromRight.Point;
             }
             return new Rectangle(left, top, right - left, bottom - top);
         }
@@ -1928,14 +1929,14 @@ namespace MigraDoc.Rendering
                 return;
 
             var shadingArea = GetShadingArea();
-            XUnit left = shadingArea.X;
-            XUnit top = shadingArea.Y;
-            XUnit bottom = shadingArea.Y + shadingArea.Height;
-            XUnit right = shadingArea.X + shadingArea.Width;
+            XUnitPt left = shadingArea.X;
+            XUnitPt top = shadingArea.Y;
+            XUnitPt bottom = shadingArea.Y + shadingArea.Height;
+            XUnitPt right = shadingArea.X + shadingArea.Width;
 
             var borders = _paragraph.Format.Borders;
             var bordersRenderer = new BordersRenderer(borders, _gfx);
-            XUnit borderWidth = bordersRenderer.GetWidth(BorderType.Left);
+            XUnitPt borderWidth = bordersRenderer.GetWidth(BorderType.Left);
             if (borderWidth > 0)
             {
                 left -= borderWidth;
@@ -1963,10 +1964,10 @@ namespace MigraDoc.Rendering
             }
         }
 
-        XUnit MeasureString(string word)
+        XUnitPt MeasureString(string word)
         {
             var xFont = CurrentFont;
-            XUnit width = _gfx.MeasureString(word, xFont, StringFormat).Width;
+            XUnitPt width = _gfx.MeasureString(word, xFont, StringFormat).Width;
             var font = CurrentDomFont;
 
             if (font.Subscript || font.Superscript)
@@ -1975,9 +1976,9 @@ namespace MigraDoc.Rendering
             return width;
         }
 
-        XUnit GetSpaceWidth(Character character)
+        XUnitPt GetSpaceWidth(Character character)
         {
-            XUnit width = character.SymbolName switch
+            XUnitPt width = character.SymbolName switch
             {
                 SymbolName.Blank => MeasureString(" "),
                 SymbolName.Em => MeasureString("m"),
@@ -2013,7 +2014,7 @@ namespace MigraDoc.Rendering
 
         FormatResult FormatSpace(Character character, Rectangle fittingRect)
         {
-            XUnit width = GetSpaceWidth(character);
+            XUnitPt width = GetSpaceWidth(character);
             return FormatAsWord(width, fittingRect);
         }
 
@@ -2112,12 +2113,12 @@ namespace MigraDoc.Rendering
                 return FormatResult.Ignore;
 
             _savedWordWidth = 0;
-            XUnit width;
+            XUnitPt width;
             var currentFont = CurrentFont;
             if (_lastFont == currentFont)
             {
                 width = _blankWidth;
-#if DEBUG
+#if DEBUG_
                 if (MeasureString(" ") != width)
                     throw new InvalidOperationException("Check FormatBlank.");
                 //Debug.Assert(MeasureString(" ") == width);
@@ -2131,13 +2132,13 @@ namespace MigraDoc.Rendering
 
             if (_currentXPosition + width > fittingRect.X + fittingRect.Width - RightIndent + Tolerance)
                 return FormatResult.NewLine;
-            
+
             _currentXPosition += width;
             SaveBlankWidth(width);
             return FormatResult.Continue;
         }
 
-        XUnit _blankWidth;
+        XUnitPt _blankWidth;
         XFont? _lastFont;
 
         FormatResult FormatLineBreak()
@@ -2190,7 +2191,7 @@ namespace MigraDoc.Rendering
             if (fittingRect is null)
                 NRT.ThrowOnNull();
 
-            XUnit hyphenWidth = MeasureString("-");
+            XUnitPt hyphenWidth = MeasureString("-");
             if (xPosition + hyphenWidth <= fittingRect.X + fittingRect.Width + Tolerance
                 // If one word fits, but not the hyphen, the formatting must continue with the next leaf.
                 || prevIter.Current == _startLeaf.Current)
@@ -2214,9 +2215,9 @@ namespace MigraDoc.Rendering
             }
         }
 
-        XUnit GetPreviousBlankWidth(ParagraphIterator beforeIter)
+        XUnitPt GetPreviousBlankWidth(ParagraphIterator beforeIter)
         {
-            XUnit width = 0;
+            XUnitPt width = 0;
             var savedIter = _currentLeaf;
             _currentLeaf = beforeIter.GetPreviousLeaf();
             while (_currentLeaf != null)
@@ -2286,7 +2287,7 @@ namespace MigraDoc.Rendering
         {
             PopSavedBlankWidth();
 
-            XUnit topBorderOffset = TopBorderOffset;
+            XUnitPt topBorderOffset = TopBorderOffset;
             var contentArea = _renderInfo.LayoutInfo.ContentArea;
             if (topBorderOffset > 0) // May only occur for the first line.
                 contentArea = _formattingArea.GetFittingRect(_formattingArea.Y, topBorderOffset);
@@ -2344,14 +2345,14 @@ namespace MigraDoc.Rendering
         /// <summary>
         /// Gets the top border offset for the first line, else 0.
         /// </summary>
-        XUnit TopBorderOffset
+        XUnitPt TopBorderOffset
         {
             get
             {
-                XUnit offset = 0;
+                XUnitPt offset = 0;
                 if (_isFirstLine && _paragraph.Format.Values.Borders is not null && !_paragraph.Format.Values.Borders.IsNull())
                 {
-                    offset += _paragraph.Format.Borders.DistanceFromTop;
+                    offset += _paragraph.Format.Borders.DistanceFromTop.Point;
                     if (_paragraph.Format.Values.Borders is not null && !_paragraph.Format.Values.Borders.IsNull())
                     {
                         var bordersRenderer = new BordersRenderer(_paragraph.Format.Borders, _gfx);
@@ -2366,7 +2367,7 @@ namespace MigraDoc.Rendering
         /// Gets the bottom border offset for the last line, else 0.
         /// While formatting, the actual border offset for the last line is only returned for the last paragraph's element.
         /// </summary>
-        XUnit BottomBorderOffset
+        XUnitPt BottomBorderOffset
         {
             get
             {
@@ -2383,7 +2384,7 @@ namespace MigraDoc.Rendering
                 if (_paragraph.Format.Values.Borders is null || _paragraph.Format.Values.Borders.IsNull())
                     return 0;
 
-                var offset = new XUnit(_paragraph.Format.Borders.DistanceFromBottom);
+                XUnitPt offset = _paragraph.Format.Borders.DistanceFromBottom.ToXUnitPt();
                 var bordersRenderer = new BordersRenderer(_paragraph.Format.Borders, _gfx);
                 offset += bordersRenderer.GetWidth(BorderType.Bottom);
                 return offset;
@@ -2399,17 +2400,17 @@ namespace MigraDoc.Rendering
         {
             ParagraphFormat paragraphFormat = _paragraph.Format;
             LineSpacingRule spacingRule = paragraphFormat.LineSpacingRule;
-            XUnit lineHeight = 0;
+            XUnitPt lineHeight = 0;
 
-            XUnit descent = FontHandler.GetDescent(font);
+            XUnitPt descent = FontHandler.GetDescent(font);
             descent = Math.Max(_currentVerticalInfo.Descent, descent);
 
-            XUnit singleLineSpace = font.GetHeight();
+            XUnitPt singleLineSpace = font.GetHeight();
             var imageRenderInfo = CurrentImageRenderInfo;
             if (imageRenderInfo != null)
                 singleLineSpace = singleLineSpace - FontHandler.GetAscent(font) + imageRenderInfo.LayoutInfo.ContentArea.Height;
 
-            XUnit inherentLineSpace = Math.Max(_currentVerticalInfo.InherentLineSpace, singleLineSpace);
+            XUnitPt inherentLineSpace = Math.Max(_currentVerticalInfo.InherentLineSpace, singleLineSpace);
             switch (spacingRule)
             {
                 case LineSpacingRule.Single:
@@ -2425,15 +2426,15 @@ namespace MigraDoc.Rendering
                     break;
 
                 case LineSpacingRule.Multiple:
-                    lineHeight = _paragraph.Format.LineSpacing * singleLineSpace;
+                    lineHeight = _paragraph.Format.LineSpacing.Point * singleLineSpace;
                     break;
 
                 case LineSpacingRule.AtLeast:
-                    lineHeight = Math.Max(singleLineSpace, _paragraph.Format.LineSpacing);
+                    lineHeight = Math.Max(singleLineSpace, _paragraph.Format.LineSpacing.Point);
                     break;
 
                 case LineSpacingRule.Exactly:
-                    lineHeight = new XUnit(_paragraph.Format.LineSpacing);
+                    lineHeight = _paragraph.Format.LineSpacing.Point;
                     inherentLineSpace = _paragraph.Format.LineSpacing.Point;
                     break;
             }
@@ -2447,7 +2448,7 @@ namespace MigraDoc.Rendering
         /// <summary>
         /// The font used for the current paragraph element.
         /// </summary>
-        XFont CurrentFont => FontHandler.FontToXFont(CurrentDomFont /*, _documentRenderer.PrivateFonts, _gfx.M/UH*/);  // CLEANUP
+        XFont CurrentFont => FontHandler.FontToXFont(CurrentDomFont);
 
         Font CurrentDomFont
         {
@@ -2526,16 +2527,16 @@ namespace MigraDoc.Rendering
         /// <param name="gfx">The GFX.</param>
         /// <param name="renderer">The renderer.</param>
 #pragma warning disable IDE0060
-        internal static XUnit GetLineHeight(ParagraphFormat format, XGraphics gfx, DocumentRenderer renderer)
+        internal static XUnitPt GetLineHeight(ParagraphFormat format, XGraphics gfx, DocumentRenderer renderer)
 #pragma warning restore IDE0060
         {
             var font = FontHandler.FontToXFont(format.Font);
-            XUnit singleLineSpace = font.GetHeight();
+            XUnitPt singleLineSpace = font.GetHeight();
             return format.LineSpacingRule switch
             {
                 LineSpacingRule.Exactly => format.LineSpacing.Point,
                 LineSpacingRule.AtLeast => Math.Max(format.LineSpacing.Point, font.GetHeight()),
-                LineSpacingRule.Multiple => format.LineSpacing * format.Font.Size,
+                LineSpacingRule.Multiple => format.LineSpacing.Point * format.Font.Size.Point,
                 LineSpacingRule.OnePtFive => 1.5 * singleLineSpace,
                 LineSpacingRule.Double => 2.0 * singleLineSpace,
                 LineSpacingRule.Single => singleLineSpace,
@@ -2543,7 +2544,7 @@ namespace MigraDoc.Rendering
             };
         }
 
-        void RenderUnderline(XUnit width, bool isWord)
+        void RenderUnderline(XUnitPt width, bool isWord)
         {
             var pen = GetUnderlinePen(isWord);
 
@@ -2569,20 +2570,20 @@ namespace MigraDoc.Rendering
             }
         }
 
-        void StartUnderline(XUnit xPosition)
+        void StartUnderline(XUnitPt xPosition)
         {
             _underlineStartPos = xPosition;
         }
 
-        void EndUnderline(XPen pen, XUnit xPosition)
+        void EndUnderline(XPen pen, XUnitPt xPosition)
         {
-            XUnit yPosition = CurrentBaselinePosition;
+            XUnitPt yPosition = CurrentBaselinePosition;
             yPosition += 0.33 * _currentVerticalInfo.Descent;
             _gfx.DrawLine(pen, _underlineStartPos, yPosition, xPosition, yPosition);
         }
 
         XPen? _currentUnderlinePen;
-        XUnit _underlineStartPos;
+        XUnitPt _underlineStartPos;
 
         bool UnderlinePenChanged(XPen? pen)
         {
@@ -2641,7 +2642,7 @@ namespace MigraDoc.Rendering
             XPen pen = new XPen(XColor.FromArgb(font.Color.Argb), font.Size / 16);
 #else
             Debug.Assert(_paragraph.Document != null, "_paragraph.Document != null");
-            var pen = new XPen(ColorHelper.ToXColor(font.Color, _paragraph.Document.UseCmykColor), font.Size / 16);
+            var pen = new XPen(ColorHelper.ToXColor(font.Color, _paragraph.Document.UseCmykColor), font.Size.Point / 16);
 #endif
             pen.DashStyle = font.Underline switch
             {
@@ -2664,24 +2665,24 @@ namespace MigraDoc.Rendering
         /// </summary>
         readonly Paragraph _paragraph;
 
-        XUnit _currentWordsWidth;
+        XUnitPt _currentWordsWidth;
         int _currentBlankCount;
-        XUnit _currentLineWidth;
+        XUnitPt _currentLineWidth;
         bool _isFirstLine;
         bool _isLastLine;
         VerticalLineInfo _currentVerticalInfo;
         Area _formattingArea = default!;
-        XUnit _currentYPosition;
-        XUnit _currentXPosition;
+        XUnitPt _currentYPosition;
+        XUnitPt _currentXPosition;
         ParagraphIterator? _currentLeaf;
         ParagraphIterator? _startLeaf;
         ParagraphIterator? _endLeaf;
         bool _reMeasureLine;
-        XUnit _minWidth = 0;
+        XUnitPt _minWidth = 0;
         Dictionary<Image, RenderInfo> _imageRenderInfos = default!;
         List<TabOffset> _tabOffsets = default!;
         DocumentObject? _lastTab;
         bool _lastTabPassed;
-        XUnit _lastTabPosition;
+        XUnitPt _lastTabPosition;
     }
 }

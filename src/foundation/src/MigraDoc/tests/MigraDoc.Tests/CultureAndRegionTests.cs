@@ -15,7 +15,7 @@ using System.Text.RegularExpressions;
 
 namespace MigraDoc.Tests
 {
-    [Collection("MGD")]
+    [Collection("PDFsharp")]
     public class CultureAndRegionTests
     {
         [Fact]

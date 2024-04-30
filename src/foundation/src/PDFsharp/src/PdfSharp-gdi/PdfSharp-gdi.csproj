@@ -8,6 +8,8 @@
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>GDI</DefineConstants>
     <PackageId>$(AssemblyName)</PackageId>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -133,6 +135,7 @@
     <Compile Include="..\PdfSharp\Drawing\XStringFormats.cs" Link="Drawing\XStringFormats.cs" />
     <Compile Include="..\PdfSharp\Drawing\XTypeface.cs" Link="Drawing\XTypeface.cs" />
     <Compile Include="..\PdfSharp\Drawing\XUnit.cs" Link="Drawing\XUnit.cs" />
+    <Compile Include="..\PdfSharp\Drawing\XUnitPt.cs" Link="Drawing\XUnitPt.cs" />
     <Compile Include="..\PdfSharp\Drawing\XVector.cs" Link="Drawing\XVector.cs" />
     <Compile Include="..\PdfSharp\Events\DocumentEvents.cs" Link="Events\DocumentEvents.cs" />
     <Compile Include="..\PdfSharp\Events\PdfSharpEventArgs.cs" Link="Events\PdfSharpEventArgs.cs" />
@@ -142,6 +145,7 @@
     <Compile Include="..\PdfSharp\Fonts.Internal\UnicodeHelper.cs" Link="Fonts.Internal\UnicodeHelper.cs" />
     <Compile Include="..\PdfSharp\Fonts.OpenType\enums\FontTechnology.cs" Link="Fonts.OpenType\enums\FontTechnology.cs" />
     <Compile Include="..\PdfSharp\Fonts.OpenType\enums\TableTagNames.cs" Link="Fonts.OpenType\enums\TableTagNames.cs" />
+    <Compile Include="..\PdfSharp\Fonts.OpenType\CharacterMap.cs" Link="Fonts.OpenType\CharacterMap.cs" />
     <Compile Include="..\PdfSharp\Fonts.OpenType\FontDescriptor.cs" Link="Fonts.OpenType\FontDescriptor.cs" />
     <Compile Include="..\PdfSharp\Fonts.OpenType\GenericFontTable.cs" Link="Fonts.OpenType\GenericFontTable.cs" />
     <Compile Include="..\PdfSharp\Fonts.OpenType\GlyphDataTable.cs" Link="Fonts.OpenType\GlyphDataTable.cs" />
@@ -185,6 +189,7 @@
     <Compile Include="..\PdfSharp\Internal\LogMessages.cs" Link="Internal\LogMessages.cs" />
     <Compile Include="..\PdfSharp\Internal\NativeMethods.cs" Link="Internal\NativeMethods.cs" />
     <Compile Include="..\PdfSharp\Internal\TokenizerHelper.cs" Link="Internal\TokenizerHelper.cs" />
+    <Compile Include="..\PdfSharp\Logging\PdfSharpLogHost.cs" Link="PdfSharpLogHost.cs" />
     <Compile Include="..\PdfSharp\Pdf.AcroForms\enums\PdfAcroFieldFlags.cs" Link="Pdf.AcroForms\enums\PdfAcroFieldFlags.cs" />
     <Compile Include="..\PdfSharp\Pdf.AcroForms\PdfAcroField.cs" Link="Pdf.AcroForms\PdfAcroField.cs" />
     <Compile Include="..\PdfSharp\Pdf.AcroForms\PdfAcroForm.cs" Link="Pdf.AcroForms\PdfAcroForm.cs" />
@@ -302,7 +307,6 @@
     <Compile Include="..\PdfSharp\Pdf.IO\PdfReaderOptions.cs" Link="Pdf.IO\PdfReaderOptions.cs" />
     <Compile Include="..\PdfSharp\Pdf.IO\PdfReaderException.cs" Link="Pdf.IO\PdfReaderException.cs" />
     <Compile Include="..\PdfSharp\Pdf.IO\PdfWriter.cs" Link="Pdf.IO\PdfWriter.cs" />
-    <Compile Include="..\PdfSharp\Pdf.IO\ShiftStack.cs" Link="Pdf.IO\ShiftStack.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\Encryption\PdfEncryptionBase.cs" Link="Pdf.Security\Encryption\PdfEncryptionBase.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\Encryption\PdfEncryptionV1To4.cs" Link="Pdf.Security\Encryption\PdfEncryptionV1To4.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\Encryption\PdfEncryptionV5.cs" Link="Pdf.Security\Encryption\PdfEncryptionV5.cs" />
@@ -417,8 +421,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="PDFsharp.Tests-gdi" />
-    <InternalsVisibleTo Include="PDFsharp.TestHelper-gdi" />
+    <InternalsVisibleTo Include="PDFsharp.Tests-gdi, PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
+    <InternalsVisibleTo Include="PDFsharp.TestHelper-gdi, PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
   </ItemGroup>
 
 </Project>

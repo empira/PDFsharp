@@ -18,11 +18,6 @@ namespace PdfSharp.Features.Drawing
 {
     public class NotoSans : Feature
     {
-        static NotoSans()
-        {
-            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
-        }
-
         public void Load_all_Noto_Sans()
         {
             var doc = new PdfDocument();
@@ -49,7 +44,8 @@ namespace PdfSharp.Features.Drawing
             XFont fontInfo = new XFont("Arial", 10, XFontStyleEx.Regular);
             int y = 100;
 
-            // German version of "The quick brown fox..." with umlauts, sharp s and digits.
+            // German version of 'The quick brown fox...' with umlauts, sharp s, digits, and some symbols.
+            // English: 'Twelve boxers chase Viktor across the large Sylt dike'
             var pangram = "Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich, 1234567890 +-*/";
             for (int idx = 0; idx < fontFiles.Length; idx++)
             {

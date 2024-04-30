@@ -17,7 +17,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
     /// <summary>
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    static class TH  // #RENAME TODO 
+    static class TH  // #RENAME TODO
     {
         #region General Messages
 

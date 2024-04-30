@@ -160,17 +160,21 @@ namespace PdfSharp.Quality
         /// It is not tested whether the file exists, because we have no path here.
         /// </summary>
         // ReSharper disable once InconsistentNaming
-        public static string GetTempFileName(string? namePrefix, string? extension, bool addOS = true)
+        public static string GetTempFileName(string? namePrefix, string? extension, bool addInfo = true)
         {
             var uuid = Guid.NewGuid().ToString("N")[..10].ToUpperInvariant();
             var os = Capabilities.OperatingSystem.OSAbbreviation;
+            var build = Capabilities.Build.BuildName;
+            var framework = Capabilities.Build.Framework;
+
+            var info = $"{os}-{build}-{framework}";
 
             var file = String.IsNullOrEmpty(namePrefix)
-                ? addOS
-                    ? $"{os}-{uuid}_temp"
+                ? addInfo
+                    ? $"{info}-{uuid}_temp"
                     : $"{uuid}_temp"
-                : addOS
-                    ? $"{namePrefix}-{os}-{uuid}_temp"
+                : addInfo
+                    ? $"{namePrefix}-{info}-{uuid}_temp"
                     : $"{namePrefix}-{uuid}_temp";
 
             if (!String.IsNullOrEmpty(extension))
@@ -208,7 +212,7 @@ namespace PdfSharp.Quality
             }
 
             var tempPath = GetTempPath() ?? throw new IOException("Cannot localize temp directory. Your current directory may not be part of a solution.");
-            
+
             if (pathPart != null)
             {
                 tempPath = Path.Combine(tempPath, pathPart);

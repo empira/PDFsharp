@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net6.0;net472</TargetFrameworks>
+    <!--<TargetFramework>net6.0</TargetFramework>-->
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 

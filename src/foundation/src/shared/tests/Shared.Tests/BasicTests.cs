@@ -16,8 +16,6 @@ namespace PdfSharp.Tests
         [Fact(/*Skip = "Just a placeholder"*/)]
         public void Create_Hello_World_BasicTests()
         {
-            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
-
             // Create a new PDF document.
             var document = new PdfDocument();
             document.Info.Title = "Created with PDFsharp";
@@ -29,8 +27,8 @@ namespace PdfSharp.Tests
             var gfx = XGraphics.FromPdfPage(page);
 
             // Draw two lines with a red default pen.
-            var width = page.Width;
-            var height = page.Height;
+            var width = page.Width.Point;
+            var height = page.Height.Point;
             gfx.DrawLine(XPens.Red, 0, 0, width, height);
             gfx.DrawLine(XPens.Red, width, 0, 0, height);
 
@@ -38,14 +36,12 @@ namespace PdfSharp.Tests
             var r = width / 5;
             gfx.DrawEllipse(new XPen(XColors.Red, 1.5), XBrushes.White, new XRect(width / 2 - r, height / 2 - r, 2 * r, 2 * r));
 
-            bool snippetsFontResolver = GlobalFontSettings.FontResolver!.GetType()!.FullName!.EndsWith("SnippetsFontResolver");
-
             // Create a font.
-            var font = new XFont(snippetsFontResolver ? "Times New Roman" : "segoe wp", 20, XFontStyleEx.BoldItalic);
+            var font = new XFont("Times New Roman", 20, XFontStyleEx.BoldItalic);
 
             // Draw the text.
             gfx.DrawString("Hello, dotnet 6.0!", font, XBrushes.Black,
-                new XRect(0, 0, page.Width, page.Height), XStringFormats.Center);
+                new XRect(0, 0, width, height), XStringFormats.Center);
 
             // Save the document...
             string filename = PdfFileUtility.GetTempPdfFileName("HelloWorld");

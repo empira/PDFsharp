@@ -6,6 +6,8 @@
     <RootNamespace>PdfSharp.Snippets</RootNamespace>
     <UseWPF>true</UseWPF>
     <DefineConstants>TRACE;WPF</DefineConstants>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -24,6 +26,9 @@
     <Compile Include="..\PdfSharp.Snippets\Drawing\colors\ColorsCmyk.cs" Link="Drawing\colors\ColorsCmyk.cs" />
     <Compile Include="..\PdfSharp.Snippets\Drawing\colors\ColorsRgb.cs" Link="Drawing\colors\ColorsRgb.cs" />
     <Compile Include="..\PdfSharp.Snippets\Drawing\graphics\GraphicsFromImage.cs" Link="Drawing\graphics\GraphicsFromImage.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\graphics\GraphicsUnitBase.cs" Link="Drawing\graphics\GraphicsUnitBase.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\graphics\GraphicsUnitDownwards.cs" Link="Drawing\graphics\GraphicsUnitDownwards.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\graphics\GraphicsUnitUpwards.cs" Link="Drawing\graphics\GraphicsUnitUpwards.cs" />
     <Compile Include="..\PdfSharp.Snippets\Drawing\images\ImageHelper.cs" Link="Drawing\images\ImageHelper.cs" />
     <Compile Include="..\PdfSharp.Snippets\Drawing\images\ImagesBmp.cs" Link="Drawing\images\ImagesBmp.cs" />
     <Compile Include="..\PdfSharp.Snippets\Drawing\images\ImagesGif.cs" Link="Drawing\images\ImagesGif.cs" />
@@ -38,8 +43,10 @@
     <Compile Include="..\PdfSharp.Snippets\Drawing\paths\PathMisc.cs" Link="Drawing\paths\PathMisc.cs" />
     <Compile Include="..\PdfSharp.Snippets\Drawing\paths\PathShapes.cs" Link="Drawing\paths\PathShapes.cs" />
     <Compile Include="..\PdfSharp.Snippets\Drawing\paths\PathText.cs" Link="Drawing\paths\PathText.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\paths\PathWpf.cs" Link="Drawing\paths\PathWpf.cs" />
     <Compile Include="..\PdfSharp.Snippets\Drawing\shapes\ShapeTypes.cs" Link="Drawing\shapes\ShapeTypes.cs" />
     <Compile Include="..\PdfSharp.Snippets\Drawing\text\Surrogates.cs" Link="Drawing\text\Surrogates.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\text\SymbolFonts.cs" Link="Drawing\text\SymbolFonts.cs" />
     <Compile Include="..\PdfSharp.Snippets\Drawing\text\TextAlignmentCenter.cs" Link="Drawing\text\TextAlignmentCenter.cs" />
     <Compile Include="..\PdfSharp.Snippets\Drawing\text\TextAlignmentLeft.cs" Link="Drawing\text\TextAlignmentLeft.cs" />
     <Compile Include="..\PdfSharp.Snippets\Drawing\text\TextAlignmentRight.cs" Link="Drawing\text\TextAlignmentRight.cs" />
@@ -55,9 +62,8 @@
     <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\ExoticFontsFontResolver.cs" Link="Font\fontresolving\ExoticFontsFontResolver.cs" />
     <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\FailsafeFontResolver.cs" Link="Font\fontresolving\FailsafeFontResolver.cs" />
     <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\FontResolver.cs" Link="Font\fontresolving\FontResolver.cs" />
-    <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\SegoeUIFontResolver.cs" Link="Font\fontresolving\SegoeUIFontResolver.cs" />
     <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\SegoeWpFontResolver.cs" Link="Font\fontresolving\SegoeWpFontResolver.cs" />
-    <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\SnippetsFontResolver.cs" Link="Font\fontresolving\SnippetsFontResolver.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\SomeTestFontResolvers.cs" Link="Font\fontresolving\SomeTestFontResolvers.cs" />
     <Compile Include="..\PdfSharp.Snippets\Font\metrics\FontMetrics.cs" Link="Font\metrics\FontMetrics.cs" />
     <Compile Include="..\PdfSharp.Snippets\Font\selection\ChineseFont.cs" Link="Font\selection\ChineseFont.cs" />
     <Compile Include="..\PdfSharp.Snippets\Font\selection\DefaultConstructionSnippets.cs" Link="Font\selection\DefaultConstructionSnippets.cs" />

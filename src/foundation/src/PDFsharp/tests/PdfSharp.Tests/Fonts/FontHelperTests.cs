@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using FluentAssertions;
+using PdfSharp.Diagnostics;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Fonts.Internal;
@@ -13,13 +14,9 @@ using Xunit;
 
 namespace PdfSharp.Tests.Fonts
 {
+    [Collection("PDFsharp")]
     public class FontHelperTests
     {
-        static FontHelperTests()
-        {
-            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
-        }
-
         [Fact]
         public void Count_glyphs_of_fonts()
         {
@@ -29,20 +26,26 @@ namespace PdfSharp.Tests.Fonts
             int counter1 = CountGlyphs(font1);
             counter1.Should().Be(3361);
 
-            var font2 = new XFont("Segoe UI Emoji", 10);
-            int counter2 = CountGlyphs(font2);
-            counter2.Should().Be(1962);
+            if (Capabilities.Build.IsGdiBuild || Capabilities.Build.IsWpfBuild)
+            {
+                var font2 = new XFont("Segoe UI Emoji", 10);
+
+                int counter2 = CountGlyphs(font2);
+                counter2.Should().Be(1962);
+            }
         }
-        
-        static int CountGlyphs(XFont font)
+
+        public static int CountGlyphs(XFont font)
         {
             var sw = Stopwatch.StartNew();
             int counter = 0;
             for (int codePoint = 0; codePoint < 0x10FFFF; codePoint++)
             {
                 // Skip surrogates.
-                if (codePoint is >= 0xD000 and <= 0xDFFF)
-                    continue;
+                //if (codePoint is >= 0xD800 and <= 0xDFFF)
+                //    continue;
+                if (codePoint == 0xD800)
+                    codePoint += 0x0800;
 
                 var glyphIndex = GlyphHelper.GlyphIndexFromCodePoint(codePoint, font);
                 if (glyphIndex != 0)

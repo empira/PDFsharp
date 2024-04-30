@@ -1,17 +1,16 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
 #if GDI
 using System.Drawing;
 #endif
 #if WPF
 using System.Windows;
 #endif
-using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
+using PdfSharp.Internal.Logging;
 using PdfSharp.Logging;
 
 namespace PdfSharp.Internal
@@ -27,7 +26,7 @@ namespace PdfSharp.Internal
 
             //string text = "Not implemented: " + message;
             const string prefix = "Feature not available: {message}";
-            const string category = "FeatureNotAvailable";
+            //const string category = "FeatureNotAvailable";
             switch (behavior)
             {
                 case FeatureNotAvailableBehavior.SilentlyIgnore:
@@ -35,15 +34,15 @@ namespace PdfSharp.Internal
                     break;
 
                 case FeatureNotAvailableBehavior.LogInformation:
-                    LogHost.CreateLogger(category).LogInformation(prefix, message);
+                    PdfSharpLogHost.Logger.LogInformation(PdfSharpEventId.Test1, prefix, message);
                     break;
 
                 case FeatureNotAvailableBehavior.LogWarning:
-                    LogHost.CreateLogger(category).LogWarning(prefix, message);
+                    PdfSharpLogHost.Logger.LogWarning(PdfSharpEventId.Test1, prefix, message);
                     break;
 
                 case FeatureNotAvailableBehavior.LogError:
-                    LogHost.CreateLogger(category).LogError(prefix, message);
+                    PdfSharpLogHost.Logger.LogError(PdfSharpEventId.Test1, prefix, message);
                     break;
 
                 case FeatureNotAvailableBehavior.ThrowException:

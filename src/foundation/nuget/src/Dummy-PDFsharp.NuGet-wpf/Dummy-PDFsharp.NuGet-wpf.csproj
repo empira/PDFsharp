@@ -5,6 +5,8 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <!--<NoBuild>true</NoBuild>
     <IncludeBuildOutput>false</IncludeBuildOutput>-->
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup>

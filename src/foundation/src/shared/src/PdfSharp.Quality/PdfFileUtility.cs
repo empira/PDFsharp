@@ -21,9 +21,9 @@ namespace PdfSharp.Quality
         /// It is not tested whether the file exists, because we have no path here.
         /// </summary>
         // ReSharper disable once InconsistentNaming
-        public static string GetTempPdfFileName(string? namePrefix, bool addOS = true)
+        public static string GetTempPdfFileName(string? namePrefix, bool addInfo = true)
         {
-            return IOUtility.GetTempFileName(namePrefix, "pdf", addOS);
+            return IOUtility.GetTempFileName(namePrefix, "pdf", addInfo);
         }
 
         /// <summary>
@@ -33,9 +33,9 @@ namespace PdfSharp.Quality
         /// The file is created and immediately closed. That ensures the returned full file name can be used.
         /// </summary>
         // ReSharper disable once InconsistentNaming
-        public static string GetTempPdfFullFileName(string? namePrefix, bool addOS = true)
+        public static string GetTempPdfFullFileName(string? namePrefix, bool addInfo = true)
         {
-            return IOUtility.GetTempFullFileName(namePrefix, "pdf", addOS);
+            return IOUtility.GetTempFullFileName(namePrefix, "pdf", addInfo);
         }
 
         /// <summary>
@@ -51,17 +51,30 @@ namespace PdfSharp.Quality
         }
 
         /// <summary>
+        /// Save the specified document and returns the path.
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="name"></param>
+        /// <param name="addInfo"></param>
+        public static string SaveDocument(PdfDocument doc, string name, bool addInfo = true)
+        {
+            var pdfFilename = GetTempPdfFullFileName(name, addInfo);
+            doc.Save(pdfFilename);
+            return pdfFilename;
+        }
+
+        /// <summary>
         /// Save the specified document and shows it in a PDF viewer application.
         /// </summary>
         /// <param name="doc"></param>
         /// <param name="name"></param>
-        /// <param name="addOS"></param>
-        // ReSharper disable once InconsistentNaming
-        public static void SaveAndShowDocument(PdfDocument doc, string name, bool addOS = true)
+        /// <param name="addInfo"></param>
+        public static string SaveAndShowDocument(PdfDocument doc, string name, bool addInfo = true)
         {
-            var pdfFilename = GetTempPdfFullFileName(name, addOS);
+            var pdfFilename = GetTempPdfFullFileName(name, addInfo);
             doc.Save(pdfFilename);
             ShowDocument(pdfFilename);
+            return pdfFilename;
         }
 
         /// <summary>
@@ -70,13 +83,13 @@ namespace PdfSharp.Quality
         /// </summary>
         /// <param name="doc"></param>
         /// <param name="name"></param>
-        /// <param name="addOS"></param>
-        // ReSharper disable once InconsistentNaming
-        public static void SaveAndShowDocumentIfDebugging(PdfDocument doc, string name, bool addOS = true)
+        /// <param name="addInfo"></param>
+        public static string SaveAndShowDocumentIfDebugging(PdfDocument doc, string name, bool addInfo = true)
         {
-            var pdfFilename = GetTempPdfFullFileName(name, addOS);
+            var pdfFilename = GetTempPdfFullFileName(name, addInfo);
             doc.Save(pdfFilename);
             ShowDocumentIfDebugging(pdfFilename);
+            return pdfFilename;
         }
 
         /// <summary>
@@ -109,7 +122,7 @@ namespace PdfSharp.Quality
             }
             else
             {
-                throw new InvalidOperationException("What OS?");
+                throw new NotImplementedException("What OS?");
             }
 
             static void CopyFile(string pdfFilename)
@@ -122,7 +135,8 @@ namespace PdfSharp.Quality
                         Directory.CreateDirectory(dir);
 
                     var filename = Path.GetFileName(pdfFilename);
-                    File.Copy(pdfFilename, Path.Combine(dir, filename));
+                    var destination = Path.Combine(dir, filename);
+                    File.Copy(pdfFilename, destination);
                 }
                 catch (Exception ex)
                 {

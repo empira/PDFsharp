@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using PdfSharp.Diagnostics;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
@@ -13,9 +14,14 @@ namespace PdfSharp.Snippets.Font
 {
     public class ExoticFontResolverSnippet : Snippet
     {
+        public ExoticFontResolverSnippet()
+        {
+            PdfSharpCore.ResetFontManagement();
+            GlobalFontSettings.FontResolver = new ExoticFontsFontResolver();
+        }
+
         public override void RenderSnippet(XGraphics gfx)
         {
-            GlobalFontSettings.FontResolver = new ExoticFontsFontResolver();
 
             XPdfFontOptions options = XPdfFontOptions.WinAnsiDefault;
 

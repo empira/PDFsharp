@@ -153,8 +153,8 @@ namespace PdfSharp.Charting.Renderers
                     mri.MarkerBackgroundColor = sri.LineFormat.Color;
 
                 mri.MarkerSize = sri.Series.MarkerSize;
-                if (mri.MarkerSize == 0)
-                    mri.MarkerSize = 7;
+                if (mri.MarkerSize.Point == 0)
+                    mri.MarkerSize = XUnit.FromPoint(7);
 
                 if (!sri.Series._markerStyleInitialized)
                     //mri.MarkerStyle = (MarkerStyle)(seriesIndex % (Enum.GetNames(typeof(MarkerStyle)).Length - 1) + 1);

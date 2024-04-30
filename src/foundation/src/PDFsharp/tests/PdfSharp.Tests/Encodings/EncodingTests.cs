@@ -8,6 +8,7 @@ using Xunit;
 
 namespace PdfSharp.Tests.Encodings
 {
+    [Collection("PDFsharp")]
     public class EncodingTests
     {
         [Fact]

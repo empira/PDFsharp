@@ -227,6 +227,18 @@ namespace PdfSharp.Fonts.OpenType
                 // We wait for bug reports.
 
                 char ch = (char)idx;
+#if true
+                if (isSymbolFont)
+                {
+                    ch = RemapSymbolChar(ch);
+                }
+                else
+                {
+                    string s = ansi.GetString(bytes, idx, 1);
+                    if (s.Length != 0)
+                        ch = s[0];
+                }
+#else
                 string s = ansi.GetString(bytes, idx, 1);
                 if (s.Length != 0)
                 {
@@ -237,7 +249,7 @@ namespace PdfSharp.Fonts.OpenType
                 // Remap ch for symbol fonts.
                 if (isSymbolFont)
                     ch = RemapSymbolChar(ch);
-
+#endif
                 var glyphIndex = BmpCodepointToGlyphIndex(ch);
                 Widths[idx] = GlyphIndexToPdfWidth(glyphIndex);
             }
@@ -264,7 +276,7 @@ namespace PdfSharp.Fonts.OpenType
         /// Format 4: Segment mapping to delta values"
         /// for details about this a little bit strange looking algorithm.
         /// </summary>
-        public int BmpCodepointToGlyphIndex(char ch)
+        public ushort BmpCodepointToGlyphIndex(char ch)
         {
             // ReSharper disable once IdentifierTypo
             var cmap = FontFace.cmap.cmap4;
@@ -283,12 +295,12 @@ namespace PdfSharp.Fonts.OpenType
             if (ch < cmap.startCount[seg])
                 return 0;
 
-            int glyphIndex;
+            ushort glyphIndex;
 
             if (cmap.idRangeOffs[seg] == 0)
             {
-                glyphIndex = (int)((ch + (uint)cmap.idDelta[seg]) & 0xFFFF);
-                Debug.Assert((glyphIndex & 0xFFFF0000) == 0, "Glyph index larger than 65535.");
+                glyphIndex = (ushort)((ch + (uint)cmap.idDelta[seg]) & 0xFFFF);
+                // Cannot happen anymore with glyphIndex as of type ushort:  Debug.Assert((glyphIndex & 0xFFFF0000) == 0, "Glyph index larger than 65535.");
                 return glyphIndex;
             }
 
@@ -299,7 +311,7 @@ namespace PdfSharp.Fonts.OpenType
             if (glyphIndex == 0)
                 return 0;
 
-            glyphIndex = (int)((glyphIndex + (uint)cmap.idDelta[seg]) & 0xFFFF);
+            glyphIndex = (ushort)((glyphIndex + (uint)cmap.idDelta[seg]) & 0xFFFF);
             Debug.Assert((glyphIndex & 0xFFFF0000) == 0, "Glyph index larger than 65535.");
             return glyphIndex;
         }
@@ -311,7 +323,7 @@ namespace PdfSharp.Fonts.OpenType
         /// Format 12: Segmented coverage"
         /// for details about this a little bit strange looking algorithm.
         /// </summary>
-        public int SurrogatePairToGlyphIndex(char highSurrogate, char lowSurrogate)
+        public ushort SurrogatePairToGlyphIndex(char highSurrogate, char lowSurrogate)
         {
             // ReSharper disable once IdentifierTypo
             var cmap = FontFace.cmap.cmap12;
@@ -332,11 +344,11 @@ namespace PdfSharp.Fonts.OpenType
         /// Format 4: Segment mapping to delta values"
         /// for details about this a little bit strange looking algorithm.
         /// </summary>
-        public int CodepointToGlyphIndex(int codePoint)
+        public ushort CodepointToGlyphIndex(int codePoint)
         {
             if (codePoint <= 0xFFFF)
             {
-                LogHost.FontManagementLogger.LogWarning("For code points from the BMP call BmpCharacterToGlyphID directly.");
+                PdfSharpLogHost.FontManagementLogger.LogWarning("For code points from the BMP call BmpCharacterToGlyphID directly.");
                 return BmpCodepointToGlyphIndex((char)codePoint);
             }
 
@@ -360,8 +372,8 @@ namespace PdfSharp.Fonts.OpenType
             if (codePoint < cmap.groups[seg].startCharCode)
                 return 0;
 
-            var glyphIndex = (int)(cmap.groups[seg].startGlyphIndex + codePoint - cmap.groups[seg].startCharCode);
-            Debug.Assert((glyphIndex & 0xFFFF0000) == 0, "Glyph index larger than 65535.");
+            var glyphIndex = (ushort)(cmap.groups[seg].startGlyphIndex + codePoint - cmap.groups[seg].startCharCode);
+            // Debug.Assert((glyphIndex & 0xFFFF0000) == 0, "Glyph index larger than 65535.");
             return glyphIndex;
         }
 
@@ -369,7 +381,7 @@ namespace PdfSharp.Fonts.OpenType
         /// Converts the width of a glyph identified by its index to PDF design units.
         /// Index 0 also returns a valid font specific width for the non-existing glyph.
         /// </summary>
-        public int GlyphIndexToPdfWidth(int glyphIndex)
+        public int GlyphIndexToPdfWidth(ushort glyphIndex)
         {
             try
             {
@@ -378,7 +390,7 @@ namespace PdfSharp.Fonts.OpenType
 
                 // glyphIndex >= numberOfHMetrics means the font is monospaced and all glyphs have the same width.
                 if (glyphIndex >= numberOfHMetrics)
-                    glyphIndex = numberOfHMetrics - 1;
+                    glyphIndex = (ushort)(numberOfHMetrics - 1);
 
                 int width = FontFace.hmtx.Metrics[glyphIndex].advanceWidth;
 
@@ -390,7 +402,7 @@ namespace PdfSharp.Fonts.OpenType
             // ReSharper disable once RedundantCatchClause
             catch (Exception)
             {
-                LogHost.FontManagementLogger.LogError("Invalid glyph index hmtx: 0x{Glyph:X4}", glyphIndex);
+                PdfSharpLogHost.FontManagementLogger.LogError("Invalid glyph index hmtx: 0x{Glyph:X4}", glyphIndex);
                 throw;
             }
         }
@@ -414,7 +426,7 @@ namespace PdfSharp.Fonts.OpenType
             }
             catch (Exception ex)
             {
-                LogHost.Logger.LogError(ex, "Error calculating em-size for glyph 0x{Glyph:X4}.", glyphIndex);
+                PdfSharpLogHost.Logger.LogError(ex, "Error calculating em-size for glyph 0x{Glyph:X4}.", glyphIndex);
                 throw;
             }
         }
@@ -439,7 +451,7 @@ namespace PdfSharp.Fonts.OpenType
             }
             catch (Exception ex)
             {
-                LogHost.Logger.LogError(ex, "Error find advance width for glyph 0x{Glyph:X4}.", glyphIndex);
+                PdfSharpLogHost.Logger.LogError(ex, "Error find advance width for glyph 0x{Glyph:X4}.", glyphIndex);
                 throw;
             }
         }
@@ -485,7 +497,7 @@ namespace PdfSharp.Fonts.OpenType
                     if ((ch & 0xFF00) != 0)
                     {
                         // Just log a hint but do not skip the character.
-                        LogHost.FontManagementLogger.LogDebug("Unexpected character found for symbol font: 0x{Char:X2}", ch);
+                        PdfSharpLogHost.FontManagementLogger.LogDebug("Unexpected character found for symbol font: 0x{Char:X2}", ch);
                     }
 
                     // Remap ch for symbol fonts.
@@ -507,7 +519,7 @@ namespace PdfSharp.Fonts.OpenType
                     //    var ansi = AnsiEncoding.UnicodeToAnsi(ch);
                     //    if (ansi == '\uFFFF')
                     //    {
-                    //        LogHost.FontManagementLogger.LogDebug("Unexpected low surrogate found: 0x{Char:X2}", ch);
+                    //        PdfSharpLogHost.FontManagementLogger.LogDebug("Unexpected low surrogate found: 0x{Char:X2}", ch);
                     //        result[iRes++] = new CodepointGlyphID(ch, ch, 0);  // unclear what to do
                     //    }
                     //    else
@@ -533,8 +545,16 @@ namespace PdfSharp.Fonts.OpenType
         public char RemapSymbolChar(char ch)
         {
             Debug.Assert(IsSymbolFont);
-            if (ch > 255)
-                LogHost.FontManagementLogger.LogError("Character 0x{char:X4} larger than 255 in symbol font.", ch);
+
+            // Check if ch is either a byte or in range [0xf000..0xf0ff], wich is both valid for a
+            // code unit of a symbol font.
+            // Second expression is clever code from WPF source meaning:
+            // 'ch >= 0xf000 && ch <= 0xf0ff' done with one test and branch.
+            if (ch > 255 && !((uint)(ch - 0xf000) <= 0xff))
+            {
+                var value = ((int)ch).ToString("x4");
+                PdfSharpLogHost.FontManagementLogger.LogError("Character 0u{char} of a symbol font is not in valid range.", value);
+            }
 
             // Used | instead of + because of: http://pdfsharp.codeplex.com/workitem/15954
             return (char)(ch | (FontFace.os2.usFirstCharIndex & 0xFF00));

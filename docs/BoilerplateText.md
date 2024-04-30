@@ -71,7 +71,7 @@ The package ’PdfSharp’ can be used on any platform including Windows and Lin
 The packages ’PDFsharp-gdi’ and ’PDFsharp-wpf’ can be used under Windows only. The Target Frameworks are ’net6.0-windows’ and ’net472-windows’.
 We also publish packages that contain PDFsharp plus MigraDoc.
 See the project docs site for further information:
-https://docs.pdfsharp.net/history/readme-v6.1.html
+https://docs.pdfsharp.net/link/readme-v6.1.html
 
 
 PDFsharp & MigraDoc:
@@ -79,4 +79,4 @@ This is a version of PDFsharp and MigraDoc Foundation using .NET 6.
 The package ’PDFsharp-MigraDoc’ can be used on any platform including Windows and Linux. The Target Frameworks are ’net6.0’ and ’netstandard2.0’.
 The packages ’PDFsharp-MigraDoc-GDI’ and ’PDFsharp-MigraDoc-WPF’ can be used under Windows only. The Target Frameworks are ’net6.0-windows’ and ’net472-windows’.
 See the project docs site for further information:
-https://docs.pdfsharp.net/history/readme-v6.1.html
+https://docs.pdfsharp.net/link/readme-v6.1.html

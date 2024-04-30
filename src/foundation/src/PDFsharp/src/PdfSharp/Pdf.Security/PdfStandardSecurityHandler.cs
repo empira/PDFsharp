@@ -42,7 +42,8 @@ namespace PdfSharp.Pdf.Security
         }
 
         /// <summary>
-        /// Set the encryption according to the given parameter.
+        /// Set the encryption according to the given DefaultEncryption.
+        /// Allows setting the encryption automized using one single parameter.
         /// </summary>
         public void SetEncryption(DefaultEncryption encryption)
         {
@@ -881,7 +882,8 @@ namespace PdfSharp.Pdf.Security
         CryptFilterBase? _defaultCryptFilterEmbeddedFileStreams;
 
         /// <summary>
-        /// Basic settings to initialize encryption with.
+        /// Typical settings to initialize encryption with.
+        /// With DefaultEncryption, the encryption can be set automized using PdfStandardSecurityHandler.SetPermission() with one single parameter.
         /// </summary>
         public enum DefaultEncryption
         {

@@ -85,7 +85,7 @@ namespace PdfSharp.Snippets.Font
                 string path = Path.Combine(windir + @"\..\fonts\", font);
                 using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
                 {
-                    XPrivateFontCollection.Add(stream);
+                    //XPrivateFontCollection.Add(stream);
                 }
             }
             Debug.WriteLine(FontsDevHelper.GetFontCachesState());
@@ -210,22 +210,22 @@ namespace PdfSharp.Snippets.Font
 
                 {
                     var fntBold = new XFont(FamilyNameT, EmSize, XFontStyleEx.Bold, _fontOptions);
-                    XUnit descent = GetDescent(fntBold);
-                    XUnit singleLineSpace = fntBold.GetHeight();
+                    double descent = GetDescent(fntBold);
+                    double singleLineSpace = fntBold.GetHeight();
                     //sizeBold = gfx.MeasureString(text, fntBold);
                 }
 
                 {
                     var fntRegular = new XFont(FamilyNameT, EmSize, XFontStyleEx.Regular, _fontOptions);
-                    XUnit descent = GetDescent(fntRegular);
-                    XUnit singleLineSpace = fntRegular.GetHeight();
+                    double descent = GetDescent(fntRegular);
+                    double singleLineSpace = fntRegular.GetHeight();
                     //sizeRegular = gfx.MeasureString(text, fntRegular);
                 }
 
                 {
                     var fntBold = new XFont(FamilyNameT, EmSize, XFontStyleEx.Bold, _fontOptions);
-                    //XUnit descent = GetDescent(fntBold);
-                    //XUnit singleLineSpace = fntBold.GetHeight();
+                    //double descent = GetDescent(fntBold);
+                    //double singleLineSpace = fntBold.GetHeight();
                     gfx.MeasureString("De", fntBold);
                     gfx.MeasureString("do", fntBold);
                     gfx.MeasureString("do", fntBold);
@@ -234,8 +234,8 @@ namespace PdfSharp.Snippets.Font
 
                 {
                     var fntRegular = new XFont(FamilyNameT, EmSize, XFontStyleEx.Regular, _fontOptions);
-                    //XUnit descent = GetDescent(fntRegular);
-                    //XUnit singleLineSpace = fntRegular.GetHeight();
+                    //double descent = GetDescent(fntRegular);
+                    //double singleLineSpace = fntRegular.GetHeight();
                     gfx.MeasureString("De", fntRegular);
                     gfx.MeasureString("do", fntRegular);
                     gfx.MeasureString("do", fntRegular);
@@ -364,9 +364,9 @@ namespace PdfSharp.Snippets.Font
 
 #endif
         }
-        internal static XUnit GetDescent(XFont font)
+        internal static double GetDescent(XFont font)
         {
-            XUnit descent = font.Metrics.Descent;
+            double descent = font.Metrics.Descent;
             descent *= font.Size;
             descent /= font.FontFamily.GetEmHeight(font.Style);
             return descent;

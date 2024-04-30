@@ -80,7 +80,7 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
     /// Represents a sequence of objects in a PDF content stream.
     /// </summary>
     [DebuggerDisplay("(count={" + nameof(Count) + "})")]
-    public class CSequence : CObject, IList<CObject>  // , ICollection<CObject>, IEnumerable<CObject>
+    public class CSequence : CObject, IList<CObject>
     {
         /// <summary>
         /// Creates a new object that is a copy of the current instance.
@@ -92,11 +92,11 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         /// </summary>
         protected override CObject Copy()
         {
-            var obj = base.Copy();
-            _items = new(_items);
+            var clone = (CSequence)base.Copy();
+            clone._items = [];
             for (int idx = 0; idx < _items.Count; idx++)
-                _items[idx] = _items[idx].Clone();
-            return obj;
+                clone._items.Add(_items[idx].Clone());
+            return clone;
         }
 
         /// <summary>
@@ -121,11 +121,6 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         /// Removes all elements from the sequence.
         /// </summary>
         public void Clear() => _items.Clear();
-
-        //bool IList.Contains(object value)
-        //{
-        //  return items.Contains(value);
-        //}
 
         /// <summary>
         /// Determines whether the specified value is in the sequence.
@@ -201,11 +196,7 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
             byte[] bytes = new byte[count];
             var readBytes = stream.Read(bytes, 0, count);
             Debug.Assert(readBytes == count);
-#if !UWP
             stream.Close();
-#else
-            stream.Dispose();
-#endif
             return bytes;
         }
 
@@ -222,10 +213,7 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
             return s.ToString();
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         internal override void WriteObject(ContentWriter writer)
         {
@@ -235,41 +223,54 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
 
         #region IList<CObject> Members
 
-        int IList<CObject>.IndexOf(CObject item) => throw new NotImplementedException();
+        int IList<CObject>.IndexOf(CObject item) => _items.IndexOf(item);
 
-        void IList<CObject>.Insert(int index, CObject item) => throw new NotImplementedException();
+        void IList<CObject>.Insert(int index, CObject item) => _items.Insert(index, item);
 
-        void IList<CObject>.RemoveAt(int index) => throw new NotImplementedException();
+        void IList<CObject>.RemoveAt(int index) => _items.RemoveAt(index);
 
         CObject IList<CObject>.this[int index]
         {
-            get => throw new NotImplementedException();
-            set => throw new NotImplementedException();
+            get => _items[index];
+            set => _items[index] = value;
         }
 
         #endregion
 
         #region ICollection<CObject> Members
 
-        void ICollection<CObject>.Add(CObject item) => throw new NotImplementedException();
+        void ICollection<CObject>.Add(CObject item) => Add(item);
 
-        void ICollection<CObject>.Clear() => throw new NotImplementedException();
+        void ICollection<CObject>.Clear() => Clear();
 
-        bool ICollection<CObject>.Contains(CObject item) => throw new NotImplementedException();
+        bool ICollection<CObject>.Contains(CObject item) => Contains(item);
 
-        void ICollection<CObject>.CopyTo(CObject[] array, int arrayIndex) => throw new NotImplementedException();
+        void ICollection<CObject>.CopyTo(CObject[] array, int arrayIndex)
+        {
+            if (array == null!)
+                throw new ArgumentNullException(nameof(array));
 
-        int ICollection<CObject>.Count => throw new NotImplementedException();
+            if (arrayIndex < 0)
+                throw new ArgumentOutOfRangeException(nameof(array));
 
-        bool ICollection<CObject>.IsReadOnly => throw new NotImplementedException();
+            if (_items.Count > array.Length - arrayIndex)
+                throw new ArgumentException("The number of elements in the source collection is greater than the available space from arrayIndex to the end of the destination array.");
 
-        bool ICollection<CObject>.Remove(CObject item) => throw new NotImplementedException();
+            for (int i = arrayIndex; i < _items.Count; i++)
+                array[i] = _items[i];
+        }
+
+        int ICollection<CObject>.Count => _items.Count;
+
+        bool ICollection<CObject>.IsReadOnly => false;
+
+        bool ICollection<CObject>.Remove(CObject item) => _items.Remove(item);
 
         #endregion
 
         #region IEnumerable<CObject> Members
 
-        IEnumerator<CObject> IEnumerable<CObject>.GetEnumerator() => throw new NotImplementedException();
+        IEnumerator<CObject> IEnumerable<CObject>.GetEnumerator() => _items.GetEnumerator();
 
         #endregion
 
@@ -407,7 +408,7 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
 
         /// <summary>
         /// HACK: The string is the content of a dictionary.
-        /// Currently there is no parser for dictionaries in Content Streams.
+        /// Currently, there is no parser for dictionaries in Content Streams.
         /// </summary>
         Dictionary,
     }
@@ -715,8 +716,8 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
                     _sequence[idx].WriteObject(writer);
                 }
             }
-            writer.WriteLineRaw(_opCode.OpCodeName == OpCodeName.Dictionary 
-                    ? " " 
+            writer.WriteLineRaw(_opCode.OpCodeName == OpCodeName.Dictionary
+                    ? " "
                     : Name);
         }
     }

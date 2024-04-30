@@ -2,6 +2,8 @@
 // See the LICENSE file in the solution root for more information.
 
 using Microsoft.Extensions.Logging;
+using PdfSharp.Drawing;
+using PdfSharp.Fonts.OpenType;
 using PdfSharp.Logging;
 using PdfSharp.Pdf.Internal;
 
@@ -59,7 +61,7 @@ namespace PdfSharp.Fonts.Internal
                         else
                         {
                             // Case: Unpaired high surrogate.
-                            LogHost.FontManagementLogger.LogDebug("High surrogate 0x{Char:X2} not followed by a low surrogate.", ch);
+                            PdfSharpLogHost.FontManagementLogger.LogDebug("High surrogate 0x{Char:X2} not followed by a low surrogate.", ch);
                             idx--;
                             continue;
                         }
@@ -67,7 +69,7 @@ namespace PdfSharp.Fonts.Internal
                     else
                     {
                         // Case: High surrogate at string end.
-                        LogHost.FontManagementLogger.LogDebug("High surrogate 0x{Char:X2} found at end of string.", ch);
+                        PdfSharpLogHost.FontManagementLogger.LogDebug("High surrogate 0x{Char:X2} found at end of string.", ch);
                         break;
                     }
                 }
@@ -81,7 +83,7 @@ namespace PdfSharp.Fonts.Internal
                         // Case: unpaired low surrogate.
                         // We only come here when the text contains a low surrogate not preceded by a high surrogate.
                         // This is an error in the UTF-32 text.
-                        LogHost.FontManagementLogger.LogDebug("Unexpected low surrogate found: 0x{Char:X2}", ch);
+                        PdfSharpLogHost.FontManagementLogger.LogDebug("Unexpected low surrogate found: 0x{Char:X2}", ch);
                         continue;
                     }
 
@@ -91,6 +93,23 @@ namespace PdfSharp.Fonts.Internal
             }
             if (iRes < length)
                 Array.Resize(ref result, iRes);
+            return result;
+        }
+
+        /// <summary>
+        /// Converts a UTF-16 string into an array of code points of a symbol font.
+        /// </summary>
+        public static int[] SymbolCodePointsFromString(string s, OpenTypeDescriptor openTypeDescriptor)
+        {
+            if (String.IsNullOrEmpty(s))
+                return [];
+
+            int length = s.Length;
+            var result = new int[length];
+
+            for (int idx = 0; idx < length; idx++)
+                result[idx] = openTypeDescriptor.RemapSymbolChar(s[idx]);
+
             return result;
         }
 
@@ -106,8 +125,8 @@ namespace PdfSharp.Fonts.Internal
             uint highSurrogateOffset = (uint)highSurrogate - UnicodeHelper.HighSurrogateStart;
             uint lowSurrogateOffset = (uint)lowSurrogate - UnicodeHelper.LowSurrogateStart;
 
-            // If surros not in range return 0.
-            // The cool code using underflow to check two ranges with one comparison comes from the .NET source code.
+            // If surrogates not in range return 0.
+            // The cool code using underflow effect to check two ranges with one comparison comes from the .NET source code.
             if ((highSurrogateOffset | lowSurrogateOffset) > UnicodeHelper.HighSurrogateRange)
                 return 0;
             // Convert to code point.

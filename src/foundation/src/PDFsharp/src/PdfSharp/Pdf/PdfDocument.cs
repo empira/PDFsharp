@@ -23,7 +23,7 @@ namespace PdfSharp.Pdf
     /// <summary>
     /// Represents a PDF document.
     /// </summary>
-    [DebuggerDisplay("(Name={" + nameof(Name) + "})")] // A name makes debugging easier
+    [DebuggerDisplay("(Name={" + nameof(Name) + "})")]  // A name makes debugging easier
     public sealed class PdfDocument : PdfObject, IDisposable
     {
 #if DEBUG_
@@ -41,7 +41,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfDocument()
         {
-            LogHost.Logger.PdfDocumentCreated(Name);
+            PdfSharpLogHost.Logger.PdfDocumentCreated(Name);
             //PdfDocument.Gob.AttachDocument(Handle);
 
             _creation = DateTime.Now;
@@ -54,32 +54,22 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Creates a new PDF document with the specified file name. The file is immediately created and kept
         /// locked until the document is closed. At that time the document is saved automatically.
-        /// Do not call Save() for documents created with this constructor, just call Close().
+        /// Do not call Save for documents created with this constructor, just call Close.
         /// To open an existing PDF file and import it, use the PdfReader class.
         /// </summary>
-        public PdfDocument(string filename) : this()
+        public PdfDocument(string outputFilename) : this()
         {
-            //PdfDocument.Gob.AttachDocument(Handle);
-
-            //_creation = DateTime.Now;
-            //_state = DocumentState.Created;
-            //_version = 14;
-            //Initialize();
-            //Info.CreationDate = _creation;
-
-            OutStream = new FileStream(filename, FileMode.Create);
+            OutStream = new FileStream(outputFilename, FileMode.Create);
         }
 
         /// <summary>
         /// Creates a new PDF document using the specified stream.
         /// The stream won't be used until the document is closed. At that time the document is saved automatically.
-        /// Do not call Save() for documents created with this constructor, just call Close().
+        /// Do not call Save for documents created with this constructor, just call Close.
         /// To open an existing PDF file, use the PdfReader class.
         /// </summary>
         public PdfDocument(Stream outputStream)
         {
-            //PdfDocument.Gob.AttachDocument(Handle);
-
             _creation = DateTime.Now;
             _state = DocumentState.Created;
             _version = 14;
@@ -117,10 +107,13 @@ namespace PdfSharp.Pdf
             Trailer.CreateNewDocumentIDs();
         }
 
-        //~PdfDocument()
-        //{
-        //  Dispose(false);
-        //}
+        /// <summary>
+        /// Why we need XML documentation here?
+        /// </summary>
+        ~PdfDocument()
+        {
+            Dispose(false);
+        }
 
         /// <summary>
         /// Disposes all references to this document stored in other documents. This function should be called
@@ -130,7 +123,7 @@ namespace PdfSharp.Pdf
         public void Dispose()
         {
             Dispose(true);
-            //GC.SuppressFinalize(this);
+            GC.SuppressFinalize(this);
         }
 
         void Dispose(bool disposing)
@@ -147,7 +140,7 @@ namespace PdfSharp.Pdf
                 }
                 //PdfDocument.Gob.DetachDocument(Handle);
             }
-            _state = DocumentState.Disposed;
+            _state = DocumentState.Disposed | DocumentState.Saved;
         }
 
         /// <summary>
@@ -201,6 +194,8 @@ namespace PdfSharp.Pdf
 
             if (OutStream != null)
             {
+                EnsureNotYetSaved();
+
                 // Get security handler if document gets encrypted.
                 var effectiveSecurityHandler = SecuritySettings.EffectiveSecurityHandler;
 
@@ -221,6 +216,8 @@ namespace PdfSharp.Pdf
         /// </summary>
         public void Save(string path)
         {
+            EnsureNotYetSaved();
+
             if (!CanModify)
                 throw new InvalidOperationException(PSSR.CannotModify);
 
@@ -234,6 +231,8 @@ namespace PdfSharp.Pdf
         /// </summary>
         public async Task SaveAsync(string path, bool closeStream)
         {
+            EnsureNotYetSaved();
+
             if (!CanModify)
                 throw new InvalidOperationException(PSSR.CannotModify);
 
@@ -260,6 +259,8 @@ namespace PdfSharp.Pdf
         /// </summary>
         public void Save(Stream stream, bool closeStream)
         {
+            EnsureNotYetSaved();
+
             if (!CanModify)
                 throw new InvalidOperationException(PSSR.CannotModify);
 
@@ -310,7 +311,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         void DoSave(PdfWriter writer)
         {
-            LogHost.Logger.PdfDocumentSaved(Name);
+            PdfSharpLogHost.Logger.PdfDocumentSaved(Name);
 
             if (_pages == null || _pages.Count == 0)
             {
@@ -379,6 +380,7 @@ namespace PdfSharp.Pdf
                     writer.Stream.Flush();
                     // DO NOT CLOSE WRITER HERE
                 }
+                _state |= DocumentState.Saved;
             }
         }
 
@@ -389,12 +391,6 @@ namespace PdfSharp.Pdf
         {
             PdfDocumentInformation info = Info;
 
-            // DELETE
-            //// Add patch level to producer if it is not '0'.
-            //string pdfSharpProducer = VersionInfo.Producer;
-            //if (!PdfSharpProductVersionInformation.VersionPatch.Equals("0"))
-            //    pdfSharpProducer = ProductVersionInfo.Producer;
-
             // The Creator is called 'Application' in Acrobat.
             // The Producer is call "Created by" in Acrobat.
 
@@ -403,9 +399,11 @@ namespace PdfSharp.Pdf
                 info.Creator = PdfSharpProductVersionInformation.Producer;
 
             // We set Producer if it is not yet set.
-
+#if DEBUG
             var pdfProducer = $"{PdfSharpProductVersionInformation.Creator} under {RuntimeInformation.OSDescription}";
-
+#else
+            var pdfProducer = PdfSharpProductVersionInformation.Creator;
+#endif
             //pdfProducer = $"{GitVersionInformation.SemVer} under {RuntimeInformation.OSDescription}";
 
             // Keep original producer if file was imported. This is 'PDF created by' in Adobe Reader.
@@ -429,9 +427,9 @@ namespace PdfSharp.Pdf
 #if true
             // Remove all unreachable objects (e.g. from deleted pages).
             int removed = IrefTable.Compact();
-            if (removed != 0 && LogHost.Logger.IsEnabled(LogLevel.Information))
+            if (removed != 0 && PdfSharpLogHost.Logger.IsEnabled(LogLevel.Information))
             {
-                LogHost.Logger.LogInformation($"\"PrepareForSave: Number of deleted unreachable objects: {removed}");
+                PdfSharpLogHost.Logger.LogInformation($"\"PrepareForSave: Number of deleted unreachable objects: {removed}");
             }
             IrefTable.Renumber();
 #endif
@@ -449,13 +447,14 @@ namespace PdfSharp.Pdf
             if (!SecuritySettings.CanSave(ref message))
                 return false;
 
+            if ((_state & DocumentState.Saved) != 0)
+                return false;
+
             return true;
         }
 
         internal bool HasVersion(string version)
-        {
-            return String.CompareOrdinal(Catalog.Version, version) >= 0;
-        }
+            => String.CompareOrdinal(Catalog.Version, version) >= 0;
 
         /// <summary>
         /// Gets the document options used for saving the document.
@@ -473,11 +472,11 @@ namespace PdfSharp.Pdf
 
         PdfDocumentSettings? _settings;
 
-        /// <summary>
-        /// NYI Indicates whether large objects are written immediately to the output stream to reduce
-        /// memory consumption.
-        /// </summary>
-        internal bool EarlyWrite => false;
+        ///// <summary>
+        ///// NYI Indicates whether large objects are written immediately to the output stream to reduce
+        ///// memory consumption.
+        ///// </summary>
+        //internal bool EarlyWrite => false;
 
         /// <summary>
         /// Gets or sets the PDF version number. Return value 14 e.g. means PDF 1.4 / Acrobat 5 etc.
@@ -487,6 +486,8 @@ namespace PdfSharp.Pdf
             get => _version;
             set
             {
+                EnsureNotYetSaved();
+
                 if (!CanModify)
                     throw new InvalidOperationException(PSSR.CannotModify);
                 if (value is < 12 or > 20) // TODO not really implemented
@@ -504,6 +505,8 @@ namespace PdfSharp.Pdf
         /// <returns>True, if Version was modified.</returns>
         public bool SetRequiredVersion(int requiredVersion)
         {
+            EnsureNotYetSaved();
+
             if (requiredVersion > Version && CanModify)
             {
                 Version = requiredVersion;
@@ -520,6 +523,8 @@ namespace PdfSharp.Pdf
         {
             get
             {
+                EnsureNotYetSaved();
+
                 if (CanModify)
                     return Pages.Count;
                 // PdfOpenMode is InformationOnly.
@@ -584,6 +589,7 @@ namespace PdfSharp.Pdf
             get => _customValues ??= PdfCustomValues.Get(Catalog.Elements);
             set
             {
+                EnsureNotYetSaved();
                 if (value != null)
                     throw new ArgumentException("Only null is allowed to clear all custom values.");
                 PdfCustomValues.Remove(Catalog.Elements);
@@ -672,10 +678,10 @@ namespace PdfSharp.Pdf
         {
             // Get or create PDF font with glyph encoding.
             var pdfFont = FontTable.GetOrCreateFont(font.GlyphTypeface, FontType.Type0Unicode);
-            var sssss = UnicodeHelper.Utf32FromString(chars);
+            var codePoints = UnicodeHelper.Utf32FromString(chars);
             var otDescriptor = font.OpenTypeDescriptor;
-            var codePoints = otDescriptor.GlyphIndicesFromCodePoints(sssss);
-            pdfFont.AddChars(codePoints);
+            var codePointsWithGlyphIndices = otDescriptor.GlyphIndicesFromCodePoints(codePoints);
+            pdfFont.AddChars(codePointsWithGlyphIndices);
         }
 
         /// <summary>
@@ -738,6 +744,8 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfPage AddPage()
         {
+            EnsureNotYetSaved();
+
             if (!CanModify)
                 throw new InvalidOperationException(PSSR.CannotModify);
             return Catalog.Pages.Add();
@@ -750,6 +758,8 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfPage AddPage(PdfPage page)
         {
+            EnsureNotYetSaved();
+
             if (!CanModify)
                 throw new InvalidOperationException(PSSR.CannotModify);
             return Catalog.Pages.Add(page);
@@ -760,6 +770,8 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfPage InsertPage(int index)
         {
+            EnsureNotYetSaved();
+
             if (!CanModify)
                 throw new InvalidOperationException(PSSR.CannotModify);
             return Catalog.Pages.Insert(index);
@@ -772,6 +784,8 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfPage InsertPage(int index, PdfPage page)
         {
+            EnsureNotYetSaved();
+
             if (!CanModify)
                 throw new InvalidOperationException(PSSR.CannotModify);
             return Catalog.Pages.Insert(index, page);
@@ -887,6 +901,18 @@ namespace PdfSharp.Pdf
 
             public static bool operator !=(DocumentHandle? left, DocumentHandle? right)
                 => !(left == right);
+        }
+
+        internal void EnsureNotYetSaved()
+        {
+            if ((_state & DocumentState.Saved) == 0)
+                return;
+
+            var message = "The document was already saved and cannot be modified anymore. " +
+                          "Saving a document converts its in memory representation into a PDF file or stream. " +
+                          "This can only be done once. " +
+                          "After that process the in memory representation is outdated and protected against further modification.";
+            throw new InvalidOperationException(message);
         }
 
         internal DocumentState _state;

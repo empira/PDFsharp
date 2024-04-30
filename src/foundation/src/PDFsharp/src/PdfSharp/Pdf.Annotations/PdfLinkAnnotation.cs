@@ -1,6 +1,7 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Drawing;
 using PdfSharp.Pdf.Actions;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Internal;
@@ -42,7 +43,8 @@ namespace PdfSharp.Pdf.Annotations
         /// </summary>
         /// <param name="rect">The link area in default page coordinates.</param>
         /// <param name="destinationPage">The one-based destination page number.</param>
-        public static PdfLinkAnnotation CreateDocumentLink(PdfRectangle rect, int destinationPage)
+        /// <param name="point">The position in the destination page.</param>
+        public static PdfLinkAnnotation CreateDocumentLink(PdfRectangle rect, int destinationPage, XPoint? point = null)
         {
             if (destinationPage < 1)
                 throw new ArgumentException("Invalid destination page in call to CreateDocumentLink: page number is one-based and must be 1 or higher.", nameof(destinationPage));
@@ -51,12 +53,14 @@ namespace PdfSharp.Pdf.Annotations
             link._linkType = LinkType.Document;
             link.Rectangle = rect;
             link._destPage = destinationPage;
+            link._point = point;
             return link;
         }
 
         int _destPage;
         LinkType _linkType;
         string _url = "";
+        private XPoint? _point = null;
 
         /// <summary>
         /// Creates a link within the current document using a named destination.
@@ -195,8 +199,16 @@ namespace PdfSharp.Pdf.Annotations
                         destIndex = Owner.PageCount;
                     destIndex--;
                     dest = Owner.Pages[destIndex];
-                    //pdf.AppendFormat("/Dest[{0} 0 R/XYZ null null 0]\n", dest.ObjectID);
-                    Elements[Keys.Dest] = new PdfLiteral("[{0} 0 R/XYZ null null 0]", dest.ObjectNumber);
+                    ////pdf.AppendFormat("/Dest[{0} 0 R/XYZ null null 0]\n", dest.ObjectID);
+                    //Elements[Keys.Dest] = new PdfLiteral("[{0} 0 R/XYZ null null 0]", dest.ObjectNumber);
+                    if (_point.HasValue)
+                    {
+                        Elements[Keys.Dest] = new PdfLiteral(Invariant($"[{dest.ObjectNumber} 0 R /XYZ {_point.Value.X} {_point.Value.Y} 0]") /*, dest.ObjectNumber, _point.Value.X, _point.Value.Y*/);
+                    }
+                    else
+                    {
+                        Elements[Keys.Dest] = new PdfLiteral(Invariant($"[{dest.ObjectNumber} 0 R /XYZ null null 0]") /*, dest.ObjectNumber*/);
+                    }
                     break;
 
                 case LinkType.NamedDestination:

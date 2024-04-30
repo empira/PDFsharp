@@ -6,6 +6,8 @@
     <RootNamespace>PdfSharp.Quality</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
     <DefineConstants>GDI</DefineConstants>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

@@ -27,7 +27,7 @@ namespace MigraDoc.Rendering
             _formatter.FormatOnAreas(gfx, false);
         }
 
-        internal XUnit InnerWidth
+        internal XUnitPt InnerWidth
         {
             set => _innerWidth = value;
             get
@@ -42,23 +42,22 @@ namespace MigraDoc.Rendering
                 return _innerWidth;
             }
         }
+        XUnitPt _innerWidth = double.NaN;
 
-        XUnit _innerWidth = double.NaN;
-
-        internal XUnit InnerHeight
+        internal XUnitPt InnerHeight
         {
             get
             {
                 //if (TextArea.Values.Height is null)
                 if (TextArea.Values.Height.IsValueNullOrEmpty())
-                    return ContentHeight + TextArea.TopPadding + TextArea.BottomPadding;
+                    return new XUnitPt(ContentHeight + TextArea.TopPadding.Point + TextArea.BottomPadding.Point);
                 return TextArea.Height.Point;
             }
         }
 
-        XUnit CalcInherentWidth()
+        XUnitPt CalcInherentWidth()
         {
-            XUnit inherentWidth = 0;
+            XUnitPt inherentWidth = 0;
             foreach (var doc in TextArea.Elements)
             {
                 if (doc == null)
@@ -71,8 +70,8 @@ namespace MigraDoc.Rendering
                     inherentWidth = Math.Max(renderer.RenderInfo.LayoutInfo.MinWidth, inherentWidth);
                 }
             }
-            inherentWidth += TextArea.LeftPadding;
-            inherentWidth += TextArea.RightPadding;
+            inherentWidth.Point += TextArea.LeftPadding.Point;
+            inherentWidth.Point += TextArea.RightPadding.Point;
             return inherentWidth;
         }
 
@@ -102,12 +101,12 @@ namespace MigraDoc.Rendering
             return Array.Empty<RenderInfo>();
         }
 
-        internal XUnit ContentHeight => RenderInfo.GetTotalHeight(GetRenderInfos());
+        internal XUnitPt ContentHeight => RenderInfo.GetTotalHeight(GetRenderInfos());
 
         Rectangle CalcContentRect()
         {
-            XUnit width = InnerWidth - TextArea.LeftPadding - TextArea.RightPadding;
-            XUnit height = double.MaxValue;
+            XUnitPt width = InnerWidth - TextArea.LeftPadding.Point - TextArea.RightPadding.Point;
+            XUnitPt height = double.MaxValue;
             return new Rectangle(0, 0, width, height);
         }
 

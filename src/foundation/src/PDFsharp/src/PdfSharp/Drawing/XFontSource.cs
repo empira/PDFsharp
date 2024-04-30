@@ -83,7 +83,7 @@ namespace PdfSharp.Drawing
 #endif
 
 #if GDI
-        internal static XFontSource GetOrCreateFromGdi(string typefaceKey, GdiFont gdiFont)
+        internal static XFontSource? GetOrCreateFromGdi(string typefaceKey, GdiFont gdiFont)
         {
             byte[] bytes = ReadFontBytesFromGdi(gdiFont);
             XFontSource fontSource = GetOrCreateFrom(typefaceKey, bytes);
@@ -133,10 +133,13 @@ namespace PdfSharp.Drawing
 #else
             // We ignore error 127 here.
             // We ignore error 2 here if font data was found.
-            Debug.Assert(error == 0 || error == 127 || error == 2 && size > 10000 && isTtcf == false,
-                "ReadFontBytesFromGdi failed: " + gdiFont.Name + ": " + error + ", size: " + size + ", isTtcf: " + isTtcf);
+            //Debug.Assert(error == 0 || error == 127 || error == 2 && size > 10000 && isTtcf == false,
+            //    "ReadFontBytesFromGdi failed: " + gdiFont.Name + ": " + error + ", size: " + size + ", isTtcf: " + isTtcf);
+            if (!(error == 0 || error == 127 || error == 2 && size > 10_000 && isTtcf == false))
+            {
+                var message = Invariant($"Error while reading GDI FontData: error: {error}, bytes read: {size}");
+            }
 #endif
-
             if (size == 0)
                 throw new InvalidOperationException("Cannot retrieve font data.");
 

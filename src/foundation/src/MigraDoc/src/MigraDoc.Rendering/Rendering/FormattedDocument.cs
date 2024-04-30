@@ -186,17 +186,17 @@ namespace MigraDoc.Rendering
         Rectangle CalcContentRect(int page)
         {
             var pageSetup = _currentSection.PageSetup;
-            XUnit width = pageSetup.EffectivePageWidth.Point;
+            XUnitPt width = pageSetup.EffectivePageWidth.Point;
 
             width -= pageSetup.RightMargin.Point;
             width -= pageSetup.LeftMargin.Point;
-
-            XUnit height = pageSetup.EffectivePageHeight.Point;
+            
+            XUnitPt height = pageSetup.EffectivePageHeight.Point;
 
             height -= pageSetup.TopMargin.Point;
             height -= pageSetup.BottomMargin.Point;
-            XUnit x;
-            XUnit y = pageSetup.TopMargin.Point;
+            XUnitPt x;
+            XUnitPt y = pageSetup.TopMargin.Point;
             if (pageSetup.MirrorMargins)
                 x = page % 2 == 0 ? pageSetup.RightMargin.Point : pageSetup.LeftMargin.Point;
             else
@@ -284,17 +284,17 @@ namespace MigraDoc.Rendering
         Rectangle GetHeaderArea(Section section, int page)
         {
             var pageSetup = section.PageSetup;
-            XUnit xPos;
+            XUnitPt xPos;
             if (pageSetup.MirrorMargins && page % 2 == 0)
                 xPos = pageSetup.RightMargin.Point;
             else
                 xPos = pageSetup.LeftMargin.Point;
 
-            XUnit width = pageSetup.EffectivePageWidth.Point;
-            width -= pageSetup.LeftMargin + pageSetup.RightMargin;
+            XUnitPt width = pageSetup.EffectivePageWidth.Point;
+            width -= (pageSetup.LeftMargin + pageSetup.RightMargin).Point;
 
-            XUnit yPos = pageSetup.HeaderDistance.Point;
-            XUnit height = pageSetup.TopMargin - pageSetup.HeaderDistance;
+            XUnitPt yPos = pageSetup.HeaderDistance.Point;
+            XUnitPt height = (pageSetup.TopMargin - pageSetup.HeaderDistance).Point;
             return new Rectangle(xPos, yPos, width, height);
         }
 
@@ -315,18 +315,18 @@ namespace MigraDoc.Rendering
         Rectangle GetFooterArea(Section section, int page)
         {
             var pageSetup = section.PageSetup;
-            XUnit xPos;
+            XUnitPt xPos;
             if (pageSetup.MirrorMargins && page % 2 == 0)
                 xPos = pageSetup.RightMargin.Point;
             else
                 xPos = pageSetup.LeftMargin.Point;
 
-            XUnit width = pageSetup.EffectivePageWidth.Point;
-            width -= pageSetup.LeftMargin + pageSetup.RightMargin;
-            XUnit yPos = pageSetup.EffectivePageHeight.Point;
+            XUnitPt width = pageSetup.EffectivePageWidth.Point;
+            width -= (pageSetup.LeftMargin + pageSetup.RightMargin).Point;
+            XUnitPt yPos = pageSetup.EffectivePageHeight.Point;
 
             yPos -= pageSetup.BottomMargin.Point;
-            XUnit height = pageSetup.BottomMargin - pageSetup.FooterDistance;
+            XUnitPt height = (pageSetup.BottomMargin - pageSetup.FooterDistance).Point;
             return new Rectangle(xPos, yPos, width, height);
         }
 
@@ -386,7 +386,7 @@ namespace MigraDoc.Rendering
 
         int _currentPage;
 
-        Area IAreaProvider.ProbeNextArea() 
+        Area IAreaProvider.ProbeNextArea()
             => CalcContentRect(_currentPage + 1);
 
         void InitFieldInfos()
@@ -422,7 +422,7 @@ namespace MigraDoc.Rendering
             return pageOrientation;
         }
 
-        XSize CalcPageSize(PageSetup pageSetup) 
+        XSize CalcPageSize(PageSetup pageSetup)
             => new(pageSetup.PageWidth.Point, pageSetup.PageHeight.Point);
 
         bool IAreaProvider.PositionHorizontally(LayoutInfo layoutInfo)
@@ -475,7 +475,7 @@ namespace MigraDoc.Rendering
                     return false;
 
                 case ElementAlignment.Far:
-                    XUnit xPos = rect.X + rect.Width;
+                    XUnitPt xPos = rect.X + rect.Width;
                     xPos -= layoutInfo.ContentArea.Width;
                     xPos -= layoutInfo.MarginRight;
                     layoutInfo.ContentArea.X = xPos;
@@ -493,7 +493,7 @@ namespace MigraDoc.Rendering
 
         bool PositionHorizontallyToPage(LayoutInfo layoutInfo)
         {
-            XUnit xPos;
+            XUnitPt xPos;
             var align = GetCurrentAlignment(layoutInfo.HorizontalAlignment);
             switch (align)
             {
@@ -502,7 +502,7 @@ namespace MigraDoc.Rendering
                     // Attempt to make it compatible with MigraDoc CPP.
                     // Ignore layoutInfo.Left if absolute position is specified in layoutInfo.MarginLeft.
                     // Use layoutInfo.Left if layoutInfo.MarginLeft is 0.
-                    // TODO We would need HasValue for XUnit to determine whether a value was assigned.
+                    // TODO We would need HasValue for XUnitPt to determine whether a value was assigned.
                     if (layoutInfo.HorizontalReference == HorizontalReference.Page ||
                       layoutInfo.HorizontalReference == HorizontalReference.PageMargin)
                         xPos = layoutInfo.MarginLeft != 0 ? layoutInfo.MarginLeft : layoutInfo.Left;
@@ -538,7 +538,7 @@ namespace MigraDoc.Rendering
         bool PositionVerticallyToMargin(LayoutInfo layoutInfo)
         {
             Rectangle rect = CalcContentRect(_currentPage);
-            XUnit yPos;
+            XUnitPt yPos;
             switch (layoutInfo.VerticalAlignment)
             {
                 case ElementAlignment.Near:
@@ -596,7 +596,7 @@ namespace MigraDoc.Rendering
 
         bool PositionVerticallyToPage(LayoutInfo layoutInfo)
         {
-            XUnit yPos;
+            XUnitPt yPos;
             switch (layoutInfo.VerticalAlignment)
             {
                 case ElementAlignment.Near:
@@ -651,7 +651,7 @@ namespace MigraDoc.Rendering
         int _sectionNumber;
         Section _currentSection = null!;  // Set in foreach loop.
         bool _isNewSection;
-        FieldInfos _currentFieldInfos=null!;  // Set in InitFieldInfos.
+        FieldInfos _currentFieldInfos = null!;  // Set in InitFieldInfos.
         readonly Dictionary<string, FieldInfos.BookmarkInfo> _bookmarks = new();
         readonly Dictionary<int, FieldInfos> _pageFieldInfos = new();
         readonly Dictionary<HeaderFooterPosition, FormattedHeaderFooter> _formattedHeaders = new();

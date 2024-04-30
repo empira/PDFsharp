@@ -184,9 +184,7 @@ namespace MigraDoc.RtfRendering
         void Prepare()
         {
             _fontList.Clear();
-            //Fonts 
-            _fontList.Add("Symbol");
-            _fontList.Add("Wingdings");
+            //Fonts
             _fontList.Add("Courier New");
 
             _colorList.Clear();
@@ -481,7 +479,7 @@ namespace MigraDoc.RtfRendering
                 return;
 
             _rtfWriter.StartContent();
-            _rtfWriter.WriteControl("f", 2); // Second font is Courier New. See Prepare().
+            _rtfWriter.WriteControl("f", 0); // Font with ID 0 is Courier New. See Prepare().
             _rtfWriter.WriteControl("info");
             DocumentInfo info = _document.Info;
             if (!info.Values.Title.IsValueNullOrEmpty())

@@ -11,7 +11,6 @@ using System.Drawing.Drawing2D;
 #endif
 #if WPF
 #endif
-using PdfSharp.Internal;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Internal;
@@ -302,7 +301,7 @@ namespace PdfSharp.Drawing.Pdf
         PdfFont? _realizedFont;
         string _realizedFontName = "";
         double _realizedFontSize;
-        int _realizedRenderingMode;  // Reference: TABLE 5.2  Text state operators / Page 398
+        int _realizedRenderingMode; // Reference: TABLE 5.2  Text state operators / Page 398
         double _realizedCharSpace;  // Reference: TABLE 5.2  Text state operators / Page 398
 
         public void RealizeFont(XGlyphTypeface glyphTypeface, double emSize, XBrush brush, int renderingMode, FontType fontType)
@@ -339,8 +338,6 @@ namespace PdfSharp.Drawing.Pdf
             }
 
             _realizedFont = null;
-            //string fontName = _renderer.GetFontName(font, out _realizedFont); // #NFM
-            //string fontName = renderer.GetFontName(glyphTypeface, font.Font.FontTypeFromUnicodeFlag, out _realizedFont);
             string fontName = renderer.GetFontName(glyphTypeface, fontType, out _realizedFont);
             if (fontName != _realizedFontName || _realizedFontSize != emSize)
             {

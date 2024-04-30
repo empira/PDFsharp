@@ -24,7 +24,7 @@ namespace PdfSharp.Fonts.OpenType
             try
             {
                 Lock.EnterFontFactory();
-                var result = Globals.Global.FontFaceCache.TryGetValue(key, out fontFace);
+                var result = Globals.Global.Fonts.FontFaceCache.TryGetValue(key, out fontFace);
                 return result;
             }
             finally { Lock.ExitFontFactory(); }
@@ -40,7 +40,7 @@ namespace PdfSharp.Fonts.OpenType
             try
             {
                 Lock.EnterFontFactory();
-                var result = Globals.Global.FontFacesByCheckSum.TryGetValue(checkSum, out fontFace);
+                var result = Globals.Global.Fonts.FontFacesByCheckSum.TryGetValue(checkSum, out fontFace);
                 return result;
             }
             finally { Lock.ExitFontFactory(); }
@@ -57,11 +57,17 @@ namespace PdfSharp.Fonts.OpenType
                         throw new InvalidOperationException("OpenTypeFontFace with same signature but different bytes.");
                     return fontFaceCheck;
                 }
-                Globals.Global.FontFaceCache.Add(fontFace.FullFaceName, fontFace);
-                Globals.Global.FontFacesByCheckSum.Add(fontFace.CheckSum, fontFace);
+                Globals.Global.Fonts.FontFaceCache.Add(fontFace.FullFaceName, fontFace);
+                Globals.Global.Fonts.FontFacesByCheckSum.Add(fontFace.CheckSum, fontFace);
                 return fontFace;
             }
             finally { Lock.ExitFontFactory(); }
+        }
+
+        internal static void Reset()
+        {
+            Globals.Global.Fonts.FontFaceCache.Clear();
+            Globals.Global.Fonts.FontFacesByCheckSum.Clear();
         }
 
         internal static string GetCacheState()
@@ -69,13 +75,13 @@ namespace PdfSharp.Fonts.OpenType
             StringBuilder state = new StringBuilder();
             state.Append("====================\n");
             state.Append("OpenType font faces by name\n");
-            Dictionary<string, OpenTypeFontFace>.KeyCollection familyKeys = Globals.Global.FontFaceCache.Keys;
+            Dictionary<string, OpenTypeFontFace>.KeyCollection familyKeys = Globals.Global.Fonts.FontFaceCache.Keys;
             int count = familyKeys.Count;
             string[] keys = new string[count];
             familyKeys.CopyTo(keys, 0);
             Array.Sort(keys, StringComparer.OrdinalIgnoreCase);
             foreach (string key in keys)
-                state.AppendFormat("  {0}: {1}\n", key, Globals.Global.FontFaceCache[key].DebuggerDisplay);
+                state.AppendFormat("  {0}: {1}\n", key, Globals.Global.Fonts.FontFaceCache[key].DebuggerDisplay);
             state.Append("\n");
             return state.ToString();
         }
@@ -86,7 +92,7 @@ namespace PdfSharp.Fonts.OpenType
         // ReSharper disable UnusedMember.Local
         static string DebuggerDisplay
         // ReSharper restore UnusedMember.Local
-            => String.Format(CultureInfo.InvariantCulture, "Font faces: {0}", Globals.Global.FontFaceCache.Count);
+            => String.Format(CultureInfo.InvariantCulture, "Font faces: {0}", Globals.Global.Fonts.FontFaceCache.Count);
     }
 }
 
@@ -94,14 +100,17 @@ namespace PdfSharp.Internal
 {
     partial class Globals
     {
-        /// <summary>
-        /// Maps face name to OpenType font face.
-        /// </summary>
-        public readonly Dictionary<string, OpenTypeFontFace> FontFaceCache = [];
+        partial class FontStorage
+        {
+            /// <summary>
+            /// Maps face name to OpenType font face.
+            /// </summary>
+            public readonly Dictionary<string, OpenTypeFontFace> FontFaceCache = [];
 
-        /// <summary>
-        /// Maps font source key to OpenType font face.
-        /// </summary>
-        public readonly Dictionary<ulong, OpenTypeFontFace> FontFacesByCheckSum = [];
+            /// <summary>
+            /// Maps font source key to OpenType font face.
+            /// </summary>
+            public readonly Dictionary<ulong, OpenTypeFontFace> FontFacesByCheckSum = [];
+        }
     }
 }

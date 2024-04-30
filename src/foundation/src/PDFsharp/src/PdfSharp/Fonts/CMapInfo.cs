@@ -55,9 +55,9 @@ namespace PdfSharp.Fonts
             }
         }
 
-        public int[] GetGlyphIndices()
+        public ushort[] GetGlyphIndices()
         {
-            var indices = new int[GlyphIndices.Count];
+            var indices = new ushort[GlyphIndices.Count];
             GlyphIndices.Keys.CopyTo(indices, 0);
             Array.Sort(indices);
             return indices;
@@ -69,11 +69,11 @@ namespace PdfSharp.Fonts
         /// <summary>
         /// Maps a Unicode code point to a glyph id.
         /// </summary>
-        public Dictionary<int, int> CodePointsToGlyphIndices = [];
+        public Dictionary<int, ushort> CodePointsToGlyphIndices = [];
 
         /// <summary>
         /// Collects all use glyph ids. Value is not used.
         /// </summary>
-        public Dictionary<int, object?> GlyphIndices = [];
+        public Dictionary<ushort, object?> GlyphIndices = [];
     }
 }

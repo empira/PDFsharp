@@ -134,7 +134,7 @@ namespace PdfSharp.Pdf
 
         internal override void WriteObject(PdfWriter writer)
         {
-            ((Action)(() => { }))();
+            _ = typeof(int);  // Suppress warning for next line.
             base.WriteObject(writer);
         }
 

@@ -4,10 +4,13 @@
     <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <UseWindowsForms>true</UseWindowsForms>
+    <DefineConstants>GDI</DefineConstants>
     <!--
     PDFsharp internal class RuntimeHelpers is visible in this assembly because of InternalsVisibleTo.
     This conflics with mscorlib. -->
-   <NoWarn>CS1685,CS0436</NoWarn>
+    <NoWarn>CS1685,CS0436</NoWarn>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -26,10 +29,26 @@
 
   <ItemGroup>
     <Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
+    <Compile Include="..\PdfSharp.Tests\BasicTests.cs" Link="BasicTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Build\CSharpFeaturesTests.cs" Link="Build\CSharpFeaturesTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Build\ReleaseBuildTests.cs" Link="Build\ReleaseBuildTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\CLexerTests.cs" Link="CLexerTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Core\GlobalsTests.cs" Link="Core\GlobalsTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\CreationTests.cs" Link="CreationTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Encodings\EncodingTests.cs" Link="Encodings\EncodingTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Fonts\FontEmbeddingTests.cs" Link="Fonts\FontEmbeddingTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Fonts\FontHelperTests.cs" Link="Fonts\FontHelperTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Fonts\FontResolverTests.cs" Link="Fonts\FontResolverTests.cs" />
     <Compile Include="..\PdfSharp.Tests\ImageTests.cs" Link="ImageTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Drawing\text\GlyphHelperTests.cs" Link="Drawing\text\GlyphHelperTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Drawing\text\MeasurementTests.cs" Link="Drawing\text\MeasurementTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Drawing\text\UnicodeHelperTests.cs" Link="Drawing\text\UnicodeHelperTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\MergeTests.cs" Link="MergeTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\ReaderTests.cs" Link="ReaderTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Structs\XUnitTests.cs" Link="Structs\XUnitTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\TextTests.cs" Link="TextTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\WriterTests.cs" Link="WriterTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\XFormTests.cs" Link="XFormTests.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,5 +57,17 @@
     <ProjectReference Include="..\..\src\PdfSharp.Charting-gdi\PdfSharp.Charting-gdi.csproj" />
     <ProjectReference Include="..\..\src\PdfSharp-gdi\PdfSharp-gdi.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Core\" />
+    <Folder Include="Encodings\" />
+    <Folder Include="IO\" />
+    <Folder Include="Structs\" />
+    <Folder Include="Pdf\" />
+  </ItemGroup>
+
+  <!--<ItemGroup>
+    <Folder Include="Fonts\" />
+  </ItemGroup>-->
 
 </Project>

@@ -4,24 +4,17 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 namespace PdfSharp.Logging
 {
     /// <summary>
     /// Defines the logging categories of PDFsharp.
-    /// UNDER CONSTRUCTION.
     /// </summary>
     public static class LogCategory
     {
+        /// <summary>
+        /// Default category for standard logger.
+        /// </summary>
         public const string PdfSharp = "PDFsharp";
-        public const string DocumentCreation = "DocumentCreation";
-        public const string FontManagement = "FontResolving";
-        public const string FontResolving = "FontResolving";
-        public const string ImageCreation = "ImageCreation";
-        public const string PdfReading = "PdfReading";
-
-        public const string MigraDoc = "MigraDoc";
     }
 
     /// <summary>
@@ -30,9 +23,9 @@ namespace PdfSharp.Logging
     public static class LogHost
     {
         /// <summary>
-        /// Gets or sets the current global logger factory for PDFsharp.
+        /// Gets or sets the current global logger factory singleton for PDFsharp.
         /// Every logger used in PDFsharp code is created by this factory.
-        /// You can change the logger factory at any one time.
+        /// You can change the logger factory at any one time you want.
         /// If no factory is provided the NullLoggerFactory is used as the default.
         /// </summary>
         public static ILoggerFactory Factory
@@ -42,26 +35,15 @@ namespace PdfSharp.Logging
             {
                 _loggerFactory = value;
                 _logger = default;
-                _fontManagementLogger = default;
             }
         }
-        static ILoggerFactory _loggerFactory = default!;
+        static ILoggerFactory? _loggerFactory;
 
         /// <summary>
-        /// Gets the global PDFsharp logger.
+        /// Gets the global PDFsharp default logger.
         /// </summary>
         public static ILogger Logger => _logger ??= CreateLogger(LogCategory.PdfSharp);
         static ILogger? _logger;
-
-        #region Specific logger
-
-        /// <summary>
-        /// Gets the global PDFsharp font management logger.
-        /// </summary>
-        public static ILogger FontManagementLogger => _fontManagementLogger ??= CreateLogger(LogCategory.FontManagement);
-        static ILogger? _fontManagementLogger;
-
-        #endregion
 
         /// <summary>
         /// Creates a logger with a given category name.
@@ -77,12 +59,12 @@ namespace PdfSharp.Logging
         /// Resets the logging host to the state it has immediately after loading the PDFsharp library.
         /// </summary>
         /// <remarks>
-        /// This function is only useful in unit test scenarios and not intended to be called in application code.
+        /// This function is only useful in unit test scenarios and not intended to be called from application code.
         /// </remarks>
         public static void ResetLogging()
         {
-            _loggerFactory = default!;
-            _logger = default!;
+            _loggerFactory = default;
+            _logger = default;
         }
     }
 }

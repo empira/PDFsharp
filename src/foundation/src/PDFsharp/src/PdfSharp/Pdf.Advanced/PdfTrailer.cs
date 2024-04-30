@@ -11,7 +11,8 @@ namespace PdfSharp.Pdf.Advanced
     /// Represents a PDF trailer dictionary. Even though trailers are dictionaries they never have a cross
     /// reference entry in PdfReferenceTable.
     /// </summary>
-    class PdfTrailer : PdfDictionary  // Reference: 3.4.4  File Trailer / Page 96
+    // Reference: 3.4.4  File Trailer / Page 96
+    class PdfTrailer : PdfDictionary
     {
         /// <summary>
         /// Initializes a new instance of PdfTrailer.

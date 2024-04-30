@@ -11,13 +11,9 @@ using Xunit;
 
 namespace PdfSharp.Tests.Drawing
 {
+    [Collection("PDFsharp")]
     public class MeasurementTests
     {
-        static MeasurementTests()
-        {
-            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
-        }
-
         [Fact]
         public static void MeasureContextTest()
         {
@@ -52,7 +48,7 @@ namespace PdfSharp.Tests.Drawing
             };
 
             var options = new XPdfFontOptions(PdfFontEncoding.Unicode);
-            var font = new XFont("Segoe UI", 12, XFontStyleEx.Bold, options);
+            var font = new XFont("Arial", 12, XFontStyleEx.Bold, options);
 
             renderTextEventCallCount.Should().Be(0, "no text has been measured.");
             renderTextEventReplacementsCount.Should().Be(0, "no text has been measured.");

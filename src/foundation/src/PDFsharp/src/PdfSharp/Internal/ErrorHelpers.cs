@@ -12,24 +12,29 @@ namespace PdfSharp.Internal
     // ReSharper disable once InconsistentNaming
     static class TH
     {
+        private const string SendUsTheFile = "\nPDFsharp cannot read this PDF file. " +
+            "If you think your file is a valid PDF file please send it to us so that we can fix this bug in the PDF parser.";
+
         public static InvalidOperationException InvalidOperationException_CouldNotFindMetadataDictionary() =>
-            new("Could not find document's metadata dictionary.");
+            new("Could not find document's metadata dictionary." + SendUsTheFile);
 
         #region Reader Messages
+
         public static ObjectNotAvailableException ObjectNotAvailableException_CannotRetrieveStreamLengthByNow(Exception? innerException = null)
         {
-            const string message = "Cannot retrieve stream length from stream object by now.";
+            const string message = "Cannot retrieve stream length from stream object." + SendUsTheFile;
             return innerException != null ? new(message, innerException) : new(message);
         }
 
         public static ObjectNotAvailableException ObjectNotAvailableException_CannotRetrieveStreamLength() =>
-            new("Cannot retrieve stream length.");
+            new("Cannot retrieve stream length." + SendUsTheFile);
 
         public static InvalidOperationException InvalidOperationException_ReferencesOfObjectStreamNotYetRead() =>
-            new("References of object stream are not yet read.");
+            new("References of object stream are not yet read." + SendUsTheFile);
 
         public static PdfReaderException PdfReaderException_ObjectCouldNotBeFoundInObjectStreams() =>
-            new("Object could not be found in object streams.");
+            new("Object could not be found in object streams." + SendUsTheFile);
+
         #endregion
 
         #region Encryption Messages

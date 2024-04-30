@@ -25,16 +25,12 @@ using PdfSharp.TestHelper;
 
 namespace MigraDoc.Tests
 {
-    [Collection("MGD")]
+    [Collection("PDFsharp")]
     public class RtfRendererTests
     {
         [Fact]
         public void Create_Hello_World_RtfRendererTests()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = CreateDocument();
 
@@ -56,7 +52,7 @@ namespace MigraDoc.Tests
             //};
 
             // Create a renderer for the MigraDoc document.
-            var pdfRenderer = new RtfDocumentRenderer();
+            var rtfRenderer = new RtfDocumentRenderer();
 
             // Save the document...
             var filename = IOUtility.GetTempFileName("HelloWorld", null);
@@ -67,8 +63,8 @@ namespace MigraDoc.Tests
             dw.Close();
 #endif
 
-            // Layout and render document to PDF.
-            pdfRenderer.Render(document, filename + ".rtf", Environment.CurrentDirectory);
+            // Layout and render document to RTF.
+            rtfRenderer.Render(document, filename + ".rtf", Environment.CurrentDirectory);
 
 #if DEBUG___
             dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_1.mdddl");
@@ -117,10 +113,6 @@ namespace MigraDoc.Tests
         public void Test_Tabs(bool doNotUnifyTabStopHandling)
         {
             Capabilities.BackwardCompatibility.DoNotUnifyTabStopHandling = doNotUnifyTabStopHandling;
-
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
 
             var document = new Document();
 
@@ -569,18 +561,14 @@ namespace MigraDoc.Tests
 
         public void Create_Rtf_with_Image()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = new Document();
 
             var sect = document.AddSection();
 
-            sect.AddImage(@"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\bmp\Color4A.bmp"); // Fails: Cannot load resources.
-            //sect.AddImage(@"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\png\color8A.png"); // OK
-            //sect.AddImage(@"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\jpeg\color8A.jpg"); // OK
+            sect.AddImage(IOUtility.GetAssetsPath(@"PDFsharp\images\samples\bmp\Color4A.bmp")!); // Fails: Cannot load resources.
+            //sect.AddImage(IOUtility.GetAssetsPath(@"\PDFsharp\images\samples\png\color8A.png")!); // OK
+            //sect.AddImage(IOUtility.GetAssetsPath(@"\PDFsharp\images\samples\jpeg\color8A.jpg")!); // OK
 
             // Create a renderer for the MigraDoc document.
             var rtfRenderer = new RtfDocumentRenderer();
@@ -611,10 +599,6 @@ namespace MigraDoc.Tests
         [Fact]
         public void Create_Rtf_with_Embedded_Base64Image()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = new Document();
 
@@ -648,7 +632,7 @@ namespace MigraDoc.Tests
 
         }
 
-        private static void AddImage(Document document)
+        static void AddImage(Document document)
         {
             var base64 = @"base64:iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAACUlBMVEUAAAABAAACAQADAgAHBAAH
 BQANCAALCQARCwARDgAcFQAeFQAeGAAtHAApHgAoHwAuIQAvJQAtJwA4KAA/KQA3LABBLwBGMQBC
@@ -722,16 +706,12 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
         [InlineData(@"Logo landscape 256.png")]
         public void Create_Rtf_with_Base64Image(string assetName)
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = new Document();
 
             var sect = document.AddSection();
 
-            var imagePath = @"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\" + assetName;
+            var imagePath = IOUtility.GetAssetsPath(@"PDFsharp\images\samples\" + assetName)!;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 imagePath = imagePath.Replace('\\', '/');
@@ -779,9 +759,6 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
         [Fact]
         public void Test_Heading_Border()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
             var bottomWidth = Unit.FromPoint(2.3);
             var bottomColor = Colors.Blue;
             var rtfBottomString = "\\brdrs\\brdrw46\\brdrcf2";
@@ -856,12 +833,11 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
 
             var bottomBorderPart = rowBorderParts[3];
             bottomBorderPart.Should().StartWith("b", "last border should be bottom border");
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
             bottomBorderPart[1..].Should().Be(rtfHeadingBottomString, "heading bottom border should be defined heading bottom border");
 #else
             bottomBorderPart.Substring(1).Should().Be(rtfHeadingBottomString, "heading bottom border should be defined heading bottom border");
 #endif
-
 
             // Row 1.
             rowBorderParts = rowsByBorders[1];
@@ -873,12 +849,11 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
 
             bottomBorderPart = rowBorderParts[3];
             bottomBorderPart.Should().StartWith("b", "last border should be bottom border");
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
             bottomBorderPart[1..].Should().Be(rtfBottomString, "row 1 bottom border should be defined content bottom border");
 #else
             bottomBorderPart.Substring(1).Should().Be(rtfBottomString, "row 1 bottom border should be defined content bottom border");
 #endif
-
 
             // Row 2-4.
             for (var r = 2; r < 5; r++)
@@ -887,7 +862,7 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
 
                 topBorderPart = rowBorderParts[0];
                 topBorderPart.Should().StartWith("t", "first border should be top border");
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
                 topBorderPart[1..].Should().Be(rtfBottomString, $"row {r} top border should be the defined content bottom border of the top neighbor row");
 #else
                 topBorderPart.Substring(1).Should().Be(rtfBottomString, $"row {r} top border should be the defined content bottom border of the top neighbor row");
@@ -895,7 +870,7 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
 
                 bottomBorderPart = rowBorderParts[3];
                 bottomBorderPart.Should().StartWith("b", "last border should be bottom border");
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
                 bottomBorderPart[1..].Should().Be(rtfBottomString, $"row {r} bottom border should be defined content bottom border");
 #else
                 bottomBorderPart.Substring(1).Should().Be(rtfBottomString, $"row {r} bottom border should be defined content bottom border");

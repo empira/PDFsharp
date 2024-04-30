@@ -9,7 +9,7 @@ namespace PdfSharp.Internal
     public class UrlLiterals  // #CHECK_BEFORE_RELEASE
     {
 #if DEBUG
-        const string DocsPdfSharpUrl = "http://localhost:8093/";
+        const string DocsPdfSharpUrl = "http://localhost:8094/";
 #else
         const string DocsPdfSharpUrl = "https://docs.pdfsharp.net/";
 #endif

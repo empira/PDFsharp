@@ -12,16 +12,12 @@ using Xunit;
 
 namespace MigraDoc.Tests
 {
-    [Collection("MGD")]
+    [Collection("PDFsharp")]
     public class Template
     {
         [Fact]
         public void Create_Hello_World_TemplateMigraDocTests()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = CreateDocument();
 

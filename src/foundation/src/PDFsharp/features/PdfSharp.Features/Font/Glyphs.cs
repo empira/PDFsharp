@@ -5,6 +5,7 @@ using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
 
 #pragma warning disable 1591
+
 namespace PdfSharp.Features.Font
 {
     public class Glyphs : Feature

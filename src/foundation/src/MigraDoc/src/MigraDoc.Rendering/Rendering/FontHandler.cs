@@ -33,7 +33,7 @@ namespace MigraDoc.Rendering
                 && (style & XFontStyleEx.BoldItalic) == XFontStyleEx.Italic)
                 font.GetType();
 #endif
-            var xFont = new XFont(font.Name, font.Size, style);
+            var xFont = new XFont(font.Name, font.Size.Point, style);
 #if DEBUG_
             CreateFontCounter++;
 #endif
@@ -56,17 +56,17 @@ namespace MigraDoc.Rendering
             return style;
         }
 
-        internal static XUnit GetDescent(XFont font)
+        internal static XUnitPt GetDescent(XFont font)
         {
-            XUnit descent = font.Metrics.Descent;
+            XUnitPt descent = font.Metrics.Descent;
             descent *= font.Size;
             descent /= font.FontFamily.GetEmHeight(font.Style);
             return descent;
         }
 
-        internal static XUnit GetAscent(XFont font)
+        internal static XUnitPt GetAscent(XFont font)
         {
-            XUnit ascent = font.Metrics.Ascent;
+            XUnitPt ascent = font.Metrics.Ascent;
             ascent *= font.Size;
             ascent /= font.FontFamily.GetEmHeight(font.Style);
             return ascent;

@@ -46,7 +46,7 @@ namespace MigraDoc.Rendering
         /// </summary>
         public Dictionary<Cell, FormattedCell>? FormattedCells; //Sorted_List formattedCells;
         internal MergedCellList? MergedCells;
-        internal Dictionary<int, XUnit>? BottomBorderMap; //Sorted_List bottomBorderMap;
+        internal Dictionary<int, XUnitPt>? BottomBorderMap; //Sorted_List bottomBorderMap;
         //internal Dictionary<int, int>? ConnectedRowsMap; //Sorted_List connectedRowsMap;
         internal int[]? ConnectedRowsMap; //Sorted_List connectedRowsMap;
         internal int[]? MinMergedCellRowMap;

@@ -21,13 +21,13 @@ namespace PdfSharp.Fonts
             if (font == null)
                 throw new ArgumentNullException(nameof(font));
 
-            Globals.Global.CheckVersion(font.GlyphTypeface.GlobalVersion);
+            font.GlyphTypeface.CheckVersion();
 
             //FontSelector1 selector = new FontSelector1(font);
             string fontDescriptorKey = font.GlyphTypeface.Key;
             try
             {
-                var cache = Globals.Global.FontDescriptorCache;
+                var cache = Globals.Global.Fonts.FontDescriptorCache;
                 Lock.EnterFontFactory();
                 if (cache.TryGetValue(fontDescriptorKey, out var descriptor))
                     return descriptor;
@@ -41,12 +41,12 @@ namespace PdfSharp.Fonts
 
         public static FontDescriptor GetOrCreateDescriptorFor(XGlyphTypeface glyphTypeface)
         {
-            Globals.Global.CheckVersion(glyphTypeface.GlobalVersion);
+            glyphTypeface.CheckVersion();
 
             string fontDescriptorKey = glyphTypeface.Key;
             try
             {
-                var cache = Globals.Global.FontDescriptorCache;
+                var cache = Globals.Global.Fonts.FontDescriptorCache;
                 Lock.EnterFontFactory();
                 if (cache.TryGetValue(fontDescriptorKey, out var descriptor))
                     return descriptor;
@@ -71,7 +71,7 @@ namespace PdfSharp.Fonts
             string fontDescriptorKey = FontDescriptor.ComputeFdKey(fontFamilyName, style);
             try
             {
-                var cache = Globals.Global.FontDescriptorCache;
+                var cache = Globals.Global.Fonts.FontDescriptorCache;
                 Lock.EnterFontFactory();
                 if (!cache.TryGetValue(fontDescriptorKey, out var descriptor))
                 {
@@ -87,6 +87,11 @@ namespace PdfSharp.Fonts
             }
             finally { Lock.ExitFontFactory(); }
         }
+
+        internal static void Reset()
+        {
+            Globals.Global.Fonts.FontDescriptorCache.Clear();
+        }
     }
 }
 
@@ -94,9 +99,12 @@ namespace PdfSharp.Internal
 {
     partial class Globals
     {
-        /// <summary>
-        /// Maps font descriptor key to font descriptor which is currently only an OpenTypeFontDescriptor.
-        /// </summary>
-        public readonly Dictionary<string, FontDescriptor> FontDescriptorCache = [];
+        partial class FontStorage
+        {
+            /// <summary>
+            /// Maps font descriptor key to font descriptor which is currently only an OpenTypeFontDescriptor.
+            /// </summary>
+            public readonly Dictionary<string, FontDescriptor> FontDescriptorCache = [];
+        }
     }
 }

@@ -29,29 +29,6 @@ using PdfSharp.Pdf.Advanced;
 
 namespace PdfSharp.Drawing
 {
-#if true_
-    /// <summary>
-    /// Temporary helper class for refactoring and keep all existing code running.
-    /// The goal is to replace XFont in PdfXxx font classes.
-    /// </summary>
-    class XFontSurro(XFont font)
-    {
-        public XFont Font = font;
-
-        public string? PdfFontSelector
-        {
-            get => Font.PdfFontSelector;
-            set => Font.PdfFontSelector = value;
-        }
-
-        public FontType FontTypeFromUnicodeFlag => Font.FontTypeFromUnicodeFlag;
-
-        public XPdfFontOptions PdfOptions => Font.PdfOptions;
-
-        public XGlyphTypeface GlyphTypeface => Font.GlyphTypeface;
-    }
-#endif
-
     /// <summary>
     /// Defines an object used to draw text.
     /// </summary>
@@ -157,7 +134,7 @@ namespace PdfSharp.Drawing
             _emSize = emSize;
             _style = (glyphTypeface.IsBold ? XFontStyleEx.Bold : XFontStyleEx.Regular) |
                      (glyphTypeface.IsItalic ? XFontStyleEx.Italic : XFontStyleEx.Regular);
-            _pdfOptions ??= new XPdfFontOptions(GlobalFontSettings.DefaultFontEncoding);
+            _pdfOptions = pdfOptions ?? new XPdfFontOptions(GlobalFontSettings.DefaultFontEncoding);
             OverrideStyleSimulations = styleSimulations != null && styleSimulations != XStyleSimulations.None;
             StyleSimulations = styleSimulations ?? XStyleSimulations.None;
             Initialize();
@@ -341,7 +318,7 @@ namespace PdfSharp.Drawing
         ////public Font(FontFamily family, float emSize, FontStyle style, GraphicsUnit unit, byte gdiCharSet, bool gdiVerticalFont);
         ////public Font(string familyName, float emSize, FontStyle style, GraphicsUnit unit, byte gdiCharSet, bool gdiVerticalFont);
         //public object Clone();
-        //private static FontFamily CreateFontFamilyWithFallback(string familyName);
+        //static FontFamily CreateFontFamilyWithFallback(string familyName);
         //private void Dispose(bool disposing);
         //public override bool Equals(object? obj);
         //protected override void Finalize();
@@ -365,24 +342,20 @@ namespace PdfSharp.Drawing
                 ? new FontResolvingOptions(_style, StyleSimulations)
                 : new FontResolvingOptions(_style);
 
-            // Pseudo-font 'PlatformDefault' is used in unit test code.
-            if (StringComparer.OrdinalIgnoreCase.Compare(_familyName, GlobalFontSettings.DefaultFontName) == 0)
-            {
-#if CORE || GDI || WPF
-                _familyName = "Calibri";
-#else
-#warning Unsupported platform.
-#endif
-            }
-
             if (GlyphTypeface == null!)
             {
                 // In principle an XFont is an XGlyphTypeface plus an em-size.
                 GlyphTypeface = XGlyphTypeface.GetOrCreateFrom(_familyName, fontResolvingOptions);
+
+                GlyphTypeface.FontFace.SetFontEmbedding(_pdfOptions.FontEmbedding);
             }
 #if GDI
             // Create font by using font family.
-            GdiFont = FontHelper.CreateFont(_familyName, (float)_emSize, (GdiFontStyle)(_style & XFontStyleEx.BoldItalic), out _);
+            var gdiFont = FontHelper.CreateFont(_familyName, (float)_emSize, (GdiFontStyle)(_style & XFontStyleEx.BoldItalic), out _);
+            // Should not fail because GDI font is created by other GDI font.   
+            // No, fails if CFR creates the font.
+            //Debug.Assert(gdiFont!=null);
+            GdiFont = gdiFont!;
 #endif
 #if WPF
             WpfFontFamily = GlyphTypeface.FontFamily.WpfFamily;
@@ -795,12 +768,19 @@ namespace PdfSharp.Drawing
         /// </summary>
         internal string? PdfFontSelector { get; set; }
 
+        internal void CheckVersion() => GlyphTypeface.CheckVersion();
+
         /// <summary>
         /// Gets the DebuggerDisplayAttribute text.
         /// </summary>
         // ReSharper disable UnusedMember.Local
         string DebuggerDisplay
         // ReSharper restore UnusedMember.Local
-            => Invariant($"font=('{Name}' {Size:0.##}");
+        {
+            get
+            {
+                return Invariant($"font=('{Name}' {Size:0.##}{(Bold ? " bold" : "")}{(Italic ? " italic" : "")} {GlyphTypeface.StyleSimulations})");
+            }
+        }
     }
 }

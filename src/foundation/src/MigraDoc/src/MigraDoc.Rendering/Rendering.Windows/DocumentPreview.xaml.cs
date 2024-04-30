@@ -60,11 +60,11 @@ namespace MigraDoc.Rendering.Windows
                     return;
 
                 // HA/CK: hardcoded A4 size
-                //double pageWidth = XUnit.FromMillimeter(210).Presentation;
-                //double pageHeight = XUnit.FromMillimeter(297).Presentation;
+                //double pageWidth = XUnitPt.FromMillimeter(210).Presentation;
+                //double pageHeight = XUnitPt.FromMillimeter(297).Presentation;
                 //Size a4 = new Size(pageWidth, pageHeight);
 
-                XUnit pageWidth, pageHeight;
+                XUnitPt pageWidth, pageHeight;
                 Size size96 = GetSizeOfPage(1, out pageWidth, out pageHeight);
 
                 FixedDocument fixedDocument = new FixedDocument();
@@ -78,7 +78,7 @@ namespace MigraDoc.Rendering.Windows
 
                         DrawingVisual dv = new DrawingVisual();
                         DrawingContext dc = dv.RenderOpen();
-                        //XGraphics gfx = XGraphics.FromDrawingContext(dc, new XSize(XUnit.FromMillimeter(210).Point, XUnit.FromMillimeter(297).Point), XGraphicsUnit.Point);
+                        //XGraphics gfx = XGraphics.FromDrawingContext(dc, new XSize(XUnitPt.FromMillimeter(210).Point, XUnitPt.FromMillimeter(297).Point), XGraphicsUnit.Point);
                         XGraphics gfx = XGraphics.FromDrawingContext(dc, new XSize(pageWidth.Point, pageHeight.Presentation), XGraphicsUnit.Point, RenderEvents);
                         Renderer.RenderPage(gfx, pageNumber, PageRenderOptions.All);
                         dc.Close();
@@ -225,7 +225,7 @@ namespace MigraDoc.Rendering.Windows
             }
         }
 
-        Size GetSizeOfPage(int page, out XUnit width, out XUnit height)
+        Size GetSizeOfPage(int page, out XUnitPt width, out XUnitPt height)
         {
             if (Renderer == null)
             {

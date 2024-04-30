@@ -34,9 +34,9 @@ namespace PdfSharp.Features.Font
 #if true
         static readonly XPdfFontOptions PdfOptions = XPdfFontOptions.WinAnsiDefault;
 #else
-        private static readonly XPdfFontOptions PdfOptions = XPdfFontOptions.UnicodeDefault;
+        static readonly XPdfFontOptions PdfOptions = XPdfFontOptions.UnicodeDefault;
 #endif
-        // WPF's System.Windows.Media.Fonts.SystemFontFamilies gets less families than InstalledFontCollection().Families, because some faces are embedded in a family here, while they are not in InstalledFontCollection().Families.
+        // WPF's System.Windows.Media.Fonts.SystemFontFamilies gets fewer families than InstalledFontCollection().Families, because some faces are embedded in a family here, while they are not in InstalledFontCollection().Families.
         // E.g. Arial Black is included in Arial in WPF, but not in CORE and GDI. To get the same fonts set, you can manually add the fonts found by CORE and GDI here (but don't check-in the changes).
         // For the fonts that would not be found by System.Windows.Media.Fonts.SystemFontFamilies, but by the name in this list, some FontStyles may not be applied correctly.
         readonly List<string> _wpfFonts = new()
@@ -90,7 +90,7 @@ namespace PdfSharp.Features.Font
 
                 var font = _fonts[_fontIdx];
 
-                Console.WriteLine($"Rendering font {_fontIdx + 1} of {_fonts.Count}: {font}");
+                //Con/sole.WriteLine($"Rendering font {_fontIdx + 1} of {_fonts.Count}: {font}");
 
                 gfx.DrawString($"{font}", _headingFont, XBrushes.Black, PosX, posY);
                 posY += FaceOffset;

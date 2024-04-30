@@ -1,6 +1,7 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using System.IO;
 using System.Text;
 using FluentAssertions;
 using PdfSharp.Pdf;
@@ -11,6 +12,7 @@ using Xunit;
 
 namespace PdfSharp.Tests
 {
+    [Collection("PDFsharp")]
     public class CLexerTests
     {
         [Theory]

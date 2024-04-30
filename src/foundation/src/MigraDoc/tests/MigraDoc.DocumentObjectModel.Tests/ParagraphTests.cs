@@ -14,15 +14,12 @@ using Xunit;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
+    [Collection("PDFsharp")]
     public class ParagraphTests
     {
         [Fact]
         public void Test_Empty_Paragraph()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             var document = new Document();
             var section = document.AddSection();
 
@@ -40,10 +37,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
         [Fact]
         public void Test_Empty_FormattedText()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             var document = new Document();
             var section = document.AddSection();
 
@@ -67,9 +60,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
         [Fact]
         public void Test_Multiline_Border_Paragraph_PageBreaks()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
             // Create one document containing all results.
             var sumDoc = new PdfDocument();
             var exceptions = new List<Exception>();
@@ -228,9 +218,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         [Fact]
         public void Test_Trailing_Objects_Border_Paragraph_PageBreak()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
+            PdfSharpCore.ResetAll();
             var trailingObjects = new Dictionary<DocumentObject, string>
             {
                 { new Text(" "), "Text with one space only" },

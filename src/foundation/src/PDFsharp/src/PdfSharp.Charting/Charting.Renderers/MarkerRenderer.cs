@@ -19,7 +19,7 @@ namespace PdfSharp.Charting.Renderers
             if (rendererInfo.MarkerStyle == MarkerStyle.None)
                 return;
 
-            double size = rendererInfo.MarkerSize;
+            double size = rendererInfo.MarkerSize.Point;
             double size2 = size / 2;
             double x0, y0, x1, y1;
             double g;

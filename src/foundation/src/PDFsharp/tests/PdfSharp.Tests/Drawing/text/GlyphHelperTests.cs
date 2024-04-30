@@ -13,16 +13,12 @@ using Xunit;
 
 namespace PdfSharp.Tests.Drawing
 {
+    [Collection("PDFsharp")]
     public class GlyphHelperTests
     {
-        static GlyphHelperTests()
-        {
-            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
-        }
-
         const int Euro = '€';
         const int SmilingFaceWithHearts = 0x_0001_F970;  // 😍
-        const int RedRose = 0x_0001_F339;  // 🌹
+        //const int RedRose = 0x_0001_F339;  // 🌹
 
         [Fact]
         public void GlyphIndexFromCodePoint_Test()
@@ -34,30 +30,31 @@ namespace PdfSharp.Tests.Drawing
             glyphIndex1 = GlyphHelper.GlyphIndexFromCodePoint(SmilingFaceWithHearts, font1);
             glyphIndex1.Should().Be(0);
 
+#if !CORE
             var font2 = new XFont("Segoe UI Emoji", 10);
             var glyphIndex2 = GlyphHelper.GlyphIndexFromCodePoint(Euro, font2);
             glyphIndex2.Should().Be(189);
 
             glyphIndex2 = GlyphHelper.GlyphIndexFromCodePoint(SmilingFaceWithHearts, font2);
             glyphIndex2.Should().Be(10441);
+#endif
         }
 
-        [Fact]
+        [Fact(Skip = "Need Segoe UI Emoji here")]
         public void GlyphIndicesFromString_Test()
         {
-            const string s1 = "Hallo";
+            const string s1 = "Hello";
             const string s2 = "🦀 - 🦀 😀 🥰 😀 🥰";
 
             var font = new XFont("Segoe UI Emoji", 10);
 
-            var glyphIndexs = GlyphHelper.GlyphIndicesFromString(s1, font);
-            glyphIndexs.Length.Should().Be(s1.Length);
+            var glyphIndexes = GlyphHelper.GlyphIndicesFromString(s1, font);
+            glyphIndexes.Length.Should().Be(s1.Length);
 
-            glyphIndexs = GlyphHelper.GlyphIndicesFromString(s2, font);
-            glyphIndexs.Length.Should().Be(s2.Length - 6);
+            glyphIndexes = GlyphHelper.GlyphIndicesFromString(s2, font);
+            glyphIndexes.Length.Should().Be(s2.Length - 6);
         }
 
-      
         [Fact]
         public void Glyphs_from_invalid_ANSI_codes()
         {

@@ -1,7 +1,6 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
 #if GDI
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -20,17 +19,13 @@ namespace PdfSharp.Drawing
     {
         internal XPdfFontOptions() { }
 
-        //DELETE
         /// <summary>
         /// Initializes a new instance of the <see cref="XPdfFontOptions"/> class.
         /// </summary>
-        [Obsolete("Must not specify an embedding option anymore. Fonts get always embedded.")]
         public XPdfFontOptions(PdfFontEncoding encoding, PdfFontEmbedding embedding)
         {
             FontEncoding = encoding;
-            FontEmbedding = PdfFontEmbedding.Automatic;
-            FontEncoding = PdfFontEncoding.Automatic;
-
+            FontEmbedding = embedding;
         }
 
         /// <summary>
@@ -45,10 +40,9 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Initializes a new instance of the <see cref="XPdfFontOptions"/> class.
         /// </summary>
-        [Obsolete("Must not specify an embedding option anymore. Fonts get always embedded as subsets.")]
         public XPdfFontOptions(PdfFontEmbedding embedding)
         {
-            FontEmbedding = PdfFontEmbedding.Automatic;
+            FontEmbedding = PdfFontEmbedding.TryComputeSubset;
             FontEncoding = PdfFontEncoding.Automatic;
         }
 

@@ -399,7 +399,7 @@ namespace PdfSharp.Pdf.Security.Encryption
                 var k1 = k1Enumerable.ToArray();
 
                 // b): Create e: Encrypt k1 using AES-128 (CBC, no padding), with the first 16 bytes of k as the key and the second 16 bytes of k as the initialization vector.
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
                 var aesKey = k[..16];
                 var aesIV = k[16..32];
 #else
@@ -410,7 +410,7 @@ namespace PdfSharp.Pdf.Security.Encryption
                 var e = encryptor.TransformFinalBlock(k1, 0, k1.Length);
 
                 // c) + d): Take the first 16 bytes of e as an unsigned big-endian integer.
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
                 var e16 = e[..16];
 #else
                 var e16 = e.Take(16).ToArray();
@@ -443,7 +443,7 @@ namespace PdfSharp.Pdf.Security.Encryption
             }
 
             // The first 32 bytes of the final K are the output of the algorithm.
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
             var result = k[..32];
 #else
             var result = k.Take(32).ToArray();
@@ -613,7 +613,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerHashValue(byte[] userOwnerValue)
         {
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
             return userOwnerValue[..32];
 #else
             return userOwnerValue.Take(32).ToArray();
@@ -625,7 +625,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerValidationSalt(byte[] userOwnerValue)
         {
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
             return userOwnerValue[32..40];
 #else
             return userOwnerValue.Skip(32).Take(8).ToArray();
@@ -637,7 +637,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerKeySalt(byte[] userOwnerValue)
         {
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
             return userOwnerValue[40..48];
 #else
             return userOwnerValue.Skip(40).Take(8).ToArray();

@@ -160,7 +160,7 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
             }
         }
 
-        IEnumerable<(String PropertyName, Type PropertyType, Object? Value)> GetPropertyInformation(DocumentObject docObj)
+        IEnumerable<(string PropertyName, Type PropertyType, object? Value)> GetPropertyInformation(DocumentObject docObj)
         {
             var type = docObj.GetType();
 
@@ -217,7 +217,7 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
             return $"{pathToObject} > {segment}";
         }
 
-        public override String ToString()
+        public override string ToString()
         {
             var typeStr = Type?.Name ?? "unknown";
 

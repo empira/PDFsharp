@@ -86,7 +86,7 @@ namespace PdfSharp.Drawing
         /// <param name="width">The width of the form.</param>
         /// <param name="height">The height of the form.</param>
         public XForm(XGraphics gfx, XUnit width, XUnit height)
-            : this(gfx, new XSize(width, height))
+            : this(gfx, new XSize(width.Point, height.Point))
         { }
 #endif
 
@@ -143,7 +143,7 @@ namespace PdfSharp.Drawing
         /// <param name="width">The width of the page.</param>
         /// <param name="height">The height of the page</param>
         public XForm(PdfDocument document, XUnit width, XUnit height)
-            : this(document, new XRect(0, 0, width, height))
+            : this(document, new XRect(0, 0, width.Point, height.Point))
         { }
 
         /// <summary>

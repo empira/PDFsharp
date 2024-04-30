@@ -13,10 +13,12 @@ using FluentAssertions;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
+using PdfSharp.Quality;
 using Xunit;
 
 namespace PdfSharp.Tests
 {
+    [Collection("PDFsharp")]
     public class ReaderTests
     {
         [Fact]
@@ -85,17 +87,6 @@ namespace PdfSharp.Tests
             var page = doc.AddPage();
             doc.Info.Author = "empira";
             doc.Info.Title = "Test";
-#if DEBUG_
-            var properties = doc.Info.Elements;
-            properties.SetString("/Test", "Test");
-            //properties.SetString("/UmlautTestÄÖÜäöüß", "UmlautTestÄÖÜäöüß");
-            //properties.SetString("/A#20B", "A#20B");
-            //properties.SetString("/A B", "A B");
-            //properties.SetString("/A()B", "A()B");
-            //properties.SetString("/A<>B", "A<>B");
-            //properties.SetString("/A<<>>B", "A<<>>B");
-            //properties.SetString("/AÀÁÂÃÄÅÆÇÈÉÊËB", "AÀÁÂÃÄÅÆÇÈÉÊËB");
-#endif
 
             // Now add many different numbers for testing.
             var dict = new PdfDictionary(doc);
@@ -133,10 +124,6 @@ namespace PdfSharp.Tests
             //array.Elements.Add(new PdfStringObject("Foo_äöüß", PdfStringEncoding.WinAnsiEncoding));
             //array.Elements.Add(new PdfStringObject("Foo_äöüß", PdfStringEncoding.Unicode));
             //page.Resources.Elements["/ReferenceTest"] = array;
-
-#if true_
-            doc.Save("temp.pdf");
-#endif
 
             using var stream = new MemoryStream();
             doc.Save(stream, false);
@@ -191,7 +178,7 @@ namespace PdfSharp.Tests
         [Fact]
         public void Custom_properties_test()
         {
-            // Checks Lexer::ScanNumber with various number formats.
+            // Checks custom properties with non-ASCII chars.
             var doc = new PdfDocument();
             var page = doc.AddPage();
             doc.Info.Author = "empira";
@@ -209,45 +196,15 @@ namespace PdfSharp.Tests
             properties.SetString("/A<>B", "A<>B");
             properties.SetString("/A<<>>B", "A<<>>B");
             properties.SetString("/AÀÁÂÃÄÅÆÇÈÉÊËB", "AÀÁÂÃÄÅÆÇÈÉÊËB");
+            properties.SetString("/🖕 🦄 🦂 🍇 🍆 ☕ 🚂 🛸 ☁ ☢ ♌ ♏ ✅ ☑ ✔ ™ 🆒", "🖕 🦄 🦂 🍇 🍆 ☕ 🚂 🛸 ☁ ☢ ♌ ♏ ✅ ☑ ✔ ™ 🆒");
+            properties.SetString("/✓✔✅🐛👌🆗", "✓✔✅🐛👌🆗");
 #endif
-
-#if true
-            doc.Save("temp.pdf");
-#endif
-
             using var stream = new MemoryStream();
             doc.Save(stream, false);
             stream.Position = 0;
             stream.Length.Should().BeGreaterThan(0);
 
             var doc2 = PdfReader.Open(stream, PdfDocumentOpenMode.Modify);
-
-            // Now check if the numbers are correct.
-            page = doc2.Pages[0];
-            //var array2 = page.Resources.Elements["/NumberTest"] as PdfArray;
-            //Debug.Assert(array2 != null, nameof(array2) + " != null");
-            //for (int x = 0; x < array2.Elements.Count; ++x)
-            //{
-            //    var item1 = array.Elements[x];
-            //    var item2 = array2.Elements[x];
-            //    var num2 = Double.Parse(item1.ToString()!, CultureInfo.InvariantCulture);
-            //    if (item2 is PdfInteger int2)
-            //    {
-            //        num2.Should().Be(int2.Value);
-            //    }
-            //    else if (item2 is PdfReal real2)
-            //    {
-            //        num2.Should().Be(real2.Value);
-            //    }
-            //    else
-            //    {
-            //        1.Should().Be(2, "Should not come here!");
-            //    }
-            //}
-
-#if true
-            doc2.Save("temp2.pdf");
-#endif
 
             using var stream2 = new MemoryStream();
             doc2.Save(stream2, false);
@@ -256,10 +213,6 @@ namespace PdfSharp.Tests
 
             var doc3 = PdfReader.Open(stream2, PdfDocumentOpenMode.Modify);
 
-#if true
-            doc3.Save("temp3.pdf");
-#endif
-
             using var stream3 = new MemoryStream();
             doc3.Save(stream3, false);
             stream3.Position = 0;
@@ -267,6 +220,11 @@ namespace PdfSharp.Tests
 
             doc3.Info.Author.Should().Be("empira");
             doc3.Info.Title.Should().Be("Test");
+
+            var doc4 = PdfReader.Open(stream3, PdfDocumentOpenMode.Modify);
+            var filename = PdfFileUtility.GetTempPdfFileName("Custom_properties");
+            doc4.Save(filename);
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
     }
 }

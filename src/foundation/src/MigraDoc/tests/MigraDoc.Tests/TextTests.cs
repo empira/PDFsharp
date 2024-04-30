@@ -17,15 +17,9 @@ using FluentAssertions;
 
 namespace MigraDoc.Tests
 {
-    [Collection("MGD")]
+    [Collection("PDFsharp")]
     public class TextTests
     {
-        static TextTests()
-        {
-            if (PdfSharp.Capabilities.Build.IsCoreBuild)
-                GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-        }
-
         [Fact]
         public void Surrogate_Pairs_Test()
         {
@@ -94,9 +88,7 @@ namespace MigraDoc.Tests
             return document;
         }
 
-        [Fact(Skip = "Due to an error, the font resolver doesn't always return the correct font for TextTest test. " +
-                     "The wrong font (or the correct one?) causes this test to fail. " +
-                     "After this is fixed, ensure that a line break occurs at least once between 'hyphen-' and 'Test'.")]
+        [Fact]
         public void Document_with_No_Break_Hyphen()
         {
             // Create a new MigraDoc document.
@@ -106,7 +98,6 @@ namespace MigraDoc.Tests
             var paragraph = section.AddParagraph("No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test 12345 " +
                                                  "No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test 12345 " +
                                                  "No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test 12345 ");
-            paragraph.Format.Font.Name = "Segoe UI";
             paragraph.Format.Font.Bold = true;
 
 
@@ -115,21 +106,25 @@ namespace MigraDoc.Tests
             var pdfFilename = filename + ".pdf";
             var pdfRenderer = new PdfDocumentRenderer { Document = document };
 
+            var hasReplaced = false;
+
             pdfRenderer.PdfDocument.RenderEvents.RenderTextEvent += (sender, args) =>
                 {
                     var length = args.CodePointGlyphIndexPairs.Length;
                     for (var idx = 0; idx < length; idx++)
                     {
                         ref var item = ref args.CodePointGlyphIndexPairs[idx];
-                        if (item.CodePoint is '\u2011')
+                        if (item is { GlyphIndex: 0, CodePoint: '\u2011' })
                         {
                             item.CodePoint = '-';
                             args.ReevaluateGlyphIndices = true;
+                            hasReplaced = true;
                         }
                     }
                 };
-
             pdfRenderer.RenderDocument();
+
+            hasReplaced.Should().BeTrue();
 
             var pdfDocument = pdfRenderer.PdfDocument;
             pdfDocument.Options.CompressContentStreams = false;

@@ -4,6 +4,8 @@
     <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
     <RootNamespace>PdfSharp</RootNamespace>
     <DefineConstants>CORE</DefineConstants>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -32,8 +34,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
-    <InternalsVisibleTo Include="$(AssemblyName).TestHelper" />
+    <!-- Using just PublicKeyToken does not work, but I cannot find out why.
+	     If somebody can explain or fix it, please write me.
+         For now we use the whole public key instead.
+    <InternalsVisibleTo Include="$(AssemblyName).Tests, PublicKeyToken=f94615aa0424f9eb" />
+    <InternalsVisibleTo Include="$(AssemblyName).TestHelper, PublicKeyToken=f94615aa0424f9eb" />-->
+    <InternalsVisibleTo Include="$(AssemblyName).Tests, PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
+    <InternalsVisibleTo Include="$(AssemblyName).TestHelper, PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
+
   </ItemGroup>
 
   <ItemGroup>

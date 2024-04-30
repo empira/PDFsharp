@@ -13,16 +13,12 @@ using PdfSharp.Snippets.Font;
 
 namespace MigraDoc.Tests
 {
-    [Collection("MGD")]
+    [Collection("PDFsharp")]
     public class MultipleFooters
     {
         [Fact]
         public void Create_Multiple_Footers()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = CreateDocument();
 
@@ -44,7 +40,7 @@ namespace MigraDoc.Tests
             pdfRenderer.RenderDocument();
 
             // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("HelloWorld");
+            var filename = PdfFileUtility.GetTempPdfFileName("Multiple_Footers");
             pdfRenderer.PdfDocument.Save(filename);
             // ...and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);

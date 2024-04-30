@@ -11,19 +11,24 @@ namespace PdfSharp.Features.Drawing
 {
     public class SurrogateChars : Feature
     {
-        public void Test1()
+        //public void Test1()
+        //{
+        //    var doc = new PdfDocument();
+        //    var page = doc.AddPage();
+        //    page.Orientation = PageOrientation.Landscape;
+        //    var gfx = XGraphics.FromPdfPage(page, XGraphicsUnit.Presentation);
+
+        //    var shapeTypes = new Surrogates();
+        //    shapeTypes.RenderSnippet(gfx);
+
+        //    var filename = PdfFileUtility.GetTempPdfFileName(nameof(SurrogateChars));
+
+        //    PdfFileUtility.SaveAndShowDocument(doc, filename);
+        //}
+
+        public void Surrogates()
         {
-            var doc = new PdfDocument();
-            var page = doc.AddPage();
-            page.Orientation = PageOrientation.Landscape;
-            var gfx = XGraphics.FromPdfPage(page, XGraphicsUnit.Presentation);
-
-            var shapeTypes = new Surrogates();
-            shapeTypes.RenderSnippet(gfx);
-
-            var filename = PdfFileUtility.GetTempPdfFileName(nameof(SurrogateChars));
-
-            PdfFileUtility.SaveAndShowDocument(doc, filename);
+            RenderSnippetAsPdf(new Surrogates());
         }
     }
 }

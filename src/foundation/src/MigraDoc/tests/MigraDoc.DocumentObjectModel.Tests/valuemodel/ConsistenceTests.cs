@@ -51,7 +51,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
                 }
                 else
                 {
-                    ((Action)(() => { }))();
+                    _ = typeof(int);
                 }
             }
         }

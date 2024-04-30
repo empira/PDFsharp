@@ -38,7 +38,7 @@ namespace PdfSharp
         public static readonly string VersionPatch = GitVersionInformation.Patch;
 
         /// <summary>
-        /// The Version PreRelease String for NuGet.
+        /// The Version PreRelease string for NuGet.
         /// </summary>
         public static readonly string VersionPreRelease = GitVersionInformation.NuGetPreReleaseTagV2;
 
@@ -59,6 +59,11 @@ namespace PdfSharp
         public static readonly string Version = GitVersionInformation.MajorMinorPatch;
 
         /// <summary>
+        /// The full semantic version number created by GitVersion.
+        /// </summary>
+        public static readonly string SemanticVersion = GitVersionInformation.SemVer;
+
+        /// <summary>
         /// The home page of this product.
         /// </summary>
         public const string Url = "www.pdfsharp.net";
@@ -71,7 +76,7 @@ namespace PdfSharp
         /// <summary>
         /// The company that created/owned the product.
         /// </summary>
-        public const string Company = "empira Software GmbH, Cologne Area (Germany)";
+        public const string Company = "empira Software GmbH, Troisdorf (Cologne Area), Germany";
 
         /// <summary>
         /// The name of the product.

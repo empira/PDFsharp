@@ -370,7 +370,6 @@ namespace MigraDoc.DocumentObjectModel
 
             Type type;
 
-            //if (type == typeof(Unit))
             if (value is Unit unit)
             {
                 string strUnit = unit.ToString(); // BUG Can anything actually return null here? If so, how to write null?

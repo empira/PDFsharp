@@ -1,10 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PdfSharp.Pdf;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+using Microsoft.Extensions.Logging;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member because it is for internal use only.
 
@@ -82,15 +79,7 @@ namespace PdfSharp.Internal.Logging
         public static partial void XGraphicsCreated
             (this ILogger logger, string source);
 
-
-
-
-
-
-
         [LoggerMessage(EventId = 43, Level = LogLevel.Warning, Message = "This is a warning: `{someText}`")]
         public static partial void WarningMessage(this ILogger logger, string someText);
     }
-
-
 }

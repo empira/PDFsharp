@@ -48,7 +48,7 @@ namespace PdfSharp.Pdf.Advanced
             //var glyphIndexToCharacter = new Dictionary<int, char>();
             var glyphIndexToCharacter = new Dictionary<int, int>();
             int lowIndex = 65536, hiIndex = -1;
-            foreach (KeyValuePair<int, int> entry in CMapInfo.CodePointsToGlyphIndices)
+            foreach (KeyValuePair<int, ushort> entry in CMapInfo.CodePointsToGlyphIndices)
             {
                 int index = (int)entry.Value;
                 lowIndex = Math.Min(lowIndex, index);
@@ -79,8 +79,7 @@ namespace PdfSharp.Pdf.Advanced
                 var key = array[idx];
                 var value = glyphIndexToCharacter[key];
 #if DEBUG
-                LogHost.Logger.LogInformation(
-                    $"Glyph index: {key,-7} {(value /*& 0xFFFF_0000*/) >>> 16,4:X4}-{value & 0xFFFF,4:X4}");
+                PdfSharpLogHost.Logger.LogDebug($"Glyph index: {key,-7} {(value /*& 0xFFFF_0000*/) >>> 16,4:X4}-{value & 0xFFFF,4:X4}");
 #endif
                 //wrt.WriteLine(String.Format(CultureInfo.InvariantCulture, "<{0:X4}><{0:X4}><{1:X4}>", item.Key, (int)item.Value));
                 if ((value & 0xFFFF_0000) == 0)

@@ -1,6 +1,7 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Diagnostics;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
@@ -10,34 +11,26 @@ using PdfSharp.Snippets.Drawing;
 using PdfSharp.Snippets.Font;
 
 #pragma warning disable 1591
-namespace PdfSharp.Features.Drawing
+namespace PdfSharp.Features.Font
 {
     public class Encodings : Feature
     {
-        public void Ansi()
+        public void AnsiEncodingTable()
         {
-            GlobalFontSettings.ResetFontResolvers();
-            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
+            PdfSharpCore.ResetAll();
 
             var doc = new PdfDocument();
-            //doc.PageMode = PdfPageMode.;
             doc.PageLayout = PdfPageLayout.OneColumn;
-            //doc.ViewerPreferences.FitWindow = true;
-            //doc.ViewerPreferences.FitWindow = true;
             var page = doc.AddPage();
             page.Orientation = PageOrientation.Portrait;
             var gfx = XGraphics.FromPdfPage(page, XGraphicsUnit.Presentation);
 
-            new Snippets.Font.FontAnsiEncoding().RenderSnippet(gfx);
+            var snippet = new FontAnsiEncoding();
+            snippet.RenderSnippet(gfx);
 
-            var filename = PdfFileUtility.GetTempPdfFileName(nameof(SurrogateChars));
+            var filename = PdfFileUtility.GetTempPdfFileName(snippet.PathName);
 
             SaveAndShowDocument(doc, filename);
         }
-
-        //public override void Execute(Stream stream = null)
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }

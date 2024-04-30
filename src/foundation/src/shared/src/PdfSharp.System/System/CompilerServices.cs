@@ -39,17 +39,17 @@ namespace System.Diagnostics.CodeAnalysis
 static class StringExtensions
 {
     /// <summary>
-    /// String.Contains implementation for .NET Framework and .NET Standard as an extention method.
+    /// String.Contains implementation for .NET Framework and .NET Standard as an extension method.
     /// </summary>
     public static bool Contains(this string s,string value, StringComparison comparisonType) => s.IndexOf(value, comparisonType) >= 0;
 }
 #endif
 
-#if (NET472 || NETSTANDARD2_0) && USE_INDEX_AND_RANGE
+#if (NET472 || NETSTANDARD2_0) && true
 
 // This is just experimental. If we use it in PDFsharp, the code will move to the PDFsharp assembly
 // and the classes become internal. Otherwise, customers may run into problems of ambiguity of these classes.
-// USE_INDEX_AND_RANGE is set in Directory.Build.targets.
+// true is set in Directory.Build.targets.
 // StL/24-03-04: We will use Index and Range in PDFsharp until we ger problem reports.
 
 namespace System

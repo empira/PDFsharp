@@ -69,7 +69,7 @@ namespace PdfSharp.Pdf
             Size = RegionInfo.CurrentRegion.IsMetric ? PageSize.A4 : PageSize.Letter;
 
             // Force creation of MediaBox object by invoking property.
-            var _ = MediaBox;
+            _ = MediaBox;
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace PdfSharp.Pdf
                     _trimMargins.Bottom = value.Bottom;
                 }
                 else
-                    _trimMargins.All = 0;
+                    _trimMargins.All = XUnit.Zero;
             }
         }
         TrimMargins _trimMargins = new TrimMargins();
@@ -241,15 +241,15 @@ namespace PdfSharp.Pdf
             get
             {
                 var rect = MediaBox;
-                return _orientation == PageOrientation.Portrait ? rect.Height : rect.Width;
+                return _orientation == PageOrientation.Portrait ? XUnit.FromPoint(rect.Height) : XUnit.FromPoint(rect.Width);
             }
             set
             {
                 var rect = MediaBox;
                 if (_orientation == PageOrientation.Portrait)
-                    MediaBox = new PdfRectangle(rect.X1, 0, rect.X2, value);
+                    MediaBox = new PdfRectangle(rect.X1, 0, rect.X2, value.Point);
                 else
-                    MediaBox = new PdfRectangle(0, rect.Y1, value, rect.Y2);
+                    MediaBox = new PdfRectangle(0, rect.Y1, value.Point, rect.Y2);
                 _pageSize = PageSize.Undefined;
             }
         }
@@ -263,15 +263,15 @@ namespace PdfSharp.Pdf
             get
             {
                 var rect = MediaBox;
-                return _orientation == PageOrientation.Portrait ? rect.Width : rect.Height;
+                return _orientation == PageOrientation.Portrait ? XUnit.FromPoint(rect.Width) : XUnit.FromPoint(rect.Height);
             }
             set
             {
                 var rect = MediaBox;
                 if (_orientation == PageOrientation.Portrait)
-                    MediaBox = new PdfRectangle(0, rect.Y1, value, rect.Y2);
+                    MediaBox = new PdfRectangle(0, rect.Y1, value.Point, rect.Y2);
                 else
-                    MediaBox = new PdfRectangle(rect.X1, 0, rect.X2, value);
+                    MediaBox = new PdfRectangle(rect.X1, 0, rect.X2, value.Point);
                 _pageSize = PageSize.Undefined;
             }
         }
@@ -403,9 +403,10 @@ namespace PdfSharp.Pdf
         /// </summary>
         /// <param name="rect">The link area in default page coordinates.</param>
         /// <param name="destinationPage">The destination page.</param>
-        public PdfLinkAnnotation AddDocumentLink(PdfRectangle rect, int destinationPage)
+        /// <param name="point">The position in the destination page.</param>
+        public PdfLinkAnnotation AddDocumentLink(PdfRectangle rect, int destinationPage, XPoint? point = null)
         {
-            var annotation = PdfLinkAnnotation.CreateDocumentLink(rect, destinationPage);
+            var annotation = PdfLinkAnnotation.CreateDocumentLink(rect, destinationPage, point);
             Annotations.Add(annotation);
             return annotation;
         }
@@ -574,7 +575,7 @@ namespace PdfSharp.Pdf
             return name;
         }
 
-        string IContentStream.GetFontName(string idName, byte[] fontData, out PdfFont pdfFont) 
+        string IContentStream.GetFontName(string idName, byte[] fontData, out PdfFont pdfFont)
             => GetFontName(idName, fontData, out pdfFont);
 
         /// <summary>
@@ -609,9 +610,7 @@ namespace PdfSharp.Pdf
         /// Implements the interface because the primary function is internal.
         /// </summary>
         string IContentStream.GetFormName(XForm form)
-        {
-            return GetFormName(form);
-        }
+            => GetFormName(form);
 
         internal override void WriteObject(PdfWriter writer)
         {

@@ -1,14 +1,7 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Diagnostics;
-using System.IO;
-using PdfSharp.Drawing;
 using PdfSharp.Fonts;
-using PdfSharp.Pdf;
-using PdfSharp.Quality;
-using PdfSharp.Snippets.Font;
 
 namespace PdfSharp.Snippets.Font
 {
@@ -84,9 +77,10 @@ namespace PdfSharp.Snippets.Font
             if (faceName != null)
                 return new FontResolverInfo(faceName, simulateBold, simulateItalic);
 
-            // Return null means that the typeface cannot be resolved and PDFsharp stops working.
-            // Alternatively forward call to PlatformFontResolver.
-            return FailsafeFontResolver.ResolveTypeface(familyName, isBold, isItalic);
+            //// Return null means that the typeface cannot be resolved and PDFsharp stops working.
+            //// Alternatively forward call to PlatformFontResolver.
+            //return FailsafeFontResolver.ResolveTypeface(familyName, isBold, isItalic);
+            return null;
         }
 
         /// <summary>
@@ -106,10 +100,11 @@ namespace PdfSharp.Snippets.Font
                 FaceNames.Oblivious => ExoticFontsDataHelper.Oblivious,
                 FaceNames.XFiles => ExoticFontsDataHelper.XFiles,
                 // PDFsharp never calls GetFont with a face name that was not returned by ResolveTypeface.
-                _ => FailsafeFontResolver.GetFont(faceName)
+                //_ => FailsafeFontResolver.GetFont(faceName)
+                _ => null
             };
         }
 
-        static readonly FailsafeFontResolver FailsafeFontResolver = new();
+        //static readonly FailsafeFontResolver FailsafeFontResolver = new();
     }
 }

@@ -1,3 +1,6 @@
+//// MigraDoc - Creating Documents on the Fly
+//// See the LICENSE file in the solution root for more information.
+
 //using MigraDoc.DocumentObjectModel;
 //using MigraDoc.DocumentObjectModel.IO;
 

@@ -731,7 +731,7 @@ namespace PdfSharp.Fonts.OpenType
                     byte[] value = new byte[nrec.length];
                     Buffer.BlockCopy(_fontData.FontSource.Bytes, DirectoryEntry.Offset + stringOffset + nrec.offset, value, 0, nrec.length);
 
-                    //Debug.WriteLine(nrec.platformID.ToString());
+                    //De/bug.WriteLine(nrec.platformID.ToString());
 
                     // Read font name and style in US English.
                     if (nrec.platformID is 0 or 3)

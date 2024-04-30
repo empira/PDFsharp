@@ -730,13 +730,13 @@ namespace PdfSharp.Snippets.Font
             // No PrivateFontCollection - use font resolver.
 #endif
 
-#if GDI
+#if GDI_
             var assembly = Assembly.GetExecutingAssembly();
             XPrivateFontCollection.Add(assembly.GetManifestResourceStream("PdfSharp.Features.Fonts.xfiles.ttf")!);
             XPrivateFontCollection.Add(assembly.GetManifestResourceStream("PdfSharp.Features.Fonts.oblivious.ttf")!);
 #endif
 
-#if WPF
+#if WPF_
             var uri = new Uri("pack://application:,,,/");
             XPrivateFontCollection.Add(uri, "./Fonts/#X-Files");
             XPrivateFontCollection.Add(uri, "./Fonts/#Oblivious font");
@@ -833,7 +833,7 @@ namespace PdfSharp.Snippets.Font
 
         static FrutigerFontsSnippet()
         {
-#if GDI
+#if GDI_
             XPrivateFontCollection.Add(Assembly.GetExecutingAssembly().GetManifestResourceStream("PdfSharp.Features.Fonts.walrod.ttf")!);
             XPrivateFontCollection.Add(Assembly.GetExecutingAssembly().GetManifestResourceStream("PdfSharp.Features.Fonts.battlest.ttf")!);
             XPrivateFontCollection.Add(Assembly.GetExecutingAssembly().GetManifestResourceStream("PdfSharp.Features.Fonts.xfiles.ttf")!);
@@ -841,7 +841,7 @@ namespace PdfSharp.Snippets.Font
 
 #if WPF
             Uri uriPackApplication = new Uri("pack://application:,,,/");
-#if FRUTIGER_VIA_WPF_FONTFAMILY
+#if FRUTIGER_VIA_WPF_FONTFAMILY_
             // We have 'Frutiger' and 'Frutiger,bold'.
             XPrivateFontCollection.Add(uriPackApplication, "./Fonts/Frutiger/#Frutiger");
             XPrivateFontCollection.Add(uriPackApplication, "./Fonts/Frutiger/#FrutigerLight");
@@ -1015,15 +1015,15 @@ namespace PdfSharp.Snippets.Font
 
         static HelveticaNeueFontsSnippet()
         {
-#if GDI
+#if GDI_
             XPrivateFontCollection.Add(Assembly.GetExecutingAssembly().GetManifestResourceStream("PdfSharp.Features.Fonts.walrod.ttf")!);
             XPrivateFontCollection.Add(Assembly.GetExecutingAssembly().GetManifestResourceStream("PdfSharp.Features.Fonts.battlest.ttf")!);
             XPrivateFontCollection.Add(Assembly.GetExecutingAssembly().GetManifestResourceStream("PdfSharp.Features.Fonts.xfiles.ttf")!);
 #endif
 
-#if WPF
+#if WPF_
             Uri uriPackApplication = new Uri("pack://application:,,,/");
-#if true //FRUTIGER_VIA_WPF_FONTFAMILY
+#if true_ //FRUTIGER_VIA_WPF_FONTFAMILY
             // We have 'Helvetica Neue', 'Helvetica Neue Light', and 'Helvetica Neue,bold'.
             XPrivateFontCollection.Add(uriPackApplication, "./Fonts/HelveticaNeue/#Helvetica Neue");
             XPrivateFontCollection.Add(uriPackApplication, "./Fonts/HelveticaNeue/#Helvetica Neue Bold");

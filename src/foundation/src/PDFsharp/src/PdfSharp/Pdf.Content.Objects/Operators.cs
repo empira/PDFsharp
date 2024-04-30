@@ -140,7 +140,7 @@ namespace PdfSharp.Pdf.Content.Objects
             "(PDF 1.1) Set color space for stroking operations");
 
         static readonly OpCode cs = new("cs", OpCodeName.cs, 1, "setcolorspace", OpCodeFlags.None,
-            "(PDF 1.1) Set color space for nonstroking operations");
+            "(PDF 1.1) Set color space for non-stroking operations");
 
         static readonly OpCode d = new("d", OpCodeName.d, 2, "setdash", OpCodeFlags.None,
             "Set line dash pattern");
@@ -182,7 +182,7 @@ namespace PdfSharp.Pdf.Content.Objects
             "Set gray level for stroking operations");
 
         static readonly OpCode g = new("g", OpCodeName.g, 1, "setgray", OpCodeFlags.None,
-            "Set gray level for nonstroking operations");
+            "Set gray level for non-stroking operations");
 
         static readonly OpCode gs = new("gs", OpCodeName.gs, 1, null, OpCodeFlags.None,
             "(PDF 1.2) Set parameters from graphics state parameter dictionary");
@@ -206,7 +206,7 @@ namespace PdfSharp.Pdf.Content.Objects
             "Set CMYK color for stroking operations");
 
         static readonly OpCode k = new("k", OpCodeName.k, 4, "setcmykcolor", OpCodeFlags.None,
-            "Set CMYK color for nonstroking operations");
+            "Set CMYK color for non-stroking operations");
 
         static readonly OpCode l = new("l", OpCodeName.l, 2, "lineto", OpCodeFlags.None,
             "Append straight line segment to path");
@@ -251,13 +251,13 @@ namespace PdfSharp.Pdf.Content.Objects
             "(PDF 1.1) Set color for stroking operations");
 
         static readonly OpCode sc = new("sc", OpCodeName.sc, -1, "setcolor", OpCodeFlags.None,
-            "(PDF 1.1) Set color for nonstroking operations");
+            "(PDF 1.1) Set color for non-stroking operations");
 
         static readonly OpCode SCN = new("SCN", OpCodeName.SCN, -1, "setcolor", OpCodeFlags.None,
             "(PDF 1.2) Set color for stroking operations (ICCBased and special color spaces)");
 
         static readonly OpCode scn = new("scn", OpCodeName.scn, -1, "setcolor", OpCodeFlags.None,
-            "(PDF 1.2) Set color for nonstroking operations (ICCBased and special color spaces)");
+            "(PDF 1.2) Set color for non-stroking operations (ICCBased and special color spaces)");
 
         static readonly OpCode sh = new("sh", OpCodeName.sh, 1, "shfill", OpCodeFlags.None,
             "(PDF 1.3) Paint area defined by shading pattern");

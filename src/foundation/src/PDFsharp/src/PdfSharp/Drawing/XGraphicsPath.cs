@@ -70,6 +70,17 @@ namespace PdfSharp.Drawing
         }
 #endif
 
+#if WPF
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XGraphicsPath"/> class
+        /// and initializes it with a clone of the specified geometry.
+        /// </summary>
+        public XGraphicsPath(PathGeometry geometry)
+        {
+            PathGeometry = geometry.Clone();
+        }
+#endif
+
 #if WPF || UWP
         /// <summary>
         /// Gets the current path figure.
@@ -142,6 +153,24 @@ namespace PdfSharp.Drawing
 #endif
             return path;
         }
+
+#if GDI_
+#endif
+
+#if WPF_
+        internal static XGraphicsPath FromPathGeometry(PathGeometry pathGeometry)
+        {
+            foreach (var figure in pathGeometry.Figures)
+            {
+                foreach (var segment in figure.Segments)
+                {
+                    segment.
+                }
+            }
+
+            return default;
+        }
+#endif
 
         // ----- AddLine ------------------------------------------------------------------------------
 
@@ -1553,6 +1582,15 @@ namespace PdfSharp.Drawing
             PathGeometry.AddGeometry(path.PathGeometry);
 #endif
         }
+
+        // ----- AddPath ------------------------------------------------------------------------------
+
+#if WPF
+        /// <summary>
+        /// Adds the specified path to this path.
+        /// </summary>
+        public void AddGeometry(PathGeometry geometry) => PathGeometry.AddGeometry(geometry);
+#endif
 
         // ----- AddString ----------------------------------------------------------------------------
 

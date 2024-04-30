@@ -1,8 +1,6 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-
 namespace PdfSharp.Pdf
 {
     /// <summary>
@@ -12,27 +10,40 @@ namespace PdfSharp.Pdf
     public enum PdfFontEmbedding
     {
         /// <summary>
-        /// OpenType font programs with TrueType outline are embedded as a font subset.
-        /// OpenType font programs with PostScript outline are embedded as they are.
+        /// OpenType font files with TrueType outline are embedded as a font subset.
+        /// OpenType font files with PostScript outline are embedded as they are,
+        /// because PDFsharp cannot compute subsets from this type of font files.
         /// </summary>
-        Automatic,
-        
+        TryComputeSubset = 0,
+
         /// <summary>
-        /// All fonts are embedded as they are.
+        /// Use TryComputeSubset.
         /// </summary>
-        Always_,
+        [Obsolete("Renamed to TryComputeSubset.")]
+        Automatic = 0,
+
+        /// <summary>
+        /// The font file is completely embedded. No subset is computed.
+        /// </summary>
+        EmbedCompleteFontFile = 1,
+
+        /// <summary>
+        /// Use EmbedCompleteFontFile.
+        /// </summary>
+        [Obsolete("Renamed to EmbedCompleteFontFile.")]
+        Always = 1,
 
         /// <summary>
         /// Fonts are not embedded. This is not an option anymore.
-        /// Treated as Default.
+        /// Treated as Automatic.
         /// </summary>
         [Obsolete("Fonts must always be embedded. Treated as Automatic.")]
-        None,
+        None = 0,
 
         /// <summary>
         /// Not yet implemented. Treated as Default.
         /// </summary>
         [Obsolete("Treated as Automatic.")]
-        Default_
+        Default = 0
     }
 }

@@ -19,7 +19,7 @@ using static MigraDoc.Tests.SecurityTestHelper;
 
 namespace MigraDoc.Tests
 {
-    [Collection("MGD")]
+    [Collection("PDFsharp")]
     public class SecurityTests
     {
         // Notice: Test opening files written by these tests in Adobe Acrobat Reader after changes that may affect encryption.
@@ -77,17 +77,21 @@ namespace MigraDoc.Tests
 #endif
         }
 
-        [Fact]
+        [SkippableFact]
         public void Test_Write_NoPassword()
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var filename = AddPrefixToFilename("w.pdf");
             WriteStandardTestDocument(filename);
             OpenPdf(filename);
         }
 
-        [Fact]
+        [SkippableFact]
         public void Test_Read_NoPassword()
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             const string tempFile = "temp.pdf";
             WriteStandardTestDocument(tempFile);
 
@@ -99,11 +103,13 @@ namespace MigraDoc.Tests
             OpenPdf(filename);
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersionsAndDefault))]
         [ClassData(typeof(TestData.AllVersionsAndDefaultSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Write_UserPassword(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true);
             var filename = AddPrefixToFilename("w U.pdf", options);
@@ -111,11 +117,13 @@ namespace MigraDoc.Tests
             OpenPdf(filename);
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Read_UserPassword_Without_Fails(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true);
             const string tempFile = "temp.pdf";
@@ -136,11 +144,13 @@ namespace MigraDoc.Tests
             e!.Message.Should().Contain("password is required");
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Read_UserPassword_Without_Import_Fails(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true);
             const string tempFile = "temp.pdf";
@@ -163,11 +173,13 @@ namespace MigraDoc.Tests
 
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Read_UserPassword_Wrong_Fails(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true);
             const string tempFile = "temp.pdf";
@@ -188,11 +200,13 @@ namespace MigraDoc.Tests
             e!.Message.Should().Contain("password is invalid");
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Read_UserPassword(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true);
             const string tempFile = "temp.pdf";
@@ -207,11 +221,13 @@ namespace MigraDoc.Tests
             OpenPdf(filename);
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Write_OwnerPassword(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(false, true);
             var filename = AddPrefixToFilename("w O.pdf", options);
@@ -219,11 +235,13 @@ namespace MigraDoc.Tests
             OpenPdf(filename);
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Read_OwnerPassword_Without_Fails(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(false, true);
             const string tempFile = "temp.pdf";
@@ -245,11 +263,13 @@ namespace MigraDoc.Tests
             e!.Message.Should().Contain("password is required");
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Read_OwnerPassword_Without_Import(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(false, true);
             const string tempFile = "temp.pdf";
@@ -268,11 +288,13 @@ namespace MigraDoc.Tests
             OpenPdf(filename);
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Read_OwnerPassword_Wrong_Fails(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(false, true);
             const string tempFile = "temp.pdf";
@@ -293,11 +315,13 @@ namespace MigraDoc.Tests
             e!.Message.Should().Contain("password is invalid");
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Read_OwnerPassword(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(false, true);
             const string tempFile = "temp.pdf";
@@ -312,11 +336,13 @@ namespace MigraDoc.Tests
             OpenPdf(filename);
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Write_UserOwnerPassword(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true, true);
             var filename = AddPrefixToFilename("w UO.pdf", options);
@@ -324,11 +350,13 @@ namespace MigraDoc.Tests
             OpenPdf(filename);
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Read_UserAndOwnerPassword_Without_Fails(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true, true);
             const string tempFile = "temp.pdf";
@@ -349,11 +377,13 @@ namespace MigraDoc.Tests
             e!.Message.Should().Contain("password is required");
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Read_UserAndOwnerPassword_Wrong_Fails(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true, true);
             const string tempFile = "temp.pdf";
@@ -374,11 +404,13 @@ namespace MigraDoc.Tests
             e!.Message.Should().Contain("password is invalid");
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Read_UserAndOwnerPassword_User_Fails(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true, true);
             const string tempFile = "temp.pdf";
@@ -402,11 +434,13 @@ namespace MigraDoc.Tests
             e.Message.Should().Contain("owner password is required");
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Read_UserAndOwnerPassword_User_Import(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true, true);
             const string tempFile = "temp.pdf";
@@ -425,11 +459,13 @@ namespace MigraDoc.Tests
             OpenPdf(filename);
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Read_UserAndOwnerPassword_Owner(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true, true);
             const string tempFile = "temp.pdf";
@@ -444,11 +480,13 @@ namespace MigraDoc.Tests
             OpenPdf(filename);
         }
 
-        [Theory]
+        [SkippableTheory]
         [InlineData(TestOptionsEnum.V5)]
         // Older encryption versions don't support these password values. Passwords for revision 4 and earlier are up to 32 characters in length.
         public void Test_Password_Long(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             const string userPassword =
             "User56789a123456789b123456789c123456789d123456789e123456789f123456789g123456789h123456789i123456789j123456789k123456789l123456789m123456789n123456789o123456789p123456789q123456789r123456789s123456789t123456789u123456789v123456789w123456789x123456789y123456";
@@ -471,11 +509,13 @@ namespace MigraDoc.Tests
             OpenPdf(filenameRead);
         }
 
-        [Theory]
+        [SkippableTheory]
         [InlineData(TestOptionsEnum.V5)] // Explicitly test SASLprep, which is used in encryption version 5.
         // Older encryption versions don't support these password values. Passwords for revision 4 and earlier are limited to characters in the PDFDocEncoding character set.
         public void Test_Password_Unicode(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
 
             // => "uḕﬃz"
@@ -504,10 +544,12 @@ namespace MigraDoc.Tests
             OpenPdf(filenameRead);
         }
 
-        [Theory]
+        [SkippableTheory]
         [InlineData(TestOptionsEnum.Default)] // Testing with one encryption version should do it.
         public void Test_EmbeddedFile_WrapperEncrypted(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true, true);
 
@@ -546,10 +588,12 @@ namespace MigraDoc.Tests
             OpenPdf(filenameRead);
         }
 
-        [Theory]
+        [SkippableTheory]
         [InlineData(TestOptionsEnum.Default)] // Testing with one encryption version should do it.
         public void Test_EmbeddedFile_EmbEncrypted(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true, true);
 
@@ -588,10 +632,12 @@ namespace MigraDoc.Tests
             OpenPdf(filenameRead);
         }
 
-        [Theory]
+        [SkippableTheory]
         [InlineData(TestOptionsEnum.Default)] // Testing with one encryption version should do it.
         public void Test_EmbeddedFile_BothEncrypted(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true, true);
 
@@ -632,11 +678,11 @@ namespace MigraDoc.Tests
 #if true
         const string SkippedTestEmbeddedFilesMessage = "The feature to encrypt embedded files only is not yet correctly implemented. The resulting files may not be readyble with PDF readers.";
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.V4), Skip = SkippedTestEmbeddedFilesMessage)]
         [ClassData(typeof(TestData.V5), Skip = SkippedTestEmbeddedFilesMessage)]
 #else
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.V4))]
         [ClassData(typeof(TestData.V5))]
         [ClassData(typeof(TestData.V4Skipped), Skip = SkippedTestOptionsMessage)]
@@ -644,6 +690,8 @@ namespace MigraDoc.Tests
 #endif
         public void Test_EmbeddedFile_OnlyEFEncrypted(TestOptionsEnum optionsEnum)
         {
+            Skip.If(true || SkippableTests.SkipSlowTestsUnderDotNetFramework());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true, true);
 
@@ -684,11 +732,13 @@ namespace MigraDoc.Tests
             OpenPdf(filenameRead);
         }
 
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Permissions(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTests());
+
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true);
             // Get all permission properties of PdfSecuritySettings by filtering with type bool and Name.StartsWith("Permit").
@@ -731,16 +781,19 @@ namespace MigraDoc.Tests
         }
 
 #if true
-        [Fact]
+        [SkippableFact]
         public void Test_Strings()
         {
+            Skip.If(SkippableTests.SkipSlowTests());
+
             var optionsEnum = TestOptionsEnum.V5; // Encryption V5 should be sufficient, as it even crashes on wrong encrypted string length.
 #else
-        [Theory]
+        [SkippableTheory]
         [ClassData(typeof(TestData.AllVersions))]
         [ClassData(typeof(TestData.AllVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         public void Test_Strings(TestOptionsEnum optionsEnum)
         {
+            Skip.If(SkippableTests.SkipSlowTests());
 #endif
             // Cache old logger factory.
             var oldLoggerFactory = LogHost.Factory;
@@ -793,7 +846,11 @@ namespace MigraDoc.Tests
 
                 var doc = CreateEmptyTestDocument();
 
+#if CORE
+                var font = new XFont("Arial", 10);
+#else
                 var font = new XFont("Segoe UI Emoji", 10);
+#endif
 
                 var normalStyle = doc.Styles.Normal;
                 normalStyle.ParagraphFormat.TabStops.AddTabStop(Unit.FromCentimeter(2));

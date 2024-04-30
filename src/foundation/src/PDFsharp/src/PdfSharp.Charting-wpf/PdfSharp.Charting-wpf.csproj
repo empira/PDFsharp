@@ -5,10 +5,9 @@
         <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <RootNamespace>PdfSharp.Charting</RootNamespace>
-        <!--<UseWPF>true</UseWPF> not needed -->
         <UseWPF>true</UseWPF>
-        <!--<ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>annotations</Nullable>-->
+        <SignAssembly>True</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

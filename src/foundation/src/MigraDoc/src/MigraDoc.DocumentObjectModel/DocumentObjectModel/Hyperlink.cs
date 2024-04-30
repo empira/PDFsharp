@@ -111,7 +111,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a text phrase to the hyperlink.
         /// </summary>
-        public Text AddText(String text)
+        public Text AddText(string text)
         {
             return Elements.AddText(text);
         }

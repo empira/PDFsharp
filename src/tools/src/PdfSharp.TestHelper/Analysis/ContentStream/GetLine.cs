@@ -1,4 +1,7 @@
-﻿namespace PdfSharp.TestHelper.Analysis.ContentStream
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+namespace PdfSharp.TestHelper.Analysis.ContentStream
 {
     /// <summary>
     /// Iterates the line elements of a content stream for easier inspection.

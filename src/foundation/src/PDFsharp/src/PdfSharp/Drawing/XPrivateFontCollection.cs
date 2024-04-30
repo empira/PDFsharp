@@ -3,6 +3,7 @@
 
 #if GDI
 using System.Runtime.InteropServices;
+using PdfSharp.Logging;
 using GdiFontFamily = System.Drawing.FontFamily;
 using GdiFont = System.Drawing.Font;
 using GdiFontStyle = System.Drawing.FontStyle;
@@ -14,11 +15,20 @@ using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfTypeface = System.Windows.Media.Typeface;
 using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
 #endif
+using Microsoft.Extensions.Logging;
 using PdfSharp.Fonts;
 using PdfSharp.Fonts.Internal;
 
 namespace PdfSharp.Drawing
 {
+#if true
+    /// <summary>
+    /// This class is out of order. Use a font resolver instead.
+    /// </summary>
+    [Obsolete("XPrivateFontCollection is out of order now. Use a font resolver instead.")]
+    public sealed class XPrivateFontCollection
+    { }
+#else
     ///<summary>
     /// Makes fonts that are not installed on the system available within the current application domain.<br/>
     /// </summary>
@@ -226,7 +236,7 @@ namespace PdfSharp.Drawing
         //                throw new InvalidOperationException(PSSR.FontAlreadyAdded(glyphTypeface.DisplayName));
 
         //            _typefaces.Add(name, glyphTypeface);
-        //            //Debug.WriteLine("Font added: " + name);
+        //            //De/bug.WriteLine("Font added: " + name);
 
         //#if GDI
         //            // Add to GDI+ PrivateFontCollection singleton.
@@ -303,10 +313,10 @@ namespace PdfSharp.Drawing
             ICollection<WpfTypeface> list = fontFamily.GetTypefaces();
             foreach (WpfTypeface typeFace in list)
             {
-                Debug.WriteLine($"{familyName}, {typeFace.FaceNames[FontHelper.XmlLanguageEnUs]}, {typeFace.Style}, {typeFace.Weight}, {typeFace.Stretch}");
+                //De/bug.WriteLine($"{familyName}, {typeFace.FaceNames[FontHelper.XmlLanguageEnUs]}, {typeFace.Style}, {typeFace.Weight}, {typeFace.Stretch}");
                 if (!typeFace.TryGetGlyphTypeface(out var glyphTypeface))
                 {
-                    Debug.WriteLine("    Glyph typeface does not exist.");
+                    //De/bug.WriteLine("    Glyph typeface does not exist.");
                     //throw new ArgumentException("Font with the specified family name does not exist.");
                 }
             }
@@ -377,7 +387,7 @@ namespace PdfSharp.Drawing
             catch (Exception ex)
             {
                 // Ignore exception and return null.
-                Debug.WriteLine(ex.ToString());
+                PdfSharpLogHost.FontManagementLogger.LogError(ex.Message);
             }
             return null;
         }
@@ -417,4 +427,5 @@ namespace PdfSharp.Drawing
         readonly Dictionary<string, WpfFontFamily> _fontFamilies = new Dictionary<string, WpfFontFamily>(StringComparer.OrdinalIgnoreCase);
 #endif
     }
+#endif
 }

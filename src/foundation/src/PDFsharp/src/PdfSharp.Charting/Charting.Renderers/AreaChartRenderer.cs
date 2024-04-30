@@ -155,7 +155,7 @@ namespace PdfSharp.Charting.Renderers
                             pri.LineFormat = sri.LineFormat;
                             pri.FillFormat = sri.FillFormat;
                             if (point._lineFormat != null && !point._lineFormat.Color.IsEmpty)
-                                pri.LineFormat = new XPen(point._lineFormat.Color, point._lineFormat.Width);
+                                pri.LineFormat = new XPen(point._lineFormat.Color, point._lineFormat.Width.Point);
                             if (point._fillFormat != null && !point._fillFormat.Color.IsEmpty)
                                 pri.FillFormat = new XSolidBrush(point._fillFormat.Color);
                         }

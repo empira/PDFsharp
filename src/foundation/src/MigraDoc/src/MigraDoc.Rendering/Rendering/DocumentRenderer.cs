@@ -150,7 +150,7 @@ namespace MigraDoc.Rendering
         /// <param name="width">The width.</param>
         /// <param name="documentObject">The document object to render. Can be paragraph, table, or shape.</param>
         /// <remarks>This function is still in an experimental state.</remarks>
-        public void RenderObject(XGraphics graphics, XUnit xPosition, XUnit yPosition, XUnit width, DocumentObject documentObject)
+        public void RenderObject(XGraphics graphics, XUnitPt xPosition, XUnitPt yPosition, XUnitPt width, DocumentObject documentObject)
         {
             if (graphics == null)
                 throw new ArgumentNullException(nameof(graphics));
@@ -205,9 +205,9 @@ namespace MigraDoc.Rendering
             var renderInfos = formattedFooter.GetRenderInfos();
 
             // The footer is bottom-aligned and grows with its contents. topY specifies the Y position where the footer begins.
-            XUnit topY = footerArea.Y + footerArea.Height - RenderInfo.GetTotalHeight(renderInfos);
+            XUnitPt topY = footerArea.Y + footerArea.Height - RenderInfo.GetTotalHeight(renderInfos);
             // offsetY specifies the offset (amount of movement) for all footer items. It's the difference between topY and the position calculated for the first item.
-            XUnit offsetY = 0;
+            XUnitPt offsetY = 0;
             bool notFirst = false;
 
             var fieldInfos = FormattedDocument.GetFieldInfos(page);

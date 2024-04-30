@@ -140,7 +140,7 @@ namespace PdfSharp.Pdf
                 if (_document._uaManager != null)
                     _document.Events.OnPageAdded(_document, new PageEventArgs(_document) { Page = page, PageIndex = index, EventType = PageEventType.Moved });
 
-                LogHost.Logger.ExistingPdfPageAdded(_document?.Name);
+                PdfSharpLogHost.Logger.ExistingPdfPageAdded(_document?.Name);
 
                 return page;
             }
@@ -180,7 +180,7 @@ namespace PdfSharp.Pdf
                     _document.Events.OnPageAdded(_document, new PageEventArgs(_document) { Page = page, PageIndex = index, EventType = PageEventType.Imported });
             }
 
-            LogHost.Logger.NewPdfPageAdded(_document?.Name);
+            PdfSharpLogHost.Logger.NewPdfPageAdded(_document?.Name);
 
 
             if (Owner.Settings.TrimMargins.AreSet)

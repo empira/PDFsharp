@@ -3,7 +3,6 @@
 
 using Microsoft.Extensions.Logging;
 using PdfSharp.Internal;
-using PdfSharp.Internal.Logging;
 using PdfSharp.Logging;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Internal;
@@ -38,7 +37,7 @@ namespace PdfSharp.Pdf.IO
     {
         PdfReader(ILogger? logger, PdfReaderOptions? options)
         {
-            _logger = logger ?? LogHost.CreateLogger(LogCategory.PdfReading);
+            _logger = logger ?? PdfSharpLogHost.PdfReadingLogger;
             _options = options ?? new();
         }
 
@@ -241,7 +240,7 @@ namespace PdfSharp.Pdf.IO
         }
 
         /// <summary>
-        /// Implementation from opening a PDF document from a file.
+        /// Opens a PDF document from a file.
         /// </summary>
         PdfDocument OpenFromFile(string path, string? password, PdfDocumentOpenMode openMode, PdfPasswordProvider? passwordProvider)
         {
@@ -259,14 +258,14 @@ namespace PdfSharp.Pdf.IO
             }
             catch (Exception ex)
             {
-                LogHost.Logger.LogError(ex, "Open a PDF document failed.");
+                PdfSharpLogHost.Logger.LogError(ex, "Open a PDF document failed.");
                 throw;
             }
             return document!;
         }
 
         /// <summary>
-        /// Implementation from opening a PDF document from a stream.
+        /// Opens a PDF document from a stream.
         /// </summary>
         PdfDocument OpenFromStream(Stream stream, string? password, PdfDocumentOpenMode openMode,
             PdfPasswordProvider? passwordProvider, PdfReaderOptions? options = null)
@@ -334,7 +333,7 @@ namespace PdfSharp.Pdf.IO
                             var args = new PdfPasswordProviderArgs();
                             passwordProvider(args);
                             if (args.Abort)
-                                return null!; // NRT THROW
+                                return null!; // null means protected document not read.
                             password = args.Password;
                             goto TryAgain;
                         }
@@ -366,11 +365,11 @@ namespace PdfSharp.Pdf.IO
                 {
                     if (password != null)
                     {
-                        LogHost.Logger.LogWarning("Password specified but document is not encrypted.");
+                        PdfSharpLogHost.Logger.LogWarning("Password specified but document is not encrypted.");
                         // Ignore the password.
                     }
                 }
-                
+
                 // 4. Read all Objects streams and the references to the objects saved in them.
                 parser.ReadAllObjectStreamsAndTheirReferences();
                 // References available by now: All references (to file-level objects and to objects residing in object streams).
@@ -502,7 +501,7 @@ namespace PdfSharp.Pdf.IO
             foreach (var key in dictionary.Elements.Keys)
             {
                 var item = dictionary.Elements[key];
-                
+
                 // For PdfReference: Update reference, if necessary, and continue with referred item.
                 if (item is PdfReference iref)
                 {
@@ -596,17 +595,17 @@ namespace PdfSharp.Pdf.IO
             switch (pdfItem)
             {
                 case PdfArray pdfArray:
-                {
-                    foreach (var childItem in pdfArray.Elements)
-                        RereadUnicodeStrings(childItem);
-                    break;
-                }
+                    {
+                        foreach (var childItem in pdfArray.Elements)
+                            RereadUnicodeStrings(childItem);
+                        break;
+                    }
                 case PdfDictionary pdfDictionary:
-                {
-                    foreach (var childItem in pdfDictionary.Elements.Select(x => x.Value))
-                        RereadUnicodeStrings(childItem!);
-                    break;
-                }
+                    {
+                        foreach (var childItem in pdfDictionary.Elements.Select(x => x.Value))
+                            RereadUnicodeStrings(childItem!);
+                        break;
+                    }
                 case PdfString pdfString:
                     pdfString.TryRereadAsUnicode();
                     break;

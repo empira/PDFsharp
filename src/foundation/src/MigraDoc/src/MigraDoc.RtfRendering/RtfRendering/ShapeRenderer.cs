@@ -386,14 +386,14 @@ namespace MigraDoc.RtfRendering
                 Unit leftPgMrg = (Unit)parentSec.PageSetup.Values.LeftMargin!; // Re "!": Not null after visiting.
                 leftInd = -leftPgMrg.Point;
                 Unit rightPgMrg = (Unit)parentSec.PageSetup.Values.RightMargin!;
-                rightInd = -rightPgMrg;
+                rightInd = -rightPgMrg.Point;
             }
 
             LeftPosition leftPos = (LeftPosition)GetValueOrDefault("Left", new LeftPosition());
             switch (leftPos.ShapePosition)
             {
                 case ShapePosition.Undefined:
-                    leftInd += leftPos.Position;
+                    leftInd += leftPos.Position.Point;
                     leftInd += ((Unit)GetValueOrDefault("WrapFormat.DistanceLeft", (Unit)0)).Point;
                     break;
 
@@ -467,29 +467,29 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         void AlignVertically(ShapePosition shpPos, Unit distanceTopBottom, out Unit topValue, out Unit bottomValue)
         {
-            double height = GetShapeHeight().Point;
+            double heightPt = GetShapeHeight().Point;
             topValue = 0;
-            bottomValue = height;
+            bottomValue = heightPt;
             Unit topWrap = (Unit)GetValueOrDefault("WrapFormat.DistanceTop", (Unit)0);
             Unit bottomWrap = (Unit)GetValueOrDefault("WrapFormat.DistanceBottom", (Unit)0);
             switch (shpPos)
             {
                 case ShapePosition.Bottom:
-                    topValue = distanceTopBottom - height - bottomWrap;
+                    topValue = distanceTopBottom - heightPt - bottomWrap;
                     bottomValue = distanceTopBottom - bottomWrap;
                     break;
 
                 case ShapePosition.Center:
                     {
                         Unit centerPos = distanceTopBottom / 2.0;
-                        topValue = centerPos - height / 2.0;
-                        bottomValue = centerPos + height / 2.0;
+                        topValue = Unit.FromPoint(centerPos.Point - heightPt / 2.0);
+                        bottomValue = Unit.FromPoint(centerPos.Point + heightPt / 2.0);
                     }
                     break;
 
                 case ShapePosition.Top:
                     topValue = topWrap;
-                    bottomValue = topWrap + height;
+                    bottomValue = topWrap + heightPt;
                     break;
             }
         }

@@ -190,31 +190,31 @@ namespace PdfSharp.Drawing
 
         int _pageCount = -1;
 
-        /// <summary>
-        /// Gets the width in point of the page identified by the property PageNumber.
-        /// </summary>
-        [Obsolete("Use either PixelWidth or PointWidth. Temporarily obsolete because of rearrangements for WPF.")]
-        public override double Width
-        {
-            get
-            {
-                var page = ExternalDocument.Pages[_pageNumber - 1];
-                return page.Width;
-            }
-        }
+        ///// <summary>
+        ///// Gets the width in point of the page identified by the property PageNumber.
+        ///// </summary>
+        //[Obsolete("Use either PixelWidth or PointWidth. Temporarily obsolete because of rearrangements for WPF.")]
+        //public override double Width
+        //{
+        //    get
+        //    {
+        //        var page = ExternalDocument.Pages[_pageNumber - 1];
+        //        return page.Width;
+        //    }
+        //}
 
-        /// <summary>
-        /// Gets the height in point of the page identified by the property PageNumber.
-        /// </summary>
-        [Obsolete("Use either PixelHeight or PointHeight. Temporarily obsolete because of rearrangements for WPF.")]
-        public override double Height
-        {
-            get
-            {
-                var page = ExternalDocument.Pages[_pageNumber - 1];
-                return page.Height;
-            }
-        }
+        ///// <summary>
+        ///// Gets the height in point of the page identified by the property PageNumber.
+        ///// </summary>
+        //[Obsolete("Use either PixelHeight or PointHeight. Temporarily obsolete because of rearrangements for WPF.")]
+        //public override double Height
+        //{
+        //    get
+        //    {
+        //        var page = ExternalDocument.Pages[_pageNumber - 1];
+        //        return page.Height;
+        //    }
+        //}
 
         /// <summary>
         /// Gets the width in point of the page identified by the property PageNumber.
@@ -224,7 +224,7 @@ namespace PdfSharp.Drawing
             get
             {
                 var page = ExternalDocument.Pages[_pageNumber - 1];
-                return page.Width;
+                return page.Width.Point;
             }
         }
 
@@ -236,7 +236,7 @@ namespace PdfSharp.Drawing
             get
             {
                 var page = ExternalDocument.Pages[_pageNumber - 1];
-                return page.Height;
+                return page.Height.Point;
             }
         }
 
@@ -251,14 +251,14 @@ namespace PdfSharp.Drawing
         public override int PixelHeight => DoubleUtil.DoubleToInt(PointHeight);
 
         /// <summary>
-        /// Get the size of the page identified by the property PageNumber.
+        /// Get the size in point of the page identified by the property PageNumber.
         /// </summary>
         public override XSize Size
         {
             get
             {
                 var page = ExternalDocument.Pages[_pageNumber - 1];
-                return new XSize(page.Width, page.Height);
+                return new(page.Width.Point, page.Height.Point);
             }
         }
 

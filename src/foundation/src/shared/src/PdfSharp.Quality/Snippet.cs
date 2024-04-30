@@ -4,6 +4,7 @@
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
+using System.IO.Pipes;
 
 namespace PdfSharp.Quality
 {
@@ -22,6 +23,11 @@ namespace PdfSharp.Quality
         /// Gets or sets the title of the snipped
         /// </summary>
         public string Title { get; set; } = "";
+
+        /// <summary>
+        /// Gets or sets the path or name where to store the PDF file.
+        /// </summary>
+        public string PathName { get; set; } = "snippets/path-not-specified-in-snippet/";
 
         /// <summary>
         /// Gets or sets the box option.
@@ -50,7 +56,7 @@ namespace PdfSharp.Quality
         /// <summary>
         /// The standard font name used in snippet.
         /// </summary>
-        public static string FontNameStd { get; } = GlobalFontSettings.DefaultFontName;
+        public static string FontNameStd { get; } = "Arial";
 
         /// <summary>
         /// Gets the standard font in snippets.
@@ -135,8 +141,20 @@ namespace PdfSharp.Quality
         /// </summary>
         public void RenderSnippetAsPdf()
         {
+            RenderSnippetAsPdf(XUnit.FromPoint(WidthInPoint), XUnit.FromPoint(HeightInPoint), XGraphicsUnit.Presentation, XPageDirection.Downwards);
+        }
+
+        /// <summary>
+        /// Renders a snippet as PDF document.
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="graphicsUnit"></param>
+        /// <param name="pageDirection"></param>
+        public void RenderSnippetAsPdf(XUnit width, XUnit height, XGraphicsUnit graphicsUnit, XPageDirection pageDirection)
+        {
             BeginPdfDocument();
-            BeginPdfPage();
+            BeginPdfPage(width, height, graphicsUnit, pageDirection);
             RenderSnippet();
             DrawPdfHeader();
             EndPdfPage();
@@ -182,7 +200,8 @@ namespace PdfSharp.Quality
             gfx.TranslateTransform(x, y);
             if (Cleanroom)
             {
-                gfx.WriteComment(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                gfx.WriteComment(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -- begin of box content");
+
                 return;
             }
 
@@ -250,10 +269,10 @@ namespace PdfSharp.Quality
             }
             if (!NoText && !Cleanroom && !String.IsNullOrEmpty(description))
             {
-                gfx.DrawString(description, new XFont(GlobalFontSettings.DefaultFontName, 8, XFontStyleEx.Italic), XBrushes.Black,
+                gfx.DrawString(description, new XFont("Arial", 8, XFontStyleEx.Italic), XBrushes.Black,
                     new XRect(0, BoxHeight + 8, BoxWidth, 0), XStringFormats.BaseLineCenter);
             }
-            gfx.WriteComment(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+            gfx.WriteComment(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> --  begin of box content");
         }
 
         /// <summary>
@@ -283,7 +302,7 @@ namespace PdfSharp.Quality
         /// <param name="gfx">The XGraphics object.</param>
         protected void EndBox(XGraphics gfx)
         {
-            gfx.WriteComment("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+            gfx.WriteComment("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< -- end of box content");
             gfx.Restore();
         }
 
@@ -310,9 +329,7 @@ namespace PdfSharp.Quality
         protected void DrawTiledBox(XGraphics gfx, double x, double y, double width, double height, double delta)
         {
             var path = new XGraphicsPath();
-            var points = new List<XPoint>();
-
-            points.Add(new(x, y));
+            var points = new List<XPoint> { new(x, y) };
             for (var xx = x; xx < x + width; xx += 2 * delta)
             {
                 points.Add(new(xx, y + height));
@@ -330,7 +347,7 @@ namespace PdfSharp.Quality
                 points.Add(new(x + width, yy - 2 * delta));
             }
             path.AddPolygon(points.ToArray());
-            gfx.DrawPath(Gray, path);
+             gfx.DrawPath(Gray, path);
         }
 
         /// <summary>
@@ -424,30 +441,6 @@ namespace PdfSharp.Quality
             return points;
         }
 
-#if true_
-        protected async Task<string> SaveToStreamOrSaveToFileAsync(PdfDocument document, Stream stream, string filenameTag, bool show)
-        {
-            string filename;
-
-            // Save and show the document.
-            if (stream == null)
-            {
-                if (show)
-                    filename = await SaveAndShowDocumentAsync(document, filenameTag);
-                else
-                    filename = await SaveDocumentAsync(document, filenameTag);
-            }
-            else
-            {
-                document.Save(stream, false);
-                stream.Position = 0;
-                filename = null;
-            }
-            return filename;
-        }
-#endif
-
-
         /// <summary>
         /// Creates a HelloWorld document, optionally with custom message.
         /// </summary>
@@ -472,7 +465,7 @@ namespace PdfSharp.Quality
 
             // Draw the text.
             gfx.DrawString(String.IsNullOrEmpty(message) ? "Hello, World!" : message, font, XBrushes.Black,
-                new XRect(0, 0, page.Width, page.Height),
+                new XRect(0, 0, page.Width.Point, page.Height.Point),
                 XStringFormats.Center);
 
             return document;

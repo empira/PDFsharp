@@ -1,4 +1,7 @@
-﻿namespace PdfSharp.Pdf
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+namespace PdfSharp.Pdf
 {
     /// <summary>
     /// Provides methods to handle keys that may contain a PdfArray or a single PdfItem.

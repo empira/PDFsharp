@@ -230,6 +230,7 @@ namespace PdfSharp.Drawing
             Palette1,
             Palette4,
             Palette8,
+            Grayscale8,
             RGB24,
             ARGB32
 

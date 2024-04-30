@@ -220,9 +220,6 @@ namespace PdfSharp.Pdf
                 if (obj is PdfReference reference)
                 {
                     //Debug.Assert(false, "Check why this is not PdfRealObject or PdfIntegerObject.");
-#if DEBUG
-                    GetType();
-#endif
 
                     // ReSharper disable once RedundantCast
                     obj = (object)reference.Value switch

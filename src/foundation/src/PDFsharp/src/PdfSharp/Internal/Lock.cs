@@ -5,6 +5,7 @@ namespace PdfSharp.Internal
 {
     /// <summary>
     /// Static locking functions to make PDFsharp thread save.
+    /// POSSIBLE BUG: Having more than one lock can lead to a deadlock.
     /// </summary>
     static class Lock
     {
@@ -13,33 +14,37 @@ namespace PdfSharp.Internal
             //if (_fontFactoryLockCount > 0)
             //    throw new InvalidOperationException("");
 
-            Monitor.Enter(GdiPlus);
+            Monitor.Enter(GdiPlusLock);
             _gdiPlusLockCount++;
         }
 
         public static void ExitGdiPlus()
         {
             _gdiPlusLockCount--;
-            Monitor.Exit(GdiPlus);
+            Monitor.Exit(GdiPlusLock);
         }
 
-        static readonly object GdiPlus = new();
+        static readonly object GdiPlusLock = new();
         static int _gdiPlusLockCount;
+        
+        // ------------------------------------------------------------
 
         public static void EnterFontFactory()
         {
-            Monitor.Enter(FontFactory);
+            Monitor.Enter(FontFactoryLock);
             _fontFactoryLockCount++;
         }
 
         public static void ExitFontFactory()
         {
             _fontFactoryLockCount--;
-            Monitor.Exit(FontFactory);
+            Monitor.Exit(FontFactoryLock);
         }
 
-        static readonly object FontFactory = new();
-        [ThreadStatic] 
+        public static bool IsFontFactoryLookTaken() => _fontFactoryLockCount > 0;
+        
+        static readonly object FontFactoryLock = new();
+        //[ThreadStatic] // StL: ??? - makes no sense
         static int _fontFactoryLockCount;
     }
 }

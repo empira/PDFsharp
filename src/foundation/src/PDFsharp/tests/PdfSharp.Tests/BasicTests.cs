@@ -1,6 +1,7 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Diagnostics;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
@@ -11,12 +12,13 @@ using Xunit;
 
 namespace PdfSharp.Tests
 {
+    [Collection("PDFsharp")]
     public class BasicTests
     {
         [Fact]
         public void Create_Hello_World_BasicTests()
         {
-            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
+            PdfSharpCore.ResetAll();
 
             // Create a new PDF document.
             var document = new PdfDocument();
@@ -29,8 +31,8 @@ namespace PdfSharp.Tests
             var gfx = XGraphics.FromPdfPage(page);
 
             // Draw two lines with a red default pen.
-            var width = page.Width;
-            var height = page.Height;
+            var width = page.Width.Point;
+            var height = page.Height.Point;
             gfx.DrawLine(XPens.Red, 0, 0, width, height);
             gfx.DrawLine(XPens.Red, width, 0, 0, height);
 
@@ -38,14 +40,12 @@ namespace PdfSharp.Tests
             var r = width / 5;
             gfx.DrawEllipse(new XPen(XColors.Red, 1.5), XBrushes.White, new XRect(width / 2 - r, height / 2 - r, 2 * r, 2 * r));
 
-            bool snippetsFontResolver = GlobalFontSettings.FontResolver!.GetType()!.FullName!.EndsWith("SnippetsFontResolver");
-
             // Create a font.
-            var font = new XFont(snippetsFontResolver ? "Times New Roman" : "segoe wp", 20, XFontStyleEx.BoldItalic);
+            var font = new XFont("Times New Roman", 20, XFontStyleEx.BoldItalic);
 
             // Draw the text.
             gfx.DrawString("Hello, dotnet 6.0!", font, XBrushes.Black,
-                new XRect(0, 0, page.Width, page.Height), XStringFormats.Center);
+                new XRect(0, 0, width, height), XStringFormats.Center);
 
             // Save the document...
             string filename = PdfFileUtility.GetTempPdfFileName("HelloWorld");

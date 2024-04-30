@@ -586,7 +586,7 @@ namespace PdfSharp.Pdf.Internal
 
                 default:
                     Debug.Assert(false,"Cannot come here.");
-                    LogHost.Logger.LogError("Render a color with invalid color mode.");
+                    PdfSharpLogHost.Logger.LogError("Render a color with invalid color mode.");
                     goto case PdfColorMode.Rgb;
             }
         }

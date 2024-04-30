@@ -1,18 +1,23 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using System.IO;
 using FluentAssertions;
 using PdfSharp.Pdf;
+using PdfSharp.Quality;
 using Xunit;
 
 namespace PdfSharp.Tests
 {
+    [Collection("PDFsharp")]
     public class CreationTests
     {
         [Fact]
         public void Create_for_Stream()
         {
-            using (var outputStream = new FileStream("test0.pdf", FileMode.Create, FileAccess.ReadWrite))
+            var filename = PdfFileUtility.GetTempPdfFileName("CreationTest");
+
+            using (var outputStream = new FileStream(filename, FileMode.Create, FileAccess.ReadWrite))
             {
                 PdfDocument document = new PdfDocument(outputStream);
                 document.AddPage();
@@ -20,18 +25,5 @@ namespace PdfSharp.Tests
                 document.Version.Should().BeGreaterThan(0);
             }
         }
-
-        //[Fact]
-        //public void Create_for_Stream_with_Version_0()
-        //{
-        //    using (var outputStream = new FileStream("test0.pdf", FileMode.Create, FileAccess.ReadWrite))
-        //    {
-        //        PdfDocument document = new PdfDocument(outputStream);
-        //        document.Version = 0;
-        //        document.AddPage();
-        //        document.Close();
-        //        document.Version.Should().BeGreaterThan(0);
-        //    }
-        //}
     }
 }

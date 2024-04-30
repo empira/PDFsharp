@@ -16,9 +16,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         [Fact]
         public void Create_Bullets()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
+            PdfSharpCore.ResetAll();
 
             // Create a MigraDoc document.
             var document = CreateDocument();

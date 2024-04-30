@@ -56,7 +56,7 @@ namespace PdfSharp.Pdf.Internal
 #endif
                 //Debug.Assert((uint)chars[charIndex] < 256, "Raw string contains invalid character with a value > 255.");
                 bytes[byteIndex] = (byte)chars[charIndex];
-                //#warning Here is a HA/CK that must not be ignored!
+                //#war/ning Here is a HA/CK that must not be ignored!
                 // HA/CK: 
                 // bytes[byteIndex] = (byte)chars[charIndex];
             }

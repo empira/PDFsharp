@@ -39,7 +39,7 @@ namespace PdfSharp.Pdf.Advanced
         internal void AddChars(CodePointGlyphIndexPair[] codePoints)
         {
             _cmapInfo.AddChars(codePoints);
-            _fontDescriptor.CMapInfo2.AddChars(codePoints);
+            _fontDescriptor.CMapInfo.AddChars(codePoints);
         }
 
         /// <summary>

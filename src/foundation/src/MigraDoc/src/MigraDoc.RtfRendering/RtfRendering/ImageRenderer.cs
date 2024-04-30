@@ -174,13 +174,16 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         void RenderDimensionSettings()
         {
-            float scaleX = (GetShapeWidth() / _originalWidth);
-            float scaleY = (GetShapeHeight() / _originalHeight);
+            var shapeWidthPt = GetShapeWidth().Point;
+            var shapeHeightPt = GetShapeHeight().Point;
+
+            var scaleX = shapeWidthPt / _originalWidth.Point;
+            var scaleY = shapeHeightPt / _originalHeight.Point;
             _rtfWriter.WriteControl("picscalex", (int)(scaleX * 100));
             _rtfWriter.WriteControl("picscaley", (int)(scaleY * 100));
 
-            RenderUnit("pichgoal", GetShapeHeight() / scaleY);
-            RenderUnit("picwgoal", GetShapeWidth() / scaleX);
+            RenderUnit("pichgoal", shapeHeightPt / scaleY);
+            RenderUnit("picwgoal", shapeWidthPt / scaleX);
 
             //A bit obscure, but necessary for Word 2000:
             _rtfWriter.WriteControl("pich", (int)(_originalHeight.Millimeter * 100));
@@ -230,8 +233,8 @@ namespace MigraDoc.RtfRendering
                     vertResolution = horzResolution;
                 }
 
-                Unit origHeight = bip.Size.Height * 72 / vertResolution;
-                Unit origWidth = bip.Size.Width * 72 / horzResolution;
+                double origHeight = bip.Size.Height * 72 / vertResolution;
+                double origWidth = bip.Size.Width * 72 / horzResolution;
 
                 _imageHeight = origHeight;
                 _imageWidth = origWidth;
@@ -250,12 +253,12 @@ namespace MigraDoc.RtfRendering
                     if (_image.Values.Width is not null && _image.Values.Height is null)
                     {
                         _imageWidth = _image.Width;
-                        _imageHeight = origHeight * _imageWidth / origWidth;
+                        _imageHeight = Unit.FromPoint(origHeight * _imageWidth.Point / origWidth);
                     }
                     else if (_image.Values.Height is not null && _image.Values.Width is null)
                     {
                         _imageHeight = _image.Height;
-                        _imageWidth = origWidth * _imageHeight / origHeight;
+                        _imageWidth = Unit.FromPoint(origWidth * _imageHeight.Point / origHeight);
                     }
                     else if (_image.Values.Height is not null && _image.Values.Width is not null)
                     {

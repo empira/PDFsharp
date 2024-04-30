@@ -25,7 +25,7 @@ namespace PdfSharp.Fonts
             try
             {
                 Lock.EnterFontFactory();
-                Globals.Global.FontFamiliesByName.TryGetValue(familyName, out var family);
+                Globals.Global.Fonts.FontFamiliesByName.TryGetValue(familyName, out var family);
                 return family;
             }
             finally { Lock.ExitFontFactory(); }
@@ -40,7 +40,7 @@ namespace PdfSharp.Fonts
             {
                 Lock.EnterFontFactory();
                 // Recall that a font family is uniquely identified by its case-insensitive name.
-                if (Globals.Global.FontFamiliesByName.TryGetValue(fontFamily.Name, out var existingFontFamily))
+                if (Globals.Global.Fonts.FontFamiliesByName.TryGetValue(fontFamily.Name, out var existingFontFamily))
                 {
 #if DEBUG
                     if (fontFamily.Name == "xxx")
@@ -48,10 +48,15 @@ namespace PdfSharp.Fonts
 #endif
                     return existingFontFamily;
                 }
-                Globals.Global.FontFamiliesByName.Add(fontFamily.Name, fontFamily);
+                Globals.Global.Fonts.FontFamiliesByName.Add(fontFamily.Name, fontFamily);
                 return fontFamily;
             }
             finally { Lock.ExitFontFactory(); }
+        }
+
+        internal static void Reset()
+        {
+            Globals.Global.Fonts.FontFamiliesByName.Clear();
         }
 
         internal static string GetCacheState()
@@ -59,13 +64,13 @@ namespace PdfSharp.Fonts
             var state = new StringBuilder();
             state.Append("====================\n");
             state.Append("Font families by name\n");
-            Dictionary<string, FontFamilyInternal>.KeyCollection familyKeys = Globals.Global.FontFamiliesByName.Keys;
+            Dictionary<string, FontFamilyInternal>.KeyCollection familyKeys = Globals.Global.Fonts.FontFamiliesByName.Keys;
             int count = familyKeys.Count;
             string[] keys = new string[count];
             familyKeys.CopyTo(keys, 0);
             Array.Sort(keys, StringComparer.OrdinalIgnoreCase);
             foreach (string key in keys)
-                state.AppendFormat("  {0}: {1}\n", key, Globals.Global.FontFamiliesByName[key].DebuggerDisplay);
+                state.AppendFormat("  {0}: {1}\n", key, Globals.Global.Fonts.FontFamiliesByName[key].DebuggerDisplay);
             state.Append("\n");
             return state.ToString();
         }
@@ -76,9 +81,12 @@ namespace PdfSharp.Internal
 {
     partial class Globals
     {
-        /// <summary>
-        /// Maps family name to internal font family.
-        /// </summary>
-        public readonly Dictionary<string, FontFamilyInternal> FontFamiliesByName = [];
+        partial class FontStorage
+        {
+            /// <summary>
+            /// Maps family name to internal font family.
+            /// </summary>
+            public readonly Dictionary<string, FontFamilyInternal> FontFamiliesByName = [];
+        }
     }
 }

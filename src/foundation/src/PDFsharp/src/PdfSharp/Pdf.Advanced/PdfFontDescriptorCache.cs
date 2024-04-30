@@ -26,7 +26,7 @@ namespace PdfSharp.Pdf.Advanced
             if (!_cache.TryGetValue(otDescriptor.Key, out var pdfDescriptor))
             {
                 pdfDescriptor = new PdfFontDescriptor(Owner, otDescriptor);
-                pdfDescriptor.FontName2 = pdfDescriptor.CreateEmbeddedFontSubsetName(baseName);
+                pdfDescriptor.FontName = pdfDescriptor.CreateEmbeddedFontSubsetName(baseName);
                 _cache.Add(otDescriptor.Key, pdfDescriptor);
             }
             return pdfDescriptor;

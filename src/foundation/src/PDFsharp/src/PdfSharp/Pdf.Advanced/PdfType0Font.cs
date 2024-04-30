@@ -25,11 +25,8 @@ namespace PdfSharp.Pdf.Advanced
             Elements.SetName(Keys.Encoding, vertical ? "/Identity-V" : "/Identity-H");
 
             var otDescriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptorFor(glyphTypeface);
-#if SHARED_FONTDESCRIPTOR
             FontDescriptor = document.PdfFontDescriptorCache.GetOrCreatePdfDescriptorFor(otDescriptor, glyphTypeface.GetBaseName());
-#else
-            FontDescriptor = new PdfFontDescriptor(document, otDescriptor);
-#endif
+
             //FontOptions = font.PdfOptions;
             //Debug.Assert(FontOptions != null);
 
@@ -45,19 +42,11 @@ namespace PdfSharp.Pdf.Advanced
             document.Internals.AddObject(_toUnicodeMap);
             Elements.Add(Keys.ToUnicode, _toUnicodeMap);
 
-#if SHARED_FONTDESCRIPTOR
             BaseFont = glyphTypeface.GetBaseName();
             // CID fonts are always embedded
-            BaseFont = FontDescriptor.FontName2;
+            BaseFont = FontDescriptor.FontName;
             _descendantFont.BaseFont = BaseFont;
-#else
-            BaseFont = glyphTypeface.GetBaseName();
-            // CID fonts are always embedded
-            BaseFont = FontDescriptor.CreateEmbeddedFontSubsetName(BaseFont);
 
-            FontDescriptor.FontName2 = BaseFont;
-            _descendantFont.BaseFont = BaseFont;
-#endif
             PdfArray descendantFonts = new PdfArray(document);
             Owner.IrefTable.Add(_descendantFont);
             descendantFonts.Elements.Add(_descendantFont.Reference!); // Reference is set in Add(_descendantFont).
@@ -132,7 +121,7 @@ namespace PdfSharp.Pdf.Advanced
             var w = new StringBuilder("[");
             if (_cmapInfo != null!)
             {
-                int[] glyphIndices = _cmapInfo.GetGlyphIndices();
+                ushort[] glyphIndices = _cmapInfo.GetGlyphIndices();
                 int count = glyphIndices.Length;
                 int[] glyphWidths = new int[count];
 

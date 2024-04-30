@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using PdfSharp.Pdf;
 using PdfSharp.Pdf.Content;
 using PdfSharp.Pdf.IO;
 
@@ -15,7 +16,7 @@ using System.Windows;
 
 namespace PdfSharp.Internal
 {
-    enum NotImplementedBehavior  // RENAME NotSupportedBehavior
+    enum NotSupportedBehavior
     {
         /// <summary>
         /// Function invocation has no effect.
@@ -53,7 +54,7 @@ namespace PdfSharp.Internal
     //    static NotImplementedBehavior _notImplementedBehavior;
     //}
 
-    static class ParserDiagnostics
+    static class ParserDiagnostics  // #CLEANUP 
     {
         public static void ThrowParserException(string message)
         {
@@ -68,22 +69,27 @@ namespace PdfSharp.Internal
         public static void HandleUnexpectedCharacter(char ch, string dump)
         {
             // Hex formatting does not work with type Char. It must be cast to integer.
-            string message = String.Format(CultureInfo.InvariantCulture,
-                $"Unexpected character '0x{ch:x4}' in PDF stream. The file may be corrupted. " +
-                "If you think this is a bug in PDFsharp, please send us your PDF file.\n");
+            string message =
+                Invariant($"Unexpected character '0x{ch:x4}' in PDF stream. The file may be corrupted. ") +
+                    "If you think this is a bug in PDFsharp, please send us your PDF file.\n" + dump;
             ThrowParserException(message);
         }
         public static void HandleUnexpectedToken(string token, string dump)
         {
-            string message = String.Format(CultureInfo.InvariantCulture,
-                $"Unexpected token '{token}' in PDF stream. The file may be corrupted. " +
-                "If you think this is a bug in PDFsharp, please send us your PDF file.\n" +
-                $"{dump}");
+            string message =
+                Invariant($"Unexpected token '{token}' in PDF stream. The file may be corrupted. ") +
+                    "If you think this is a bug in PDFsharp, please send us your PDF file.\n" + dump;
+            ThrowParserException(message);
+        }
+
+        public static void CannotFindEndOfStream(PdfDictionary dict)
+        {
+            string message = $"Cannot find end of stream in object '{dict.ObjectID}'.";
             ThrowParserException(message);
         }
     }
 
-    static class ContentReaderDiagnostics
+    static class ContentReaderDiagnostics  // #CLEANUP 
     {
         public static void ThrowContentReaderException(string message)
         {

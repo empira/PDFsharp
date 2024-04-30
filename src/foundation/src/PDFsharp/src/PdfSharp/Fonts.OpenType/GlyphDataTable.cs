@@ -87,10 +87,10 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// Adds for all composite glyphs, the glyphs the composite one is made of.
         /// </summary>
-        public void CompleteGlyphClosure(Dictionary<int, object?> glyphs)
+        public void CompleteGlyphClosure(Dictionary<ushort, object?> glyphs)
         {
             int count = glyphs.Count;
-            int[] glyphArray = new int[glyphs.Count];
+            ushort[] glyphArray = new ushort[glyphs.Count];
             glyphs.Keys.CopyTo(glyphArray, 0);
             // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd because of .NET Framework
             if (!glyphs.ContainsKey(0))
@@ -110,7 +110,7 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// If the specified glyph is a composite glyph add the glyphs it is made of to the glyph table.
         /// </summary>
-        void AddCompositeGlyphs(Dictionary<int, object?> glyphs, int glyph)
+        void AddCompositeGlyphs(Dictionary<ushort, object?> glyphs, int glyph)
         {
             //int start = fontData.loca.GetOffset(glyph);
             int start = GetOffset(glyph);
@@ -126,7 +126,7 @@ namespace PdfSharp.Fonts.OpenType
             for (; ; )
             {
                 int flags = _fontData.ReadUFWord();
-                int cGlyph = _fontData.ReadUFWord();
+                ushort cGlyph = _fontData.ReadUFWord();
                 if (!glyphs.ContainsKey(cGlyph))
                     glyphs.Add(cGlyph, null);
                 if ((flags & MORE_COMPONENTS) == 0)

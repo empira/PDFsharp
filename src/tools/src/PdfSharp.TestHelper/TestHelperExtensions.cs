@@ -1,4 +1,7 @@
-﻿using System;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+using System;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -78,7 +81,7 @@ namespace PdfSharp.TestHelper
             return ChunkIterator(source, size);
         }
 
-        private static IEnumerable<TSource[]> ChunkIterator<TSource>(IEnumerable<TSource> source, int size)
+        static IEnumerable<TSource[]> ChunkIterator<TSource>(IEnumerable<TSource> source, int size)
         {
             using IEnumerator<TSource> e = source.GetEnumerator();
             while (e.MoveNext())

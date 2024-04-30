@@ -1,47 +1,15 @@
-﻿using System.Globalization;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+using System.Globalization;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
-using PdfSharp.Quality;
 using PdfSharp.TestHelper.Analysis.ContentStream;
 
 namespace PdfSharp.TestHelper
 {
     public static class PdfFileHelper
     {
-        [Obsolete("Use IOUtility.GetTempFileName")]
-        public static string CreateTempFileName(string prefix, string extension = "pdf")
-        {
-            // ReS harper disable once StringLiteralTypo
-            //return $"{CreateTempFileNameWithoutExtension(prefix)}.{extension}";
-            return IOUtility.GetTempFileName(prefix, extension);
-        }
-
-        [Obsolete("Use IOUtility.GetTempFileName")]
-        public static string CreateTempFileNameWithoutExtension(string prefix)
-        {
-            // ReSharper disable once StringLiteralTypo
-            //return $"{prefix}-{Guid.NewGuid().ToString("N").ToUpperInvariant()}_tempfile";
-            return IOUtility.GetTempFileName(prefix, null);
-        }
-
-        [Obsolete("Use PdfFileUtility.ShowDocument")]
-        public static void StartPdfViewer(string filename)
-        {
-            //var startInfo = new ProcessStartInfo(filename) { UseShellExecute = true };
-            //Process.Start(startInfo);
-            PdfFileUtility.ShowDocument(filename);
-        }
-
-        [Obsolete("Use PdfFileUtility.ShowDocumentIfDebugging")]
-        public static void StartPdfViewerIfDebugging(string filename)
-        {
-            //if (Debugger.IsAttached)
-            //{
-            //    StartPdfViewer(filename);
-            //}
-            PdfFileUtility.ShowDocumentIfDebugging(filename);
-        }
-
         /// <summary>
         /// Gets the content stream of the specified page of the document as string.
         /// </summary>

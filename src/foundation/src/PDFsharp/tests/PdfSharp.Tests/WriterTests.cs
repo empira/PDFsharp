@@ -9,21 +9,19 @@ using Xunit;
 
 namespace PdfSharp.Tests
 {
+    [Collection("PDFsharp")]
     public class WriterTests
     {
         [Fact]
         public void Write_import_file()
         {
-            var testFile = IOUtility.GetAssetsPath(@"archives\samples-1.5\PDFs\SomeLayout.pdf")!;
+            var testFile = IOUtility.GetAssetsPath("archives/samples-1.5/PDFs/SomeLayout.pdf")!;
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                testFile = testFile.Replace('\\', '/');
-
-            var outFile = @"SomeLayout_temp.pdf";
+            var filename = PdfFileUtility.GetTempPdfFileName("FooterTest");
 
             var doc = PdfReader.Open(testFile, PdfDocumentOpenMode.Import);
 
-            Action save = () => doc.Save(outFile);
+            Action save = () => doc.Save(filename);
             save.Should().Throw<InvalidOperationException>();
         }
     }

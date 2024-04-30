@@ -44,7 +44,7 @@ namespace PdfSharp.Pdf
             // Preserve "ï»¿" if text is UTF8 encoded.
             var i = stream.IndexOf(begin, StringComparison.Ordinal);
             var pos = i + begin.Length;
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
             stream = stream[..pos] + "xxx" + stream[(pos + 3)..];
 #else
             stream = stream.Substring(0, pos) + "xxx" + stream.Substring(pos + 3);

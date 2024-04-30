@@ -57,7 +57,7 @@ namespace PdfSharp.Fonts
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public class FontResolverInfo
     {
-        const string KeySuffix = ":frik";  // Font Resolver Info Key
+        const string KeySuffix = ":FRK";  // Font Resolver Key
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FontResolverInfo"/> struct.
@@ -131,12 +131,12 @@ namespace PdfSharp.Fonts
         /// <summary>
         /// Indicates whether bold must be simulated.
         /// </summary>
-        public bool MustSimulateBold { get; }
+        public bool MustSimulateBold { get; internal set; }
 
         /// <summary>
         /// Indicates whether italic must be simulated.
         /// </summary>
-        public bool MustSimulateItalic { get; }
+        public bool MustSimulateItalic { get; internal set; }
 
         /// <summary>
         /// Gets the style simulation flags.

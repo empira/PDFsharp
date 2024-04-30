@@ -65,9 +65,11 @@ namespace PdfSharp
         /// </remarks>
         public static void ResetAll()
         {
-            LogHost.Logger.LogInformation("All PDFsharp capability settings are about to be reset.");
+            PdfSharpLogHost.Logger.LogInformation("All PDFsharp capability settings are about to be reset.");
 
             Action.GlyphsToPath = FeatureNotAvailableBehavior.SilentlyIgnore;
+            
+            // ... TODO
         }
 
         /// <summary>
@@ -135,10 +137,18 @@ namespace PdfSharp
                 => "-gdi";
 #elif WPF
                 => "-wpf";
-#else 
+#else
                 => "-xxx";
 #endif
+
+            public static string Framework
+#if NET6_0_OR_GREATER
+                => "6.0";
+#else
+                => "4.7";
+#endif
         }
+
 
         /// <summary>
         /// Access to information about the currently running operating system.
@@ -200,7 +210,7 @@ namespace PdfSharp
             // IsUI if we run tests on Azure?
             /*public*/
             // ReSharper disable once InconsistentNaming
-            private static bool IsLinuxWithUI => false;
+            static bool IsLinuxWithUI => false;
         }
 
         /// <summary>
@@ -318,9 +328,7 @@ namespace PdfSharp
                 {
                     public static FeatureNotAvailableBehavior GlyphsToPath { get; set; } = FeatureNotAvailableBehavior.SilentlyIgnore;
                 }
-
             }
-
         }
     }
 }

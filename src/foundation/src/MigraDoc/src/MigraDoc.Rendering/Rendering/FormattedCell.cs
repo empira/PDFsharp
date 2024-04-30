@@ -13,7 +13,7 @@ namespace MigraDoc.Rendering
     /// </summary>
     public class FormattedCell : IAreaProvider
     {
-        internal FormattedCell(Cell cell, DocumentRenderer documentRenderer, Borders cellBorders, FieldInfos? fieldInfos, XUnit xOffset, XUnit yOffset)
+        internal FormattedCell(Cell cell, DocumentRenderer documentRenderer, Borders cellBorders, FieldInfos? fieldInfos, XUnitPt xOffset, XUnitPt yOffset)
         {
             Cell = cell;
             _fieldInfos = fieldInfos;
@@ -54,26 +54,26 @@ namespace MigraDoc.Rendering
         {
             var column = Cell.Column;
             Debug.Assert(column != null, nameof(column) + " != null");
-            XUnit width = InnerWidth;
+            XUnitPt width = InnerWidth;
             width -= column.LeftPadding.Point;
             Debug.Assert(Cell.Table != null, "Cell.Table != null");
             var rightColumn = Cell.Table.Columns[column.Index + Cell.MergeRight];
             width -= rightColumn.RightPadding.Point;
 
-            XUnit height = double.MaxValue;
+            XUnitPt height = double.MaxValue;
             return new Rectangle(_xOffset, _yOffset, width, height);
         }
 
-        internal XUnit ContentHeight => _contentHeight;
+        internal XUnitPt ContentHeight => _contentHeight;
 
-        internal XUnit InnerHeight
+        internal XUnitPt InnerHeight
         {
             get
             {
                 Debug.Assert(Cell != null, nameof(Cell) + " != null");
                 var row = Cell.Row;
                 Debug.Assert(row != null, nameof(row) + " != null");
-                XUnit verticalPadding = row.TopPadding.Point;
+                XUnitPt verticalPadding = row.TopPadding.Point;
                 verticalPadding += row.BottomPadding.Point;
 
                 switch (row.HeightRule)
@@ -86,16 +86,16 @@ namespace MigraDoc.Rendering
 
                     case RowHeightRule.AtLeast:
                     default:
-                        return Math.Max(row.Height, verticalPadding + _contentHeight);
+                        return Math.Max(row.Height.Point, verticalPadding + _contentHeight);
                 }
             }
         }
 
-        internal XUnit InnerWidth
+        internal XUnitPt InnerWidth
         {
             get
             {
-                XUnit width = 0;
+                XUnitPt width = 0;
                 Debug.Assert(Cell != null, nameof(Cell) + " != null");
                 Debug.Assert(Cell.Column != null, "Cell.Column != null");
                 int cellColumnIdx = Cell.Column.Index;
@@ -103,7 +103,7 @@ namespace MigraDoc.Rendering
                 {
                     int columnIdx = cellColumnIdx + toRight;
                     Debug.Assert(Cell.Table != null, "Cell.Table != null");
-                    width += Cell.Table.Columns[columnIdx]?.Width ?? NRT.ThrowOnNull<Unit>();
+                    width += (Cell.Table.Columns[columnIdx]?.Width ?? NRT.ThrowOnNull<Unit>()).Point;
                 }
                 width -= _bordersRenderer.GetWidth(BorderType.Right);
 
@@ -125,19 +125,19 @@ namespace MigraDoc.Rendering
         bool IAreaProvider.PositionHorizontally(LayoutInfo layoutInfo)
             => false;
 
-        XUnit CalcContentHeight(DocumentRenderer documentRenderer)
+        XUnitPt CalcContentHeight(DocumentRenderer documentRenderer)
         {
-            XUnit height = RenderInfo.GetTotalHeight(GetRenderInfos());
+            XUnitPt height = RenderInfo.GetTotalHeight(GetRenderInfos());
             if (height == 0)
             {
                 height = ParagraphRenderer.GetLineHeight(Cell.Format, _gfx, documentRenderer);
-                height += Cell.Format.SpaceBefore;
-                height += Cell.Format.SpaceAfter;
+                height += Cell.Format.SpaceBefore.Point;
+                height += Cell.Format.SpaceAfter.Point;
             }
             return height;
         }
 
-        XUnit _contentHeight = 0;
+        XUnitPt _contentHeight = 0;
 
         internal RenderInfo[]? GetRenderInfos()
         {
@@ -149,8 +149,8 @@ namespace MigraDoc.Rendering
 
         readonly FieldInfos? _fieldInfos;
         List<RenderInfo>? _renderInfos;
-        readonly XUnit _xOffset;
-        readonly XUnit _yOffset;
+        readonly XUnitPt _xOffset;
+        readonly XUnitPt _yOffset;
 
         TopDownFormatter _formatter = null!;  // Set in Format.
         readonly BordersRenderer _bordersRenderer;

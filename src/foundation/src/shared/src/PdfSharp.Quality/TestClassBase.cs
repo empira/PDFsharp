@@ -47,7 +47,7 @@
 
 //        protected class TestInstance
 //        {
-//            private static TestInstance _current;
+//            static TestInstance _current;
 //            private readonly List<string> _openedDirectories = new List<string>();
 
 //            public static TestInstance Current()
@@ -73,7 +73,7 @@
 
 //            public DateTime StartTime;
 
-//            public String TestDocumentsDirectorySL
+//            public string TestDocumentsDirectorySL
 //            {
 //                get { return StartTime.ToString("yy-MM-dd HH_mm_ss"); }
 //            }

@@ -17,7 +17,7 @@ namespace MigraDoc.Rendering
         /// <param name="prevBottomMargin">The bottom margin of the previous element.</param>
         /// <param name="nextTopMargin">The top margin of the next element.</param>
         /// <returns></returns>
-        XUnit MarginMax(XUnit prevBottomMargin, XUnit nextTopMargin)
+        XUnitPt MarginMax(XUnitPt prevBottomMargin, XUnitPt nextTopMargin)
         {
             if (prevBottomMargin >= 0 && nextTopMargin >= 0)
                 return Math.Max(prevBottomMargin, nextTopMargin);
@@ -43,15 +43,15 @@ namespace MigraDoc.Rendering
         public void FormatOnAreas(XGraphics gfx, bool topLevel)
         {
             _gfx = gfx;
-            XUnit prevBottomMargin = 0;
-            XUnit yPos = prevBottomMargin;
+            XUnitPt prevBottomMargin = 0;
+            XUnitPt yPos = prevBottomMargin;
             RenderInfo? prevRenderInfo = null;
             FormatInfo? prevFormatInfo = null;
             var renderInfos = new List<RenderInfo>();
             bool ready = _elements.Count == 0;
             bool isFirstOnPage = true;
             var area = _areaProvider.GetNextArea() ?? NRT.ThrowOnNull<Area>();
-            XUnit maxHeight = area.Height;
+            XUnitPt maxHeight = area.Height;
             if (ready)
             {
                 _areaProvider.StoreRenderInfos(renderInfos);
@@ -98,7 +98,7 @@ namespace MigraDoc.Rendering
                 if (prevFormatInfo == null)
                 {
                     LayoutInfo initialLayoutInfo = renderer.InitialLayoutInfo;
-                    XUnit distance = prevBottomMargin;
+                    XUnitPt distance = prevBottomMargin;
                     if (initialLayoutInfo.VerticalReference == VerticalReference.PreviousElement &&
                         initialLayoutInfo.Floating != Floating.None)
                         distance = MarginMax(initialLayoutInfo.MarginTop, distance);
@@ -132,7 +132,7 @@ namespace MigraDoc.Rendering
                         }
                         prevBottomMargin = 0;
                         area = _areaProvider.GetNextArea();
-                        maxHeight = area?.Height ?? NRT.ThrowOnNull<XUnit>();
+                        maxHeight = area?.Height ?? NRT.ThrowOnNull<XUnitPt>();
                     }
                     else
                     {
@@ -186,7 +186,7 @@ namespace MigraDoc.Rendering
                     if (!ready)
                     {
                         area = _areaProvider.GetNextArea();
-                        maxHeight = area?.Height ?? NRT.ThrowOnNull<XUnit>();
+                        maxHeight = area?.Height ?? NRT.ThrowOnNull<XUnitPt>();
                     }
 
                 }
@@ -202,7 +202,7 @@ namespace MigraDoc.Rendering
         /// Finishes rendering for the page.
         /// </summary>
         /// <param name="lastRenderInfo">The last render info.</param>
-        /// <param name="pageBreakBefore">set to <c>true</c> if there is a pagebreak before this page.</param>
+        /// <param name="pageBreakBefore">set to <c>true</c> if there is a page break before this page.</param>
         /// <param name="renderInfos">The render infos.</param>
         /// <returns>
         /// The RenderInfo to set as previous RenderInfo.
@@ -279,9 +279,9 @@ namespace MigraDoc.Rendering
         /// </summary>
         internal static readonly int MaxCombineElements = 10;
 
-        bool NextElementsDoNotFit(int idx, Area remainingArea, XUnit previousMarginBottom)
+        bool NextElementsDoNotFit(int idx, Area remainingArea, XUnitPt previousMarginBottom)
         {
-            XUnit elementDistance = previousMarginBottom;
+            XUnitPt elementDistance = previousMarginBottom;
             Area area = remainingArea;
             for (int index = idx + 1; index < _elements.Count; ++index)
             {

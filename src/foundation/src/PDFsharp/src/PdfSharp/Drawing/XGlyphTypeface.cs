@@ -20,10 +20,12 @@ using WpfStyleSimulations = System.Windows.Media.StyleSimulations;
 #if UWP
 using Windows.UI.Xaml.Media;
 #endif
+using Microsoft.Extensions.Logging;
 using PdfSharp.Fonts;
 using PdfSharp.Fonts.Internal;
 using PdfSharp.Fonts.OpenType;
 using PdfSharp.Internal;
+using PdfSharp.Logging;
 
 namespace PdfSharp.Drawing
 {
@@ -38,10 +40,8 @@ namespace PdfSharp.Drawing
         // * Each XGlyphTypeface can belong to one or more XFont objects.
         // * An XGlyphTypeface hold an XFontFamily.
         // * XGlyphTypeface hold a reference to an OpenTypeFontFace. 
-        // * 
-        //
 
-        const string KeySuffix = ":tk";  // "typeface key"
+        const string KeySuffix = ":TFK";  // Typeface Key
 
 #if CORE
         XGlyphTypeface(string key, XFontFamily fontFamily, XFontSource fontSource, XStyleSimulations styleSimulations)
@@ -51,7 +51,9 @@ namespace PdfSharp.Drawing
             FontSource = fontSource;
 
             FontFace = OpenTypeFontFace.CetOrCreateFrom(fontSource);
-            Debug.Assert(ReferenceEquals(FontSource.FontFace, FontFace));
+            
+            // Check why it fails.
+            //Debug.Assert(ReferenceEquals(FontSource.FontFace, FontFace));
 
             StyleSimulations = styleSimulations;
             Initialize();
@@ -146,22 +148,48 @@ namespace PdfSharp.Drawing
                     return glyphTypeface;
                 }
 
-                // Resolve typeface by FontFactory.
-                var fontResolverInfo = FontFactory.ResolveTypeface(familyName, fontResolvingOptions, typefaceKey);
+                //// Resolve typeface by FontFactory. If no success, try fallback font resolver.
+                //var fontResolverInfo = FontFactory.ResolveTypeface(familyName, fontResolvingOptions, typefaceKey, false) ??
+                //                       FontFactory.ResolveTypeface(familyName, fontResolvingOptions, typefaceKey, true);
+                FontResolverInfo? fontResolverInfo = null;
+                const string message = "A font resolver throws an exception, but it must return null if the font cannot be resolved.";
+                try  // Custom font resolvers may throw an exception.
+                {
+                    // Try primary font resolver.
+                    fontResolverInfo = FontFactory.ResolveTypeface(familyName, fontResolvingOptions, typefaceKey, false);
+                }
+                catch // (Exception ex)
+                {
+                    PdfSharpLogHost.Logger.LogError(message);
+                }
+
+                if (fontResolverInfo == null)
+                {
+                    try  // Custom font resolvers may throw an exception.
+                    {
+                        // Try fallback font resolver.
+                        fontResolverInfo = FontFactory.ResolveTypeface(familyName, fontResolvingOptions, typefaceKey, true);
+                    }
+                    catch // (Exception ex)
+                    {
+                        PdfSharpLogHost.Logger.LogError(message);
+                    }
+                }
+
                 if (fontResolverInfo == null)
                 {
                     // No fallback - just stop.
 #if CORE
                     if (GlobalFontSettings.FontResolver is null)
                     {
+                        // Only Arial, Times, ...
                         throw new InvalidOperationException(
-                            $"No appropriate font found for family name \"{familyName}\". " +
-                                   "Implement IFontResolver and assign to \"GlobalFontSettings.FontResolver\" to use fonts.");
+                            $"No appropriate font found for family name '{familyName}'. " +
+                                   "Implement IFontResolver and assign to 'GlobalFontSettings.FontResolver' to use fonts.");
                     }
 #endif
-                    throw new InvalidOperationException($"No appropriate font found for family name \"{familyName}\".");
+                    throw new InvalidOperationException($"No appropriate font found for family name '{familyName}'.");
                 }
-
 #if GDI
                 GdiFont gdiFont = default!;
 #endif
@@ -182,9 +210,11 @@ namespace PdfSharp.Drawing
                     // Case: fontResolverInfo was created by platform font resolver
                     // and contains platform specific objects that are reused.
 #if CORE
-                    // Cannot come here
-                    fontFamily = null;
-                    Debug.Assert(false);
+                    // Get or create font family for custom font resolver retrieved font source.
+                    fontFamily = XFontFamily.GetOrCreateFontFamily(familyName);
+                    //// Cannot come here
+                    //fontFamily = null;
+                    //Debug.Assert(false);
 #endif
 #if GDI
                     // Reuse GDI+ font from platform font resolver.
@@ -233,7 +263,7 @@ namespace PdfSharp.Drawing
             return glyphTypeface;
         }
 
-#if GDI        
+#if GDI
         /// <summary>
         /// Gets or create an XGlyphTypeface from a GDI+ font.
         /// </summary>
@@ -252,8 +282,10 @@ namespace PdfSharp.Drawing
                     return glyphTypeface;
                 }
 
-                XFontFamily fontFamily = XFontFamily.GetOrCreateFromGdi(gdiFont);
-                XFontSource fontSource = XFontSource.GetOrCreateFromGdi(typefaceKey, gdiFont);
+                var fontFamily = XFontFamily.GetOrCreateFromGdi(gdiFont);
+                Debug.Assert(fontFamily != null);
+                var fontSource = XFontSource.GetOrCreateFromGdi(typefaceKey, gdiFont);
+                Debug.Assert(fontSource != null);
 
                 // Check if styles must be simulated.
                 XStyleSimulations styleSimulations = XStyleSimulations.None;
@@ -278,10 +310,6 @@ namespace PdfSharp.Drawing
         /// <param name="wpfTypeface">The WPF typeface.</param>
         public static XGlyphTypeface? GetOrCreateFromWpf(WpfTypeface wpfTypeface)
         {
-#if DEBUG_
-            if (wpfTypeface.FontFamily.Source == "Segoe UI Semilight")
-                wpfTypeface.GetType();
-#endif
             //string typefaceKey = ComputeKey(wpfTypeface);
             //XGlyphTypeface glyphTypeface;
             //if (GlyphTypefaceCache.TryGetGlyphTypeface(typefaceKey, out glyphTypeface))
@@ -347,8 +375,12 @@ namespace PdfSharp.Drawing
         void Initialize()
         {
             FamilyName = FontFace.name.Name;
-            if (String.IsNullOrEmpty(FaceName) || FaceName.StartsWith("?", StringComparison.Ordinal))
-                FaceName = FamilyName;
+            //if (String.IsNullOrEmpty(FaceName) || FaceName.StartsWith("?", StringComparison.Ordinal))
+#if TEST_CODE_
+            if (!String.IsNullOrEmpty(FaceName))
+                _ = typeof(int);
+#endif
+            FaceName = FontFace.name.FullFontName;
             StyleName = FontFace.name.Style;
             DisplayName = FontFace.name.FullFontName;
             if (String.IsNullOrEmpty(DisplayName))
@@ -419,7 +451,7 @@ namespace PdfSharp.Drawing
         {
             string name = DisplayName;
             int ich = name.IndexOf("bold", StringComparison.OrdinalIgnoreCase);
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE
+#if NET6_0_OR_GREATER || true
             if (ich > 0)
                 name = name[..ich] + name.Substring(ich + 4, name.Length - ich - 4);
             ich = name.IndexOf("italic", StringComparison.OrdinalIgnoreCase);
@@ -468,7 +500,7 @@ namespace PdfSharp.Drawing
                 false when !italic => name + "/N/400/500" + simulationSuffix + KeySuffix,
                 true when !italic => name + "/N/700/500" + simulationSuffix + KeySuffix,
                 false when italic => name + "/I/400/500" + simulationSuffix + KeySuffix,
-                _ => name + "/I/700/5" + simulationSuffix + KeySuffix,
+                _ => name + "/I/700/500" + simulationSuffix + KeySuffix,
             };
             return key;
         }
@@ -547,7 +579,7 @@ namespace PdfSharp.Drawing
             } + KeySuffix;
             return key;
         }
-#endif        
+#endif
         /// <summary>
         /// Gets a string that uniquely identifies an instance of XGlyphTypeface.
         /// </summary>
@@ -562,15 +594,137 @@ namespace PdfSharp.Drawing
         internal WpfTypeface? WpfTypeface { get; }
         internal WpfGlyphTypeface? WpfGlyphTypeface { get; }
 #endif
+        internal void CheckVersion() => Globals.Global.Fonts.CheckVersion(_globalFontStorageVersion);
+        readonly int _globalFontStorageVersion = Globals.Global.Fonts.Version;
 
         /// <summary>
         /// Gets the DebuggerDisplayAttribute text.
         /// </summary>
         // ReSharper disable UnusedMember.Local
         internal string DebuggerDisplay
-        // ReSharper restore UnusedMember.Local
+            // ReSharper restore UnusedMember.Local
             => Invariant($"{FamilyName} - {StyleName} ({FaceName})");
-
-        internal readonly int GlobalVersion = Globals.Global.Version;
     }
 }
+
+/*
+   Properties of WPF
+
+   AdvanceHeights	
+   Gets the advance heights for the glyphs represented by the GlyphTypeface object.
+   
+   AdvanceWidths	
+   Gets the advance widths for the glyphs represented by the GlyphTypeface object.
+   
+   Baseline	
+   Gets the baseline value for the GlyphTypeface.
+   
+   BottomSideBearings	
+   Gets the distance from bottom edge of the black box to the bottom end of the advance vector for the glyphs represented by the GlyphTypeface object.
+   
+   CapsHeight	
+   Gets the distance from the baseline to the top of an English capital, relative to em size, for the GlyphTypeface object.
+   
+   CharacterToGlyphMap	
+   Gets the nominal mapping of a Unicode code point to a glyph index as defined by the font 'CMAP' table.
+   
+   Copyrights	
+   Gets the copyright information for the GlyphTypeface object.
+   
+   Descriptions	
+   Gets the description information for the GlyphTypeface object.
+   
+   DesignerNames	
+   Gets the designer information for the GlyphTypeface object.
+   
+   DesignerUrls	
+   Gets the designer URL information for the GlyphTypeface object.
+   
+   DistancesFromHorizontalBaselineToBlackBoxBottom	
+   Gets the offset value from the horizontal Western baseline to the bottom of the glyph black box for the glyphs represented by the GlyphTypeface object.
+   
+   EmbeddingRights	
+   Gets the font embedding permission for the GlyphTypeface object.
+   
+   FaceNames	
+   Gets the face name for the GlyphTypeface object.
+   
+   FamilyNames	
+   Gets the family name for the GlyphTypeface object.
+   
+   FontUri	
+   Gets or sets the URI for the GlyphTypeface object.
+   
+   GlyphCount	
+   Gets the number of glyphs for the GlyphTypeface object.
+   
+   Height	
+   Gets the height of the character cell relative to the em size.
+   
+   LeftSideBearings	
+   Gets the distance from the leading end of the advance vector to the left edge of the black box for the glyphs represented by the GlyphTypeface object.
+   
+   LicenseDescriptions	
+   Gets the font license description information for the GlyphTypeface object.
+   
+   ManufacturerNames	
+   Gets the font manufacturer information for the GlyphTypeface object.
+   
+   RightSideBearings	
+   Gets the distance from the right edge of the black box to the right end of the advance vector for the glyphs represented by the GlyphTypeface object.
+   
+   SampleTexts	
+   Gets the sample text information for the GlyphTypeface object.
+   
+   Stretch	
+   Gets the FontStretch value for the GlyphTypeface object.
+   
+   StrikethroughPosition	
+   Gets a value that indicates the distance from the baseline to the strikethrough for the typeface.
+   
+   StrikethroughThickness	
+   Gets a value that indicates the thickness of the strikethrough relative to the font em size.
+   
+   Style	
+   Gets the style for the GlyphTypeface object.
+   
+   StyleSimulations	
+   Gets or sets the StyleSimulations for the GlyphTypeface object.
+   
+   Symbol	
+   Gets a value that indicates whether the GlyphTypeface font conforms to Unicode encoding.
+   
+   TopSideBearings	
+   Gets the distance from the top end of the vertical advance vector to the top edge of the black box for the glyphs represented by the GlyphTypeface object.
+   
+   Trademarks	
+   Gets the trademark notice information for the GlyphTypeface object.
+   
+   UnderlinePosition	
+   Gets the position of the underline in the GlyphTypeface.
+   
+   UnderlineThickness	
+   Gets the thickness of the underline relative to em size.
+   
+   VendorUrls	
+   Gets the vendor URL information for the GlyphTypeface object.
+   
+   Version	
+   Gets the font face version interpreted from the font's 'NAME' table.
+   
+   VersionStrings	
+   Gets the version string information for the GlyphTypeface object interpreted from the font's 'NAME' table.
+   
+   Weight	
+   Gets the designed weight of the font represented by the GlyphTypeface object.
+   
+   Win32FaceNames	
+   Gets the Win32 face name for the font represented by the GlyphTypeface object.
+   
+   Win32FamilyNames	
+   Gets the Win32 family name for the font represented by the GlyphTypeface object.
+   
+   XHeight	
+   Gets the Western x-height relative to em size for the font represented by the GlyphTypeface object.
+
+*/

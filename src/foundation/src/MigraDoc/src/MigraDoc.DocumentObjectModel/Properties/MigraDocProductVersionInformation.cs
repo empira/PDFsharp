@@ -54,6 +54,11 @@ namespace MigraDoc
         public static readonly string Version = GitVersionInformation.MajorMinorPatch;
 
         /// <summary>
+        /// The full semantic version number created by GitVersion.
+        /// </summary>
+        public static readonly string SemanticVersion = GitVersionInformation.SemVer;
+
+        /// <summary>
         /// The home page of this product.
         /// </summary>
         public const string Url = "www.pdfsharp.net";
@@ -66,7 +71,7 @@ namespace MigraDoc
         /// <summary>
         /// The company that created/owned the product.
         /// </summary>
-        public const string Company = "empira Software GmbH, Cologne Area (Germany)";
+        public const string Company = "empira Software GmbH, Troisdorf (Cologne Area), Germany";
 
         /// <summary>
         /// The name of the product.
