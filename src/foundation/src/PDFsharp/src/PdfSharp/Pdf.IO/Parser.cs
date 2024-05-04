@@ -1161,11 +1161,13 @@ namespace PdfSharp.Pdf.IO
             // Read position behind 'startxref'.
             _lexer.Position = ReadSize();
 
+            var xrefStart = _lexer.Position;
+
             // Read all trailers.
             PdfTrailer? newerTrailer = null;
             while (true)
             {
-                var trailer = ReadXRefTableAndTrailer(_document.IrefTable);
+                var trailer = ReadXRefTableAndTrailer(_document.IrefTable, xrefStart);
 
                 // Return the first found trailer, which is the one 'startxref' points to.
                 // This is the current trailer, even for incrementally updated files.
@@ -1183,6 +1185,7 @@ namespace PdfSharp.Pdf.IO
 
                 // Continue loading previous trailer and cache this one as the newerTrailer to add its previous trailer.
                 _lexer.Position = prev;
+                xrefStart = prev;
                 newerTrailer = trailer;
             }
             return _document.Trailer;
@@ -1191,7 +1194,7 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Reads cross-reference table(s) and trailer(s).
         /// </summary>
-        PdfTrailer? ReadXRefTableAndTrailer(PdfCrossReferenceTable xrefTable)
+        PdfTrailer? ReadXRefTableAndTrailer(PdfCrossReferenceTable xrefTable, SizeType xrefStart)
         {
             Debug.Assert(xrefTable != null);
 
@@ -1260,7 +1263,10 @@ namespace PdfSharp.Pdf.IO
                     else if (symbol == Symbol.Trailer)
                     {
                         ReadSymbol(Symbol.BeginDictionary);
-                        var trailer = new PdfTrailer(_document);
+                        var trailer = new PdfTrailer(_document)
+                        {
+                            Position = xrefStart
+                        };
                         ReadDictionary(trailer, false);
                         return trailer;
                     }
@@ -1275,8 +1281,8 @@ namespace PdfSharp.Pdf.IO
                 // Reference: 3.4.7  Cross-Reference Streams / Page 93
                 // TODO: We have not yet tested PDF files larger than 2 GiB because we have none and cannot produce one.
 
-                // The parsed integer is the object ID of the cross-reference stream object.
-                return ReadXRefStream(xrefTable);
+                // The parsed integer is the object ID of the cross-reference stream.
+                return ReadXRefStream(xrefTable, xrefStart);
             }
             return null;
         }
@@ -1330,13 +1336,10 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Reads cross-reference stream(s).
         /// </summary>
-        PdfTrailer ReadXRefStream(PdfCrossReferenceTable xrefTable)
+        PdfTrailer ReadXRefStream(PdfCrossReferenceTable xrefTable, SizeType xrefStart)
         {
             // Read cross-reference stream.
             //Debug.Assert(_lexer.Symbol == Symbol.Integer);
-
-            // NEEDED???
-            var xrefStart = _lexer.Position - _lexer.Token.Length;
 
             int number = _lexer.TokenToInteger;
             int generation = ReadInteger();
@@ -1357,7 +1360,10 @@ namespace PdfSharp.Pdf.IO
             ReadSymbol(Symbol.BeginDictionary);
             var objectID = new PdfObjectID(number, generation);
 
-            var xrefStream = new PdfCrossReferenceStream(_document);
+            var xrefStream = new PdfCrossReferenceStream(_document)
+            {
+                Position = xrefStart
+            };
 
             ReadDictionary(xrefStream, false);
             ReadSymbol(Symbol.BeginStream);

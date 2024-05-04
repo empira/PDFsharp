@@ -38,7 +38,7 @@ namespace PdfSharp.Pdf.Advanced
             : base(dict)
         {
             // A PdfContent dictionary is always unfiltered.
-            Decode();
+            Owner.IrefTable.IgnoreModify(Decode);   // decode modifies the object, ignore that
         }
 
         /// <summary>

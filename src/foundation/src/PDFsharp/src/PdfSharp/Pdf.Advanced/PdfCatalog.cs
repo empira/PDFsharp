@@ -68,7 +68,7 @@ namespace PdfSharp.Pdf.Advanced
                 if (_pages == null)
                 {
                     _pages = (PdfPages?)Elements.GetValue(Keys.Pages, VCF.CreateIndirect) ?? NRT.ThrowOnNull<PdfPages>();
-                    if (Owner.IsImported)
+                    if (Owner.IsImported && Owner._openMode != PdfDocumentOpenMode.Append)
                         _pages.FlattenPageTree();
                 }
                 return _pages;

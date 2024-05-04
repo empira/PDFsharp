@@ -49,7 +49,8 @@ namespace PdfSharp.Pdf.Advanced
         {
             Debug.Assert(Owner != null);
 
-            SetModified();
+            if (Owner._openMode != PdfDocumentOpenMode.Append)
+                SetModified();
             PdfContent content = new PdfContent(Owner);
             Owner.IrefTable.Add(content);
             Debug.Assert(content.Reference != null);
@@ -64,7 +65,8 @@ namespace PdfSharp.Pdf.Advanced
         {
             Debug.Assert(Owner != null);
 
-            SetModified();
+            if (Owner._openMode != PdfDocumentOpenMode.Append)
+                SetModified();
             PdfContent content = new PdfContent(Owner);
             Owner.IrefTable.Add(content);
             Debug.Assert(content.Reference != null);

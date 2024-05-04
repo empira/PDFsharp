@@ -181,7 +181,7 @@ namespace PdfSharp.Pdf
         static int _nameCount;
 
         //internal bool CanModify => true;
-        internal bool CanModify => _openMode == PdfDocumentOpenMode.Modify;
+        internal bool CanModify => _openMode == PdfDocumentOpenMode.Modify || _openMode == PdfDocumentOpenMode.Append;
 
         /// <summary>
         /// Closes this instance.
@@ -328,7 +328,10 @@ namespace PdfSharp.Pdf
                 // HACK: Remove XRefTrailer
                 if (Trailer is PdfCrossReferenceStream crossReferenceStream)
                 {
-                    Trailer = new PdfTrailer(crossReferenceStream);
+                    Trailer = new PdfTrailer(crossReferenceStream)
+                    {
+                        Position = crossReferenceStream.Position
+                    };
                 }
 
                 var effectiveSecurityHandler = _securitySettings?.EffectiveSecurityHandler;
@@ -342,6 +345,16 @@ namespace PdfSharp.Pdf
                 }
                 else
                     Trailer.Elements.Remove(PdfTrailer.Keys.Encrypt);
+
+                if (_openMode == PdfDocumentOpenMode.Append)
+                {
+                    // Prepare used fonts.
+                    _fontTable?.PrepareForSave();
+                    // Let catalog do the rest.
+                    Catalog.PrepareForSave();
+                    SaveIncrementally(writer);
+                    return;
+                }
 
                 PrepareForSave();
 
@@ -382,6 +395,79 @@ namespace PdfSharp.Pdf
                 }
                 _state |= DocumentState.Saved;
             }
+        }
+
+        /// <summary>
+        /// Saves changes made to the document as an incremental update.<br></br>
+        /// If the document was not modified, this method does nothing.<br></br>
+        /// </summary>
+        /// <remarks>
+        /// Note that when updating a document that is <b>linearized</b>, the document will no longer be linearized
+        /// as the update changes the file-length and may invalidate the existing hint-tables.<br></br>
+        /// Acrobat(Reader) may complain that the file is damaged and need to be repaired.<br></br>
+        /// </remarks>
+        /// <param name="writer"></param>
+        internal void SaveIncrementally(PdfWriter writer)
+        {
+            if (IrefTable.ModifiedObjects.Count == 0)
+                return;
+
+            _securitySettings?.EffectiveSecurityHandler?.PrepareForWriting();
+
+            writer.Stream.Seek(0, SeekOrigin.End);
+            // there may be the line "%%EOF" at the end of the file, make sure we start on a new line
+            writer.WriteRaw('\n');
+
+            var objects = new List<Tuple<int, int, long>>(IrefTable.ModifiedObjects.Count);
+
+            foreach (var iref in IrefTable.ModifiedObjects.Values.OrderBy(it => it.ObjectNumber))
+            {
+                iref.Position = writer.Position;
+                iref.Value.WriteObject(writer);
+                objects.Add(new (iref.ObjectNumber, iref.GenerationNumber, iref.Position));
+            }
+            SizeType startxref = writer.Position;
+
+            writer.WriteRaw("xref\n");
+
+            writer.WriteRaw(Invariant($"0 1\n"));
+            writer.WriteRaw(Invariant($"{0:0000000000} {65535:00000} f \n"));
+
+            // build chunks of consecutively numbered objects
+            var startIndex = 0;
+            var chunk = new List<Tuple<int, int, long>>(objects.Count);
+            do
+            {
+                chunk.Clear();
+                chunk.AddRange(objects.Skip(startIndex).TakeWhile((it, idx) =>
+                {
+                    return idx == 0 || it.Item1 == objects[idx + startIndex - 1].Item1 + 1;
+                }));
+                startIndex += chunk.Count;
+
+                writer.WriteRaw(Invariant($"{chunk[0].Item1} {chunk.Count}\n"));
+                foreach (var element in chunk)
+                {
+                    // Acrobat is very pedantic; it must be exactly 20 bytes per line.
+                    writer.WriteRaw(Invariant($"{element.Item3:0000000000} {element.Item2:00000} n \n"));
+                }
+            } while (startIndex < objects.Count);
+
+            var newTrailer = new PdfTrailer(this);
+            // copy all entries from the previous trailer, as specified in the spec
+            foreach (var key in Trailer.Elements.Keys)
+            {
+                // skip these as we provide new values for them
+                if (key == PdfTrailer.Keys.Prev || key == PdfTrailer.Keys.Size)
+                    continue;
+                newTrailer.Elements[key] = Trailer.Elements[key];
+            }
+            newTrailer.Size = IrefTable.MaxObjectNumber + 1;
+            newTrailer.Elements.SetObject(PdfTrailer.Keys.Prev, new PdfLongIntegerObject(this, Trailer.Position));
+
+            writer.WriteRaw("trailer\n");
+            newTrailer.WriteObject(writer);
+            writer.WriteEof(this, startxref);
         }
 
         /// <summary>
@@ -566,7 +652,12 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Returns a value indicating whether the document is read only or can be modified.
         /// </summary>
-        public bool IsReadOnly => (_openMode != PdfDocumentOpenMode.Modify);
+        public bool IsReadOnly => (_openMode != PdfDocumentOpenMode.Modify && _openMode != PdfDocumentOpenMode.Append);
+
+        /// <summary>
+        /// Gets a value indicating whether the document was opened in append-mode
+        /// </summary>
+        public bool IsAppending => _openMode == PdfDocumentOpenMode.Append;
 
         internal Exception DocumentNotImported()
         {

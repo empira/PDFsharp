@@ -33,5 +33,10 @@ namespace PdfSharp.Pdf.IO
         /// and is e.g. useful for browsing information about a collection of PDF documents in a user interface.
         /// </summary>
         InformationOnly,  // TODO: not yet implemented
+
+        /// <summary>
+        /// Comparable to <see cref="Modify"/> but changes are appended to the document when saving
+        /// </summary>
+        Append
     }
 }

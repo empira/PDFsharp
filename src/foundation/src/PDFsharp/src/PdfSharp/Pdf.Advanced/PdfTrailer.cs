@@ -15,6 +15,12 @@ namespace PdfSharp.Pdf.Advanced
     class PdfTrailer : PdfDictionary
     {
         /// <summary>
+        /// Gets or sets the position of this trailer in the input-stream<br></br>
+        /// Only meaningful for loaded documents; will be zero for new documents
+        /// </summary>
+        internal SizeType Position { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of PdfTrailer.
         /// </summary>
         public PdfTrailer(PdfDocument document)
@@ -211,8 +217,9 @@ namespace PdfSharp.Pdf.Advanced
 
             Elements.Remove(Keys.Prev);
 
-            Debug.Assert(_document.IrefTable.IsUnderConstruction == false);
+            Debug.Assert(_document.IrefTable.IsUnderConstruction == false);     // Why ??
             _document.IrefTable.IsUnderConstruction = false;
+            _document.IrefTable.ReadyForModification = true;
         }
 
         /// <summary>
