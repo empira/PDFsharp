@@ -3,6 +3,7 @@
 
 #define VERBOSE_
 
+using PdfSharp.Drawing;
 using System.Text;
 
 using Fixed = System.Int32;
@@ -251,6 +252,157 @@ namespace PdfSharp.Fonts.OpenType
                 }
                 if (!success)
                     throw new InvalidOperationException("Font has no usable platform or encoding ID. It cannot be used with PDFsharp.");
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(PSSR.ErrorReadingFontData, ex);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Color Table<br></br>
+    /// https://learn.microsoft.com/en-us/typography/opentype/spec/colr
+    /// </summary>
+    class ColrTable : OpenTypeFontTable
+    {
+        public const string Tag = TableTagNames.COLR;
+
+        internal struct GlyphRecord
+        {
+            public ushort glyphId;
+            public ushort firstLayerIndex;
+            public ushort numLayers;
+        }
+        internal struct LayerRecord
+        {
+            public ushort glyphId;
+            public ushort paletteIndex;
+        }
+
+        public ushort version;
+        // version 0 tables start
+        public ushort numBaseGlyphRecords;
+        public uint baseGlyphRecordsOffset;
+        public uint layerRecordsOffset;
+        public ushort numLayerRecords;
+        // version 0 tables end
+
+        public GlyphRecord[] baseGlyphRecords = [];
+        public LayerRecord[] layerRecords = [];
+        // helper array that contains just the glyphIds for the baseGlyphRecords
+        private int[] glyphRecordsHelperArray = [];
+
+        public ColrTable(OpenTypeFontFace fontData)
+            : base(fontData, Tag)
+        {
+            Read(fontData);
+        }
+
+        public GlyphRecord? GetLayers(int glyphId)
+        {
+            var index = Array.BinarySearch(glyphRecordsHelperArray, glyphId);
+            if (index >= 0)
+            {
+                return baseGlyphRecords[index];
+            }
+            return null;
+        }
+
+        void Read(OpenTypeFontFace fontData)
+        {
+            try
+            {
+                var tableStart = fontData.Position;
+
+                version = fontData.ReadUShort();
+                Debug.Assert(version == 0 || version == 1, "Version 0 or 1 of COLR table is expected");
+                numBaseGlyphRecords = fontData.ReadUShort();
+                baseGlyphRecordsOffset = fontData.ReadULong();
+                layerRecordsOffset = fontData.ReadULong();
+                numLayerRecords = fontData.ReadUShort();
+
+                baseGlyphRecords = new GlyphRecord[numBaseGlyphRecords];
+                glyphRecordsHelperArray = new int[numBaseGlyphRecords];
+                layerRecords = new LayerRecord[numLayerRecords];
+
+                fontData.Position = tableStart + (int)baseGlyphRecordsOffset;
+                for (var i = 0; i < numBaseGlyphRecords; i++)
+                {
+                    var glyphId = fontData.ReadUShort();
+                    baseGlyphRecords[i] = new GlyphRecord
+                    {
+                        glyphId = glyphId,
+                        firstLayerIndex = fontData.ReadUShort(),
+                        numLayers = fontData.ReadUShort()
+                    };
+                    glyphRecordsHelperArray[i] = glyphId;
+                }
+                fontData.Position = tableStart + (int)layerRecordsOffset;
+                for (var i = 0; i < numLayerRecords; i++)
+                {
+                    layerRecords[i] = new LayerRecord
+                    {
+                        glyphId = fontData.ReadUShort(),
+                        paletteIndex = fontData.ReadUShort()
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(PSSR.ErrorReadingFontData, ex);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Color Palette table<br></br>
+    /// https://learn.microsoft.com/en-us/typography/opentype/spec/cpal
+    /// </summary>
+    class CpalTable : OpenTypeFontTable
+    {
+        public const string Tag = TableTagNames.CPAL;
+
+        public ushort version;
+        public ushort numPaletteEntries;
+        public ushort numPalettes;
+        public ushort numColorRecords;
+        public uint colorRecordsArrayOffset;
+        public ushort[] colorRecordIndices = [];
+        public XColor[] colorRecords = [];
+
+        public CpalTable(OpenTypeFontFace fontData)
+            : base(fontData, Tag)
+        {
+            Read(fontData);
+        }
+
+        void Read(OpenTypeFontFace fontData)
+        {
+            try
+            {
+                var tableStart = fontData.Position;
+
+                version = fontData.ReadUShort();
+                numPaletteEntries = fontData.ReadUShort();
+                numPalettes = fontData.ReadUShort();
+                numColorRecords = fontData.ReadUShort();
+                colorRecordsArrayOffset = fontData.ReadULong();
+
+                colorRecordIndices = new ushort[numPalettes];
+                for (int i = 0; i < numPalettes; i++)
+                {
+                    colorRecordIndices[i] = fontData.ReadUShort();
+                }
+                colorRecords = new XColor[numColorRecords];
+                for (int i = 0; i < numColorRecords; i++)
+                {
+                    var blue = fontData.ReadByte();
+                    var green = fontData.ReadByte();
+                    var red = fontData.ReadByte();
+                    var alpha = fontData.ReadByte();
+                    colorRecords[i] = XColor.FromArgb(alpha, red, green, blue);
+                }
             }
             catch (Exception ex)
             {

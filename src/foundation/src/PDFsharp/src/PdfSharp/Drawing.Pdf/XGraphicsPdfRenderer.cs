@@ -27,6 +27,7 @@ using PdfSharp.Pdf;
 using PdfSharp.Pdf.Internal;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
+using PdfSharp.Fonts;
 
 // ReSharper disable RedundantNameQualifier
 // ReSharper disable CompareOfFloatsByEqualityOperator
@@ -443,10 +444,7 @@ namespace PdfSharp.Drawing.Pdf
             double cyAscent = lineSpace * font.CellAscent / font.CellSpace;
             double cyDescent = lineSpace * font.CellDescent / font.CellSpace;
 
-            bool italicSimulation = (font.GlyphTypeface.StyleSimulations & XStyleSimulations.ItalicSimulation) != 0;
             bool boldSimulation = (font.GlyphTypeface.StyleSimulations & XStyleSimulations.BoldSimulation) != 0;
-            bool strikeout = (font.Style & XFontStyleEx.Strikeout) != 0;
-            bool underline = (font.Style & XFontStyleEx.Underline) != 0;
 
             //var otDescriptor = font.OpenTypeDescriptor;
             //var ids = otDescriptor.GlyphIndicesFromCodepoints(codePoints);
@@ -567,35 +565,143 @@ namespace PdfSharp.Drawing.Pdf
                 }
             }
 
-            string? text;
-            if (isAnsi)
+            var length = codePoints.Length;
+
+            // Standard-case: characters do not have color-information
+            if (codePointsWithGlyphIndices.All(item => item.Color is null))
             {
-                // Use ANSI character encoding.
-                var length = codePoints.Length;
-                byte[] bytes = new byte[length];
-                for (int idx = 0; idx < length; idx++)
+                string? text;
+                if (isAnsi)
                 {
-                    ref var item = ref codePoints[idx];
-                    //Debug.Assert(item.Character == item.Codepoint);
-                    var ch = AnsiEncoding.UnicodeToAnsi((char)item);
-                    bytes[idx] = (byte)ch;
+                    // Use ANSI character encoding.
+                    byte[] bytes = new byte[length];
+                    for (int idx = 0; idx < length; idx++)
+                    {
+                        ref var item = ref codePoints[idx];
+                        var ch = AnsiEncoding.UnicodeToAnsi((char)item);
+                        bytes[idx] = (byte)ch;
+                    }
+                    text = PdfEncoders.ToStringLiteral(bytes, false, null);
                 }
-                //bytes = PdfEncoders.WinAnsiEncoding.GetBytes(s);
-                text = PdfEncoders.ToStringLiteral(bytes, false, null);
+                else
+                {
+                    // Use Unicode glyph encoding.
+                    var bytes = new byte[2 * length];
+                    for (int idx = 0; idx < length; idx++)
+                    {
+                        ref var item = ref codePointsWithGlyphIndices[idx];
+                        bytes[idx * 2] = (byte)((item.GlyphIndex & 0xFF00) >>> 8);
+                        bytes[idx * 2 + 1] = (byte)(item.GlyphIndex & 0xFF);
+                    }
+                    text = PdfEncoders.ToHexStringLiteral(bytes, true, false, null);
+                }
+                RenderText(text, font, brush, x, y, width);
+                return;
             }
-            else
+
+            // Special case: characters are colorized (e.g. Emoji-Fonts)
+            // we split the text based on whether special color-handling is required for a character
+
+            List<List<CodePointGlyphIndexPair>> textParts = [];
+            var partGlyphs = new List<CodePointGlyphIndexPair>();
+            var isColorized = false;
+            for (int idx = 0; idx < length; idx++)
             {
-                // Use Unicode glyph encoding.
-                int length = codePointsWithGlyphIndices.Length;
-                var bytes = new byte[2 * length];
-                for (int idx = 0; idx < length; idx++)
+                ref var cp = ref codePointsWithGlyphIndices[idx];
+                var color = cp.Color;
+                // if glyph is colored, render individually, else add to list
+                if (color != null || (color == null && isColorized))
                 {
-                    ref var item = ref codePointsWithGlyphIndices[idx];
-                    bytes[idx * 2] = (byte)((item.GlyphIndex & 0xFF00) >>> 8);
-                    bytes[idx * 2 + 1] = (byte)(item.GlyphIndex & 0xFF);
+                    if (partGlyphs.Count > 0)
+                        textParts.Add(partGlyphs);
+                    partGlyphs = [];
+                    isColorized = color != null;
                 }
-                text = PdfEncoders.ToHexStringLiteral(bytes, true, false, null);
+                partGlyphs.Add(cp);
             }
+            if (partGlyphs.Count > 0)
+                textParts.Add(partGlyphs);
+
+            Debug.Assert(textParts.Sum(p => p.Count) == length, "Character count mismatch");
+
+            const string format2 = Config.SignificantDecimalPlaces4;
+            var layerBytes = new byte[2];
+            foreach (var textPart in textParts)
+            {
+                // textPart is either a single item having a color-record or 1-N items without color
+                if (textPart.Count == 1 && textPart[0].Color != null)
+                {
+                    var chunkWidth = 0.0;
+                    var glyphRecord = textPart[0].Color!.Value;
+                    for (var i = 0; i < glyphRecord.numLayers; i++)
+                    {
+                        var layer = otDescriptor.FontFace.colr!.layerRecords[i + glyphRecord.firstLayerIndex];
+                        var cp = new CodePointGlyphIndexPair(layer.glyphId, layer.glyphId);
+                        // 0xffff is a special entry denoting the current foreground-color
+                        if (layer.paletteIndex != 0xffff)
+                        {
+                            var color = otDescriptor.FontFace.cpal!.colorRecords[layer.paletteIndex];
+                            _gfxState.RealizeBrush(new XSolidBrush(color), _colorMode, 0, 0);
+                        }
+                        else
+                        {
+                            _gfxState.RealizeBrush(brush, _colorMode, 0, 0);
+                        }
+                        realizedFont.AddChars([cp]);
+                        var partWidth = otDescriptor.GlyphIndexToEmWidth(layer.glyphId, font.Size);
+                        chunkWidth = Math.Max(chunkWidth, partWidth);
+                        layerBytes[0] = (byte)((layer.glyphId & 0xFF00) >>> 8);
+                        layerBytes[1] = (byte)(layer.glyphId & 0xFF);
+                        var text = PdfEncoders.ToHexStringLiteral(layerBytes, true, false, null);
+                        if (i == 0)
+                        {
+                            var pos = new XPoint(x, y);
+                            pos = WorldToView(pos);
+                            AdjustTdOffset(ref pos, 0, false);
+                            AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} Td {2} Tj\n", pos.X, pos.Y, text);
+                        }
+                        else
+                        {
+                            // rest of the layers are rendered on top of the first layer
+                            AppendFormatArgs("0 0 Td {0} Tj\n", text);
+                        }
+                    }
+                    x += chunkWidth;
+                }
+                else
+                {
+                    Debug.Assert(textPart.All(p => p.Color == null), "Colors should be null here");
+
+                    width = 0.0;
+                    var bytes = new byte[textPart.Count * 2];
+                    for (var idx = 0; idx < textPart.Count; idx++)
+                    {
+                        var cp = textPart[idx];
+                        width += otDescriptor.GlyphIndexToWidth(cp.GlyphIndex);
+                        bytes[idx * 2] = (byte)((cp.GlyphIndex & 0xFF00) >>> 8);
+                        bytes[idx * 2 + 1] = (byte)(cp.GlyphIndex & 0xFF);
+                    }
+                    width = width * font.Size / otDescriptor.UnitsPerEm;
+                    var text = PdfEncoders.ToHexStringLiteral(bytes, true, false, null);
+                    _gfxState.RealizeBrush(brush, _colorMode, 0, 0);
+                    RenderText(text, font, brush, x, y, width);
+                    x += width;
+                }
+            }
+        }
+
+        void RenderText(string text, XFont font, XBrush brush, double x, double y, double width)
+        {
+            double lineSpace = font.GetHeight();
+            double cyAscent = lineSpace * font.CellAscent / font.CellSpace;
+            double cyDescent = lineSpace * font.CellDescent / font.CellSpace;
+
+            bool italicSimulation = (font.GlyphTypeface.StyleSimulations & XStyleSimulations.ItalicSimulation) != 0;
+            bool boldSimulation = (font.GlyphTypeface.StyleSimulations & XStyleSimulations.BoldSimulation) != 0;
+            bool strikeout = (font.Style & XFontStyleEx.Strikeout) != 0;
+            bool underline = (font.Style & XFontStyleEx.Underline) != 0;
+
+            var realizedFont = _gfxState.RealizedFont!;
 
             // Map absolute position to PDF world space.
             var pos = new XPoint(x, y);
@@ -696,6 +802,7 @@ namespace PdfSharp.Drawing.Pdf
                 DrawRectangle(null, brush, x, strikeoutRectY, width, strikeoutSize);
             }
         }
+
         // ReSharper disable InconsistentNaming
         static string? s_format1;
         static string? s_format2;

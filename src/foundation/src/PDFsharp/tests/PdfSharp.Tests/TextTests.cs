@@ -17,9 +17,26 @@ namespace PdfSharp.Tests
     [Collection("PDFsharp")]
     public class TextTests
     {
-        [Fact(Skip = "Need Segoe UI Emoji here")]
-        public void PDF_with_Emojis()
+        [Theory]
+        [InlineData(@"C:\Windows\Fonts\seguiemj.ttf")]
+        public void PDF_with_Emojis(string fontPath)
         {
+            File.Exists(fontPath).Should().BeTrue();
+
+            var fontName = Path.GetFileNameWithoutExtension(fontPath);
+
+            var fontResolver = new ApplicationFontResolver();
+            var fontLocations = new List<string>
+            {
+                @"C:\Windows\Fonts"
+            };
+            foreach (var fontLocation in fontLocations)
+            {
+                fontResolver.RegisterSearchPath(fontLocation);
+            }
+            GlobalFontSettings.FontResolver = fontResolver;
+
+
             // Create a new PDF document.
             var document = new PdfDocument();
             document.Info.Title = "Created with PDFsharp";
@@ -35,13 +52,13 @@ namespace PdfSharp.Tests
             var width = page.Width.Point;
             var height = page.Height.Point;
 
-            XPdfFontOptions options = new XPdfFontOptions(PdfFontEncoding.Unicode);
-            XFont font = new XFont("Segoe UI Emoji", 12, XFontStyleEx.Regular, options);
-            gfx.DrawString("111😢😞💪", font, XBrushes.Black, new XRect(0, 0, width, height), XStringFormats.Center);
+            var options = new XPdfFontOptions(PdfFontEncoding.Unicode);
+            var font = new XFont(fontName, 12, XFontStyleEx.Regular, options);
+            gfx.DrawString("111 😢X😞X💪 111", font, XBrushes.Black, new XRect(0, 0, width, height), XStringFormats.Center);
             gfx.DrawString("\ud83d\udca9\ud83d\udca9\ud83d\udca9\u2713\u2714\u2705\ud83d\udc1b\ud83d\udc4c\ud83c\udd97\ud83d\udd95 \ud83e\udd84 \ud83e\udd82 \ud83c\udf47 \ud83c\udf46 \u2615 \ud83d\ude82 \ud83d\udef8 \u2601 \u2622 \u264c \u264f \u2705 \u2611 \u2714 \u2122 \ud83c\udd92 \u25fb", font, XBrushes.Black, new XRect(0, 50, width, height), XStringFormats.Center);
 
             // Save the document...
-            string filename = PdfFileUtility.GetTempPdfFileName("HelloEmoji");
+            string filename = Path.Combine(Path.GetTempPath(), "HelloEmoji.pdf");
             document.Save(filename);
             // ...and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
