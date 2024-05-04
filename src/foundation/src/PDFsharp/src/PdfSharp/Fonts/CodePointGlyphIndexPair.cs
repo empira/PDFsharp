@@ -1,6 +1,8 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Fonts.OpenType;
+
 namespace PdfSharp.Fonts
 {
     /// <summary>
@@ -20,5 +22,10 @@ namespace PdfSharp.Fonts
         /// The value is 0 if the specific font has no glyph for the code point.
         /// </summary>
         public ushort GlyphIndex = glyphIndex;
+
+        /// <summary>
+        /// The color-record of the Glyph if provided by the font.
+        /// </summary>
+        internal ColrTable.GlyphRecord? Color = null;
     }
 }

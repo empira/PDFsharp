@@ -503,6 +503,7 @@ namespace PdfSharp.Fonts.OpenType
                     // Remap ch for symbol fonts.
                     item.CodePoint = codePoint;
                     item.GlyphIndex = BmpCodepointToGlyphIndex(ch);
+                    item.Color = GetColorRecord(item.GlyphIndex);
                 }
             }
             else
@@ -532,6 +533,7 @@ namespace PdfSharp.Fonts.OpenType
                     item.GlyphIndex = item.CodePoint < UnicodeHelper.UnicodePlane01Start
                         ? BmpCodepointToGlyphIndex((char)item.CodePoint)
                         : CodepointToGlyphIndex(item.CodePoint);
+                    item.Color = GetColorRecord(item.GlyphIndex);
                 }
             }
             return result;
@@ -558,6 +560,22 @@ namespace PdfSharp.Fonts.OpenType
 
             // Used | instead of + because of: http://pdfsharp.codeplex.com/workitem/15954
             return (char)(ch | (FontFace.os2.usFirstCharIndex & 0xFF00));
+        }
+
+        /// <summary>
+        /// Gets the color-record of the glyph with the specified id
+        /// </summary>
+        /// <param name="glyphId"></param>
+        /// <returns>The color-record for the specified glyph or null, if the specified glyph has no color record</returns>
+        public ColrTable.GlyphRecord? GetColorRecord(int glyphId)
+        {
+            // both tables are required according to the spec
+            // ref: https://learn.microsoft.com/en-us/typography/opentype/spec/colr
+            if (FontFace.cpal != null && FontFace.colr != null)
+            {
+                return FontFace.colr.GetLayers(glyphId);
+            }
+            return null;
         }
     }
 }
