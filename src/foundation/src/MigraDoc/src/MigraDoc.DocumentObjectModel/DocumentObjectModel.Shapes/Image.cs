@@ -94,6 +94,16 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
 
         /// <summary>
+        /// Gets or sets whether the image is interpolated on resizing.
+        /// Defaults to true.
+        /// </summary>
+        public bool Interpolate
+        {
+            get => Values.Interpolate ?? true;
+            set => Values.Interpolate = value;
+        }
+
+        /// <summary>
         /// Gets or sets the PictureFormat for the image.
         /// </summary>
         public PictureFormat PictureFormat
@@ -132,6 +142,8 @@ namespace MigraDoc.DocumentObjectModel.Shapes
                 serializer.WriteSimpleAttribute("ScaleHeight", ScaleHeight);
             if (Values.LockAspectRatio is not null)
                 serializer.WriteSimpleAttribute("LockAspectRatio", LockAspectRatio);
+            if (Values.Interpolate is not null)
+                serializer.WriteSimpleAttribute("Interpolate", Interpolate);
             if (Values.Resolution is not null)
                 serializer.WriteSimpleAttribute("Resolution", Resolution);
             Values.PictureFormat?.Serialize(serializer);
@@ -212,6 +224,12 @@ namespace MigraDoc.DocumentObjectModel.Shapes
             /// See enclosing document object class for documentation of this property.
             /// </summary>
             public bool? LockAspectRatio { get; set; }
+
+            /// <summary>
+            /// Gets or sets the internal nullable implementation value of the enclosing document object property.
+            /// See enclosing document object class for documentation of this property.
+            /// </summary>
+            public bool? Interpolate { get; set; }
 
             /// <summary>
             /// Gets or sets the internal nullable implementation value of the enclosing document object property.

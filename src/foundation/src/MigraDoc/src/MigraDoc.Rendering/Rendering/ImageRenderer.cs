@@ -78,7 +78,7 @@ namespace MigraDoc.Rendering
                 {
                     XRect srcRect = new(formatInfo.CropX, formatInfo.CropY, formatInfo.CropWidth, formatInfo.CropHeight);
                     //xImage = XImage.FromFile(formatInfo.ImagePath);
-                    xImage = CreateXImage(formatInfo.ImagePath);
+                    xImage = CreateXImage(formatInfo.ImagePath, _image.Interpolate);
                     _gfx.DrawImage(xImage, destRect, srcRect, XGraphicsUnit.Point); //Pixel.
                 }
                 catch (Exception)
@@ -138,7 +138,7 @@ namespace MigraDoc.Rendering
                 try
                 {
                     //xImage = XImage.FromFile(_imageFilePath);
-                    xImage = CreateXImage(_imageFilePath);
+                    xImage = CreateXImage(_imageFilePath, _image.Interpolate);
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -310,7 +310,7 @@ namespace MigraDoc.Rendering
             }
         }
 
-        XImage CreateXImage(string uri)
+        XImage CreateXImage(string uri, bool interpolate)
         {
             if (uri.StartsWith("base64:", StringComparison.Ordinal))
             {
@@ -323,16 +323,23 @@ namespace MigraDoc.Rendering
                 {
                     Stream stream = new MemoryStream(bytes);
                     XImage image = XImage.FromStream(stream);
+                    image.Interpolate = interpolate;
                     return image;
                 }
 #else
                 //using Stream stream = new MemoryStream(bytes);
                 using Stream stream = new MemoryStream(bytes, 0, bytes.Length, true, true);
                 XImage image = XImage.FromStream(stream);
+                image.Interpolate = interpolate;
                 return image;
 #endif
             }
-            return XImage.FromFile(uri);
+            else
+            {
+                XImage image = XImage.FromFile(uri);
+                image.Interpolate = interpolate;
+                return image;
+            }
         }
 
         readonly Image _image;
