@@ -134,7 +134,7 @@ namespace PdfSharp.Pdf.Advanced
             {
 #if DEBUG_
                 if (value < 0)
-                    GetType();
+                    _ = typeof(int);
 #endif
                 Debug.Assert(value >= 0);
                 _position = value;
@@ -143,7 +143,7 @@ namespace PdfSharp.Pdf.Advanced
                 set => _position = value;
 #endif
         }
-        SizeType _position;  // I know it should be long, but I have never seen a 2GB PDF file.
+        SizeType _position;
 
         /// <summary>
         /// Gets or sets the referenced PdfObject.

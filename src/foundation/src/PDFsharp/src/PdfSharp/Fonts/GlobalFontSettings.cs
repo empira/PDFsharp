@@ -16,17 +16,16 @@ namespace PdfSharp.Fonts
     public static class GlobalFontSettings
     {
         /// <summary>
-        /// The name of the default font.
+        /// The name of the default font. This name is obsolete and must not be used anymore.
         /// </summary>
         [Obsolete("DefaultFontName is deprecated. Do not use it anymore. Use Arial instead.")]
         public const string DefaultFontName_ = "PlatformDefault";
 
         /// <summary>
-        /// Gets or sets the global font resolver for the current application domain.
+        /// Gets or sets the custom font resolver for the current application.
         /// This static function must be called only once and before any font operation was executed by PDFsharp.
         /// If this is not easily to obtain, e.g. because your code is running on a web server, you must provide the
         /// same instance of your font resolver in every subsequent setting of this property.
-        /// //In a web application set the font resolver in Global.asax.
         /// </summary>
         public static IFontResolver? FontResolver
         {
@@ -35,7 +34,7 @@ namespace PdfSharp.Fonts
             {
                 // Cannot remove font resolver.
                 if (value == null)
-                    throw new ArgumentNullException(nameof(value));
+                    throw new ArgumentNullException(nameof(value), "You cannot remove the font resolver.");
 
                 ref var fontResolver = ref Globals.Global.Fonts.FontResolver;
                 try
@@ -48,12 +47,10 @@ namespace PdfSharp.Fonts
         }
 
         /// <summary>
-        /// #DOCUMENTATION
-        /// Gets or sets the global font resolver for the current application domain.
+        /// Gets or sets the fallback font resolver for the current application.
         /// This static function must be called only once and before any font operation was executed by PDFsharp.
         /// If this is not easily to obtain, e.g. because your code is running on a web server, you must provide the
         /// same instance of your font resolver in every subsequent setting of this property.
-        /// //In a web application set the font resolver in Global.asax.
         /// </summary>
         public static IFontResolver? FallbackFontResolver
         {
@@ -62,7 +59,7 @@ namespace PdfSharp.Fonts
             {
                 // Cannot remove font resolver.
                 if (value == null)
-                    throw new ArgumentNullException(nameof(value));
+                    throw new ArgumentNullException(nameof(value), "You cannot remove the fallback font resolver.");
 
                 ref var fontResolver = ref Globals.Global.Fonts.FallbackFontResolver;
                 try
@@ -207,7 +204,7 @@ namespace PdfSharp.Internal
         partial class FontStorage
         {
             /// <summary>
-            /// The globally set font resolver.
+            /// The globally set custom font resolver.
             /// </summary>
             public IFontResolver? FontResolver;
 
@@ -222,7 +219,7 @@ namespace PdfSharp.Internal
             public PdfFontEncoding FontEncoding;
 
             /// <summary>
-            /// Is true if FontEncoding was set by user.
+            /// Is true if FontEncoding was set by user code.
             /// </summary>
             public bool FontEncodingInitialized;
         }

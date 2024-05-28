@@ -9,6 +9,8 @@ namespace PdfSharp.Pdf.Internal
     /// <summary>
     /// An encoder use for PDF WinAnsi encoding.
     /// It is by design not to use CodePagesEncodingProvider.Instance.GetEncoding(1252).
+    /// However, AnsiEncoding is equivalent to Windows-1252 (CP-1252),
+    /// see https://en.wikipedia.org/wiki/Windows-1252
     /// </summary>
     public sealed class AnsiEncoding : Encoding
     {
@@ -167,12 +169,11 @@ namespace PdfSharp.Pdf.Internal
         /// <summary>
         /// Indicates whether all code points in the specified array are available in the ANSI code page 1252.
         /// </summary>
-        public static bool IsAnsi(int[] codePoints)  // #RENAME IsWinAnsi? IsPdfAnsi?
+        public static bool IsAnsi(int[] codePoints)
         {
             var length = codePoints.Length;
             for (int idx = 0; idx < length; idx++)
             {
-                //int ch = codePoints[idx].Character;
                 int ch = codePoints[idx];
 
                 if (ch is < '\u0080' or >= '\u00A0' and <= '\u00FF')
@@ -180,7 +181,7 @@ namespace PdfSharp.Pdf.Internal
 
                 // There are 6 values between 128 and 255 that are not part of the original ANSI character set.
                 // U+00AD was later added for the soft hyphen. The remaining 5 undefined values (see below) are
-                // no valid ANSI characters. All of them are control characters (from U+0080 to U+009F) in
+                // no valid ANSI characters. All of them are C1 control characters (from U+0080 to U+009F) in
                 // Unicode. Therefore, we return false here.
                 if (ch switch
                 {
@@ -224,9 +225,9 @@ namespace PdfSharp.Pdf.Internal
         }
 
         /// <summary>
-        /// Maps Unicode to ANSI code page 1252.
-        /// Return an ANSI code in a char or U-FFFF if Unicode
-        /// value has no ANSI counterpart.
+        /// Maps Unicode to ANSI (CP-1252).
+        /// Return an ANSI code in a char or the value of parameter nonAnsi
+        /// if Unicode value has no ANSI counterpart.
         /// </summary>
         public static char UnicodeToAnsi(char ch, char nonAnsi = '\u003F')
         {
@@ -235,6 +236,8 @@ namespace PdfSharp.Pdf.Internal
 
             // Unicode code points from U-0080 to U-009F are no
             // valid ANSI characters in a PDF file.
+            // But the 5 undefined ANSI value 81, 8D, 8F, 90, and 9D are mapped to
+            // themselves. This is the same as .NET handles them.
             return ch switch
             {
                 '\u20AC' => '\u0080',
@@ -275,6 +278,8 @@ namespace PdfSharp.Pdf.Internal
 
         /// <summary>
         /// Maps WinAnsi to Unicode characters.
+        /// The 5 undefined ANSI value 81, 8D, 8F, 90, and 9D are mapped to
+        /// the C1 control code. This is the same as .NET handles them.
         /// </summary>
         static readonly char[] AnsiToUnicode =
             [
@@ -296,50 +301,5 @@ namespace PdfSharp.Pdf.Internal
                 /* E0 */ '\u00E0', '\u00E1', '\u00E2', '\u00E3', '\u00E4', '\u00E5', '\u00E6', '\u00E7', '\u00E8', '\u00E9', '\u00EA', '\u00EB', '\u00EC', '\u00ED', '\u00EE', '\u00EF',
                 /* F0 */ '\u00F0', '\u00F1', '\u00F2', '\u00F3', '\u00F4', '\u00F5', '\u00F6', '\u00F7', '\u00F8', '\u00F9', '\u00FA', '\u00FB', '\u00FC', '\u00FD', '\u00FE', '\u00FF'
             ];
-
-#if true_  // Keep for reference to proof that this implementation is correct.
-        public static void ProofImplementation()
-        {
-#if NET6_0_OR_GREATER || true
-            // Implementation was verified with .NET Ansi encoding.
-            Encoding dotnetImplementation = CodePagesEncodingProvider.Instance.GetEncoding(1252);
-            Encoding thisImplementation = new AnsiEncoding();
-
-            // Check ANSI chars.
-            for (int i = 0; i <= 255; i++)
-            {
-                byte[] b = { (byte) i };
-                char[] ch1 = dotnetImplementation.GetChars(b, 0, 1);
-                char[] ch2 = thisImplementation.GetChars(b, 0, 1);
-                if (ch1[0] != ch2[0])
-                    Debug.Print("Error");
-                byte[] b1 = dotnetImplementation.GetBytes(ch1, 0, 1);
-                byte[] b2 = thisImplementation.GetBytes(ch1, 0, 1);
-                if (b1.Length != b2.Length || b1.Length > 1 || b1[0] != b2[0])
-                    Debug.Print("Error");
-            }
-
-            // Check Unicode chars.
-            for (int i = 0; i <= 65535; i++)
-            {
-                if (i >= 256)
-                    break;
-                if (i == 0x80)
-                    Debug.Print("");
-                char[] ch = new char[] { (char)i };
-                byte[] b1 = dotnetImplementation.GetBytes(ch, 0, 1);
-                byte[] b2 = thisImplementation.GetBytes(ch, 0, 1);
-                if (b1.Length != b2.Length || b1.Length > 1 || b1[0] != b2[0])
-                    Debug.Print("Error");
-                //byte[] b = new byte[] { (byte)i };
-                //char ch = (char)i;
-                char[] ch1 = dotnetImplementation.GetChars(b1, 0, 1);
-                char[] ch2 = thisImplementation.GetChars(b2, 0, 1);
-                if (ch1[0] != ch2[0])
-                    Debug.Print("Error");
-            }
-#endif
-        }
-#endif
     }
 }

@@ -29,7 +29,7 @@ namespace PdfSharp.Snippets.Font
         }
 
         /// <summary>
-        /// The internal names that uniquely identify a font's type faces (i.e. a physical font file).
+        /// The internal names that uniquely identify a font’s type faces (i.e. a physical font file).
         /// Used in the first parameter of the FontResolverInfo constructor.
         /// </summary>
         static class FaceNames

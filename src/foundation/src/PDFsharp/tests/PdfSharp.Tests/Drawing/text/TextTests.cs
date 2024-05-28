@@ -2,22 +2,33 @@
 // See the LICENSE file in the solution root for more information.
 
 using FluentAssertions;
+using PdfSharp.Diagnostics;
 using PdfSharp.Drawing;
+using PdfSharp.FontResolver;
 using PdfSharp.Fonts;
-using PdfSharp.Fonts.Internal;
 using PdfSharp.Pdf;
-using PdfSharp.Pdf.Advanced;
 using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
 using Xunit;
 
-namespace PdfSharp.Tests
+namespace PdfSharp.Tests.Drawing
 {
     [Collection("PDFsharp")]
-    public class TextTests
+    public class TextTests : IDisposable
     {
-        [Fact(Skip = "Need Segoe UI Emoji here")]
+        public TextTests()
+        {
+            GlobalFontSettings.ResetFontManagement();
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+        }
+
+        public void Dispose()
+        {
+            GlobalFontSettings.ResetFontManagement();
+        }
+
+        [Fact]
         public void PDF_with_Emojis()
         {
             // Create a new PDF document.
@@ -36,7 +47,7 @@ namespace PdfSharp.Tests
             var height = page.Height.Point;
 
             XPdfFontOptions options = new XPdfFontOptions(PdfFontEncoding.Unicode);
-            XFont font = new XFont("Segoe UI Emoji", 12, XFontStyleEx.Regular, options);
+            XFont font = new XFont(UnitTestFontResolver.EmojiFont, 12, XFontStyleEx.Regular, options);
             gfx.DrawString("111😢😞💪", font, XBrushes.Black, new XRect(0, 0, width, height), XStringFormats.Center);
             gfx.DrawString("\ud83d\udca9\ud83d\udca9\ud83d\udca9\u2713\u2714\u2705\ud83d\udc1b\ud83d\udc4c\ud83c\udd97\ud83d\udd95 \ud83e\udd84 \ud83e\udd82 \ud83c\udf47 \ud83c\udf46 \u2615 \ud83d\ude82 \ud83d\udef8 \u2601 \u2622 \u264c \u264f \u2705 \u2611 \u2714 \u2122 \ud83c\udd92 \u25fb", font, XBrushes.Black, new XRect(0, 50, width, height), XStringFormats.Center);
 
@@ -78,14 +89,13 @@ namespace PdfSharp.Tests
             var font = new XFont("Arial", 12, XFontStyleEx.Bold, options);
             gfx.DrawString("No\u2011break\u2011hyphen-Test", font, XBrushes.Black, new XRect(0, 50, page.Width.Point, page.Height.Point), XStringFormats.Center);
 
-
             // Save the document...
             var filename = PdfFileUtility.GetTempPdfFileName("PdfWithNoBreakHyphen");
             document.Save(filename);
             // ...and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
-            // Analyze the drawn text in the PDF's content stream.
+            // Analyze the drawn text in the PDF’s content stream.
             var streamEnumerator = PdfFileHelper.GetPageContentStreamEnumerator(document, 0);
 
             streamEnumerator.Text.MoveAndGetNext(true, out var textInfo).Should().BeTrue();

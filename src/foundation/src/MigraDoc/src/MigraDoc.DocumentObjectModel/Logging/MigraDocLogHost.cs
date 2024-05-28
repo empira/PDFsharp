@@ -45,8 +45,12 @@ namespace MigraDoc.Logging
         {
             get
             {
-                CheckFactoryHasChanged();
-                return _migraDocLogger ??= LogHost.CreateLogger(MigraDocLogCategory.MigraDoc);
+                // We do not need lock, because even creating two loggers has no negative effects.
+                //lock (typeof(MigraDocLogHost)) // Keep for documenting that it is by design not to lock.
+                {
+                    CheckFactoryHasChanged();
+                    return _migraDocLogger ??= LogHost.CreateLogger(MigraDocLogCategory.MigraDoc);
+                }
             }
         }
         static ILogger? _migraDocLogger;
@@ -60,8 +64,11 @@ namespace MigraDoc.Logging
         {
             get
             {
-                CheckFactoryHasChanged();
-                return _documentModelLogger ??= LogHost.CreateLogger(MigraDocLogCategory.DocumentModel);
+                //lock (typeof(MigraDocLogHost)) // Keep for documenting that it is by design not to lock.
+                {
+                    CheckFactoryHasChanged();
+                    return _documentModelLogger ??= LogHost.CreateLogger(MigraDocLogCategory.DocumentModel);
+                }
             }
         }
         static ILogger? _documentModelLogger;
@@ -73,8 +80,11 @@ namespace MigraDoc.Logging
         {
             get
             {
-                CheckFactoryHasChanged();
-                return _pdfRenderingLogger ??= LogHost.CreateLogger(MigraDocLogCategory.PdfRendering);
+                //lock (typeof(MigraDocLogHost)) // Keep for documenting that it is by design not to lock.
+                {
+                    CheckFactoryHasChanged();
+                    return _pdfRenderingLogger ??= LogHost.CreateLogger(MigraDocLogCategory.PdfRendering);
+                }
             }
         }
         static ILogger? _pdfRenderingLogger;
@@ -86,8 +96,11 @@ namespace MigraDoc.Logging
         {
             get
             {
-                CheckFactoryHasChanged();
-                return _rtfRenderingLogger ??= LogHost.CreateLogger(MigraDocLogCategory.RtfRendering);
+                //lock (typeof(MigraDocLogHost)) // Keep for documenting that it is by design not to lock.
+                {
+                    CheckFactoryHasChanged();
+                    return _rtfRenderingLogger ??= LogHost.CreateLogger(MigraDocLogCategory.RtfRendering);
+                }
             }
         }
         static ILogger? _rtfRenderingLogger;

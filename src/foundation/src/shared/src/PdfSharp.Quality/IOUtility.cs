@@ -118,7 +118,7 @@ namespace PdfSharp.Quality
                     break;
 
                 case '\\':
-                    // We don't know here if we are under Windows or Linux.
+                    // We don’t know here if we are under Windows or Linux.
                     if (Path.DirectorySeparatorChar != '\\')
                         path = path[..^1] + Path.DirectorySeparatorChar;
                     break;
@@ -134,7 +134,6 @@ namespace PdfSharp.Quality
             return path;
         }
         static string? _tempPath;
-
 
         /// <summary>
         /// Gets the viewer watch directory.

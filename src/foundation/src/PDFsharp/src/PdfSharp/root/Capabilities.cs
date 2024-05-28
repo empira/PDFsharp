@@ -42,14 +42,14 @@ namespace PdfSharp
     }
 
     /// <summary>
-    /// UNDER CONSTRUCTION
+    /// UNDER CONSTRUCTION - DO NOT USE.
     /// Capabilities.Fonts.IsAvailable.GlyphToPath
     /// </summary>
     public static class Capabilities
     {
         static Capabilities()
         {
-#if DEBUG
+#if DEBUG_
             var x = Capabilities.IsAvailable.GlyphsToPathFrom(new XFontFamily("test"));
 
             Capabilities.Action.GlyphsToPath = FeatureNotAvailableBehavior.ThrowException;
@@ -148,7 +148,6 @@ namespace PdfSharp
                 => "4.7";
 #endif
         }
-
 
         /// <summary>
         /// Access to information about the currently running operating system.

@@ -181,7 +181,7 @@ namespace PdfSharp.Pdf.Filters
             else if (filterItem is PdfArray itemArray && decodeParms is null or PdfArray)
             {
                 var decodeArray = decodeParms as PdfArray;
-                // Array length of filter and decode parms should match. If they don't, return data unmodified.
+                // Array length of filter and decode parms should match. If they don’t, return data unmodified.
                 if (decodeArray != null && decodeArray.Elements.Count != itemArray.Elements.Count)
                     return data;
                 for (var i = 0; i < itemArray.Elements.Count; i++)

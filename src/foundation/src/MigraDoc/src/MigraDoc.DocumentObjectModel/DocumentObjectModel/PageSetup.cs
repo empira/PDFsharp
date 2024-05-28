@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc.DocumentObjectModel
@@ -40,7 +40,7 @@ namespace MigraDoc.DocumentObjectModel
         internal void Freeze() => _frozen = true;
 
         /// <summary>
-        /// Gets the page's size and height for the given PageFormat.
+        /// Gets the page’s size and height for the given PageFormat.
         /// </summary>
         public static void GetPageSize(PageFormat pageFormat, out Unit pageWidth, out Unit pageHeight)
         {
@@ -521,7 +521,7 @@ namespace MigraDoc.DocumentObjectModel
         void EnsureNotFrozen()
         {
             // It is still possible to change DefaultPageSetup directly via Values,
-            // but that's your own bad luck.
+            // but that’s your own bad luck.
             if (_frozen)
                 throw new InvalidOperationException("DefaultPageSetup must not be changed. Change the PageSetup member of your Section. You can assign a Clone() of DefaultPageSetup to that PageSetup member as needed.");
         }

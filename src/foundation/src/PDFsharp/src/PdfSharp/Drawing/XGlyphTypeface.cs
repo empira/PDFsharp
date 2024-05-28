@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 #if GDI
@@ -155,7 +155,7 @@ namespace PdfSharp.Drawing
                 const string message = "A font resolver throws an exception, but it must return null if the font cannot be resolved.";
                 try  // Custom font resolvers may throw an exception.
                 {
-                    // Try primary font resolver.
+                    // Try custom font resolver.
                     fontResolverInfo = FontFactory.ResolveTypeface(familyName, fontResolvingOptions, typefaceKey, false);
                 }
                 catch // (Exception ex)
@@ -185,7 +185,8 @@ namespace PdfSharp.Drawing
                         // Only Arial, Times, ...
                         throw new InvalidOperationException(
                             $"No appropriate font found for family name '{familyName}'. " +
-                                   "Implement IFontResolver and assign to 'GlobalFontSettings.FontResolver' to use fonts.");
+                                   "Implement IFontResolver and assign to 'GlobalFontSettings.FontResolver' to use fonts. " +
+                                   $"See {UrlLiterals.LinkToFontResolving}");
                     }
 #endif
                     throw new InvalidOperationException($"No appropriate font found for family name '{familyName}'.");
@@ -710,10 +711,10 @@ namespace PdfSharp.Drawing
    Gets the vendor URL information for the GlyphTypeface object.
    
    Version	
-   Gets the font face version interpreted from the font's 'NAME' table.
+   Gets the font face version interpreted from the font’s 'NAME' table.
    
    VersionStrings	
-   Gets the version string information for the GlyphTypeface object interpreted from the font's 'NAME' table.
+   Gets the version string information for the GlyphTypeface object interpreted from the font’s 'NAME' table.
    
    Weight	
    Gets the designed weight of the font represented by the GlyphTypeface object.

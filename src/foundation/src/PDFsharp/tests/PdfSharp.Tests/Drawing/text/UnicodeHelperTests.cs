@@ -29,7 +29,6 @@ namespace PdfSharp.Tests.Drawing
             var r1 = UnicodeHelper.Utf32FromString(rose);
             r1.Should().BeEquivalentTo([(int)'A', (int)'B', (int)'C', RedRose, (int)'X', (int)'Y', (int)'Z',]);
 
-
             const string invalidHigh = "ABC" + SomeHighSurrogateString + "XYZ";
             var r10 = UnicodeHelper.Utf32FromString(invalidHigh);
             r10.Should().BeEquivalentTo([(int)'A', (int)'B', (int)'C', (int)SomeHighSurrogate, (int)'X', (int)'Y', (int)'Z',]);

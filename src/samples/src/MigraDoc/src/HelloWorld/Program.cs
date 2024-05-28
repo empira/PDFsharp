@@ -11,7 +11,6 @@ using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.Rendering;
 
-
 // For clarity, we do not use var keyword.
 // ReSharper disable SuggestVarOrType_SimpleTypes
 #pragma warning disable IDE0090

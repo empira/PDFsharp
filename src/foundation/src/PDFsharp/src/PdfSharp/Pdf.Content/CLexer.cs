@@ -43,7 +43,7 @@ namespace PdfSharp.Pdf.Content
             switch (ch)
             {
                 case '%':
-                    // Eat comments, the parser doesn't handle them.
+                    // Eat comments, the parser doesn’t handle them.
                     //return symbol = ScanComment();
                     ScanComment();
                     goto Again;
@@ -419,7 +419,7 @@ namespace PdfSharp.Pdf.Content
             // Test UNICODE string
             if (ch == '\xFE' && _nextChar == '\xFF')
             {
-                // I'm not sure if the code is correct in any case.
+                // I’m not sure if the code is correct in any case.
                 // ? Can a UNICODE character not start with ')' as hibyte
                 // ? What about \# escape sequences
                 ScanNextChar();
@@ -529,15 +529,15 @@ namespace PdfSharp.Pdf.Content
                     ch = (char)((chHi << 8) + chLo);
                 }
             }
-            else if (ch == '\xFF' && _nextChar == '\xFE')
+            else if (ch == '\xFF' && _nextChar == '\xFE')  // Little endian?
             {
                 // Is this possible?
-                Debug.Assert(false, "Found UTF-16 LE string. Please send us the PDF file and we will fix it.");
+                Debug.Assert(false, "Found UTF-16 LE string. Please send us the PDF file and we will fix it (issues (at) pdfsharp.net).");
                 return Symbol = CSymbol.None;
             }
             else
             {
-                // 8-bit characters
+                // 8-bit characters.
                 while (true)
                 {
                 SkipChar:
@@ -688,7 +688,7 @@ namespace PdfSharp.Pdf.Content
 
             static char LogError(char ch)
             {
-                PdfSharpLogHost.Logger.LogError("Illegal character {char} in hex string.", ch);
+                PdfSharpLogHost.Logger.LogError("Illegal character '{char}' in hex string.", ch);
                 return '\0';
             }
         }
@@ -721,7 +721,7 @@ namespace PdfSharp.Pdf.Content
                     }
                     else
                     {
-                        // Treat single CR as LF
+                        // Treat single CR as LF.
                         _currChar = Chars.LF;
                     }
                 }

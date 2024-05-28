@@ -634,8 +634,7 @@ namespace MigraDoc.DocumentObjectModel
         /// Compares two Unit? values.
         /// </summary>
         public static bool operator <=(Unit? l, Unit? r) => Compare(l, r) <= 0;
-
-
+        
         /// <summary>
         /// Returns the negative value of a Unit.
         /// </summary>

@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics;
@@ -30,7 +30,7 @@ namespace MigraDoc.Rendering
         /// Prepares this instance for rendering.
         /// Commit renderEvents to allow RenderTextEvent calls.
         /// </summary>
-        public void PrepareDocument(RenderEvents renderEvents)
+        public void PrepareDocument(RenderEvents? renderEvents = null)
         {
             var visitor = new PdfFlattenVisitor();
             visitor.Visit(_document);
@@ -206,7 +206,7 @@ namespace MigraDoc.Rendering
 
             // The footer is bottom-aligned and grows with its contents. topY specifies the Y position where the footer begins.
             XUnitPt topY = footerArea.Y + footerArea.Height - RenderInfo.GetTotalHeight(renderInfos);
-            // offsetY specifies the offset (amount of movement) for all footer items. It's the difference between topY and the position calculated for the first item.
+            // offsetY specifies the offset (amount of movement) for all footer items. It’s the difference between topY and the position calculated for the first item.
             XUnitPt offsetY = 0;
             bool notFirst = false;
 
@@ -315,7 +315,7 @@ namespace MigraDoc.Rendering
             /// Indicates the current step reached in document preparation.
             /// </summary>
             public int Value = value;
-            
+
             /// <summary>
             /// Indicates the final step in document preparation. The quotient of Value and Maximum can be used to calculate a percentage (e.g. for use in a progress bar).
             /// </summary>

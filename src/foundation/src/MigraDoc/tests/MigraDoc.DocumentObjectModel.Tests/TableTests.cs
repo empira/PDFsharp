@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Fonts;
@@ -13,6 +13,7 @@ using FluentAssertions;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
+    [Collection("PDFsharp")]
     public class TableTests
     {
         [Fact]
@@ -175,11 +176,11 @@ namespace MigraDoc.DocumentObjectModel.Tests
             row0[1].AddParagraph("Row 0 Cell 1");
 
             var row1 = table.AddRow();
-            row1[0].AddParagraph("Row 1 Cell 0 MergeDown 1 with\nline break ID#1"); // The cell's content must end with "ID#1" to allow analysis of the generated PDF below.
+            row1[0].AddParagraph("Row 1 Cell 0 MergeDown 1 with\nline break ID#1"); // The cell’s content must end with "ID#1" to allow analysis of the generated PDF below.
             row1[0].MergeDown = 1;
             row1[1].AddParagraph("Row 1 Cell 1");
             var row1CommentRow = table.AddRow();
-            row1CommentRow[1].AddParagraph("Comment 1 Cell 1 ID#2"); // The cell's content must end with "ID#2" to allow analysis of the generated PDF below.
+            row1CommentRow[1].AddParagraph("Comment 1 Cell 1 ID#2"); // The cell’s content must end with "ID#2" to allow analysis of the generated PDF below.
 
             var row2 = table.AddRow();
             row2[0].AddParagraph("Row 2 Cell 0 MergeDown 1");
@@ -195,7 +196,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             pdfRenderer.PdfDocument.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
-            // Analyze the drawn borders in the PDF's content stream.
+            // Analyze the drawn borders in the PDF’s content stream.
             var streamEnumerator = PdfFileHelper.GetPageContentStreamEnumerator(pdfRenderer.PdfDocument, 0);
 
             // Find "ID#1" text object.
@@ -291,7 +292,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             pdfRenderer.PdfDocument.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
-            // Analyze the drawn border widths in the PDF's content stream.
+            // Analyze the drawn border widths in the PDF’s content stream.
             var page = pdfRenderer.PdfDocument.Pages[0];
             var contentReference = (PdfReference)page.Contents.Elements.Items[0];
             var content = (PdfDictionary)contentReference.Value;
@@ -421,7 +422,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
 
-            // Analyze the drawn border widths and colors in the PDF's pages content streams.
+            // Analyze the drawn border widths and colors in the PDF’s pages content streams.
             // The two parts the page break breaks the table into should be identical (except the row numbers).
             for (var pageIdx = 0; pageIdx < pdfRenderer.PageCount; pageIdx++)
             {
@@ -476,8 +477,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
                 bottomBorderDrawLinePartLines.Should().Contain(contentStreamHeadingBottomColor, "row 1 top border should be of heading bottom border color, as this is the same border");
                 bottomBorderDrawLinePartLines.Should().NotContain(contentStreamBottomWidth, "row 1 top border should not be of content bottom border width, as this border is the same like heading bottom");
                 bottomBorderDrawLinePartLines.Should().NotContain(contentStreamBottomColor, "row 1 top border should not be of content bottom border color, as this border is the same like heading bottom");
-
-
                 // Row 2.
                 contentRowDrawLineParts = rowsByDrawLinesByLines[2];
                 contentRowDrawLineParts.Length.Should().Be(3, "for the content rows one bottom and one top border should split the content into 3 parts");

@@ -1,11 +1,11 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using Microsoft.Extensions.Logging;
-using PdfSharp.Fonts;
-using PdfSharp.Logging;
-using PdfSharp.Quality;
-using PdfSharp.Snippets.Font;
+//using Microsoft.Extensions.Logging;
+//using PdfSharp.Fonts;
+//using PdfSharp.Logging;
+//using PdfSharp.Quality;
+//using PdfSharp.Snippets.Font;
 
 using Features = PdfSharp.Features.PdfSharpFeatures;
 
@@ -22,7 +22,7 @@ namespace PdfSharp.Features
 
             var features = new PdfSharpFeatures();
             // Set a logger factory.
-            Feature.SetDefaultLoggerFactory();
+            //Feature.SetDefaultLoggerFactory();
 
             // ========== Drawing ==========
 
@@ -42,14 +42,7 @@ namespace PdfSharp.Features
             //features[PdfSharpFeatures.Names.Drawing_text_SurrogateChars__Surrogates].Run();
             //features[PdfSharpFeatures.Names.Drawing_text_SymbolFonts__Symbols].Run();
 
-
             //features[PdfSharpFeatures.Names.Font_encoding_Encodings_AnsiEncoding].Run();
-
-
-
-
-
-
 
             // === reviewed up to here ===
 
@@ -67,7 +60,6 @@ namespace PdfSharp.Features
             //new Features.Drawing.AutoFontEncoding().MeasureString_Test();
             //new Features.Drawing.Encodings().Ansi();
             //new Features.Drawing.SurrogateChars().Test1();
-
 
             //new Features.Drawing.NotoSans().Load_all_Noto_Sans();
 

@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 namespace PdfSharp
@@ -86,7 +86,7 @@ namespace PdfSharp
         /// <summary>
         /// The copyright information.
         /// </summary>
-        public const string Copyright = "Copyright � 2005-2024 empira Software GmbH.";
+        public const string Copyright = "Copyright © 2005-2024 empira Software GmbH.";
 
         /// <summary>
         /// The trademark of the product.

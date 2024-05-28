@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.IO;
@@ -143,7 +143,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets the standard security handler, if existing and encryption is active.
         /// </summary>
-        public PdfStandardSecurityHandler? EffectiveSecurityHandler => (SecurityHandlerInternal ??= (PdfStandardSecurityHandler?)Elements.GetValue(Keys.Encrypt))?.GetIfEncryptionActive();
+        public PdfStandardSecurityHandler? EffectiveSecurityHandler => SecurityHandlerInternal?.GetIfEncryptionIsActive();
 
         /// <summary>
         /// Gets and sets the internally saved standard security handler.
@@ -156,11 +156,11 @@ namespace PdfSharp.Pdf.Advanced
             // HACK: 
             _elements?.Remove(Keys.XRefStm);
 
-            // Don't encrypt myself.
-            var securityHandler = writer.SecurityHandler;
-            writer.SecurityHandler = null;
+            // Donâ€™t encrypt myself.
+            var effectiveSecurityHandler = writer.EffectiveSecurityHandler;
+            writer.EffectiveSecurityHandler = null;
             base.WriteObject(writer);
-            writer.SecurityHandler = securityHandler;
+            writer.EffectiveSecurityHandler = effectiveSecurityHandler;
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace PdfSharp.Pdf.Advanced
         internal class Keys : KeysBase  // Reference: TABLE 3.13  Entries in the file trailer dictionary / Page 97
         {
             /// <summary>
-            /// (Required; must not be an indirect reference) The total number of entries in the file’s 
+            /// (Required; must not be an indirect reference) The total number of entries in the fileâ€™s 
             /// cross-reference table, as defined by the combination of the original section and all
             /// update sections. Equivalently, this value is 1 greater than the highest object number
             /// used in the file.
@@ -247,13 +247,13 @@ namespace PdfSharp.Pdf.Advanced
             public const string Root = "/Root";
 
             /// <summary>
-            /// (Required if document is encrypted; PDF 1.1) The document’s encryption dictionary.
+            /// (Required if document is encrypted; PDF 1.1) The documentâ€™s encryption dictionary.
             /// </summary>
             [KeyInfo(KeyType.Dictionary | KeyType.Optional, typeof(PdfStandardSecurityHandler))]
             public const string Encrypt = "/Encrypt";
 
             /// <summary>
-            /// (Optional; must be an indirect reference) The document’s information dictionary.
+            /// (Optional; must be an indirect reference) The documentâ€™s information dictionary.
             /// </summary>
             [KeyInfo(KeyType.Dictionary | KeyType.Optional, typeof(PdfDocumentInformation))]
             public const string Info = "/Info";

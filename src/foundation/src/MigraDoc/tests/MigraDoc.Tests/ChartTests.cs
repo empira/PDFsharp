@@ -40,7 +40,7 @@ namespace MigraDoc.Tests
             pdfRenderer.RenderDocument();
 
             // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("HelloWorld");
+            var filename = PdfFileUtility.GetTempPdfFileName("ChartTests");
             pdfRenderer.PdfDocument.Save(filename);
             // ...and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);

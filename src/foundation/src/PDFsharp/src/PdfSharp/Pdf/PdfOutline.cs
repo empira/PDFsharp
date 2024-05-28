@@ -439,7 +439,7 @@ namespace PdfSharp.Pdf
                     if (item.Reference != lastRef)
                     {
                         // Word produces PDFs that come to this case.
-                        GetType();
+                        _ = typeof(int);
                     }
                 }
 #endif

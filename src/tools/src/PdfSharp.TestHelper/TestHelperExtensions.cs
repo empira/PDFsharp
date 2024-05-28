@@ -32,7 +32,7 @@ namespace PdfSharp.TestHelper
             var dllPath = assembly.Location;
 #else
             // In net 4.7.2 assembly.Location returns a temporary folder, when executed via Test Explorer.
-            // Get the original dll's path via CodeBase instead.
+            // Get the original dll’s path via CodeBase instead.
             var dllPath = assembly.CodeBase;
             if (dllPath.StartsWith("file:///"))
                 dllPath = dllPath.Substring(8);

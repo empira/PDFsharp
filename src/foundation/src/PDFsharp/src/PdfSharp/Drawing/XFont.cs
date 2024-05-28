@@ -336,7 +336,7 @@ namespace PdfSharp.Drawing
         {
 #if DEBUG_
             if (_familyName == "Segoe UI Semilight" && (_style & XFontStyleEx.BoldItalic) == XFontStyleEx.Italic)
-                GetType();
+                _ = typeof(int);
 #endif
             FontResolvingOptions fontResolvingOptions = OverrideStyleSimulations
                 ? new FontResolvingOptions(_style, StyleSimulations)

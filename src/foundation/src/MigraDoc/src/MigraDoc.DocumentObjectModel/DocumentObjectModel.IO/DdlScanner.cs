@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+ï»¿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
@@ -7,10 +7,10 @@ using System.Text;
   ddl = <document> | <empty>
   
   table-element:
-    \table «attributes»opt { «columns-element» «rows-element» }
+    \table Â«attributesÂ»opt { Â«columns-elementÂ» Â«rows-elementÂ» }
 
   table-element:
-    \table «attributes»opt { «columns-element» «rows-element» }
+    \table Â«attributesÂ»opt { Â«columns-elementÂ» Â«rows-elementÂ» }
 */
 
 namespace MigraDoc.DocumentObjectModel.IO
@@ -250,7 +250,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                 //  sym = Symbol.Question;
                 //  break;
 
-                case '¤':
+                case 'Â¤':
                     sym = Symbol.Currency; //??? used in DDL?
                     break;
 
@@ -1149,12 +1149,12 @@ namespace MigraDoc.DocumentObjectModel.IO
                 return Symbol.SoftHyphen;
             }
 
-            // \( is a short cut for symbol.
+            // \( is a shortcut for symbol.
             if (ch == '(')
             {
                 _token += "(";
                 _symbol = Symbol.Chr;
-                return Symbol.Chr; // Short cut for \chr(
+                return Symbol.Chr; // Shortcut for \chr(
             }
 
 #if false
@@ -1242,7 +1242,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                 //  sym = Symbol.Question;
                 //  break;
 
-                case '¤':
+                case 'Â¤':
                     sym = Symbol.Currency; //??? used in DDL?
                     break;
 
@@ -1336,7 +1336,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         //}
 
         /// <summary>
-        /// Scans verbatim strings like «@"String with ""quoted"" text"».
+        /// Scans verbatim strings like Â«@"String with ""quoted"" text"Â».
         /// </summary>
         string ScanVerbatimStringLiteral()
         {
@@ -1361,7 +1361,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Scans regular string literals like «"String with \"escaped\" text"».
+        /// Scans regular string literals like Â«"String with \"escaped\" text"Â».
         /// </summary>
         string ScanStringLiteral()
         {

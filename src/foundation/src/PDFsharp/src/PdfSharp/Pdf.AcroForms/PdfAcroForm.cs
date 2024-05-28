@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 namespace PdfSharp.Pdf.AcroForms
@@ -48,7 +48,7 @@ namespace PdfSharp.Pdf.AcroForms
             // ReSharper disable InconsistentNaming
 
             /// <summary>
-            /// (Required) An array of references to the document�s root fields (those with
+            /// (Required) An array of references to the document’s root fields (those with
             /// no ancestors in the field hierarchy).
             /// </summary>
             [KeyInfo(KeyType.Array | KeyType.Required, typeof(PdfAcroField.PdfAcroFieldCollection))]

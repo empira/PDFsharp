@@ -7,6 +7,7 @@ using Xunit;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
+    [Collection("PDFsharp")]
     public class NullableTests
     {
         [Fact]

@@ -41,8 +41,7 @@ namespace PdfSharp.Snippets
         public override void RenderSnippet(XGraphics gfx)
         {
             BeginBox(gfx, 1, BoxOptions.Tile);
-            {
-            }
+            { }
             EndBox(gfx);
 
             BeginBox(gfx, 2, BoxOptions.Box);
@@ -50,8 +49,7 @@ namespace PdfSharp.Snippets
             EndBox(gfx);
 
             BeginBox(gfx, 3, BoxOptions.Tile);
-            {
-            }
+            { }
             EndBox(gfx);
 
             BeginBox(gfx, 4, BoxOptions.Box);
@@ -59,8 +57,7 @@ namespace PdfSharp.Snippets
             EndBox(gfx);
 
             BeginBox(gfx, 5, BoxOptions.Tile);
-            {
-            }
+            { }
             EndBox(gfx);
 
             BeginBox(gfx, 6, BoxOptions.Box);

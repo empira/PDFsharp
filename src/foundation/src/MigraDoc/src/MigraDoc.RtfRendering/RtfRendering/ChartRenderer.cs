@@ -3,11 +3,13 @@
 
 using System.Diagnostics;
 using System.Drawing;
+using Microsoft.Extensions.Logging;
 #if !NETSTANDARD2_0_OR_GREATER
 using System.Drawing.Imaging;
 #endif
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Shapes.Charts;
+using MigraDoc.Logging;
 using MigraDoc.RtfRendering.Resources;
 using PdfSharp.Events;
 #if WPF
@@ -40,12 +42,14 @@ namespace MigraDoc.RtfRendering
                 return;
 
             bool renderInParagraph = RenderInParagraph();
-            var elms = DocumentRelations.GetParent(_chart) as DocumentElements;
-            if (elms != null && !renderInParagraph && !(DocumentRelations.GetParent(elms) is Section || DocumentRelations.GetParent(elms) is HeaderFooter))
+
+            if (DocumentRelations.GetParent(_chart) is DocumentElements elms && !renderInParagraph && !(DocumentRelations.GetParent(elms) is Section || DocumentRelations.GetParent(elms) is HeaderFooter))
             {
-                Debug.WriteLine(Messages2.ChartFreelyPlacedInWrongContext, "warning");
+                MigraDocLogHost.RtfRenderingLogger.LogWarning(Messages2.ChartFreelyPlacedInWrongContext);
+                //Debug.WriteLine(Messages2.ChartFreelyPlacedInWrongContext, "warning");
                 return;
             }
+
             if (renderInParagraph)
                 StartDummyParagraph();
 
@@ -320,7 +324,8 @@ namespace MigraDoc.RtfRendering
             }
             catch
             {
-                Debug.WriteLine("Chart image file not read", "warning");
+                MigraDocLogHost.RtfRenderingLogger.LogError("Chart image file not read");
+                //Debug.WriteLine("Chart image file not read", "warning");
             }
             finally
             {

@@ -24,7 +24,6 @@ namespace PdfSharp.Snippets.Drawing
 
             //string xxx = "སྐྱེ་བོ་དག་གིས་འུ་ཐུག་ཐབས་ཟད་ཀྱིས་རྐྱེན་པས་བཙན་དབང་དང༌། གཉའ་གནོན་ལ་ངོ་རྒོལ་སྒེར་ལངས་བྱེད་པའི་མཐའ་མའི་བྱ་ཐབས་ལག་བསྟར་མི་དགོས་པ་ཞིག་བྱེད་ན།";
 
-
             if (!Capabilities.OperatingSystem.IsWindows)
                 return;
 
@@ -67,7 +66,6 @@ namespace PdfSharp.Snippets.Drawing
             //    //gfx.DrawString(String.Format("{0} (bold)", facename), fontBold, XBrushes.DarkSlateGray, 0, 112.5);
             //}
             //EndBox(gfx);
-
 
             // Text Styles (resulting in own Type Faces).
             BeginBox(gfx, 2, BoxOptions.Fill, "'Hello World' Chinese");

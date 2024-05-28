@@ -130,7 +130,6 @@ namespace PdfSharp.Pdf.Content.Objects
         /// </summary>
         EX,
 
-
         /// <summary>
         /// Fill path using non-zero winding number rule.
         /// </summary>

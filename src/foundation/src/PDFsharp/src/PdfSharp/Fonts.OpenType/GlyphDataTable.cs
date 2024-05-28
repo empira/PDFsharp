@@ -119,7 +119,7 @@ namespace PdfSharp.Fonts.OpenType
                 return;
             _fontData!.Position = start;
             int numContours = _fontData.ReadShort();
-            // Isn't a composite glyph?
+            // Isn’t a composite glyph?
             if (numContours >= 0)
                 return;
             _fontData.SeekOffset(8);

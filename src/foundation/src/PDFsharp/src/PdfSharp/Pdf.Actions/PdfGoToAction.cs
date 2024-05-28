@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.IO;
@@ -31,7 +31,7 @@ namespace PdfSharp.Pdf.Actions
         /// <summary>
         /// Creates a link within the current document.
         /// </summary>
-        /// <param name="destinationName">The Named Destination's name in the target document.</param>
+        /// <param name="destinationName">The Named Destination’s name in the target document.</param>
         public static PdfGoToAction CreateGoToAction(string destinationName)
         {
             var action = new PdfGoToAction
@@ -68,7 +68,7 @@ namespace PdfSharp.Pdf.Actions
             //public const string S = "/S";
 
             /// <summary>
-            /// (Required) The destination to jump to (see Section 8.2.1, �Destinations�).
+            /// (Required) The destination to jump to (see Section 8.2.1, “Destinations”).
             /// </summary>
             [KeyInfo(KeyType.Name | KeyType.ByteString | KeyType.Array | KeyType.Required)]
             public const string D = "/D";

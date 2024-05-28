@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+ï»¿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc.DocumentObjectModel
@@ -44,35 +44,35 @@ namespace MigraDoc.DocumentObjectModel
 
         // ===== \symbol =====
         /// <summary>
-        /// The Euro symbol €.
+        /// The Euro symbol â‚¬.
         /// </summary>
         public static readonly Character Euro = new(SymbolName.Euro);
         /// <summary>
-        /// The copyright symbol ©.
+        /// The copyright symbol Â©.
         /// </summary>
         public static readonly Character Copyright = new(SymbolName.Copyright);
         /// <summary>
-        /// The trademark symbol ™.
+        /// The trademark symbol â„¢.
         /// </summary>
         public static readonly Character Trademark = new(SymbolName.Trademark);
         /// <summary>
-        /// The registered trademark symbol ®.
+        /// The registered trademark symbol Â®.
         /// </summary>
         public static readonly Character RegisteredTrademark = new(SymbolName.RegisteredTrademark);
         /// <summary>
-        /// The bullet symbol •.
+        /// The bullet symbol â€¢.
         /// </summary>
         public static readonly Character Bullet = new(SymbolName.Bullet);
         /// <summary>
-        /// The not symbol ¬.
+        /// The not symbol Â¬.
         /// </summary>
         public static readonly Character Not = new(SymbolName.Not);
         /// <summary>
-        /// The em dash —.
+        /// The em dash â€”.
         /// </summary>
         public static readonly Character EmDash = new(SymbolName.EmDash);
         /// <summary>
-        /// The en dash –.
+        /// The en dash â€“.
         /// </summary>
         public static readonly Character EnDash = new(SymbolName.EnDash);
         /// <summary>
@@ -171,7 +171,7 @@ namespace MigraDoc.DocumentObjectModel
                 {
                     if (SymbolName == SymbolName.Blank)
                     {
-                        //Note: Don't try to optimize it by leaving away the braces in case a single space is added.
+                        //Note: Donâ€™t try to optimize it by leaving away the braces in case a single space is added.
                         //This would lead to confusion with '(' in directly following text.
                         text = "\\space(" + Count + ")";
                     }

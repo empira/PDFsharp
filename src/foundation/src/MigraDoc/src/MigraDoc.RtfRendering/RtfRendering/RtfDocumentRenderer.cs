@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System;
@@ -331,7 +331,7 @@ namespace MigraDoc.RtfRendering
                 return (int)_fontList.IndexOf(fontName);
 
             //development purpose exception
-            throw new ArgumentException(@"Font does not exist in this document's font table.", "fontName");
+            throw new ArgumentException(@"Font does not exist in this document’s font table.", "fontName");
         }
 
         /// <summary>
@@ -343,7 +343,7 @@ namespace MigraDoc.RtfRendering
             int idx = (int)_colorList.IndexOf(clr);
             // Development purpose exception.
             if (idx < 0)
-                throw new ArgumentException(@"Color does not exist in this document's color table.", "color");
+                throw new ArgumentException(@"Color does not exist in this document’s color table.", "color");
             return idx;
         }
 
@@ -424,7 +424,7 @@ namespace MigraDoc.RtfRendering
             _rtfWriter.WriteControl("viewkind", 4);
             _rtfWriter.WriteControl("uc", 1);
 
-            //Em4-Space doesn't work without this:
+            //Em4-Space doesn’t work without this:
             _rtfWriter.WriteControl("lnbrkrule");
 
             //Footnotes only, no endnotes:
@@ -438,7 +438,7 @@ namespace MigraDoc.RtfRendering
 
             // Word cannot realize the mirror margins property for single sections,
             // although rtf control words exist for this purpose.
-            // Thus, the mirror margins property is set globally if it's true for the first section.
+            // Thus, the mirror margins property is set globally if it’s true for the first section.
             var sec = _document.Sections.First as Section;
             if (sec != null)
             {

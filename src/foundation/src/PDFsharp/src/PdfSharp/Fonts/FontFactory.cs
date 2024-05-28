@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
@@ -181,7 +181,7 @@ namespace PdfSharp.Fonts
                     // Thereby a typeface with the same resolver info as a previous one is not cached twice.
                     fontResolverInfosByName.Add(resolverInfoKey, fontResolverInfo);
 
-                    // Create font source if not yet exists.
+                    // Create font source if it does not yet exist.
                     // The face name is considered to be unique. So check if it already exists.
                     // Note that different resolver infos may map to the same font face because
                     // of style simulation.
@@ -206,11 +206,11 @@ namespace PdfSharp.Fonts
                             throw new InvalidOperationException(message);
                         }
 
-                        // Create a new font source if no suc one exists. It can already exist if a
-                        // custom font resolver returns the same byte for more than one face name.
+                        // Create a new font source if no such one exists. It can already exist if a
+                        // custom font resolver returns the same bytes for more than one face name.
                         var fontSource = XFontSource.GetOrCreateFrom(bytes);
 
-                        // Add font source's font resolver name if it is different to the face name.
+                        // Add font source’s font resolver name if it is different to the face name.
                         if (String.Compare(fontResolverInfo.FaceName, fontSource.FontName,
                                 StringComparison.OrdinalIgnoreCase) != 0)
                             fontSourcesByName.Add(fontResolverInfo.FaceName, fontSource);

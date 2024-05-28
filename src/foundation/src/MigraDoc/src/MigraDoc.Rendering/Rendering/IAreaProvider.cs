@@ -14,7 +14,7 @@ namespace MigraDoc.Rendering
         Area? GetNextArea();
 
         /// <summary>
-        /// Probes the next area to render into like GetNextArea, but doesn't change the provider state. 
+        /// Probes the next area to render into like GetNextArea, but doesn’t change the provider state. 
         /// </summary>
         /// <returns>The area for the next rendering act.</returns>
         Area? ProbeNextArea();

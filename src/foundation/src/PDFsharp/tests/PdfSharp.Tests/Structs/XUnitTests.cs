@@ -23,7 +23,6 @@ namespace PdfSharp.Tests.Structs
             const double d2CmPt = d2CmIn * 72;
             const double d2CmPu = d2CmIn * 96;
 
-
             // FromXxx()
             XUnit xUnit2Mm = XUnit.FromMillimeter(d2);
             XUnit xUnit2In = XUnit.FromInch(d2);
@@ -42,7 +41,6 @@ namespace PdfSharp.Tests.Structs
             xUnit2CmPt.Centimeter.Should().BeApproximately(d2, acceptedRoundingError);
             xUnit2CmPu.Centimeter.Should().BeApproximately(d2, acceptedRoundingError);
 
-
             // ToString(), XUnit(string), == and !=
             string str2Cm = xUnit2Cm.ToString();
             string str2CmMm = xUnit2CmMm.ToString();
@@ -56,7 +54,7 @@ namespace PdfSharp.Tests.Structs
             XUnit xUnit2CmPt2 = str2CmPt;
             XUnit xUnit2CmPu2 = str2CmPu;
 
-            // Only check cm variables, which are totally equal because str2Cm with "2cm" won't cause rounding errors.
+            // Only check cm variables, which are totally equal because str2Cm with "2cm" won’t cause rounding errors.
             (xUnit2Cm2 == xUnit2Cm).Should().BeTrue();
 
             // Use IsSameValue() for other variables.
@@ -65,9 +63,8 @@ namespace PdfSharp.Tests.Structs
             xUnit2CmPt2.IsSameValue(xUnit2CmPt).Should().BeTrue();
             xUnit2CmPu2.IsSameValue(xUnit2CmPu).Should().BeTrue();
 
-            // Only check cm variables, which are totally equal because str2Cm with "2cm" won't cause rounding errors.
+            // Only check cm variables, which are totally equal because str2Cm with "2cm" won’t cause rounding errors.
             (xUnit2Cm2 != xUnit2Cm).Should().BeFalse();
-
 
             // Same value - other unit.
             (xUnit2Mm == xUnit2CmMm).Should().BeFalse();
@@ -80,7 +77,6 @@ namespace PdfSharp.Tests.Structs
             (xUnit2Pt != xUnit2CmPt).Should().BeTrue();
             (xUnit2Pu != xUnit2CmPu).Should().BeTrue();
 
-
             // >, >=
             (xUnit2Mm > xUnit2CmMm).Should().BeFalse();
             (xUnit2In > xUnit2CmIn).Should().BeTrue();
@@ -91,7 +87,6 @@ namespace PdfSharp.Tests.Structs
             (xUnit2In >= xUnit2CmIn).Should().BeTrue();
             (xUnit2Pt >= xUnit2CmPt).Should().BeFalse();
             (xUnit2Pu >= xUnit2CmPu).Should().BeFalse();
-
 
             // <, <=
             (xUnit2Mm < xUnit2CmMm).Should().BeTrue();
@@ -104,23 +99,19 @@ namespace PdfSharp.Tests.Structs
             (xUnit2Pt <= xUnit2CmPt).Should().BeTrue();
             (xUnit2Pu <= xUnit2CmPu).Should().BeTrue();
 
-
             // >=, <=
             (xUnit2Cm2 >= xUnit2Cm).Should().BeTrue();
 
             (xUnit2Cm2 <= xUnit2Cm).Should().BeTrue();
 
-
             XUnit x1;
             XUnit x2;
             XUnit x3;
-
 
             // -x
             x1 = XUnit.FromCentimeter(-d2);
             x2 = -xUnit2Cm;
             (x2 == x1).Should().BeTrue();
-
 
             // +, -
             x1 = XUnit.FromCentimeter(d2 + d2);
@@ -137,7 +128,6 @@ namespace PdfSharp.Tests.Structs
             (x2 == x1).Should().BeTrue();
             (x3 == x1).Should().BeTrue();
 
-
             // *, /
             x1 = XUnit.FromCentimeter(d2 * d2);
             x2 = xUnit2Cm * d2;
@@ -149,7 +139,6 @@ namespace PdfSharp.Tests.Structs
             x1.Value.Should().Be(1);
             (x2 == x1).Should().BeTrue();
 
-
             // IsSameValue()
             xUnit2CmMm.IsSameValue(xUnit2Cm).Should().BeTrue();
             xUnit2CmIn.IsSameValue(xUnit2Cm).Should().BeTrue();
@@ -160,7 +149,6 @@ namespace PdfSharp.Tests.Structs
             xUnit2In.IsSameValue(xUnit2Cm).Should().BeFalse();
             xUnit2Pt.IsSameValue(xUnit2Cm).Should().BeFalse();
             xUnit2Pu.IsSameValue(xUnit2Cm).Should().BeFalse();
-
 
             // ConvertType()
             XUnit xUnit2CmMmConv = xUnit2Cm;
@@ -191,7 +179,6 @@ namespace PdfSharp.Tests.Structs
             const double d2CmPt = d2CmIn * 72;
             const double d2CmPu = d2CmIn * 96;
 
-
             // FromXxx()
             XUnitPt xUnitPt2Mm = XUnitPt.FromMillimeter(d2);
             XUnitPt xUnitPt2In = XUnitPt.FromInch(d2);
@@ -210,7 +197,6 @@ namespace PdfSharp.Tests.Structs
             xUnitPt2CmPt.Value.Should().BeApproximately(d2CmPt, acceptedRoundingError);
             xUnitPt2CmPu.Value.Should().BeApproximately(d2CmPt, acceptedRoundingError);
 
-
             // ToString(), XUnitPt(string), == and !=
             string str2Cm = xUnitPt2Cm.ToString();
             string str2Pt = xUnitPt2Pt.ToString();
@@ -220,7 +206,6 @@ namespace PdfSharp.Tests.Structs
             (xUnitPt2Pt2 == xUnitPt2Pt).Should().BeTrue();
 
             (xUnitPt2Pt2 != xUnitPt2Pt).Should().BeFalse();
-
 
             // Same value - other unit.
             (xUnitPt2Mm == xUnitPt2CmMm).Should().BeFalse();
@@ -233,7 +218,6 @@ namespace PdfSharp.Tests.Structs
             (xUnitPt2Pt != xUnitPt2CmPt).Should().BeTrue();
             (xUnitPt2Pu != xUnitPt2CmPu).Should().BeTrue();
 
-
             // >, >=
             (xUnitPt2Mm > xUnitPt2CmMm).Should().BeFalse();
             (xUnitPt2In > xUnitPt2CmIn).Should().BeTrue();
@@ -244,7 +228,6 @@ namespace PdfSharp.Tests.Structs
             (xUnitPt2In >= xUnitPt2CmIn).Should().BeTrue();
             (xUnitPt2Pt >= xUnitPt2CmPt).Should().BeFalse();
             (xUnitPt2Pu >= xUnitPt2CmPu).Should().BeFalse();
-
 
             // <, <=
             (xUnitPt2Mm < xUnitPt2CmMm).Should().BeTrue();
@@ -257,23 +240,19 @@ namespace PdfSharp.Tests.Structs
             (xUnitPt2Pt <= xUnitPt2CmPt).Should().BeTrue();
             (xUnitPt2Pu <= xUnitPt2CmPu).Should().BeTrue();
 
-
             // >=, <=
             (xUnitPt2Pt2 >= xUnitPt2Pt).Should().BeTrue();
 
             (xUnitPt2Pt2 <= xUnitPt2Pt).Should().BeTrue();
 
-
             XUnitPt x1;
             XUnitPt x2;
             XUnitPt x3;
-
 
             // -x
             x1 = XUnitPt.FromCentimeter(-d2);
             x2 = -xUnitPt2Cm;
             (x2 == x1).Should().BeTrue();
-
 
             // +, -
             x1 = XUnitPt.FromCentimeter(d2 + d2);
@@ -290,7 +269,6 @@ namespace PdfSharp.Tests.Structs
             x2.Centimeter.Should().BeApproximately(x1.Centimeter, acceptedRoundingError);
             x3.Centimeter.Should().BeApproximately(x1.Centimeter, acceptedRoundingError);
 
-
             // *, /
             x1 = XUnitPt.FromCentimeter(d2 * d2);
             x2 = xUnitPt2Cm * d2;
@@ -301,7 +279,6 @@ namespace PdfSharp.Tests.Structs
             x2 = xUnitPt2Cm / d2;
             x1.Centimeter.Should().BeApproximately(1, acceptedRoundingError);
             x2.Centimeter.Should().BeApproximately(x1.Centimeter, acceptedRoundingError);
-
 
             // IsSameValue()
             xUnitPt2CmMm.IsSameValue(xUnitPt2Cm).Should().BeTrue();
@@ -314,7 +291,6 @@ namespace PdfSharp.Tests.Structs
             xUnitPt2Pt.IsSameValue(xUnitPt2Cm).Should().BeFalse();
             xUnitPt2Pu.IsSameValue(xUnitPt2Cm).Should().BeFalse();
 
-
             // XUnitPt(int)
             x1 = 2;
             x1.Value.Should().Be(2);
@@ -322,13 +298,11 @@ namespace PdfSharp.Tests.Structs
             x2 = XUnitPt.Zero + 2;
             (x2 == xUnitPt2Pt).Should().BeTrue();
 
-
             // XUnitPt(double)
             x1 = 2d;
             (x1 == xUnitPt2Pt).Should().BeTrue();
             x2 = XUnitPt.Zero + 2d;
             (x2 == xUnitPt2Pt).Should().BeTrue();
-
 
             // double(XUnitPt)
             double xd1 = xUnitPt2Pt;
@@ -348,13 +322,11 @@ namespace PdfSharp.Tests.Structs
             XUnit xUnit2Cm = XUnit.FromCentimeter(d2Cm);
             XUnitPt xUnitPt2Cm = XUnitPt.FromCentimeter(d2Cm);
 
-
             // XUnitPt(XUnit)
             XUnitPt xUnit2CmAsXUnitPt = xUnit2Cm;
             xUnit2CmAsXUnitPt.Should().Be(xUnitPt2Cm);
             xUnit2CmAsXUnitPt.Point.Should().Be(xUnitPt2Cm.Point);
             xUnit2CmAsXUnitPt.Should().Be(xUnitPt2Cm.Point);
-
 
             // XUnit(XUnitPt)
             XUnit xUnitPt2CmAsXUnit = xUnitPt2Cm;
@@ -362,6 +334,5 @@ namespace PdfSharp.Tests.Structs
             xUnitPt2CmAsXUnit.Point.Should().Be(xUnit2Cm.Point);
             xUnitPt2CmAsXUnit.Centimeter.Should().BeApproximately(xUnit2Cm.Centimeter, acceptedRoundingError);
         }
-
     }
 }

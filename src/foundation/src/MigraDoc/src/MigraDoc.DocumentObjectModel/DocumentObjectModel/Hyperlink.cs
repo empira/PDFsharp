@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using MigraDoc.DocumentObjectModel.Visitors;
@@ -456,7 +456,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public bool NoHyperlinkStyle
         {
-            // This Property is not part of Word's Automation Model. With this property Hyperlinks can be used without implicitly setting the Hyperlink style.
+            // This Property is not part of Word’s Automation Model. With this property Hyperlinks can be used without implicitly setting the Hyperlink style.
             // This way they occur like linked cross references in Word, which are not implemented as an own DocumentObject type in MigraDoc.
             get => Values.NoHyperlinkStyle ?? false;
             set => Values.NoHyperlinkStyle = value;

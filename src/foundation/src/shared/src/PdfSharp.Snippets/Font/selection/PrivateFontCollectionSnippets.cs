@@ -60,7 +60,7 @@ namespace PdfSharp.Snippets.Font
 
 #if true
             // There is one problem with Arial and one problem with Tahoma.
-            // Maybe it's the same bug, but showing two different effects.
+            // Maybe it’s the same bug, but showing two different effects.
             // Add Arial and Tahoma from the Fonts directory to the private font collection.
 #if true
             // Register regular first.

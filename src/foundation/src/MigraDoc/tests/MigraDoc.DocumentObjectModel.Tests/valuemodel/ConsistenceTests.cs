@@ -11,6 +11,7 @@ using static MigraDoc.DocumentObjectModel.Border;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
+    [Collection("PDFsharp")]
     public class ConsistenceTests
     {
         public Type[] GetAllDocumentObjectTypes()

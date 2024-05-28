@@ -11,6 +11,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
     /// <summary>
     /// Low level test of document object model.
     /// </summary>
+    [Collection("PDFsharp")]
     public class BasicTests2
     {
         [Fact]
@@ -29,7 +30,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             //var value = new Test1Object();
             //var meta = value.Meta;
 
-            ////GetType();
+            ////_ = typeof(int);
 
             //var p = new Border();
             //var m = p.Meta;

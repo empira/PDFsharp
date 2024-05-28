@@ -79,8 +79,8 @@ namespace PdfSharp.Pdf.Advanced
                 }
                 else
                 {
-#if DEBUG
-                    GetType();
+#if DEBUG_
+                    _ = typeof(int);
 #endif
                 }
             }
@@ -89,10 +89,14 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Tries to get the position of the PdfObject inside this ObjectStream.
         /// </summary>
-        internal bool TryGetObjectOffset(PdfObjectID pdfObjectID, out SizeType offset)
+        internal bool TryGetObjectOffset(PdfObjectID pdfObjectID, out SizeType offset, SuppressExceptions? suppressObjectOrderExceptions)
         {
             if (_objectOffsets == null)
-                throw TH.InvalidOperationException_ReferencesOfObjectStreamNotYetRead();
+            {
+                SuppressExceptions.HandleError(suppressObjectOrderExceptions, () => throw TH.InvalidOperationException_ReferencesOfObjectStreamNotYetRead());
+                offset = -1;
+                return false;
+            }
 
             return _objectOffsets.TryGetValue(pdfObjectID, out offset);
         }

@@ -158,33 +158,25 @@ namespace PdfSharp.UniversalAccessibility
         /// <summary>
         /// Sets the language of the document.
         /// </summary>
-        public void SetDocumentLanguage(string lang)
-        {
-            _document.Internals.Catalog.Language = lang;
-        }
+        public void SetDocumentLanguage(string lang) 
+            => _document.Internals.Catalog.Language = lang;
 
         /// <summary>
         /// Sets the text mode.
         /// </summary>
-        public void BeginTextMode()
-        {
-            PdfRendererExtensions.BeginTextMode(CurrentGraphics);
-        }
+        public void BeginTextMode() 
+            => PdfRendererExtensions.BeginTextMode(CurrentGraphics);
 
         /// <summary>
         /// Sets the graphic mode.
         /// </summary>
-        public void BeginGraphicMode()
-        {
-            PdfRendererExtensions.BeginGraphicMode(CurrentGraphics);
-        }
+        public void BeginGraphicMode() 
+            => PdfRendererExtensions.BeginGraphicMode(CurrentGraphics);
 
         /// <summary>
         /// Determine if renderer is in Text mode or Graphic mode.
         /// </summary>
-        public bool IsInTextMode()
-        {
-            return PdfRendererExtensions.IsInTextMode(CurrentGraphics);
-        }
+        public bool IsInTextMode() 
+            => PdfRendererExtensions.IsInTextMode(CurrentGraphics);
     }
 }

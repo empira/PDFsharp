@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
@@ -63,7 +63,7 @@ namespace PdfSharp.Charting.Renderers
             // Calculate rects and positions.
             CalcLayout();
 
-            // Calculated remaining plot area, now it's safe to format.
+            // Calculated remaining plot area, now it’s safe to format.
             LinePlotAreaRenderer lpar = new LinePlotAreaRenderer(_rendererParms);
             lpar.Format();
         }
@@ -89,7 +89,7 @@ namespace PdfSharp.Charting.Renderers
             PlotAreaBorderRenderer pabr = new PlotAreaBorderRenderer(_rendererParms);
             pabr.Draw();
 
-            // Draw line chart's plot area.
+            // Draw line chart’s plot area.
             LinePlotAreaRenderer lpar = new LinePlotAreaRenderer(_rendererParms);
             lpar.Draw();
 

@@ -49,14 +49,10 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         /// </summary>
         public new CComment Clone() => (CComment)Copy();
 
-        /// <summary>
-        /// Implements the copy mechanism of this class.
-        /// </summary>
-        protected override CObject Copy()
-        {
-            var obj = base.Copy();
-            return obj;
-        }
+        ///// <summary>
+        ///// Implements the copy mechanism of this class.
+        ///// </summary>
+        //protected override CObject Copy() => base.Copy();
 
         /// <summary>
         /// Gets or sets the comment text.
@@ -274,7 +270,7 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
 
         #endregion
 
-        List<CObject> _items = new();
+        List<CObject> _items = [];
     }
 
     /// <summary>
@@ -287,19 +283,10 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         /// </summary>
         public new CNumber Clone() => (CNumber)Copy();
 
-        /// <summary>
-        /// Implements the copy mechanism of this class.
-        /// </summary>
-        protected override CObject Copy()
-        {
-            var obj = base.Copy();
-            return obj;
-        }
-
-        //internal override void WriteObject(ContentWriter writer)
-        //{
-        //  throw new Exception("Must not come here.");
-        //}
+        ///// <summary>
+        ///// Implements the copy mechanism of this class.
+        ///// </summary>
+        //protected override CObject Copy() => base.Copy();
     }
 
     /// <summary>
@@ -313,14 +300,10 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         /// </summary>
         public new CInteger Clone() => (CInteger)Copy();
 
-        /// <summary>
-        /// Implements the copy mechanism of this class.
-        /// </summary>
-        protected override CObject Copy()
-        {
-            var obj = base.Copy();
-            return obj;
-        }
+        ///// <summary>
+        ///// Implements the copy mechanism of this class.
+        ///// </summary>
+        //protected override CObject Copy() => base.Copy();
 
         /// <summary>
         /// Gets or sets the value.
@@ -330,7 +313,6 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
             get => _value;
             set => _value = value;
         }
-
         int _value;
 
         /// <summary>
@@ -354,14 +336,10 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         /// </summary>
         public new CReal Clone() => (CReal)Copy();
 
-        /// <summary>
-        /// Implements the copy mechanism of this class.
-        /// </summary>
-        protected override CObject Copy()
-        {
-            var obj = base.Copy();
-            return obj;
-        }
+        ///// <summary>
+        ///// Implements the copy mechanism of this class.
+        ///// </summary>
+        //protected override CObject Copy() => base.Copy();
 
         /// <summary>
         /// Gets or sets the value.
@@ -424,14 +402,10 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         /// </summary>
         public new CString Clone() => (CString)Copy();
 
-        /// <summary>
-        /// Implements the copy mechanism of this class.
-        /// </summary>
-        protected override CObject Copy()
-        {
-            var obj = base.Copy();
-            return obj;
-        }
+        ///// <summary>
+        ///// Implements the copy mechanism of this class.
+        ///// </summary>
+        //protected override CObject Copy() => base.Copy();
 
         /// <summary>
         /// Gets or sets the value.
@@ -470,35 +444,35 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
                         switch (ch)
                         {
                             case Chars.LF:
-                                s.Append("\\n");
+                                s.Append(@"\n");
                                 break;
 
                             case Chars.CR:
-                                s.Append("\\r");
+                                s.Append(@"\r");
                                 break;
 
                             case Chars.HT:
-                                s.Append("\\t");
+                                s.Append(@"\t");
                                 break;
 
                             case Chars.BS:
-                                s.Append("\\b");
+                                s.Append(@"\b");
                                 break;
 
                             case Chars.FF:
-                                s.Append("\\f");
+                                s.Append(@"\f");
                                 break;
 
                             case Chars.ParenLeft:
-                                s.Append("\\(");
+                                s.Append(@"\(");
                                 break;
 
                             case Chars.ParenRight:
-                                s.Append("\\)");
+                                s.Append(@"\)");
                                 break;
 
                             case Chars.BackSlash:
-                                s.Append("\\\\");
+                                s.Append(@"\\");
                                 break;
 
                             default:
@@ -567,14 +541,10 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         /// </summary>
         public new CName Clone() => (CName)Copy();
 
-        /// <summary>
-        /// Implements the copy mechanism of this class.
-        /// </summary>
-        protected override CObject Copy()
-        {
-            var obj = base.Copy();
-            return obj;
-        }
+        ///// <summary>
+        ///// Implements the copy mechanism of this class.
+        ///// </summary>
+        //protected override CObject Copy() => base.Copy();
 
         /// <summary>
         /// Gets or sets the name. Names must start with a slash.
@@ -613,14 +583,10 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         /// </summary>
         public new CArray Clone() => (CArray)Copy();
 
-        /// <summary>
-        /// Implements the copy mechanism of this class.
-        /// </summary>
-        protected override CObject Copy()
-        {
-            var obj = base.Copy();
-            return obj;
-        }
+        ///// <summary>
+        ///// Implements the copy mechanism of this class.
+        ///// </summary>
+        //protected override CObject Copy() => base.Copy();
 
         /// <summary>
         /// Returns a string that represents the current value.
@@ -635,7 +601,9 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
     /// <summary>
     /// Represents an operator a PDF content stream.
     /// </summary>
-    [DebuggerDisplay("({Name}, operands={Operands.Count})")]
+    //[DebuggerDisplay("({Name}, operands={Operands.Count})")]
+    [DebuggerDisplay($"{{{nameof(DebuggerDisplay)},nq}}")]
+    [DebuggerTypeProxy(typeof(COperatorDebuggerDisplay))]
     public class COperator : CObject
     {
         /// <summary>
@@ -650,17 +618,13 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         /// </summary>
         public new COperator Clone() => (COperator)Copy();
 
-        /// <summary>
-        /// Implements the copy mechanism of this class.
-        /// </summary>
-        protected override CObject Copy()
-        {
-            var obj = base.Copy();
-            return obj;
-        }
+        ///// <summary>
+        ///// Implements the copy mechanism of this class.
+        ///// </summary>
+        //protected override CObject Copy() => base.Copy();
 
         /// <summary>
-        /// Gets or sets the name of the operator
+        /// Gets or sets the name of the operator.
         /// </summary>
         /// <value>The name.</value>
         public virtual string Name => _opCode.Name;
@@ -687,7 +651,6 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         {
             if (_opCode.OpCodeName == OpCodeName.Dictionary)
                 return " ";
-
 #if true
             return Name;
 #else
@@ -719,6 +682,49 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
             writer.WriteLineRaw(_opCode.OpCodeName == OpCodeName.Dictionary
                     ? " "
                     : Name);
+        }
+
+        #region Printing/Debugger display
+        /// <summary>Function returning string that will be used to display object’s value in debugger for this type of objects.</summary>
+        public static Func<COperator, string> debuggerDisplay { get; set; } = o => o.ToString(15);
+        string DebuggerDisplay => debuggerDisplay(this);
+
+        /// <summary>Prints longer version of string including name, operands list and operator description.</summary>
+        /// <param name="maxOperandsStringLength">Maximal number of characters in operands portion of the string that could be displayed.
+        /// If printing all operands would require greater number of characters, a string in form like "15 operands" will be put in the result instead.</param>
+        public string ToString(int maxOperandsStringLength)
+        {
+            if (maxOperandsStringLength < 1)
+                return ToString();
+
+            const string sep = ", ";
+            var operands = "";
+            foreach (var op in Operands)
+            {
+                var os = op + sep; // This should be optimized and size should be checked before converting to string, I guess some objects may be really long...
+                operands += os;
+                if (operands.Length > maxOperandsStringLength + sep.Length)
+                {
+                    operands = Operands.Count + " operands" + sep;
+                    break;
+                }
+            }
+            if (operands.Length > 0) operands = operands.Substring(0, operands.Length - sep.Length);
+
+            return $"{Name,-4}({operands})  # {OpCode.Description}";
+        }
+        #endregion
+
+        internal class COperatorDebuggerDisplay(COperator o)
+        {
+            public string Name => $"{o.Name} - {o.OpCode.Description}";
+
+            public string Postscript => o.OpCode.Postscript ?? "<none>";
+
+            public OpCodeFlags Flags => o.OpCode.Flags;
+
+            [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+            public CObject[] Operands => o.Operands.ToArray();
         }
     }
 }

@@ -15,7 +15,7 @@ namespace PdfSharp.Drawing.Internal
             // Only used for Core build.
             // TODO Enable for GDI and WPF for testing?
 #if WPF || GDI
-            // We don't handle any files for WPF or GDI+ build.
+            // We don’t handle any files for WPF or GDI+ build.
             return null;
 #endif
 
@@ -180,9 +180,12 @@ namespace PdfSharp.Drawing.Internal
             // Now access the PNG pixels.
             // Png does not implement IDisposable.
             {
-                stream.OriginalStream.Position = 0;
+                if (stream.OriginalStream != null!)
+                    stream.OriginalStream.Position = 0;
                 var myVisitor = new MyVisitor();
-                var png = Png.Open(stream.OriginalStream, myVisitor);
+                var png = stream.OriginalStream != null ?
+                    Png.Open(stream.OriginalStream, myVisitor) :
+                    Png.Open(stream.Data, myVisitor);
 
                 if (png.Width != ii.Information.Width ||
                     png.Height != ii.Information.Height)

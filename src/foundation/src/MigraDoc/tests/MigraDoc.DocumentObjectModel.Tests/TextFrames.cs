@@ -11,6 +11,7 @@ using Xunit;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
+    [Collection("PDFsharp")]
     public class TextFrames
     {
         [Fact]
@@ -26,9 +27,8 @@ namespace MigraDoc.DocumentObjectModel.Tests
             //// This setting has no effect on the RTF renderer.
             //const bool unicode = false;
 
-#if DEBUG___
+#if DEBUG_
             var ddl = MigraDoc.DocumentObjectModel.IO.DdlWriter.WriteToString(document);
-            //GetType();
 #endif
 
             // Create a renderer for the MigraDoc document.

@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc
@@ -81,7 +81,7 @@ namespace MigraDoc
         /// <summary>
         /// The copyright information.
         /// </summary>
-        public const string Copyright = "Copyright � 2001-2024 empira Software GmbH."; // Also used as NuGet Copyright.
+        public const string Copyright = "Copyright © 2001-2024 empira Software GmbH."; // Also used as NuGet Copyright.
 
         /// <summary>
         /// The trademark of the product.

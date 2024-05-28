@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 namespace PdfSharp.Charting
@@ -56,7 +56,7 @@ namespace PdfSharp.Charting
         }
 
         /// <summary>
-        /// Gets the line format of the data point's border.
+        /// Gets the line format of the data point’s border.
         /// </summary>
         public LineFormat LineFormat => _lineFormat ??= new LineFormat(this);
         // ReSharper disable once InconsistentNaming because this is old code

@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System.Globalization;
@@ -20,7 +20,7 @@ namespace PdfSharp.Charting.Renderers
         { }
 
         /// <summary>
-        /// Initializes the legend's renderer info. Each data point will be represented through
+        /// Initializes the legend’s renderer info. Each data point will be represented through
         /// a legend entry renderer info.
         /// </summary>
         internal override RendererInfo? Init()

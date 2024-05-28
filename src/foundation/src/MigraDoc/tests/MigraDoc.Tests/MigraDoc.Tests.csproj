@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <PackageReference Include="Xunit.SkippableFact" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,6 +32,7 @@
     <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp.Charting\PdfSharp.Charting.csproj" />
     <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp\PdfSharp.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets\PdfSharp.Snippets.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.Testing\PdfSharp.Testing.csproj" />
     <ProjectReference Include="..\..\src\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
     <ProjectReference Include="..\..\src\MigraDoc.Rendering\MigraDoc.Rendering.csproj" />
     <ProjectReference Include="..\..\src\MigraDoc.RtfRendering\MigraDoc.RtfRendering.csproj" />

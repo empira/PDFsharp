@@ -30,7 +30,7 @@ namespace PdfSharp.Snippets.Drawing
 
             BeginBox(gfx, 2, BoxOptions.Tile);
             {
-                // This JPEG didn't work under Windows 7 and higher with PDFsharp 1.32 - should work now.
+                // This JPEG didn’t work under Windows 7 and higher with PDFsharp 1.32 - should work now.
                 var img = ImageHelper.GetJpegImage(ImageHelper.JpegImages.Windows7Problem);
                 gfx.DrawImage(img, 28, 18, 152, 114);
             }

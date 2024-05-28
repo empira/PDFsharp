@@ -1348,12 +1348,8 @@ namespace MigraDoc.DocumentObjectModel.Tests
                 }
                 """;
 
-            //GetType();
-
             // Read MDDDL.
             var docRead = DdlReader.DocumentFromString(mdddl);
-
-            //GetType();
         }
 
         [Fact(Skip = "Escaping bug in current implementation")]
@@ -1389,13 +1385,9 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var mdddl = DdlWriter.WriteToString(doc);
             mdddl.Should().NotBeNullOrEmpty();
 
-            //GetType();
-
             // Read MDDDL.
             var docRead = DdlReader.DocumentFromString(mdddl);
             docRead.Should().NotBeNull();
-
-            //GetType();
         }
 
         [Fact(Skip = "Escaping bug in current implementation")]
@@ -1417,15 +1409,10 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var mdddl = DdlWriter.WriteToString(doc);
             mdddl.Should().NotBeNullOrEmpty();
 
-            //GetType();
-
             // Read MDDDL.
             // Throws exception "DdlParserException" with message "Newline in string not allowed.".
             // Exception should be thrown in DdlWriter or linefeed should be escaped.
             var docRead = DdlReader.DocumentFromString(mdddl);
-
-            //GetType();
         }
-
     }
 }

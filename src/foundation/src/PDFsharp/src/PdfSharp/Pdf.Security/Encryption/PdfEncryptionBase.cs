@@ -8,7 +8,7 @@ using PdfSharp.Pdf.IO;
 namespace PdfSharp.Pdf.Security.Encryption
 {
     /// <summary>
-    /// Abstract class for StandardSecurityHandler's encryption versions implementations.
+    /// Abstract class for StandardSecurityHandler’s encryption versions implementations.
     /// </summary>
     abstract class PdfEncryptionBase
     {
@@ -56,7 +56,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         }
 
         /// <summary>
-        /// Sets the encryption dictionary's values for saving.
+        /// Sets the encryption dictionary’s values for saving.
         /// </summary>
         public abstract void PrepareEncryptionForSaving(string userPassword, string ownerPassword);
 

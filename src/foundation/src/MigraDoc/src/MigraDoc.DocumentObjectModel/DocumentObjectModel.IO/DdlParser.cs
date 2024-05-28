@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+ï»¿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 #define SECTIONFIX // BUG: Verify changes and clean if checked.
@@ -35,7 +35,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\document».
+        /// Parses the keyword Â«\documentÂ».
         /// </summary>
         internal Document ParseDocument(Document? document)
         {
@@ -68,8 +68,8 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses one of the keywords «\document», «\styles», «\section», «\table», «\textframe», «\chart»
-        /// and «\paragraph» and returns the corresponding DocumentObject or DocumentObjectCollection.
+        /// Parses one of the keywords Â«\documentÂ», Â«\stylesÂ», Â«\sectionÂ», Â«\tableÂ», Â«\textframeÂ», Â«\chartÂ»
+        /// and Â«\paragraphÂ» and returns the corresponding DocumentObject or DocumentObjectCollection.
         /// </summary>
         internal DocumentObject? ParseDocumentObject()
         {
@@ -124,7 +124,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\styles».
+        /// Parses the keyword Â«\stylesÂ».
         /// </summary>
         Styles ParseStyles(Styles styles)
         {
@@ -146,7 +146,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses a style definition block within the keyword «\styles».
+        /// Parses a style definition block within the keyword Â«\stylesÂ».
         /// </summary>
         Style? ParseStyleDefinition(Styles styles)
         {
@@ -224,13 +224,13 @@ namespace MigraDoc.DocumentObjectModel.IO
         {
             var sym = Symbol;
             return sym is Symbol.Header or Symbol.Footer
-                or Symbol.PrimaryHeader or Symbol.PrimaryFooter 
+                or Symbol.PrimaryHeader or Symbol.PrimaryFooter
                 or Symbol.EvenPageHeader or Symbol.EvenPageFooter
                 or Symbol.FirstPageHeader or Symbol.FirstPageFooter;
         }
 
         /// <summary>
-        /// Parses the keyword «\EmbeddedFiles».
+        /// Parses the keyword Â«\EmbeddedFilesÂ».
         /// </summary>
         EmbeddedFiles ParseEmbeddedFiles(EmbeddedFiles embeddedFiles)
         {
@@ -257,7 +257,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\section».
+        /// Parses the keyword Â«\sectionÂ».
         /// </summary>
         Section? ParseSection(Sections sections)
         {
@@ -298,7 +298,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                     ParseDocumentElements(section.Elements, Symbol.Section);
                 }
 #else
-                // Consider the case that the keyword «\paragraph» can be omitted.
+                // Consider the case that the keyword Â«\paragraphÂ» can be omitted.
                 if (IsParagraphContent())
                 {
                     var paragraph = section.Elements.AddParagraph();
@@ -329,12 +329,12 @@ namespace MigraDoc.DocumentObjectModel.IO
 
 #if SECTIONFIX
         /// <summary>
-        /// Parses the keywords «\header».
-        /// Doesn't move to next token as paragraph content may follow, which has to be checked before moving to the next token.
+        /// Parses the keywords Â«\headerÂ».
+        /// Doesnâ€™t move to next token as paragraph content may follow, which has to be checked before moving to the next token.
         /// </summary>
 #else
         /// <summary>
-        /// Parses the keywords «\header».
+        /// Parses the keywords Â«\headerÂ».
         /// </summary>
 #endif
         void ParseHeaderFooter(Section section)
@@ -447,7 +447,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the document elements of a «\paragraph», «\cell» or comparable.
+        /// Parses the document elements of a Â«\paragraphÂ», Â«\cellÂ» or comparable.
         /// </summary>
 #pragma warning disable IDE0060
         DocumentElements ParseDocumentElements(DocumentElements elements, Symbol context)
@@ -508,7 +508,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\paragraph».
+        /// Parses the keyword Â«\paragraphÂ».
         /// </summary>
         void ParseParagraph(DocumentElements elements)
         {
@@ -698,7 +698,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keywords «\bold», «\italic», and «\underline».
+        /// Parses the keywords Â«\boldÂ», Â«\italicÂ», and Â«\underlineÂ».
         /// </summary>
         void ParseBoldItalicEtc(FormattedText formattedText, int nestingLevel)
         {
@@ -709,7 +709,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\font».
+        /// Parses the keyword Â«\fontÂ».
         /// </summary>
         void ParseFont(FormattedText formattedText, int nestingLevel)
         {
@@ -731,7 +731,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses code like «("name")».
+        /// Parses code like Â«("name")Â».
         /// </summary>
         string ParseElementName()
         {
@@ -748,7 +748,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\fontsize».
+        /// Parses the keyword Â«\fontsizeÂ».
         /// </summary>
         void ParseFontSize(FormattedText formattedText, int nestingLevel)
         {
@@ -769,7 +769,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\fontcolor».
+        /// Parses the keyword Â«\fontcolorÂ».
         /// </summary>
         void ParseFontColor(FormattedText formattedText, int nestingLevel)
         {
@@ -788,7 +788,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\symbol» resp. «\(».
+        /// Parses the keyword Â«\symbolÂ» resp. Â«\(Â».
         /// </summary>
         void ParseSymbol(ParagraphElements elements)
         {
@@ -840,7 +840,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\chr».
+        /// Parses the keyword Â«\chrÂ».
         /// </summary>
         void ParseChr(ParagraphElements elements)
         {
@@ -885,7 +885,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\field».
+        /// Parses the keyword Â«\fieldÂ».
         /// </summary>
 #pragma warning disable IDE0060
         void ParseField(ParagraphElements elements, int nestingLevel)
@@ -948,7 +948,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\footnote».
+        /// Parses the keyword Â«\footnoteÂ».
         /// </summary>
 #pragma warning disable IDE0060
         void ParseFootnote(ParagraphElements elements, int nestingLevel)
@@ -963,7 +963,7 @@ namespace MigraDoc.DocumentObjectModel.IO
 
             AssertSymbol(Symbol.BraceLeft);
 
-            // The keyword «\paragraph» is typically omitted.
+            // The keyword Â«\paragraphÂ» is typically omitted.
             if (IsParagraphContent())
             {
                 Paragraph paragraph = footnote.Elements.AddParagraph();
@@ -978,7 +978,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\hyperlink».
+        /// Parses the keyword Â«\hyperlinkÂ».
         /// </summary>
         void ParseHyperlink(ParagraphElements elements, int nestingLevel)
         {
@@ -996,7 +996,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\space».
+        /// Parses the keyword Â«\spaceÂ».
         /// </summary>
 #pragma warning disable IDE0060
         void ParseSpace(ParagraphElements elements, int nestingLevel)
@@ -1011,7 +1011,7 @@ namespace MigraDoc.DocumentObjectModel.IO
 
             Character space = elements.AddSpace(1);
 
-            // «\space» can stand alone
+            // Â«\spaceÂ» can stand alone
             if (_scanner.PeekSymbol() == Symbol.ParenLeft)
             {
                 ReadCode(); // read '('
@@ -1055,7 +1055,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\table».
+        /// Parses the keyword Â«\tableÂ».
         /// </summary>
         void ParseTable(DocumentElements? elements, Table? table)
         {
@@ -1079,11 +1079,11 @@ namespace MigraDoc.DocumentObjectModel.IO
                 AssertSymbol(Symbol.BraceLeft);
                 ReadCode();
 
-                // Table must start with «\columns»...
+                // Table must start with Â«\columnsÂ»...
                 AssertSymbol(Symbol.Columns);
                 ParseColumns(tbl);
 
-                // ...followed by «\rows».
+                // ...followed by Â«\rowsÂ».
                 AssertSymbol(Symbol.Rows);
                 ParseRows(tbl);
 
@@ -1098,7 +1098,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\columns».
+        /// Parses the keyword Â«\columnsÂ».
         /// </summary>
         void ParseColumns(Table table)
         {
@@ -1138,7 +1138,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\column».
+        /// Parses the keyword Â«\columnÂ».
         /// </summary>
         void ParseColumn(Column column)
         {
@@ -1159,7 +1159,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\rows».
+        /// Parses the keyword Â«\rowsÂ».
         /// </summary>
         void ParseRows(Table table)
         {
@@ -1199,7 +1199,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\row».
+        /// Parses the keyword Â«\rowÂ».
         /// </summary>
         void ParseRow(Row row)
         {
@@ -1244,7 +1244,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\cell».
+        /// Parses the keyword Â«\cellÂ».
         /// </summary>
         void ParseCell(Cell cell)
         {
@@ -1274,7 +1274,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\image».
+        /// Parses the keyword Â«\imageÂ».
         /// </summary>
         void ParseImage(Image image, bool paragraphContent)
         {
@@ -1310,7 +1310,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\textframe».
+        /// Parses the keyword Â«\textframeÂ».
         /// </summary>
         void ParseTextFrame(DocumentElements elements)
         {
@@ -1384,7 +1384,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\chart».
+        /// Parses the keyword Â«\chartÂ».
         /// </summary>
         void ParseChart(DocumentElements elements)
         {
@@ -1502,7 +1502,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\plotarea» inside a chart.
+        /// Parses the keyword Â«\plotareaÂ» inside a chart.
         /// </summary>
         void ParseArea(PlotArea area)
         {
@@ -1548,8 +1548,8 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keywords «\headerarea», «\toparea», «\bottomarea», «\footerarea»,
-        /// «\leftarea» or «\rightarea» inside a chart.
+        /// Parses the keywords Â«\headerareaÂ», Â«\topareaÂ», Â«\bottomareaÂ», Â«\footerareaÂ»,
+        /// Â«\leftareaÂ» or Â«\rightareaÂ» inside a chart.
         /// </summary>
         void ParseArea(TextArea area)
         {
@@ -1624,7 +1624,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keywords «\xaxis», «\yaxis» or «\zaxis» inside a chart.
+        /// Parses the keywords Â«\xaxisÂ», Â«\yaxisÂ» or Â«\zaxisÂ» inside a chart.
         /// </summary>
         void ParseAxes(Axis axis, Symbol symbolAxis)
         {
@@ -1660,7 +1660,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\series» inside a chart.
+        /// Parses the keyword Â«\seriesÂ» inside a chart.
         /// </summary>
         void ParseSeries(Series series)
         {
@@ -1728,7 +1728,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\xvalues» inside a chart.
+        /// Parses the keyword Â«\xvaluesÂ» inside a chart.
         /// </summary>
         void ParseSeries(XSeries series)
         {
@@ -1790,7 +1790,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\point» inside a series.
+        /// Parses the keyword Â«\pointÂ» inside a series.
         /// </summary>
         void ParsePoint(Point point)
         {
@@ -1820,7 +1820,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses the keyword «\legend» inside a textarea.
+        /// Parses the keyword Â«\legendÂ» inside a textarea.
         /// </summary>
         void ParseLegend(Legend legend)
         {
@@ -1852,7 +1852,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses an attribute declaration block enclosed in brackets «[…]». If readNextSymbol is
+        /// Parses an attribute declaration block enclosed in brackets Â«[â€¦]Â». If readNextSymbol is
         /// set to true, the closing bracket will be read.
         /// </summary>
         void ParseAttributes(DocumentObject element, bool readNextSymbol)
@@ -1871,7 +1871,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses an attribute declaration block enclosed in brackets «[…]».
+        /// Parses an attribute declaration block enclosed in brackets Â«[â€¦]Â».
         /// </summary>
         void ParseAttributes(DocumentObject element)
         {
@@ -1888,7 +1888,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             // or 
             //   sequence of identifiers: xxx.yyy.zzz
             //
-            // followed by: «=», «+=», «-=», or «{»
+            // followed by: Â«=Â», Â«+=Â», Â«-=Â», or Â«{Â»
             //
             // Parser of rhs depends on the type of the l-value.
 
@@ -1904,10 +1904,6 @@ namespace MigraDoc.DocumentObjectModel.IO
                 object? val;
                 while (Symbol == Symbol.Dot)
                 {
-#if DEBUG_
-                    if (valueName == "TabStops")
-                        valueName.GetType();
-#endif
                     Debug.Assert(doc != null, "Make ReSharper happy.");
                     val = doc.GetValue(valueName);
                     if (val == null)
@@ -1924,11 +1920,6 @@ namespace MigraDoc.DocumentObjectModel.IO
                     AssertCondition(Symbol == Symbol.Identifier, DomMsgID.InvalidValueName, _scanner.Token);
                     valueName = _scanner.Token;
                     AssertCondition(valueName[0] != '_', DomMsgID.NoAccess, _scanner.Token);
-
-#if DEBUG_
-                    if (valueName == "TabStops")
-                        valueName.GetType();
-#endif
 
                     ReadCode();
                 }
@@ -2010,7 +2001,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses an attribute declaration block enclosed in braces «{…}».
+        /// Parses an attribute declaration block enclosed in braces Â«{â€¦}Â».
         /// </summary>
         void ParseAttributeBlock(DocumentObject element)
         {
@@ -2247,8 +2238,8 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses a color. It can be «green», «123456», «0xFFABCDEF», 
-        /// «RGB(r, g, b)», «CMYK(c, m, y, k)», «CMYK(a, c, m, y, k)», «GRAY(g)», or «"MyColor"».
+        /// Parses a color. It can be Â«greenÂ», Â«123456Â», Â«0xFFABCDEFÂ», 
+        /// Â«RGB(r, g, b)Â», Â«CMYK(c, m, y, k)Â», Â«CMYK(a, c, m, y, k)Â», Â«GRAY(g)Â», or Â«"MyColor"Â».
         /// </summary>
         Color ParseColor()
         {
@@ -2304,7 +2295,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses «RGB(r, g, b)».
+        /// Parses Â«RGB(r, g, b)Â».
         /// </summary>
         // ReSharper disable once InconsistentNaming
         Color ParseRGB()
@@ -2345,7 +2336,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses «CMYK(c, m, y, k)» or «CMYK(a, c, m, y, k)».
+        /// Parses Â«CMYK(c, m, y, k)Â» or Â«CMYK(a, c, m, y, k)Â».
         /// </summary>
         Color ParseCMYK()
         {
@@ -2416,7 +2407,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Parses «GRAY(g)».
+        /// Parses Â«GRAY(g)Â».
         /// </summary>
         Color ParseGray()
         {
@@ -2528,7 +2519,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// If current symbol is not equal symbol a DdlParserException with the specified message id
+        /// If current symbol is not equal symbol a DdlParserException with the specified message ID
         /// will be thrown.
         /// </summary>
         void AssertSymbol(Symbol symbol, DomMsgID err)
@@ -2538,7 +2529,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// If current symbol is not equal symbol a DdlParserException with the specified message id
+        /// If current symbol is not equal symbol a DdlParserException with the specified message ID
         /// will be thrown.
         /// </summary>
         void AssertSymbol(Symbol symbol, DomMsgID err, params object[] parms)

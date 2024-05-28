@@ -36,7 +36,6 @@ namespace PdfSharp.Snippets.Drawing
             gfx.DrawString("Hello, 10pt", font10pt, XBrushes.Black, 10, 80);
             EndPdfPage();
 
-
             // Page 2 - mm
             gfx = BeginPdfPage(XUnit.FromPoint(WidthInPoint), XUnit.FromPoint(HeightInPoint), XGraphicsUnit.Millimeter, direction);
             gfx.DrawLine(XPens.Red, 0, 0, 100, 100);

@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.IO;
@@ -26,13 +26,13 @@ namespace PdfSharp.Pdf.AcroForms
         /// </summary>
         internal override void WriteDictionaryElement(PdfWriter writer, PdfName key)
         {
-            // Don't encrypt Contents key's value (PDF Reference 2.0: 7.6.2, Page 71).
+            // Don’t encrypt Contents key’s value (PDF Reference 2.0: 7.6.2, Page 71).
             if (key.Value == Keys.Contents)
             {
-                var securityHandler = writer.SecurityHandler;
-                writer.SecurityHandler = null;
+                var effectiveSecurityHandler = writer.EffectiveSecurityHandler;
+                writer.EffectiveSecurityHandler = null;
                 base.WriteDictionaryElement(writer, key);
-                writer.SecurityHandler = securityHandler;
+                writer.EffectiveSecurityHandler = effectiveSecurityHandler;
             }
             else
                 base.WriteDictionaryElement(writer, key);
@@ -53,7 +53,7 @@ namespace PdfSharp.Pdf.AcroForms
 
             /// <summary>
             /// (Required; inheritable) The name of the signature handler to be used for
-            /// authenticating the field�s contents, such as Adobe.PPKLite, Entrust.PPKEF,
+            /// authenticating the field’s contents, such as Adobe.PPKLite, Entrust.PPKEF,
             /// CICI.SignIt, or VeriSign.PPKVS.
             /// </summary>
             [KeyInfo(KeyType.Name | KeyType.Required)]
@@ -101,7 +101,7 @@ namespace PdfSharp.Pdf.AcroForms
             public const string Location = "/Location";
 
             /// <summary>
-            /// (Optional) The reason for the signing, such as (I agree�).
+            /// (Optional) The reason for the signing, such as (I agree…).
             /// </summary>
             [KeyInfo(KeyType.TextString | KeyType.Optional)]
             public const string Reason = "/Reason";

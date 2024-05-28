@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using Microsoft.Extensions.Logging;
@@ -43,7 +43,7 @@ namespace PdfSharp.Pdf.IO
 
         /// <summary>
         /// Determines whether the file specified by its path is a PDF file by inspecting the first eight
-        /// bytes of the data. If the file header has the form «%PDF-x.y» the function returns the version
+        /// bytes of the data. If the file header has the form Â«%PDF-x.yÂ» the function returns the version
         /// number as integer (e.g. 14 for PDF 1.4). If the file header is invalid or inaccessible
         /// for any reason, 0 is returned. The function never throws an exception. 
         /// </summary>
@@ -83,7 +83,7 @@ namespace PdfSharp.Pdf.IO
 
         /// <summary>
         /// Determines whether the specified stream is a PDF file by inspecting the first eight
-        /// bytes of the data. If the data begins with «%PDF-x.y» the function returns the version
+        /// bytes of the data. If the data begins with Â«%PDF-x.yÂ» the function returns the version
         /// number as integer (e.g. 14 for PDF 1.4). If the data is invalid or inaccessible
         /// for any reason, 0 is returned. The function never throws an exception.
         /// This method expects the stream position to point to the start of the file data to be checked.
@@ -120,7 +120,7 @@ namespace PdfSharp.Pdf.IO
 
         /// <summary>
         /// Determines whether the specified data is a PDF file by inspecting the first eight
-        /// bytes of the data. If the data begins with «%PDF-x.y» the function returns the version
+        /// bytes of the data. If the data begins with Â«%PDF-x.yÂ» the function returns the version
         /// number as integer (e.g. 14 for PDF 1.4). If the data is invalid or inaccessible
         /// for any reason, 0 is returned. The function never throws an exception. 
         /// </summary>
@@ -134,7 +134,7 @@ namespace PdfSharp.Pdf.IO
         {
             try
             {
-                // Acrobat accepts headers like «%!PS-Adobe-N.n PDF-M.m»...
+                // Acrobat accepts headers like Â«%!PS-Adobe-N.n PDF-M.mÂ»...
                 var header =
                     PdfEncoders.RawEncoding.GetString(bytes, 0, bytes.Length); // Encoding.ASCII.GetString(bytes);
                 if (header[0] == '%' || header.Contains("%PDF"))
@@ -310,7 +310,7 @@ namespace PdfSharp.Pdf.IO
                 // 2. Read the encryption dictionary, if existing.
                 if (_document.Trailer!.Elements[PdfTrailer.Keys.Encrypt] is PdfReference xrefEncrypt)
                 {
-                    var encrypt = parser.ReadIndirectObject(xrefEncrypt, true);
+                    var encrypt = parser.ReadIndirectObject(xrefEncrypt, null, true);
                     encrypt.Reference = xrefEncrypt;
                     xrefEncrypt.Value = encrypt;
 
@@ -383,7 +383,7 @@ namespace PdfSharp.Pdf.IO
                 // 6. Reset encryption so that it must be redefined to save the document encrypted.
                 effectiveSecurityHandler?.SetEncryptionToNoneAndResetPasswords();
 
-                // 7. Replace all document's placeholder references by references knowing their objects.
+                // 7. Replace all documentâ€™s placeholder references by references knowing their objects.
                 // Placeholder references are used, when reading indirect objects referring objects stored in object streams before reading and decoding them.
                 FinishReferences();
 
@@ -392,7 +392,7 @@ namespace PdfSharp.Pdf.IO
 #if DEBUG_ // TODO: Delete or rewrite.
                 // Some tests...
                 PdfReference[] reachables = document.xrefTable.TransitiveClosure(document.trailer);
-                reachables.GetType();
+                _ = typeof(int);
                 reachables = document.xrefTable.AllXRefs;
                 document.xrefTable.CheckConsistence();
 #endif
@@ -414,7 +414,10 @@ namespace PdfSharp.Pdf.IO
                     // Remove all unreachable objects.
                     int removed = _document.IrefTable.Compact();
                     if (removed != 0)
-                        Debug.WriteLine("Number of deleted unreachable objects: " + removed);
+                    {
+                        //Debug.WriteLine("Number of deleted unreachable objects: " + removed);
+                        PdfSharpLogHost.PdfReadingLogger.LogInformation("Number of deleted unreachable objects: " + removed);
+                    }
 
                     // Force flattening of page tree.
                     var pages = _document.Pages;
@@ -444,7 +447,7 @@ namespace PdfSharp.Pdf.IO
                 Debug.Assert(iref.Value != null,
                     "All references saved in IrefTable should have been created when their referred PdfObject has been accessible.");
 
-                // Get and update object's references.
+                // Get and update objectâ€™s references.
                 FinishItemReferences(iref.Value, _document, finishedObjects);
             }
 
@@ -510,7 +513,7 @@ namespace PdfSharp.Pdf.IO
                     item = value;
                 }
 
-                // Get and update item's references.
+                // Get and update itemâ€™s references.
                 FinishItemReferences(item, _document, finishedObjects);
             }
         }
@@ -530,7 +533,7 @@ namespace PdfSharp.Pdf.IO
                     item = value;
                 }
 
-                // Get and update item's references.
+                // Get and update itemâ€™s references.
                 FinishItemReferences(item, _document, finishedObjects);
             }
         }

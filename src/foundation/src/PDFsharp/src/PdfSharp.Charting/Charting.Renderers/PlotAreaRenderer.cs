@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Diagnostics;
@@ -32,7 +32,7 @@ namespace PdfSharp.Charting.Renderers
         }
 
         /// <summary>
-        /// Initializes the plot area's line format common to all derived plot area renderers.
+        /// Initializes the plot area’s line format common to all derived plot area renderers.
         /// If line format is given all uninitialized values will be set.
         /// </summary>
         protected void InitLineFormat(PlotAreaRendererInfo rendererInfo)
@@ -42,7 +42,7 @@ namespace PdfSharp.Charting.Renderers
         }
 
         /// <summary>
-        /// Initializes the plot area's fill format common to all derived plot area renderers.
+        /// Initializes the plot area’s fill format common to all derived plot area renderers.
         /// If fill format is given all uninitialized values will be set.
         /// </summary>
         protected void InitFillFormat(PlotAreaRendererInfo rendererInfo)
@@ -52,7 +52,7 @@ namespace PdfSharp.Charting.Renderers
         }
 
         /// <summary>
-        /// Represents the default line width for the plot area's border.
+        /// Represents the default line width for the plot area’s border.
         /// </summary>
         protected const double DefaultLineWidth = 0.15;
     }

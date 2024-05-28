@@ -1,6 +1,7 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using PdfSharp.Drawing;
@@ -11,7 +12,7 @@ using PdfSharp.Quality;
 
 namespace Shared.TestApp
 {
-    class Program
+    partial class Program
     {
         static void Main( /*string[] args*/)
         {
@@ -40,13 +41,21 @@ namespace Shared.TestApp
             LogHost.Logger.TestMessage("di-blub");
             LogHost.Logger.TestMessage("------------------------------------------------------------------------------");
 
-           
+
 
             var tempFileName = PdfFileUtility.GetTempPdfFullFileName("tests");
 
             //document.Save(tempFileName);
 
-            PdfFileUtility.ShowDocumentIfDebugging(tempFileName);
+            // Call some developer specific test code from a file not in the repo.
+            // Implement your code in ProgramEx.cs in partial class Program.
+            var test = typeof(Program).GetMethod("Test", BindingFlags.Static| BindingFlags.NonPublic);
+            if (test != null)
+            {
+                test.Invoke(null, null);
+            }
+
+            //PdfFileUtility.ShowDocumentIfDebugging(tempFileName);
         }
     }
 }

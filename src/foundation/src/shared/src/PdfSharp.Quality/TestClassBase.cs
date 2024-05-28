@@ -39,7 +39,7 @@
 //            set
 //            {
 //                if (value == null)
-//                    GetType();
+//                    _ = typeof(int);
 //                _testContextInstance = value;
 //            }
 //        }

@@ -10,7 +10,7 @@ using PdfSharp.Pdf.IO;
 namespace PdfSharp.Pdf.Security.Encryption
 {
     /// <summary>
-    /// Implements StandardSecurityHandler's encryption versions 1, 2, and 4 (3 shall not appear in conforming files).
+    /// Implements StandardSecurityHandler’s encryption versions 1, 2, and 4 (3 shall not appear in conforming files).
     /// </summary>
     class PdfEncryptionV1To4 : PdfEncryptionBase
     {
@@ -129,7 +129,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         }
 
         /// <summary>
-        /// Sets the encryption dictionary's values for saving.
+        /// Sets the encryption dictionary’s values for saving.
         /// </summary>
         public override void PrepareEncryptionForSaving(string userPassword, string ownerPassword)
         {

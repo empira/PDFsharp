@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
@@ -71,18 +71,18 @@ namespace PdfSharp.Events
         GraphicsCreated = 1,
         
         /// <summary>
-        /// DrawString() was called on the page's XGraphics object.
+        /// DrawString() was called on the page’s XGraphics object.
         /// </summary>
         DrawString,
         
         /// <summary>
-        /// Another method drawing content was called on the page's XGraphics object.
+        /// Another method drawing content was called on the page’s XGraphics object.
         /// </summary>
         Draw
     }
 
     /// <summary>
-    /// EventArgs for actions on a page's XGraphics object.
+    /// EventArgs for actions on a page’s XGraphics object.
     /// </summary>
     public class PageGraphicsEventArgs(PdfObject source) : PdfSharpEventArgs(source)
     {
@@ -160,7 +160,7 @@ namespace PdfSharp.Events
         public event PageGraphicsEventHandler? PageGraphicsCreated;
 
         /// <summary>
-        /// An event raised if something is drawn on a page's XGraphics object.
+        /// An event raised if something is drawn on a page’s XGraphics object.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="args">The PageGraphicsEventArgs of the event.</param>

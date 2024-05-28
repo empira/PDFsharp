@@ -6,6 +6,8 @@ using System.IO;
 #endif
 using FluentAssertions;
 using PdfSharp.Drawing;
+using PdfSharp.FontResolver;
+using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 using PdfSharp.Quality;
 using Xunit;
@@ -13,8 +15,18 @@ using Xunit;
 namespace PdfSharp.Tests.Fonts
 {
     [Collection("PDFsharp")]
-    public class FontEmbeddingTests
+    public class FontEmbeddingTests : IDisposable
     {
+        public FontEmbeddingTests()
+        {
+            GlobalFontSettings.ResetFontManagement();
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+        }
+
+        public void Dispose()
+        {
+            GlobalFontSettings.ResetFontManagement();
+        }
 
         [Fact]
         public void Embed_font_subset()
@@ -65,12 +77,8 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void Embed_Segoe_UI_Emoji_file()
         {
-            if (Capabilities.Build.IsCoreBuild)
-                return;
-
             //const int SmilingFaceWithHearts = 0x_0001_F970;  // 😍
             //const int RedRose = 0x_0001_F339;  // 🌹
-
 
             var fontEmoji = new XFont("Segoe UI Emoji", 10, XFontStyleEx.Regular, new(PdfFontEncoding.Unicode, PdfFontEmbedding.EmbedCompleteFontFile));
 

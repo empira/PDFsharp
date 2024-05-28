@@ -43,7 +43,6 @@ using PdfSharp.Drawing.Pdf;
 using PdfSharp.Events;
 using PdfSharp.Fonts.Internal;
 using PdfSharp.Internal;
-using PdfSharp.Internal.Logging;
 using PdfSharp.Logging;
 //using PdfSharp.Internal;
 using PdfSharp.Pdf.Advanced;
@@ -85,7 +84,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// <param name="pageUnit">The page unit.</param>
         /// <param name="pageDirection">The page direction.</param>
         /// <param name="renderEvents">The render events.</param>
-        XGraphics(Graphics? gfx, XSize size, XGraphicsUnit pageUnit, XPageDirection pageDirection, RenderEvents renderEvents)
+        XGraphics(Graphics? gfx, XSize size, XGraphicsUnit pageUnit, XPageDirection pageDirection, RenderEvents? renderEvents = null)
         {
             RenderEvents = renderEvents;
 
@@ -146,7 +145,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// <param name="pageUnit">The page unit.</param>
         /// <param name="pageDirection">The page direction.</param>
         /// <param name="renderEvents">The render events.</param>
-        XGraphics(DrawingContext? dc, XSize size, XGraphicsUnit pageUnit, XPageDirection pageDirection, RenderEvents renderEvents)
+        XGraphics(DrawingContext? dc, XSize size, XGraphicsUnit pageUnit, XPageDirection pageDirection, RenderEvents? renderEvents = null)
         {
             RenderEvents = renderEvents;
 
@@ -395,7 +394,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// <summary>
         /// Initializes a new instance of the XGraphics class for a measure context.
         /// </summary>
-        XGraphics(XGraphicsUnit pageUnit, XPageDirection pageDirection, RenderEvents renderEvents)
+        XGraphics(XGraphicsUnit pageUnit, XPageDirection pageDirection, RenderEvents? renderEvents = null)
         {
             RenderEvents = renderEvents;
             _gsStack = default!;
@@ -537,7 +536,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// Drawing on a measure context has no effect.
         /// Commit renderEvents to allow RenderTextEvent calls.
         /// </summary>
-        public static XGraphics CreateMeasureContext(XSize size, XGraphicsUnit pageUnit, XPageDirection pageDirection, RenderEvents renderEvents)
+        public static XGraphics CreateMeasureContext(XSize size, XGraphicsUnit pageUnit, XPageDirection pageDirection, RenderEvents? renderEvents = null)
         {
 #if CORE
             //var dummy = new PdfDocument();
@@ -1051,7 +1050,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         PdfDocument? _owner;
         bool _tryGetOwner;
 
-        RenderEvents? RenderEvents { get; } = default!;
+        RenderEvents? RenderEvents { get; }
 
         #region Drawing
 
@@ -3596,7 +3595,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                     //GlyphRun glyphRun=new GlyphRun(font.GlyphTypeface , 0,);
 #if DEBUG_
                     if (font.WpfTypeface.FontFamily.Source == "Segoe UI Light")
-                        GetType();
+                        _ = typeof(int);
 #endif
                     var formattedText = FontHelper.CreateFormattedText(text, font.WpfTypeface ?? NRT.ThrowOnNull<Typeface>(),
                         font.Size, brush.RealizeWpfBrush());
@@ -3734,6 +3733,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                     codePointsWithGlyphIndices = otDescriptor.GlyphIndicesFromCodePoints(codePoints);
                 }
             }
+#if true_  // renderEvents being null is possible and OK.
             else
             {
                 // We always need a target for RenderEvent.
@@ -3742,6 +3742,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                     "MeasureString could not invoke OnRenderTextEvent because we have no owning PDF document in the current context and no renderEvent parameter.");
                 throw new InvalidOperationException("No owning document or valid renderEvent.");
             }
+#endif
             return FontHelper.MeasureString(codePointsWithGlyphIndices, font/*, stringFormat*/);
 #else
 
@@ -4632,7 +4633,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 
         /// <summary>
         /// Applies the specified translation operation to the transformation matrix of this object by 
-        /// prepending it to the object's transformation matrix.
+        /// prepending it to the object’s transformation matrix.
         /// </summary>
         public void TranslateTransform(double dx, double dy)
         {
@@ -4652,7 +4653,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 
         /// <summary>
         /// Applies the specified scaling operation to the transformation matrix of this object by 
-        /// prepending it to the object's transformation matrix.
+        /// prepending it to the object’s transformation matrix.
         /// </summary>
         public void ScaleTransform(double scaleX, double scaleY)
         {
@@ -4672,7 +4673,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 
         /// <summary>
         /// Applies the specified scaling operation to the transformation matrix of this object by 
-        /// prepending it to the object's transformation matrix.
+        /// prepending it to the object’s transformation matrix.
         /// </summary>
         // ReSharper disable once InconsistentNaming
         public void ScaleTransform(double scaleXY)
@@ -4692,7 +4693,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 
         /// <summary>
         /// Applies the specified scaling operation to the transformation matrix of this object by 
-        /// prepending it to the object's transformation matrix.
+        /// prepending it to the object’s transformation matrix.
         /// </summary>
         public void ScaleAtTransform(double scaleX, double scaleY, double centerX, double centerY)
         {
@@ -4701,7 +4702,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 
         /// <summary>
         /// Applies the specified scaling operation to the transformation matrix of this object by 
-        /// prepending it to the object's transformation matrix.
+        /// prepending it to the object’s transformation matrix.
         /// </summary>
         public void ScaleAtTransform(double scaleX, double scaleY, XPoint center)
         {
@@ -4710,7 +4711,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 
         /// <summary>
         /// Applies the specified rotation operation to the transformation matrix of this object by 
-        /// prepending it to the object's transformation matrix.
+        /// prepending it to the object’s transformation matrix.
         /// </summary>
         public void RotateTransform(double angle)
         {
@@ -4730,7 +4731,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 
         /// <summary>
         /// Applies the specified rotation operation to the transformation matrix of this object by 
-        /// prepending it to the object's transformation matrix.
+        /// prepending it to the object’s transformation matrix.
         /// </summary>
         public void RotateAtTransform(double angle, XPoint point)
         {
@@ -4739,7 +4740,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 
         /// <summary>
         /// Applies the specified rotation operation to the transformation matrix of this object by 
-        /// prepending it to the object's transformation matrix.
+        /// prepending it to the object’s transformation matrix.
         /// </summary>
         public void RotateAtTransform(double angle, XPoint point, XMatrixOrder order)
         {
@@ -4748,7 +4749,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 
         /// <summary>
         /// Applies the specified shearing operation to the transformation matrix of this object by 
-        /// prepending it to the object's transformation matrix.
+        /// prepending it to the object’s transformation matrix.
         /// ShearTransform is a synonym for SkewAtTransform.
         /// Parameter shearX specifies the horizontal skew which is measured in degrees counterclockwise from the y-axis.
         /// Parameter shearY specifies the vertical skew which is measured in degrees counterclockwise from the x-axis.
@@ -4772,7 +4773,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 
         /// <summary>
         /// Applies the specified shearing operation to the transformation matrix of this object by 
-        /// prepending it to the object's transformation matrix.
+        /// prepending it to the object’s transformation matrix.
         /// ShearTransform is a synonym for SkewAtTransform.
         /// Parameter shearX specifies the horizontal skew which is measured in degrees counterclockwise from the y-axis.
         /// Parameter shearY specifies the vertical skew which is measured in degrees counterclockwise from the x-axis.
@@ -4784,7 +4785,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 
         /// <summary>
         /// Applies the specified shearing operation to the transformation matrix of this object by 
-        /// prepending it to the object's transformation matrix.
+        /// prepending it to the object’s transformation matrix.
         /// ShearTransform is a synonym for SkewAtTransform.
         /// Parameter shearX specifies the horizontal skew which is measured in degrees counterclockwise from the y-axis.
         /// Parameter shearY specifies the vertical skew which is measured in degrees counterclockwise from the x-axis.
@@ -4833,7 +4834,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #if CORE
             if (TargetContext == XGraphicTargetContext.CORE)
             {
-                GetType();
+                _ = typeof(int);
                 // TODO: _gsStack...
                 // ReviewSTLA THHO4STLA
             }

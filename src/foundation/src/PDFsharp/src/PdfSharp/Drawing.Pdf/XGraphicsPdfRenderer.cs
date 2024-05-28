@@ -779,7 +779,7 @@ namespace PdfSharp.Drawing.Pdf
                 {
                     var xForm = form as XPdfForm;
                     // Reset colors in this graphics state. Usually PDF images should set them.
-                    // But in rare cases they aren't which may result in changed colors inside the image.
+                    // But in rare cases they aren’t which may result in changed colors inside the image.
                     var resetColor = xForm != null ? "\n0 g\n0 G\n" : " ";
 
                     if (_gfx.PageDirection == XPageDirection.Downwards)
@@ -847,7 +847,7 @@ namespace PdfSharp.Drawing.Pdf
                 if (cx != 0 && cy != 0)
                 {
                     var xForm = form as XPdfForm;
-                    // Reset colors in this graphics state. Usually PDF images should set them, but in rare cases they don't which may result in changed colors inside the image.
+                    // Reset colors in this graphics state. Usually PDF images should set them, but in rare cases they don’t and this may result in changed colors inside the image.
                     var resetColor = xForm != null ? "\n0 g\n0 G\n" : " ";
 
                     if (_gfx.PageDirection == XPageDirection.Downwards)
@@ -1100,7 +1100,7 @@ namespace PdfSharp.Drawing.Pdf
                         AppendPartialArcQuadrant(x, y, width, height, ξ1, ξ2, PathStart.Ignore1st, matrix);
                     }
 
-                    // Don't stop immediately if arc is greater than 270 degrees
+                    // Don’t stop immediately if arc is greater than 270 degrees
                     if (currentQuadrant == endQuadrant && smallAngle)
                         break;
 
@@ -1520,7 +1520,7 @@ namespace PdfSharp.Drawing.Pdf
 #if DEBUG
                 //#war/ning For DdlGBE_Chart_Layout (WPF) execution sticks at this Assertion.
                 // The empty Figure is added via XGraphicsPath.CurrentPathFigure Getter.
-                // Some methods like XGraphicsPath.AddRectangle() or AddLine() use this empty Figure to add Segments, others like AddEllipse() don't.
+                // Some methods like XGraphicsPath.AddRectangle() or AddLine() use this empty Figure to add Segments, others like AddEllipse() don’t.
                 // Here, _pathGeometry.AddGeometry() of course ignores this first Figure and adds a second.
                 // Encapsulate relevant Add methods to delete a first empty Figure or move the Addition of a first empty Figure to a GetOrCreateCurrentPathFigure()
                 // or simply remove Assertion?
@@ -1615,7 +1615,7 @@ namespace PdfSharp.Drawing.Pdf
                                         Here is how to do it from GPT 4:
 
                                         To convert a quadratic Bézier curve to a cubic one, you need to adjust the control points of the
-                                        cubic curve so that it mimics the shape of the original quadratic curve. Here's how to do it:
+                                        cubic curve so that it mimics the shape of the original quadratic curve. Here’s how to do it:
 
                                         Assume that your quadratic Bézier curve is defined by the points P0, P1, and P2, where P0 and P2
                                         are the endpoints and P1 is the control point.

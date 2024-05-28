@@ -23,6 +23,7 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <Compile Include="..\PdfSharp.Quality\AssetsHelper.cs" Link="AssetsHelper.cs" />
     <Compile Include="..\PdfSharp.Quality\FeatureAndSnippetBase.cs" Link="FeatureAndSnippetBase.cs" />
     <Compile Include="..\PdfSharp.Quality\DefaultFontResolver.cs" Link="DefaultFontResolver.cs" />
     <Compile Include="..\PdfSharp.Quality\Feature.cs" Link="Feature.cs" />

@@ -1,13 +1,8 @@
-﻿# MigraDoc.DocumentObjectModel.Tests
-
-Tests related to MigraDoc DocumentObjectModel.
-
-Requirements:
-* ...
+﻿# xUnit runner settings for test projects
 
 ## `xunit.runner.json`
 
-Each test project can have a `xunit.runner.json`, e.g.
+Each test project can have an `xunit.runner.json` file, e.g.
 
 ```json
 {

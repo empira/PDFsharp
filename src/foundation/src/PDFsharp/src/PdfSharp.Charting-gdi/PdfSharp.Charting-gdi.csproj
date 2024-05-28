@@ -5,7 +5,7 @@
         <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <RootNamespace>PdfSharp.Charting</RootNamespace>
-        <!--<UseWindowsForms>true</UseWindowsForms> not needed -->
+        <UseWindowsForms>true</UseWindowsForms>
         <SignAssembly>True</SignAssembly>
         <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>

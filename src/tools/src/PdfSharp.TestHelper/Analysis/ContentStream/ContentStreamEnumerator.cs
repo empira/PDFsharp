@@ -73,7 +73,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         /// </summary>
         public bool MovePrevious()
         {
-            // If we are at the first element, there's no other previous to it.
+            // If we are at the first element, there’s no other previous to it.
             if (_state.CurrentElementIndex == 0)
                 return false;
 
@@ -81,7 +81,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
 
             // We expect all previous element to be read already.
             if (!_elements.TryGetValue(elementIdx, out var elementBase) || elementBase is not Element element)
-                throw new KeyNotFoundException("There's an error in the implementation of ContentStreamEnumerator. " +
+                throw new KeyNotFoundException("There’s an error in the implementation of ContentStreamEnumerator. " +
                                                "For all elements accessible by MovePrevious() the ElementPositions must be cached by a further call of MoveNext().");
 
             SetCurrent(elementIdx, element);
@@ -280,7 +280,6 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         public void Dispose()
         { }
 
-
         object? IEnumerator.Current => Current;
 
         bool MoveAfterWhiteSpaces(ref int position, bool moveByOneNecessaryWhiteSpace)
@@ -405,8 +404,8 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         void SetCurrent(int elementIndex, Element element)
         {
             var oldState = GetState();
-            
-            // Don't set state if there's no change.
+
+            // Don’t set state if there’s no change.
             if (elementIndex == oldState.CurrentElementIndex)
             {
                 Debug.Assert(element.Position == oldState.CurrentPosition && element.String == oldState.Current);
@@ -423,7 +422,6 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         readonly char[] _whiteSpaceChars = [' ', '\n', '\r', '\t'];
 
         State _state;
-
 
         class ElementBase
         { }

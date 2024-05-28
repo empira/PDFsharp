@@ -33,7 +33,6 @@ namespace PdfSharp.Features
         }
         // ReSharper restore InconsistentNaming
 
-
         /// <summary>
         /// The features by their names.
         /// </summary>

@@ -162,7 +162,6 @@ namespace PdfSharp.Features.Drawing
             doc.Info.Subject = "s xxxöäüß \U00029C9Cあ";  // BUG in encoding UTF-16
             doc.PageLayout = PdfPageLayout.SinglePage;
 
-
             var page = doc.AddPage();
             page.Orientation = PageOrientation.Portrait;
             var gfx = XGraphics.FromPdfPage(page, XGraphicsUnit.Presentation);

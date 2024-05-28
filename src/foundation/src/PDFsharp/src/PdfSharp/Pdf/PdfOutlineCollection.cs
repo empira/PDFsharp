@@ -254,10 +254,12 @@ namespace PdfSharp.Pdf
 
             //_outlines.Add(outline);
             if (!Owner.IrefTable.Contains(outline.ObjectID))
+            {
                 Owner.IrefTable.Add(outline);
+            }
             else
             {
-                outline.GetType();
+                _ = typeof(int);
             }
 
             //if (outline.Opened)

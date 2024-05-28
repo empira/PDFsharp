@@ -1,9 +1,8 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System.Collections;
 using PdfSharp.Events;
-using PdfSharp.Internal.Logging;
 using PdfSharp.Logging;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Advanced;
@@ -48,8 +47,8 @@ namespace PdfSharp.Pdf
                 if (index < 0 || index >= Count)
                     throw new ArgumentOutOfRangeException(nameof(index), index, PSSR.PageIndexOutOfRange);
 
-                PdfDictionary dict = (PdfDictionary)((PdfReference)PagesArray.Elements[index]).Value;
-                if (!(dict is PdfPage))
+                var dict = (PdfDictionary)((PdfReference)PagesArray.Elements[index]).Value;
+                if (dict is not PdfPage)
                     dict = new PdfPage(dict);
                 return (PdfPage)dict;
             }
@@ -181,7 +180,6 @@ namespace PdfSharp.Pdf
             }
 
             PdfSharpLogHost.Logger.NewPdfPageAdded(_document?.Name);
-
 
             if (Owner.Settings.TrimMargins.AreSet)
                 page.TrimMargins = Owner.Settings.TrimMargins;
@@ -346,7 +344,7 @@ namespace PdfSharp.Pdf
                         var annots2 = page.Elements.GetArray(PdfPage.Keys.Annots);
                         if (annots2 is not null)
                         {
-                            GetType(); // Temporary line for breakpoints.
+                            _ = typeof(int);  // Temporary line for breakpoints.
                         }
 
                         //Owner._irefTable.Add(annotations);
@@ -595,11 +593,11 @@ namespace PdfSharp.Pdf
                 return new PdfDictionary[] { kid };
             }
 
-            // If it has kids, it's logically not going to be type page.
+            // If it has kids, it’s logically not going to be type page.
             if (String.IsNullOrEmpty(type) && !kid.Elements.ContainsKey("/Kids"))
             {
                 // Type is required. If type is missing, assume it is "/Page" and hope it will work.
-                // TODO Implement a "Strict" mode in PDFsharp and don't do this in "Strict" mode.
+                // TODO Implement a "Strict" mode in PDFsharp and don’t do this in "Strict" mode.
                 PdfPage.InheritValues(kid, values);
                 return new PdfDictionary[] { kid };
             }

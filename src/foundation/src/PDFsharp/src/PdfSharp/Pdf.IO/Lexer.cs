@@ -78,7 +78,7 @@ namespace PdfSharp.Pdf.IO
             switch (ch)
             {
                 case '%':
-                    // Eat comments, the parser doesn't handle them.
+                    // Eat comments, the parser doesn’t handle them.
                     ScanComment();
                     goto TryAgain;
 
@@ -618,7 +618,7 @@ namespace PdfSharp.Pdf.IO
                                         // #PRD Notify about unknown escape character.
                                         // Debug.As-sert(false, "Not implemented; unknown escape character.");
                                         // ParserDiagnostics.HandleUnexpectedCharacter(ch);
-                                        //GetType();
+                                        //_ = typeof(int);
                                         goto RetryAfterSkipIllegalCharacter;
                                     }
                                     break;
@@ -832,7 +832,7 @@ namespace PdfSharp.Pdf.IO
             int read = _pdfStream.Read(bytes, 0, length);
             if (read != length)
             {
-                throw new InvalidOperationException("Stream cannot be read. Please send us the PDF file so that we can fix this.");
+                throw new InvalidOperationException("Stream cannot be read. Please send us the PDF file so that we can fix this (issues (at) pdfsharp.net).");
             }
 
             // Note: Position += length cannot be used here.
@@ -847,8 +847,9 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         /// <param name="start">The position behind 'stream' symbol in dictionary.</param>
         /// <param name="searchLength">The range to search for 'endstream'.</param>
+        /// <param name="suppressObjectOrderExceptions">Suppresses exceptions that may be caused by not yet available objects.</param>
         /// <returns>The real length of the stream when 'endstream' was found.</returns>
-        public int DetermineStreamLength(SizeType start, int searchLength)
+        public int DetermineStreamLength(SizeType start, int searchLength, SuppressExceptions? suppressObjectOrderExceptions = null)
         {
 #if DEBUG_
             if (start == 144848)
@@ -862,7 +863,11 @@ namespace PdfSharp.Pdf.IO
             // it would be a serious problem. But we wait if this really happens.
             int idxEndStream = rawString.LastIndexOf("endstream", StringComparison.Ordinal);
             if (idxEndStream == -1)
-                throw TH.ObjectNotAvailableException_CannotRetrieveStreamLength();
+            {
+                SuppressExceptions.HandleError(suppressObjectOrderExceptions, () => throw TH.ObjectNotAvailableException_CannotRetrieveStreamLength());
+                return -1;
+            }
+
             return idxEndStream;
         }
 

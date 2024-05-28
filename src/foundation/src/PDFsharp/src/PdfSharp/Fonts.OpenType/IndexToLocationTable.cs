@@ -65,7 +65,7 @@ namespace PdfSharp.Fonts.OpenType
             }
             catch (Exception)
             {
-                GetType();
+                _ = typeof(int);
                 throw;
             }
         }

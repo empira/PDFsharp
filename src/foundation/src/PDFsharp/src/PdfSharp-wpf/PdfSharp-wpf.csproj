@@ -24,7 +24,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
+    <Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="root\CompilerServices.cs" />
     <Compile Include="..\PdfSharp\!internal\Configuration.cs" Link="!internal\Configuration.cs" />
     <Compile Include="..\PdfSharp\!internal\Directives.cs" Link="!internal\Directives.cs" />
     <Compile Include="..\PdfSharp\!internal\TargetContext.cs" Link="!internal\TargetContext.cs" />
@@ -174,7 +174,6 @@
     <Compile Include="..\PdfSharp\Fonts\IFontResolver.cs" Link="Fonts\IFontResolver.cs" />
     <Compile Include="..\PdfSharp\Fonts\PlatformFontResolver.cs" Link="Fonts\PlatformFontResolver.cs" />
     <Compile Include="..\PdfSharp\Fonts\PlatformFontResolverInfo.cs" Link="Fonts\PlatformFontResolverInfo.cs" />
-    <Compile Include="..\PdfSharp\Internal.Logging\LogMessages.cs" Link="Internal.Logging\LogMessages.cs" />
     <Compile Include="..\PdfSharp\Internal\Calc.cs" Link="Internal\Calc.cs" />
     <Compile Include="..\PdfSharp\Internal\ColorHelper.cs" Link="Internal\ColorHelper.cs" />
     <Compile Include="..\PdfSharp\Internal\Diagnostics.cs" Link="Internal\Diagnostics.cs" />
@@ -184,10 +183,10 @@
     <Compile Include="..\PdfSharp\Internal\ErrorHelpers.cs" Link="Internal\ErrorHelpers.cs" />
     <Compile Include="..\PdfSharp\Internal\Globals.cs" Link="Internal\Globals.cs" />
     <Compile Include="..\PdfSharp\Internal\Lock.cs" Link="Internal\Lock.cs" />
-    <Compile Include="..\PdfSharp\Internal\Logging.cs" Link="Internal\Logging.cs" />
-    <Compile Include="..\PdfSharp\Internal\LogMessages.cs" Link="Internal\LogMessages.cs" />
     <Compile Include="..\PdfSharp\Internal\NativeMethods.cs" Link="Internal\NativeMethods.cs" />
+    <Compile Include="..\PdfSharp\Internal\SuppressExceptions.cs" Link="Internal\SuppressExceptions.cs" />
     <Compile Include="..\PdfSharp\Internal\TokenizerHelper.cs" Link="Internal\TokenizerHelper.cs" />
+    <Compile Include="..\PdfSharp\Logging\LogMessages.cs" Link="Logging\LogMessages.cs" />
     <Compile Include="..\PdfSharp\Logging\PdfSharpLogHost.cs" Link="PdfSharpLogHost.cs" />
     <Compile Include="..\PdfSharp\Pdf.AcroForms\enums\PdfAcroFieldFlags.cs" Link="Pdf.AcroForms\enums\PdfAcroFieldFlags.cs" />
     <Compile Include="..\PdfSharp\Pdf.AcroForms\PdfAcroField.cs" Link="Pdf.AcroForms\PdfAcroField.cs" />

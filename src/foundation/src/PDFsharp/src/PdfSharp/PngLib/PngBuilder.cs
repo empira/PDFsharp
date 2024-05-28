@@ -310,7 +310,7 @@ namespace PdfSharp.BigGustave
 
                 for (var y = 0; y < height; y++)
                 {
-                    // None filter - we don't use filtering for palette images.
+                    // None filter - we don’t use filtering for palette images.
                     rawData[rawDataIndex++] = 0;
 
                     for (var x = 0; x < width; x++)

@@ -117,14 +117,14 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                         case '-': // minus.
                             currentString.Append('-');
 
-                            // Recognize minus as a sign, if it's the first char of the currently processed string...
+                            // Recognize minus as a sign, if it’s the first char of the currently processed string...
                             bool isSign;
                             if (currentString.Length != 1)
                                 isSign = false;
                             else
                             {
                                 var nextIdx = chIdx + 1;
-                                // ...and if it's followed by a number...
+                                // ...and if it’s followed by a number...
                                 if (nextIdx < content.Length && char.IsNumber(content[nextIdx]))
                                     isSign = true;
                                 else

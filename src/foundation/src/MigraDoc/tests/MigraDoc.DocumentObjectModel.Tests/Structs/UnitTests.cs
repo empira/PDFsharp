@@ -6,6 +6,7 @@ using Xunit;
 
 namespace MigraDoc.DocumentObjectModel.Tests.Structs
 {
+    [Collection("PDFsharp")]
     public class UnitTests
     {
         [Fact]
@@ -20,7 +21,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Structs
             const double d2CmIn = d2Cm / 2.54;
             const double d2CmPt = d2CmIn * 72;
             const double d2CmPc = d2CmPt / 12;
-
 
             // FromXxx()
             Unit unit2Mm = Unit.FromMillimeter(d2);
@@ -39,7 +39,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Structs
             unit2CmIn.Centimeter.Should().BeApproximately(d2, acceptedRoundingError);
             unit2CmPt.Centimeter.Should().BeApproximately(d2, acceptedRoundingError);
             unit2CmPc.Centimeter.Should().BeApproximately(d2, acceptedRoundingError);
-
 
             // ToString(), Unit(string?), == and !=
             string? strNull = null;
@@ -61,7 +60,7 @@ namespace MigraDoc.DocumentObjectModel.Tests.Structs
             (unitNull == null).Should().BeTrue();
             (unitNull != null).Should().BeFalse();
 
-            // Only check cm variables, which are totally equal because str2Cm with "2cm" won't cause rounding errors.
+            // Only check cm variables, which are totally equal because str2Cm with "2cm" won’t cause rounding errors.
             (unit2Cm2 == unit2Cm).Should().BeTrue();
 
             // Use IsSameValue() for other variables.
@@ -70,9 +69,8 @@ namespace MigraDoc.DocumentObjectModel.Tests.Structs
             unit2CmPt2.IsSameValue(unit2CmPt).Should().BeTrue();
             unit2CmPc2.IsSameValue(unit2CmPc).Should().BeTrue();
 
-            // Only check cm variables, which are totally equal because str2Cm with "2cm" won't cause rounding errors.
+            // Only check cm variables, which are totally equal because str2Cm with "2cm" won’t cause rounding errors.
             (unit2Cm2 != unit2Cm).Should().BeFalse();
-
 
             // Same value - other unit.
             (unit2Mm == unit2CmMm).Should().BeFalse();
@@ -84,7 +82,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Structs
             (unit2In != unit2CmIn).Should().BeTrue();
             (unit2Pt != unit2CmPt).Should().BeTrue();
             (unit2Pc != unit2CmPc).Should().BeTrue();
-
 
             // >, >=
             (unitNull > unit2CmMm).Should().BeFalse();
@@ -103,7 +100,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Structs
             (unit2Pt >= unit2CmPt).Should().BeFalse();
             (unit2Pc >= unit2CmPc).Should().BeFalse();
 
-
             // <, <=
             (unitNull < unit2CmMm).Should().BeTrue();
             (unit2CmMm < unitNull).Should().BeFalse();
@@ -121,23 +117,19 @@ namespace MigraDoc.DocumentObjectModel.Tests.Structs
             (unit2Pt <= unit2CmPt).Should().BeTrue();
             (unit2Pc <= unit2CmPc).Should().BeTrue();
 
-
             // >=, <=
             (unit2Cm2 >= unit2Cm).Should().BeTrue();
 
             (unit2Cm2 <= unit2Cm).Should().BeTrue();
 
-
             Unit x1;
             Unit x2;
             Unit x3;
-
 
             // -x
             x1 = Unit.FromCentimeter(-d2);
             x2 = -unit2Cm;
             (x2 == x1).Should().BeTrue();
-
 
             // +, -
             x1 = Unit.FromCentimeter(d2 + d2);
@@ -154,7 +146,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Structs
             (x2 == x1).Should().BeTrue();
             (x3 == x1).Should().BeTrue();
 
-
             // *, /
             x1 = Unit.FromCentimeter(d2 * d2);
             x2 = unit2Cm * d2;
@@ -166,7 +157,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Structs
             x1.Value.Should().Be(1);
             (x2 == x1).Should().BeTrue();
 
-
             // IsSameValue()
             unit2CmMm.IsSameValue(unit2Cm).Should().BeTrue();
             unit2CmIn.IsSameValue(unit2Cm).Should().BeTrue();
@@ -177,7 +167,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Structs
             unit2In.IsSameValue(unit2Cm).Should().BeFalse();
             unit2Pt.IsSameValue(unit2Cm).Should().BeFalse();
             unit2Pc.IsSameValue(unit2Cm).Should().BeFalse();
-
 
             // ConvertType()
             Unit unit2CmMmConv = unit2Cm;
@@ -194,7 +183,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Structs
             (unit2CmPtConv == unit2CmPt).Should().BeTrue();
             (unit2CmPcConv == unit2CmPc).Should().BeTrue();
 
-
             // Unit(int)
             x1 = 2;
             x1.Value.Should().Be(2);
@@ -203,7 +191,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Structs
             x2 = Unit.Zero + 2;
             (x2 == unit2Pt).Should().BeTrue();
 
-
             // Unit(float)
             x1 = 2f;
             x1.Value.Should().Be(2f);
@@ -211,7 +198,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Structs
             (x1 == unit2Pt).Should().BeTrue();
             x2 = Unit.Zero + 2d;
             (x2 == unit2Pt).Should().BeTrue();
-
 
             // Unit(double)
             x1 = 2d;

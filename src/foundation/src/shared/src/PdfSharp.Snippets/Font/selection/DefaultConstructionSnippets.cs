@@ -524,8 +524,8 @@ namespace PdfSharp.Snippets.Font
             var families = System.Windows.Media.Fonts.SystemFontFamilies;
             var typefaces = System.Windows.Media.Fonts.SystemTypefaces;
             //FontFamily; Typeface
-            GetType();
-//#else
+            //_ = typeof(int);
+            //#else
             var segoeUI = new FontFamily("Segoe UI");
             //var segoeUISemilight = new FontFamily("Segoe UI Semilight");
             var segoeCondensed = new FontFamily("Segoe");

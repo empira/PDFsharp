@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
@@ -13,10 +13,10 @@ namespace PdfSharp.Pdf.IO
     /// </summary>
     class PdfWriter
     {
-        public PdfWriter(Stream pdfStream, PdfStandardSecurityHandler? securityHandler)
+        public PdfWriter(Stream pdfStream, PdfStandardSecurityHandler? effectiveSecurityHandler)
         {
             _stream = pdfStream;
-            SecurityHandler = securityHandler;
+            EffectiveSecurityHandler = effectiveSecurityHandler;
             //System.Xml.XmlTextWriter
 #if DEBUG
             _layout = PdfWriterLayout.Verbose;
@@ -168,8 +168,8 @@ namespace PdfSharp.Pdf.IO
 #if true
             PdfStringEncoding encoding = (PdfStringEncoding)(value.Flags & PdfStringFlags.EncodingMask);
             string pdf = (value.Flags & PdfStringFlags.HexLiteral) == 0 ?
-                PdfEncoders.ToStringLiteral(value.Value, encoding, SecurityHandler) :
-                PdfEncoders.ToHexStringLiteral(value.Value, encoding, SecurityHandler);
+                PdfEncoders.ToStringLiteral(value.Value, encoding, EffectiveSecurityHandler) :
+                PdfEncoders.ToHexStringLiteral(value.Value, encoding, EffectiveSecurityHandler);
             WriteRaw(pdf);
 #else
             switch (value.Flags & PdfStringFlags.EncodingMask)
@@ -207,14 +207,34 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public void Write(PdfName value)
         {
+            // From Adobe specs: 3.2.4 Name objects
+            // Beginning with PDF 1.2, any character except null (character code 0) may be included
+            // in a name by writing its 2-digit hexadecimal code, preceded by the number
+            // sign character (#); see implementation notes 3 and 4 in Appendix H. This
+            // syntax is required in order to represent any of the delimiter or white-space characters
+            // or the number sign character itself; it is recommended but not required for
+            // characters whose codes are outside the range 33(!) to 126(~).
+
+            // And also:
+            // In such situations, it is recommended that the sequence of bytes (after expansion
+            // of # sequences, if any) be interpreted according to UTF-8, a variable-length byte-encoded
+            // representation of Unicode in which the printable ASCII characters have
+            // the same representations as in ASCII.This enables a name object to represent text
+            // in any natural language, subject to the implementation limit on the length of a
+            // name.
+
             WriteSeparator(CharCat.Delimiter, '/');
             string name = value.Value;
+            Debug.Assert(name[0] == '/');
+
+            // Encode to raw UTF-8 is any char is larger than 126.
+            // 127 [DEL] is not a valid value and is also get encoded.
             for (int idx = 1; idx < name.Length; idx++)
             {
                 char ch = name[idx];
                 if (ch > 126)
                 {
-                    // Special character found, convert whole string to UTF-8.
+                    // Non-ASCII character found, convert whole string to raw UTF-8.
                     var bytes = Encoding.UTF8.GetBytes(name);
                     var nameBuilder = new StringBuilder();
                     foreach (var ch2 in bytes)
@@ -224,28 +244,14 @@ namespace PdfSharp.Pdf.IO
                 }
             }
 
-            StringBuilder pdf = new StringBuilder("/");
+            // Here all high bytes are zero.
+            var pdf = new StringBuilder("/");
             for (int idx = 1; idx < name.Length; idx++)
             {
-                // From Adobe specs: 3.2.4 Name objects
-                // Beginning with PDF 1.2, any character except null (character code 0) may be included
-                // in a name by writing its 2-digit hexadecimal code, preceded by the number
-                // sign character (#); see implementation notes 3 and 4 in Appendix H. This
-                // syntax is required in order to represent any of the delimiter or white-space characters
-                // or the number sign character itself; it is recommended but not required for
-                // characters whose codes are outside the range 33(!) to 126(~).
-
-                // And also:
-                // In such situations, it is recommended that the sequence of bytes (after expansion
-                // of # sequences, if any) be interpreted according to UTF-8, a variable-length byte-encoded
-                // representation of Unicode in which the printable ASCII characters have
-                // the same representations as in ASCII.This enables a name object to represent text
-                // in any natural language, subject to the implementation limit on the length of a
-                // name.
-
                 char ch = name[idx];
                 Debug.Assert(ch < 256);
                 if (ch > ' ')
+                {
                     switch (ch)
                     {
                         // TODO: is this all?
@@ -269,6 +275,7 @@ namespace PdfSharp.Pdf.IO
                             }
                             break;
                     }
+                }
                 pdf.AppendFormat("#{0:X2}", (int)ch);
             }
             WriteRaw(pdf.ToString());
@@ -306,7 +313,7 @@ namespace PdfSharp.Pdf.IO
                 bytes = PdfEncoders.DocEncoding.GetBytes(text);
             else
                 bytes = PdfEncoders.UnicodeEncoding.GetBytes(text);
-            bytes = PdfEncoders.FormatStringLiteral(bytes, unicode, true, false, SecurityHandler);
+            bytes = PdfEncoders.FormatStringLiteral(bytes, unicode, true, false, EffectiveSecurityHandler);
             Write(bytes);
             _lastCat = CharCat.Delimiter;
         }
@@ -316,7 +323,7 @@ namespace PdfSharp.Pdf.IO
             WriteSeparator(CharCat.Delimiter);
             //WriteRaw(PdfEncoders.DocEncode(text, false));
             byte[] bytes = PdfEncoders.DocEncoding.GetBytes(text);
-            bytes = PdfEncoders.FormatStringLiteral(bytes, false, false, false, SecurityHandler);
+            bytes = PdfEncoders.FormatStringLiteral(bytes, false, false, false, EffectiveSecurityHandler);
             Write(bytes);
             _lastCat = CharCat.Delimiter;
         }
@@ -326,7 +333,7 @@ namespace PdfSharp.Pdf.IO
             WriteSeparator(CharCat.Delimiter);
             //WriteRaw(PdfEncoders.DocEncodeHex(text));
             byte[] bytes = PdfEncoders.DocEncoding.GetBytes(text);
-            bytes = PdfEncoders.FormatStringLiteral(bytes, false, false, true, SecurityHandler);
+            bytes = PdfEncoders.FormatStringLiteral(bytes, false, false, true, EffectiveSecurityHandler);
             _stream.Write(bytes, 0, bytes.Length);
             _lastCat = CharCat.Delimiter;
         }
@@ -340,7 +347,7 @@ namespace PdfSharp.Pdf.IO
             if (indirect)
             {
                 WriteObjectAddress(obj);
-                SecurityHandler?.EnterObject(obj.ObjectID);
+                EffectiveSecurityHandler?.EnterObject(obj.ObjectID);
             }
             _stack.Add(new StackItem(obj));
             if (indirect)
@@ -385,7 +392,7 @@ namespace PdfSharp.Pdf.IO
             PdfObject value = stackItem.Object;
             var indirect = value.IsIndirect;
             if (indirect)
-                SecurityHandler?.LeaveObject();
+                EffectiveSecurityHandler?.LeaveObject();
             if (_layout == PdfWriterLayout.Verbose)
                 DecreaseIndent();
             if (value is PdfArray)
@@ -439,7 +446,7 @@ namespace PdfSharp.Pdf.IO
 
             if (omitStream)
             {
-                WriteRaw("  «…stream content omitted…»\n");  // useful for debugging only
+                WriteRaw("  Â«â€¦stream content omittedâ€¦Â»\n");  // useful for debugging only
             }
             else
             {
@@ -472,7 +479,7 @@ namespace PdfSharp.Pdf.IO
 
         public void Write(byte[] bytes)
         {
-            if (bytes == null || bytes.Length == 0)
+            if (bytes == null! || bytes.Length == 0)
                 return;
 
             _stream.Write(bytes, 0, bytes.Length);
@@ -494,10 +501,11 @@ namespace PdfSharp.Pdf.IO
 
         public void WriteFileHeader(PdfDocument document)
         {
-            StringBuilder header = new StringBuilder("%PDF-");
+            var header = new StringBuilder("%PDF-");
             int version = document._version;
-            header.Append((version / 10).ToString(CultureInfo.InvariantCulture) + "." +
-              (version % 10).ToString(CultureInfo.InvariantCulture) + "\n%\xD3\xF4\xCC\xE1\n");
+            //header.Append((version / 10).ToString(CultureInfo.InvariantCulture) + "." +
+            //  (version % 10).ToString(CultureInfo.InvariantCulture) + "\n%\xD3\xF4\xCC\xE1\n");
+            header.Append(Invariant($"{version / 10}.{version % 10}\n%\xD3\xF4\xCC\xE1\n"));
             WriteRaw(header.ToString());
 
             if (_layout == PdfWriterLayout.Verbose)
@@ -597,7 +605,6 @@ namespace PdfSharp.Pdf.IO
                 case CharCat.Character:
                     if (_layout == PdfWriterLayout.Verbose)
                     {
-                        //if (cat == CharCat.Character || ch == '/')
                         _stream.WriteByte((byte)' ');
                     }
                     else
@@ -639,7 +646,7 @@ namespace PdfSharp.Pdf.IO
 
         Stream _stream;
 
-        internal PdfStandardSecurityHandler? SecurityHandler { get; set; }
+        internal PdfStandardSecurityHandler? EffectiveSecurityHandler { get; set; }
 
         class StackItem
         {

@@ -42,24 +42,24 @@ namespace PdfSharp.Features.IO
             PdfFileCreator creator = new();
             creator.AddPages(document, pageCount);
             stopwatch.Stop();
-            Console.WriteLine($"Time to create document: {stopwatch.Elapsed.TotalSeconds:0.0}s");
+            PdfSharpLogHost.Logger.LogInformation($"Time to create document: {stopwatch.Elapsed.TotalSeconds:0.0}s");
 
             stopwatch.Start();
             var filename = PdfFileUtility.GetTempPdfFileName($"LargePdf({pageCount:0.0})");
             document.Save(filename);
             stopwatch.Stop();
-            Console.WriteLine($"Time to save document: {stopwatch.Elapsed.TotalSeconds:0.0}s");
+            PdfSharpLogHost.Logger.LogInformation($"Time to save document: {stopwatch.Elapsed.TotalSeconds:0.0}s");
 
             stopwatch.Start();
             document = PdfReader.Open(filename);
             stopwatch.Stop();
-            Console.WriteLine($"Time to load document: {stopwatch.Elapsed.TotalSeconds:0.0}s");
+            PdfSharpLogHost.Logger.LogInformation($"Time to load document: {stopwatch.Elapsed.TotalSeconds:0.0}s");
 
             stopwatch.Start();
             filename = PdfFileUtility.GetTempPdfFileName($"LargePdf({pageCount})_2nd_");
             document.Save(filename);
             stopwatch.Stop();
-            Console.WriteLine($"Time to 2nd save document: {stopwatch.Elapsed.TotalSeconds:0.0}s");
+            PdfSharpLogHost.Logger.LogInformation($"Time to 2nd save document: {stopwatch.Elapsed.TotalSeconds:0.0}s");
         }
     }
 }

@@ -22,7 +22,7 @@ namespace PdfSharp.Pdf
 #if DEBUG_
             // Just a place for a breakpoint during debugging.
             if (objectNumber == 5894)
-                GetType();
+                _ = typeof(int);
 #endif
         }
 

@@ -183,7 +183,7 @@ namespace PdfSharp.Pdf.Content
             {
                 if (op.OpCode.OpCodeName != OpCodeName.ID)
                 {
-                    GetType();
+                    _ = typeof(int);
                     Debug.Assert(false, "Invalid number of operands.");
                 }
             }

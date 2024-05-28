@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
@@ -55,7 +55,7 @@ namespace PdfSharp.Charting.Renderers
         }
 
         /// <summary>
-        /// Gets the area's size.
+        /// Gets the area’s size.
         /// </summary>
         public XSize Size
         {
@@ -64,7 +64,7 @@ namespace PdfSharp.Charting.Renderers
         }
 
         /// <summary>
-        /// Gets the area's rectangle.
+        /// Gets the area’s rectangle.
         /// </summary>
         public XRect Rect
         {
@@ -95,7 +95,7 @@ namespace PdfSharp.Charting.Renderers
         public SeriesRendererInfo[] SeriesRendererInfos = null!;
 
         /// <summary>
-        /// Gets the chart's default font for rendering.
+        /// Gets the chart’s default font for rendering.
         /// </summary>
         public XFont DefaultFont
             => _defaultFont ??= Converter.ToXFont(Chart._font, new XFont("Arial", 12, XFontStyleEx.Regular));
@@ -103,7 +103,7 @@ namespace PdfSharp.Charting.Renderers
         XFont? _defaultFont;
 
         /// <summary>
-        /// Gets the chart's default font for rendering data labels.
+        /// Gets the chart’s default font for rendering data labels.
         /// </summary>
         public XFont DefaultDataLabelFont
             => _defaultDataLabelFont ??= Converter.ToXFont(Chart._font, new XFont("Arial", 10, XFontStyleEx.Regular));
@@ -417,7 +417,7 @@ namespace PdfSharp.Charting.Renderers
         public PlotArea PlotArea = null!;
 
         /// <summary>
-        /// Saves the plot area's matrix.
+        /// Saves the plot area’s matrix.
         /// </summary>
         public XMatrix Matrix;
 

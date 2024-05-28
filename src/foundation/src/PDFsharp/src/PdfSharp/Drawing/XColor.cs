@@ -291,8 +291,8 @@ namespace PdfSharp.Drawing
         {
 #if GDI
             // The implementation in System.Drawing.dll is interesting. It uses a ColorConverter
-            // with hash tables, locking mechanisms etc. I'm not sure what problems that solves.
-            // So I don't use the source, but the reflection.
+            // with hash tables, locking mechanisms etc. I’m not sure what problems that solves.
+            // So I don’t use the source, but the reflection.
             try
             {
                 return new XColor((KnownColor)Enum.Parse(typeof(KnownColor), name, true));

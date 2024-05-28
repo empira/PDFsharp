@@ -86,7 +86,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
             x += xOffset;
             y += yOffset;
 
-            // Find all preceding Td's of Text object and calculate coordinates.
+            // Find all preceding Td’s of Text object and calculate coordinates.
             while (MoveToPreviousTdInTextObject())
             {
                 if (!GetCurrentOffset(out var xOffset2, out var yOffset2, out _, out _))
@@ -134,7 +134,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
                 if (!_contentStreamEnumerator.MovePrevious())
                     return false;
 
-                // TD's before BT belong to another text object and their offsets don't mind. 
+                // TD’s before BT belong to another text object and their offsets don’t mind. 
                 if (_contentStreamEnumerator.Current == "BT")
                     return false;
 
@@ -318,7 +318,6 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
 
                     text = PdfEncoders.ToHexStringLiteral(bytes, true, false, null);
                 }
-
 
                 // Remove the brackets:
                 if (text.Length >= 2)

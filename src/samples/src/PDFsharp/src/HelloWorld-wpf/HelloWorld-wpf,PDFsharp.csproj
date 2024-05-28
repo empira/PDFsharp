@@ -14,7 +14,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\foundation\src\PDFsharp\src\PdfSharp-wpf\PdfSharp-wpf.csproj" />
-    <ProjectReference Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.Snippets-wpf\PdfSharp.Snippets-wpf.csproj" />
+    <ProjectReference Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.Quality-wpf\PdfSharp.Quality-wpf.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
   </ItemGroup>
 
 </Project>
