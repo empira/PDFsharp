@@ -33,7 +33,7 @@ namespace MigraDoc.DocumentObjectModel
         public bool HasBorder(BorderType type)
         {
             if (!Enum.IsDefined(typeof(BorderType), type))
-                throw new /*InvalidEnum*/ArgumentException(DomSR.InvalidEnumValue(type), "type");
+                throw new /*InvalidEnum*/ArgumentException(DomSR.InvalidEnumValue(type), nameof(type));
 
             return GetBorder(type) is not null;
         }

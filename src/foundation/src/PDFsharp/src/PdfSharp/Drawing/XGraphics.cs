@@ -1155,11 +1155,11 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public void DrawLines(XPen pen, GdiPointF[] points)
         {
             if (pen == null)
-                throw new ArgumentNullException("pen");
+                throw new ArgumentNullException(nameof(pen));
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
             if (points.Length < 2)
-                throw new ArgumentException(PSSR.PointArrayAtLeast(2), "points");
+                throw new ArgumentException(PSSR.PointArrayAtLeast(2), nameof(points));
 
             if (_drawGraphics)
             {
@@ -1914,9 +1914,9 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public void DrawRectangles(XPen pen, GdiRect[] rectangles)
         {
             if (pen == null)
-                throw new ArgumentNullException("pen");
+                throw new ArgumentNullException(nameof(pen));
             if (rectangles == null)
-                throw new ArgumentNullException("rectangles");
+                throw new ArgumentNullException(nameof(rectangles));
 
             DrawRectangles(pen, null, rectangles);
         }
@@ -1929,9 +1929,9 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public void DrawRectangles(XPen pen, GdiRectF[] rectangles)
         {
             if (pen == null)
-                throw new ArgumentNullException("pen");
+                throw new ArgumentNullException(nameof(pen));
             if (rectangles == null)
-                throw new ArgumentNullException("rectangles");
+                throw new ArgumentNullException(nameof(rectangles));
 
             DrawRectangles(pen, null, rectangles);
         }
@@ -1959,9 +1959,9 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public void DrawRectangles(XBrush brush, GdiRect[] rectangles)
         {
             if (brush == null)
-                throw new ArgumentNullException("brush");
+                throw new ArgumentNullException(nameof(brush));
             if (rectangles == null)
-                throw new ArgumentNullException("rectangles");
+                throw new ArgumentNullException(nameof(rectangles));
 
             DrawRectangles(null, brush, rectangles);
         }
@@ -1974,9 +1974,9 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public void DrawRectangles(XBrush brush, GdiRectF[] rectangles)
         {
             if (brush == null)
-                throw new ArgumentNullException("brush");
+                throw new ArgumentNullException(nameof(brush));
             if (rectangles == null)
-                throw new ArgumentNullException("rectangles");
+                throw new ArgumentNullException(nameof(rectangles));
 
             DrawRectangles(null, brush, rectangles);
         }
@@ -2006,7 +2006,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             if (pen == null && brush == null)
                 throw new ArgumentNullException("pen and brush", PSSR.NeedPenOrBrush);
             if (rectangles == null)
-                throw new ArgumentNullException("rectangles");
+                throw new ArgumentNullException(nameof(rectangles));
 
             if (_drawGraphics)
             {
@@ -2041,7 +2041,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             if (pen == null && brush == null)
                 throw new ArgumentNullException("pen and brush", PSSR.NeedPenOrBrush);
             if (rectangles == null)
-                throw new ArgumentNullException("rectangles");
+                throw new ArgumentNullException(nameof(rectangles));
 
             if (_drawGraphics)
             {

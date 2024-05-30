@@ -94,7 +94,7 @@ namespace MigraDoc.Rendering
         void PrepareDocumentRenderer(bool prepareCompletely)
         {
             if (_document == null)
-                throw new InvalidOperationException(Messages2.PropertyNotSetBefore("DocumentRenderer", MethodBase.GetCurrentMethod()!.Name));
+                throw new InvalidOperationException(Messages2.PropertyNotSetBefore(nameof(DocumentRenderer), MethodBase.GetCurrentMethod()!.Name));
 
             _documentRenderer ??= new(_document)
             {

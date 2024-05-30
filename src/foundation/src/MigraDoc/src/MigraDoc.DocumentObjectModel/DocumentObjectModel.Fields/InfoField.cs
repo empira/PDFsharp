@@ -73,9 +73,11 @@ namespace MigraDoc.DocumentObjectModel.Fields
         /// </summary>
         internal override void Serialize(Serializer serializer)
         {
-            string str = "\\field(Info)";
             if (Name == "")
-                throw new InvalidOperationException(DomSR.MissingObligatoryProperty("Name", "InfoField"));
+                throw new InvalidOperationException(DomSR.MissingObligatoryProperty(nameof(Name), nameof(InfoField)));
+
+            string str = "\\field(Info)";
+
             str += "[Name = \"" + Name + "\"]";
 
             serializer.Write(str);

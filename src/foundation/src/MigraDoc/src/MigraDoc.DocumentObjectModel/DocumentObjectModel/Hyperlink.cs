@@ -581,14 +581,14 @@ namespace MigraDoc.DocumentObjectModel
             if (Type is HyperlinkType.ExternalBookmark or HyperlinkType.File or HyperlinkType.Url)
             {
                 if (String.IsNullOrEmpty(Values.Filename))
-                    throw new InvalidOperationException(DomSR.MissingObligatoryProperty("Filename", $"Hyperlink {Type.ToString()}"));
+                    throw new InvalidOperationException(DomSR.MissingObligatoryProperty(nameof(Filename), $"Hyperlink {Type.ToString()}"));
 
                 str += " Filename = \"" + Filename.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
             }
             if (Type is HyperlinkType.ExternalBookmark or HyperlinkType.Bookmark or HyperlinkType.EmbeddedDocument)
             {
                 if (String.IsNullOrEmpty(Values.BookmarkName))
-                    throw new InvalidOperationException(DomSR.MissingObligatoryProperty("BookmarkName", $"Hyperlink {Type.ToString()}"));
+                    throw new InvalidOperationException(DomSR.MissingObligatoryProperty(nameof(BookmarkName), $"Hyperlink {Type.ToString()}"));
 
                 str += " BookmarkName = \"" + BookmarkName.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
             }

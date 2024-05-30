@@ -400,7 +400,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public void RotateAppend(double angle) // TODO: will become default Rotate
         {
-            angle = angle % 360.0;
+            angle %= 360.0;
             this *= CreateRotationRadians(angle * Const.Deg2Rad);
         }
 
@@ -409,7 +409,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public void RotatePrepend(double angle)
         {
-            angle = angle % 360.0;
+            angle %= 360.0;
             this = CreateRotationRadians(angle * Const.Deg2Rad) * this;
         }
 
@@ -421,7 +421,7 @@ namespace PdfSharp.Drawing
             if (_type == XMatrixTypes.Identity)
                 this = CreateIdentity();
 
-            angle = angle * Const.Deg2Rad;
+            angle *= Const.Deg2Rad;
             double cos = Math.Cos(angle);
             double sin = Math.Sin(angle);
             if (order == XMatrixOrder.Append)
@@ -472,7 +472,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public void RotateAtAppend(double angle, double centerX, double centerY) // TODO: will become default
         {
-            angle = angle % 360.0;
+            angle %= 360.0;
             this *= CreateRotationRadians(angle * Const.Deg2Rad, centerX, centerY);
         }
 
@@ -481,7 +481,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public void RotateAtPrepend(double angle, double centerX, double centerY)
         {
-            angle = angle % 360.0;
+            angle %= 360.0;
             this = CreateRotationRadians(angle * Const.Deg2Rad, centerX, centerY) * this;
         }
 
@@ -520,7 +520,7 @@ namespace PdfSharp.Drawing
         {
             if (order == XMatrixOrder.Append)
             {
-                angle = angle % 360.0;
+                angle %= 360.0;
                 this *= CreateRotationRadians(angle * Const.Deg2Rad, point.X, point.Y);
 
                 //Translate(point.X, point.Y, order);
@@ -529,7 +529,7 @@ namespace PdfSharp.Drawing
             }
             else
             {
-                angle = angle % 360.0;
+                angle %= 360.0;
                 this = CreateRotationRadians(angle * Const.Deg2Rad, point.X, point.Y) * this;
             }
 
@@ -614,8 +614,8 @@ namespace PdfSharp.Drawing
         /// </summary>
         public void SkewAppend(double skewX, double skewY)
         {
-            skewX = skewX % 360.0;
-            skewY = skewY % 360.0;
+            skewX %= 360.0;
+            skewY %= 360.0;
             this *= CreateSkewRadians(skewX * Const.Deg2Rad, skewY * Const.Deg2Rad);
         }
 
@@ -624,8 +624,8 @@ namespace PdfSharp.Drawing
         /// </summary>
         public void SkewPrepend(double skewX, double skewY)
         {
-            skewX = skewX % 360.0;
-            skewY = skewY % 360.0;
+            skewX %= 360.0;
+            skewY %= 360.0;
             this = CreateSkewRadians(skewX * Const.Deg2Rad, skewY * Const.Deg2Rad) * this;
         }
 
@@ -687,7 +687,7 @@ namespace PdfSharp.Drawing
         public void TransformPoints(System.Drawing.Point[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
             if (IsIdentity)
                 return;
@@ -710,7 +710,7 @@ namespace PdfSharp.Drawing
         public void TransformPoints(System.Windows.Point[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
             if (IsIdentity)
                 return;
@@ -764,7 +764,7 @@ namespace PdfSharp.Drawing
         public void TransformVectors(PointF[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
             if (IsIdentity)
                 return;
@@ -1142,7 +1142,7 @@ namespace PdfSharp.Drawing
         public static XMatrix Parse(string source)
         {
             IFormatProvider cultureInfo = CultureInfo.InvariantCulture; //.GetCultureInfo("en-us");
-            TokenizerHelper helper = new TokenizerHelper(source, cultureInfo);
+            TokenizerHelper helper = new(source, cultureInfo);
             var str = helper.NextTokenRequired();
             XMatrix identity = str == "Identity"
                 ? Identity
@@ -1254,7 +1254,7 @@ namespace PdfSharp.Drawing
 
         internal static XMatrix CreateTranslation(double offsetX, double offsetY)
         {
-            XMatrix matrix = new XMatrix();
+            XMatrix matrix = new();
             matrix.SetMatrix(1, 0, 0, 1, offsetX, offsetY, XMatrixTypes.Translation);
             return matrix;
         }
@@ -1266,7 +1266,7 @@ namespace PdfSharp.Drawing
 
         internal static XMatrix CreateRotationRadians(double angle, double centerX, double centerY)
         {
-            XMatrix matrix = new XMatrix();
+            XMatrix matrix = new();
             double sin = Math.Sin(angle);
             double cos = Math.Cos(angle);
             double offsetX = (centerX * (1.0 - cos)) + (centerY * sin);
@@ -1277,14 +1277,14 @@ namespace PdfSharp.Drawing
 
         internal static XMatrix CreateScaling(double scaleX, double scaleY)
         {
-            XMatrix matrix = new XMatrix();
+            XMatrix matrix = new();
             matrix.SetMatrix(scaleX, 0, 0, scaleY, 0, 0, XMatrixTypes.Scaling);
             return matrix;
         }
 
         internal static XMatrix CreateScaling(double scaleX, double scaleY, double centerX, double centerY)
         {
-            XMatrix matrix = new XMatrix();
+            XMatrix matrix = new();
             matrix.SetMatrix(scaleX, 0, 0, scaleY, centerX - scaleX * centerX, centerY - scaleY * centerY,
                 XMatrixTypes.Scaling | XMatrixTypes.Translation);
             return matrix;
@@ -1292,7 +1292,7 @@ namespace PdfSharp.Drawing
 
         internal static XMatrix CreateSkewRadians(double skewX, double skewY, double centerX, double centerY)
         {
-            XMatrix matrix = new XMatrix();
+            XMatrix matrix = new();
             matrix.Append(CreateTranslation(-centerX, -centerY));
             matrix.Append(new XMatrix(1, Math.Tan(skewY), Math.Tan(skewX), 1, 0, 0));
             matrix.Append(CreateTranslation(centerX, centerY));
@@ -1301,14 +1301,14 @@ namespace PdfSharp.Drawing
 
         internal static XMatrix CreateSkewRadians(double skewX, double skewY)
         {
-            XMatrix matrix = new XMatrix();
+            XMatrix matrix = new ();
             matrix.SetMatrix(1, Math.Tan(skewY), Math.Tan(skewX), 1, 0, 0, XMatrixTypes.Unknown);
             return matrix;
         }
 
         static XMatrix CreateIdentity()
         {
-            XMatrix matrix = new XMatrix();
+            XMatrix matrix = new();
             matrix.SetMatrix(1, 0, 0, 1, 0, 0, XMatrixTypes.Identity);
             return matrix;
         }

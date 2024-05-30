@@ -1,14 +1,14 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Internals;
 using MigraDoc.DocumentObjectModel.Visitors;
 using PdfSharp.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text;
 using Color = MigraDoc.DocumentObjectModel.Color;
 using Font = MigraDoc.DocumentObjectModel.Font;
 
@@ -96,7 +96,8 @@ namespace MigraDoc.RtfRendering
         public void Render(Document document, Stream stream, bool closeStream, string workingDirectory)
         {
             if (document == null)
-                throw new ArgumentNullException("document");
+                throw new ArgumentNullException(nameof(document));
+
             if (document.UseCmykColor)
                 throw new InvalidOperationException("Cannot create RTF document with CMYK colors.");
 
@@ -138,7 +139,8 @@ namespace MigraDoc.RtfRendering
         public string RenderToString(Document document, string workingDirectory)
         {
             if (document == null)
-                throw new ArgumentNullException("document");
+                throw new ArgumentNullException(nameof(document));
+
             if (document.UseCmykColor)
                 throw new InvalidOperationException("Cannot create RTF document with CMYK colors.");
 
@@ -169,7 +171,7 @@ namespace MigraDoc.RtfRendering
             if (Document.EmbeddedFiles.Count > 0)
                 throw new InvalidOperationException("Embedded files are not supported in RTF documents.");
 
-            RtfFlattenVisitor flattener = new RtfFlattenVisitor();
+            RtfFlattenVisitor flattener = new();
             flattener.Visit(_document);
             Prepare();
             _rtfWriter.StartContent();
@@ -280,7 +282,7 @@ namespace MigraDoc.RtfRendering
             for (int idx = 0; idx < _fontList.Count; ++idx)
             {
                 _rtfWriter.StartContent();
-                string name = (string)_fontList[idx];
+                string name = _fontList[idx];
                 _rtfWriter.WriteControl("f", idx);
 #if true
                 //System.Drawing.Font font = new System.Drawing.Font(name, 12); //any size
@@ -311,9 +313,8 @@ namespace MigraDoc.RtfRendering
             //this would indicate index 0 as auto color:
             //this.rtfWriter.WriteSeparator();
             //left away cause there is no auto color in MigraDoc.
-            foreach (var obj in _colorList)
+            foreach (var color in _colorList)
             {
-                Color color = (Color)obj;
                 _rtfWriter.WriteControl("red", (int)color.R);
                 _rtfWriter.WriteControl("green", (int)color.G);
                 _rtfWriter.WriteControl("blue", (int)color.B);
@@ -328,10 +329,10 @@ namespace MigraDoc.RtfRendering
         internal int GetFontIndex(string fontName)
         {
             if (_fontList.Contains(fontName))
-                return (int)_fontList.IndexOf(fontName);
+                return _fontList.IndexOf(fontName);
 
             //development purpose exception
-            throw new ArgumentException(@"Font does not exist in this document’s font table.", "fontName");
+            throw new ArgumentException(@"Font does not exist in this document’s font table.", nameof(fontName));
         }
 
         /// <summary>
@@ -340,10 +341,10 @@ namespace MigraDoc.RtfRendering
         internal int GetColorIndex(Color color)
         {
             Color clr = color.GetMixedTransparencyColor();
-            int idx = (int)_colorList.IndexOf(clr);
+            int idx = _colorList.IndexOf(clr);
             // Development purpose exception.
             if (idx < 0)
-                throw new ArgumentException(@"Color does not exist in this document’s color table.", "color");
+                throw new ArgumentException(@"Color does not exist in this document’s color table.", nameof(color));
             return idx;
         }
 
@@ -380,21 +381,18 @@ namespace MigraDoc.RtfRendering
 
             _rtfWriter.StartContent();
             _rtfWriter.WriteControlWithStar("listtable");
-            foreach (var obj in _listList)
+            foreach (var lst in _listList)
             {
-                ListInfo lst = (ListInfo)obj;
-                ListInfoRenderer lir = new ListInfoRenderer(lst, this);
+                ListInfoRenderer lir = new(lst, this);
                 lir.Render();
             }
             _rtfWriter.EndContent();
 
             _rtfWriter.StartContent();
             _rtfWriter.WriteControlWithStar("listoverridetable");
-            foreach (var obj in _listList)
+            foreach (var lst in _listList)
             {
-                ListInfo lst = (ListInfo)obj;
-                ListInfoOverrideRenderer lir =
-                    new ListInfoOverrideRenderer(lst, this);
+                ListInfoOverrideRenderer lir = new(lst, this);
                 lir.Render();
             }
             _rtfWriter.EndContent();
@@ -517,9 +515,7 @@ namespace MigraDoc.RtfRendering
         /// Gets the MigraDoc document that is currently rendered.
         /// </summary>
         internal Document Document
-        {
-            get { return _document; }
-        }
+            => _document;
 
         Document _document = null!;
 
@@ -527,18 +523,15 @@ namespace MigraDoc.RtfRendering
         /// Gets the RtfWriter the document is rendered with.
         /// </summary>
         internal RtfWriter RtfWriter
-        {
-            get { return _rtfWriter; }
-        }
+            => _rtfWriter;
 
         internal string WorkingDirectory
-        {
-            get { return _workingDirectory; }
-        }
+            => _workingDirectory;
+        
         string _workingDirectory = null!;
 
-        readonly List<Color> _colorList = new List<Color>();
-        readonly List<string> _fontList = new List<string>();
-        readonly List<ListInfo> _listList = new List<ListInfo>();
+        readonly List<Color> _colorList = new();
+        readonly List<string> _fontList = new();
+        readonly List<ListInfo> _listList = new();
     }
 }
