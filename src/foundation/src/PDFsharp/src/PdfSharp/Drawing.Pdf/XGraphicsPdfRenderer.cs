@@ -242,8 +242,6 @@ namespace PdfSharp.Drawing.Pdf
                 throw new ArgumentNullException("pen and brush");
             }
 
-            const string format = Config.SignificantDecimalPlaces4;
-
             Realize(pen, brush);
             if (brush is XImageBrush xImageBrush)
             {
@@ -262,7 +260,7 @@ namespace PdfSharp.Drawing.Pdf
 
             void AppendRectangle()
             {
-                const string format = Config.SignificantFigures3;
+                const string format = Config.SignificantDecimalPlaces4;
                 //AppendFormat123("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} re\n", x, y, width, -height);
                 AppendFormatRect("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} re\n", x, y + height, width, height);
             }
@@ -395,14 +393,10 @@ namespace PdfSharp.Drawing.Pdf
             Realize(pen, brush);
 
             if (brush is XImageBrush imageBrush) {
-#if false
                 XGraphicsPath graphicsPath = new XGraphicsPath();
                 graphicsPath.AddPie(x, y, width, height, startAngle, sweepAngle);
 
                 DrawImageBrush(imageBrush, graphicsPath);
-#else
-                DiagnosticsHelper.HandleNotImplemented("XGraphicsPath.AddPie");
-#endif
                 if (pen != null)
                 {
                     AppendPie();
@@ -441,13 +435,9 @@ namespace PdfSharp.Drawing.Pdf
             Realize(pen, brush);
             if (brush is XImageBrush imageBrush)
             {
-#if false
                 XGraphicsPath xGraphicsPath = new XGraphicsPath();
                 xGraphicsPath.AddClosedCurve(points, tension);
                 DrawImageBrush(imageBrush, xGraphicsPath);
-#else
-                DiagnosticsHelper.HandleNotImplemented("XGraphicsPath.AddClosedCurve");
-#endif
                 if (pen != null)
                 {
                     AppendClosedCurve();
@@ -988,7 +978,7 @@ namespace PdfSharp.Drawing.Pdf
 
                 XGraphicsContainer container;
 #if GDI
-                container = new XGraphicsContainer(_gfx._gfx.Save());
+                container = _gfx.BeginContainer(xRect.Value, xRect.Value, XGraphicsUnit.Point);
 #else
                 container = new XGraphicsContainer();
 #endif
@@ -1105,7 +1095,7 @@ namespace PdfSharp.Drawing.Pdf
                     yMax = item.Y;
             }
 
-            if (!double.IsNormal(xMin) || !double.IsNormal(yMin) || !double.IsNormal(xMin) || !double.IsNormal(xMin))
+            if (!IsNormal(xMin) || !IsNormal(yMin) || !IsNormal(xMin) || !IsNormal(xMin))
             {
                 return null;
             }
@@ -1113,6 +1103,11 @@ namespace PdfSharp.Drawing.Pdf
             double width = xMax - xMin;
             double height = yMax - yMin;
             return new XRect(xMin, yMin, width, height);
+
+            bool IsNormal(double value)
+            {
+                return !double.IsNaN(value) && !double.IsInfinity(value);
+            }
         }
 
         #endregion
