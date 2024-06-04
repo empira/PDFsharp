@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System;
@@ -64,7 +64,7 @@ namespace PdfSharp.Pdf.Advanced
             public const string PatternType = "/PatternType";
 
             /// <summary>
-            /// (Required) A shading object (see below) defining the shading pattern�s gradient fill.
+            /// (Required) A shading object (see below) defining the shading pattern’s gradient fill.
             /// </summary>
             [KeyInfo(KeyType.Dictionary | KeyType.Required)]
             public const string Shading = "/Shading";

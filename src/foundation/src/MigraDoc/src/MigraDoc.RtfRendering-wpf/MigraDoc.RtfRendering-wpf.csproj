@@ -1,21 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
-        <EnableWindowsTargeting>true</EnableWindowsTargeting>
-        <RootNamespace>MigraDoc</RootNamespace>
-        <DefineConstants>WPF</DefineConstants>
-        <UseWindowsForms>true</UseWindowsForms>
-        <UseWPF>true</UseWPF>
-        <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <RootNamespace>MigraDoc</RootNamespace>
+    <DefineConstants>WPF</DefineConstants>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472-windows|AnyCPU'">
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472-windows|AnyCPU'">
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="..\MigraDoc.RtfRendering\Properties\VersionInfo.cs">
       <Link>Properties\VersionInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\MigraDoc.RtfRendering\Properties\GlobalDeclarations.cs">
+      <Link>Properties\GlobalDeclarations.cs</Link>
     </Compile>
     <Compile Include="..\MigraDoc.RtfRendering\RtfRendering.Resources\Messages2.cs">
       <Link>RtfRendering.Resources\Messages2.cs</Link>
@@ -187,12 +200,6 @@
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>$(DefineConstants);TRACE;WPF</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472-windows|AnyCPU'">
-    <WarningLevel>0</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472-windows|AnyCPU'">
-    <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-wpf\PdfSharp-wpf.csproj" />

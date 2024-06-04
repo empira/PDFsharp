@@ -57,25 +57,16 @@ namespace PdfSharp.Pdf.Security
         /// </summary>
         public IEnumerable<(string Name, PdfCryptFilter CryptFilter)> GetCryptFilters()
         {
-#if NET6_0_OR_GREATER
-            foreach (var element in Elements)
+            // Convert() modifies Elements. Avoid "Collection was modified; enumeration operation may not execute" error occuring in net 4.7.2.
+            // There is no way to access KeyValuePairs via index natively to use a for loop with.
+            // Instead, enumerate Keys and get value via Elements[key], which shall be O(1).
+            foreach (var key in Elements.Keys)
             {
-                var key = element.Key;
+                var value = Elements[key]!;
                 var name = PdfName.RemoveSlash(key);
-                var cryptFilter = Convert(element.Value!, key);
+                var cryptFilter = Convert(value, key);
                 yield return (name, cryptFilter);
             }
-#else
-            // Avoid "Collection was modified; enumeration operation may not execute" error.
-            var elements = Elements.Clone();
-            foreach (var element in elements)
-            {
-                var key = element.Key;
-                var name = PdfName.RemoveSlash(key);
-                var cryptFilter = Convert(element.Value!, key);
-                yield return (name, cryptFilter);
-            }
-#endif
         }
 
         /// <summary>

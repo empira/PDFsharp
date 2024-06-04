@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
+    <RootNamespace>PdfSharp</RootNamespace>
+    <!--<Error Condition="!Exists('C:\Process\Fail.txt')" Text="Process did not pass!" />-->
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!--<Target Name="BeforeBuild">
+    <Error Text=" The 0 property must be set on the command line." Condition="'' == ''" />
+  </Target>-->
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Internal\" />
+    <Folder Include="System\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp\PdfSharp.csproj" />
+    <ProjectReference Include="..\PdfSharp.Quality\PdfSharp.Quality.csproj" />
+    <ProjectReference Include="..\PdfSharp.WPFonts\PdfSharp.WPFonts.csproj" />
+  </ItemGroup>
+</Project>

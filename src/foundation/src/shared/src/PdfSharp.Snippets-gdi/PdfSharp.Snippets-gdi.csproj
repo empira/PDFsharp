@@ -1,84 +1,94 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
-        <EnableWindowsTargeting>true</EnableWindowsTargeting>
-        <RootNamespace>PdfSharp.Snippets</RootNamespace>
-        <UseWindowsForms>true</UseWindowsForms>
-        <DefineConstants>TRACE;GDI</DefineConstants>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <RootNamespace>PdfSharp.Snippets</RootNamespace>
+    <UseWindowsForms>true</UseWindowsForms>
+    <DefineConstants>TRACE;GDI</DefineConstants>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <Compile Include="..\PdfSharp.Snippets\Drawing\brushes\BrushTypes.cs" Link="Drawing\brushes\BrushTypes.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\clipping\ClippingMisc.cs" Link="Drawing\clipping\ClippingMisc.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\colors\ColorsCmyk.cs" Link="Drawing\colors\ColorsCmyk.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\colors\ColorsRgb.cs" Link="Drawing\colors\ColorsRgb.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\graphics\GraphicsFromImage.cs" Link="Drawing\graphics\GraphicsFromImage.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\images\ImageHelper.cs" Link="Drawing\images\ImageHelper.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\images\ImagesBmp.cs" Link="Drawing\images\ImagesBmp.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\images\ImagesGif.cs" Link="Drawing\images\ImagesGif.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\images\ImagesJpeg.cs" Link="Drawing\images\ImagesJpeg.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\images\ImagesMisc.cs" Link="Drawing\images\ImagesMisc.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\images\ImagesPng.cs" Link="Drawing\images\ImagesPng.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\lines\LineStyle.cs" Link="Drawing\lines\LineStyle.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\lines\LineTestsNew.cs" Link="Drawing\lines\LineTestsNew.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\lines\LineTypes.cs" Link="Drawing\lines\LineTypes.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\paths\PathCurves.cs" Link="Drawing\paths\PathCurves.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\paths\PathFigures.cs" Link="Drawing\paths\PathFigures.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\paths\PathMisc.cs" Link="Drawing\paths\PathMisc.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\paths\PathShapes.cs" Link="Drawing\paths\PathShapes.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\paths\PathText.cs" Link="Drawing\paths\PathText.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\shapes\ShapeTypes.cs" Link="Drawing\shapes\ShapeTypes.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\text\TextAlignmentCenter.cs" Link="Drawing\text\TextAlignmentCenter.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\text\TextAlignmentLeft.cs" Link="Drawing\text\TextAlignmentLeft.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\text\TextAlignmentRight.cs" Link="Drawing\text\TextAlignmentRight.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\text\TextMeasure.cs" Link="Drawing\text\TextMeasure.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\text\TextMisc.cs" Link="Drawing\text\TextMisc.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\transformation\TransformationMisc.cs" Link="Drawing\transformation\TransformationMisc.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\transformation\TransformationText.cs" Link="Drawing\transformation\TransformationText.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\transformation\TransformationXForms.cs" Link="Drawing\transformation\TransformationXForms.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Drawing\transformation\TransformationXImages.cs" Link="Drawing\transformation\TransformationXImages.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\ExoticFontResolverSnippet.cs" Link="Font\fontresolving\ExoticFontResolverSnippet.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\ExoticFontsDataHelper.cs" Link="Font\fontresolving\ExoticFontsDataHelper.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\ExoticFontsFontResolver.cs" Link="Font\fontresolving\ExoticFontsFontResolver.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\FailsafeFontResolver.cs" Link="Font\fontresolving\FailsafeFontResolver.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\FontResolver.cs" Link="Font\fontresolving\FontResolver.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\SegoeUIFontResolver.cs" Link="Font\fontresolving\SegoeUIFontResolver.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\SegoeWpFontResolver.cs" Link="Font\fontresolving\SegoeWpFontResolver.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Font\metrics\FontMetrics.cs" Link="Font\metrics\FontMetrics.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Font\selection\ChineseFont.cs" Link="Font\selection\ChineseFont.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Font\selection\DefaultConstructionSnippets.cs" Link="Font\selection\DefaultConstructionSnippets.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Font\selection\FontStyles.cs" Link="Font\selection\FontStyles.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Font\selection\HelloWorldSnippets.cs" Link="Font\selection\HelloWorldSnippets.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Font\selection\PrivateFontCollectionSnippets.cs" Link="Font\selection\PrivateFontCollectionSnippets.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Font\selection\SimpleFont.cs" Link="Font\selection\SimpleFont.cs" />
-        <Compile Include="..\PdfSharp.Snippets\IO\security\Passwords.cs" Link="IO\security\Passwords.cs" />
-        <Compile Include="..\PdfSharp.Snippets\Pdf\annotations\LinkAnnotations.cs" Link="Pdf\annotations\LinkAnnotations.cs" />
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\PdfSharp.Snippets\Drawing\brushes\BrushTypes.cs" Link="Drawing\brushes\BrushTypes.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\clipping\ClippingMisc.cs" Link="Drawing\clipping\ClippingMisc.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\colors\ColorsCmyk.cs" Link="Drawing\colors\ColorsCmyk.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\colors\ColorsRgb.cs" Link="Drawing\colors\ColorsRgb.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\graphics\GraphicsFromImage.cs" Link="Drawing\graphics\GraphicsFromImage.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\graphics\GraphicsUnitBase.cs" Link="Drawing\graphics\GraphicsUnitBase.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\graphics\GraphicsUnitDownwards.cs" Link="Drawing\graphics\GraphicsUnitDownwards.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\graphics\GraphicsUnitUpwards.cs" Link="Drawing\graphics\GraphicsUnitUpwards.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\images\ImageHelper.cs" Link="Drawing\images\ImageHelper.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\images\ImagesBmp.cs" Link="Drawing\images\ImagesBmp.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\images\ImagesGif.cs" Link="Drawing\images\ImagesGif.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\images\ImagesJpeg.cs" Link="Drawing\images\ImagesJpeg.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\images\ImagesMisc.cs" Link="Drawing\images\ImagesMisc.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\images\ImagesPng.cs" Link="Drawing\images\ImagesPng.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\lines\LineStyle.cs" Link="Drawing\lines\LineStyle.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\lines\LineTestsNew.cs" Link="Drawing\lines\LineTestsNew.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\lines\LineTypes.cs" Link="Drawing\lines\LineTypes.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\paths\PathCurves.cs" Link="Drawing\paths\PathCurves.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\paths\PathFigures.cs" Link="Drawing\paths\PathFigures.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\paths\PathMisc.cs" Link="Drawing\paths\PathMisc.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\paths\PathShapes.cs" Link="Drawing\paths\PathShapes.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\paths\PathText.cs" Link="Drawing\paths\PathText.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\paths\PathWpf.cs" Link="Drawing\paths\PathWpf.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\shapes\ShapeTypes.cs" Link="Drawing\shapes\ShapeTypes.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\text\Surrogates.cs" Link="Drawing\text\Surrogates.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\text\SymbolFonts.cs" Link="Drawing\text\SymbolFonts.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\text\TextAlignmentCenter.cs" Link="Drawing\text\TextAlignmentCenter.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\text\TextAlignmentLeft.cs" Link="Drawing\text\TextAlignmentLeft.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\text\TextAlignmentRight.cs" Link="Drawing\text\TextAlignmentRight.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\text\TextMeasure.cs" Link="Drawing\text\TextMeasure.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\text\TextMisc.cs" Link="Drawing\text\TextMisc.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\transformation\TransformationMisc.cs" Link="Drawing\transformation\TransformationMisc.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\transformation\TransformationText.cs" Link="Drawing\transformation\TransformationText.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\transformation\TransformationXForms.cs" Link="Drawing\transformation\TransformationXForms.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Drawing\transformation\TransformationXImages.cs" Link="Drawing\transformation\TransformationXImages.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\encoding\FontAnsiEncoding.cs" Link="Font\encoding\FontAnsiEncoding.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\ExoticFontResolverSnippet.cs" Link="Font\fontresolving\ExoticFontResolverSnippet.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\ExoticFontsDataHelper.cs" Link="Font\fontresolving\ExoticFontsDataHelper.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\ExoticFontsFontResolver.cs" Link="Font\fontresolving\ExoticFontsFontResolver.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\FailsafeFontResolver.cs" Link="Font\fontresolving\FailsafeFontResolver.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\FontResolver.cs" Link="Font\fontresolving\FontResolver.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\SegoeWpFontResolver.cs" Link="Font\fontresolving\SegoeWpFontResolver.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\fontresolving\SomeTestFontResolvers.cs" Link="Font\fontresolving\SomeTestFontResolvers.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\metrics\FontMetrics.cs" Link="Font\metrics\FontMetrics.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\selection\ChineseFont.cs" Link="Font\selection\ChineseFont.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\selection\DefaultConstructionSnippets.cs" Link="Font\selection\DefaultConstructionSnippets.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\selection\FontStyles.cs" Link="Font\selection\FontStyles.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\selection\HelloWorldSnippets.cs" Link="Font\selection\HelloWorldSnippets.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\selection\PrivateFontCollectionSnippets.cs" Link="Font\selection\PrivateFontCollectionSnippets.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Font\selection\SimpleFont.cs" Link="Font\selection\SimpleFont.cs" />
+    <Compile Include="..\PdfSharp.Snippets\IO\creation\PdfFileCreator.cs" Link="IO\creation\PdfFileCreator.cs" />
+    <Compile Include="..\PdfSharp.Snippets\IO\security\Passwords.cs" Link="IO\security\Passwords.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Pdf\annotations\LinkAnnotations.cs" Link="Pdf\annotations\LinkAnnotations.cs" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <EmbeddedResource Include="..\..\..\..\..\..\assets\pdfsharp-6.x\fonts\SampleFonts\Oblivious.ttf" Link="assets\fonts\Oblivious.ttf" />
-        <EmbeddedResource Include="..\..\..\..\..\..\assets\pdfsharp-6.x\fonts\SampleFonts\xfiles.ttf" Link="assets\fonts\xfiles.ttf" />
-    </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\..\..\..\..\assets\pdfsharp-6.x\fonts\SampleFonts\Oblivious.ttf" Link="assets\fonts\Oblivious.ttf" />
+    <EmbeddedResource Include="..\..\..\..\..\..\assets\pdfsharp-6.x\fonts\SampleFonts\xfiles.ttf" Link="assets\fonts\xfiles.ttf" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-gdi\PdfSharp-gdi.csproj" />
-        <ProjectReference Include="..\PdfSharp.Quality-gdi\PdfSharp.Quality-gdi.csproj" />
-        <ProjectReference Include="..\PdfSharp.WPFonts\PdfSharp.WPFonts.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-gdi\PdfSharp-gdi.csproj" />
+    <ProjectReference Include="..\PdfSharp.Quality-gdi\PdfSharp.Quality-gdi.csproj" />
+    <ProjectReference Include="..\PdfSharp.WPFonts\PdfSharp.WPFonts.csproj" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="assets\fonts\" />
-        <Folder Include="assets\images\" />
-        <Folder Include="assets\PDFs\" />
-    </ItemGroup>
+  <ItemGroup>
+    <Folder Include="assets\fonts\" />
+    <Folder Include="assets\images\" />
+    <Folder Include="assets\PDFs\" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <None Include="..\PdfSharp.Snippets\assets\fonts\LICENSE.md" Link="assets\fonts\LICENSE.md" />
-    </ItemGroup>
+  <!--<ItemGroup>
+    <None Include="..\PdfSharp.Snippets\assets\fonts\LICENSE.md" Link="assets\fonts\LICENSE.md" />
+  </ItemGroup>-->
 
 </Project>

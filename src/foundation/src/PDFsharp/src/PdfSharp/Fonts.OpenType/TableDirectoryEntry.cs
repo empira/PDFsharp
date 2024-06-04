@@ -56,7 +56,7 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// Creates and reads a TableDirectoryEntry from the font image.
         /// </summary>
-        public static TableDirectoryEntry ReadFrom(OpenTypeFontface fontData)
+        public static TableDirectoryEntry ReadFrom(OpenTypeFontFace fontData)
         {
             var entry = new TableDirectoryEntry
             {
@@ -68,7 +68,7 @@ namespace PdfSharp.Fonts.OpenType
             return entry;
         }
 
-        public void Read(OpenTypeFontface fontData)
+        public void Read(OpenTypeFontFace fontData)
         {
             Tag = fontData.ReadTag();
             CheckSum = fontData.ReadULong();

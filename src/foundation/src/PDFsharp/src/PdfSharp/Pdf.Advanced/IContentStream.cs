@@ -9,7 +9,7 @@ namespace PdfSharp.Pdf.Advanced
     {
         PdfResources Resources { get; }
 
-        string GetFontName(XFont font, out PdfFont pdfFont);
+        string GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont);
 
         string GetFontName(string idName, byte[] fontData, out PdfFont pdfFont);
 

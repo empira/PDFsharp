@@ -1,7 +1,6 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.IO;
 using PdfSharp.Pdf.Internal;
 
 namespace PdfSharp.Pdf.Content
@@ -115,8 +114,7 @@ namespace PdfSharp.Pdf.Content
         /// </summary>
         string IndentBlanks => new string(' ', _writeIndent);
 
-        void WriteIndent()
-            => WriteRaw(IndentBlanks);
+        void WriteIndent() => WriteRaw(IndentBlanks);
 
         void WriteSeparator(CharCat cat, char ch)
         {

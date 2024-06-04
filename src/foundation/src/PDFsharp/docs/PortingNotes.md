@@ -19,7 +19,8 @@
 
 * WinAnsiEncoding 1252 does exist.
   ⇒ Must call "var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;" with .NET Core.
-* Process.Start needs ProcessStartInfo to start PDF file.
+* ~~Process.Sta/rt needs ProcessStartInfo to start PDF file.~~
+  * Use PdfFileUtility.StartPdfViewer(...);
 
 * .NET Core 3.1 / .NET Standard 2.1
 * Run without dependencies to GDI+ or WPF unter Windows

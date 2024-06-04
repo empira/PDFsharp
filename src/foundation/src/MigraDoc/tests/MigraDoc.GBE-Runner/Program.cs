@@ -132,7 +132,7 @@ namespace MigraDoc.GBE_Runner
             Console.WriteLine($"Total time: {sw.ElapsedMilliseconds / 1000d}");
         }
 
-        private static void RunTest(DdlGbeTestBase test)
+        static void RunTest(DdlGbeTestBase test)
         {
             ++_counter;
             // ReSharper disable once LocalizableElement
@@ -145,6 +145,6 @@ namespace MigraDoc.GBE_Runner
             Console.WriteLine($"        {sw.ElapsedMilliseconds / 1000d}");
         }
 
-        private static int _counter = 0;
+        static int _counter = 0;
     }
 }

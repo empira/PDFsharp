@@ -6,31 +6,12 @@
 // Checks correct settings and obsolete conditional compilation symbols.
 //
 
-//#if New/ViewMatrix // obsolete
-//#error NewViewMatrix must not be defined anymore.
-//#endif
-
-//#if MIGRA/D7OC  // obsolete
-//// empira internal only: Some hacks that make PDFsharp behave like PDFlib when used with Asc.RenderContext.
-//// Applies to MigraDoc 1.2 only. The Open Source MigraDoc lite does not need this define.
-//#error MIGRA/D7OC must not be defined anymore.
-//#endif
-
-#if NET_2_0  // obsolete
-#error Undefine 'NET_2_0' because earlier versions are not supported anymore.
-#endif
-
-#if Gdip  // obsolete
-#error Conditional compilation symbol 'Gdip' was renamed to 'GDI'.
-#endif
-
-// Fragmentation of large object heap is a serious issue that must be tackled in the future.
-// Update: .NET 4.51 can ultimately defragment LOH. So maybe we can wait and see.
-#if UseMemoryStreams
-// Use MemoryStream instead of byte[] to avoid large heap problems.
-#error Undefine 'UseMemoryStreams' because it has no effect anymore.
-#else
-// Use byte[] (instead of MemoryStream) to analyze the symptoms of large heap issues.
+#if !DEBUG && (TEST_CODE || TEST_CODE_)
+// Ensure not to accidentally rename TEST_CODE to TEST_CODE_
+// This would compile code previously disabled with #if TEST_CODE_
+#warning *********************************************************
+#warning ***** TEST_CODE MUST BE UNDEFINED FOR FINAL RELEASE *****
+#warning *********************************************************
 #endif
 
 #if GDI && WPF
@@ -50,5 +31,5 @@
 // PDFsharp based on 'Windows Universal Platform'.
 #error UWP is not supported anymore
 #else
-#error Either 'CORE', 'GDI', 'WPF', or 'UWP' must be defined.
+#error Either 'CORE', 'GDI', or 'WPF' must be defined.
 #endif

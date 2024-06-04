@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FluentAssertions;
+﻿// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
 using MigraDoc.DocumentObjectModel.Tables;
+using FluentAssertions;
 using Xunit;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
+    [Collection("PDFsharp")]
     public class NullableTests
     {
         [Fact]

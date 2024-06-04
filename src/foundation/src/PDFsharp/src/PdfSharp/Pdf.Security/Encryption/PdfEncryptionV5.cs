@@ -12,7 +12,7 @@ using PdfSharp.Pdf.Internal;
 namespace PdfSharp.Pdf.Security.Encryption
 {
     /// <summary>
-    /// Implements StandardSecurityHandler's encryption version 5 (PDF 20).
+    /// Implements StandardSecurityHandler’s encryption version 5 (PDF 20).
     /// </summary>
     class PdfEncryptionV5 : PdfEncryptionBase
     {
@@ -22,7 +22,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         }
 
         /// <summary>
-        /// Initializes the encryption. Has to be called after the security handler's encryption has been set to this object.
+        /// Initializes the encryption. Has to be called after the security handler’s encryption has been set to this object.
         /// </summary>
         /// <param name="encryptMetadata">True, if the document metadata stream shall be encrypted (default: true).</param>
         public void Initialize(bool encryptMetadata = true)
@@ -69,7 +69,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         public override void EnterObject(PdfObjectID id)
         {
-            // Used encryption key doesn't depend on PDFObject ID, so there is nothing to do.
+            // Used encryption key doesn’t depend on PDFObject ID, so there is nothing to do.
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         public override void LeaveObject()
         {
-            // Used encryption key doesn't depend on PDFObject ID, so there is nothing to do.
+            // Used encryption key doesn’t depend on PDFObject ID, so there is nothing to do.
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         }
 
         /// <summary>
-        /// Sets the encryption dictionary's values for saving.
+        /// Sets the encryption dictionary’s values for saving.
         /// </summary>
         public override void PrepareEncryptionForSaving(string userPassword, string ownerPassword)
         {
@@ -399,7 +399,7 @@ namespace PdfSharp.Pdf.Security.Encryption
                 var k1 = k1Enumerable.ToArray();
 
                 // b): Create e: Encrypt k1 using AES-128 (CBC, no padding), with the first 16 bytes of k as the key and the second 16 bytes of k as the initialization vector.
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || true
                 var aesKey = k[..16];
                 var aesIV = k[16..32];
 #else
@@ -410,12 +410,15 @@ namespace PdfSharp.Pdf.Security.Encryption
                 var e = encryptor.TransformFinalBlock(k1, 0, k1.Length);
 
                 // c) + d): Take the first 16 bytes of e as an unsigned big-endian integer.
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || true
                 var e16 = e[..16];
-                var e16BigEndianUnsigned = new BigInteger(e16, true, true);
 #else
                 var e16 = e.Take(16).ToArray();
-                var e16BigEndianUnsigned = new BigInteger(e16.Reverse().ToArray());
+#endif
+#if NET6_0_OR_GREATER
+                var e16BigEndianUnsigned = new BigInteger(e16, true, true);
+#else
+                var e16BigEndianUnsigned = DotNetHelper.CreateBigInteger(e16, true, true);
 #endif
                 // Calculate the remainder of the result by modulo 3
                 // and according to that result choose the SHA algorithm to calculate the new k from e.
@@ -440,7 +443,7 @@ namespace PdfSharp.Pdf.Security.Encryption
             }
 
             // The first 32 bytes of the final K are the output of the algorithm.
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || true
             var result = k[..32];
 #else
             var result = k.Take(32).ToArray();
@@ -534,7 +537,7 @@ namespace PdfSharp.Pdf.Security.Encryption
 
             // Validate permissions only if password has been correctly validated.
             // If no password has been successful validated (and thus the retrieved encryption key is wrong),
-            // it doesn't make sense to react to a not correctly decrypted Perms (in PDF reference, Perms is instead already mostly validated when retrieving the encryption key).
+            // it doesn’t make sense to react to a not correctly decrypted Perms (in PDF reference, Perms is instead already mostly validated when retrieving the encryption key).
             if (result != PasswordValidity.Invalid)
             {
                 if (!ValidatePermissions(permsValue, permissionsValue))
@@ -566,7 +569,7 @@ namespace PdfSharp.Pdf.Security.Encryption
             var aes = CreateAesForKeyCryptography();
 
             // If the result matches the saved owner hash value, inputPassword is the owner password.
-            // The PDF reference algorithm steps don't state that d) and e) shall be inside these if conditions, but logically it has to be this way,
+            // The PDF reference algorithm steps don’t state that d) and e) shall be inside these if conditions, but logically it has to be this way,
             // as d) states to work with the owner password and e) states to work with the user password.
             // If the same password was used for user and owner, both forks generate the same encryption key.
             if (computedOwnerHash.SequenceEqual(ownerHashValue))
@@ -610,7 +613,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerHashValue(byte[] userOwnerValue)
         {
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || true
             return userOwnerValue[..32];
 #else
             return userOwnerValue.Take(32).ToArray();
@@ -622,7 +625,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerValidationSalt(byte[] userOwnerValue)
         {
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || true
             return userOwnerValue[32..40];
 #else
             return userOwnerValue.Skip(32).Take(8).ToArray();
@@ -634,7 +637,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// </summary>
         static byte[] GetUserOwnerKeySalt(byte[] userOwnerValue)
         {
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || true
             return userOwnerValue[40..48];
 #else
             return userOwnerValue.Skip(40).Take(8).ToArray();
@@ -697,10 +700,10 @@ namespace PdfSharp.Pdf.Security.Encryption
                 return false;
 
             // Bytes 0-3 of the decrypted Perms entry, treated as a little-endian integer, are the user permissions. They should match the value in the P key.
-#if NET6_0_OR_GREATER
-            var pFromPerms = BitConverter.ToUInt32(permsDecrypted[..4]); // Little-endian is default, so we don't have to change the order.
+#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE_
+            var pFromPerms = BitConverter.ToUInt32(permsDecrypted[..4]);  // Little-endian is default, so we don’t have to change the order.
 #else
-            var pFromPerms = BitConverter.ToUInt32(permsDecrypted.Take(4).ToArray(), 0); // Little-endian is default, so we don't have to change the order.
+            var pFromPerms = BitConverter.ToUInt32(permsDecrypted.Take(4).ToArray(), 0); // Little-endian is default, so we don’t have to change the order.
 #endif
             if (pFromPerms != pValue)
                 return false;

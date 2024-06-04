@@ -21,7 +21,7 @@ namespace PdfSharp.Pdf
     // ReSharper restore InconsistentNaming
     {
         /// <summary>
-        /// Don't create the value.
+        /// Don’t create the value.
         /// </summary>
         None,
 
@@ -66,7 +66,7 @@ namespace PdfSharp.Pdf
         {
             if (dict._elements != null)
                 dict._elements.ChangeOwner(this);
-            if (dict.Stream != null)
+            if (dict.Stream != null!)
                 dict.Stream.ChangeOwner(this);
         }
 
@@ -160,12 +160,12 @@ namespace PdfSharp.Pdf
                 Debug.Assert(Elements.ContainsKey("/Length"), "Dictionary has a stream but no length is set.");
 #endif
 
-            if (_stream is not null && writer.SecurityHandler != null)
+            if (_stream is not null && writer.EffectiveSecurityHandler != null)
             {
                 // Encryption could change the size of the stream.
                 // Encrypt the bytes before writing the dictionary to get and update the actual size.
                 var bytes = (byte[])_stream.Value.Clone();
-                writer.SecurityHandler.EncryptStream(ref bytes, this);
+                writer.EffectiveSecurityHandler.EncryptStream(ref bytes, this);
                 _stream.Value = bytes;
                 Elements[PdfStream.Keys.Length] = new PdfInteger(_stream?.Length ?? 0);
             }
@@ -462,11 +462,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Tries to get the string. TODO: more TryGet...
             /// </summary>
-            public bool TryGetString(string key,
-#if NET6_0_OR_GREATER
-                [MaybeNullWhen(false)]
-#endif
-                out string value)
+            public bool TryGetString(string key, [MaybeNullWhen(false)] out string value)
             {
                 value = null;
                 var obj = this[key];
@@ -512,7 +508,7 @@ namespace PdfSharp.Pdf
                 {
                     //if (create)
                     //  this[key] = new Pdf();
-                    return String.Empty;
+                    return "";
                 }
 
                 if (obj is PdfReference reference)
@@ -528,7 +524,7 @@ namespace PdfSharp.Pdf
 
             /// <summary>
             /// Sets the specified name value.
-            /// If the value doesn't start with a slash, it is added automatically.
+            /// If the value doesn’t start with a slash, it is added automatically.
             /// </summary>
             public void SetName(string key, string value)
             {
@@ -839,10 +835,10 @@ namespace PdfSharp.Pdf
                     if (kd != null)
                         type = kd.GetValueType();
                     //else
-                    //    Debug.WriteLine("Warning: Key not descriptor table: " + key);  // TODO: check what this means...
+                    //  Deb/ug.WriteLine("Warning: Key not descriptor table: " + key);  // TODO: check what this means...
                 }
                 //else
-                //    Debug.WriteLine("Warning: No meta provided for type: " + _owner.GetType().Name);  // TODO: check what this means...
+                //  Deb/ug.WriteLine("Warning: No meta provided for type: " + _owner.GetType().Name);  // TODO: check what this means...
                 return type;
             }
 
@@ -1014,7 +1010,7 @@ namespace PdfSharp.Pdf
             }
 
             /// <summary>
-            /// Sets the entry with the specified value. DON'T USE THIS FUNCTION - IT MAY BE REMOVED.
+            /// Sets the entry with the specified value. DON’T USE THIS FUNCTION - IT MAY BE REMOVED.
             /// </summary>
             public void SetValue(string key, PdfItem value)
             {
@@ -1025,7 +1021,7 @@ namespace PdfSharp.Pdf
                 // HACK?
                 _elements[key] = value;
             }
-            
+
             /// <summary>
             /// Gets the PdfObject with the specified key, or null if no such object exists. If the key refers to
             /// a reference, the referenced PdfObject is returned.
@@ -1131,7 +1127,7 @@ namespace PdfSharp.Pdf
                         throw new ArgumentNullException(nameof(value));
 #if DEBUG_
                     if (key == "/MediaBox")
-                        key.GetType();
+                        _ = typeof(int);
 
                     //if (value is PdfObject)
                     //{
@@ -1349,7 +1345,7 @@ namespace PdfSharp.Pdf
             /// Access a key that may contain an array or a single item for working with its value(s).
             /// </summary>
             public ArrayOrSingleItemHelper ArrayOrSingleItem => new(this); // TODO PDFsharp6: Naming.
-            
+
             /// <summary>
             /// Gets the DebuggerDisplayAttribute text.
             /// </summary>
@@ -1669,20 +1665,7 @@ namespace PdfSharp.Pdf
         /// Gets the DebuggerDisplayAttribute text.
         /// </summary>
         // ReSharper disable UnusedMember.Local
-        string DebuggerDisplay
+        string DebuggerDisplay => Invariant($"dictionary({ObjectID.DebuggerDisplay},[{Elements.Count}])={_elements?.DebuggerDisplay}");
         // ReSharper restore UnusedMember.Local
-        {
-            get
-            {
-#if true
-                return String.Format(CultureInfo.InvariantCulture, "dictionary({0},[{1}])={2}",
-                    ObjectID.DebuggerDisplay,
-                    Elements.Count,
-                    _elements?.DebuggerDisplay);
-#else
-                return String.Format(CultureInfo.InvariantCulture, "dictionary({0},[{1}])=", ObjectID.DebuggerDisplay, _elements.DebuggerDisplay);
-#endif
-            }
-        }
     }
 }

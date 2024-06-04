@@ -19,7 +19,7 @@ namespace MigraDoc.Rendering
             _fillFormat = fillFormat;
         }
 
-        internal void Render(XUnit x, XUnit y, XUnit width, XUnit height)
+        internal void Render(XUnitPt x, XUnitPt y, XUnitPt width, XUnitPt height)
         {
             var brush = GetBrush();
             if (brush == null)

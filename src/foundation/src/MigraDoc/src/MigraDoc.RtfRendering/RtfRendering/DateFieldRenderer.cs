@@ -1,11 +1,13 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System;
 using MigraDoc.DocumentObjectModel;
 using System.Globalization;
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using MigraDoc.DocumentObjectModel.Fields;
+using MigraDoc.Logging;
 using MigraDoc.RtfRendering.Resources;
 
 namespace MigraDoc.RtfRendering
@@ -49,7 +51,7 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         void TranslateFormat()
         {
-            // The format is translated using the document's actual culture.
+            // The format is translated using the document’s actual culture.
             var format = GetEffectiveFormat(_dateField, out var dtfInfo);
 
             if (format.Length == 1)
@@ -138,8 +140,9 @@ namespace MigraDoc.RtfRendering
                     case '\'':
                         if (isEscaped)
                         {
-                            //Doesn't work in word format strings.
-                            Debug.WriteLine(Messages2.CharacterNotAllowedInDateFormat(c), "warning");
+                            //Doesn’t work in Word format strings.
+                            MigraDocLogHost.RtfRenderingLogger.LogWarning(Messages2.CharacterNotAllowedInDateFormat(c));
+                            //Debug.WriteLine(Messages2.CharacterNotAllowedInDateFormat(c), "warning");
                             isEscaped = false;
                         }
                         else if (!isSingleQuoted && !isQuoted)
@@ -220,7 +223,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Translates an unescaped character of a DateField's custom format to RTF.
+        /// Translates an unescaped character of a DateField’s custom format to RTF.
         /// </summary>
         string TranslateCustomFormatChar(char ch)
         {

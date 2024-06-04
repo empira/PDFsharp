@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+Ôªø// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 namespace PdfSharp.Pdf.Advanced
@@ -22,12 +22,12 @@ namespace PdfSharp.Pdf.Advanced
             /// <summary>
             /// (Sometimes required, as discussed below)
             /// The group color space, which is used for the following purposes:
-            /// ï As the color space into which colors are converted when painted into the group
-            /// ï As the blending color space in which objects are composited within the group
-            /// ï As the color space of the group as a whole when it in turn is painted as an object onto its backdrop
+            /// ‚Ä¢ As the color space into which colors are converted when painted into the group
+            /// ‚Ä¢ As the blending color space in which objects are composited within the group
+            /// ‚Ä¢ As the color space of the group as a whole when it in turn is painted as an object onto its backdrop
             /// The group color space may be any device or CIE-based color space that
             /// treats its components as independent additive or subtractive values in the
-            /// range 0.0 to 1.0, subject to the restrictions described in Section 7.2.3, ìBlending Color Space.î
+            /// range 0.0 to 1.0, subject to the restrictions described in Section 7.2.3, ‚ÄúBlending Color Space.‚Äù
             /// These restrictions exclude Lab and lightness-chromaticity ICCBased color spaces,
             /// as well as the special color spaces Pattern, Indexed, Separation, and DeviceN.
             /// Device color spaces are subject to remapping according to the DefaultGray,
@@ -36,7 +36,7 @@ namespace PdfSharp.Pdf.Advanced
             /// Ordinarily, the CS entry is allowed only for isolated transparency groups
             /// (those for which I, below, is true), and even then it is optional. However,
             /// this entry is required in the group attributes dictionary for any transparency
-            /// group XObject that has no parent group or page from which to inherit ó in
+            /// group XObject that has no parent group or page from which to inherit ‚Äî in
             /// particular, one that is the value of the G entry in a soft-mask dictionary of
             /// subtype Luminosity.
             /// In addition, it is always permissible to specify CS in the group attributes
@@ -48,7 +48,7 @@ namespace PdfSharp.Pdf.Advanced
             /// and the color space is inherited from the actual backdrop with which the
             /// page is composited.
             /// Default value: the color space of the parent group or page into which this
-            /// transparency group is painted. (The parentís color space in turn can be
+            /// transparency group is painted. (The parent‚Äôs color space in turn can be
             /// either explicitly specified or inherited.)
             /// </summary>
             [KeyInfo(KeyType.NameOrArray | KeyType.Optional)]
@@ -58,7 +58,7 @@ namespace PdfSharp.Pdf.Advanced
             /// (Optional) A flag specifying whether the transparency group is isolated.
             /// If this flag is true, objects within the group are composited against a fully
             /// transparent initial backdrop; if false, they are composited against the
-            /// groupís backdrop.
+            /// group‚Äôs backdrop.
             /// Default value: false.
             /// In the group attributes dictionary for a page, the interpretation of this
             /// entry is slightly altered. In the normal case in which the page is imposed
@@ -75,7 +75,7 @@ namespace PdfSharp.Pdf.Advanced
             /// (Optional) A flag specifying whether the transparency group is a knockout
             /// group. If this flag is false, later objects within the group are composited
             /// with earlier ones with which they overlap; if true, they are composited with
-            /// the groupís initial backdrop and overwrite (ìknock outî) any earlier
+            /// the group‚Äôs initial backdrop and overwrite (‚Äúknock out‚Äù) any earlier
             /// overlapping objects.
             /// Default value: false.
             /// </summary>

@@ -11,7 +11,6 @@
     <PackageVersion Include="GitVersion.MsBuild" Version="5.12.0" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageVersion Include="System.Drawing.Common" Version="4.7.3" />
-    <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.IO.Compression.ZipFile" Version="4.3.0" />
     <PackageVersion Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageVersion Include="System.Diagnostics.FileVersionInfo" Version="4.3.0" />
@@ -24,7 +23,7 @@
     <PackageVersion Include="Azure.ResourceManager.Resources" Version="1.0.0-beta.3" />
     <!-- Microsoft system packages -->
     <PackageVersion Include="System.ComponentModel.Annotations" Version="6.0.0-preview.4.21253.7" />
-    <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="7.0.0" />
+    <!--<PackageVersion Include="System.Reflection.MetadataLoadContext" Version="7.0.0" />-->
     <!-- Microsoft packages -->
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="$(NetCore_PackageVersion)" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="$(NetCore_PackageVersion)" />
@@ -34,7 +33,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(NetCore_PackageVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Configuration" Version="$(NetCore_PackageVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(NetCore_PackageVersion)" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="$(NetCore_PackageVersion)" />
+    <!--<PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="$(NetCore_PackageVersion)" />-->
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="$(NetCore_PackageVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="$(NetCore_PackageVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="$(NetCore_PackageVersion)" />
@@ -89,15 +88,14 @@
     <PackageVersion Include="Microsoft.VisualStudio.Services.NuGet.CredentialProvider" Version="0.37.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.0" />
     <!-- Unit test packages -->
-    <!--<PackageVersion Include="BioNTech.Extensions.Fakes" Version="1.2102.0-preview.89" />-->
-    <PackageVersion Include="FluentAssertions" Version="6.10.0" />
-    <PackageVersion Include="xunit.core" Version="2.4.2" />
+    <PackageVersion Include="FluentAssertions" Version="6.12.0" />
+    <PackageVersion Include="xunit.core" Version="2.8.1" />
     <PackageVersion Include="xunit.assert" Version="2.4.2" />
     <PackageVersion Include="Xunit.Priority" Version="1.1.6" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
     <PackageVersion Include="NSubstitute" Version="4.2.2" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
-    <PackageVersion Include="XunitXml.TestLogger" Version="3.0.78" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.1" />
+    <PackageVersion Include="XunitXml.TestLogger" Version="3.1.20" />
     <PackageVersion Include="coverlet.collector" Version="1.3.0" />
     <PackageVersion Include="Moq" Version="4.16.1" />
     <PackageVersion Include="NCrunch.Framework" Version="4.7.0.4" />
@@ -106,9 +104,10 @@
     <PackageVersion Include="System.IO.Abstractions" Version="13.2.47" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageVersion Include="AutoMapper" Version="10.1.1" />
+    <PackageVersion Include="Xunit.SkippableFact" Version="1.4.13" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta1.20104.2" />
-    <PackageVersion Include="Seq.Extensions.Logging" Version="6.0.0" />
+    <!--<PackageVersion Include="Seq.Extensions.Logging" Version="6.0.0" />
     <PackageVersion Include="morelinq" Version="3.3.2" />
-    <PackageVersion Include="Spectre.Console" Version="0.41.0" />
+    <PackageVersion Include="Spectre.Console" Version="0.41.0" />-->
   </ItemGroup>
 </Project>

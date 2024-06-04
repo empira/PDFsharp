@@ -1,28 +1,23 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System.Diagnostics;
-using PdfSharp.Pdf;
+using PdfSharp.TestHelper;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Rendering;
 using PdfSharp.Fonts;
+using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
-using PdfSharp.TestHelper;
 using Xunit;
 
 namespace MigraDoc.Tests
 {
-    [Collection("MGD")]
+    [Collection("PDFsharp")]
     public class SpaceBeforeTests
     {
         [Fact]
         public void Tests_for_SpaceBefore()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = SnippetsFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = CreateDocument();
 
@@ -44,10 +39,10 @@ namespace MigraDoc.Tests
             pdfRenderer.RenderDocument();
 
             // Save the document...
-            var filename = PdfFileHelper.CreateTempFileName("HelloWorld");
+            var filename = PdfFileUtility.GetTempPdfFileName("SpaceBefore");
             pdfRenderer.PdfDocument.Save(filename);
             // ...and start a viewer.
-            PdfFileHelper.StartPdfViewerIfDebugging(filename);
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
 
 #if DEBUG___
             MigraDoc.DocumentObjectModel.IO.DdlWriter dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_2.mdddl");

@@ -2,6 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
+using Microsoft.Extensions.Logging;
 #if GDI
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -11,41 +12,58 @@ using System.Windows;
 //using System.Windows.Media;
 #endif
 using PdfSharp.Pdf.Internal;
-#if !EDF_CORE
 using PdfSharp.Drawing;
-#endif
+using PdfSharp.Fonts.Internal;
+using PdfSharp.Internal;
+using PdfSharp.Logging;
 
 namespace PdfSharp.Fonts.OpenType
 {
     /// <summary>
     /// The OpenType font descriptor.
-    /// Currently the only font type PDFsharp supports.
+    /// Currently, the only font type PDFsharp supports.
     /// </summary>
     sealed class OpenTypeDescriptor : FontDescriptor
     {
-        /// <summary>
-        /// New...
-        /// </summary>
-        public OpenTypeDescriptor(string fontDescriptorKey, string name, XFontStyleEx stlye, OpenTypeFontface fontface, XPdfFontOptions options)
-            : base(fontDescriptorKey)
-        {
-            FontFace = fontface;
-            FontName = name;
-            Initialize();
-        }
+        ///// <summary>
+        ///// New...
+        ///// </summary>
+        //public OpenTypeDescriptor(string fontDescriptorKey, string name, XFontStyleEx style, OpenTypeFontFace fontFace, XPdfFontOptions options)
+        //    : base(fontDescriptorKey)
+        //{
+        //    FontFace = fontFace;
+        //    FontName = name;
+        //    Initialize();
+        //}
 
         public OpenTypeDescriptor(string fontDescriptorKey, XFont font)
             : base(fontDescriptorKey)
         {
             try
             {
-                FontFace = font.GlyphTypeface.Fontface;
-                FontName = font.Name;
+                FontFace = font.GlyphTypeface.FontFace;
+                FontName2 = font.Name;
                 Initialize();
             }
             catch
             {
-                GetType();
+                _ = typeof(int);
+                throw;
+            }
+        }
+
+        public OpenTypeDescriptor(string fontDescriptorKey, XGlyphTypeface glyphTypeface)
+            : base(fontDescriptorKey)
+        {
+            try
+            {
+                FontFace = glyphTypeface.FontFace;
+                FontName2 = glyphTypeface.FaceName;
+                Initialize();
+            }
+            catch
+            {
+                _ = typeof(int);
                 throw;
             }
         }
@@ -55,11 +73,11 @@ namespace PdfSharp.Fonts.OpenType
         {
             try
             {
-                FontFace = new OpenTypeFontface(fontData, idName);
+                FontFace = new OpenTypeFontFace(fontData, idName);
                 // Try to get real name from name table
-                if (idName.Contains("XPS-Font-") && FontFace.name != null && FontFace.name.Name.Length != 0)
+                if (idName.Contains("XPS-Font-") && FontFace.name != null! && FontFace.name.Name.Length != 0)
                 {
-                    string tag = String.Empty;
+                    string tag = "";
                     if (idName.IndexOf("+", StringComparison.Ordinal) == 6)
                         tag = idName.Substring(0, 6);
                     idName = tag + "+" + FontFace.name.Name;
@@ -67,17 +85,17 @@ namespace PdfSharp.Fonts.OpenType
                         idName += "," + FontFace.name.Style;
                     //idName = idName.Replace(" ", "");
                 }
-                FontName = idName;
+                FontName2 = idName;
                 Initialize();
             }
             catch (Exception)
             {
-                GetType();
+                _ = typeof(int);
                 throw;
             }
         }
 
-        internal OpenTypeFontface FontFace;
+        internal OpenTypeFontFace FontFace;
 
         void Initialize()
         {
@@ -87,7 +105,7 @@ namespace PdfSharp.Fonts.OpenType
             //fontName = image.n
             ItalicAngle = FontFace.post.italicAngle;
 
-            XMin = FontFace!.head!.xMin;
+            XMin = FontFace.head!.xMin;
             YMin = FontFace.head.yMin;
             XMax = FontFace.head.xMax;
             YMax = FontFace.head.yMax;
@@ -104,7 +122,7 @@ namespace PdfSharp.Fonts.OpenType
             // No documentation found how to get the set vertical stems width from the
             // TrueType tables.
             // The following formula comes from PDFlib Lite source code. Acrobat 5.0 sets
-            // /StemV to 0 always. I think the value doesn't matter.
+            // /StemV to 0 always. I think the value doesn’t matter.
             //float weight = (float)(image.os2.usWeightClass / 65.0f);
             //stemV = (int)(50 + weight * weight);  // MAGIC
             StemV = 0;
@@ -113,7 +131,7 @@ namespace PdfSharp.Fonts.OpenType
 
             // Calculate Ascent, Descent, Leading and LineSpacing like in WPF Source Code (see FontDriver.ReadBasicMetrics)
 
-            // OS/2 is an optional table, but we can't determine if it is existing in this font.
+            // OS/2 is an optional table, but we can’t determine if it is existing in this font.
             bool os2SeemsToBeEmpty = FontFace.os2.sTypoAscender == 0 && FontFace.os2.sTypoDescender == 0 && FontFace.os2.sTypoLineGap == 0;
             //Debug.Assert(!os2SeemsToBeEmpty); // Are there fonts without OS/2 table?
 
@@ -142,7 +160,7 @@ namespace PdfSharp.Fonts.OpenType
                 // normally negative whereas we want a positive value; however some fonts get the sign wrong
                 // so instead of just negating we take the absolute value.
                 int descender = Math.Abs(FontFace.hhea.descender);
-                // Comment from WPF: get the lineGap field and make sure it's >= 0 
+                // Comment from WPF: get the lineGap field and make sure it’s >= 0 
                 int lineGap = Math.Max((short)0, FontFace.hhea.lineGap);
 
                 if (!os2SeemsToBeEmpty)
@@ -157,12 +175,13 @@ namespace PdfSharp.Fonts.OpenType
 
                     Ascender = winAscent;
                     Descender = winDescent;
-                    // Comment from WPF: The following calculation for designLineSpacing is per [....]. The default line spacing 
+                    // Comment from WPF:
+                    // The following calculation for designLineSpacing is per [....]. The default line spacing 
                     // should be the sum of the Mac ascender, descender, and lineGap unless the resulting value would
                     // be less than the cell height (winAscent + winDescent) in which case we use the cell height.
                     // See also http://www.microsoft.com/typography/otspec/recom.htm.
-                    // Note that in theory it's valid for the baseline-to-baseline distance to be less than the cell
-                    // height. However, Windows has never allowed this for Truetype fonts, and fonts built for Windows
+                    // Note that in theory it’s valid for the baseline-to-baseline distance to be less than the cell
+                    // height. However, Windows has never allowed this for TrueType fonts, and fonts built for Windows
                     // sometimes rely on this behavior and get the hha values wrong or set them all to zero.
                     LineSpacing = Math.Max(lineGap + ascender + descender, winAscent + winDescent);
                 }
@@ -194,16 +213,12 @@ namespace PdfSharp.Fonts.OpenType
 
             //flags = image.
 
-#if !EDF_CORE
-            Encoding ansi = PdfEncoders.WinAnsiEncoding; // System.Text.Encoding.Default;
-#else
-            Encoding ansi = null; //$$$ PdfEncoders.WinAnsiEncoding; // System.Text.Encoding.Default;
-#endif
+            Encoding ansi = PdfEncoders.WinAnsiEncoding;
 
             Encoding unicode = Encoding.Unicode;
             byte[] bytes = new byte[256];
 
-            bool symbol = FontFace.cmap.symbol;
+            bool isSymbolFont = IsSymbolFont;
             Widths = new int[256];
             for (int idx = 0; idx < 256; idx++)
             {
@@ -212,38 +227,34 @@ namespace PdfSharp.Fonts.OpenType
                 // We wait for bug reports.
 
                 char ch = (char)idx;
+#if true
+                if (isSymbolFont)
+                {
+                    ch = RemapSymbolChar(ch);
+                }
+                else
+                {
+                    string s = ansi.GetString(bytes, idx, 1);
+                    if (s.Length != 0)
+                        ch = s[0];
+                }
+#else
                 string s = ansi.GetString(bytes, idx, 1);
                 if (s.Length != 0)
                 {
-                    if (s[0] != ch)
-                        ch = s[0];
+                    //if (s[0] != ch)
+                    ch = s[0];
                 }
 
-                //Debug.Assert(ch == idx);
-
-                //int glyphIndex;
-                //if (symbol)
-                //{
-                //    glyphIndex = idx + (FontFace.os2. usFirstCharIndex & 0xFF00);
-                //    glyphIndex = CharCodeToGlyphIndex((char)glyphIndex);
-                //}
-                //else
-                //{
-                //    //Debug.Assert(idx + (fontData.os2.usFirstCharIndex & 0xFF00) == idx);
-                //    //glyphIndex = CharCodeToGlyphIndex((char)idx);
-                //    glyphIndex = CharCodeToGlyphIndex(ch);
-                //}
-
-                if (symbol)
-                {
-                    // Remap ch for symbol fonts.
-                    ch = (char)(ch | (FontFace.os2.usFirstCharIndex & 0xFF00));  // @@@ refactor
-                }
-                var glyphIndex = CharCodeToGlyphIndex(ch);
+                // Remap ch for symbol fonts.
+                if (isSymbolFont)
+                    ch = RemapSymbolChar(ch);
+#endif
+                var glyphIndex = BmpCodepointToGlyphIndex(ch);
                 Widths[idx] = GlyphIndexToPdfWidth(glyphIndex);
             }
         }
-        public int[] Widths = null!;
+        public int[] Widths = default!;
 
         /// <summary>
         /// Gets a value indicating whether this instance belongs to a bold font.
@@ -256,89 +267,130 @@ namespace PdfSharp.Fonts.OpenType
         public override bool IsItalicFace => FontFace.os2.IsItalic;
 
         internal int DesignUnitsToPdf(double value)
-        {
-            return (int)Math.Round(value * 1000.0 / FontFace!.head!.unitsPerEm);
-        }
+            => (int)Math.Round(value * 1000.0 / FontFace.head!.unitsPerEm);
 
         /// <summary>
-        /// Maps a Unicode to the index of the corresponding glyph.
-        /// See OpenType spec "cmap - Character To Glyph Index Mapping Table / Format 4: Segment mapping to delta values"
+        /// Maps a Unicode code point from the BMP to the index of the corresponding glyph.
+        /// Returns 0 if no glyph exists for the specified character.
+        /// See OpenType spec "cmap - Character To Glyph Index Mapping Table /
+        /// Format 4: Segment mapping to delta values"
         /// for details about this a little bit strange looking algorithm.
         /// </summary>
-        public uint CharCodeToGlyphIndex(char value)
+        public ushort BmpCodepointToGlyphIndex(char ch)
         {
+            // ReSharper disable once IdentifierTypo
             var cmap = FontFace.cmap.cmap4;
             int segCount = cmap.segCountX2 / 2;
             int seg;
+
             for (seg = 0; seg < segCount; seg++)
             {
-                if (value <= cmap.endCount[seg])
+                if (ch <= cmap.endCount[seg])
                     break;
             }
-            Debug.Assert(seg < segCount);
-
-            if (value < cmap.startCount[seg])
-            {
-                // If no glyph is found for no-break hyphen, use hyphen glyph instead.
-                if (value == '\u2011')
-                    return CharCodeToGlyphIndex('-');
-
+            //Debug.Assert(seg < segCount);
+            if (seg == segCount)
                 return 0;
-            }
+
+            if (ch < cmap.startCount[seg])
+                return 0;
+
+            ushort glyphIndex;
 
             if (cmap.idRangeOffs[seg] == 0)
-                return (value + (uint)cmap.idDelta[seg]) & 0xFFFF;
+            {
+                glyphIndex = (ushort)((ch + (uint)cmap.idDelta[seg]) & 0xFFFF);
+                // Cannot happen anymore with glyphIndex as of type ushort:  Debug.Assert((glyphIndex & 0xFFFF0000) == 0, "Glyph index larger than 65535.");
+                return glyphIndex;
+            }
 
-            int idx = cmap.idRangeOffs[seg] / 2 + (value - cmap.startCount[seg]) - (segCount - seg);
+            int idx = cmap.idRangeOffs[seg] / 2 + (ch - cmap.startCount[seg]) - (segCount - seg);
             Debug.Assert(idx >= 0 && idx < cmap.glyphCount);
 
-            var glyphId = cmap.glyphIdArray[idx];
-
-            if (glyphId == 0)
+            glyphIndex = cmap.glyphIdArray[idx];
+            if (glyphIndex == 0)
                 return 0;
 
-            return (glyphId + (uint)cmap.idDelta[seg]) & 0xFFFF;
+            glyphIndex = (ushort)((glyphIndex + (uint)cmap.idDelta[seg]) & 0xFFFF);
+            Debug.Assert((glyphIndex & 0xFFFF0000) == 0, "Glyph index larger than 65535.");
+            return glyphIndex;
         }
 
         /// <summary>
-        /// Maps a Unicode to the index of the corresponding glyph.
-        /// See OpenType spec "cmap - Character To Glyph Index Mapping Table / Format 4: Segment mapping to delta values"
+        /// Maps a Unicode character from outside the BMP to the index of the corresponding glyph.
+        /// Returns 0 if no glyph exists for the specified code point.
+        /// See OpenType spec "cmap - Character To Glyph Index Mapping Table /
+        /// Format 12: Segmented coverage"
         /// for details about this a little bit strange looking algorithm.
         /// </summary>
-        public uint CharCodeToGlyphIndex(char highSurrogate, char lowSurrogate)
+        public ushort SurrogatePairToGlyphIndex(char highSurrogate, char lowSurrogate)
         {
-            var value = char.ConvertToUtf32(highSurrogate, lowSurrogate);
-
-            var converted = BitConverter.ToUInt32(BitConverter.GetBytes(value), 0);
+            // ReSharper disable once IdentifierTypo
             var cmap = FontFace.cmap.cmap12;
+            // cmap can be null here if the font does not support surrogate pairs.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (cmap is null)
+                return 0;
+
+            var codePoint = Char.ConvertToUtf32(highSurrogate, lowSurrogate);
+            return CodepointToGlyphIndex(codePoint);
+        }
+
+        /// <summary>
+        /// Maps a Unicode code point to the index of the corresponding glyph.
+        /// Returns 0 if no glyph exists for the specified character.
+        /// Should only be called for code points that are not from BMP.
+        /// See OpenType spec "cmap - Character To Glyph Index Mapping Table /
+        /// Format 4: Segment mapping to delta values"
+        /// for details about this a little bit strange looking algorithm.
+        /// </summary>
+        public ushort CodepointToGlyphIndex(int codePoint)
+        {
+            if (codePoint <= 0xFFFF)
+            {
+                PdfSharpLogHost.FontManagementLogger.LogWarning("For code points from the BMP call BmpCharacterToGlyphID directly.");
+                return BmpCodepointToGlyphIndex((char)codePoint);
+            }
+
+            // ReSharper disable once IdentifierTypo
+            var cmap = FontFace.cmap.cmap12;
+            // cmap can be null here if the font does not support surrogate pairs.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (cmap is null)
+                return 0;
 
             int seg;
             for (seg = 0; seg < cmap.groups.Length; seg++)
             {
-                if (value <= cmap.groups[seg].endCharCode)
+                if (codePoint <= cmap.groups[seg].endCharCode)
                     break;
             }
-            Debug.Assert(seg < cmap.groups.Length);
 
-            if (value < cmap.groups[seg].startCharCode)
+            if (seg == cmap.groups.Length)
                 return 0;
 
-            return cmap.groups[seg].startGlyphID + converted - cmap.groups[seg].startCharCode;
+            if (codePoint < cmap.groups[seg].startCharCode)
+                return 0;
+
+            var glyphIndex = (ushort)(cmap.groups[seg].startGlyphIndex + codePoint - cmap.groups[seg].startCharCode);
+            // Debug.Assert((glyphIndex & 0xFFFF0000) == 0, "Glyph index larger than 65535.");
+            return glyphIndex;
         }
 
         /// <summary>
         /// Converts the width of a glyph identified by its index to PDF design units.
+        /// Index 0 also returns a valid font specific width for the non-existing glyph.
         /// </summary>
-        public int GlyphIndexToPdfWidth(uint glyphIndex)
+        public int GlyphIndexToPdfWidth(ushort glyphIndex)
         {
             try
             {
                 var numberOfHMetrics = FontFace.hhea.numberOfHMetrics;
-                var unitsPerEm = FontFace!.head!.unitsPerEm;
+                var unitsPerEm = FontFace.head!.unitsPerEm;
 
-                // glyphIndex >= numberOfHMetrics means the font is mono-spaced and all glyphs have the same width
+                // glyphIndex >= numberOfHMetrics means the font is monospaced and all glyphs have the same width.
                 if (glyphIndex >= numberOfHMetrics)
-                    glyphIndex = numberOfHMetrics - (uint)1;
+                    glyphIndex = (ushort)(numberOfHMetrics - 1);
 
                 int width = FontFace.hmtx.Metrics[glyphIndex].advanceWidth;
 
@@ -347,41 +399,34 @@ namespace PdfSharp.Fonts.OpenType
                     return width;
                 return width * 1000 / unitsPerEm; // normalize
             }
+            // ReSharper disable once RedundantCatchClause
             catch (Exception)
             {
-                GetType();
+                PdfSharpLogHost.FontManagementLogger.LogError("Invalid glyph index hmtx: 0x{Glyph:X4}", glyphIndex);
                 throw;
             }
-        }
-
-        public int PdfWidthFromCharCode(char ch)
-        {
-            var idx = CharCodeToGlyphIndex(ch);
-            int width = GlyphIndexToPdfWidth(idx);
-            return width;
         }
 
         /// <summary>
         /// Converts the width of a glyph identified by its index to PDF design units.
         /// </summary>
-        public double GlyphIndexToEmfWidth(uint glyphIndex, double emSize)
+        public double GlyphIndexToEmWidth(uint glyphIndex, double emSize)
         {
             try
             {
                 uint numberOfHMetrics = FontFace.hhea.numberOfHMetrics;
-                int unitsPerEm = FontFace!.head!.unitsPerEm;
+                int unitsPerEm = FontFace.head!.unitsPerEm;
 
-                // glyphIndex >= numberOfHMetrics means the font is mono-spaced and all glyphs have the same width
+                // glyphIndex >= numberOfHMetrics means the font is monospaced and all glyphs have the same width.
                 if (glyphIndex >= numberOfHMetrics)
                     glyphIndex = numberOfHMetrics - 1;
 
                 int width = FontFace.hmtx.Metrics[glyphIndex].advanceWidth;
-
-                return width * emSize / unitsPerEm; // normalize
+                return width * emSize / unitsPerEm;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                GetType();
+                PdfSharpLogHost.Logger.LogError(ex, "Error calculating em-size for glyph 0x{Glyph:X4}.", glyphIndex);
                 throw;
             }
         }
@@ -389,24 +434,130 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// Converts the width of a glyph identified by its index to PDF design units.
         /// </summary>
-        public int GlyphIndexToWidth(uint glyphIndex)
+        public int GlyphIndexToWidth(int glyphIndex)
         {
+            //if (glyphIndex == 0)
+            //    return 0;
             try
             {
-                uint numberOfHMetrics = FontFace.hhea.numberOfHMetrics;
+                int numberOfHMetrics = FontFace.hhea.numberOfHMetrics;
 
-                // glyphIndex >= numberOfHMetrics means the font is mono-spaced and all glyphs have the same width
+                // glyphIndex >= numberOfHMetrics means the font is monospaced and all glyphs have the same width.
                 if (glyphIndex >= numberOfHMetrics)
                     glyphIndex = numberOfHMetrics - 1;
 
                 int width = FontFace.hmtx.Metrics[glyphIndex].advanceWidth;
                 return width;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                GetType();
+                PdfSharpLogHost.Logger.LogError(ex, "Error find advance width for glyph 0x{Glyph:X4}.", glyphIndex);
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Converts the code units of a UTF-16 string into the glyph identifier of this font.
+        /// If useAnsiCharactersOnly is true, only valid ANSI code units a taken into account.
+        /// All non-ANSI characters are skipped and not part of the result
+        /// </summary>
+        public bool IsSymbolFont => FontFace.cmap.symbol;
+
+        public CodePointGlyphIndexPair[] GlyphIndicesFromString(string s, bool useAnsiCharactersOnly = false)
+        {
+            if (String.IsNullOrEmpty(s))
+                return [];
+
+            var codePoints = UnicodeHelper.Utf32FromString(s);
+            return GlyphIndicesFromCodePoints(codePoints);
+        }
+
+        public CodePointGlyphIndexPair[] GlyphIndicesFromCodePoints(int[] codePoints, bool useAnsiCharactersOnly = false)
+        {
+            if (codePoints == null!)
+                return [];
+
+            int length = codePoints.Length;
+            if (length == 0)
+                return [];
+
+            var result = new CodePointGlyphIndexPair[length];
+            int iRes = 0;
+
+            // Is the font a symbol font?
+            if (IsSymbolFont)
+            {
+                for (int idx = 0; idx < length; idx++)
+                {
+                    ref var item = ref result[iRes++];
+                    int codePoint = codePoints[idx];
+
+                    char ch = (char)codePoint;
+                    // ch must be fit in one byte.
+                    if ((ch & 0xFF00) != 0)
+                    {
+                        // Just log a hint but do not skip the character.
+                        PdfSharpLogHost.FontManagementLogger.LogDebug("Unexpected character found for symbol font: 0x{Char:X2}", ch);
+                    }
+
+                    // Remap ch for symbol fonts.
+                    item.CodePoint = codePoint;
+                    item.GlyphIndex = BmpCodepointToGlyphIndex(ch);
+                }
+            }
+            else
+            {
+                // It is not a symbol font, i.e. it is a regular open type font.
+                for (int idx = 0; idx < length; idx++)
+                {
+
+                    ref var item = ref result[iRes++];
+                    item.CodePoint = codePoints[idx];
+
+                    //if (useAnsiCharactersOnly)
+                    //{
+                    //    var ansi = AnsiEncoding.UnicodeToAnsi(ch);
+                    //    if (ansi == '\uFFFF')
+                    //    {
+                    //        PdfSharpLogHost.FontManagementLogger.LogDebug("Unexpected low surrogate found: 0x{Char:X2}", ch);
+                    //        result[iRes++] = new CodepointGlyphID(ch, ch, 0);  // unclear what to do
+                    //    }
+                    //    else
+                    //    {
+                    //        result[iRes++] = new CodepointGlyphID(ch, ch, 0);  // unclear what to do
+                    //    }
+                    //    continue;
+                    //}
+
+                    item.GlyphIndex = item.CodePoint < UnicodeHelper.UnicodePlane01Start
+                        ? BmpCodepointToGlyphIndex((char)item.CodePoint)
+                        : CodepointToGlyphIndex(item.CodePoint);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Remaps a character of a symbol font.
+        /// Required to get the correct glyph identifier
+        /// from the cmap type 4 table.
+        /// </summary>
+        public char RemapSymbolChar(char ch)
+        {
+            Debug.Assert(IsSymbolFont);
+
+            // Check if ch is either a byte or in range [0xf000..0xf0ff], wich is both valid for a
+            // code unit of a symbol font.
+            // Second expression is clever code from WPF source meaning:
+            // 'ch >= 0xf000 && ch <= 0xf0ff' done with one test and branch.
+            if (ch > 255 && !((uint)(ch - 0xf000) <= 0xff))
+            {
+                var value = ((int)ch).ToString("x4");
+                PdfSharpLogHost.FontManagementLogger.LogError("Character 0u{char} of a symbol font is not in valid range.", value);
+            }
+
+            // Used | instead of + because of: http://pdfsharp.codeplex.com/workitem/15954
+            return (char)(ch | (FontFace.os2.usFirstCharIndex & 0xFF00));
         }
     }
 }

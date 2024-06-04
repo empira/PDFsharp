@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics;
@@ -53,7 +53,7 @@ namespace MigraDoc.DocumentObjectModel
             => (Font)DeepCopy();
 
         /// <summary>
-        /// Applies all non-null properties of a font to this font if the given font's property is different from the given refFont's property.
+        /// Applies all non-null properties of a font to this font if the given font’s property is different from the given refFont’s property.
         /// </summary>
         internal void ApplyFont(Font font, Font? refFont)
         {
@@ -325,7 +325,7 @@ namespace MigraDoc.DocumentObjectModel
 
 #if DEBUG_ // Test
                 if (!_size.IsNull && Size != 0 && Size.Point == 0)
-                    GetType();
+                    _ = typeof(int);
 #endif
 
                 if (!Values.Size.IsValueNullOrEmpty())
@@ -354,7 +354,7 @@ namespace MigraDoc.DocumentObjectModel
             {
                 int pos = serializer.BeginContent("Font");
 
-                // Don't write null values if font is null.
+                // Don’t write null values if font is null.
                 // Do write null values if font is not null!
                 var empty = String.IsNullOrEmpty(Values.Name);
                 if ((font == null && !empty) ||
@@ -366,11 +366,10 @@ namespace MigraDoc.DocumentObjectModel
 #if DEBUG_
                 // Test
                 if (!_size.IsNull && Size != 0 && Size.Point == 0)
-                    GetType();
+                    _ = typeof(int);
 #endif
 
-                if (!Values.Size.IsValueNullOrEmpty() &&
-                    (font == null || Size != font.Size))
+                if (!Values.Size.IsValueNullOrEmpty() && (font == null || Size != font.Size))
                     serializer.WriteSimpleAttribute("Size", Size);
                 // NBool and NEnum have to be compared directly to check whether the value is Null.
 

@@ -1,6 +1,9 @@
-using FluentAssertions;
+// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
 using MigraDoc.DocumentObjectModel.Tables;
 using Xunit;
+using FluentAssertions;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
@@ -8,6 +11,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
     /// <summary>
     /// Low level test of document object model.
     /// </summary>
+    [Collection("PDFsharp")]
     public class BasicTests2
     {
         [Fact]
@@ -26,7 +30,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             //var value = new Test1Object();
             //var meta = value.Meta;
 
-            ////GetType();
+            ////_ = typeof(int);
 
             //var p = new Border();
             //var m = p.Meta;

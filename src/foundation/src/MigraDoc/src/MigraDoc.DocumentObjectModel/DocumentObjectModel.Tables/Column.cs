@@ -75,9 +75,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         /// </summary>
         public Table Table
         {
-#if NET6_0_OR_GREATER
             [return: MaybeNull]
-#endif
             get
             {
                 if (_table == null)
@@ -120,7 +118,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         /// <summary>
         /// Gets a cell by its row index. The first cell has index 0.
         /// </summary>
-        public Cell? this[int index] => Values.Index is not null ? Table.Rows[index][Values.Index.Value] : null; // BUG Doesn't use Index property to guarantee getter loop ran.
+        public Cell? this[int index] => Values.Index is not null ? Table.Rows[index][Values.Index.Value] : null; // BUG Doesn’t use Index property to guarantee getter loop ran.
 
         /// <summary>
         /// Sets or gets the default style name for all cells of the column.

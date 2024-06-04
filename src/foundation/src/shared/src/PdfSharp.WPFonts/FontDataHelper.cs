@@ -1,4 +1,7 @@
-﻿using System;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -50,7 +53,7 @@ namespace PdfSharp.WPFonts
             var assembly = typeof(FontDataHelper).Assembly;
             using var stream = assembly.GetManifestResourceStream(name);
             if (stream == null)
-                throw new ArgumentException("No resource with name " + name);
+                throw new ArgumentException($"No resource named '{name}'.");
 
             int count = (int)stream.Length;
             byte[] data = new byte[count];

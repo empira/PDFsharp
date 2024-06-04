@@ -4,12 +4,13 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
-using System.IO;
+using Microsoft.Extensions.Logging;
 #if true || GDI || WPF
 using PdfSharp.Drawing;
 #endif
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Shapes;
+using MigraDoc.Logging;
 using MigraDoc.RtfRendering.Resources;
 using PdfSharp.Diagnostics;
 using Image = MigraDoc.DocumentObjectModel.Shapes.Image;
@@ -40,13 +41,15 @@ namespace MigraDoc.RtfRendering
         internal override void Render()
         {
             bool renderInParagraph = RenderInParagraph();
-            var elms = DocumentRelations.GetParent(_image) as DocumentElements;
-            if (elms != null && !renderInParagraph &&
+
+            if (DocumentRelations.GetParent(_image) is DocumentElements elms && !renderInParagraph &&
                 !(DocumentRelations.GetParent(elms) is Section || DocumentRelations.GetParent(elms) is HeaderFooter))
             {
-                Debug.WriteLine(Messages2.ImageFreelyPlacedInWrongContext(_image.Name), "warning");
+                MigraDocLogHost.RtfRenderingLogger.LogWarning(Messages2.ImageFreelyPlacedInWrongContext(_image.Name));
+                //Debug.WriteLine(Messages2.ImageFreelyPlacedInWrongContext(_image.Name), "warning");
                 return;
             }
+
             if (renderInParagraph)
                 StartDummyParagraph();
 
@@ -127,7 +130,8 @@ namespace MigraDoc.RtfRendering
             if (extension.IsValueNullOrEmpty())
             {
                 _imageFile = null;
-                Debug.WriteLine("No Image type given.", "warning");
+                MigraDocLogHost.RtfRenderingLogger.LogError("No Image type given.");
+                //Debug.WriteLine("No Image type given.", "warning");
                 return;
             }
 
@@ -164,7 +168,8 @@ namespace MigraDoc.RtfRendering
                     break;
 
                 default:
-                    Debug.WriteLine(Messages2.ImageTypeNotSupported(_image.Name), "warning");
+                    MigraDocLogHost.RtfRenderingLogger.LogError(Messages2.ImageTypeNotSupported(_image.Name));
+                    //Debug.WriteLine(Messages2.ImageTypeNotSupported(_image.Name), "warning");
                     _imageFile = null;
                     break;
             }
@@ -175,13 +180,16 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         void RenderDimensionSettings()
         {
-            float scaleX = (GetShapeWidth() / _originalWidth);
-            float scaleY = (GetShapeHeight() / _originalHeight);
+            var shapeWidthPt = GetShapeWidth().Point;
+            var shapeHeightPt = GetShapeHeight().Point;
+
+            var scaleX = shapeWidthPt / _originalWidth.Point;
+            var scaleY = shapeHeightPt / _originalHeight.Point;
             _rtfWriter.WriteControl("picscalex", (int)(scaleX * 100));
             _rtfWriter.WriteControl("picscaley", (int)(scaleY * 100));
 
-            RenderUnit("pichgoal", GetShapeHeight() / scaleY);
-            RenderUnit("picwgoal", GetShapeWidth() / scaleX);
+            RenderUnit("pichgoal", shapeHeightPt / scaleY);
+            RenderUnit("picwgoal", shapeWidthPt / scaleX);
 
             //A bit obscure, but necessary for Word 2000:
             _rtfWriter.WriteControl("pich", (int)(_originalHeight.Millimeter * 100));
@@ -210,7 +218,6 @@ namespace MigraDoc.RtfRendering
                     _xImage = bip = XImage.FromFile(_filePath);
                 }
 
-
                 float horzResolution;
                 float vertResolution;
                 string ext = GetFileExtension(); // Path.GetExtension(_filePath).ToLower();
@@ -231,8 +238,8 @@ namespace MigraDoc.RtfRendering
                     vertResolution = horzResolution;
                 }
 
-                Unit origHeight = bip.Size.Height * 72 / vertResolution;
-                Unit origWidth = bip.Size.Width * 72 / horzResolution;
+                double origHeight = bip.Size.Height * 72 / vertResolution;
+                double origWidth = bip.Size.Width * 72 / horzResolution;
 
                 _imageHeight = origHeight;
                 _imageWidth = origWidth;
@@ -251,12 +258,12 @@ namespace MigraDoc.RtfRendering
                     if (_image.Values.Width is not null && _image.Values.Height is null)
                     {
                         _imageWidth = _image.Width;
-                        _imageHeight = origHeight * _imageWidth / origWidth;
+                        _imageHeight = Unit.FromPoint(origHeight * _imageWidth.Point / origWidth);
                     }
                     else if (_image.Values.Height is not null && _image.Values.Width is null)
                     {
                         _imageHeight = _image.Height;
-                        _imageWidth = origWidth * _imageHeight / origHeight;
+                        _imageWidth = Unit.FromPoint(origWidth * _imageHeight.Point / origHeight);
                     }
                     else if (_image.Values.Height is not null && _image.Values.Width is not null)
                     {
@@ -279,11 +286,13 @@ namespace MigraDoc.RtfRendering
             }
             catch (FileNotFoundException)
             {
-                Debug.WriteLine(Messages2.ImageNotFound(_image.Name), "warning");
+                MigraDocLogHost.RtfRenderingLogger.LogError(Messages2.ImageNotFound(_image.Name));
+                //Debug.WriteLine(Messages2.ImageNotFound(_image.Name), "warning");
             }
             catch (Exception exc)
             {
-                Debug.WriteLine(Messages2.ImageNotReadable(_image.Name, exc.Message), "warning");
+                MigraDocLogHost.RtfRenderingLogger.LogError(Messages2.ImageNotReadable(_image.Name, exc.Message));
+                //Debug.WriteLine(Messages2.ImageNotReadable(_image.Name, exc.Message), "warning");
             }
             finally
             {

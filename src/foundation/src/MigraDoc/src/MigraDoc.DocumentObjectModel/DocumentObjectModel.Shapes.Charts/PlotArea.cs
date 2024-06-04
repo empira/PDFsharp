@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc.DocumentObjectModel.Shapes.Charts
@@ -50,7 +50,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         }
 
         /// <summary>
-        /// Gets the line format of the plot area's border.
+        /// Gets the line format of the plot area’s border.
         /// </summary>
         public LineFormat LineFormat
         {

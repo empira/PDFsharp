@@ -1,7 +1,6 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.IO;
 using System.IO.Compression;
 
 namespace PdfSharp.Pdf.Filters
@@ -108,7 +107,7 @@ namespace PdfSharp.Pdf.Filters
             //
             //    The information in FLEVEL is not needed for decompression; it
             //    is there to indicate if recompression might be worthwhile.
-            ms.WriteByte(0xDA); // FLEVEL may not always be correct here, but that's okay.
+            ms.WriteByte(0xDA); // FLEVEL may not always be correct here, but that’s okay.
 
             using var zip = new DeflateStream(ms, level, true);
             zip.Write(data, 0, data.Length);

@@ -1,6 +1,5 @@
-#region PDFsharp - A .NET library for processing PDF
-// TODO
-#endregion
+// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
 
 // Draw crosses to check layout calculation
 #define DRAW_X_

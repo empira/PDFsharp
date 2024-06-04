@@ -1,24 +1,34 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.Runtime.InteropServices;
-using PdfSharp.Fonts;
 #if GDI
+using System.Runtime.InteropServices;
+using PdfSharp.Logging;
 using GdiFontFamily = System.Drawing.FontFamily;
 using GdiFont = System.Drawing.Font;
 using GdiFontStyle = System.Drawing.FontStyle;
 using GdiPrivateFontCollection = System.Drawing.Text.PrivateFontCollection;
 #endif
 #if WPF
-using System.IO;
 using WpfFonts = System.Windows.Media.Fonts;
 using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfTypeface = System.Windows.Media.Typeface;
 using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
 #endif
+using Microsoft.Extensions.Logging;
+using PdfSharp.Fonts;
+using PdfSharp.Fonts.Internal;
 
 namespace PdfSharp.Drawing
 {
+#if true
+    /// <summary>
+    /// This class is out of order. Use a font resolver instead.
+    /// </summary>
+    [Obsolete("XPrivateFontCollection is out of order now. Use a font resolver instead.")]
+    public sealed class XPrivateFontCollection
+    { }
+#else
     ///<summary>
     /// Makes fonts that are not installed on the system available within the current application domain.<br/>
     /// </summary>
@@ -145,13 +155,13 @@ namespace PdfSharp.Drawing
             if (familyName.EndsWith(" Regular", StringComparison.OrdinalIgnoreCase))
                 familyName = familyName.Substring(0, familyName.Length - 8);
 
-            bool bold = fontSource.Fontface.os2.IsBold;
-            bool italic = fontSource.Fontface.os2.IsItalic;
+            bool bold = fontSource.FontFace.os2.IsBold;
+            bool italic = fontSource.FontFace.os2.IsItalic;
             IncompetentlyMakeAHackToFixAProblemYouWouldNeverHaveIfYouUsedAFontResolver(fontSource, ref familyName, ref bold, ref italic);
             string key = MakeKey(familyName, bold, italic);
             Singleton._fontSources.Add(key, fontSource);
 
-            string typefaceKey = XGlyphTypeface.ComputeKey(familyName, bold, italic);
+            string typefaceKey = XGlyphTypeface.ComputeGtfKey(familyName, bold, italic);
             FontFactory.CacheExistingFontSourceWithNewTypefaceKey(typefaceKey, fontSource);
         }
 
@@ -226,11 +236,11 @@ namespace PdfSharp.Drawing
         //                throw new InvalidOperationException(PSSR.FontAlreadyAdded(glyphTypeface.DisplayName));
 
         //            _typefaces.Add(name, glyphTypeface);
-        //            //Debug.WriteLine("Font added: " + name);
+        //            //De/bug.WriteLine("Font added: " + name);
 
         //#if GDI
         //            // Add to GDI+ PrivateFontCollection singleton.
-        //            byte[] data = glyphTypeface.Fontface.FontSource.Bytes;
+        //            byte[] data = glyphTypeface.FontFace.FontSource.Bytes;
         //            int length = data.Length;
 
         //            IntPtr ip = Marshal.AllocCoTaskMem(length);
@@ -303,10 +313,10 @@ namespace PdfSharp.Drawing
             ICollection<WpfTypeface> list = fontFamily.GetTypefaces();
             foreach (WpfTypeface typeFace in list)
             {
-                Debug.WriteLine($"{familyName}, {typeFace.FaceNames[FontHelper.XmlLanguageEnUs]}, {typeFace.Style}, {typeFace.Weight}, {typeFace.Stretch}");
+                //De/bug.WriteLine($"{familyName}, {typeFace.FaceNames[FontHelper.XmlLanguageEnUs]}, {typeFace.Style}, {typeFace.Weight}, {typeFace.Stretch}");
                 if (!typeFace.TryGetGlyphTypeface(out var glyphTypeface))
                 {
-                    Debug.WriteLine("    Glyph typeface does not exist.");
+                    //De/bug.WriteLine("    Glyph typeface does not exist.");
                     //throw new ArgumentException("Font with the specified family name does not exist.");
                 }
             }
@@ -315,14 +325,14 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-            //internal static XGlyphTypeface TryGetXGlyphTypeface(string familyName, XFontStyleEx style)
-            //{
-            //    string name = MakeName(familyName, style);
+        //internal static XGlyphTypeface TryGetXGlyphTypeface(string familyName, XFontStyleEx style)
+        //{
+        //    string name = MakeName(familyName, style);
 
-            //    XGlyphTypeface typeface;
-            //    _global._typefaces.TryGetValue(name, out typeface);
-            //    return typeface;
-            //}
+        //    XGlyphTypeface typeface;
+        //    _global._typefaces.TryGetValue(name, out typeface);
+        //    return typeface;
+        //}
 
 #if CORE
         internal static XTypeface? TryCreateTypeface(string name, XFontStyleEx style, out XFontFamily? fontFamily)
@@ -377,7 +387,7 @@ namespace PdfSharp.Drawing
             catch (Exception ex)
             {
                 // Ignore exception and return null.
-                Debug.WriteLine(ex.ToString());
+                PdfSharpLogHost.FontManagementLogger.LogError(ex.Message);
             }
             return null;
         }
@@ -417,4 +427,5 @@ namespace PdfSharp.Drawing
         readonly Dictionary<string, WpfFontFamily> _fontFamilies = new Dictionary<string, WpfFontFamily>(StringComparer.OrdinalIgnoreCase);
 #endif
     }
+#endif
 }

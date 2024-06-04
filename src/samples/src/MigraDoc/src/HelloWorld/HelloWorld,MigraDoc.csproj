@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net6.0;net472</TargetFrameworks>
-    </PropertyGroup>
+  </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\foundation\src\MigraDoc\src\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />

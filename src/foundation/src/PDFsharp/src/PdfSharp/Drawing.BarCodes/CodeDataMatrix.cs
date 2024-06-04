@@ -119,7 +119,7 @@ namespace PdfSharp.Drawing.BarCodes
         }
 
         /// <summary>
-        /// Gets or sets the size of the Matrix' Quiet Zone.
+        /// Gets or sets the size of the Matrix¹ Quiet Zone.
         /// </summary>
         public int QuietZone
         {

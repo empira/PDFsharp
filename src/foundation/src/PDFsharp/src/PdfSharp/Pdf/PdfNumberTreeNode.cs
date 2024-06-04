@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System;
@@ -27,11 +27,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfNumberTreeNode(bool isRoot)  //??? Needed HACK StLa
         {
-#if NET6_0_OR_GREATER
             IsRoot = isRoot;
-#else
-            _isRoot = isRoot;
-#endif
         }
 
         /// <summary>
@@ -40,9 +36,7 @@ namespace PdfSharp.Pdf
         public bool IsRoot
         {
             get => _isRoot;
-#if NET6_0_OR_GREATER
             private init => _isRoot = value;
-#endif
         }
         readonly bool _isRoot;
 
@@ -135,7 +129,7 @@ namespace PdfSharp.Pdf
 
         internal override void WriteObject(PdfWriter writer)
         {
-            GetType();
+            _ = typeof(int);
             base.WriteObject(writer);
         }
 
@@ -169,7 +163,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// (Root and leaf nodes only; required in leaf nodes; present in the root node if and only if Kids is not present)
             /// An array of the form
-            ///      [key1 value1 key2 value2 � keyn valuen]
+            ///      [key1 value1 key2 value2 … keyn valuen]
             /// where each keyi is an integer and the corresponding valuei is the object associated with that key.
             /// The keys are sorted in numerical order, analogously to the arrangement of keys in a name tree.
             /// </summary>

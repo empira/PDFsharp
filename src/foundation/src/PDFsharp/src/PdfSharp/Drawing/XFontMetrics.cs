@@ -4,7 +4,7 @@
 namespace PdfSharp.Drawing
 {
     /// <summary>
-    /// Collects information of a font.
+    /// Collects information of a physical font face.
     /// </summary>
     public sealed class XFontMetrics
     {

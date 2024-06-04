@@ -1,7 +1,6 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.IO;
 using PdfSharp.Internal;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Content.Objects;
@@ -83,14 +82,18 @@ namespace PdfSharp.Pdf.Content
                         break;
 
                     case CSymbol.Integer:
-                        CInteger n = new CInteger();
-                        n.Value = _lexer.TokenToInteger;
+                        CInteger n = new()
+                        {
+                            Value = _lexer.TokenToInteger
+                        };
                         _operands.Add(n);
                         break;
 
                     case CSymbol.Real:
-                        CReal r = new CReal();
-                        r.Value = _lexer.TokenToReal;
+                        CReal r = new()
+                        {
+                            Value = _lexer.TokenToReal
+                        };
                         _operands.Add(r);
                         break;
 
@@ -98,16 +101,20 @@ namespace PdfSharp.Pdf.Content
                     case CSymbol.HexString:
                     case CSymbol.UnicodeString:
                     case CSymbol.UnicodeHexString:
-                        s = new CString();
-                        s.Value = _lexer.Token;
-                        s.CStringType = CStringType.String; // Must set string type. So far, only CStringType.String is supported in CString.ToString().
+                        s = new()
+                        {
+                            Value = _lexer.Token,
+                            CStringType = CStringType.String // Must set string type. So far, only CStringType.String is supported in CString.ToString().
+                        };
                         _operands.Add(s);
                         break;
 
                     case CSymbol.Dictionary:
-                        s = new CString();
-                        s.Value = _lexer.Token;
-                        s.CStringType = CStringType.Dictionary;
+                        s = new()
+                        {
+                            Value = _lexer.Token,
+                            CStringType = CStringType.Dictionary
+                        };
                         _operands.Add(s);
                         op = CreateOperator(OpCodeName.Dictionary);
                         //_operands.Clear();
@@ -115,8 +122,10 @@ namespace PdfSharp.Pdf.Content
                         break;
 
                     case CSymbol.Name:
-                        CName name = new CName();
-                        name.Name = _lexer.Token;
+                        var name = new CName
+                        {
+                            Name = _lexer.Token
+                        };
                         _operands.Add(name);
                         break;
 
@@ -127,7 +136,7 @@ namespace PdfSharp.Pdf.Content
                         break;
 
                     case CSymbol.BeginArray:
-                        CArray array = new CArray();
+                        var array = new CArray();
                         if (_operands.Count != 0)
                             ContentReaderDiagnostics.ThrowContentReaderException("Array within array...");
 
@@ -140,7 +149,6 @@ namespace PdfSharp.Pdf.Content
                     case CSymbol.EndArray:
                         ContentReaderDiagnostics.HandleUnexpectedCharacter(']');
                         break;
-
 #if DEBUG
                     default:
                         Debug.Assert(false);
@@ -175,7 +183,7 @@ namespace PdfSharp.Pdf.Content
             {
                 if (op.OpCode.OpCodeName != OpCodeName.ID)
                 {
-                    GetType();
+                    _ = typeof(int);
                     Debug.Assert(false, "Invalid number of operands.");
                 }
             }

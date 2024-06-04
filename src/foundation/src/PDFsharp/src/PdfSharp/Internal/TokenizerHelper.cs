@@ -142,7 +142,7 @@ namespace PdfSharp.Internal
                 newTokenLength++;
             }
 
-            // If quoteCount isn't zero we hit the end of the string before the ending quote.
+            // If quoteCount isn’t zero we hit the end of the string before the ending quote.
             if (quoteCount > 0)
                 throw new InvalidOperationException("Missing end quote"); //SR.Get(SRID.TokenizerHelperMissingEndQuote, new object[0]));
 
@@ -170,7 +170,7 @@ namespace PdfSharp.Internal
                 if (currentChar != separator && !Char.IsWhiteSpace(currentChar))
                     throw new InvalidOperationException("ExtraDataEncountered"); //SR.Get(SRID.TokenizerHelperExtraDataEncountered, new object[0]));
 
-                // Loop until a character that isn't the separator or white space.
+                // Loop until a character that isn’t the separator or white space.
                 int argSepCount = 0;
                 while (_charIndex < _strLen)
                 {
@@ -193,7 +193,7 @@ namespace PdfSharp.Internal
                         break;
                 }
 
-                // If there was a separatorChar then we shouldn't be at the end of string or means there was a separator but there isn't an arg.
+                // If there was a separatorChar then we shouldn’t be at the end of string or means there was a separator but there isn’t an arg.
                 if (argSepCount > 0 && _charIndex >= _strLen)
                     throw new InvalidOperationException("EmptyToken"); // SR.Get(SRID.TokenizerHelperEmptyToken, new object[0]));
             }

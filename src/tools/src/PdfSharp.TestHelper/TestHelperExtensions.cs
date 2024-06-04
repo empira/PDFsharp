@@ -1,4 +1,7 @@
-﻿using System;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+using System;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -29,7 +32,7 @@ namespace PdfSharp.TestHelper
             var dllPath = assembly.Location;
 #else
             // In net 4.7.2 assembly.Location returns a temporary folder, when executed via Test Explorer.
-            // Get the original dll's path via CodeBase instead.
+            // Get the original dll’s path via CodeBase instead.
             var dllPath = assembly.CodeBase;
             if (dllPath.StartsWith("file:///"))
                 dllPath = dllPath.Substring(8);
@@ -78,7 +81,7 @@ namespace PdfSharp.TestHelper
             return ChunkIterator(source, size);
         }
 
-        private static IEnumerable<TSource[]> ChunkIterator<TSource>(IEnumerable<TSource> source, int size)
+        static IEnumerable<TSource[]> ChunkIterator<TSource>(IEnumerable<TSource> source, int size)
         {
             using IEnumerator<TSource> e = source.GetEnumerator();
             while (e.MoveNext())

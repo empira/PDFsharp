@@ -1,18 +1,17 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.Security;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.Rendering;
-using PdfSharp.Diagnostics;
-using PdfSharp.Pdf.Security;
 #if CORE
 using PdfSharp.Fonts;
 using PdfSharp.Snippets.Font;
+#endif
+#if WPF
+using System.IO;
 #endif
 
 namespace MigraDoc.Tests
@@ -157,7 +156,6 @@ namespace MigraDoc.Tests
             }
         }
 
-
         /// <summary>
         /// A class containing the test configuration to avoid multiple parameters in many test methods and reduce refactoring need on changes of test configurations.
         /// Use ByEnum() to create options fromTestOptionsEnum inside the test.
@@ -209,9 +207,6 @@ namespace MigraDoc.Tests
         public static Document CreateEmptyTestDocument()
         {
             var doc = new Document();
-#if CORE
-            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
-#endif
             return doc;
         }
 
@@ -236,9 +231,14 @@ namespace MigraDoc.Tests
             var pdfRenderer = new PdfDocumentRenderer { Document = document };
             pdfRenderer.RenderDocument();
 
+            SecureDocument(pdfRenderer.PdfDocument, options);
+
+            return pdfRenderer;
+        }
+        public static void SecureDocument(PdfDocument pdfDoc, TestOptions options)
+        {
             if (options.Encryption != PdfStandardSecurityHandler.DefaultEncryption.None)
             {
-                var pdfDoc = pdfRenderer.PdfDocument;
                 if (options.UserPassword is not null)
                     pdfDoc.SecuritySettings.UserPassword = options.UserPassword;
                 if (options.OwnerPassword is not null)
@@ -257,10 +257,14 @@ namespace MigraDoc.Tests
                 else if (options.Encryption != PdfStandardSecurityHandler.DefaultEncryption.Default)
                     securityHandler.SetEncryption(options.Encryption);
             }
-
-            return pdfRenderer;
         }
 
+        public static void WriteSecuredTestDocument(Document document, string filename, TestOptions options)
+        {
+            var pdfRenderer = RenderSecuredDocument(document, options);
+            pdfRenderer.Save(filename);
+        }
+        
         public static PdfDocumentRenderer RenderSecuredStandardTestDocument(TestOptions options)
         {
             return RenderSecuredDocument(CreateStandardTestDocument(), options);
@@ -282,7 +286,7 @@ namespace MigraDoc.Tests
         /// Adds a prefix to the filename, depending on the options Encryption and EncryptMetadata properties.
         /// Other information must be added manually to the filename parameter (this applies also to the use of user and/or owner password).
         /// </summary>
-        public static String AddPrefixToFilename(string filename, TestOptions? options = null)
+        public static string AddPrefixToFilename(string filename, TestOptions? options = null)
         {
             var prefix = GetFilenamePrefix(options);
 
@@ -302,7 +306,7 @@ namespace MigraDoc.Tests
             return $"{filenameWithoutExtension} {suffix}{extension}";
         }
 
-        private static string GetFilenamePrefix(TestOptions? options)
+        static string GetFilenamePrefix(TestOptions? options)
         {
             // mor information to file name scheme in SecurityTests class.
             var prefixSuffix = "S_";

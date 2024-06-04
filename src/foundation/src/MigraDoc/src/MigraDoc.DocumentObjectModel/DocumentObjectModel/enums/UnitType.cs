@@ -3,7 +3,6 @@
 
 namespace MigraDoc.DocumentObjectModel
 {
-
     /// <summary>
     /// Specifies the measure of a Unit object.
     /// </summary>

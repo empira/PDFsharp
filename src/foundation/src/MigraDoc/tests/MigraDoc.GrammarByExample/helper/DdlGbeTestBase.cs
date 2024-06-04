@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.GrammarByExample;
 using PdfSharp.Fonts;
+using PdfSharp.Quality;
 #if CORE
 using PdfSharp.Snippets.Font;
 #endif
@@ -63,26 +64,17 @@ namespace GdiGrammarByExample
 
         void DoTest()
         {
-//#if true
-//            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-//#endif
-
-#if CORE
-            //GlobalFontSettings.FontResolver ??= new SegoeUiFontResolver();
-            GlobalFontSettings.FontResolver ??= SnippetsFontResolver.Get();
-#endif
-
             Environment.CurrentDirectory = WslPathHack(_fixture.TestContext.TempDirectory);
 
             var workingDir = Environment.CurrentDirectory;
             string pdfFile = _fixture.TestContext.AddResultFileEx(_testName + ".pdf");
-            CreatePdfFromMdddlFile(pdfFile, WslPathHack(PathSource), _testName ?? throw new InvalidOperationException(), CompatibilityPatchCallback);
+            CreatePdfFromMdddlFile(pdfFile, WslPathHack(IOUtility.GetAssetsPath(PathSourceX)!), _testName ?? throw new InvalidOperationException(), CompatibilityPatchCallback);
 
             // ReSharper disable once RedundantCheckBeforeAssignment
             if (Environment.CurrentDirectory != workingDir)
                 Environment.CurrentDirectory = workingDir;
 
-            string referenceFile = FindReferenceFile(WslPathHack(ReferenceSource), _testName) ?? throw new InvalidOperationException();
+            string referenceFile = FindReferenceFile(WslPathHack(IOUtility.GetAssetsPath(ReferenceSourceX)!), _testName) ?? throw new InvalidOperationException();
 
             // ReSharper disable once RedundantCheckBeforeAssignment
             if (Environment.CurrentDirectory != workingDir)
@@ -136,21 +128,21 @@ namespace GdiGrammarByExample
         }
 
         //const string PathSource = @"D:\MigraDocAssets\GBE\GBE-DDL";
-        const string PathSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\GBE-DDL";
+        const string PathSourceX = @"archives/grammar-by-example/GBE/GBE-DDL";
 
         // ***** Select the reference for comparison *****
         // Legacy (the old C++ build):
-        //const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\CPP 1.10";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/CPP 1.10";
 
         // GDI+:
-        //const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\GDI 1.30";
-        //const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\GDI 1.31";
-        //const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\GDI 1.40";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/GDI 1.30";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/GDI 1.31";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/GDI 1.40";
 
         // WPF:
-        //const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\WPF 1.30";
-        const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\WPF 1.31";
-        //const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\WPF 1.40";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/WPF 1.30";
+         const string ReferenceSourceX = "archives/grammar-by-example/GBE/ReferencePDFs/WPF 1.31";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/WPF 1.40";
 
         GbeFixture _fixture = null!;
         string? _testName;

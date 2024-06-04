@@ -2,6 +2,29 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0;net472</TargetFrameworks>
+    <DefineConstants>CORE</DefineConstants>
+    <!--
+    PDFsharp internal class RuntimeHelpers is visible in this assembly because of InternalsVisibleTo.
+    This conflics with mscorlib. -->
+    <NoWarn>CS1685,CS0436</NoWarn>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);TRACE;CORE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants);TRACE;CORE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472|AnyCPU'">
+    <Optimize>False</Optimize>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,8 +34,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="Build\CompilerServices.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper\PdfSharp.TestHelper.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets\PdfSharp.Snippets.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.Testing\PdfSharp.Testing.csproj" />
     <ProjectReference Include="..\..\src\PdfSharp.Charting\PdfSharp.Charting.csproj" />
     <ProjectReference Include="..\..\src\PdfSharp\PdfSharp.csproj" />
   </ItemGroup>

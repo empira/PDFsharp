@@ -501,7 +501,6 @@ namespace PdfSharp.Pdf.Advanced
             }
             catch (Exception /*ex*/)
             {
-                //ex.GetType();
                 return 0;
             }
         }
@@ -528,9 +527,8 @@ namespace PdfSharp.Pdf.Advanced
                 writer.FlushBuffer();
                 return writer.BytesWritten();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ex.GetType();
                 return 0;
             }
         }
@@ -709,7 +707,7 @@ namespace PdfSharp.Pdf.Advanced
 #endif
             if (bits + _bitsInBuffer > 8)
             {
-                // We can't add all bits this time.
+                // We can’t add all bits this time.
                 uint bitsNow = 8 - _bitsInBuffer;
                 uint bitsRemainder = bits - bitsNow;
                 WriteBits(value >> (int)(bitsRemainder), bitsNow); // Write what fits.

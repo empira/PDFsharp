@@ -185,7 +185,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Gets the text content of the cell's elements as a string.
+        /// Gets the text content of the cell’s elements as a string.
         /// </summary>
         /// <param name="cell">The cell.</param>
         /// <returns>Text content as string.</returns>
@@ -195,7 +195,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Gets the text content of the paragraph's elements as a string.
+        /// Gets the text content of the paragraph’s elements as a string.
         /// </summary>
         /// <param name="paragraph">The paragraph.</param>
         /// <returns>Text content as string.</returns>
@@ -205,7 +205,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Gets the text content of the hyperlinks's elements as a string.
+        /// Gets the text content of the hyperlinks’s elements as a string.
         /// </summary>
         /// <param name="hyperlink">The hyperlink.</param>
         /// <returns>Text content as string.</returns>
@@ -362,7 +362,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         /// <param name="emptyValue">The empty value to return if the value is not assigned or could not be determined.</param>
         public static T GetUsedFormatValue<T>(this DocumentObject documentObject, Func<ParagraphFormat, T> getValue, Func<T, bool> isEmpty, T emptyValue)
         {
-            // Won't work properly inside of tables, as the formats of table columns and rows are not considered as used value. Supplement this when needed.
+            // Won’t work properly inside of tables, as the formats of table columns and rows are not considered as used value. Supplement this when needed.
             T result;
 
             var format = documentObject.GetFormat();
@@ -391,7 +391,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             if (parent != null)
                 return GetUsedFormatValue(parent, getValue, isEmpty, emptyValue);
 
-            Debug.Assert(false);
+            Debug.Assert(documentObject is Document, "parent of documentObject should not be null, except for Document.");
             return emptyValue;
         }
 
@@ -412,7 +412,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         /// <param name="emptyValue">The empty value to return if the value is not assigned or could not be determined.</param>
         public static T GetUsedFormatValue<T>(this DocumentObject documentObject, Func<Font, T> getValue, Func<T, bool> isEmpty, T emptyValue)
         {
-            // Won't work properly inside of tables, as the formats of table columns and rows are not considered as used value. Supplement this when needed.
+            // Won’t work properly inside of tables, as the formats of table columns and rows are not considered as used value. Supplement this when needed.
             T result;
 
             var font = documentObject.GetFont();
@@ -440,8 +440,8 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             var parent = documentObject.Parent;
             if (parent != null)
                 return GetUsedFormatValue(parent, getValue, isEmpty, emptyValue);
-
-            Debug.Assert(false);
+            
+            Debug.Assert(documentObject is Document, "parent of documentObject should not be null, except for Document.");
             return emptyValue;
         }
     }

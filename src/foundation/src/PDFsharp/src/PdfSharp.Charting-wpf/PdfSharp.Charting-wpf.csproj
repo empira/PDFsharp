@@ -5,10 +5,9 @@
         <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <RootNamespace>PdfSharp.Charting</RootNamespace>
-        <!--<UseWPF>true</UseWPF> not needed -->
         <UseWPF>true</UseWPF>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>annotations</Nullable>
+        <SignAssembly>True</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -283,7 +282,7 @@
         <Compile Include="..\PdfSharp.Charting\Properties\GlobalDeclarations.cs">
             <Link>Properties\GlobalDeclarations.cs</Link>
         </Compile>
-        <Compile Include="..\pdfsharp\root\VersionInfo.cs">
+        <Compile Include="..\PdfSharp\root\VersionInfo.cs">
             <Link>root\VersionInfo.cs</Link>
         </Compile>
     </ItemGroup>

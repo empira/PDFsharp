@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.IO;
@@ -49,7 +49,7 @@ namespace PdfSharp.Pdf
             => _value ? bool.TrueString : bool.FalseString;
 
         /// <summary>
-        /// Writes the keyword «false» or «true».
+        /// Writes the keyword Â«falseÂ» or Â«trueÂ».
         /// </summary>
         internal override void WriteObject(PdfWriter writer)
         {

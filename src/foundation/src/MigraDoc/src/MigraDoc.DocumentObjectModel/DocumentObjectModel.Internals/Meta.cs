@@ -31,6 +31,10 @@ namespace MigraDoc.DocumentObjectModel.Internals
         {
 #if NET6_0_OR_GREATER
             int dot = name.IndexOf('.', StringComparison.Ordinal);
+#else
+            int dot = name.IndexOf(".", StringComparison.Ordinal);
+#endif
+#if NET6_0_OR_GREATER || true
             if (dot == 0)
                 throw new ArgumentException(DomSR.InvalidValueName(name));
             string? trail = null;
@@ -40,7 +44,6 @@ namespace MigraDoc.DocumentObjectModel.Internals
                 name = name[..dot];
             }
 #else
-            int dot = name.IndexOf(".", StringComparison.Ordinal);
             if (dot == 0)
                 throw new ArgumentException(DomSR.InvalidValueName(name));
             string? trail = null;
@@ -87,7 +90,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
             string? trail = null;
             if (dot > 0)
             {
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || true
                 trail = name[(dot + 1)..];
                 name = name[..dot];
 #else
@@ -160,7 +163,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
             string? trail = null;
             if (dot > 0)
             {
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER || true
                 trail = name[(dot + 1)..];
                 name = name[..dot];
 #else
@@ -280,11 +283,6 @@ namespace MigraDoc.DocumentObjectModel.Internals
 
             foreach (var propInfo in propInfos)
             {
-#if DEBUG_
-                string name = propInfo.Name;
-                if (name == "Font")
-                    name.GetType();
-#endif
                 DVAttribute? attr = null;
                 var dvs = (DVAttribute[])propInfo.GetCustomAttributes(typeof(DVAttribute), false);
                 if (dvs.Length == 1)

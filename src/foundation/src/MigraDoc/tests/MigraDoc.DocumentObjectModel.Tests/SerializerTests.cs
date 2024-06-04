@@ -1,11 +1,17 @@
-﻿using MigraDoc.DocumentObjectModel.IO;
-using FluentAssertions;
-using Xunit;
+﻿// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
 using MigraDoc.Rendering;
+using MigraDoc.DocumentObjectModel.IO;
 using MigraDoc.DocumentObjectModel.Tests.Helper;
+using Xunit;
+using FluentAssertions;
+using PdfSharp.Fonts;
+using PdfSharp.Snippets.Font;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
+    [Collection("PDFsharp")]
     public class SerializerTests
     {
         [Fact]
@@ -185,181 +191,205 @@ namespace MigraDoc.DocumentObjectModel.Tests
         [Fact]
         public void Test_WriteAndReadMdddl_String_and_DocumentObject()
         {
-            const string desiredValue = "segoe wp bold";
-            const string changedValue = "segoe wp light";
-            const string defaultValue = "";
-
-            var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
-
-            var styleName = "TestStyle";
-            doc.AddStyle(styleName, StyleNames.Normal);
-            var style = doc.Styles[styleName];
-            style.Should().NotBeNull();
-
-            // Set desired value in doc and write MDDDL.
-            style!.ParagraphFormat.Font.Name = desiredValue;
-            style.ParagraphFormat.Values.Font.Should().NotBeNull();
-            style.ParagraphFormat.Font.Values.Name.Should().Be(desiredValue);
-            style.ParagraphFormat.Font.Name.Should().Be(desiredValue);
-
-            var mdddl = DdlWriter.WriteToString(doc);
-            mdddl.Should().NotBeNullOrEmpty();
-
-            // Change value in doc.
-            style.ParagraphFormat.Font.Name = changedValue;
-            style.ParagraphFormat.Font.Values.Name.Should().Be(changedValue);
-            style.ParagraphFormat.Font.Name.Should().Be(changedValue);
-
-            // Read Mdddl and check if desired value is restored correctly.
-            var docRead = DdlReader.DocumentFromString(mdddl);
-
-            var styleRead = docRead.Styles[styleName];
-            styleRead.Should().NotBeNull();
-            styleRead!.ParagraphFormat.Font.Name.Should().Be(desiredValue);
-
-            // Assign Style to paragraph and check that the paragraph uses default value (and null in Values).
-            var section = docRead.AddSection();
-            var p = section.AddParagraph("Test", styleName);
-            p.Format.Values.Font.Should().BeNull();
-            p.Format.Font.Name.Should().Be(defaultValue);
-
-            // Initiate flattening and check that the paragraph uses the desired value.
-            var docReadRenderer = new PdfDocumentRenderer
+            PdfSharpCore.ResetAll();
+            try
             {
-                Document = docRead
-            };
-            docReadRenderer.PrepareRenderPages();
-            p.Format.Values.Font.Should().NotBeNull();
-            p.Format.Values.Font!.Name.Should().Be(desiredValue);
-            p.Format.Font.Name.Should().Be(desiredValue);
+                GlobalFontSettings.FontResolver = new SegoeWpFontResolver();
+                const string desiredValue = "segoe wp bold";
+                const string changedValue = "segoe wp light";
+                const string defaultValue = "";
+
+                var doc = new Document();
+
+                var styleName = "TestStyle";
+                doc.AddStyle(styleName, StyleNames.Normal);
+                var style = doc.Styles[styleName];
+                style.Should().NotBeNull();
+
+                // Set desired value in doc and write MDDDL.
+                style!.ParagraphFormat.Font.Name = desiredValue;
+                style.ParagraphFormat.Values.Font.Should().NotBeNull();
+                style.ParagraphFormat.Font.Values.Name.Should().Be(desiredValue);
+                style.ParagraphFormat.Font.Name.Should().Be(desiredValue);
+
+                var mdddl = DdlWriter.WriteToString(doc);
+                mdddl.Should().NotBeNullOrEmpty();
+
+                // Change value in doc.
+                style.ParagraphFormat.Font.Name = changedValue;
+                style.ParagraphFormat.Font.Values.Name.Should().Be(changedValue);
+                style.ParagraphFormat.Font.Name.Should().Be(changedValue);
+
+                // Read Mdddl and check if desired value is restored correctly.
+                var docRead = DdlReader.DocumentFromString(mdddl);
+
+                var styleRead = docRead.Styles[styleName];
+                styleRead.Should().NotBeNull();
+                styleRead!.ParagraphFormat.Font.Name.Should().Be(desiredValue);
+
+                // Assign Style to paragraph and check that the paragraph uses default value (and null in Values).
+                var section = docRead.AddSection();
+                var p = section.AddParagraph("Test", styleName);
+                p.Format.Values.Font.Should().BeNull();
+                p.Format.Font.Name.Should().Be(defaultValue);
+
+                // Initiate flattening and check that the paragraph uses the desired value.
+                var docReadRenderer = new PdfDocumentRenderer
+                {
+                    Document = docRead
+                };
+                docReadRenderer.PrepareRenderPages();
+                p.Format.Values.Font.Should().NotBeNull();
+                p.Format.Values.Font!.Name.Should().Be(desiredValue);
+                p.Format.Font.Name.Should().Be(desiredValue);
+            }
+            finally
+            {
+                PdfSharpCore.ResetAll();
+            }
         }
 
         [Fact]
         public void Test_WriteAndReadMdddl_String_and_DocumentObject_Inherited()
         {
-            const string defaultValue = "";
-            const string baseValue = "segoe wp bold";
-            const string changedValue = "segoe wp light";
-
-            var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
-
-            var baseStyleName = "TestStyleBase";
-            var baseStyle = doc.AddStyle(baseStyleName, StyleNames.Normal);
-            baseStyle.ParagraphFormat.Font.Name = baseValue;
-
-            var styleName = "TestStyle";
-            doc.AddStyle(styleName, baseStyleName);
-
-            // Set desired value in doc and write MDDDL.
-            var style = doc.Styles[styleName];
-            style.Should().NotBeNull();
-            style!.ParagraphFormat.Values.Font = null;
-            style.ParagraphFormat.Values.Font.Should().Be(null);
-            style.ParagraphFormat.Font.Name.Should().Be(defaultValue);
-
-            var mdddl = DdlWriter.WriteToString(doc);
-            mdddl.Should().NotBeNullOrEmpty();
-
-            // Change value in doc.
-            style.ParagraphFormat.Font.Name = changedValue;
-            style.ParagraphFormat.Values.Font.Should().NotBeNull();
-            style.ParagraphFormat.Values.Font!.Name.Should().Be(changedValue);
-            style.ParagraphFormat.Font.Name.Should().Be(changedValue);
-
-            // Read Mdddl and check if desired value is restored correctly.
-            var docRead = DdlReader.DocumentFromString(mdddl);
-
-            var baseStyleRead = docRead.Styles[baseStyleName];
-            baseStyleRead.Should().NotBeNull();
-            baseStyleRead!.ParagraphFormat.Font.Name.Should().Be(baseValue);
-
-            var styleRead = docRead.Styles[styleName];
-            styleRead.Should().NotBeNull();
-            styleRead!.ParagraphFormat.Values.Font.Should().Be(null);
-            styleRead.ParagraphFormat.Font.Name.Should().Be(defaultValue);
-
-            // Assign Style to paragraph and check that the paragraph uses default value (and null in Values).
-            var section = docRead.AddSection();
-            var p = section.AddParagraph("Test", styleName);
-            p.Format.Values.Font.Should().Be(null);
-            p.Format.Font.Name.Should().Be(defaultValue);
-
-            // Initiate flattening and check that the paragraph uses base value.
-            var docReadRenderer = new PdfDocumentRenderer
+            PdfSharpCore.ResetAll();
+            try
             {
-                Document = docRead
-            };
-            docReadRenderer.PrepareRenderPages();
-            p.Format.Values.Font.Should().NotBeNull();
-            p.Format.Values.Font!.Name.Should().Be(baseValue);
-            p.Format.Font.Name.Should().Be(baseValue);
+                GlobalFontSettings.FontResolver = new SegoeWpFontResolver();
+                const string defaultValue = "";
+                const string baseValue = "segoe wp bold";
+                const string changedValue = "segoe wp light";
+
+                var doc = new Document();
+
+                var baseStyleName = "TestStyleBase";
+                var baseStyle = doc.AddStyle(baseStyleName, StyleNames.Normal);
+                baseStyle.ParagraphFormat.Font.Name = baseValue;
+
+                var styleName = "TestStyle";
+                doc.AddStyle(styleName, baseStyleName);
+
+                // Set desired value in doc and write MDDDL.
+                var style = doc.Styles[styleName];
+                style.Should().NotBeNull();
+                style!.ParagraphFormat.Values.Font = null;
+                style.ParagraphFormat.Values.Font.Should().Be(null);
+                style.ParagraphFormat.Font.Name.Should().Be(defaultValue);
+
+                var mdddl = DdlWriter.WriteToString(doc);
+                mdddl.Should().NotBeNullOrEmpty();
+
+                // Change value in doc.
+                style.ParagraphFormat.Font.Name = changedValue;
+                style.ParagraphFormat.Values.Font.Should().NotBeNull();
+                style.ParagraphFormat.Values.Font!.Name.Should().Be(changedValue);
+                style.ParagraphFormat.Font.Name.Should().Be(changedValue);
+
+                // Read Mdddl and check if desired value is restored correctly.
+                var docRead = DdlReader.DocumentFromString(mdddl);
+
+                var baseStyleRead = docRead.Styles[baseStyleName];
+                baseStyleRead.Should().NotBeNull();
+                baseStyleRead!.ParagraphFormat.Font.Name.Should().Be(baseValue);
+
+                var styleRead = docRead.Styles[styleName];
+                styleRead.Should().NotBeNull();
+                styleRead!.ParagraphFormat.Values.Font.Should().Be(null);
+                styleRead.ParagraphFormat.Font.Name.Should().Be(defaultValue);
+
+                // Assign Style to paragraph and check that the paragraph uses default value (and null in Values).
+                var section = docRead.AddSection();
+                var p = section.AddParagraph("Test", styleName);
+                p.Format.Values.Font.Should().Be(null);
+                p.Format.Font.Name.Should().Be(defaultValue);
+
+                // Initiate flattening and check that the paragraph uses base value.
+                var docReadRenderer = new PdfDocumentRenderer
+                {
+                    Document = docRead
+                };
+                docReadRenderer.PrepareRenderPages();
+                p.Format.Values.Font.Should().NotBeNull();
+                p.Format.Values.Font!.Name.Should().Be(baseValue);
+                p.Format.Font.Name.Should().Be(baseValue);
+            }
+            finally
+            {
+                PdfSharpCore.ResetAll();
+            }
         }
 
         [Fact]
         public void Test_WriteAndReadMdddl_String_and_DocumentObject_Override_Inherited()
         {
-            const string defaultValue = "";
-            const string baseValue = "segoe wp bold";
-            const string desiredValue = "segoe wp black";
-            const string changedValue = "segoe wp light";
-
-            var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
-
-            var baseStyleName = "TestStyleBase";
-            var baseStyle = doc.AddStyle(baseStyleName, StyleNames.Normal);
-            baseStyle.ParagraphFormat.Font.Name = baseValue;
-
-            var styleName = "TestStyle";
-            doc.AddStyle(styleName, baseStyleName);
-
-            // Set desired value in doc and write MDDDL.
-            var style = doc.Styles[styleName];
-            style.Should().NotBeNull();
-            style!.ParagraphFormat.Font.Name = desiredValue;
-            style.ParagraphFormat.Values.Font.Should().NotBeNull();
-            style.ParagraphFormat.Values.Font!.Name.Should().Be(desiredValue);
-            style.ParagraphFormat.Font.Name.Should().Be(desiredValue);
-
-            var mdddl = DdlWriter.WriteToString(doc);
-            mdddl.Should().NotBeNullOrEmpty();
-
-            // Change value in doc.
-            style.ParagraphFormat.Font.Name = changedValue;
-            style.ParagraphFormat.Values.Font.Name.Should().Be(changedValue);
-            style.ParagraphFormat.Font.Name.Should().Be(changedValue);
-
-            // Read Mdddl and check if desired value is restored correctly.
-            var docRead = DdlReader.DocumentFromString(mdddl);
-
-            var baseStyleRead = docRead.Styles[baseStyleName];
-            baseStyleRead.Should().NotBeNull();
-            baseStyleRead!.ParagraphFormat.Font.Name.Should().Be(baseValue);
-
-            var styleRead = docRead.Styles[styleName];
-            styleRead.Should().NotBeNull();
-
-            styleRead!.ParagraphFormat.Values.Font.Should().NotBeNull();
-            styleRead.ParagraphFormat.Values.Font!.Name.Should().Be(desiredValue);
-            styleRead.ParagraphFormat.Font.Name.Should().Be(desiredValue);
-
-            // Assign Style to paragraph and check that the paragraph uses default value (and null in Values).
-            var section = docRead.AddSection();
-            var p = section.AddParagraph("Test", styleName);
-            p.Format.Values.Font.Should().Be(null);
-            p.Format.Font.Name.Should().Be(defaultValue);
-
-            // Initiate flattening and check that the paragraph uses the desired value.
-            var docReadRenderer = new PdfDocumentRenderer
+            PdfSharpCore.ResetAll();
+            try
             {
-                Document = docRead
-            };
-            docReadRenderer.PrepareRenderPages();
-            p.Format.Values.Font.Should().NotBeNull();
-            p.Format.Values.Font!.Name.Should().Be(desiredValue);
-            p.Format.Font.Name.Should().Be(desiredValue);
+                GlobalFontSettings.FontResolver = new SegoeWpFontResolver();
+                const string defaultValue = "";
+                const string baseValue = "segoe wp bold";
+                const string desiredValue = "segoe wp black";
+                const string changedValue = "segoe wp light";
+
+                var doc = new Document();
+
+                var baseStyleName = "TestStyleBase";
+                var baseStyle = doc.AddStyle(baseStyleName, StyleNames.Normal);
+                baseStyle.ParagraphFormat.Font.Name = baseValue;
+
+                var styleName = "TestStyle";
+                doc.AddStyle(styleName, baseStyleName);
+
+                // Set desired value in doc and write MDDDL.
+                var style = doc.Styles[styleName];
+                style.Should().NotBeNull();
+                style!.ParagraphFormat.Font.Name = desiredValue;
+                style.ParagraphFormat.Values.Font.Should().NotBeNull();
+                style.ParagraphFormat.Values.Font!.Name.Should().Be(desiredValue);
+                style.ParagraphFormat.Font.Name.Should().Be(desiredValue);
+
+                var mdddl = DdlWriter.WriteToString(doc);
+                mdddl.Should().NotBeNullOrEmpty();
+
+                // Change value in doc.
+                style.ParagraphFormat.Font.Name = changedValue;
+                style.ParagraphFormat.Values.Font.Name.Should().Be(changedValue);
+                style.ParagraphFormat.Font.Name.Should().Be(changedValue);
+
+                // Read Mdddl and check if desired value is restored correctly.
+                var docRead = DdlReader.DocumentFromString(mdddl);
+
+                var baseStyleRead = docRead.Styles[baseStyleName];
+                baseStyleRead.Should().NotBeNull();
+                baseStyleRead!.ParagraphFormat.Font.Name.Should().Be(baseValue);
+
+                var styleRead = docRead.Styles[styleName];
+                styleRead.Should().NotBeNull();
+
+                styleRead!.ParagraphFormat.Values.Font.Should().NotBeNull();
+                styleRead.ParagraphFormat.Values.Font!.Name.Should().Be(desiredValue);
+                styleRead.ParagraphFormat.Font.Name.Should().Be(desiredValue);
+
+                // Assign Style to paragraph and check that the paragraph uses default value (and null in Values).
+                var section = docRead.AddSection();
+                var p = section.AddParagraph("Test", styleName);
+                p.Format.Values.Font.Should().Be(null);
+                p.Format.Font.Name.Should().Be(defaultValue);
+
+                // Initiate flattening and check that the paragraph uses the desired value.
+                var docReadRenderer = new PdfDocumentRenderer
+                {
+                    Document = docRead
+                };
+                docReadRenderer.PrepareRenderPages();
+                p.Format.Values.Font.Should().NotBeNull();
+                p.Format.Values.Font!.Name.Should().Be(desiredValue);
+                p.Format.Font.Name.Should().Be(desiredValue);
+            }
+            finally
+            {
+                PdfSharpCore.ResetAll();
+            }
         }
 
         [Fact]
@@ -368,7 +398,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             const bool defaultValue = false;
 
             var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
 
             var styleName = "TestStyle";
             doc.AddStyle(styleName, StyleNames.Normal);
@@ -422,7 +451,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             const bool changedValue = false;
 
             var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
 
             var baseStyleName = "TestStyleBase";
             var baseStyle = doc.AddStyle(baseStyleName, StyleNames.Normal);
@@ -483,7 +511,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             const bool changedValue = false;
 
             var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
 
             var baseStyleName = "TestStyleBase";
             var baseStyle = doc.AddStyle(baseStyleName, StyleNames.Normal);
@@ -551,7 +578,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             desiredValue.Should().NotBe(Unit.Empty).And.NotBe(Unit.Empty);
 
             var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
 
             var styleName = "TestStyle";
             doc.AddStyle(styleName, StyleNames.Normal);
@@ -612,7 +638,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var changedValue = Unit.Zero;
 
             var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
 
             var baseStyleName = "TestStyleBase";
             var baseStyle = doc.AddStyle(baseStyleName, StyleNames.Normal);
@@ -682,7 +707,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var changedValue = Unit.Parse("32.1mm");
 
             var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
 
             var baseStyleName = "TestStyleBase";
             var baseStyle = doc.AddStyle(baseStyleName, StyleNames.Normal);
@@ -742,7 +766,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var changedValue = ParagraphAlignment.Center;
 
             var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
 
             var styleName = "TestStyle";
             doc.AddStyle(styleName, StyleNames.Normal);
@@ -799,7 +822,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var changedValue = ParagraphAlignment.Center;
 
             var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
 
             var baseStyleName = "TestStyleBase";
             var baseStyle = doc.AddStyle(baseStyleName, StyleNames.Normal);
@@ -860,7 +882,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var changedValue = ParagraphAlignment.Center;
 
             var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
 
             var baseStyleName = "TestStyleBase";
             var baseStyle = doc.AddStyle(baseStyleName, StyleNames.Normal);
@@ -916,190 +937,199 @@ namespace MigraDoc.DocumentObjectModel.Tests
         [Fact]
         public void Test_WriteAndReadMdddl_Style_Inheritance()
         {
-            var desiredAlignment = ParagraphAlignment.Right;
-            var desiredBorderRightWidth = Unit.Parse("1pt");
-            var desiredFirstLineIndent = Unit.Parse("1cm");
-            var desiredFontBold = true;
-            var desiredFontItalic = true;
-            var desiredFontName = "segoe wp bold";
-            var desiredLineSpacing = Unit.Parse("2.5mm");
-            var desiredLineSpacingRule = LineSpacingRule.AtLeast;
-            var desiredShadingColor = Color.Parse("#123456");
-            var desiredSpaceAfter = Unit.Parse("0.97in");
-
-            var baseAlignment = ParagraphAlignment.Center;
-            var baseBorderRightWidth = Unit.Parse("1.5pt");
-            var baseFirstLineIndent = Unit.Parse("1.5cm");
-            var baseFontBold = true;
-            var baseFontItalic = false;
-            var baseFontName = "segoe ui";
-            var baseLineSpacing = Unit.Parse("3.75mm");
-            var baseLineSpacingRule = LineSpacingRule.Exactly;
-            var baseShadingColor = Color.Parse("#654321");
-            var baseSpaceAfter = Unit.Parse("1.45in");
-            var baseLeftIndent = Unit.Parse("17mm");
-            var baseRightIndent = Unit.Parse("34mm");
-
-            var changedAlignment = ParagraphAlignment.Justify;
-            var changedBorderRightWidth = Unit.Parse("2pt");
-            var changedFirstLineIndent = Unit.Parse("2cm");
-            var changedFontBold = false;
-            var changedFontItalic = false;
-            var changedFontName = "segoe wp light";
-            var changedLineSpacing = Unit.Parse("5mm");
-            var changedLineSpacingRule = LineSpacingRule.Double;
-            var changedShadingColor = Color.Parse("#ABCDEF");
-            var changedSpaceAfter = Unit.Parse("1.94in");
-
-            var defaultAlignment = ParagraphAlignment.Left;
-            var defaultBorderRightWidth = Unit.Empty;
-            var defaultFirstLineIndent = Unit.Empty;
-            var defaultFontBold = false;
-            var defaultFontItalic = false;
-            var defaultFontName = "";
-            var defaultLineSpacing = Unit.Empty;
-            var defaultLineSpacingRule = LineSpacingRule.Single;
-            var defaultShadingColor = Color.Empty;
-            var defaultSpaceAfter = Unit.Empty;
-            var defaultLeftIndent = Unit.Empty;
-            var defaultRightIndent = Unit.Empty;
-
-            var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
-
-            var baseStyleName = "TestStyleBase";
-            var baseStyle = doc.AddStyle(baseStyleName, StyleNames.Normal);
-
-            baseStyle.ParagraphFormat.Alignment = baseAlignment;
-            baseStyle.ParagraphFormat.Borders = new Borders { Right = new Border { Width = baseBorderRightWidth } };
-            baseStyle.ParagraphFormat.FirstLineIndent = baseFirstLineIndent;
-            baseStyle.ParagraphFormat.Font.Bold = baseFontBold;
-            baseStyle.ParagraphFormat.Font.Italic = baseFontItalic;
-            baseStyle.ParagraphFormat.Font.Name = baseFontName;
-            baseStyle.ParagraphFormat.LineSpacing = baseLineSpacing;
-            baseStyle.ParagraphFormat.LineSpacingRule = baseLineSpacingRule;
-            baseStyle.ParagraphFormat.Shading = new Shading { Color = baseShadingColor };
-            baseStyle.ParagraphFormat.SpaceAfter = baseSpaceAfter;
-            baseStyle.ParagraphFormat.LeftIndent = baseLeftIndent;
-            baseStyle.ParagraphFormat.RightIndent = baseRightIndent;
-
-            var styleName = "TestStyle";
-            doc.AddStyle(styleName, baseStyleName);
-            var style = doc.Styles[styleName];
-            style.Should().NotBeNull();
-
-            // Set desired values in doc and write MDDDL.
-            style!.ParagraphFormat.Alignment = desiredAlignment;
-            style.ParagraphFormat.Borders = new Borders { Right = new Border { Width = desiredBorderRightWidth } };
-            style.ParagraphFormat.FirstLineIndent = desiredFirstLineIndent;
-            style.ParagraphFormat.Font.Bold = desiredFontBold;
-            style.ParagraphFormat.Font.Italic = desiredFontItalic;
-            style.ParagraphFormat.Font.Name = desiredFontName;
-            style.ParagraphFormat.LineSpacing = desiredLineSpacing;
-            style.ParagraphFormat.LineSpacingRule = desiredLineSpacingRule;
-            style.ParagraphFormat.Shading = new Shading { Color = desiredShadingColor };
-            style.ParagraphFormat.SpaceAfter = desiredSpaceAfter;
-
-            var mdddl = DdlWriter.WriteToString(doc);
-            mdddl.Should().NotBeNullOrEmpty();
-
-            // Change values in doc.
-            style.ParagraphFormat.Alignment = changedAlignment;
-            style.ParagraphFormat.Borders.Right.Width = changedBorderRightWidth;
-            style.ParagraphFormat.FirstLineIndent = changedFirstLineIndent;
-            style.ParagraphFormat.Font.Bold = changedFontBold;
-            style.ParagraphFormat.Font.Italic = changedFontItalic;
-            style.ParagraphFormat.Font.Name = changedFontName;
-            style.ParagraphFormat.LineSpacing = changedLineSpacing;
-            style.ParagraphFormat.LineSpacingRule = changedLineSpacingRule;
-            style.ParagraphFormat.Shading.Color = changedShadingColor;
-            style.ParagraphFormat.SpaceAfter = changedSpaceAfter;
-
-            // Read MDDDL and check if desired values are restored correctly.
-            var docRead = DdlReader.DocumentFromString(mdddl);
-
-            var baseStyleRead = docRead.Styles[baseStyleName];
-            baseStyleRead.Should().NotBeNull();
-            baseStyleRead!.ParagraphFormat.Alignment.Should().Be(baseAlignment);
-            baseStyleRead.ParagraphFormat.Borders.Right.Width.Should().Be(baseBorderRightWidth);
-            baseStyleRead.ParagraphFormat.FirstLineIndent.Should().Be(baseFirstLineIndent);
-            baseStyleRead.ParagraphFormat.Font.Bold.Should().Be(baseFontBold);
-            baseStyleRead.ParagraphFormat.Font.Italic.Should().Be(baseFontItalic);
-            baseStyleRead.ParagraphFormat.Font.Name.Should().Be(baseFontName);
-            baseStyleRead.ParagraphFormat.LineSpacing.Should().Be(baseLineSpacing);
-            baseStyleRead.ParagraphFormat.LineSpacingRule.Should().Be(baseLineSpacingRule);
-            baseStyleRead.ParagraphFormat.Shading.Color.Should().Be(baseShadingColor);
-            baseStyleRead.ParagraphFormat.SpaceAfter.Should().Be(baseSpaceAfter);
-
-            var styleRead = docRead.Styles[styleName];
-            styleRead.Should().NotBeNull();
-            styleRead!.ParagraphFormat.Alignment.Should().Be(desiredAlignment);
-            styleRead.ParagraphFormat.Borders.Right.Width.Should().Be(desiredBorderRightWidth);
-            styleRead.ParagraphFormat.FirstLineIndent.Should().Be(desiredFirstLineIndent);
-            // Font.Bold is optimized away in MDDDL but will be available again after flattening.
-            styleRead.ParagraphFormat.Font.Values.Bold.Should().BeNull();
-            styleRead.ParagraphFormat.Font.Italic.Should().Be(desiredFontItalic);
-            styleRead.ParagraphFormat.Font.Name.Should().Be(desiredFontName);
-            styleRead.ParagraphFormat.LineSpacing.Should().Be(desiredLineSpacing);
-            styleRead.ParagraphFormat.LineSpacingRule.Should().Be(desiredLineSpacingRule);
-            styleRead.ParagraphFormat.Shading.Color.Should().Be(desiredShadingColor);
-            styleRead.ParagraphFormat.SpaceAfter.Should().Be(desiredSpaceAfter);
-            // Indents will be inherited after flattening.
-            styleRead.ParagraphFormat.Values.LeftIndent.Should().BeNull();
-            styleRead.ParagraphFormat.LeftIndent.Should().Be(defaultLeftIndent);
-            styleRead.ParagraphFormat.Values.RightIndent.Should().BeNull();
-            styleRead.ParagraphFormat.RightIndent.Should().Be(defaultRightIndent);
-
-            // Assign style to paragraph and check that the paragraph uses default value (and null in Values)
-            var section = docRead.AddSection();
-            var p = section.AddParagraph("Test", styleName);
-            p.Format.Values.Alignment.Should().BeNull();
-            p.Format.Alignment.Should().Be(defaultAlignment);
-            p.Format.Values.Borders.Should().BeNull();
-            p.Format.Borders.Right.Width.Should().Be(defaultBorderRightWidth);
-            p.Format.Values.FirstLineIndent.Should().BeNull();
-            p.Format.FirstLineIndent.Should().Be(defaultFirstLineIndent);
-            p.Format.Values.Font.Should().BeNull();
-            p.Format.Font.Bold.Should().Be(defaultFontBold);
-            p.Format.Font.Italic.Should().Be(defaultFontItalic);
-            p.Format.Font.Name.Should().Be(defaultFontName);
-            p.Format.Values.LineSpacing.Should().BeNull();
-            p.Format.LineSpacing.Should().Be(defaultLineSpacing);
-            p.Format.Values.LineSpacingRule.Should().BeNull();
-            p.Format.LineSpacingRule.Should().Be(defaultLineSpacingRule);
-            p.Format.Values.Shading.Should().BeNull();
-            p.Format.Shading.Color.Should().Be(defaultShadingColor);
-            p.Format.Values.SpaceAfter.Should().BeNull();
-            p.Format.SpaceAfter.Should().Be(defaultSpaceAfter);
-
-            // Initiate flattening and check that the paragraph uses the desired values.
-            var docReadRenderer = new PdfDocumentRenderer
+            PdfSharpCore.ResetAll();
+            try
             {
-                Document = docRead
-            };
-            docReadRenderer.PrepareRenderPages();
-            p.Format.Values.Alignment.Should().NotBeNull();
-            p.Format.Alignment.Should().Be(desiredAlignment);
-            p.Format.Values.Borders.Should().NotBeNull();
-            p.Format.Values.Borders!.Values.Right.Should().NotBeNull();
-            p.Format.Values.Borders.Values.Right!.Values.Width.Should().NotBeNull();
-            p.Format.Borders.Right.Width.Should().Be(desiredBorderRightWidth);
-            p.Format.Values.FirstLineIndent.Should().NotBeNull();
-            p.Format.FirstLineIndent.Should().Be(desiredFirstLineIndent);
-            p.Format.Values.Font.Should().NotBeNull();
-            p.Format.Font.Bold.Should().Be(desiredFontBold);
-            p.Format.Font.Italic.Should().Be(desiredFontItalic);
-            p.Format.Font.Name.Should().Be(desiredFontName);
-            p.Format.Values.LineSpacing.Should().NotBeNull();
-            p.Format.LineSpacing.Should().Be(desiredLineSpacing);
-            p.Format.Values.LineSpacingRule.Should().NotBeNull();
-            p.Format.LineSpacingRule.Should().Be(desiredLineSpacingRule);
-            p.Format.Values.Shading.Should().NotBeNull();
-            p.Format.Shading.Color.Should().Be(desiredShadingColor);
-            p.Format.Values.SpaceAfter.Should().NotBeNull();
-            p.Format.SpaceAfter.Should().Be(desiredSpaceAfter);
-            p.Format.LeftIndent.Should().Be(baseLeftIndent);
-            p.Format.RightIndent.Should().Be(baseRightIndent);
+                GlobalFontSettings.FontResolver = new SegoeWpFontResolver();
+
+                var desiredAlignment = ParagraphAlignment.Right;
+                var desiredBorderRightWidth = Unit.Parse("1pt");
+                var desiredFirstLineIndent = Unit.Parse("1cm");
+                var desiredFontBold = true;
+                var desiredFontItalic = true;
+                var desiredFontName = "segoe wp bold";
+                var desiredLineSpacing = Unit.Parse("2.5mm");
+                var desiredLineSpacingRule = LineSpacingRule.AtLeast;
+                var desiredShadingColor = Color.Parse("#123456");
+                var desiredSpaceAfter = Unit.Parse("0.97in");
+
+                var baseAlignment = ParagraphAlignment.Center;
+                var baseBorderRightWidth = Unit.Parse("1.5pt");
+                var baseFirstLineIndent = Unit.Parse("1.5cm");
+                var baseFontBold = true;
+                var baseFontItalic = false;
+                var baseFontName = "segoe ui";
+                var baseLineSpacing = Unit.Parse("3.75mm");
+                var baseLineSpacingRule = LineSpacingRule.Exactly;
+                var baseShadingColor = Color.Parse("#654321");
+                var baseSpaceAfter = Unit.Parse("1.45in");
+                var baseLeftIndent = Unit.Parse("17mm");
+                var baseRightIndent = Unit.Parse("34mm");
+
+                var changedAlignment = ParagraphAlignment.Justify;
+                var changedBorderRightWidth = Unit.Parse("2pt");
+                var changedFirstLineIndent = Unit.Parse("2cm");
+                var changedFontBold = false;
+                var changedFontItalic = false;
+                var changedFontName = "segoe wp light";
+                var changedLineSpacing = Unit.Parse("5mm");
+                var changedLineSpacingRule = LineSpacingRule.Double;
+                var changedShadingColor = Color.Parse("#ABCDEF");
+                var changedSpaceAfter = Unit.Parse("1.94in");
+
+                var defaultAlignment = ParagraphAlignment.Left;
+                var defaultBorderRightWidth = Unit.Empty;
+                var defaultFirstLineIndent = Unit.Empty;
+                var defaultFontBold = false;
+                var defaultFontItalic = false;
+                var defaultFontName = "";
+                var defaultLineSpacing = Unit.Empty;
+                var defaultLineSpacingRule = LineSpacingRule.Single;
+                var defaultShadingColor = Color.Empty;
+                var defaultSpaceAfter = Unit.Empty;
+                var defaultLeftIndent = Unit.Empty;
+                var defaultRightIndent = Unit.Empty;
+
+                var doc = new Document();
+
+                var baseStyleName = "TestStyleBase";
+                var baseStyle = doc.AddStyle(baseStyleName, StyleNames.Normal);
+
+                baseStyle.ParagraphFormat.Alignment = baseAlignment;
+                baseStyle.ParagraphFormat.Borders = new Borders { Right = new Border { Width = baseBorderRightWidth } };
+                baseStyle.ParagraphFormat.FirstLineIndent = baseFirstLineIndent;
+                baseStyle.ParagraphFormat.Font.Bold = baseFontBold;
+                baseStyle.ParagraphFormat.Font.Italic = baseFontItalic;
+                baseStyle.ParagraphFormat.Font.Name = baseFontName;
+                baseStyle.ParagraphFormat.LineSpacing = baseLineSpacing;
+                baseStyle.ParagraphFormat.LineSpacingRule = baseLineSpacingRule;
+                baseStyle.ParagraphFormat.Shading = new Shading { Color = baseShadingColor };
+                baseStyle.ParagraphFormat.SpaceAfter = baseSpaceAfter;
+                baseStyle.ParagraphFormat.LeftIndent = baseLeftIndent;
+                baseStyle.ParagraphFormat.RightIndent = baseRightIndent;
+
+                var styleName = "TestStyle";
+                doc.AddStyle(styleName, baseStyleName);
+                var style = doc.Styles[styleName];
+                style.Should().NotBeNull();
+
+                // Set desired values in doc and write MDDDL.
+                style!.ParagraphFormat.Alignment = desiredAlignment;
+                style.ParagraphFormat.Borders = new Borders { Right = new Border { Width = desiredBorderRightWidth } };
+                style.ParagraphFormat.FirstLineIndent = desiredFirstLineIndent;
+                style.ParagraphFormat.Font.Bold = desiredFontBold;
+                style.ParagraphFormat.Font.Italic = desiredFontItalic;
+                style.ParagraphFormat.Font.Name = desiredFontName;
+                style.ParagraphFormat.LineSpacing = desiredLineSpacing;
+                style.ParagraphFormat.LineSpacingRule = desiredLineSpacingRule;
+                style.ParagraphFormat.Shading = new Shading { Color = desiredShadingColor };
+                style.ParagraphFormat.SpaceAfter = desiredSpaceAfter;
+
+                var mdddl = DdlWriter.WriteToString(doc);
+                mdddl.Should().NotBeNullOrEmpty();
+
+                // Change values in doc.
+                style.ParagraphFormat.Alignment = changedAlignment;
+                style.ParagraphFormat.Borders.Right.Width = changedBorderRightWidth;
+                style.ParagraphFormat.FirstLineIndent = changedFirstLineIndent;
+                style.ParagraphFormat.Font.Bold = changedFontBold;
+                style.ParagraphFormat.Font.Italic = changedFontItalic;
+                style.ParagraphFormat.Font.Name = changedFontName;
+                style.ParagraphFormat.LineSpacing = changedLineSpacing;
+                style.ParagraphFormat.LineSpacingRule = changedLineSpacingRule;
+                style.ParagraphFormat.Shading.Color = changedShadingColor;
+                style.ParagraphFormat.SpaceAfter = changedSpaceAfter;
+
+                // Read MDDDL and check if desired values are restored correctly.
+                var docRead = DdlReader.DocumentFromString(mdddl);
+
+                var baseStyleRead = docRead.Styles[baseStyleName];
+                baseStyleRead.Should().NotBeNull();
+                baseStyleRead!.ParagraphFormat.Alignment.Should().Be(baseAlignment);
+                baseStyleRead.ParagraphFormat.Borders.Right.Width.Should().Be(baseBorderRightWidth);
+                baseStyleRead.ParagraphFormat.FirstLineIndent.Should().Be(baseFirstLineIndent);
+                baseStyleRead.ParagraphFormat.Font.Bold.Should().Be(baseFontBold);
+                baseStyleRead.ParagraphFormat.Font.Italic.Should().Be(baseFontItalic);
+                baseStyleRead.ParagraphFormat.Font.Name.Should().Be(baseFontName);
+                baseStyleRead.ParagraphFormat.LineSpacing.Should().Be(baseLineSpacing);
+                baseStyleRead.ParagraphFormat.LineSpacingRule.Should().Be(baseLineSpacingRule);
+                baseStyleRead.ParagraphFormat.Shading.Color.Should().Be(baseShadingColor);
+                baseStyleRead.ParagraphFormat.SpaceAfter.Should().Be(baseSpaceAfter);
+
+                var styleRead = docRead.Styles[styleName];
+                styleRead.Should().NotBeNull();
+                styleRead!.ParagraphFormat.Alignment.Should().Be(desiredAlignment);
+                styleRead.ParagraphFormat.Borders.Right.Width.Should().Be(desiredBorderRightWidth);
+                styleRead.ParagraphFormat.FirstLineIndent.Should().Be(desiredFirstLineIndent);
+                // Font.Bold is optimized away in MDDDL but will be available again after flattening.
+                styleRead.ParagraphFormat.Font.Values.Bold.Should().BeNull();
+                styleRead.ParagraphFormat.Font.Italic.Should().Be(desiredFontItalic);
+                styleRead.ParagraphFormat.Font.Name.Should().Be(desiredFontName);
+                styleRead.ParagraphFormat.LineSpacing.Should().Be(desiredLineSpacing);
+                styleRead.ParagraphFormat.LineSpacingRule.Should().Be(desiredLineSpacingRule);
+                styleRead.ParagraphFormat.Shading.Color.Should().Be(desiredShadingColor);
+                styleRead.ParagraphFormat.SpaceAfter.Should().Be(desiredSpaceAfter);
+                // Indents will be inherited after flattening.
+                styleRead.ParagraphFormat.Values.LeftIndent.Should().BeNull();
+                styleRead.ParagraphFormat.LeftIndent.Should().Be(defaultLeftIndent);
+                styleRead.ParagraphFormat.Values.RightIndent.Should().BeNull();
+                styleRead.ParagraphFormat.RightIndent.Should().Be(defaultRightIndent);
+
+                // Assign style to paragraph and check that the paragraph uses default value (and null in Values)
+                var section = docRead.AddSection();
+                var p = section.AddParagraph("Test", styleName);
+                p.Format.Values.Alignment.Should().BeNull();
+                p.Format.Alignment.Should().Be(defaultAlignment);
+                p.Format.Values.Borders.Should().BeNull();
+                p.Format.Borders.Right.Width.Should().Be(defaultBorderRightWidth);
+                p.Format.Values.FirstLineIndent.Should().BeNull();
+                p.Format.FirstLineIndent.Should().Be(defaultFirstLineIndent);
+                p.Format.Values.Font.Should().BeNull();
+                p.Format.Font.Bold.Should().Be(defaultFontBold);
+                p.Format.Font.Italic.Should().Be(defaultFontItalic);
+                p.Format.Font.Name.Should().Be(defaultFontName);
+                p.Format.Values.LineSpacing.Should().BeNull();
+                p.Format.LineSpacing.Should().Be(defaultLineSpacing);
+                p.Format.Values.LineSpacingRule.Should().BeNull();
+                p.Format.LineSpacingRule.Should().Be(defaultLineSpacingRule);
+                p.Format.Values.Shading.Should().BeNull();
+                p.Format.Shading.Color.Should().Be(defaultShadingColor);
+                p.Format.Values.SpaceAfter.Should().BeNull();
+                p.Format.SpaceAfter.Should().Be(defaultSpaceAfter);
+
+                // Initiate flattening and check that the paragraph uses the desired values.
+                var docReadRenderer = new PdfDocumentRenderer
+                {
+                    Document = docRead
+                };
+                docReadRenderer.PrepareRenderPages();
+                p.Format.Values.Alignment.Should().NotBeNull();
+                p.Format.Alignment.Should().Be(desiredAlignment);
+                p.Format.Values.Borders.Should().NotBeNull();
+                p.Format.Values.Borders!.Values.Right.Should().NotBeNull();
+                p.Format.Values.Borders.Values.Right!.Values.Width.Should().NotBeNull();
+                p.Format.Borders.Right.Width.Should().Be(desiredBorderRightWidth);
+                p.Format.Values.FirstLineIndent.Should().NotBeNull();
+                p.Format.FirstLineIndent.Should().Be(desiredFirstLineIndent);
+                p.Format.Values.Font.Should().NotBeNull();
+                p.Format.Font.Bold.Should().Be(desiredFontBold);
+                p.Format.Font.Italic.Should().Be(desiredFontItalic);
+                p.Format.Font.Name.Should().Be(desiredFontName);
+                p.Format.Values.LineSpacing.Should().NotBeNull();
+                p.Format.LineSpacing.Should().Be(desiredLineSpacing);
+                p.Format.Values.LineSpacingRule.Should().NotBeNull();
+                p.Format.LineSpacingRule.Should().Be(desiredLineSpacingRule);
+                p.Format.Values.Shading.Should().NotBeNull();
+                p.Format.Shading.Color.Should().Be(desiredShadingColor);
+                p.Format.Values.SpaceAfter.Should().NotBeNull();
+                p.Format.SpaceAfter.Should().Be(desiredSpaceAfter);
+                p.Format.LeftIndent.Should().Be(baseLeftIndent);
+                p.Format.RightIndent.Should().Be(baseRightIndent);
+            }
+            finally
+            {
+                PdfSharpCore.ResetAll();
+            }
         }
 
         [Theory] // Generate Section with no, one and two paragraphs, to use and avoid direct paragraph content in section.
@@ -1109,7 +1139,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Test_WriteAndReadMdddl_Section_Header_Empty_And_Paragraphs(int paragraphCount)
         {
             var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
 
             TestHelper.RemoveStyles(doc);
 
@@ -1166,7 +1195,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Test_WriteAndReadMdddl_Section_Header_Empty_Cleared_And_Paragraphs(int paragraphCount)
         {
             var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
 
             TestHelper.RemoveStyles(doc);
 
@@ -1235,7 +1263,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Test_WriteAndReadMdddl_Section_Header_Not_Empty_And_Paragraphs(int paragraphCount)
         {
             var doc = new Document();
-            TestHelper.InitializeFontResolverWithSegoeWpAsDefault(doc);
 
             TestHelper.RemoveStyles(doc);
 
@@ -1308,7 +1335,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var mdddl = DdlWriter.WriteToString(doc);
             mdddl.Should().NotBeNullOrEmpty();
 
-            mdddl = """" 
+            mdddl = """ 
                 \document
                 {
                     \section
@@ -1319,14 +1346,10 @@ namespace MigraDoc.DocumentObjectModel.Tests
                       //}
                     }
                 }
-                """";
-
-            //GetType();
+                """;
 
             // Read MDDDL.
             var docRead = DdlReader.DocumentFromString(mdddl);
-
-            //GetType();
         }
 
         [Fact(Skip = "Escaping bug in current implementation")]
@@ -1362,13 +1385,9 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var mdddl = DdlWriter.WriteToString(doc);
             mdddl.Should().NotBeNullOrEmpty();
 
-            //GetType();
-
             // Read MDDDL.
             var docRead = DdlReader.DocumentFromString(mdddl);
             docRead.Should().NotBeNull();
-
-            //GetType();
         }
 
         [Fact(Skip = "Escaping bug in current implementation")]
@@ -1390,15 +1409,10 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var mdddl = DdlWriter.WriteToString(doc);
             mdddl.Should().NotBeNullOrEmpty();
 
-            //GetType();
-
             // Read MDDDL.
             // Throws exception "DdlParserException" with message "Newline in string not allowed.".
             // Exception should be thrown in DdlWriter or linefeed should be escaped.
             var docRead = DdlReader.DocumentFromString(mdddl);
-
-            //GetType();
         }
-
     }
 }

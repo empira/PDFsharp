@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System;
@@ -119,7 +119,7 @@ namespace PdfSharp.Pdf.Actions
                 currentElementsObject = target.Elements;
             }
 
-            // The destination is the last segment of the path. It has to be saved in the embedded GoTo-Action's Elements.
+            // The destination is the last segment of the path. It has to be saved in the embedded GoTo-Action’s Elements.
             var destination = segments[segments.Length - 1];
             Elements.SetString(Keys.D, destination);
         }
@@ -152,7 +152,7 @@ namespace PdfSharp.Pdf.Actions
             public const string F = "/F";
 
             /// <summary>
-            /// (Required) The destination in the target to jump to (see Section 8.2.1, �Destinations�).
+            /// (Required) The destination in the target to jump to (see Section 8.2.1, “Destinations”).
             /// </summary>
             [KeyInfo(KeyType.Name | KeyType.ByteString | KeyType.Array | KeyType.Required)]
             public const string D = "/D";

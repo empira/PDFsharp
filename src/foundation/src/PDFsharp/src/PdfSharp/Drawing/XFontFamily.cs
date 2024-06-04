@@ -11,6 +11,7 @@ using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfFontStyle = System.Windows.FontStyle;
 #endif
 using PdfSharp.Fonts;
+using PdfSharp.Fonts.Internal;
 using PdfSharp.Fonts.OpenType;
 
 namespace PdfSharp.Drawing

@@ -2,17 +2,16 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics;
-using System.IO;
-#if !SILVERLIGHT
 using System.Drawing;
+using Microsoft.Extensions.Logging;
 #if !NETSTANDARD2_0_OR_GREATER
 using System.Drawing.Imaging;
 #endif
-#endif
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Shapes.Charts;
-//using MigraDoc.Rendering;
+using MigraDoc.Logging;
 using MigraDoc.RtfRendering.Resources;
+using PdfSharp.Events;
 #if WPF
 using PdfSharp.Drawing;
 using MigraDoc.Rendering;
@@ -43,12 +42,14 @@ namespace MigraDoc.RtfRendering
                 return;
 
             bool renderInParagraph = RenderInParagraph();
-            var elms = DocumentRelations.GetParent(_chart) as DocumentElements;
-            if (elms != null && !renderInParagraph && !(DocumentRelations.GetParent(elms) is Section || DocumentRelations.GetParent(elms) is HeaderFooter))
+
+            if (DocumentRelations.GetParent(_chart) is DocumentElements elms && !renderInParagraph && !(DocumentRelations.GetParent(elms) is Section || DocumentRelations.GetParent(elms) is HeaderFooter))
             {
-                Debug.WriteLine(Messages2.ChartFreelyPlacedInWrongContext, "warning");
+                MigraDocLogHost.RtfRenderingLogger.LogWarning(Messages2.ChartFreelyPlacedInWrongContext);
+                //Debug.WriteLine(Messages2.ChartFreelyPlacedInWrongContext, "warning");
                 return;
             }
+
             if (renderInParagraph)
                 StartDummyParagraph();
 
@@ -187,7 +188,7 @@ namespace MigraDoc.RtfRendering
                 Bitmap bmp = new Bitmap(horzPixels, vertPixels);
 #if true
                 XGraphics gfx =
-                    XGraphics.CreateMeasureContext(new XSize(horzPixels, vertPixels), XGraphicsUnit.Point, XPageDirection.Downwards);
+                    XGraphics.CreateMeasureContext(new XSize(horzPixels, vertPixels), XGraphicsUnit.Point, XPageDirection.Downwards, new RenderEvents());
 #else
 #if GDI
                 XGraphics gfx = XGraphics.FromGraphics(Graphics.FromImage(bmp), new XSize(horzPixels, vertPixels));
@@ -323,7 +324,8 @@ namespace MigraDoc.RtfRendering
             }
             catch
             {
-                Debug.WriteLine("Chart image file not read", "warning");
+                MigraDocLogHost.RtfRenderingLogger.LogError("Chart image file not read");
+                //Debug.WriteLine("Chart image file not read", "warning");
             }
             finally
             {

@@ -30,7 +30,7 @@ namespace PdfSharp.Snippets.Drawing
 
             BeginBox(gfx, 2, BoxOptions.Tile);
             {
-                // This JPEG didn't work under Windows 7 and higher with PDFsharp 1.32 - should work now.
+                // This JPEG didn’t work under Windows 7 and higher with PDFsharp 1.32 - should work now.
                 var img = ImageHelper.GetJpegImage(ImageHelper.JpegImages.Windows7Problem);
                 gfx.DrawImage(img, 28, 18, 152, 114);
             }
@@ -146,10 +146,9 @@ namespace PdfSharp.Snippets.Drawing
 
             BeginBox(gfx, 8, BoxOptions.Tile);
             {
-//#warning TODO Duplicate test.
-                // GIF test.
+                // Same GIF test as in box 7.
                 var img = ImageHelper.GetGifImage(ImageHelper.GifImages.Image009);
-                gfx.DrawImage(img, 28, 18, 152, 152 * 82 / 683);
+                gfx.DrawImage(img, 28, 18, 152, 152 * 82 / 683d);
             }
             EndBox(gfx);
         }

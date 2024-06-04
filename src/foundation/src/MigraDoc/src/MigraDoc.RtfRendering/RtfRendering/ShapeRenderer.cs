@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System;
@@ -104,7 +104,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Renders the shape's Left attribute by setting the \posv, \shptop and \shpbottom RTF controls.
+        /// Renders the shape’s Left attribute by setting the \posv, \shptop and \shpbottom RTF controls.
         /// </summary>
         protected void RenderTopPosition()
         {
@@ -138,7 +138,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Renders the shape's Left attribute by setting the \posh, \shpleft and \shpright RTF controls.
+        /// Renders the shape’s Left attribute by setting the \posh, \shpleft and \shpright RTF controls.
         /// </summary>
         protected void RenderLeftPosition()
         {
@@ -202,7 +202,7 @@ namespace MigraDoc.RtfRendering
             {
 
                 var docObjects = DocumentRelations.GetParent(_shape) as DocumentObjectCollection;
-                if (DocumentRelations.GetParent(docObjects) is Paragraph)//don't embed it twice!
+                if (DocumentRelations.GetParent(docObjects) is Paragraph) // Don’t embed it twice!
                     return false;
 
                 return _shape.Values.WrapFormat.IsValueNullOrEmpty() || _shape.WrapFormat.Values.Style is null || _shape.WrapFormat.Style == WrapStyle.TopBottom;
@@ -212,7 +212,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Renders the dummy paragraph's attributes.
+        /// Renders the dummy paragraph’s attributes.
         /// </summary>
         protected virtual void RenderParagraphAttributes()
         {
@@ -226,7 +226,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Renders the dummy paragraph's space before and space after attributes.
+        /// Renders the dummy paragraph’s space before and space after attributes.
         /// </summary>
         void RenderParagraphDistances()
         {
@@ -243,7 +243,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Renders the dummy paragraph's Alignment taking into account the shape's Left property.
+        /// Renders the dummy paragraph’s Alignment taking into account the shape’s Left property.
         /// </summary>
         void RenderParagraphAlignment()
         {
@@ -356,7 +356,7 @@ namespace MigraDoc.RtfRendering
             {
                 Translate("WrapFormat.Style", "shpwr", RtfUnit.Undefined, "3", false);
 
-                //REM: Distances don't work using them like this:
+                //REM: Distances don’t work using them like this:
                 /*
                 TranslateAsNameValuePair("WrapFormat.DistanceTop", "dyWrapDistTop", RtfUnit.EMU, null);
                 TranslateAsNameValuePair("WrapFormat.DistanceBottom", "dyWrapDistBottom", RtfUnit.EMU, null);
@@ -373,7 +373,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Renders the dummy paragraph's left indent.
+        /// Renders the dummy paragraph’s left indent.
         /// </summary>
         void RenderParagraphIndents()
         {
@@ -386,14 +386,14 @@ namespace MigraDoc.RtfRendering
                 Unit leftPgMrg = (Unit)parentSec.PageSetup.Values.LeftMargin!; // Re "!": Not null after visiting.
                 leftInd = -leftPgMrg.Point;
                 Unit rightPgMrg = (Unit)parentSec.PageSetup.Values.RightMargin!;
-                rightInd = -rightPgMrg;
+                rightInd = -rightPgMrg.Point;
             }
 
             LeftPosition leftPos = (LeftPosition)GetValueOrDefault("Left", new LeftPosition());
             switch (leftPos.ShapePosition)
             {
                 case ShapePosition.Undefined:
-                    leftInd += leftPos.Position;
+                    leftInd += leftPos.Position.Point;
                     leftInd += ((Unit)GetValueOrDefault("WrapFormat.DistanceLeft", (Unit)0)).Point;
                     break;
 
@@ -467,29 +467,29 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         void AlignVertically(ShapePosition shpPos, Unit distanceTopBottom, out Unit topValue, out Unit bottomValue)
         {
-            double height = GetShapeHeight().Point;
+            double heightPt = GetShapeHeight().Point;
             topValue = 0;
-            bottomValue = height;
+            bottomValue = heightPt;
             Unit topWrap = (Unit)GetValueOrDefault("WrapFormat.DistanceTop", (Unit)0);
             Unit bottomWrap = (Unit)GetValueOrDefault("WrapFormat.DistanceBottom", (Unit)0);
             switch (shpPos)
             {
                 case ShapePosition.Bottom:
-                    topValue = distanceTopBottom - height - bottomWrap;
+                    topValue = distanceTopBottom - heightPt - bottomWrap;
                     bottomValue = distanceTopBottom - bottomWrap;
                     break;
 
                 case ShapePosition.Center:
                     {
                         Unit centerPos = distanceTopBottom / 2.0;
-                        topValue = centerPos - height / 2.0;
-                        bottomValue = centerPos + height / 2.0;
+                        topValue = Unit.FromPoint(centerPos.Point - heightPt / 2.0);
+                        bottomValue = Unit.FromPoint(centerPos.Point + heightPt / 2.0);
                     }
                     break;
 
                 case ShapePosition.Top:
                     topValue = topWrap;
-                    bottomValue = topWrap + height;
+                    bottomValue = topWrap + heightPt;
                     break;
             }
         }
@@ -556,7 +556,7 @@ namespace MigraDoc.RtfRendering
             switch (shpPos)
             {
                 case ShapePosition.Right:
-                //Positioning the shape Outside seems impossible=>Do the best that's possible.
+                //Positioning the shape Outside seems impossible=>Do the best that’s possible.
                 case ShapePosition.Outside:
                     leftValue = distanceLeftRight.Point - width - rightWrap;
                     rightValue = distanceLeftRight - rightWrap;
@@ -571,7 +571,7 @@ namespace MigraDoc.RtfRendering
                     break;
 
                 case ShapePosition.Left:
-                //Positioning the shape inside seems impossible=>Do the best that's possible.
+                //Positioning the shape inside seems impossible=>Do the best that’s possible.
                 case ShapePosition.Inside:
                     leftValue = leftWrap;
                     rightValue = leftWrap + width;
@@ -590,7 +590,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Renders name as the beginning of a shape's name value pair to RTF.
+        /// Renders name as the beginning of a shape’s name value pair to RTF.
         /// Used in the order StartNameValuePair &lt;value rendering&gt; EndNameValuePair.
         /// </summary>
         protected void StartNameValuePair(string name)
@@ -606,7 +606,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Renders the end of a shape's name value pair.
+        /// Renders the end of a shape’s name value pair.
         /// Used in the order StartNameValuePair &lt;value rendering&gt; EndNameValuePair.
         /// </summary>
         protected void EndNameValuePair()
@@ -616,7 +616,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Translates a value as a shape's name value pair to RTF.
+        /// Translates a value as a shape’s name value pair to RTF.
         /// </summary>
         protected void TranslateAsNameValuePair(string domValueName, string rtfName, RtfUnit unit, string? defaultValue)
         {
@@ -634,7 +634,7 @@ namespace MigraDoc.RtfRendering
                 else if (val is Color col)
                 {
                     col = col.GetMixedTransparencyColor();
-                    valueStr = (col.R + (col.G * 256) + (col.B * 65536)).ToString();
+                    valueStr = (col.R + (col.G << 8) + (col.B << 16)).ToString();
                 }
                 else if (val is Enum)
                     valueStr = _enumTranslationTable[val].ToString()!;

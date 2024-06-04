@@ -1,4 +1,7 @@
-﻿// ReSharper disable once CheckNamespace
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+// ReSharper disable once CheckNamespace
 namespace PdfSharp.BigGustave
 {
     using System;
@@ -42,7 +45,8 @@ namespace PdfSharp.BigGustave
                     }
                 case InterlaceMethod.Adam7:
                     {
-                        var pixelsPerRow = header.Width * bytesPerPixel;
+                        var byteHack = bytesPerPixel == 1 ? 1 : 0; // TODO: Further investigation required.
+                        var pixelsPerRow = header.Width * bytesPerPixel + byteHack; // Add an extra byte per line.
                         var newBytes = new byte[header.Height * pixelsPerRow];
                         var i = 0;
                         var previousStartRowByteAbsolute = -1;
@@ -72,7 +76,7 @@ namespace PdfSharp.BigGustave
                                         i++;
                                     }
 
-                                    var start = pixelsPerRow * pixelIndex.y + pixelIndex.x * bytesPerPixel;
+                                    var start = byteHack + pixelsPerRow * pixelIndex.y + pixelIndex.x * bytesPerPixel; // Add 1 byte extra offset.
                                     Array.ConstrainedCopy(decompressedData, rowStartByte + j * bytesPerPixel, newBytes, start, bytesPerPixel);
                                 }
 
@@ -87,13 +91,14 @@ namespace PdfSharp.BigGustave
             }
         }
         
-        private static byte SamplesPerPixel(ImageHeader header)
+        static byte SamplesPerPixel(ImageHeader header)
         {
             switch (header.ColorType)
             {
                 case ColorType.None:
                     return 1;
                 case ColorType.PaletteUsed:
+                case ColorType.PaletteUsed | ColorType.ColorUsed:
                     return 1;
                 case ColorType.ColorUsed:
                     return 3;
@@ -106,7 +111,7 @@ namespace PdfSharp.BigGustave
             }
         }
 
-        private static int BytesPerScanline(ImageHeader header, byte samplesPerPixel)
+        static int BytesPerScanline(ImageHeader header, byte samplesPerPixel)
         {
             var width = header.Width;
 
@@ -126,7 +131,7 @@ namespace PdfSharp.BigGustave
             }
         }
 
-        private static void ReverseFilter(byte[] data, FilterType type, int previousRowStartByteAbsolute, int rowStartByteAbsolute, int byteAbsolute, int rowByteIndex, int bytesPerPixel)
+        static void ReverseFilter(byte[] data, FilterType type, int previousRowStartByteAbsolute, int rowStartByteAbsolute, int byteAbsolute, int rowByteIndex, int bytesPerPixel)
         {
             byte GetLeftByteValue()
             {
@@ -194,7 +199,7 @@ namespace PdfSharp.BigGustave
         /// Computes a simple linear function of the three neighboring pixels (left, above, upper left),
         /// then chooses as predictor the neighboring pixel closest to the computed value.
         /// </summary>
-        private static byte GetPaethValue(byte a, byte b, byte c)
+        static byte GetPaethValue(byte a, byte b, byte c)
         {
             var p = a + b - c;
             var pa = Math.Abs(p - a);

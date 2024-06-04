@@ -1,56 +1,64 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
-        <EnableWindowsTargeting>true</EnableWindowsTargeting>
-        <RootNamespace>PdfSharp.Quality</RootNamespace>
-        <UseWPF>true</UseWPF>
-	    <DefineConstants>WPF</DefineConstants>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <RootNamespace>PdfSharp.Quality</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <DefineConstants>WPF</DefineConstants>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472-windows|AnyCPU'">
-      <WarningLevel>0</WarningLevel>
-    </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472-windows|AnyCPU'">
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472-windows|AnyCPU'">
-      <WarningLevel>0</WarningLevel>
-    </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472-windows|AnyCPU'">
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
 
   <ItemGroup>
-        <Compile Include="..\PdfSharp.Quality\FeatureAndSnippetBase.cs" Link="FeatureAndSnippetBase.cs" />
-        <Compile Include="..\PdfSharp.Quality\DefaultFontResolver.cs" Link="DefaultFontResolver.cs" />
-        <Compile Include="..\PdfSharp.Quality\Feature.cs" Link="Feature.cs" />
-        <Compile Include="..\PdfSharp.Quality\FontHelper.cs" Link="FontHelper.cs" />
-        <Compile Include="..\PdfSharp.Quality\GlobalUsings.cs" Link="GlobalUsings.cs" />
-        <Compile Include="..\PdfSharp.Quality\IOHelper.cs" Link="IOHelper.cs" />
-        <Compile Include="..\PdfSharp.Quality\PathHelper.cs" Link="PathHelper.cs" />
-        <Compile Include="..\PdfSharp.Quality\PdfFileFormatter.cs" Link="PdfFileFormatter.cs" />
-        <Compile Include="..\PdfSharp.Quality\Snippet.cs" Link="Snippet.cs" />
-        <Compile Include="..\PdfSharp.Quality\TestClassBase.cs" Link="TestClassBase.cs" />
-    </ItemGroup>
+    <Compile Include="..\PdfSharp.Quality\AssetsHelper.cs" Link="AssetsHelper.cs" />
+    <Compile Include="..\PdfSharp.Quality\FeatureAndSnippetBase.cs" Link="FeatureAndSnippetBase.cs" />
+    <Compile Include="..\PdfSharp.Quality\DefaultFontResolver.cs" Link="DefaultFontResolver.cs" />
+    <Compile Include="..\PdfSharp.Quality\Feature.cs" Link="Feature.cs" />
+    <Compile Include="..\PdfSharp.Quality\FontHelper.cs" Link="FontHelper.cs" />
+    <Compile Include="..\PdfSharp.Quality\FontUtility.cs" Link="FontUtility.cs" />
+    <Compile Include="..\PdfSharp.Quality\GlobalUsings.cs" Link="GlobalUsings.cs" />
+    <Compile Include="..\PdfSharp.Quality\IOHelper.cs" Link="IOHelper.cs" />
+    <Compile Include="..\PdfSharp.Quality\IOUtility.cs" Link="IOUtility.cs" />
+    <Compile Include="..\PdfSharp.Quality\PathHelper.cs" Link="PathHelper.cs" />
+    <Compile Include="..\PdfSharp.Quality\PdfDocUtility.cs" Link="PdfDocUtility.cs" />
+    <Compile Include="..\PdfSharp.Quality\PdfFileFormatter.cs" Link="PdfFileFormatter.cs" />
+    <Compile Include="..\PdfSharp.Quality\PdfFileUtility.cs" Link="PdfFileUtility.cs" />
+    <Compile Include="..\PdfSharp.Quality\Snippet.cs" Link="Snippet.cs" />
+    <Compile Include="..\PdfSharp.Quality\TestClassBase.cs" Link="TestClassBase.cs" />
+    <Compile Include="..\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-wpf\PdfSharp-wpf.csproj" />
-        <ProjectReference Include="..\PdfSharp.WPFonts\PdfSharp.WPFonts.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-wpf\PdfSharp-wpf.csproj" />
+    <ProjectReference Include="..\PdfSharp.WPFonts\PdfSharp.WPFonts.csproj" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <Compile Update="Properties\Settings.Designer.cs">
-            <DesignTimeSharedInput>True</DesignTimeSharedInput>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>Settings.settings</DependentUpon>
-        </Compile>
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
 
-    <ItemGroup>
-        <None Update="Properties\Settings.settings">
-            <Generator>SettingsSingleFileGenerator</Generator>
-            <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-        </None>
-    </ItemGroup>
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
 
 </Project>

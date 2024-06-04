@@ -32,17 +32,21 @@ namespace PdfSharp.Drawing.Internal
         /// </summary>
         public ImportedImage? ImportImage(Stream stream)
         {
-            using var helper = new StreamReaderHelper(stream);
-            // Try all registered importers to see if any of them can handle the image.
-            foreach (var importer in _importers)
+            long length = -1;
+            try
             {
-                helper.Reset();
-                var image = importer.ImportImage(helper);
-                if (image != null)
-                    return image;
+                length = stream.Length;
+            }
+            // ReSharper disable once EmptyGeneralCatchClause
+            catch (Exception)
+            {
             }
 
-            return null;
+            if (length < -1 || length > Int32.MaxValue)
+                throw new InvalidOperationException($"Image files with a size of {length} bytes are not supported. Use image files smaller than 2 GiB.");
+
+            using var helper = new StreamReaderHelper(stream, (int)length);
+            return TryImageImport(helper);
         }
 
 #if GDI || WPF || CORE
@@ -51,12 +55,23 @@ namespace PdfSharp.Drawing.Internal
         /// </summary>
         public ImportedImage? ImportImage(string filename)
         {
-            ImportedImage? ii;
-            using (Stream fs = File.OpenRead(filename))
+            var data = File.ReadAllBytes(filename);
+
+            using var helper = new StreamReaderHelper(data);
+            return TryImageImport(helper);
+        }
+
+        private ImportedImage? TryImageImport(StreamReaderHelper helper)
+        {
+            // Try all registered importers to see if any of them can handle the image.
+            foreach (var importer in _importers)
             {
-                ii = ImportImage(fs);
+                helper.Reset();
+                var image = importer.ImportImage(helper);
+                if (image != null)
+                    return image;
             }
-            return ii;
+            return null;
         }
 #endif
 

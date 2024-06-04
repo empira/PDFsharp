@@ -1,3 +1,5 @@
+# Delete contents of bin and obj folders
+
 #Requires -Version 7
 #Requires -PSEdition Core
 

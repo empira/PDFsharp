@@ -1,10 +1,10 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 namespace PdfSharp.Pdf
 {
     /// <summary>
-    /// Specifies the type of a key's value in a dictionary.
+    /// Specifies the type of a key’s value in a dictionary.
     /// </summary>
     [Flags]
     enum KeyType

@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 namespace PdfSharp.Pdf.AcroForms
@@ -104,7 +104,7 @@ namespace PdfSharp.Pdf.AcroForms
             /// (Required; inheritable) An array of options to be presented to the user. Each element of
             /// the array is either a text string representing one of the available options or a two-element
             /// array consisting of a text string together with a default appearance string for constructing
-            /// the item�s appearance dynamically at viewing time.
+            /// the item’s appearance dynamically at viewing time.
             /// </summary>
             [KeyInfo(KeyType.Array | KeyType.Optional)]
             public const string Opt = "/Opt";

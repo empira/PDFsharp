@@ -1,12 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
-        <EnableWindowsTargeting>true</EnableWindowsTargeting>
-        <RootNamespace>MigraDoc</RootNamespace>
-        <DefineConstants>GDI</DefineConstants>
-        <!--<UseWindowsForms>true</UseWindowsForms>-->
-        <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <RootNamespace>MigraDoc</RootNamespace>
+    <DefineConstants>GDI</DefineConstants>
+    <!--<UseWindowsForms>true</UseWindowsForms>-->
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

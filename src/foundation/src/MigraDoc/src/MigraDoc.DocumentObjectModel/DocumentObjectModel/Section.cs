@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics.CodeAnalysis;
@@ -230,7 +230,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Gets the document elements that build the section's content.
+        /// Gets the document elements that build the section’s content.
         /// </summary>
         public DocumentElements Elements
         {
@@ -256,9 +256,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public Paragraph LastParagraph
         {
-#if NET6_0_OR_GREATER
             [return: MaybeNull]
-#endif
             get
             {
                 // _elements is created when needed and can be null.
@@ -280,9 +278,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public Table LastTable
         {
-#if NET6_0_OR_GREATER
             [return: MaybeNull]
-#endif
             get
             {
                 // _elements is created when needed and can be null.

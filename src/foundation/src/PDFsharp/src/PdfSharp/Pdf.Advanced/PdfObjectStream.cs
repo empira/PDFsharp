@@ -1,7 +1,7 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.IO;
+using PdfSharp.Internal;
 using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Pdf.Advanced
@@ -31,17 +31,17 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Initializes a new instance from an existing dictionary. Used for object type transformation.
         /// </summary>
-        internal PdfObjectStream(PdfDictionary dict)
+        internal PdfObjectStream(PdfDictionary dict, Parser documentParser)
             : base(dict)
         {
             int n = Elements.GetInteger(Keys.N);
             int first = Elements.GetInteger(Keys.First);
             Stream.TryUnfilter();
 
-            Parser parser = new Parser(null, new MemoryStream(Stream.Value));
+            var parser = new Parser(null, new MemoryStream(Stream.Value), documentParser);
             _header = parser.ReadObjectStreamHeader(n, first);
 
-#if DEBUG && CORE
+#if DEBUG_ && CORE
             if (Internal.PdfDiagnostics.TraceObjectStreams)
             {
                 Debug.WriteLine(String.Format("PdfObjectStream(document) created. Header item count: {0}", _header.GetLength(0)));
@@ -54,41 +54,51 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal void ReadReferences(PdfCrossReferenceTable xrefTable)
         {
+            var length = _header.Length;
+            _objectOffsets = new();
+
             ////// Create parser for stream.
             ////Parser parser = new Parser(_document, new MemoryStream(Stream.Value));
-            for (int idx = 0; idx < _header.Length; idx++)
+            for (var idx = 0; idx < length; idx++)
             {
                 int objectNumber = _header[idx][0];
                 int offset = _header[idx][1];
 
-                PdfObjectID objectID = new PdfObjectID(objectNumber);
+                var objectID = new PdfObjectID(objectNumber);
 
                 // HACK: -1 indicates compressed object.
-                PdfReference iref = new PdfReference(objectID, -1);
+                var iref = new PdfReference(objectID, -1);
                 ////iref.ObjectID = objectID;
                 ////iref.Value = xrefStream;
+                
+                _objectOffsets.Add(objectID, offset);
+
                 if (!xrefTable.Contains(iref.ObjectID))
                 {
                     xrefTable.Add(iref);
                 }
                 else
                 {
-#if DEBUG
-                    GetType();
+#if DEBUG_
+                    _ = typeof(int);
 #endif
                 }
             }
         }
 
         /// <summary>
-        /// Reads the compressed object with the specified index.
+        /// Tries to get the position of the PdfObject inside this ObjectStream.
         /// </summary>
-        internal PdfReference ReadCompressedObject(int index)
+        internal bool TryGetObjectOffset(PdfObjectID pdfObjectID, out SizeType offset, SuppressExceptions? suppressObjectOrderExceptions)
         {
-            Parser parser = new Parser(_document, new MemoryStream(Stream.Value));
-            int objectNumber = _header[index][0];
-            int offset = _header[index][1];
-            return parser.ReadCompressedObject(objectNumber, offset);
+            if (_objectOffsets == null)
+            {
+                SuppressExceptions.HandleError(suppressObjectOrderExceptions, () => throw TH.InvalidOperationException_ReferencesOfObjectStreamNotYetRead());
+                offset = -1;
+                return false;
+            }
+
+            return _objectOffsets.TryGetValue(pdfObjectID, out offset);
         }
 
         /// <summary>
@@ -98,6 +108,11 @@ namespace PdfSharp.Pdf.Advanced
         /// i.e. the byte offset plus First entry.
         /// </summary>
         readonly int[][] _header = default!; // Reference: Page 102
+
+        /// <summary>
+        /// Manages the read positions for all PdfObjects inside this ObjectStream.
+        /// </summary>
+        Dictionary<PdfObjectID, SizeType>? _objectOffsets;
 
         /// <summary>
         /// Predefined keys common to all font dictionaries.

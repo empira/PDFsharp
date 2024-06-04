@@ -51,9 +51,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         /// </summary>
         public Table Table
         {
-#if NET6_0_OR_GREATER
             [return: MaybeNull]
-#endif
             get
             {
                 if (_table == null && Parent is Row rw)
@@ -69,9 +67,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         /// </summary>
         public Row Row
         {
-#if NET6_0_OR_GREATER
             [return: MaybeNull]
-#endif
             get { return _row ??= (Parent as Row)!; }
         }
         Row? _row;
@@ -96,7 +92,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         }
 
         /// <summary>
-        /// Resizes this cells' list if necessary.
+        /// Resizes these cells¹ list if necessary.
         /// </summary>
         void Resize(int index)
         {
@@ -115,7 +111,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the meta-object of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

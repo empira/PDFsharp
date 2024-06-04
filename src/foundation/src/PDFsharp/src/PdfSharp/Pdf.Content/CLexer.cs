@@ -2,10 +2,9 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
-#if WPF
-using System.IO;
-#endif
+using Microsoft.Extensions.Logging;
 using PdfSharp.Internal;
+using PdfSharp.Logging;
 
 namespace PdfSharp.Pdf.Content
 {
@@ -44,60 +43,52 @@ namespace PdfSharp.Pdf.Content
             switch (ch)
             {
                 case '%':
-                    // Eat comments, the parser doesn't handle them.
+                    // Eat comments, the parser doesn’t handle them.
                     //return symbol = ScanComment();
                     ScanComment();
                     goto Again;
 
                 case '/':
-                    return _symbol = ScanName();
-
-                //case 'R':
-                //  if (Lexer.IsWhiteSpace(nextChar))
-                //  {
-                //    ScanNextChar();
-                //    return Symbol.R;
-                //  }
-                //  break;
+                    return Symbol = ScanName();
 
                 case '+':
                 case '-':
-                    return _symbol = ScanNumber();
+                    return Symbol = ScanNumber();
 
                 case '[':
                     ScanNextChar();
-                    return _symbol = CSymbol.BeginArray;
+                    return Symbol = CSymbol.BeginArray;
 
                 case ']':
                     ScanNextChar();
-                    return _symbol = CSymbol.EndArray;
+                    return Symbol = CSymbol.EndArray;
 
                 case '(':
-                    return _symbol = ScanLiteralString();
+                    return Symbol = ScanLiteralString();
 
                 case '<':
                     if (_nextChar == '<')
-                        return _symbol = ScanDictionary();
-                    return _symbol = ScanHexadecimalString();
+                        return Symbol = ScanDictionary();
+                    return Symbol = ScanHexadecimalString();
 
                 case '.':
-                    return _symbol = ScanNumber();
+                    return Symbol = ScanNumber();
 
                 case '"':
                 case '\'':
-                    return _symbol = ScanOperator();
+                    return Symbol = ScanOperator();
             }
             if (Char.IsDigit(ch))
-                return _symbol = ScanNumber();
+                return Symbol = ScanNumber();
 
             if (Char.IsLetter(ch))
-                return _symbol = ScanOperator();
+                return Symbol = ScanOperator();
 
             if (ch == Chars.EOF)
-                return _symbol = CSymbol.Eof;
+                return Symbol = CSymbol.Eof;
 
             ContentReaderDiagnostics.HandleUnexpectedCharacter(ch);
-            return _symbol = CSymbol.None;
+            return Symbol = CSymbol.None;
         }
 
         /// <summary>
@@ -110,7 +101,7 @@ namespace PdfSharp.Pdf.Content
             ClearToken();
             char ch;
             while ((ch = AppendAndScanNextChar()) != Chars.LF && ch != Chars.EOF) { }
-            return _symbol = CSymbol.Comment;
+            return Symbol = CSymbol.Comment;
         }
 
         /// <summary>
@@ -132,9 +123,9 @@ namespace PdfSharp.Pdf.Content
             {
                 ScanNextToken();
                 // HACK: Is image ASCII85 decoded?
-                if (!ascii85 && _symbol == CSymbol.Name && Token is "/ASCII85Decode" or "/A85")
+                if (!ascii85 && Symbol == CSymbol.Name && Token is "/ASCII85Decode" or "/A85")
                     ascii85 = true;
-            } while (_symbol != CSymbol.Operator || Token != "ID");
+            } while (Symbol != CSymbol.Operator || Token != "ID");
 
             if (ascii85)
             {
@@ -175,13 +166,36 @@ namespace PdfSharp.Pdf.Content
             ClearToken();
             while (true)
             {
-                char ch = AppendAndScanNextChar();
-                if (IsWhiteSpace(ch) || IsDelimiter(ch))
-                    return _symbol = CSymbol.Name;
+                var ch = AppendAndScanNextChar();
+                if (IsWhiteSpace(ch) || IsDelimiter(ch) || ch == Chars.EOF)
+                    break;
 
                 if (ch == '#')
                 {
                     ScanNextChar();
+#if true
+                    var newChar = (_currChar switch
+                    {
+                        >= '0' and <= '9' => _currChar - '0',
+                        >= 'A' and <= 'F' => _currChar - ('A' - 10),  // Not optimized in IL without parenthesis.
+                        >= 'a' and <= 'f' => _currChar - ('a' - 10),
+                        _ => LogError(_currChar)
+                    } << 4) + _nextChar switch
+                    {
+                        >= '0' and <= '9' => _nextChar - '0',
+                        >= 'A' and <= 'F' => _nextChar - ('A' - 10),
+                        >= 'a' and <= 'f' => _nextChar - ('a' - 10),
+                        _ => LogError(_nextChar)
+                    };
+                    ScanNextChar();
+                    _currChar = (char)newChar;
+
+                    static char LogError(char ch)
+                    {
+                        PdfSharpLogHost.Logger.LogError("Illegal character {char} in hex string.", ch);
+                        return '\0';
+                    }
+#else
                     char[] hex = new char[2];
                     hex[0] = _currChar;
                     hex[1] = _nextChar;
@@ -189,8 +203,31 @@ namespace PdfSharp.Pdf.Content
                     // TODO Check syntax
                     ch = (char)(ushort)Int32.Parse(new string(hex), NumberStyles.AllowHexSpecifier);
                     _currChar = ch;
+#endif
                 }
             }
+
+            var name = Token;
+            // Check token for UTF-8 encoding.
+            for (int idx = 0; idx < name.Length; ++idx)
+            {
+                // If the two top most significant bits are set this identifies a 2, 3, or 4
+                // byte UTF-8 encoding sequence.
+                if ((name[idx] & 0xC0) == 0xC0)
+                {
+                    // Special characters in Name objects use UTF-8 encoding.
+                    var length = name.Length;
+                    var bytes = new byte[length];
+                    for (int idx2 = 0; idx2 < length; ++idx2)
+                        bytes[idx2] = (byte)name[idx2];
+
+                    var decodedName = Encoding.UTF8.GetString(bytes);
+                    _token.Clear();
+                    _token.Append(decodedName);
+                    break;
+                }
+            }
+            return Symbol = CSymbol.Name;
         }
 
         /// <summary>
@@ -352,7 +389,7 @@ namespace PdfSharp.Pdf.Content
             return CSymbol.Real;
         }
 
-        static readonly double[] PowersOf10 = { 1, 10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000, 100_000_000, 1_000_000_000, 10_000_000_000 };
+        static readonly double[] PowersOf10 = [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000, 100_000_000, 1_000_000_000, 10_000_000_000];
 
         /// <summary>
         /// Scans an operator.
@@ -365,7 +402,7 @@ namespace PdfSharp.Pdf.Content
             while (IsOperatorChar(ch))
                 ch = AppendAndScanNextChar();
 
-            return _symbol = CSymbol.Operator;
+            return Symbol = CSymbol.Operator;
         }
 
         // TODO        
@@ -382,7 +419,7 @@ namespace PdfSharp.Pdf.Content
             // Test UNICODE string
             if (ch == '\xFE' && _nextChar == '\xFF')
             {
-                // I'm not sure if the code is correct in any case.
+                // I’m not sure if the code is correct in any case.
                 // ? Can a UNICODE character not start with ')' as hibyte
                 // ? What about \# escape sequences
                 ScanNextChar();
@@ -391,10 +428,10 @@ namespace PdfSharp.Pdf.Content
                 {
                     // The empty Unicode string...
                     ScanNextChar();
-                    return _symbol = CSymbol.String;
+                    return Symbol = CSymbol.String;
                 }
                 char chLo = ScanNextChar();
-                ch = (char)(chHi * 256 + chLo);
+                ch = (char)((chHi << 8) + chLo);
                 while (true)
                 {
                 SkipChar:
@@ -408,7 +445,7 @@ namespace PdfSharp.Pdf.Content
                             if (parenLevel == 0)
                             {
                                 ScanNextChar();
-                                return _symbol = CSymbol.String;
+                                return Symbol = CSymbol.String;
                             }
                             parenLevel--;
                             break;
@@ -473,28 +510,34 @@ namespace PdfSharp.Pdf.Content
                                 break;
                             }
 
-                        //case '#':
-                        //    ContentReaderDiagnostics.HandleUnexpectedCharacter('#');
-                        //    break;
+                            //case '#':
+                            //    ContentReaderDiagnostics.HandleUnexpectedCharacter('#');
+                            //    break;
 
-                        default:
-                            // Every other char is appended to the token.
-                            break;
+                            //default:
+                            //    // Every other char is appended to the token.
+                            //    break;
                     }
                     _token.Append(ch);
                     chHi = ScanNextChar();
                     if (chHi == ')')
                     {
                         ScanNextChar();
-                        return _symbol = CSymbol.String;
+                        return Symbol = CSymbol.String;
                     }
                     chLo = ScanNextChar();
-                    ch = (char)(chHi * 256 + chLo);
+                    ch = (char)((chHi << 8) + chLo);
                 }
+            }
+            else if (ch == '\xFF' && _nextChar == '\xFE')  // Little endian?
+            {
+                // Is this possible?
+                Debug.Assert(false, "Found UTF-16 LE string. Please send us the PDF file and we will fix it (issues (at) pdfsharp.net).");
+                return Symbol = CSymbol.None;
             }
             else
             {
-                // 8-bit characters
+                // 8-bit characters.
                 while (true)
                 {
                 SkipChar:
@@ -508,7 +551,7 @@ namespace PdfSharp.Pdf.Content
                             if (parenLevel == 0)
                             {
                                 ScanNextChar();
-                                return _symbol = CSymbol.String;
+                                return Symbol = CSymbol.String;
                             }
                             parenLevel--;
                             break;
@@ -572,13 +615,13 @@ namespace PdfSharp.Pdf.Content
                                 break;
                             }
 
-                        //case '#':
-                        //    ContentReaderDiagnostics.HandleUnexpectedCharacter('#');
-                        //    break;
+                            //case '#':
+                            //    ContentReaderDiagnostics.HandleUnexpectedCharacter('#');
+                            //    break;
 
-                        default:
-                            // Every other char is appended to the token.
-                            break;
+                            //default:
+                            //    // Every other char is appended to the token.
+                            //    break;
                     }
                     _token.Append(ch);
                     //token.Append(Encoding.GetEncoding(1252).GetString(new byte[] { (byte)ch }));
@@ -595,7 +638,6 @@ namespace PdfSharp.Pdf.Content
             Debug.Assert(_currChar == Chars.Less);
 
             ClearToken();
-            char[] hex = new char[2];
             ScanNextChar();
             while (true)
             {
@@ -605,41 +647,57 @@ namespace PdfSharp.Pdf.Content
                     ScanNextChar();
                     break;
                 }
-                if (Char.IsLetterOrDigit(_currChar))
+                var hex = _currChar switch
                 {
-                    hex[0] = Char.ToUpper(_currChar);
+                    >= '0' and <= '9' => _currChar - '0',
+                    >= 'A' and <= 'F' => _currChar - ('A' - 10),  // Not optimized in IL without parenthesis.
+                    >= 'a' and <= 'f' => _currChar - ('a' - 10),
+                    _ => LogError(_currChar)
+                };
+
+                ScanNextChar();
+                if (_currChar == '>')
+                {
                     // Second char is optional in PDF spec.
-                    if (Char.IsLetterOrDigit(_nextChar))
-                    {
-                        hex[1] = Char.ToUpper(_nextChar);
-                        ScanNextChar();
-                    }
-                    else
-                    {
-                        // We could check for ">" here and throw if we find anything else. The throw comes after the next iteration anyway.
-                        hex[1] = '0';
-                    }
-                    int ch = Int32.Parse(new string(hex), NumberStyles.AllowHexSpecifier);
-                    _token.Append(Convert.ToChar(ch));
+                    _token.Append((char)(hex << 4));
                     ScanNextChar();
+                    break;
                 }
+
+                hex = (hex << 4) + _currChar switch
+                {
+                    >= '0' and <= '9' => _currChar - '0',
+                    >= 'A' and <= 'F' => _currChar - ('A' - 10),
+                    >= 'a' and <= 'f' => _currChar - ('a' - 10),
+                    _ => LogError(_currChar)
+                };
+                _token.Append((char)hex);
+                ScanNextChar();
             }
             string chars = _token.ToString();
             int count = chars.Length;
-            if (count > 2 && chars[0] == (char)0xFE && chars[1] == (char)0xFF)
+            // Check for UTF-16BE encoding.
+            if (count > 2 && chars[0] == '\xFE' && chars[1] == '\xFF')
             {
-                Debug.Assert(count % 2 == 0);
+                Debug.Assert(count % 2 == 0); // #PRD runtime check
                 _token.Length = 0;
                 for (int idx = 2; idx < count; idx += 2)
-                    _token.Append((char)(chars[idx] * 256 + chars[idx + 1]));
+                    _token.Append((char)((chars[idx] << 8) + chars[idx + 1]));
             }
-            return _symbol = CSymbol.HexString;
+            return Symbol = CSymbol.HexString;
+
+            static char LogError(char ch)
+            {
+                PdfSharpLogHost.Logger.LogError("Illegal character '{char}' in hex string.", ch);
+                return '\0';
+            }
         }
 
         /// <summary>
-        /// Move current position one character further in content stream.
+        /// Move current position one byte further in PDF stream and
+        /// return it as a character with high byte always zero.
         /// </summary>
-        internal char ScanNextChar()
+        char ScanNextChar()
         {
             if (ContLength <= _charIndex)
             {
@@ -663,7 +721,7 @@ namespace PdfSharp.Pdf.Content
                     }
                     else
                     {
-                        // Treat single CR as LF
+                        // Treat single CR as LF.
                         _currChar = Chars.LF;
                     }
                 }
@@ -682,7 +740,8 @@ namespace PdfSharp.Pdf.Content
         }
 
         /// <summary>
-        /// Appends current character to the token and reads next one.
+        /// Appends current character to the token and
+        /// reads next byte as a character.
         /// </summary>
         internal char AppendAndScanNextChar()
         {
@@ -720,11 +779,7 @@ namespace PdfSharp.Pdf.Content
         /// <summary>
         /// Gets or sets the current symbol.
         /// </summary>
-        public CSymbol Symbol
-        {
-            get => _symbol;
-            set => _symbol = value;
-        }
+        public CSymbol Symbol { get; set; } = CSymbol.None;
 
         /// <summary>
         /// Gets the current token.
@@ -761,34 +816,32 @@ namespace PdfSharp.Pdf.Content
         /// </summary>
         internal static bool IsWhiteSpace(char ch)
         {
-            switch (ch)
+            return ch switch
             {
-                case Chars.NUL:  // 0 Null
-                case Chars.HT:   // 9 Tab
-                case Chars.LF:   // 10 Line feed
-                case Chars.FF:   // 12 Form feed
-                case Chars.CR:   // 13 Carriage return
-                case Chars.SP:   // 32 Space
-                    return true;
-            }
-            return false;
+                Chars.NUL => true,  // 0 Null
+                Chars.HT => true,   // 9 Tab
+                Chars.LF => true,   // 10 Line feed
+                Chars.FF => true,   // 12 Form feed
+                Chars.CR => true,   // 13 Carriage return
+                Chars.SP => true,   // 32 Space
+                _ => false
+            };
         }
 
         /// <summary>
-        /// Indicates whether the specified character is an content operator character.
+        /// Indicates whether the specified character is a content operator character.
         /// </summary>
         internal static bool IsOperatorChar(char ch)
         {
             if (Char.IsLetter(ch))
                 return true;
-            switch (ch)
+            return ch switch
             {
-                case Chars.Asterisk:    // *
-                case Chars.QuoteSingle: // '
-                case Chars.QuoteDouble:    // "
-                    return true;
-            }
-            return false;
+                Chars.Asterisk => true,     // *
+                Chars.QuoteSingle => true,  // '
+                Chars.QuoteDouble => true,  // "
+                _ => false
+            };
         }
 
         /// <summary>
@@ -796,19 +849,18 @@ namespace PdfSharp.Pdf.Content
         /// </summary>
         internal static bool IsDelimiter(char ch)
         {
-            switch (ch)
+            return ch switch
             {
-                case '(':
-                case ')':
-                case '<':
-                case '>':
-                case '[':
-                case ']':
-                case '/':
-                case '%':
-                    return true;
-            }
-            return false;
+                '(' => true,
+                ')' => true,
+                '<' => true,
+                '>' => true,
+                '[' => true,
+                ']' => true,
+                '/' => true,
+                '%' => true,
+                _ => false
+            };
         }
 
         /// <summary>
@@ -838,6 +890,5 @@ namespace PdfSharp.Pdf.Content
         readonly StringBuilder _token = new();
         long _tokenAsLong;
         double _tokenAsReal;
-        CSymbol _symbol = CSymbol.None;
     }
 }

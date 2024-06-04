@@ -112,11 +112,9 @@ namespace GdiGrammarByExample
             try
             {
                 // The Grammar By Example files still have ANSI encoding.
-                using (var streamReader = new StreamReader(DdlGbeTestBase.WslPathHack(file), ansiEncoding))
-                {
-                    reader = new DdlReader(streamReader); //, _errorManager);
-                    document = reader.ReadDocument();
-                }
+                using var streamReader = new StreamReader(DdlGbeTestBase.WslPathHack(file), ansiEncoding);
+                reader = new DdlReader(streamReader); //, _errorManager);
+                document = reader.ReadDocument();
             }
             finally
             {
@@ -226,8 +224,8 @@ namespace GdiGrammarByExample
                     page.Orientation = landscape ? PageOrientation.Portrait : PageOrientation.Landscape;
                     var gfx = XGraphics.FromPdfPage(page);
 
-                    double width = page.Width;
-                    double height = page.Height;
+                    double width = page.Width.Point;
+                    double height = page.Height.Point;
                     if (landscape)
                     {
                         // Landscape.
@@ -292,7 +290,7 @@ namespace GdiGrammarByExample
             {
                 var page = resultPdf.Pages[i];
                 var gfx = XGraphics.FromPdfPage(page);
-                var box = new XRect(0, 0, page.Width, page.Height);
+                var box = new XRect(0, 0, page.Width.Point, page.Height.Point);
 
                 // Write document file name and page number on each page.
                 box.Inflate(0, -10);

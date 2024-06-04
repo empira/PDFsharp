@@ -1,7 +1,6 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.IO;
 using PdfSharp.Pdf;
 
 namespace PdfSharp.Drawing
@@ -27,7 +26,14 @@ namespace PdfSharp.Drawing
     /// </summary>
     class StreamReaderHelper : IDisposable
     {
-        internal StreamReaderHelper(Stream stream)
+        internal StreamReaderHelper(byte[] data)
+        {
+            OriginalStream = null!;
+            Data = data;
+            Length = data.Length;
+        }
+
+        internal StreamReaderHelper(Stream stream, int streamLength)
         {
             // TODO: Use the Stream as it is or ensure it is a MemoryStream?
 #if CORE || GDI || WPF
@@ -36,7 +42,7 @@ namespace PdfSharp.Drawing
             //MemoryStream ms;
             if (stream is not MemoryStream ms)
             {
-                OwnedMemoryStream = ms = new MemoryStream();
+                OwnedMemoryStream = ms = streamLength > -1 ? new MemoryStream(streamLength) : new();
 #if false
                 CopyStream(stream, ms);
 #else
@@ -46,6 +52,12 @@ namespace PdfSharp.Drawing
             }
             Data = ms.GetBuffer();
             Length = (int)ms.Length;
+            if (Data.Length > Length)
+            {
+                var tmp = new Byte[Length];
+                Buffer.BlockCopy(Data, 0, tmp, 0, Length);
+                Data = tmp;
+            }
 #else
             // For Win_RT there is no GetBuffer() => alternative implementation for Win_RT.
             // TODO: Are there advantages of GetBuffer()? It should reduce LOH fragmentation.
@@ -72,15 +84,15 @@ namespace PdfSharp.Drawing
         internal ushort GetWord(int offset, bool bigEndian)
         {
             return (ushort)(bigEndian ?
-                GetByte(offset) * 256 + GetByte(offset + 1) :
-                GetByte(offset) + GetByte(offset + 1) * 256);
+                (GetByte(offset) << 8) + GetByte(offset + 1) :
+                GetByte(offset) + (GetByte(offset + 1) << 8));
         }
 
         internal uint GetDWord(int offset, bool bigEndian)
         {
             return (uint)(bigEndian ?
-                GetWord(offset, true) * 65536 + GetWord(offset + 2, true) :
-                GetWord(offset, false) + GetWord(offset + 2, false) * 65536);
+                (GetWord(offset, true) << 16) + GetWord(offset + 2, true) :
+                GetWord(offset, false) + (GetWord(offset + 2, false) << 16));
         }
 
         //static void CopyStream(Stream input, Stream output)
@@ -231,6 +243,7 @@ namespace PdfSharp.Drawing
             Palette1,
             Palette4,
             Palette8,
+            Grayscale8,
             RGB24,
             ARGB32
 

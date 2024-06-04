@@ -6,11 +6,10 @@ using System.ComponentModel;
 namespace PdfSharp.Drawing
 {
     /// <summary>
-    /// Represents a value and its unit of measure. The structure converts implicitly from and to
-    /// double with a value measured in point.
+    /// Represents a value and its unit of measure.
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
-    public struct XUnit : IFormattable
+    public struct XUnit : IFormattable, IComparable<XUnit>, IComparable
     {
         internal const double PointFactor = 1;
         internal const double InchFactor = 72;
@@ -69,7 +68,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Gets the raw value of the object without any conversion.
         /// To determine the XGraphicsUnit use property <code>Type</code>.
-        /// To get the value in point use the implicit conversion to double.
+        /// To get the value in point use property <code>Point</code>.
         /// </summary>
         public double Value { get; private set; }
 
@@ -209,29 +208,20 @@ namespace PdfSharp.Drawing
         /// The unit of measure is appended to the end of the string.
         /// </summary>
         public string ToString(IFormatProvider? formatProvider)
-        {
-            string value = Value.ToString(formatProvider) + GetSuffix();
-            return value;
-        }
+            => Value.ToString(formatProvider) + GetSuffix();
 
         /// <summary>
         /// Returns the object as string using the specified format and format information.
         /// The unit of measure is appended to the end of the string.
         /// </summary>
         string IFormattable.ToString(string? format, IFormatProvider? formatProvider)
-        {
-            string value = Value.ToString(format, formatProvider) + GetSuffix();
-            return value;
-        }
+            => Value.ToString(format, formatProvider) + GetSuffix();
 
         /// <summary>
         /// Returns the object as string. The unit of measure is appended to the end of the string.
         /// </summary>
         public override string ToString()
-        {
-            string value = Value.ToString(CultureInfo.InvariantCulture) + GetSuffix();
-            return value;
-        }
+            => Value.ToString(CultureInfo.InvariantCulture) + GetSuffix();
 
         /// <summary>
         /// Returns the unit of measure of the object as a string like 'pt', 'cm', or 'in'.
@@ -252,49 +242,27 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Returns an XUnit object. Sets type to point.
         /// </summary>
-        public static XUnit FromPoint(double value)
-        {
-            // Create a Point XUnit without type check.
-            XUnit unit = new(value/*, XGraphicsUnit.Point*/);
-            return unit;
-        }
+        public static XUnit FromPoint(double value) => new(value/*, XGraphicsUnit.Point*/);
 
         /// <summary>
         /// Returns an XUnit object. Sets type to inch.
         /// </summary>
-        public static XUnit FromInch(double value)
-        {
-            // Create an Inch XUnit without type check.
-            XUnit unit = new(value, value * 72);
-            return unit;
-        }
+        public static XUnit FromInch(double value) => new(value, value * 72);
 
         /// <summary>
         /// Returns an XUnit object. Sets type to millimeters.
         /// </summary>
-        public static XUnit FromMillimeter(double value)
-        {
-            XUnit unit = new(value, XGraphicsUnit.Millimeter);
-            return unit;
-        }
+        public static XUnit FromMillimeter(double value) => new(value, XGraphicsUnit.Millimeter);
 
         /// <summary>
         /// Returns an XUnit object. Sets type to centimeters.
         /// </summary>
-        public static XUnit FromCentimeter(double value)
-        {
-            XUnit unit = new(value, XGraphicsUnit.Centimeter);
-            return unit;
-        }
+        public static XUnit FromCentimeter(double value) => new(value, XGraphicsUnit.Centimeter);
 
         /// <summary>
         /// Returns an XUnit object. Sets type to Presentation.
         /// </summary>
-        public static XUnit FromPresentation(double value)
-        {
-            XUnit unit = new(value, XGraphicsUnit.Presentation);
-            return unit;
-        }
+        public static XUnit FromPresentation(double value) => new(value, XGraphicsUnit.Presentation);
 
         /// <summary>
         /// Converts a string to an XUnit object.
@@ -303,6 +271,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public static implicit operator XUnit(string value)
         {
+
             XUnit unit = default;
             value = value.Trim();
 
@@ -359,77 +328,149 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Converts an int to an XUnit object with type set to point.
         /// </summary>
-        public static implicit operator XUnit(int value)
-        {
-            XUnit unit = new(value/*, XGraphicsUnit.Point*/);
-            return unit;
-        }
+        [Obsolete("In PDFsharp 6.1 implicit conversion from int is marked obsolete, because it led to misunderstandings and unexpected behavior. " +
+                  "Provide the unit by XUnit.FromPoint() or use the new class XUnitPt instead.")]
+        public static implicit operator XUnit(int value) => new(value/*, XGraphicsUnit.Point*/);
 
         /// <summary>
         /// Converts a double to an XUnit object with type set to point.
         /// </summary>
-        public static implicit operator XUnit(double value)
+        [Obsolete("In PDFsharp 6.1 implicit conversion from double is marked obsolete, because it led to misunderstandings and unexpected behavior. "+
+                  "Provide the unit by XUnit.FromPoint() or use the new class XUnitPt instead.")]
+        public static implicit operator XUnit(double value) => new(value/*, XGraphicsUnit.Point*/);
+
+        /// <summary>
+        /// Converts an XUnit object to a double value as point.
+        /// </summary>
+        [Obsolete("In PDFsharp 6.1 implicit conversion to double is marked obsolete, because it led to misunderstandings and unexpected behavior. Use the XUnit.Point property instead.")]
+        public static implicit operator double(XUnit value) => value.PointValue;
+
+        /// <summary>
+        /// Memberwise comparison checking the exact value und unit.
+        /// To compare by value tolerating rounding errors, use IsSameValue() or code like Math.Abs(a.Pt - b.Pt) &lt; 1e-5.
+        /// </summary>
+        // ReSharper disable CompareOfFloatsByEqualityOperator
+        public static bool operator ==(XUnit l, XUnit r) => l.Type == r.Type && l.Value == r.Value;
+        // ReSharper restore CompareOfFloatsByEqualityOperator
+
+        /// <summary>
+        /// Memberwise comparison checking exact value und unit.
+        /// To compare by value tolerating rounding errors, use IsSameValue() or code like Math.Abs(a.Pt - b.Pt) &lt; 1e-5.
+        /// </summary>
+        public static bool operator !=(XUnit l, XUnit r) => !(l == r);
+
+        /// <summary>
+        /// Compares two XUnit values.
+        /// </summary>
+        public static bool operator >(XUnit l, XUnit r) => l.CompareTo(r) > 0;
+
+        /// <summary>
+        /// Compares two XUnit values.
+        /// </summary>
+        public static bool operator >=(XUnit l, XUnit r) => l.CompareTo(r) >= 0;
+
+        /// <summary>
+        /// Compares two XUnit values.
+        /// </summary>
+        public static bool operator <(XUnit l, XUnit r) => l.CompareTo(r) < 0;
+
+        /// <summary>
+        /// Compares two XUnit values.
+        /// </summary>
+        public static bool operator <=(XUnit l, XUnit r) => l.CompareTo(r) <= 0;
+
+        /// <summary>
+        /// Returns the negative value of an XUnit.
+        /// </summary>
+        public static XUnit operator -(XUnit value) => new(-value.Value, value.Type);
+
+        /// <summary>
+        /// Adds an XUnit to an XUnit.
+        /// </summary>
+        public static XUnit operator +(XUnit l, XUnit r)
         {
-            XUnit unit = new(value/*, XGraphicsUnit.Point*/);
-            return unit;
+            if (l.Type != r.Type)
+                r.ConvertType(l.Type);
+
+            return new(l.Value + r.Value, l.Type);
         }
 
         /// <summary>
-        /// Returns a double value as point.
+        /// Adds a string parsed as XUnit to an XUnit.
         /// </summary>
-        public static implicit operator double(XUnit value)
+        public static XUnit operator +(XUnit l, string r)
         {
-            return value.PointValue;
+            var u = (XUnit)r;
+            return l + u;
         }
 
         /// <summary>
-        /// Memberwise comparison. To compare by value, 
-        /// use code like Math.Abs(a.Pt - b.Pt) &lt; 1e-5.
+        /// Subtracts an XUnit from an XUnit.
         /// </summary>
-        public static bool operator ==(XUnit value1, XUnit value2)
+        public static XUnit operator -(XUnit l, XUnit r)
         {
-            // ReSharper disable CompareOfFloatsByEqualityOperator
-            return value1.Type == value2.Type && value1.Value == value2.Value;
-            // ReSharper restore CompareOfFloatsByEqualityOperator
+            if (l.Type != r.Type)
+                r.ConvertType(l.Type);
+
+            return new(l.Value - r.Value, l.Type);
         }
 
         /// <summary>
-        /// Memberwise comparison. To compare by value, 
-        /// use code like Math.Abs(a.Pt - b.Pt) &lt; 1e-5.
+        /// Subtracts a string parsed as Unit from an XUnit.
         /// </summary>
-        public static bool operator !=(XUnit value1, XUnit value2)
+        public static XUnit operator -(XUnit l, string r)
         {
-            return !(value1 == value2);
+            var u = (XUnit)r;
+            return l - u;
         }
+
+        /// <summary>
+        /// Multiplies an XUnit with a double.
+        /// </summary>
+        public static XUnit operator *(XUnit l, double r)
+        {
+            return new(l.Value * r, l.Type);
+        }
+
+        /// <summary>
+        /// Divides an XUnit by a double.
+        /// </summary>
+        public static XUnit operator /(XUnit l, double r)
+        {
+            return new(l.Value / r, l.Type);
+        }
+
+        /// <summary>
+        /// Compares this XUnit with another XUnit value.
+        /// </summary>
+        public int CompareTo(XUnit other) => Math.Sign(PointValue - other.PointValue);
+
+        /// <summary>
+        /// Compares this XUnit with another object.
+        /// </summary>
+        public int CompareTo(object? obj) => obj is XUnit unit ? CompareTo(unit) : 1;
+
+        /// <summary>
+        /// Compares the actual values of this XUnit and another XUnit value tolerating rounding errors.
+        /// </summary>
+        public bool IsSameValue(XUnit other) => Math.Abs(Point - other.Point) <= 1e-5;
 
         /// <summary>
         /// Calls base class Equals.
         /// </summary>
-        public override bool Equals(Object? obj)
-        {
-            if (obj is XUnit unit)
-                return this == unit;
-            return false;
-        }
+        public override bool Equals(Object? obj) => obj is XUnit unit && this == unit;
 
         /// <summary>
         /// Returns the hash code for this instance.
         /// </summary>
-        public override int GetHashCode()
-        {
-            // ReSharper disable NonReadonlyFieldInGetHashCode
-            return Value.GetHashCode() ^ Type.GetHashCode();
-            // ReSharper restore NonReadonlyFieldInGetHashCode
-        }
+        // ReSharper disable NonReadonlyFieldInGetHashCode
+        public override int GetHashCode() => Value.GetHashCode() ^ Type.GetHashCode();
+        // ReSharper restore NonReadonlyFieldInGetHashCode
 
         /// <summary>
         /// This member is intended to be used by XmlDomainObjectReader only.
         /// </summary>
-        public static XUnit Parse(string value)
-        {
-            XUnit unit = value;
-            return unit;
-        }
+        public static XUnit Parse(string value) => value;
 
         /// <summary>
         /// Converts an existing object from one unit into another unit type.
@@ -485,14 +526,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <value>The debugger display.</value>
         // ReSharper disable UnusedMember.Local
-        string DebuggerDisplay
+        string DebuggerDisplay => Invariant($"{Value:0.######} {GetSuffix()}");
         // ReSharper restore UnusedMember.Local
-        {
-            get
-            {
-                const string format = Config.SignificantFigures10;
-                return String.Format(CultureInfo.InvariantCulture, "unit=({0:" + format + "} {1})", Value, GetSuffix());
-            }
-        }
     }
 }

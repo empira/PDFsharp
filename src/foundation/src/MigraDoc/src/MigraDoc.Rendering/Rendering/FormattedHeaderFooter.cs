@@ -57,8 +57,8 @@ namespace MigraDoc.Rendering
 
         internal Rectangle ContentRect { get; set; } = null!;
 
-        XUnit ContentHeight => _contentHeight;
-        XUnit _contentHeight;
+        XUnitPt ContentHeight => _contentHeight;
+        XUnitPt _contentHeight;
 
         bool IAreaProvider.PositionVertically(LayoutInfo layoutInfo)
         {

@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+ï»¿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc.DocumentObjectModel.IO
@@ -19,17 +19,17 @@ namespace MigraDoc.DocumentObjectModel.IO
         Identifier,
 
         /// <summary>
-        /// Both «true» and «\bold» are keywords, case sensitive.
+        /// Both Â«trueÂ» and Â«\boldÂ» are keywords, case sensitive.
         /// </summary>
         KeyWord,
 
         /// <summary>
-        /// Sample: «42»
+        /// Sample: Â«42Â»
         /// </summary>
         IntegerLiteral,
 
         /// <summary>
-        /// Samples: «42.0», «42.», «.42»,...
+        /// Samples: Â«42.0Â», Â«42.Â», Â«.42Â»,...
         /// </summary>
         RealLiteral,
 
@@ -39,12 +39,12 @@ namespace MigraDoc.DocumentObjectModel.IO
         CharacterLiteral,
 
         /// <summary>
-        /// Both «"text"» and «@"text with ""quotes"""».
+        /// Both Â«"text"Â» and Â«@"text with ""quotes"""Â».
         /// </summary>
         StringLiteral,
 
         /// <summary>
-        /// Samples: «.», «{», «+=»,...
+        /// Samples: Â«.Â», Â«{Â», Â«+=Â»,...
         /// </summary>
         OperatorOrPunctuator,
 

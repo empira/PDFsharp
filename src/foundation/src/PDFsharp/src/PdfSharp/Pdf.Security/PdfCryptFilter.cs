@@ -92,7 +92,7 @@ namespace PdfSharp.Pdf.Security
             switch (method)
             {
                 case CryptFilterMethod.None:
-                    // For None (redirect to Security Handler), Length should be irrelevant. So we don't check it here.
+                    // For None (redirect to Security Handler), Length should be irrelevant. So we don’t check it here.
                     break;
                 case CryptFilterMethod.V2:
                     if (lengthValue is < 40 or > 256 || lengthValue % 8 > 0)

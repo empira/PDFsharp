@@ -6,10 +6,11 @@ using PdfSharp.Pdf.IO;
 namespace PdfSharp.Pdf
 {
     /// <summary>
-    /// Represents an indirect integer value. This type is not used by PDFsharp. If it is imported from
+    /// Represents an indirect 32-bit unsigned integer value. This type is not used by PDFsharp. If it is imported from
     /// an external PDF file, the value is converted into a direct object.
     /// </summary>
     [DebuggerDisplay("({" + nameof(Value) + "})")]
+    [Obsolete("This class is deprecated and will be removed.")]
     public sealed class PdfUIntegerObject : PdfNumberObject
     {
         /// <summary>

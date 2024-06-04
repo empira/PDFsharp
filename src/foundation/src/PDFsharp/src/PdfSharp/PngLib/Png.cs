@@ -1,4 +1,7 @@
-﻿// ReSharper disable once CheckNamespace
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+// ReSharper disable once CheckNamespace
 namespace PdfSharp.BigGustave
 {
     using System;
@@ -44,7 +47,7 @@ namespace PdfSharp.BigGustave
         /// </summary>
         /// <remarks>
         /// Pixel values are generated on demand from the underlying data to prevent holding many items in memory at once, so consumers
-        /// should cache values if they're going to be looped over many times.
+        /// should cache values if they’re going to be looped over many times.
         /// </remarks>
         /// <param name="x">The x coordinate (column).</param>
         /// <param name="y">The y coordinate (row).</param>
@@ -61,7 +64,7 @@ namespace PdfSharp.BigGustave
         /// </summary>
         /// <remarks>
         /// Pixel values are generated on demand from the underlying data to prevent holding many items in memory at once, so consumers
-        /// should cache values if they're going to be looped over many times.
+        /// should cache values if they’re going to be looped over many times.
         /// </remarks>
         /// <param name="x">The x coordinate (column).</param>
         /// <param name="y">The y coordinate (row).</param>

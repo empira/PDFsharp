@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 #if GDI
@@ -7,7 +7,6 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 #endif
 #if WPF
-using System.IO;
 #endif
 using PdfSharp.Internal;
 using PdfSharp.Pdf;
@@ -67,7 +66,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public new static XPdfForm FromFile(string path)
         {
-            // TODO: Same file should return same object (that's why the function is static).
+            // TODO: Same file should return same object (that’s why the function is static).
             return new XPdfForm(path);
         }
 
@@ -120,7 +119,7 @@ namespace PdfSharp.Drawing
 
         /// <summary>
         /// Frees the memory occupied by the underlying imported PDF document, even if other XPdfForm objects
-        /// refer to this document. A reuse of this object doesn't fail, because the underlying PDF document
+        /// refer to this document. A reuse of this object doesn’t fail, because the underlying PDF document
         /// is re-imported if necessary.
         /// </summary>
         // TODO: NYI: Dispose
@@ -191,31 +190,31 @@ namespace PdfSharp.Drawing
 
         int _pageCount = -1;
 
-        /// <summary>
-        /// Gets the width in point of the page identified by the property PageNumber.
-        /// </summary>
-        [Obsolete("Use either PixelWidth or PointWidth. Temporarily obsolete because of rearrangements for WPF.")]
-        public override double Width
-        {
-            get
-            {
-                var page = ExternalDocument.Pages[_pageNumber - 1];
-                return page.Width;
-            }
-        }
+        ///// <summary>
+        ///// Gets the width in point of the page identified by the property PageNumber.
+        ///// </summary>
+        //[Obsolete("Use either PixelWidth or PointWidth. Temporarily obsolete because of rearrangements for WPF.")]
+        //public override double Width
+        //{
+        //    get
+        //    {
+        //        var page = ExternalDocument.Pages[_pageNumber - 1];
+        //        return page.Width;
+        //    }
+        //}
 
-        /// <summary>
-        /// Gets the height in point of the page identified by the property PageNumber.
-        /// </summary>
-        [Obsolete("Use either PixelHeight or PointHeight. Temporarily obsolete because of rearrangements for WPF.")]
-        public override double Height
-        {
-            get
-            {
-                var page = ExternalDocument.Pages[_pageNumber - 1];
-                return page.Height;
-            }
-        }
+        ///// <summary>
+        ///// Gets the height in point of the page identified by the property PageNumber.
+        ///// </summary>
+        //[Obsolete("Use either PixelHeight or PointHeight. Temporarily obsolete because of rearrangements for WPF.")]
+        //public override double Height
+        //{
+        //    get
+        //    {
+        //        var page = ExternalDocument.Pages[_pageNumber - 1];
+        //        return page.Height;
+        //    }
+        //}
 
         /// <summary>
         /// Gets the width in point of the page identified by the property PageNumber.
@@ -225,7 +224,7 @@ namespace PdfSharp.Drawing
             get
             {
                 var page = ExternalDocument.Pages[_pageNumber - 1];
-                return page.Width;
+                return page.Width.Point;
             }
         }
 
@@ -237,7 +236,7 @@ namespace PdfSharp.Drawing
             get
             {
                 var page = ExternalDocument.Pages[_pageNumber - 1];
-                return page.Height;
+                return page.Height.Point;
             }
         }
 
@@ -252,14 +251,14 @@ namespace PdfSharp.Drawing
         public override int PixelHeight => DoubleUtil.DoubleToInt(PointHeight);
 
         /// <summary>
-        /// Get the size of the page identified by the property PageNumber.
+        /// Get the size in point of the page identified by the property PageNumber.
         /// </summary>
         public override XSize Size
         {
             get
             {
                 var page = ExternalDocument.Pages[_pageNumber - 1];
-                return new XSize(page.Width, page.Height);
+                return new(page.Width.Point, page.Height.Point);
             }
         }
 
@@ -319,11 +318,11 @@ namespace PdfSharp.Drawing
         internal PdfDocument ExternalDocument
         {
             // The problem is that you can ask an XPdfForm about the number of its pages before it was
-            // drawn the first time. At this moment the XPdfForm doesn't know the document where it will
+            // drawn the first time. At this moment the XPdfForm doesn’t know the document where it will
             // be later drawn on one of its pages. To prevent the import of the same document more than
             // once, all imported documents of a thread are cached. The cache is local to the current 
-            // thread and not to the appdomain, because I won't get problems in a multi-thread environment
-            // that I don't understand.
+            // thread and not to the appdomain, because I won’t get problems in a multi-thread environment
+            // that I don’t understand.
             get
             {
                 if (IsTemplate)
