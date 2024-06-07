@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
@@ -16,12 +16,12 @@ namespace MigraDoc.Rendering
         /// <summary>
         /// Gets or sets the height necessary to start the document object.
         /// </summary>
-        internal XUnit StartingHeight { get; set; }
+        internal XUnitPt StartingHeight { get; set; }
 
         /// <summary>
         /// Gets or sets the height necessary to end the document object.
         /// </summary>
-        internal XUnit TrailingHeight { get; set; }
+        internal XUnitPt TrailingHeight { get; set; }
 
         /// <summary>
         /// Indicates whether the document object shall be kept on one page
@@ -35,24 +35,24 @@ namespace MigraDoc.Rendering
         internal bool KeepTogether { get; set; }
 
         /// <summary>
-        /// The space that shall be kept free above the element's content.
+        /// The space that shall be kept free above the element’s content.
         /// </summary>
-        internal virtual XUnit MarginTop { get; set; }
+        internal virtual XUnitPt MarginTop { get; set; }
 
         /// <summary>
-        /// The space that shall be kept free right to the element's content.
+        /// The space that shall be kept free right to the element’s content.
         /// </summary>
-        internal XUnit MarginRight { get; set; }
+        internal XUnitPt MarginRight { get; set; }
 
         /// <summary>
-        /// The space that shall be kept free below the element's content.
+        /// The space that shall be kept free below the element’s content.
         /// </summary>
-        internal XUnit MarginBottom { get; set; }
+        internal XUnitPt MarginBottom { get; set; }
 
         /// <summary>
-        /// The space that shall be kept free left to the element's content.
+        /// The space that shall be kept free left to the element’s content.
         /// </summary>
-        internal XUnit MarginLeft { get; set; }
+        internal XUnitPt MarginLeft { get; set; }
 
         /// <summary>
         /// Gets or sets the Area needed by the content (including padding and borders for e.g. paragraphs).
@@ -97,16 +97,16 @@ namespace MigraDoc.Rendering
         /// <summary>
         /// Gets or sets the top position of the element.
         /// </summary>
-        internal XUnit Top { get; set; }
+        internal XUnitPt Top { get; set; }
 
         /// <summary>
         /// Gets or sets the left position of the element.
         /// </summary>
-        internal XUnit Left { get; set; }
+        internal XUnitPt Left { get; set; }
 
         /// <summary>
         /// Gets or sets the minimum width of the element.
         /// </summary>
-        internal XUnit MinWidth { get; set; }
+        internal XUnitPt MinWidth { get; set; }
     }
 }

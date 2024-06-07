@@ -1,25 +1,13 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 
 namespace PdfSharp.Events
 {
     /// <summary>
-    /// Base class for EventArgs in PDFsharp.
-    /// </summary>
-    public abstract class PdfSharpEventArgs : EventArgs
-    {
-        /// <summary>
-        /// The source of the event.
-        /// </summary>
-        public PdfObject Source { get; set; } = null!;
-    }
-
-    /// <summary>
-    /// The event type of a PageEvent.
+    /// The event type of PageEvent.
     /// </summary>
     public enum PageEventType
     {
@@ -27,14 +15,17 @@ namespace PdfSharp.Events
         /// A new page was created.
         /// </summary>
         Created,
+        
         /// <summary>
         /// A page was moved.
         /// </summary>
         Moved,
+        
         /// <summary>
         /// A page was imported from another document.
         /// </summary>
         Imported,
+        
         /// <summary>
         /// A page was removed.
         /// </summary>
@@ -44,12 +35,12 @@ namespace PdfSharp.Events
     /// <summary>
     /// EventArgs for changes in the PdfPages of a document.
     /// </summary>
-    public class PageEventArgs : PdfSharpEventArgs
+    public class PageEventArgs(PdfObject source) : PdfSharpEventArgs(source)
     {
         /// <summary>
         /// Gets or sets the affected page.
         /// </summary>
-        public PdfPage Page { get; set; } = null!;
+        public PdfPage Page { get; set; } = default!;
 
         /// <summary>
         /// Gets or sets the page index of the affected page.
@@ -70,7 +61,7 @@ namespace PdfSharp.Events
     public delegate void PageAddedOrRemovedEventHandler(object sender, PageEventArgs e);
 
     /// <summary>
-    /// The action type of a PageGraphicsEvent.
+    /// The action type of PageGraphicsEvent.
     /// </summary>
     public enum PageGraphicsActionType
     {
@@ -78,30 +69,32 @@ namespace PdfSharp.Events
         /// The XGraphics object for the page was created.
         /// </summary>
         GraphicsCreated = 1,
+        
         /// <summary>
-        /// DrawString() was called on the page's XGraphics object.
+        /// DrawString() was called on the page’s XGraphics object.
         /// </summary>
         DrawString,
+        
         /// <summary>
-        /// Another method drawing content was called on the page's XGraphics object.
+        /// Another method drawing content was called on the page’s XGraphics object.
         /// </summary>
         Draw
     }
 
     /// <summary>
-    /// EventArgs for actions on a page's XGraphics object.
+    /// EventArgs for actions on a page’s XGraphics object.
     /// </summary>
-    public class PageGraphicsEventArgs : PdfSharpEventArgs
+    public class PageGraphicsEventArgs(PdfObject source) : PdfSharpEventArgs(source)
     {
         /// <summary>
-        /// Gets the page xxxxx.
+        /// Gets the page that causes the event.
         /// </summary>
-        public PdfPage Page { get; internal set; } = null!;
+        public PdfPage Page { get; internal set; } = default!;
 
         /// <summary>
         /// Gets the created XGraphics object.
         /// </summary>
-        public XGraphics Graphics { get; internal set; } = null!;
+        public XGraphics Graphics { get; internal set; } = default!;
 
         /// <summary>
         /// The action type of PageGraphicsEvent.
@@ -128,8 +121,7 @@ namespace PdfSharp.Events
         /// <param name="args">The PageEventArgs of the event.</param>
         public void OnPageAdded(object sender, PageEventArgs args)
         {
-            if (PageAdded != null)
-                PageAdded(sender, args);
+            PageAdded?.Invoke(sender, args);
         }
 
         /// <summary>
@@ -168,7 +160,7 @@ namespace PdfSharp.Events
         public event PageGraphicsEventHandler? PageGraphicsCreated;
 
         /// <summary>
-        /// An event raised if something is drawn on a page's XGraphics object.
+        /// An event raised if something is drawn on a page’s XGraphics object.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="args">The PageGraphicsEventArgs of the event.</param>

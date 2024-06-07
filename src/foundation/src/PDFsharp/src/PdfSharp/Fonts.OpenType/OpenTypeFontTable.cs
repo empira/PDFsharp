@@ -14,7 +14,7 @@ namespace PdfSharp.Fonts.OpenType
     /// </summary>
     class OpenTypeFontTable : ICloneable
     {
-        public OpenTypeFontTable(OpenTypeFontface? fontData, string tag)
+        public OpenTypeFontTable(OpenTypeFontFace? fontData, string tag)
         {
             _fontData = fontData;
             if (fontData != null && fontData.TableDictionary.ContainsKey(tag))
@@ -40,9 +40,9 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// Gets the font image the table belongs to.
         /// </summary>
-        public OpenTypeFontface? FontData => _fontData;
+        public OpenTypeFontFace? FontData => _fontData;
 
-        internal OpenTypeFontface? _fontData = default!;
+        internal OpenTypeFontFace? _fontData = default!;
 
         public TableDirectoryEntry DirectoryEntry;
 

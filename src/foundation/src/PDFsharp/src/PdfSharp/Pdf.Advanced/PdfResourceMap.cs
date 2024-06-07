@@ -37,10 +37,18 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal void CollectResourceNames(Dictionary<string, object?> usedResourceNames)
         {
-            // ?TODO: Imported resources (e.g. fonts) can be reused, but I think this is rather difficult. Will be an issue in PDFsharp 2.0.
-            PdfName[] names = Elements.KeyNames;
-            foreach (PdfName name in names)
-                usedResourceNames.Add(name.ToString(), null);
+            // ?TODO: Imported resources (e.g. fonts) can be reused, but I think this is rather difficult.
+            var names = Elements.KeyNames;
+            foreach (var name in names)
+            {
+                // We found a PDF document where the names of the resources of a page are not different in pairs.
+                // The page used the name /R1 for both a font and a graphic state.
+                // So we now check first if it already exists in the collection.
+                var resName = name.ToString();
+                // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd because it is not available in .NET Standard
+                if (!usedResourceNames.ContainsKey(resName))
+                    usedResourceNames.Add(resName, null);
+            }
         }
     }
 }

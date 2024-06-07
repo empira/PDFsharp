@@ -1,6 +1,8 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+// ReSharper disable InconsistentNaming
+
 namespace PdfSharp.Pdf.Content.Objects
 {
     /// <summary>
@@ -31,12 +33,12 @@ namespace PdfSharp.Pdf.Content.Objects
         /// <summary>
         /// Close, fill, and stroke path using even-odd rule.
         /// </summary>
-        bx,  // b*
+        bx,  // actually b*
 
         /// <summary>
         /// Fill and stroke path using even-odd rule.
         /// </summary>
-        Bx,  // B*
+        Bx,  // actually B*
 
         /// <summary>
         /// (PDF 1.2) Begin marked-content sequence with property list
@@ -79,7 +81,7 @@ namespace PdfSharp.Pdf.Content.Objects
         CS,
 
         /// <summary>
-        /// (PDF 1.1) Set color space for nonstroking operations.
+        /// (PDF 1.1) Set color space for non-stroking operations.
         /// </summary>
         cs,
 
@@ -128,7 +130,6 @@ namespace PdfSharp.Pdf.Content.Objects
         /// </summary>
         EX,
 
-
         /// <summary>
         /// Fill path using non-zero winding number rule.
         /// </summary>
@@ -150,7 +151,7 @@ namespace PdfSharp.Pdf.Content.Objects
         G,
 
         /// <summary>
-        /// Set gray level for nonstroking operations.
+        /// Set gray level for non-stroking operations.
         /// </summary>
         g,
 
@@ -190,7 +191,7 @@ namespace PdfSharp.Pdf.Content.Objects
         K,
 
         /// <summary>
-        /// Set CMYK color for nonstroking operations.
+        /// Set CMYK color for non-stroking operations.
         /// </summary>
         k,
 
@@ -240,7 +241,7 @@ namespace PdfSharp.Pdf.Content.Objects
         RG,
 
         /// <summary>
-        /// Set RGB color for nonstroking operations.
+        /// Set RGB color for non-stroking operations.
         /// </summary>
         rg,
 
@@ -265,7 +266,7 @@ namespace PdfSharp.Pdf.Content.Objects
         SC,
 
         /// <summary>
-        /// (PDF 1.1) Set color for nonstroking operations.
+        /// (PDF 1.1) Set color for non-stroking operations.
         /// </summary>
         sc,
 
@@ -275,7 +276,7 @@ namespace PdfSharp.Pdf.Content.Objects
         SCN,
 
         /// <summary>
-        /// (PDF 1.2) Set color for nonstroking operations (ICCBased and special color spaces).
+        /// (PDF 1.2) Set color for non-stroking operations (ICCBased and special color spaces).
         /// </summary>
         scn,
 
@@ -367,7 +368,7 @@ namespace PdfSharp.Pdf.Content.Objects
         /// <summary>
         /// Set clipping path using even-odd rule.
         /// </summary>
-        Wx,  // W*
+        Wx,  // actually W*
 
         /// <summary>
         /// Append curved segment to path (final point replicated).
@@ -383,11 +384,5 @@ namespace PdfSharp.Pdf.Content.Objects
         /// Set word and character spacing, move to next line, and show text.
         /// </summary>
         QuoteDouble,  // "
-
-        /// <summary>
-        /// Set word and character spacing, move to next line, and show text.
-        /// </summary>
-        [Obsolete($"Use '{nameof(QuoteDouble)}'.")]
-        QuoteDbl = QuoteDouble,
     }
 }

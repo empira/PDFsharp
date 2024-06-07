@@ -1,15 +1,14 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Fonts;
 using PdfSharp.Fonts.OpenType;
 using PdfSharp.Drawing;
-using PdfSharp.Pdf.Filters;
 
 namespace PdfSharp.Pdf.Advanced
 {
     /// <summary>
-    /// Represents a TrueType font.
+    /// Represents a OpenType font that is ANSI encoded in the PDF document.
     /// </summary>
     class PdfTrueTypeFont : PdfFont
     {
@@ -27,34 +26,71 @@ namespace PdfSharp.Pdf.Advanced
             Elements.SetName(Keys.Subtype, "/TrueType");
 
             // TrueType with WinAnsiEncoding only.
-            OpenTypeDescriptor ttDescriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptorFor(font);
-            FontDescriptor = new PdfFontDescriptor(document, ttDescriptor);
-            _fontOptions = font.PdfOptions;
-            Debug.Assert(_fontOptions != null);
+            OpenTypeDescriptor otDescriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptorFor(font);
+            FontDescriptor = document.PdfFontDescriptorCache.GetOrCreatePdfDescriptorFor(otDescriptor, font.GlyphTypeface.GetBaseName());
 
-            //cmapInfo = new CMapInfo(null/*ttDescriptor*/);
-            _cmapInfo = new CMapInfo(ttDescriptor);
+            // When the font subset is created, the cmap table must be added.
+            FontDescriptor.AddCmapTable = true;
+
+            //_fontOptions = font.PdfOptions;
+            //Debug.Assert(_fontOptions != null);
+
+            _cmapInfo = new CMapInfo(otDescriptor);
+            //FontDescriptor._cmapInfo2 = new(otDescriptor);
 
             BaseFont = font.GlyphTypeface.GetBaseName();
             // Fonts are always embedded.
             //if (_fontOptions.FontEmbedding == PdfFontEmbedding.Always)
-            BaseFont = PdfFont.CreateEmbeddedFontSubsetName(BaseFont);
+            BaseFont = FontDescriptor.FontName;
 
-            FontDescriptor.FontName = BaseFont;
-
-            Debug.Assert(_fontOptions.FontEncoding == PdfFontEncoding.WinAnsi);
+            //Debug.Assert(_fontOptions.FontEncoding == PdfFontEncoding.WinAnsi);
             if (!IsSymbolFont)
                 Encoding = "/WinAnsiEncoding";
 
-            Owner.IrefTable.Add(FontDescriptor);
+            Owner.IrefTable.TryAdd(FontDescriptor);
             Elements[Keys.FontDescriptor] = FontDescriptor.Reference;
 
-            FontEncoding = font.PdfOptions.FontEncoding;
+            //FontEncoding = font.PdfOptions.FontEncoding;
+            FontEncoding = PdfFontEncoding.WinAnsi;
         }
 
-        XPdfFontOptions FontOptions => _fontOptions;
+        public PdfTrueTypeFont(PdfDocument document, XGlyphTypeface glyphTypeface)
+            : base(document)
+        {
+            Elements.SetName(Keys.Type, "/Font");
+            Elements.SetName(Keys.Subtype, "/TrueType");
 
-        readonly XPdfFontOptions _fontOptions = null!;
+            // TrueType with WinAnsiEncoding only.
+            OpenTypeDescriptor otDescriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptorFor(glyphTypeface);
+            FontDescriptor = document.PdfFontDescriptorCache.GetOrCreatePdfDescriptorFor(otDescriptor, glyphTypeface.GetBaseName());
+
+            // When the font subset is created, the cmap table must be added.
+            FontDescriptor.AddCmapTable = true;
+
+            //_fontOptions = font.PdfOptions;
+            //Debug.Assert(_fontOptions != null);
+
+            _cmapInfo = new CMapInfo(otDescriptor);
+            //FontDescriptor._cmapInfo2 = new(otDescriptor);
+
+            // Fonts are always embedded.
+            //if (_fontOptions.FontEmbedding == PdfFontEmbedding.Always)
+            BaseFont = FontDescriptor.FontName;
+
+            //Debug.Assert(_fontOptions.FontEncoding == PdfFontEncoding.WinAnsi);
+            if (!IsSymbolFont)
+                Encoding = "/WinAnsiEncoding";
+
+            Owner.IrefTable.TryAdd(FontDescriptor);
+            Elements[Keys.FontDescriptor] = FontDescriptor.Reference;
+
+            //FontEncoding = font.PdfOptions.FontEncoding;
+            FontEncoding = PdfFontEncoding.WinAnsi;
+        }
+
+        // Not needed
+        //XPdfFontOptions FontOptions => _fontOptions;
+        //readonly XPdfFontOptions _fontOptions = null!;
 
         public string BaseFont
         {
@@ -74,7 +110,7 @@ namespace PdfSharp.Pdf.Advanced
             set => Elements.SetInteger(Keys.LastChar, value);
         }
 
-        public PdfArray Widths => (PdfArray)Elements.GetValue(Keys.Widths, VCF.Create)!; // Because of Create.
+        public PdfArray Widths => (PdfArray)Elements.GetValue(Keys.Widths, VCF.CreateIndirect)!; // Because of Create.
 
         public string Encoding
         {
@@ -89,29 +125,23 @@ namespace PdfSharp.Pdf.Advanced
         {
             base.PrepareForSave();
 
-            // Fonts are always embedded.
-            OpenTypeFontface subSet = FontDescriptor._descriptor.FontFace.CreateFontSubSet(_cmapInfo!.GlyphIndices, false);
-            byte[] fontData = subSet.FontSource.Bytes;
+            FontDescriptor.PrepareForSave();
 
-            PdfDictionary fontStream = new PdfDictionary(Owner);
-            Owner.Internals.AddObject(fontStream);
-            FontDescriptor.Elements[PdfFontDescriptor.Keys.FontFile2] = fontStream.Reference;
+            // #NFM TODO use only used characters
+            var min = CMapInfo.MinCodePoint;
+            var max = CMapInfo.MaxCodePoint;
+            if (min > 32 || max < 255)
+                _ = typeof(int);
 
-            fontStream.Elements["/Length1"] = new PdfInteger(fontData.Length);
-            if (!Owner.Options.NoCompression)
-            {
-                fontData = Filtering.FlateDecode.Encode(fontData, _document.Options.FlateEncodeMode);
-                fontStream.Elements["/Filter"] = new PdfName("/FlateDecode");
-            }
-            fontStream.Elements["/Length"] = new PdfInteger(fontData.Length);
-            fontStream.CreateStream(fontData);
-
-            FirstChar = 0;
+            FirstChar = 32;
             LastChar = 255;
             PdfArray width = Widths;
+#if DEBUG
+            width.Comment = Invariant($"Width array[{FirstChar}..{LastChar}] of {typeof(PdfTrueTypeFont)} object {ObjectID}");
+#endif
             //width.Elements.Clear();
-            for (int idx = 0; idx < 256; idx++)
-                width.Elements.Add(new PdfInteger(FontDescriptor._descriptor.Widths[idx]));
+            for (int idx = 32; idx < 256; idx++)
+                width.Elements.Add(new PdfInteger(FontDescriptor.Descriptor.Widths[idx]));
         }
 
         /// <summary>
@@ -142,7 +172,7 @@ namespace PdfSharp.Pdf.Advanced
             /// <summary>
             /// (Required) The PostScript name of the font. For Type 1 fonts, this is usually
             /// the value of the FontName entry in the font program; for more information.
-            /// The Post-Script name of the font can be used to find the font’s definition in 
+            /// The Post-Script name of the font can be used to find the fontâ€™s definition in 
             /// the consumer application or its environment. It is also the name that is used when
             /// printing to a PostScript output device.
             /// </summary>
@@ -151,14 +181,14 @@ namespace PdfSharp.Pdf.Advanced
 
             /// <summary>
             /// (Required except for the standard 14 fonts) The first character code defined 
-            /// in the font’s Widths array.
+            /// in the fontâ€™s Widths array.
             /// </summary>
             [KeyInfo(KeyType.Integer)]
             public const string FirstChar = "/FirstChar";
 
             /// <summary>
             /// (Required except for the standard 14 fonts) The last character code defined
-            /// in the font’s Widths array.
+            /// in the fontâ€™s Widths array.
             /// </summary>
             [KeyInfo(KeyType.Integer)]
             public const string LastChar = "/LastChar";
@@ -177,7 +207,7 @@ namespace PdfSharp.Pdf.Advanced
 
             /// <summary>
             /// (Required except for the standard 14 fonts; must be an indirect reference)
-            /// A font descriptor describing the font’s metrics other than its glyph widths.
+            /// A font descriptor describing the fontâ€™s metrics other than its glyph widths.
             /// Note: For the standard 14 fonts, the entries FirstChar, LastChar, Widths, and 
             /// FontDescriptor must either all be present or all be absent. Ordinarily, they are
             /// absent; specifying them enables a standard font to be overridden.
@@ -186,10 +216,10 @@ namespace PdfSharp.Pdf.Advanced
             public new const string FontDescriptor = "/FontDescriptor";
 
             /// <summary>
-            /// (Optional) A specification of the font’s character encoding if different from its
+            /// (Optional) A specification of the fontâ€™s character encoding if different from its
             /// built-in encoding. The value of Encoding is either the name of a predefined
             /// encoding (MacRomanEncoding, MacExpertEncoding, or WinAnsiEncoding, as described in 
-            /// Appendix D) or an encoding dictionary that specifies differences from the font’s
+            /// Appendix D) or an encoding dictionary that specifies differences from the fontâ€™s
             /// built-in encoding or from a specified predefined encoding.
             /// </summary>
             [KeyInfo(KeyType.Name | KeyType.Dictionary)]

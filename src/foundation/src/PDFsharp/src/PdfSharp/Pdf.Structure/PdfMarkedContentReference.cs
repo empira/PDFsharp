@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 namespace PdfSharp.Pdf.Structure
@@ -56,8 +56,8 @@ namespace PdfSharp.Pdf.Structure
             /// (Optional; must be an indirect reference) The content stream containing
             /// the marked-content sequence. This entry should be present only if the
             /// marked-content sequence resides in a content stream other than the
-            /// content stream for the page—for example, in a form XObject or an
-            /// annotation’s appearance stream. If this entry is absent, the
+            /// content stream for the pageâ€”for example, in a form XObject or an
+            /// annotationâ€™s appearance stream. If this entry is absent, the
             /// marked-content sequence is contained in the content stream of the page
             /// identified by Pg (either in the marked-content reference dictionary or
             /// in the parent structure element).
@@ -67,7 +67,7 @@ namespace PdfSharp.Pdf.Structure
 
             /// <summary>
             /// (Optional; must be an indirect reference) The PDF object owning the stream
-            /// identified by Stm—for example, the annotation to which an appearance stream belongs.
+            /// identified by Stmâ€”for example, the annotation to which an appearance stream belongs.
             /// </summary>
             [KeyInfo(KeyType.Optional)]
             public const string StmOwn = "/StmOwn";

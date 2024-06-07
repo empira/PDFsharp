@@ -29,7 +29,12 @@ namespace MigraDoc.DocumentObjectModel.Internals
         /// </summary>
         public object? GetValue(DocumentObject dom, string name, GV flags)
         {
+#if NET6_0_OR_GREATER
             int dot = name.IndexOf('.', StringComparison.Ordinal);
+#else
+            int dot = name.IndexOf(".", StringComparison.Ordinal);
+#endif
+#if NET6_0_OR_GREATER || true
             if (dot == 0)
                 throw new ArgumentException(DomSR.InvalidValueName(name));
             string? trail = null;
@@ -38,6 +43,16 @@ namespace MigraDoc.DocumentObjectModel.Internals
                 trail = name[(dot + 1)..];
                 name = name[..dot];
             }
+#else
+            if (dot == 0)
+                throw new ArgumentException(DomSR.InvalidValueName(name));
+            string? trail = null;
+            if (dot > 0)
+            {
+                trail = name.Substring(dot + 1);
+                name = name.Substring(0, dot);
+            }
+#endif
 
             var vd = ValueDescriptors[name];
             if (vd == null)
@@ -65,14 +80,23 @@ namespace MigraDoc.DocumentObjectModel.Internals
         /// </summary>
         public void SetValue(DocumentObject dom, string name, object? val)
         {
+#if NET6_0_OR_GREATER
             int dot = name.IndexOf('.', StringComparison.Ordinal);
+#else
+            int dot = name.IndexOf(".", StringComparison.Ordinal);
+#endif
             if (dot == 0)
                 throw new ArgumentException(DomSR.InvalidValueName(name));
             string? trail = null;
             if (dot > 0)
             {
+#if NET6_0_OR_GREATER || true
                 trail = name[(dot + 1)..];
                 name = name[..dot];
+#else
+                trail = name.Substring(dot + 1);
+                name = name.Substring(0, dot);
+#endif
             }
             var vd = ValueDescriptors[name];
             if (vd == null)
@@ -129,14 +153,23 @@ namespace MigraDoc.DocumentObjectModel.Internals
                 return IsNull(dom);
 
             //bool isNull = false;
+#if NET6_0_OR_GREATER
             int dot = name.IndexOf('.', StringComparison.Ordinal);
+#else
+            int dot = name.IndexOf(".", StringComparison.Ordinal);
+#endif
             if (dot == 0)
                 throw new ArgumentException(DomSR.InvalidValueName(name));
             string? trail = null;
             if (dot > 0)
             {
+#if NET6_0_OR_GREATER || true
                 trail = name[(dot + 1)..];
                 name = name[..dot];
+#else
+                trail = name.Substring(dot + 1);
+                name = name.Substring(0, dot);
+#endif
             }
 
             var vd = ValueDescriptors[name];
@@ -250,11 +283,6 @@ namespace MigraDoc.DocumentObjectModel.Internals
 
             foreach (var propInfo in propInfos)
             {
-#if DEBUG_
-                string name = propInfo.Name;
-                if (name == "Font")
-                    name.GetType();
-#endif
                 DVAttribute? attr = null;
                 var dvs = (DVAttribute[])propInfo.GetCustomAttributes(typeof(DVAttribute), false);
                 if (dvs.Length == 1)

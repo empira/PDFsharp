@@ -13,12 +13,16 @@ namespace PdfSharp
     /// </summary>
     static class Config
     {
-        public const string SignificantFigures2 = "0.##";
-        public const string SignificantFigures3 = "0.###";
-        public const string SignificantFigures4 = "0.####";
-        public const string SignificantFigures7 = "0.#######";
-        public const string SignificantFigures10 = "0.##########";
-        public const string SignificantFigures1Plus9 = "0.0#########";
+#if DEBUG
+        public const string SignificantDecimalPlaces0 = "0";    // for testing only
+        public const string SignificantDecimalPlaces1 = "0.#";  // for testing only
+#endif
+        public const string SignificantDecimalPlaces2 = "0.##";
+        public const string SignificantDecimalPlaces3 = "0.###";
+        public const string SignificantDecimalPlaces4 = "0.####";
+        public const string SignificantDecimalPlaces7 = "0.#######";
+        public const string SignificantDecimalPlaces10 = "0.##########";
+        public const string SignificantDecimalPlaces1Plus9 = "0.0#########";
     }
 
     static class Const

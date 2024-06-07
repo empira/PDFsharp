@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc.DocumentObjectModel.Shapes
@@ -100,7 +100,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
 
         /// <summary>
-        /// Gets the line format of the shape's border.
+        /// Gets the line format of the shape’s border.
         /// </summary>
         public LineFormat LineFormat
         {

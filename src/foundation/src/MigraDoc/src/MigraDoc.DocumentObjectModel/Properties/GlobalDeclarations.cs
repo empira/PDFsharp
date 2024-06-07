@@ -7,8 +7,7 @@ global using PdfSharp.Diagnostics;
 global using MigraDoc.DocumentObjectModel.Internals;
 global using static System.FormattableString;
 
-using System.Runtime.CompilerServices;
+//using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: ComVisible(false)]
-[assembly: InternalsVisibleTo("MigraDoc.DocumentObjectModel.Tests")]

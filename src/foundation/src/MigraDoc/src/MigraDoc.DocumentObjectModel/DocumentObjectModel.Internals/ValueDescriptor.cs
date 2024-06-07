@@ -84,7 +84,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
                 {
                     // Case: The type of the property is nullable.
                     //ValueStyleInternal |= ValueStyleInternal.Nullable;
-                    //valueType.GetType();
+                    //_ = typeof(int);
                 }
             }
 #endif

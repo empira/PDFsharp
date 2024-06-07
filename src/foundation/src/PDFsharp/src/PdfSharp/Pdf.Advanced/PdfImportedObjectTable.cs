@@ -1,9 +1,6 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Collections.Generic;
-
 namespace PdfSharp.Pdf.Advanced
 {
     /// <summary>
@@ -19,7 +16,7 @@ namespace PdfSharp.Pdf.Advanced
         {
             if (externalDocument == null)
                 throw new ArgumentNullException(nameof(externalDocument));
-            _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+            Owner = owner ?? throw new ArgumentNullException(nameof(owner));
             _externalDocumentHandle = externalDocument.Handle;
             _xObjects = new PdfFormXObject[externalDocument.PageCount];
         }
@@ -29,9 +26,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets the document this table belongs to.
         /// </summary>
-        public PdfDocument Owner => _owner;
-
-        readonly PdfDocument _owner;
+        public PdfDocument Owner { get; }
 
         /// <summary>
         /// Gets the external document, or null if the external document is garbage collected.
@@ -62,7 +57,7 @@ namespace PdfSharp.Pdf.Advanced
         /// Adds a cloned object to this table.
         /// </summary>
         /// <param name="externalID">The object identifier in the foreign object.</param>
-        /// <param name="iref">The cross reference to the clone of the foreign object, which belongs to
+        /// <param name="iref">The cross-reference to the clone of the foreign object, which belongs to
         /// this document. In general, the clone has a different object identifier.</param>
         public void Add(PdfObjectID externalID, PdfReference iref)
         {
@@ -75,9 +70,9 @@ namespace PdfSharp.Pdf.Advanced
         public PdfReference this[PdfObjectID externalID] => _externalIDs[externalID.ToString()];
 
         /// <summary>
-        /// Maps external object identifiers to cross reference entries of the importing document
+        /// Maps external object identifiers to cross-reference entries of the importing document
         /// {PdfObjectID -> PdfReference}.
         /// </summary>
-        readonly Dictionary<string, PdfReference> _externalIDs = new Dictionary<string, PdfReference>();
+        readonly Dictionary<string, PdfReference> _externalIDs = [];
     }
 }

@@ -1,35 +1,36 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Diagnostics;
+using System.Text;
 using System.Globalization;
-using FluentAssertions;
-using PdfSharp.Pdf;
+using System.Runtime.InteropServices;
+using PdfSharp.Quality;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Fields;
-using MigraDoc.DocumentObjectModel.Tables;
 using MigraDoc.Rendering;
 using MigraDoc.RtfRendering;
 using MigraDoc.Tests.Helper;
+using Xunit;
+using FluentAssertions;
+#if CORE
 using PdfSharp.Fonts;
 using PdfSharp.Snippets.Font;
+#endif
+#if WPF
+using System.IO;
+#endif
+#if !NET6_0_OR_GREATER
 using PdfSharp.TestHelper;
-using Xunit;
-using System.Text;
+#endif
 
 namespace MigraDoc.Tests
 {
-    [Collection("MGD")]
+    [Collection("PDFsharp")]
     public class RtfRendererTests
     {
         [Fact]
         public void Create_Hello_World_RtfRendererTests()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = CreateDocument();
 
@@ -51,10 +52,10 @@ namespace MigraDoc.Tests
             //};
 
             // Create a renderer for the MigraDoc document.
-            var pdfRenderer = new RtfDocumentRenderer();
+            var rtfRenderer = new RtfDocumentRenderer();
 
             // Save the document...
-            var filename = PdfFileHelper.CreateTempFileName("HelloWorld");
+            var filename = IOUtility.GetTempFileName("HelloWorld", null);
 
 #if DEBUG___
             MigraDoc.DocumentObjectModel.IO.DdlWriter dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_0.mdddl");
@@ -62,18 +63,16 @@ namespace MigraDoc.Tests
             dw.Close();
 #endif
 
-            // Layout and render document to PDF.
-            pdfRenderer.Render(document, filename + ".rtf", Environment.CurrentDirectory);
+            // Layout and render document to RTF.
+            rtfRenderer.Render(document, filename + ".rtf", Environment.CurrentDirectory);
 
 #if DEBUG___
             dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_1.mdddl");
             dw.WriteDocument(document);
             dw.Close();
 #endif
-
             //// ...and start a viewer.
-            //PdfFileHelper.StartPdfViewerIfDebugging(filename);
-
+            //PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
         /// <summary>
@@ -97,40 +96,6 @@ namespace MigraDoc.Tests
             // Add some text to the paragraph.
             paragraph.AddFormattedText("Hello, World!", TextFormat.Bold);
 
-#if true
-            // Add a simple table.
-            var table = section.AddTable();
-            table.Borders.Visible = true;
-            table.Borders.Width = 0;
-            table.Borders.Color = Colors.Blue;
-            table.Columns.AddColumn().Width = "2cm";
-            table.Columns.AddColumn().Width = "4cm";
-            table.Columns.AddColumn().Width = "3cm";
-            var brd = table.Columns[1].Borders;
-            brd.Left.Width = 0;
-            brd.Right.Width = 0;
-            var row = table.AddRow();
-            row.Format.Shading.Color = Colors.LightPink;
-            row.HeadingFormat = true;
-            row[0].AddParagraph("Left");
-            row[1].AddParagraph("Center");
-            row[2].AddParagraph("Right");
-            AddRowBorder(row);
-
-            row = table.AddRow();
-            row.Format.Shading.Color = Colors.LightYellow;
-            row[0].AddParagraph("Lorem");
-            row[1].AddParagraph("Ipsum");
-            row[2].AddParagraph("Foo or bar");
-            AddRowBorder(row);
-
-            row = table.AddRow();
-            row.Format.Shading.Color = Colors.LightGoldenrodYellow;
-            row[0].AddParagraph("More lorem");
-            row[1].AddParagraph("More ipsum");
-            row[2].AddParagraph("More foo or bar");
-#endif
-
             // Create the primary footer.
             var footer = section.Footers.Primary;
 
@@ -142,37 +107,12 @@ namespace MigraDoc.Tests
             return document;
         }
 
-        static void AddRowBorder(Row row)
-        {
-#if true
-            row.Borders.Bottom.Width = 1;
-            row.Borders.Bottom.Color = Colors.Blue;
-
-            //foreach (Cell cell in row.Cells)
-            //{
-            //    cell.Borders.Visible = true;
-            //    cell.Borders.Bottom.Visible = true;
-            //    cell.Borders.Bottom.Width = 2;
-            //    cell.Borders.Bottom.Color = Colors.BlueViolet;
-            //}
-#else
-            row.Borders.Visible = true;
-            row.Borders.Bottom.Visible = true;
-            row.Borders.Bottom.Width = 2;
-            row.Borders.Bottom.Color = Colors.BlueViolet;
-#endif
-        }
-
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
         public void Test_Tabs(bool doNotUnifyTabStopHandling)
         {
             Capabilities.BackwardCompatibility.DoNotUnifyTabStopHandling = doNotUnifyTabStopHandling;
-
-#if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
-#endif
 
             var document = new Document();
 
@@ -206,15 +146,24 @@ namespace MigraDoc.Tests
             var paragraph = section.AddParagraph("Alignment order");
             paragraph.Style = StyleNames.Heading1;
 
+#if NET6_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
                 section.AddParagraph(alignment.ToString());
+#else
+            foreach (var alignment in Enum.GetValues(typeof(TabAlignment)))
+                section.AddParagraph(alignment.ToString());
+#endif
 
             // 1.1 Single tabs in paragraph: Nothing special - every tabstop needs a tab to be reached.
             paragraph = section.AddParagraph("1.1. Single tabs in paragraph");
             paragraph.Style = StyleNames.Heading1;
 
             TestHelper.DrawHorizontalPosition(section, position1);
+#if NET6_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
+#else
+            foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
+#endif
             {
                 paragraph = section.AddParagraph();
 
@@ -230,7 +179,11 @@ namespace MigraDoc.Tests
             paragraph.Style = StyleNames.Heading1;
 
             TestHelper.DrawHorizontalPosition(section, position1, position2);
+#if NET6_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
+#else
+            foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
+#endif
             {
                 paragraph = section.AddParagraph();
 
@@ -255,7 +208,11 @@ namespace MigraDoc.Tests
             var table = section.AddTable();
             table.AddColumn(Unit.FromCentimeter(16));
 
+#if NET6_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
+#else
+            foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
+#endif
             {
                 var row = table.AddRow();
 
@@ -290,7 +247,11 @@ namespace MigraDoc.Tests
             table.AddColumn(Unit.FromCentimeter(2));
             table.AddColumn(Unit.FromCentimeter(14));
 
+#if NET6_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
+#else
+            foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
+#endif
             {
                 var row = table.AddRow();
 
@@ -324,7 +285,11 @@ namespace MigraDoc.Tests
             table = section.AddTable();
             table.AddColumn(Unit.FromCentimeter(16));
 
+#if NET6_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
+#else
+            foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
+#endif
             {
                 var row = table.AddRow();
 
@@ -352,7 +317,11 @@ namespace MigraDoc.Tests
             table = section.AddTable();
             table.AddColumn(Unit.FromCentimeter(16));
 
+#if NET6_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
+#else
+            foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
+#endif
             {
                 var row = table.AddRow();
 
@@ -396,7 +365,11 @@ namespace MigraDoc.Tests
             table = section.AddTable();
             table.AddColumn(Unit.FromCentimeter(16));
 
+#if NET6_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
+#else
+            foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
+#endif
             {
                 var row = table.AddRow();
 
@@ -430,7 +403,11 @@ namespace MigraDoc.Tests
             table = section.AddTable();
             table.AddColumn(Unit.FromCentimeter(16));
 
+#if NET6_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
+#else
+            foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
+#endif
             {
                 var row = table.AddRow();
 
@@ -460,7 +437,7 @@ namespace MigraDoc.Tests
             var filename = "Test_Tabs_";
             filename += Capabilities.BackwardCompatibility.DoNotUnifyTabStopHandling ? "DoNotUnifyTabStopHandling" : "UnifyTabStopHandling";
 
-            var pdfFilename = PdfFileHelper.CreateTempFileName(filename);
+            var pdfFilename = PdfFileUtility.GetTempPdfFileName(filename);
             var rtfFilename = pdfFilename.Replace(".pdf", ".rtf");
 
             var rtfRenderer = new RtfDocumentRenderer();
@@ -501,11 +478,11 @@ namespace MigraDoc.Tests
                 var decTabStopPos = rtf.LastIndexOf(decimalTabStopStr, valuePos, StringComparison.Ordinal);
                 decTabStopPos.Should().BeGreaterThan(cellPos, "for the cell a decimal tabstop should be defined.");
 
-                // Get the position of the tabstop's position element.
+                // Get the position of the tabstop’s position element.
                 var positionPos = rtf.LastIndexOf(tabStopPositionStr, valuePos, StringComparison.Ordinal);
                 positionPos.Should().BeGreaterThan(decTabStopPos, "for the decimal tabstop a position should be defined.");
 
-                // Get the tabstop's position value and ensure that it's not 0.
+                // Get the tabstop’s position value and ensure that it’s not 0.
                 var positionValuePos = positionPos + tabStopPositionStr.Length;
                 var positionValueEndPos = rtf.IndexOf("\\", positionValuePos, StringComparison.Ordinal);
                 var positionValueStr = rtf.Substring(positionValuePos, positionValueEndPos - positionValuePos);
@@ -525,11 +502,11 @@ namespace MigraDoc.Tests
                     // For DoNotUnifyTabStopHandling == false, the tabstop should exist.
                     leftTabStopPos.Should().BeGreaterThan(cellPos, "with DoNotUnifyTabStopHandling enabled, an additional left tabstop should be defined for the cell.");
 
-                    // Get the position of the tabstop's position element.
+                    // Get the position of the tabstop’s position element.
                     positionPos = rtf.LastIndexOf(tabStopPositionStr, decTabStopPos, StringComparison.Ordinal);
                     positionPos.Should().BeGreaterThan(leftTabStopPos, "for the left tabstop a position should be defined.");
 
-                    // Get the tabstop's position value and ensure that it's 0.
+                    // Get the tabstop’s position value and ensure that it’s 0.
                     positionValuePos = positionPos + tabStopPositionStr.Length;
                     positionValueEndPos = rtf.IndexOf("\\", positionValuePos, StringComparison.Ordinal);
                     positionValueStr = rtf.Substring(positionValuePos, positionValueEndPos - positionValuePos);
@@ -557,7 +534,7 @@ namespace MigraDoc.Tests
                 var containerPos = Math.Max(cellPos, parPos);
                 containerPos.Should().BeGreaterThan(0, $"\"{valueStr}\" should occur inside of a cell or paragraph.");
 
-                // Check all tabstop's position elements for this cell or paragraph.
+                // Check all tabstop’s position elements for this cell or paragraph.
                 var tabStopPositionSearchPos = containerPos;
                 // Exit the loop if or positionPos exceeds the position of the value or if no position element could be found.
                 while (tabStopPositionSearchPos < valuePos)
@@ -566,7 +543,7 @@ namespace MigraDoc.Tests
                     if (positionPos < 0 || positionPos > valuePos)
                         break;
 
-                    // Get the tabstop's position value and ensure that it's not 0, as no additional tabstop should be added here at position 0.
+                    // Get the tabstop’s position value and ensure that it’s not 0, as no additional tabstop should be added here at position 0.
                     var positionValuePos = positionPos + tabStopPositionStr.Length;
                     var positionValueEndPos = rtf.IndexOf("\\", positionValuePos, StringComparison.Ordinal);
                     var positionValueStr = rtf.Substring(positionValuePos, positionValueEndPos - positionValuePos);
@@ -584,24 +561,20 @@ namespace MigraDoc.Tests
 
         public void Create_Rtf_with_Image()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = new Document();
 
             var sect = document.AddSection();
 
-            sect.AddImage(@"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\bmp\Color4A.bmp"); // Fails: Cannot load resources.
-            //sect.AddImage(@"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\png\color8A.png"); // OK
-            //sect.AddImage(@"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\jpeg\color8A.jpg"); // OK
+            sect.AddImage(IOUtility.GetAssetsPath(@"PDFsharp\images\samples\bmp\Color4A.bmp")!); // Fails: Cannot load resources.
+            //sect.AddImage(IOUtility.GetAssetsPath(@"\PDFsharp\images\samples\png\color8A.png")!); // OK
+            //sect.AddImage(IOUtility.GetAssetsPath(@"\PDFsharp\images\samples\jpeg\color8A.jpg")!); // OK
 
             // Create a renderer for the MigraDoc document.
             var rtfRenderer = new RtfDocumentRenderer();
 
             // Save the document...
-            var filename = PdfFileHelper.CreateTempFileName("HelloWorld");
+            var filename = IOUtility.GetTempFileName("HelloWorld", null);
 
 #if DEBUG___
             MigraDoc.DocumentObjectModel.IO.DdlWriter dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_0.mdddl");
@@ -619,17 +592,13 @@ namespace MigraDoc.Tests
 #endif
 
             //// ...and start a viewer.
-            //PdfFileHelper.StartPdfViewerIfDebugging(filename);
+            //PdfFileUtility.ShowDocumentIfDebugging(filename);
 
         }
 
         [Fact]
         public void Create_Rtf_with_Embedded_Base64Image()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = new Document();
 
@@ -641,7 +610,7 @@ namespace MigraDoc.Tests
             var rtfRenderer = new RtfDocumentRenderer();
 
             // Save the document...
-            var filename = PdfFileHelper.CreateTempFileName("HelloWorldEmbeddedBase64");
+            var filename = IOUtility.GetTempFileName("HelloWorldEmbeddedBase64", null);
 
 #if DEBUG___
             MigraDoc.DocumentObjectModel.IO.DdlWriter dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_0.mdddl");
@@ -659,11 +628,11 @@ namespace MigraDoc.Tests
 #endif
 
             //// ...and start a viewer.
-            //PdfFileHelper.StartPdfViewerIfDebugging(filename);
+            //PdfFileUtility.ShowDocumentIfDebugging(filename);
 
         }
 
-        private static void AddImage(Document document)
+        static void AddImage(Document document)
         {
             var base64 = @"base64:iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAACUlBMVEUAAAABAAACAQADAgAHBAAH
 BQANCAALCQARCwARDgAcFQAeFQAeGAAtHAApHgAoHwAuIQAvJQAtJwA4KAA/KQA3LABBLwBGMQBC
@@ -737,16 +706,15 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
         [InlineData(@"Logo landscape 256.png")]
         public void Create_Rtf_with_Base64Image(string assetName)
         {
-#if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = new Document();
 
             var sect = document.AddSection();
 
-            var imagePath = @"..\..\..\..\..\..\..\..\..\assets\PDFsharp\images\samples\" + assetName;
+            var imagePath = IOUtility.GetAssetsPath(@"PDFsharp\images\samples\" + assetName)!;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                imagePath = imagePath.Replace('\\', '/');
 
             var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
@@ -767,7 +735,7 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
             var rtfRenderer = new RtfDocumentRenderer();
 
             // Save the document...
-            var filename = PdfFileHelper.CreateTempFileName("HelloWorldBase64");
+            var filename = IOUtility.GetTempFileName("HelloWorldBase64", null);
 
 #if DEBUG___
             MigraDoc.DocumentObjectModel.IO.DdlWriter dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_0.mdddl");
@@ -785,15 +753,12 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
 #endif
 
             //// ...and start a viewer.
-            //PdfFileHelper.StartPdfViewerIfDebugging(filename);
+            //PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
         [Fact]
         public void Test_Heading_Border()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
-#endif
             var bottomWidth = Unit.FromPoint(2.3);
             var bottomColor = Colors.Blue;
             var rtfBottomString = "\\brdrs\\brdrw46\\brdrcf2";
@@ -824,15 +789,15 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
                 row.Cells[0].AddParagraph($"Row {rowNr}");
                 row.Height = Unit.FromCentimeter(10);
             }
-            
-            var rtfFilename = PdfFileHelper.CreateTempFileName("Test_Heading_Border") + ".rtf";
+
+            var rtfFilename = IOUtility.GetTempFileName("Test_Heading_Border", "rtf");
             var rtfRenderer = new RtfDocumentRenderer();
             rtfRenderer.Render(document, rtfFilename, Environment.CurrentDirectory);
-
 
             // Analyze rendered RTF.
             var rtf = File.ReadAllText(rtfFilename);
 
+#if NET6_0_OR_GREATER
             // Split by row identifier and skip the first part, which is no row.
             var splitByRows = rtf.Split("\\trowd").Skip(1).ToArray();
             splitByRows.Length.Should().Be(5, "as there are 5 rows");
@@ -844,7 +809,19 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
                 ).ToArray();
             foreach (var borders in rowsByBorders)
                 borders.Length.Should().Be(4, "as there are 4 borders defined");
-            
+#else
+            // Split by row identifier and skip the first part, which is no row.
+            var splitByRows = rtf.Splitter("\\trowd").Skip(1).ToArray();
+            splitByRows.Length.Should().Be(5, "as there are 5 rows");
+
+            // Get the part before the padding identifier, split it by border identifier and skip the first part, which is no border.
+            var rowsByBorders = splitByRows
+                .Select(row => row.Splitter("\\clpad").First()
+                    .Splitter("\\clbrdr").Skip(1).ToArray()
+                ).ToArray();
+            foreach (var borders in rowsByBorders)
+                borders.Length.Should().Be(4, "as there are 4 borders defined");
+#endif
 
             // Heading row.
             var rowBorderParts = rowsByBorders[0];
@@ -855,8 +832,11 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
 
             var bottomBorderPart = rowBorderParts[3];
             bottomBorderPart.Should().StartWith("b", "last border should be bottom border");
+#if NET6_0_OR_GREATER || true
             bottomBorderPart[1..].Should().Be(rtfHeadingBottomString, "heading bottom border should be defined heading bottom border");
-
+#else
+            bottomBorderPart.Substring(1).Should().Be(rtfHeadingBottomString, "heading bottom border should be defined heading bottom border");
+#endif
 
             // Row 1.
             rowBorderParts = rowsByBorders[1];
@@ -868,9 +848,12 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
 
             bottomBorderPart = rowBorderParts[3];
             bottomBorderPart.Should().StartWith("b", "last border should be bottom border");
+#if NET6_0_OR_GREATER || true
             bottomBorderPart[1..].Should().Be(rtfBottomString, "row 1 bottom border should be defined content bottom border");
+#else
+            bottomBorderPart.Substring(1).Should().Be(rtfBottomString, "row 1 bottom border should be defined content bottom border");
+#endif
 
-            
             // Row 2-4.
             for (var r = 2; r < 5; r++)
             {
@@ -878,11 +861,19 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
 
                 topBorderPart = rowBorderParts[0];
                 topBorderPart.Should().StartWith("t", "first border should be top border");
+#if NET6_0_OR_GREATER || true
                 topBorderPart[1..].Should().Be(rtfBottomString, $"row {r} top border should be the defined content bottom border of the top neighbor row");
+#else
+                topBorderPart.Substring(1).Should().Be(rtfBottomString, $"row {r} top border should be the defined content bottom border of the top neighbor row");
+#endif
 
                 bottomBorderPart = rowBorderParts[3];
                 bottomBorderPart.Should().StartWith("b", "last border should be bottom border");
+#if NET6_0_OR_GREATER || true
                 bottomBorderPart[1..].Should().Be(rtfBottomString, $"row {r} bottom border should be defined content bottom border");
+#else
+                bottomBorderPart.Substring(1).Should().Be(rtfBottomString, $"row {r} bottom border should be defined content bottom border");
+#endif
             }
         }
     }

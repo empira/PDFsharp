@@ -1,15 +1,15 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.Runtime.InteropServices;
 using PdfSharp.Fonts;
+using PdfSharp.Fonts.Internal;
 #if GDI
+using System.Runtime.InteropServices;
 using PdfSharp.Internal;
 using GdiFont = System.Drawing.Font;
 using GdiFontStyle = System.Drawing.FontStyle;
 #endif
 #if WPF
-using System.IO;
 using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfTypeface = System.Windows.Media.Typeface;
 using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
@@ -27,7 +27,7 @@ namespace PdfSharp.Drawing
         // Implementation Notes
         // 
         // * XFontSource represents a single font (file) in memory.
-        // * An XFontSource holds a reference to its OpenTypeFontface.
+        // * An XFontSource holds a reference to its OpenTypeFontFace.
         // * To prevent large heap fragmentation this class must exist only once.
         // * TODO: ttcf
 
@@ -57,6 +57,19 @@ namespace PdfSharp.Drawing
             return fontSource;
         }
 
+        /// <summary>
+        /// Creates an XFontSource from a font file.
+        /// </summary>
+        /// <param name="path">The path of the font file.</param>
+        public static XFontSource CreateFromFile(string path)
+        {
+            if (String.IsNullOrEmpty(path))
+                throw new ArgumentNullException(nameof(path));
+
+            var bytes = File.ReadAllBytes(path);
+            return GetOrCreateFrom(bytes);
+        }
+
 #if CORE
         internal static XFontSource GetOrCreateFromGlyphTypeface(string typefaceKey, XGlyphTypeface? glyphTypeface)
         {
@@ -70,7 +83,7 @@ namespace PdfSharp.Drawing
 #endif
 
 #if GDI
-        internal static XFontSource GetOrCreateFromGdi(string typefaceKey, GdiFont gdiFont)
+        internal static XFontSource? GetOrCreateFromGdi(string typefaceKey, GdiFont gdiFont)
         {
             byte[] bytes = ReadFontBytesFromGdi(gdiFont);
             XFontSource fontSource = GetOrCreateFrom(typefaceKey, bytes);
@@ -81,7 +94,7 @@ namespace PdfSharp.Drawing
         {
             ////// Weird: LastError is always 123 or 127. Comment out Debug.Assert.
             ////// StL/23-01-31 Reactivate assertions because I believe the bugs are already fixed in .NET 6.
-            
+
             ////// First call may get an error from previous calls.
             ////int error = Marshal.GetLastWin32Error();
             //////Debug.Assert(error == 0); May fail with 38
@@ -115,8 +128,18 @@ namespace PdfSharp.Drawing
                 isTtcf = true;
             }
             error = Marshal.GetLastWin32Error();
+#if NET6_0_OR_GREATER
             Debug.Assert(error == 0);
-
+#else
+            // We ignore error 127 here.
+            // We ignore error 2 here if font data was found.
+            //Debug.Assert(error == 0 || error == 127 || error == 2 && size > 10000 && isTtcf == false,
+            //    "ReadFontBytesFromGdi failed: " + gdiFont.Name + ": " + error + ", size: " + size + ", isTtcf: " + isTtcf);
+            if (!(error == 0 || error == 127 || error == 2 && size > 10_000 && isTtcf == false))
+            {
+                var message = Invariant($"Error while reading GDI FontData: error: {error}, bytes read: {size}");
+            }
+#endif
             if (size == 0)
                 throw new InvalidOperationException("Cannot retrieve font data.");
 
@@ -180,18 +203,18 @@ namespace PdfSharp.Drawing
         }
 
         /// <summary>
-        /// Gets or sets the fontface.
+        /// Gets or sets the font face.
         /// </summary>
-        internal OpenTypeFontface Fontface
+        internal OpenTypeFontFace FontFace
         {
-            get => _fontface;
+            get => _fontFace;
             set
             {
-                _fontface = value;
+                _fontFace = value;
                 _fontName = value.name.FullFontName;
             }
         }
-        OpenTypeFontface _fontface = default!; // NRT
+        OpenTypeFontFace _fontFace = default!; // NRT
 
         /// <summary>
         /// Gets the key that uniquely identifies this font source.
@@ -215,7 +238,7 @@ namespace PdfSharp.Drawing
         //}
 
         /// <summary>
-        /// Gets the name of the font's name table.
+        /// Gets the name of the font’s name table.
         /// </summary>
         public string FontName => _fontName;
 

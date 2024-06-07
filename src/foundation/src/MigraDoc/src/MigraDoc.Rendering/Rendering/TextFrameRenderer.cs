@@ -61,8 +61,8 @@ namespace MigraDoc.Rendering
         {
             Area frameContentArea = _renderInfo.LayoutInfo.ContentArea;
             XGraphicsState state = _gfx.Save();
-            XUnit xPosition;
-            XUnit yPosition;
+            XUnitPt xPosition;
+            XUnitPt yPosition;
             switch (_textFrame.Orientation)
             {
                 case TextOrientation.Downward:

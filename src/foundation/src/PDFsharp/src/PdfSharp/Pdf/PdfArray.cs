@@ -220,9 +220,6 @@ namespace PdfSharp.Pdf
                 if (obj is PdfReference reference)
                 {
                     //Debug.Assert(false, "Check why this is not PdfRealObject or PdfIntegerObject.");
-#if DEBUG
-                    GetType();
-#endif
 
                     // ReSharper disable once RedundantCast
                     obj = (object)reference.Value switch
@@ -287,7 +284,7 @@ namespace PdfSharp.Pdf
                 //object? obj = GetObject(index); // TODO Do this for all conversions! 2023-06-21
                 return obj switch
                 {
-                    null => String.Empty,
+                    null => "",
                     PdfString str => str.Value,
                     PdfStringObject strObject => strObject.Value,
                     _ => throw new InvalidCastException("GetString: Object is not a string.")
@@ -319,22 +316,6 @@ namespace PdfSharp.Pdf
 
                 throw new InvalidCastException("GetName: Object is not a name.");
             }
-
-            //DELETE
-            ///// <summary>
-            ///// Returns the indirect object if the value at the specified index is a PdfReference.
-            ///// </summary>
-            //[Obsolete("Use GetObject, GetDictionary, GetArray, or GetReference")]
-            //public PdfObject GetIndirectObject(int index)
-            //{
-            //    if (index < 0 || index >= Count)
-            //        throw new ArgumentOutOfRangeException(nameof(index), index, PSSR.IndexOutOfRange);
-
-            //    if (this[index] is PdfReference reference)
-            //        return reference.Value;
-
-            //    return null;
-            //}
 
             /// <summary>
             /// Gets the PdfObject with the specified index, or null if no such object exists. If the index refers to

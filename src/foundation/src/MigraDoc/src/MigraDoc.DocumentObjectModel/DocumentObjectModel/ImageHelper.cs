@@ -70,10 +70,19 @@ namespace MigraDoc.DocumentObjectModel
                     if (length > 0 && path[length] == '#')
                     {
                         // Must have at least one dot left of number sign to distinguish from e.g. '#123'.
+#if NET6_0_OR_GREATER
                         if (path.IndexOf('.', StringComparison.Ordinal) != -1)
+#else
+                        if (path.IndexOf(".", StringComparison.Ordinal) != -1)
+#endif
                         {
+#if NET6_0_OR_GREATER || true
                             pageNumber = Int32.Parse(path[(length + 1)..]);
+                            path = path[..length];
+#else
+                            pageNumber = Int32.Parse(path.Substring(length + 1));
                             path = path.Substring(0, length);
+#endif
                         }
                     }
                 }

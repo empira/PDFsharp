@@ -1,8 +1,6 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Diagnostics;
 #if GDI
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -23,14 +21,14 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfDictionaryWithContentStream"/> class.
         /// </summary>
-        public PdfDictionaryWithContentStream()
+        protected PdfDictionaryWithContentStream()
         { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfDictionaryWithContentStream"/> class.
         /// </summary>
         /// <param name="document">The document.</param>
-        public PdfDictionaryWithContentStream(PdfDocument document)
+        protected PdfDictionaryWithContentStream(PdfDocument document)
             : base(document)
         { }
 
@@ -46,12 +44,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal PdfResources Resources
         {
-            get
-            {
-                if (_resources == null)
-                    _resources = (PdfResources?)Elements.GetValue(Keys.Resources, VCF.Create) ?? NRT.ThrowOnNull<PdfResources>();
-                return _resources;
-            }
+            get => _resources ??= (PdfResources?)Elements.GetValue(Keys.Resources, VCF.Create) ?? NRT.ThrowOnNull<PdfResources>();
         }
         PdfResources? _resources;
 
@@ -60,18 +53,16 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         PdfResources IContentStream.Resources => Resources;
 
-        internal string GetFontName(XFont font, out PdfFont pdfFont)
+        internal string GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont)
         {
-            pdfFont = _document.FontTable.GetFont(font);
+            pdfFont = _document.FontTable.GetOrCreateFont(glyphTypeface, fontType);
             Debug.Assert(pdfFont != null);
             string name = Resources.AddFont(pdfFont);
             return name;
         }
 
-        string IContentStream.GetFontName(XFont font, out PdfFont pdfFont)
-        {
-            return GetFontName(font, out pdfFont);
-        }
+        string IContentStream.GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont) 
+            => GetFontName(glyphTypeface, fontType, out pdfFont);
 
         internal string GetFontName(string idName, byte[] fontData, out PdfFont pdfFont)
         {

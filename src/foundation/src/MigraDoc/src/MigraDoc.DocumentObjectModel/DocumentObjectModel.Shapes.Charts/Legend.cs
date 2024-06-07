@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using MigraDoc.DocumentObjectModel.Visitors;
@@ -52,7 +52,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         }
 
         /// <summary>
-        /// Gets or sets the style name of the legend's text.
+        /// Gets or sets the style name of the legend’s text.
         /// </summary>
         public string Style
         {
@@ -61,7 +61,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         }
 
         /// <summary>
-        /// Gets the paragraph format of the legend's text.
+        /// Gets the paragraph format of the legend’s text.
         /// </summary>
         public ParagraphFormat Format
         {
@@ -74,7 +74,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         }
 
         /// <summary>
-        /// Gets the line format of the legend's border.
+        /// Gets the line format of the legend’s border.
         /// </summary>
         public LineFormat LineFormat
         {

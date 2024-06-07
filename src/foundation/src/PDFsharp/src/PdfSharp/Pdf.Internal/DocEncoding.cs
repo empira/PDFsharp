@@ -14,9 +14,7 @@ namespace PdfSharp.Pdf.Internal
         { }
 
         public override int GetByteCount(char[] chars, int index, int count)
-        {
-            return PdfEncoders.WinAnsiEncoding.GetByteCount(chars, index, count);
-        }
+            => PdfEncoders.WinAnsiEncoding.GetByteCount(chars, index, count);
 
         public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
         {
@@ -35,28 +33,21 @@ namespace PdfSharp.Pdf.Internal
 
         public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
         {
-            PdfDocToUnicode.GetType();
+            _ = typeof(int);
             throw new NotImplementedException("GetChars");
             //for (; byteCount > 0; byteIndex++, charIndex++, byteCount--)
             //  chars[charIndex] = (char)bytes[byteIndex];
             //return byteCount;
         }
 
-        public override int GetMaxByteCount(int charCount)
-        {
-            return charCount;
-        }
+        public override int GetMaxByteCount(int charCount) => charCount;
 
-        public override int GetMaxCharCount(int byteCount)
-        {
-            return byteCount;
-        }
+        public override int GetMaxCharCount(int byteCount) => byteCount;
 
         /// <summary>
         /// Converts WinAnsi to DocEncode characters. Based upon PDF Reference 1.6.
         /// </summary>
-        static readonly byte[] AnsiToDoc = new byte[256]
-        {
+        static readonly byte[] AnsiToDoc = /*new byte[256]*/ {  // keep brace to ensure that Visual Studio does not reformat 
             //         x0    x1    x2    x3    x4    x5    x6    x7    x8    x9    xa    xb    xc    xd    xe    xf
             /* 00 */ 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
             /* 10 */ 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
@@ -94,6 +85,6 @@ namespace PdfSharp.Pdf.Internal
             '\xD0',   '\xD1',   '\xD2',   '\xD3',   '\xD4',   '\xD5',   '\xD6',   '\xD7',   '\xD8',   '\xD9',   '\xDA',   '\xDB',   '\xDC',   '\xDD',   '\xDE',   '\xDF',
             '\xE0',   '\xE1',   '\xE2',   '\xE3',   '\xE4',   '\xE5',   '\xE6',   '\xE7',   '\xE8',   '\xE9',   '\xEA',   '\xEB',   '\xEC',   '\xED',   '\xEE',   '\xEF',
             '\xF0',   '\xF1',   '\xF2',   '\xF3',   '\xF4',   '\xF5',   '\xF6',   '\xF7',   '\xF8',   '\xF9',   '\xFA',   '\xFB',   '\xFC',   '\xFD',   '\xFE',   '\xFF',
-        };                                
+        };
     }
 }

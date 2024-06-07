@@ -24,7 +24,7 @@ namespace PdfSharp.Charting.Renderers
 
             if (lineFormat != null)
             {
-                width = lineFormat.Width;
+                width = lineFormat.Width.Point;
                 if (DoubleUtil.IsZero(width) && !lineFormat.Color.IsEmpty)
                     width = defaultWidth;
                 visible = lineFormat.Visible || width > 0 || !lineFormat.Color.IsEmpty;

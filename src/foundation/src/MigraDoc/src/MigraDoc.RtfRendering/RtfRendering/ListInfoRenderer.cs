@@ -98,20 +98,20 @@ namespace MigraDoc.RtfRendering
 
                 case ListType.BulletList1:
                     levelText1 = "'01";
-                    levelText2 = "u-3913 ?";
-                    fontIdx = _docRenderer.GetFontIndex("Symbol");
+                    levelText2 = "u9679 ?";
+                    fontIdx = _docRenderer.GetFontIndex("Courier New");
                     break;
 
                 case ListType.BulletList2:
-                    levelText1 = "'01o";
-                    levelText2 = "";
+                    levelText1 = "'01";
+                    levelText2 = "u9675 ?";
                     fontIdx = _docRenderer.GetFontIndex("Courier New");
                     break;
 
                 case ListType.BulletList3:
                     levelText1 = "'01";
-                    levelText2 = "u-3929 ?";
-                    fontIdx = _docRenderer.GetFontIndex("Wingdings");
+                    levelText2 = "u9642 ?";
+                    fontIdx = _docRenderer.GetFontIndex("Courier New");
                     break;
             }
             WriteListLevel(levelText1, levelText2, levelNumbers, fontIdx);

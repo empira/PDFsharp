@@ -11,7 +11,6 @@ using System.Drawing.Imaging;
 using PdfSharp.Internal;
 #endif
 #if WPF
-using System.IO;
 using System.Text;
 using System.Windows.Media.Imaging;
 #endif
@@ -188,8 +187,8 @@ namespace PdfSharp.Drawing
 
         XImage(Stream stream)
         {
-            // Create a dummy unique path.
-            _path = "*" + Guid.NewGuid().ToString("B");
+            //// Create a dummy unique path.
+            //_path = "*" + Guid.NewGuid().ToString("B");
 
             // TODO: Create a fingerprint of the bytes in the stream to identify identical images.
 #if GDI
@@ -320,6 +319,9 @@ namespace PdfSharp.Drawing
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
+            if (PdfReader.TestPdfFile(stream) > 0)
+                return new XPdfForm(stream);
+
             var ii = ImageImporter.GetImageImporter();
             var i = ii.ImportImage(stream);
 
@@ -391,7 +393,7 @@ namespace PdfSharp.Drawing
         /// Creates an image.
         /// </summary>
         /// <param name="image">The imported image.</param>
-        [Obsolete("THHO4THHO Internal test code.")]
+        [Obsolete("For internal tests only. Not available in Release build.")]
         internal static XImage FromImportedImage(ImportedImage image)
         {
             if (image == null)
@@ -493,7 +495,7 @@ namespace PdfSharp.Drawing
                 //string filename = GetImageFilename(_wpfImage);
                 // WPF treats all images as images.
                 // We give JPEG images a special treatment.
-                // Test if it's a JPEG.
+                // Test if it’s a JPEG.
                 bool isJpeg = IsJpeg; // TestJpeg(filename);
                 if (isJpeg)
                 {
@@ -939,7 +941,7 @@ namespace PdfSharp.Drawing
                     if (_importedImage.Information.VerticalDPI > 0)
                         return _importedImage.Information.Height * 72 / _importedImage.Information.VerticalDPI;
                     // Assume 72 DPI if information not available.
-                    return _importedImage.Information.Width;
+                    return _importedImage.Information.Height;
                 }
 #endif
 #if CORE
@@ -1229,7 +1231,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Initializes the GDI helper.
         /// We use GDI+ to detect if image is JPEG.
-        /// If so, we also determine if it's CMYK and we read the image bytes.
+        /// If so, we also determine if it’s CMYK and we read the image bytes.
         /// </summary>
         void InitializeGdiHelper()
         {

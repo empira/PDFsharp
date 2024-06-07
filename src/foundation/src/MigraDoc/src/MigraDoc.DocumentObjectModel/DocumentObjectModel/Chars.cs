@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+ï»¿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc.DocumentObjectModel
@@ -150,8 +150,8 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public const char SoftHyphen = '\u00AD';  // char(173)
         /// <summary>
-        /// A currency sign '¤'.
+        /// A currency sign 'Â¤'.
         /// </summary>
-        public const char Currency = '¤';
+        public const char Currency = 'Â¤';
     }
 }

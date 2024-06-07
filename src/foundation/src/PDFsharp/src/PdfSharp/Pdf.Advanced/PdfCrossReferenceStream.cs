@@ -17,7 +17,7 @@ namespace PdfSharp.Pdf.Advanced
         public PdfCrossReferenceStream(PdfDocument document)
             : base(document)
         {
-#if DEBUG && CORE
+#if DEBUG_ && CORE
             if (Internal.PdfDiagnostics.TraceXrefStreams)
             {
                 Debug.WriteLine("PdfCrossReferenceStream created.");
@@ -33,7 +33,8 @@ namespace PdfSharp.Pdf.Advanced
 
             public uint Type;  // 0, 1, or 2.
 
-            public uint Field2;
+            //public SizeType Field2;  // USE_LONG_SIZE: Limits PDF documents with object streams to a maximum size of 4 GiB.
+            public uint Field2;  // USE_LONG_SIZE: Limits PDF documents with object streams to a maximum size of 4 GiB.
 
             public uint Field3;
         }

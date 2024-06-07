@@ -12,5 +12,17 @@ namespace PdfSharp.Pdf
         {
             return new DictionaryMeta(type);
         }
+
+        /// <summary>
+        /// Creates the DictionaryMeta with the specified default type to return in DictionaryElements.GetValue
+        /// if the key is not defined.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="defaultContentKeyType">Default type of the content key.</param>
+        /// <param name="defaultContentType">Default type of the content.</param>
+        internal static DictionaryMeta CreateMeta(Type type, KeyType defaultContentKeyType, Type defaultContentType)
+        {
+            return new DictionaryMeta(type, defaultContentKeyType, defaultContentType);
+        }
     }
 }

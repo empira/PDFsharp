@@ -13,11 +13,8 @@ namespace MigraDoc.DocumentObjectModel.Internals
         internal ReferenceTypeDescriptor(string valueName, Type valueType, PropertyInfo propertyInfo, VDFlags flags)
             : base(valueName, valueType, propertyInfo, flags)
         {
-#if DEBUG_ // Checked in unit tests.
             // Only String and Object should come here.
-            if (valueType != typeof(string) && valueType != typeof(object))
-                GetType();
-#endif
+            // Checked in unit tests.
         }
 
         public override object? GetValue(DocumentObject dom, GV flags)

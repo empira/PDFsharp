@@ -2,6 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics;
+using MigraDoc.Rendering.Extensions;
 using PdfSharp.Charting;
 using PdfSharp.Drawing;
 
@@ -44,7 +45,7 @@ namespace MigraDoc.Rendering.ChartMapper
             //if (domLineFormat.IsNull("Visible"))
             if (domLineFormat.Values.Visible is null)
                 lineFormat.Visible = true;
-            lineFormat.Width = domLineFormat.Width.Point;
+            lineFormat.Width = domLineFormat.Width.ToXUnit();
         }
 
         internal static void Map(LineFormat lineFormat, DocumentObjectModel.Shapes.LineFormat domLineFormat)

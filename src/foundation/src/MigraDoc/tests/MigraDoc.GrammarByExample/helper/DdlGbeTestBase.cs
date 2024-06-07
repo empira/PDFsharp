@@ -3,10 +3,13 @@
 
 using System;
 using System.Diagnostics;
+#if NET6_0_OR_GREATER
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+#endif
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.GrammarByExample;
 using PdfSharp.Fonts;
+using PdfSharp.Quality;
 #if CORE
 using PdfSharp.Snippets.Font;
 #endif
@@ -61,26 +64,17 @@ namespace GdiGrammarByExample
 
         void DoTest()
         {
-//#if true
-//            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-//#endif
-
-#if CORE
-            //GlobalFontSettings.FontResolver ??= new SegoeUiFontResolver();
-            GlobalFontSettings.FontResolver ??= NewFontResolver.Get();
-#endif
-
             Environment.CurrentDirectory = WslPathHack(_fixture.TestContext.TempDirectory);
 
             var workingDir = Environment.CurrentDirectory;
             string pdfFile = _fixture.TestContext.AddResultFileEx(_testName + ".pdf");
-            CreatePdfFromMdddlFile(pdfFile, WslPathHack(PathSource), _testName ?? throw new InvalidOperationException(), CompatibilityPatchCallback);
+            CreatePdfFromMdddlFile(pdfFile, WslPathHack(IOUtility.GetAssetsPath(PathSourceX)!), _testName ?? throw new InvalidOperationException(), CompatibilityPatchCallback);
 
             // ReSharper disable once RedundantCheckBeforeAssignment
             if (Environment.CurrentDirectory != workingDir)
                 Environment.CurrentDirectory = workingDir;
 
-            string referenceFile = FindReferenceFile(WslPathHack(ReferenceSource), _testName) ?? throw new InvalidOperationException();
+            string referenceFile = FindReferenceFile(WslPathHack(IOUtility.GetAssetsPath(ReferenceSourceX)!), _testName) ?? throw new InvalidOperationException();
 
             // ReSharper disable once RedundantCheckBeforeAssignment
             if (Environment.CurrentDirectory != workingDir)
@@ -102,19 +96,23 @@ namespace GdiGrammarByExample
             // Verdana was the default style until about 2012 or so.
             // Since all reference documents created with PDFsharp 1.40 or earlier use Verdana, we change the default to Verdana here for all DLL snippets.
             Debug.Assert(style != null, nameof(style) + " != null");
-            style.Font.Name = "Verdana";
+            style!.Font.Name = "Verdana";
 #endif
 #if CORE
-            // Note: CORE uses NewFontResolver and all required fonts should be available.
+            // Note: CORE uses SnippetsFontResolver and all required fonts should be available.
             var style = document.Styles[Style.DefaultParagraphName];
             Debug.Assert(style != null, nameof(style) + " != null");
             // Since all reference documents created with PDFsharp 1.40 or earlier use Verdana, we change the default to Verdana here for all DLL snippets.
-            style.Font.Name = "Verdana";
+            style!.Font.Name = "Verdana";
 #endif
         }
 
         internal static string WslPathHack(string path)
         {
+#if !NET6_0_OR_GREATER
+            // .NET 4.7.2 or .NETStandard 2.0, for Windows only.
+            return path;
+#else
             if (OperatingSystem.IsWindows())
             {
                 return path;
@@ -126,24 +124,25 @@ namespace GdiGrammarByExample
             }
 
             throw new NotImplementedException($"Platform {Environment.OSVersion} not yet supported.");
+#endif
         }
 
         //const string PathSource = @"D:\MigraDocAssets\GBE\GBE-DDL";
-        const string PathSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\GBE-DDL";
+        const string PathSourceX = @"archives/grammar-by-example/GBE/GBE-DDL";
 
         // ***** Select the reference for comparison *****
         // Legacy (the old C++ build):
-        //const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\CPP 1.10";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/CPP 1.10";
 
         // GDI+:
-        //const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\GDI 1.30";
-        //const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\GDI 1.31";
-        //const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\GDI 1.40";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/GDI 1.30";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/GDI 1.31";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/GDI 1.40";
 
         // WPF:
-        //const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\WPF 1.30";
-        const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\WPF 1.31";
-        //const string ReferenceSource = @"..\..\..\..\..\..\..\..\..\assets\archives\grammar-by-example\GBE\ReferencePDFs\WPF 1.40";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/WPF 1.30";
+         const string ReferenceSourceX = "archives/grammar-by-example/GBE/ReferencePDFs/WPF 1.31";
+        //const string ReferenceSource = "archives/grammar-by-example/GBE/ReferencePDFs/WPF 1.40";
 
         GbeFixture _fixture = null!;
         string? _testName;

@@ -2,8 +2,10 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Fields;
+using MigraDoc.Logging;
 using MigraDoc.RtfRendering.Resources;
 
 namespace MigraDoc.RtfRendering
@@ -46,7 +48,8 @@ namespace MigraDoc.RtfRendering
                     break;
 
                 default:
-                    Debug.WriteLine(Messages2.InvalidNumericFieldFormat(_numericField.Format), "warning");
+                    MigraDocLogHost.RtfRenderingLogger.LogError(Messages2.InvalidNumericFieldFormat(_numericField.Format));
+                    //Debug.WriteLine(Messages2.InvalidNumericFieldFormat(_numericField.Format), "warning");
                     break;
             }
         }

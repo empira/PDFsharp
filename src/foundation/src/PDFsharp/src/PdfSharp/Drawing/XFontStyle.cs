@@ -14,6 +14,8 @@ namespace PdfSharp.Drawing
 {
     /// <summary>
     /// Defines a structure that represents the style of a font face as normal, italic, or oblique.
+    /// Note that this struct is new since PDFsharp 6.0. XFontStyle from prior version of PDFsharp is
+    /// renamed to XFontStyleEx.
     /// </summary>
     [DebuggerDisplay("'{" + nameof(_style) + "}'")]
     public readonly struct XFontStyle : IFormattable

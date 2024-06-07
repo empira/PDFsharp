@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc.DocumentObjectModel.Shapes.Charts
@@ -160,7 +160,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         }
 
         /// <summary>
-        /// Gets or sets the chart type of the series if it's intended to be different than the global chart type.
+        /// Gets or sets the chart type of the series if it’s intended to be different than the global chart type.
         /// </summary>
         public ChartType ChartType
         {

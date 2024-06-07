@@ -31,7 +31,7 @@ namespace MigraDoc.Rendering
             System.Diagnostics.Debug.Assert(false, "Unexpected call of RemoveEnding");
         }
 
-        internal static XUnit GetTotalHeight(RenderInfo[]? renderInfos)
+        internal static XUnitPt GetTotalHeight(RenderInfo[]? renderInfos)
         {
             if (renderInfos == null || renderInfos.Length == 0)
                 return 0;
@@ -41,8 +41,8 @@ namespace MigraDoc.Rendering
             var lastRenderInfo = renderInfos[lastIdx];
             var firstLayoutInfo = firstRenderInfo.LayoutInfo;
             var lastLayoutInfo = lastRenderInfo.LayoutInfo;
-            XUnit top = firstLayoutInfo.ContentArea.Y - firstLayoutInfo.MarginTop;
-            XUnit bottom = lastLayoutInfo.ContentArea.Y + lastLayoutInfo.ContentArea.Height;
+            XUnitPt top = firstLayoutInfo.ContentArea.Y - firstLayoutInfo.MarginTop;
+            XUnitPt bottom = lastLayoutInfo.ContentArea.Y + lastLayoutInfo.ContentArea.Height;
             bottom += lastLayoutInfo.MarginBottom;
             return bottom - top;
         }

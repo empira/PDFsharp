@@ -209,7 +209,8 @@ namespace PdfSharp.Pdf.Advanced
             get
             {
                 string name;
-                while (ExistsResourceName(name = String.Format(CultureInfo.InvariantCulture, "/I{0}", _imageNumber++))) { }
+                while (ExistsResourceName(name = String.Format(CultureInfo.InvariantCulture, "/I{0}", _imageNumber++)))
+                { }
                 return name;
             }
         }
@@ -223,7 +224,8 @@ namespace PdfSharp.Pdf.Advanced
             get
             {
                 string name;
-                while (ExistsResourceName(name = String.Format(CultureInfo.InvariantCulture, "/Fm{0}", _formNumber++))) { }
+                while (ExistsResourceName(name = String.Format(CultureInfo.InvariantCulture, "/Fm{0}", _formNumber++)))
+                { }
                 return name;
             }
         }
@@ -237,7 +239,8 @@ namespace PdfSharp.Pdf.Advanced
             get
             {
                 string name;
-                while (ExistsResourceName(name = String.Format(CultureInfo.InvariantCulture, "/GS{0}", _extGStateNumber++))) { }
+                while (ExistsResourceName(name = String.Format(CultureInfo.InvariantCulture, "/GS{0}", _extGStateNumber++)))
+                { }
                 return name;
             }
         }
@@ -324,7 +327,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Maps all PDFsharp resources to their local resource names.
         /// </summary>
-        readonly Dictionary<PdfObject, string> _resources = new();
+        readonly Dictionary<PdfObject, string> _resources = [];
 
         /// <summary>
         /// Predefined keys of this dictionary.

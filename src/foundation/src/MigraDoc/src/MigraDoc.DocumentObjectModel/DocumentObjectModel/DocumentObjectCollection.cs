@@ -181,7 +181,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Calculate some properties of the Row object when the Rows collection has inserts or removes.
         /// </summary>
-        void UpdateRowCachedValues(Row row, bool reset = false)
+        static void UpdateRowCachedValues(Row row, bool reset = false)
         {
             if (row.Parent is Rows rws)
             {
@@ -256,7 +256,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// The elements can contain null depending on the derived class.
         /// </summary>
-        List<DocumentObject?> _elements = new();
+        List<DocumentObject?> _elements = [];
 
         internal IEnumerable<DocumentObject?> Elements => _elements;
 

@@ -1,2 +1,0 @@
-# Do not use anymore
-# dotnet nuget push .\src\foundation\nuget\src\PDFsharpNetCore\bin\Release\PDFsharpNetCore.4.0.1-preview.51.nupkg -k 172bc92f-50b3-48bc-b4cf-9555b7f0fd10 -s https://pkgs.dev.azure.com/BioNTech/_packaging/main/nuget/v3/index.json

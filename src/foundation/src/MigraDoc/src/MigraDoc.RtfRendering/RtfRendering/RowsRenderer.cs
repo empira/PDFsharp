@@ -36,7 +36,7 @@ namespace MigraDoc.RtfRendering
                 if (leftInd == null)
                     leftInd = Unit.FromCentimeter(-0.12);
                 else
-                    leftInd = Unit.FromPoint(-((Unit)leftInd));
+                    leftInd = -leftInd.Value;
 
                 Cell cell = rows[0].Cells[0];
 
