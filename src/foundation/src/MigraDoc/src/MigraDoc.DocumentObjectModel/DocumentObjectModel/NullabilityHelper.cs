@@ -11,7 +11,7 @@ namespace MigraDoc.DocumentObjectModel
     public static class NrtExtensions
     {
         /// <summary>
-        /// Determines whether a String null or empty.
+        /// Determines whether a string null or empty.
         /// </summary>
         public static bool IsValueNullOrEmpty(this string? s)
             => String.IsNullOrEmpty(s);

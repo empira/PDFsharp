@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System.Collections.Generic;
@@ -68,7 +68,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Sets the PageSetup (It stems from the section the currently HeaderFooter is used in). Caution: This PageSetup might differ from the one the "parent" section's got for inheritance reasons. This value is set by the HeadersFootersRenderer.
+        /// Sets the PageSetup (it stems from the section the currently HeaderFooter is used in). Caution: This PageSetup might differ from the one the "parent" section’s got for inheritance reasons. This value is set by the HeadersFootersRenderer.
         /// </summary>
         internal PageSetup PageSetup
         {

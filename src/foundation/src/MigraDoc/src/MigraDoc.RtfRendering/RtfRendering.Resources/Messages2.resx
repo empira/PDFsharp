@@ -33,7 +33,7 @@
     Each data row contains a name, and value. The row also contains a 
     type or mimetype. Type corresponds to a .NET class that support 
     text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+    Classes that don’t support this are serialized and stored with the 
     mimetype set.
     
     The mimetype is used for serialized objects, and tells the 
@@ -124,7 +124,7 @@
     <value>Type of image '{0}' is not supported.</value>
   </data>
   <data name="CharacterNotAllowedInDateFormat" xml:space="preserve">
-    <value>The character '{0}' is not allowed in a date field's format string and will be ignored.</value>
+    <value>The character '{0}' is not allowed in a date field’s format string and will be ignored.</value>
   </data>
   <data name="ImageFreelyPlacedInWrongContext" xml:space="preserve">
     <value>Images can be placed freely only within headers, footers and sections. Image {0} will be ignored.</value>

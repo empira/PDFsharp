@@ -91,7 +91,7 @@ namespace MigraDoc.DocumentObjectModel
                 serializer.EndContent();
             }
             else
-                serializer.WriteLine("TabStops -= \"" + Position + "\"");
+                serializer.WriteLine($"TabStops -= \"{Position}\"");
         }
 
         /// <summary>

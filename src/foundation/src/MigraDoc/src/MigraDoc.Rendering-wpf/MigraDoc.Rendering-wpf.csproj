@@ -1,17 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <RootNamespace>MigraDoc</RootNamespace>
         <UseWPF>true</UseWPF>
         <!--<DefineConstants>WPF</DefineConstants> technically not needed, but needs some work -->
         <DefineConstants>WPF</DefineConstants>
+        <SignAssembly>True</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472-windows|AnyCPU'">
+      <WarningLevel>0</WarningLevel>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472-windows|AnyCPU'">
+      <WarningLevel>0</WarningLevel>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
+    </ItemGroup>
 
     <ItemGroup>
         <Compile Include="..\MigraDoc.Rendering\Properties\GlobalDeclarations.cs">
@@ -53,11 +67,13 @@
         <Compile Include="..\MigraDoc.Rendering\Rendering.ChartMapper\XValuesMapper.cs">
             <Link>Rendering.ChartMapper\XValuesMapper.cs</Link>
         </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.Extensions\UnitConversions.cs">
+            <Link>Rendering.Extensions\UnitConversions.cs</Link>
+        </Compile>
+        <Compile Include="..\MigraDoc.Rendering\Rendering.Internals\ErrorHelpers.cs" Link="Rendering.Internals\ErrorHelpers.cs" />
         <Compile Include="..\MigraDoc.Rendering\Rendering.Windows\DocumentPreview.xaml.cs" Link="Rendering.Windows\DocumentPreview.xaml.cs" />
         <Compile Include="..\MigraDoc.Rendering\Rendering.Windows\enums\Zoom.cs" Link="Rendering.Windows\enums\Zoom.cs" />
-        <Compile Include="..\MigraDoc.Rendering\Rendering\Area.cs">
-            <Link>Rendering\Area.cs</Link>
-        </Compile>
+		<Compile Include="..\MigraDoc.Rendering\Rendering\Area.cs" Link="Rendering\Area.cs"/>
         <Compile Include="..\MigraDoc.Rendering\Rendering\BordersRenderer.cs">
             <Link>Rendering\BordersRenderer.cs</Link>
         </Compile>
@@ -236,10 +252,6 @@
         <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
         <ProjectReference Include="..\..\..\shared\src\PdfSharp.WPFonts\PdfSharp.WPFonts.csproj" />
         <ProjectReference Include="..\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="System.Reflection.MetadataLoadContext" />
     </ItemGroup>
 
 </Project>

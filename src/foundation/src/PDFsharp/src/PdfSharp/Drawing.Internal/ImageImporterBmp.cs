@@ -189,8 +189,6 @@ namespace PdfSharp.Drawing.Internal
         }
     }
 
-    // THHO4THHO Maybe there will be derived classes for direct bitmaps vs. palettized bitmaps or so. Time will tell.
-
     /// <summary>
     /// Contains data needed for PDF. Will be prepared when needed.
     /// Bitmap refers to the format used in PDF. Will be used for BMP, PNG, TIFF, GIF, and others.
@@ -509,7 +507,7 @@ namespace PdfSharp.Drawing.Internal
                 //byte[] temp = new byte[imageData.Length];
                 //int ccittSize = DoFaxEncoding(ref temp, imageBits, (uint)bytesFileOffset, (uint)width, (uint)height);
 
-                // It seems that Group 3 2D encoding never beats both other encodings, therefore we don't call it here.
+                // It seems that Group 3 2D encoding never beats both other encodings, therefore we don’t call it here.
                 //byte[] temp2D = new byte[imageData.Length];
                 //uint dpiY = (uint)image.VerticalResolution;
                 //uint kTmp = 0;

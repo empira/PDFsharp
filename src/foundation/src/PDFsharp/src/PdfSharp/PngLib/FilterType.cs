@@ -1,4 +1,7 @@
-﻿// ReSharper disable once CheckNamespace
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+// ReSharper disable once CheckNamespace
 namespace PdfSharp.BigGustave
 {
     internal enum FilterType
@@ -20,7 +23,7 @@ namespace PdfSharp.BigGustave
         /// </summary>
         Average = 3,
         /// <summary>
-        /// Byte to the left, above or top-left based on Paeth's algorithm.
+        /// Byte to the left, above or top-left based on Paeth’s algorithm.
         /// </summary>
         Paeth = 4
     }

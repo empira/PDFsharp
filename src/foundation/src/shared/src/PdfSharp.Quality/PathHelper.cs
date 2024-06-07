@@ -26,7 +26,13 @@ namespace PdfSharp.Quality
 
             string currentDirectory = Directory.GetCurrentDirectory();
             int x = currentDirectory.IndexOf("\\" + folderName + "\\", StringComparison.OrdinalIgnoreCase);
+
+            var l = x + folderName.Length + 1;
+            var test = Path.Combine(currentDirectory[0..(x + folderName.Length + 1)], subPath);
+
             currentDirectory = Path.Combine(currentDirectory.Substring(0, x + folderName.Length + 1), subPath);
+            Debug.Assert(test == currentDirectory);
+            
             return currentDirectory;
         }
     }

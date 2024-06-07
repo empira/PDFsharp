@@ -19,6 +19,7 @@ using SysSize = Windows.Foundation.Size;
 using SysRect = Windows.Foundation.Rect;
 #endif
 using PdfSharp.Internal;
+using PdfSharp.Fonts.Internal;
 
 namespace PdfSharp.Drawing
 {
@@ -66,6 +67,17 @@ namespace PdfSharp.Drawing
             _pathGeometry = new PathGeometry();
             _pathGeometry.FillRule = FillRule.EvenOdd;
 #endif
+        }
+#endif
+
+#if WPF
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XGraphicsPath"/> class
+        /// and initializes it with a clone of the specified geometry.
+        /// </summary>
+        public XGraphicsPath(PathGeometry geometry)
+        {
+            PathGeometry = geometry.Clone();
         }
 #endif
 
@@ -141,6 +153,24 @@ namespace PdfSharp.Drawing
 #endif
             return path;
         }
+
+#if GDI_
+#endif
+
+#if WPF_
+        internal static XGraphicsPath FromPathGeometry(PathGeometry pathGeometry)
+        {
+            foreach (var figure in pathGeometry.Figures)
+            {
+                foreach (var segment in figure.Segments)
+                {
+                    segment.
+                }
+            }
+
+            return default;
+        }
+#endif
 
         // ----- AddLine ------------------------------------------------------------------------------
 
@@ -763,7 +793,10 @@ namespace PdfSharp.Drawing
             CorePath.AddArc(point1, point2, size, rotationAngle, isLargeArg, sweepDirection);
 #endif
 #if GDI
-            DiagnosticsHelper.HandleNotImplemented("XGraphicsPath.AddArc");
+            //DiagnosticsHelper.HandleNotImplemented("XGraphicsPath.AddArc");
+            const string message = "AddArc: This operation is not yet implemented in GDI build.";
+            DiagnosticsHelper.HandleNotImplemented(message, Capabilities.Action.PathOperations);
+
 #endif
 #if WPF
             PathFigure figure = CurrentPathFigure;
@@ -1251,7 +1284,7 @@ namespace PdfSharp.Drawing
             figure.Segments.Add(segment);
             _pathGeometry.Figures.Add(figure);
 #endif
-            // StartFigure() isn't needed because AddGeometry() implicitly starts a new figure,
+            // StartFigure() isn’t needed because AddGeometry() implicitly starts a new figure,
             // but CloseFigure() is needed for the next adding not to continue this figure.
             CloseFigure();
 #endif
@@ -1283,7 +1316,7 @@ namespace PdfSharp.Drawing
             // TODO: fill mode unclear here
 #if true
             PathGeometry.AddGeometry(GeometryHelper.CreatePolygonGeometry(points, XFillMode.Alternate, true));
-            CloseFigure(); // StartFigure() isn't needed because AddGeometry() implicitly starts a new figure, but CloseFigure() is needed for the next adding not to continue this figure.
+            CloseFigure(); // StartFigure() isn’t needed because AddGeometry() implicitly starts a new figure, but CloseFigure() is needed for the next adding not to continue this figure.
 #else
             AddPolygon(XGraphics.MakeXPointArray(points, 0, points.Length));
 #endif
@@ -1347,7 +1380,7 @@ namespace PdfSharp.Drawing
             _pathGeometry.Figures.Add(figure);
 #endif
             // TODO: NOT NEEDED
-            //CloseFigure(); // StartFigure() isn't needed because AddGeometry() implicitly starts a new figure, but CloseFigure() is needed for the next adding not to continue this figure.
+            //CloseFigure(); // StartFigure() isn’t needed because AddGeometry() implicitly starts a new figure, but CloseFigure() is needed for the next adding not to continue this figure.
 #endif
         }
 
@@ -1392,7 +1425,8 @@ namespace PdfSharp.Drawing
         public void AddPie(double x, double y, double width, double height, double startAngle, double sweepAngle)
         {
 #if CORE
-            DiagnosticsHelper.HandleNotImplemented("XGraphicsPath.AddPie");
+            const string message = "AddPie: This operation is not yet implemented in CORE build.";
+            DiagnosticsHelper.HandleNotImplemented(message, Capabilities.Action.PathOperations);
 #endif
 #if GDI
             try
@@ -1403,7 +1437,8 @@ namespace PdfSharp.Drawing
             finally { Lock.ExitGdiPlus(); }
 #endif
 #if WPF || UWP
-            DiagnosticsHelper.HandleNotImplemented("XGraphicsPath.AddPie");
+            const string message = "AddPie: This operation is not yet implemented in WPF build.";
+            DiagnosticsHelper.HandleNotImplemented(message, Capabilities.Action.PathOperations);
 #endif
         }
 
@@ -1491,7 +1526,8 @@ namespace PdfSharp.Drawing
                 throw new ArgumentException("Not enough points.", nameof(points));
 
 #if CORE
-            DiagnosticsHelper.HandleNotImplemented("XGraphicsPath.AddClosedCurve");
+            const string message = "AddClosedCurve: This operation is not yet implemented in CORE build.";
+            DiagnosticsHelper.HandleNotImplemented(message, Capabilities.Action.PathOperations);
 #endif
 #if GDI
             try
@@ -1531,7 +1567,8 @@ namespace PdfSharp.Drawing
         public void AddPath(XGraphicsPath path, bool connect)
         {
 #if CORE
-            DiagnosticsHelper.HandleNotImplemented("XGraphicsPath.AddPath");
+            const string message = "AddPath: This operation is not yet implemented in CORE build.";
+            DiagnosticsHelper.HandleNotImplemented(message, Capabilities.Action.PathOperations);
 #endif
 #if GDI
             try
@@ -1545,6 +1582,15 @@ namespace PdfSharp.Drawing
             PathGeometry.AddGeometry(path.PathGeometry);
 #endif
         }
+
+        // ----- AddPath ------------------------------------------------------------------------------
+
+#if WPF
+        /// <summary>
+        /// Adds the specified path to this path.
+        /// </summary>
+        public void AddGeometry(PathGeometry geometry) => PathGeometry.AddGeometry(geometry);
+#endif
 
         // ----- AddString ----------------------------------------------------------------------------
 
@@ -1587,26 +1633,9 @@ namespace PdfSharp.Drawing
             try
             {
 #if CORE
-// ReviewSTLA THHO4STLA
+                // ReviewSTLA THHO4STLA
                 // EXPERIMENTAL
-                switch (Capabilities.Action.GlyphsToPath)
-                {
-                    case FeatureNotAvailableAction.DoNothing:
-                        return;
-
-                    case FeatureNotAvailableAction.FailWithException:
-                        DiagnosticsHelper.HandleNotImplemented("XGraphicsPath.AddString");
-                        break;
-
-                    case FeatureNotAvailableAction.LogWarning:
-                        break;
-
-                    case FeatureNotAvailableAction.LogError:
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                DiagnosticsHelper.HandleNotImplemented(AddStringMessage, Capabilities.Action.GlyphsToPath);
 #endif
 #if GDI
                 if (family.GdiFamily == null)
@@ -1766,8 +1795,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Adds a text string to this path.
         /// </summary>
-        public void AddString(string s, XFontFamily family, XFontStyleEx style, double emSize, XRect layoutRect,
-            XStringFormat format)
+        public void AddString(string s, XFontFamily family, XFontStyleEx style, double emSize, XRect layoutRect, XStringFormat format)
         {
             if (s == null)
                 throw new ArgumentNullException(nameof(s));
@@ -1785,9 +1813,9 @@ namespace PdfSharp.Drawing
             if (s.Length == 0)
                 return;
 
-            XFont font = new XFont(family.Name, emSize, style);
+            var font = new XFont(family.Name, emSize, style);
 #if CORE
-            DiagnosticsHelper.HandleNotImplemented("XGraphicsPath.AddString");
+            DiagnosticsHelper.HandleNotImplemented(AddStringMessage, Capabilities.Action.GlyphsToPath);
 #endif
 #if GDI && !WPF
             //Gfx.DrawString(text, font.Realize_GdiFont(), brush.RealizeGdiBrush(), rect,
@@ -1863,7 +1891,7 @@ namespace PdfSharp.Drawing
                     //y += -formattedText.Baseline + (cyAscent * 2 / 4) + layoutRect.Height / 2;
 
                     // GDI seems to make it this simple:
-                    // TODO: Check WPF's vertical alignment and make all implementations fit. $MaOs
+                    // TODO: Check WPF’s vertical alignment and make all implementations fit. $MaOs
                     y += layoutRect.Height / 2 - lineSpace / 2;
                     break;
 
@@ -1963,7 +1991,7 @@ namespace PdfSharp.Drawing
         public void StartFigure()
         {
 #if CORE
-// ReviewSTLA THHO4STLA
+            // ReviewSTLA THHO4STLA
             // TODO: ???
 #endif
 #if GDI
@@ -2022,7 +2050,7 @@ namespace PdfSharp.Drawing
         public void Flatten()
         {
 #if CORE
-// ReviewSTLA THHO4STLA
+            // ReviewSTLA THHO4STLA
             // Just do nothing.
 #endif
 #if GDI
@@ -2044,7 +2072,7 @@ namespace PdfSharp.Drawing
         public void Flatten(XMatrix matrix)
         {
 #if CORE
-// ReviewSTLA THHO4STLA
+            // ReviewSTLA THHO4STLA
             // Just do nothing.
 #endif
 #if GDI
@@ -2067,7 +2095,7 @@ namespace PdfSharp.Drawing
         public void Flatten(XMatrix matrix, double flatness)
         {
 #if CORE
-// ReviewSTLA THHO4STLA
+            // ReviewSTLA THHO4STLA
             // Just do nothing.
 #endif
 #if GDI
@@ -2095,7 +2123,7 @@ namespace PdfSharp.Drawing
         public void Widen(XPen pen)
         {
 #if CORE
-// ReviewSTLA THHO4STLA
+            // ReviewSTLA THHO4STLA
             // Just do nothing.
 #endif
 #if GDI
@@ -2168,6 +2196,8 @@ namespace PdfSharp.Drawing
         /// Gets access to underlying Core graphics path.
         /// </summary>
         internal CoreGraphicsPath CorePath;
+
+        const string AddStringMessage = "AddString: Converting a string into a graphical path is not available in CORE build.";
 #endif
 
 #if GDI

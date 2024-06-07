@@ -9,7 +9,7 @@
 //[assembly: AssemblyTitle(VersionInfo.Title)]
 //[assembly: AssemblyDescription(VersionInfo.Description)]
 //[assembly: AssemblyCompany(VersionInfo.Company)]
-//#if DEBUG
+//#if DEBUG_
 //  [assembly: AssemblyProduct(VersionInfo.Product + " (Debug Build)")]
 //#else
 //  [assembly: AssemblyProduct(VersionInfo.Product)]

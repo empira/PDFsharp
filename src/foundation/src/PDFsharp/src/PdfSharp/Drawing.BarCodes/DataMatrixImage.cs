@@ -7,7 +7,6 @@ using System.Drawing.Imaging;
 #endif
 #if WPF
 using System.Windows;
-using System.Windows.Media;
 #endif
 
 #nullable disable  // This code is a port of C++ code made by David in ~2003. We keep it untouched in the first instance.
@@ -19,24 +18,26 @@ namespace PdfSharp.Drawing.BarCodes
     /// </summary>
     class DataMatrixImage
     {
-        public static XImage GenerateMatrixImage(string text, string encoding, int rows, int columns)
+        public static XImage GenerateMatrixImage(string text, string encoding, int rows, int columns, XBrush brush)
         {
-            DataMatrixImage dataMatrixImage = new DataMatrixImage(text, encoding, rows, columns);
+            DataMatrixImage dataMatrixImage = new DataMatrixImage(text, encoding, rows, columns, brush);
             return dataMatrixImage.DrawMatrix();
         }
 
-        public DataMatrixImage(string text, string encoding, int rows, int columns)
+        public DataMatrixImage(string text, string encoding, int rows, int columns, XBrush brush)
         {
             _text = text;
             _encoding = encoding;
             _rows = rows;
             _columns = columns;
+            _brush = brush;
         }
 
         string _encoding;
         readonly string _text;
         readonly int _rows;
         readonly int _columns;
+        readonly XBrush _brush;
 
         /// <summary>
         /// Possible ECC200 Matrices.
@@ -229,9 +230,9 @@ namespace PdfSharp.Drawing.BarCodes
                                     output[p++] = (char)1;
                                     output[p++] = (char)30;
                                 }
-                                w = e.IndexOf(c, StringComparison.Ordinal) == -1 ? (char)0 : e[e.IndexOf(c, StringComparison.Ordinal)];
+                                w = e.IndexOf(c.ToString(), StringComparison.Ordinal) == -1 ? (char)0 : e[e.IndexOf(c.ToString(), StringComparison.Ordinal)];
                                 if (w != (char)0)
-                                    output[p++] = (char)((e.IndexOf(w, StringComparison.Ordinal) + 3) % 40);
+                                    output[p++] = (char)((e.IndexOf(w.ToString(), StringComparison.Ordinal) + 3) % 40);
                                 else
                                 {
                                     if (newenc == 'x')
@@ -246,7 +247,7 @@ namespace PdfSharp.Drawing.BarCodes
                                     }
                                     else
                                     {
-                                        w = s2.IndexOf(c, StringComparison.Ordinal) == -1 ? (char)0 : (char)s2.IndexOf(c, StringComparison.Ordinal);
+                                        w = s2.IndexOf(c.ToString(), StringComparison.Ordinal) == -1 ? (char)0 : (char)s2.IndexOf(c.ToString(), StringComparison.Ordinal);
                                         if (w != (char)0)
                                         {          // shift 2
                                             output[p++] = (char)1;
@@ -254,7 +255,7 @@ namespace PdfSharp.Drawing.BarCodes
                                         }
                                         else
                                         {
-                                            w = s3.IndexOf(c, StringComparison.Ordinal) == -1 ? (char)0 : (char)s3.IndexOf(c, StringComparison.Ordinal);
+                                            w = s3.IndexOf(c.ToString(), StringComparison.Ordinal) == -1 ? (char)0 : (char)s3.IndexOf(c.ToString(), StringComparison.Ordinal);
                                             if (w != (char)0)
                                             {
                                                 output[p++] = (char)2;
@@ -713,7 +714,7 @@ namespace PdfSharp.Drawing.BarCodes
                     for (int j = 0; j < columns; j++)
                     {
                         if (code[((rows - 1) - i) * columns + j] == (char)1)
-                            gfx.FillRectangle(System.Drawing.Brushes.Black, j * pixelSize, i * pixelSize, pixelSize, pixelSize);
+                            gfx.FillRectangle(_brush.RealizeGdiBrush()/*System.Drawing.Brushes.Black*/, j * pixelSize, i * pixelSize, pixelSize, pixelSize);
                     }
                 }
             }

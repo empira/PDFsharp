@@ -8,7 +8,7 @@ using PdfSharp.Pdf.IO;
 namespace PdfSharp.Pdf.Security.Encryption
 {
     /// <summary>
-    /// Abstract class for StandardSecurityHandler's encryption versions implementations.
+    /// Abstract class for StandardSecurityHandler’s encryption versions implementations.
     /// </summary>
     abstract class PdfEncryptionBase
     {
@@ -46,7 +46,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         {
             if (Capabilities.Compatibility.IgnoreErrorsOnDecryption)
             {
-                LogHost.Logger.LogWarning("A cryptographic exception occurred while decrypting an object. PDFsharp will handle the content as not encrypted.\n" +
+                PdfSharpLogHost.Logger.LogWarning("A cryptographic exception occurred while decrypting an object. PDFsharp will handle the content as not encrypted.\n" +
                                           "If PDFsharp will not be able to load the file due to consequential errors, the encryption of the file does not meet the specifications for the supported encryption methods.\n" +
                                           "If PDFsharp will load the file and the contents seem to be correct, the file is at least partly not encrypted as expected.");
                 return true;
@@ -56,7 +56,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         }
 
         /// <summary>
-        /// Sets the encryption dictionary's values for saving.
+        /// Sets the encryption dictionary’s values for saving.
         /// </summary>
         public abstract void PrepareEncryptionForSaving(string userPassword, string ownerPassword);
 

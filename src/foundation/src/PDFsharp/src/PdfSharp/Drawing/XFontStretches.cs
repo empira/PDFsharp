@@ -135,8 +135,12 @@ namespace PdfSharp.Drawing
 
             if (!Int32.TryParse(stretch, NumberStyles.Integer, provider, out var result))
                 return false;
-            xFontStretch = XFontStretch.FromOpenTypeStretch(result);
-            return true;
+            if (result is >= 1 and <= 9)
+            {
+                xFontStretch = XFontStretch.FromOpenTypeStretch(result);
+                return true;
+            }
+            return false;
         }
 
         internal static bool XFontStretchToString(XFontStretchValue stretch, out string? convertedValue)
@@ -183,6 +187,21 @@ namespace PdfSharp.Drawing
                     convertedValue = null;
                     return false;
             }
+        }
+
+        internal static XFontStretch FontStretchFromFaceName(string faceName)
+        {
+            var parts = faceName.Split(' ');
+            if (parts.Length < 2)
+                return XFontStretches.Normal;
+
+            for (int idx = 1; idx < parts.Length; idx++)
+            {
+                var xFontStretch = XFontStretches.Normal;
+                if (XFontStretchStringToKnownStretch(parts[idx], CultureInfo.InvariantCulture, ref xFontStretch))
+                    return xFontStretch;
+            }
+            return XFontStretches.Normal;
         }
     }
 }

@@ -1,10 +1,6 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Diagnostics;
-using System.Collections.Generic;
-using System.Globalization;
 using PdfSharp.Drawing;
 
 namespace PdfSharp.Pdf.Advanced
@@ -60,7 +56,7 @@ namespace PdfSharp.Pdf.Advanced
                 }
 
                 var xObject = importedObjectTable.GetXObject(pdfForm.PageNumber);
-                if (xObject == null)
+                if (xObject == null!)
                 {
                     xObject = new PdfFormXObject(Owner, importedObjectTable, pdfForm);
                     importedObjectTable.SetXObject(pdfForm.PageNumber, xObject);
@@ -142,7 +138,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Map from Selector to PdfImportedObjectTable.
         /// </summary>
-        readonly Dictionary<Selector, PdfImportedObjectTable> _forms = new Dictionary<Selector, PdfImportedObjectTable>();
+        readonly Dictionary<Selector, PdfImportedObjectTable> _forms = [];
 
         /// <summary>
         /// A collection of information that uniquely identifies a particular ImportedObjectTable.
@@ -155,7 +151,7 @@ namespace PdfSharp.Pdf.Advanced
             public Selector(XForm form)
             {
                 // HACK: just use full path to identify
-                _path = form._path.ToLowerInvariant();
+                Path = form._path.ToLowerInvariant();
             }
 
             /// <summary>
@@ -164,34 +160,28 @@ namespace PdfSharp.Pdf.Advanced
             public Selector(PdfPage page)
             {
                 PdfDocument owner = page.Owner;
-                _path = "*" + owner.Guid.ToString("B");
-                _path = _path.ToLowerInvariant();
+                Path = "*" + owner.Guid.ToString("B");
+                Path = Path.ToLowerInvariant();
             }
 
             public Selector(PdfDocument document)
             {
-                _path = "*" + document.Guid.ToString("B");
-                _path = _path.ToLowerInvariant();
+                Path = "*" + document.Guid.ToString("B");
+                Path = Path.ToLowerInvariant();
             }
 
-            public string Path
-            {
-                get => _path;
-                set => _path = value;
-            }
-
-            string _path;
+            public string Path { get; }
 
             public override bool Equals(object? obj)
             {
                 if (obj is not Selector selector)
                     return false;
-                return _path == selector._path;
+                return Path == selector.Path;
             }
 
             public override int GetHashCode()
             {
-                return _path.GetHashCode();
+                return Path.GetHashCode();
             }
         }
     }

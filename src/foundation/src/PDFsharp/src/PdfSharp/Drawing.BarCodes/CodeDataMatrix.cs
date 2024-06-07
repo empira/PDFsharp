@@ -119,7 +119,7 @@ namespace PdfSharp.Drawing.BarCodes
         }
 
         /// <summary>
-        /// Gets or sets the size of the Matrix' Quiet Zone.
+        /// Gets or sets the size of the Matrix¹ Quiet Zone.
         /// </summary>
         public int QuietZone
         {
@@ -154,7 +154,7 @@ namespace PdfSharp.Drawing.BarCodes
             XPoint pos = position + CalcDistance(Anchor, AnchorType.TopLeft, Size);
 
             if (!HasMatrixImage) // Cannot use (MatrixImage == null) here.
-                MatrixImage = DataMatrixImage.GenerateMatrixImage(Text, Encoding, Rows, Columns);
+                MatrixImage = DataMatrixImage.GenerateMatrixImage(Text, Encoding, Rows, Columns, brush);
 
             if (QuietZone > 0)
             {
@@ -184,7 +184,7 @@ namespace PdfSharp.Drawing.BarCodes
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
 
-            DataMatrixImage mImage = new DataMatrixImage(Text, Encoding, Rows, Columns);
+            DataMatrixImage mImage = new DataMatrixImage(Text, Encoding, Rows, Columns, XBrushes.Black);
             mImage.Iec16022Ecc200(Columns, Rows, Encoding, Text.Length, Text, 0, 0, 0);
         }
     }

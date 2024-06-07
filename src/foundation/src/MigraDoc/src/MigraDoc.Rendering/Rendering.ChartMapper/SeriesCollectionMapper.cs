@@ -5,6 +5,7 @@ using System.Diagnostics;
 using PdfSharp.Drawing;
 using PdfSharp.Charting;
 using MigraDoc.DocumentObjectModel;
+using MigraDoc.Rendering.Extensions;
 
 namespace MigraDoc.Rendering.ChartMapper
 {
@@ -61,7 +62,7 @@ namespace MigraDoc.Rendering.ChartMapper
                       ColorHelper.ToXColor(domSeries.MarkerForegroundColor, domSeries.Document.UseCmykColor);
 #endif
                 }
-                series.MarkerSize = domSeries.MarkerSize.Point;
+                series.MarkerSize = domSeries.MarkerSize.ToXUnit();
                 if (domSeries.Values.MarkerStyle is not null)
                     series.MarkerStyle = (MarkerStyle)domSeries.MarkerStyle;
 

@@ -133,7 +133,7 @@ namespace PdfSharp.Pdf.Advanced
 
         /// <summary>
         /// Creates a PdfNamedDestinationParameters object for a named destination.
-        /// Moving to this destination will move to the destination page. The page's bounding box is fitted to the window.
+        /// Moving to this destination will move to the destination page. The page’s bounding box is fitted to the window.
         /// </summary>
         public static PdfNamedDestinationParameters CreateFitBoundingBox()
         {
@@ -143,7 +143,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Creates a PdfNamedDestinationParameters object for a named destination.
         /// Moving to this destination will move to the desired top value on the destination page.
-        /// The page's bounding box width is fitted to the window. Null values are retained unchanged.
+        /// The page’s bounding box width is fitted to the window. Null values are retained unchanged.
         /// </summary>
         /// <param name="top">The top value of the displayed area in PDF world space units.</param>
         public static PdfNamedDestinationParameters CreateFitBoundingBoxHorizontally(double? top)
@@ -154,7 +154,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Creates a PdfNamedDestinationParameters object for a named destination.
         /// Moving to this destination will move to the desired left value on the destination page.
-        /// The page's bounding box height is fitted to the window. Null values are retained unchanged.
+        /// The page’s bounding box height is fitted to the window. Null values are retained unchanged.
         /// </summary>
         /// <param name="left">The left value of the displayed area in PDF world space units.</param>
         public static PdfNamedDestinationParameters CreateFitBoundingBoxVertically(double? left)

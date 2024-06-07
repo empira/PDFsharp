@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+Ôªø// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 #if GDI
@@ -35,19 +35,9 @@ namespace PdfSharp.Pdf.Advanced
             //{ }
         }
 
-        internal double DpiX
-        {
-            get => _dpiX;
-            set => _dpiX = value;
-        }
-        double _dpiX = 72;
+        internal double DpiX { get; set; } = 72;
 
-        internal double DpiY
-        {
-            get => _dpiY;
-            set => _dpiY = value;
-        }
-        double _dpiY = 72;
+        internal double DpiY { get; set; } = 72;
 
         internal PdfFormXObject(PdfDocument thisDocument, PdfImportedObjectTable importedObjectTable, XPdfForm form)
             : base(thisDocument)
@@ -101,7 +91,7 @@ namespace PdfSharp.Pdf.Advanced
                     Debug.Assert(resources[idx].XRef.Document != null);
                     Debug.Assert(resources[idx].Document != null);
                     if (resources[idx].ObjectID.ObjectNumber == 12)
-                        GetType();
+                        _ = typeof(int);
                 }
 #endif
                 // 1st step. Already imported objects are reused and new ones are cloned.
@@ -152,7 +142,7 @@ namespace PdfSharp.Pdf.Advanced
           Debug.Assert(resources[idx].XRef.Document != null);
           Debug.Assert(resources[idx].Document != null);
           if (resources[idx].ObjectID.ObjectNumber == 12)
-            GetType();
+            _ = typeof(int);
         }
 #endif
 
@@ -181,7 +171,7 @@ namespace PdfSharp.Pdf.Advanced
             }
             else
             {
-                // TODO: Have to adjust bounding box? (I think not, but I'm not sure -> wait for problem)
+                // TODO: Have to adjust bounding box? (I think not, but I‚Äôm not sure -> wait for problem)
                 Elements["/BBox"] = rect;
 
                 // Rotate the image such that it is upright.
@@ -190,7 +180,7 @@ namespace PdfSharp.Pdf.Advanced
                 double height = rect.Height;
                 matrix.RotateAtPrepend(-rotate, new XPoint(width / 2, height / 2));
 
-                // Translate the image such that its center lies on the center of the rotated bounding box.
+                // Translate the image such that its center lies in the center of the rotated bounding box.
                 double offset = (height - width) / 2;
                 if (rotate == 90)
                 {
@@ -244,18 +234,16 @@ namespace PdfSharp.Pdf.Advanced
 
         PdfResources IContentStream.Resources => Resources;
 
-        internal string GetFontName(XFont font, out PdfFont pdfFont)
+        internal string GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont)
         {
-            pdfFont = _document.FontTable.GetFont(font);
+            pdfFont = _document.FontTable.GetOrCreateFont(glyphTypeface, fontType);
             Debug.Assert(pdfFont != null);
             string name = Resources.AddFont(pdfFont);
             return name;
         }
 
-        string IContentStream.GetFontName(XFont font, out PdfFont pdfFont)
-        {
-            return GetFontName(font, out pdfFont);
-        }
+        string IContentStream.GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont) 
+            => GetFontName(glyphTypeface, fontType, out pdfFont);
 
         /// <summary>
         /// Gets the resource name of the specified font data within this form XObject.
@@ -414,7 +402,7 @@ namespace PdfSharp.Pdf.Advanced
             /// <summary>
             /// (Required) An array of four numbers in the form coordinate system, giving the 
             /// coordinates of the left, bottom, right, and top edges, respectively, of the 
-            /// form XObjectís bounding box. These boundaries are used to clip the form XObject
+            /// form XObject‚Äôs bounding box. These boundaries are used to clip the form XObject
             /// and to determine its size for caching.
             /// </summary>
             [KeyInfo(KeyType.Rectangle | KeyType.Required)]
@@ -438,7 +426,7 @@ namespace PdfSharp.Pdf.Advanced
             /// <summary>
             /// (Optional; PDF 1.4) A group attributes dictionary indicating that the contents
             /// of the form XObject are to be treated as a group and specifying the attributes
-            /// of that group (see Section 4.9.2, ìGroup XObjectsî).
+            /// of that group (see Section 4.9.2, ‚ÄúGroup XObjects‚Äù).
             /// Note: If a Ref entry (see below) is present, the group attributes also apply to the
             /// external page imported by that entry, which allows such an imported page to be
             /// treated as a group without further modification.

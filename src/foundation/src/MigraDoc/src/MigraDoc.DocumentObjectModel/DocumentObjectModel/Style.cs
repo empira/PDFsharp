@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using MigraDoc.DocumentObjectModel.Visitors;
@@ -272,17 +272,12 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         internal override void Serialize(Serializer serializer)
         {
-#if DEBUG_ // Test
-            if (Name == StyleNames.Heading1 || Name == StyleNames.Heading2)
-                Name.GetType();
-#endif
-
             // For built-in styles all properties that differ from their default values
             // are serialized.
             // For user-defined styles all non-null properties are serialized.
             Styles builtInStyles = Styles.BuiltInStyles;
             Style? refStyle;
-            Font? refFont;
+            //Font? refFont;
             ParagraphFormat? refFormat;
 
             serializer.WriteComment(Values.Comment);
@@ -297,7 +292,7 @@ namespace MigraDoc.DocumentObjectModel
 
                     refStyle = builtInStyles[builtInStyles.GetIndex(Name)];
                     refFormat = refStyle.ParagraphFormat;
-                    refFont = refFormat.Font;
+                    //refFont = refFormat.Font;
                     string name = DdlEncoder.QuoteIfNameContainsBlanks(Name);
                     serializer.WriteLineNoCommit(name);
                 }
@@ -306,19 +301,19 @@ namespace MigraDoc.DocumentObjectModel
                     // case: any built-in style except "Normal"
                     refStyle = builtInStyles[builtInStyles.GetIndex(Name)];
                     refFormat = refStyle.ParagraphFormat;
-                    refFont = refFormat.Font;
+                    //refFont = refFormat.Font;
                     if (String.Compare(BaseStyle, refStyle.BaseStyle, StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         // case: built-in style with unmodified base style name
                         string name = DdlEncoder.QuoteIfNameContainsBlanks(Name);
                         serializer.WriteLineNoCommit(name);
-                        // It's fine if we have the predefined base style, but...
+                        // It’s fine if we have the predefined base style, but...
                         // ...the base style may have been modified or may even have a modified base style.
-                        // Methinks it's wrong to compare with the built-in style, so let's compare with the
+                        // Methinks it’s wrong to compare with the built-in style, so let’s compare with the
                         // real base style:
                         refStyle = Document.Styles[Document.Styles.GetIndex(Values.BaseStyle!)];  // BUG: Base style can be null
                         refFormat = refStyle.ParagraphFormat;
-                        refFont = refFormat.Font;
+                        //refFont = refFormat.Font;
                         // Note: we must write "Underline = none" if the base style has "Underline = single" - we cannot
                         // detect this if we compare with the built-in style that has no underline.
                         // Known problem: Default values like "OutlineLevel = Level1" will now be serialized.
@@ -332,20 +327,19 @@ namespace MigraDoc.DocumentObjectModel
                         serializer.WriteLine(name + " : " + baseName);
                         refStyle = Document.Styles[Document.Styles.GetIndex(Values.BaseStyle!)];// BUG: Base style can be null
                         refFormat = refStyle.ParagraphFormat;
-                        refFont = refFormat.Font;
+                        //refFont = refFormat.Font;
                     }
                 }
             }
             else
             {
                 // case: user-defined style. Base style always exists.
-
                 string name = DdlEncoder.QuoteIfNameContainsBlanks(Name);
                 string baseName = DdlEncoder.QuoteIfNameContainsBlanks(BaseStyle);
                 serializer.WriteLine(name + " : " + baseName);
 
 #if true
-                var refStyle0 = Document.Styles[Document.Styles.GetIndex(Values.BaseStyle!)];  // BUG: Base style can be null
+                //var refStyle0 = Document.Styles[Document.Styles.GetIndex(Values.BaseStyle!)];  // BUG: Base style can be null
                 refStyle = Document.Styles[Values.BaseStyle!];  // BUG: Base style can be null
                 refFormat = refStyle?.ParagraphFormat;
 #else
@@ -358,7 +352,7 @@ namespace MigraDoc.DocumentObjectModel
             if (!ParagraphFormat.IsValueNullOrEmpty())
             {
                 if (!ParagraphFormat.Values.Font.IsValueNullOrEmpty())
-                    Font.Serialize(serializer, refFormat != null ? refFormat.Font : null);
+                    Font.Serialize(serializer, refFormat?.Font);
 
                 if (Type == StyleType.Paragraph)
                     ParagraphFormat.Serialize(serializer, "ParagraphFormat", refFormat);

@@ -11,7 +11,7 @@ namespace MigraDoc.Rendering
     /// </summary>
     public class PageInfo
     {
-        internal PageInfo(XUnit width, XUnit height, PageOrientation orientation)
+        internal PageInfo(XUnitPt width, XUnitPt height, PageOrientation orientation)
         {
             Width = width;
             Height = height;
@@ -22,13 +22,13 @@ namespace MigraDoc.Rendering
         /// Gets the width of the described page as specified in Document.PageSetup, i.e. the orientation
         /// is not taken into account.
         /// </summary>
-        public XUnit Width { get; }
+        public XUnitPt Width { get; }
 
         /// <summary>
         /// Gets the height of the described page as specified in Document.PageSetup, i.e. the orientation
         /// is not taken into account.
         /// </summary>
-        public XUnit Height { get; }
+        public XUnitPt Height { get; }
 
         /// <summary>
         /// Gets the orientation of the described page as specified in Document.PageSetup.

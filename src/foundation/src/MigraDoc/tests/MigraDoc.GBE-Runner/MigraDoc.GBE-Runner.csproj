@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net6.0;net472</TargetFrameworks>
     <RootNamespace>MigraDoc.GBE_Runner</RootNamespace>
     <StartupObject>MigraDoc.GBE_Runner.Program</StartupObject>
   </PropertyGroup>
@@ -61,15 +61,24 @@
     <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Table_Inheritance.cs" Link="tests\DdlGBE_Table_Inheritance.cs" />
     <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Table_Layout.cs" Link="tests\DdlGBE_Table_Layout.cs" />
     <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_TextFrame_Layout.cs" Link="tests\DdlGBE_TextFrame_Layout.cs" />
+    <Compile Include="..\MigraDoc.Tests\Extensions\XunitHelper.cs" Link="Extensions\XunitHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="helper\" />
+    <Folder Include="helper\" />
+    <Folder Include="Extensions\" />
+    <Folder Include="tests\" />
     <Folder Include="tests\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Xunit.SkippableFact" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper\PdfSharp.TestHelper.csproj" />
     <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp\PdfSharp.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets\PdfSharp.Snippets.csproj" />
     <ProjectReference Include="..\..\src\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />

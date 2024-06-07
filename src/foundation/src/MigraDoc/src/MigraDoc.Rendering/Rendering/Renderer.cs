@@ -35,7 +35,7 @@ namespace MigraDoc.Rendering
         /// <summary>
         /// Determines the maximum height a single element may have.
         /// </summary>
-        internal XUnit MaxElementHeight
+        internal XUnitPt MaxElementHeight
         {
             get => _maxElementHeight;
             set => _maxElementHeight = value;
@@ -59,15 +59,15 @@ namespace MigraDoc.Rendering
         /// <param name="xShift">The x shift.</param>
         /// <param name="yShift">The y shift.</param>
         /// <param name="renderInfos">The render infos.</param>
-        protected void RenderByInfos(XUnit xShift, XUnit yShift, RenderInfo[]? renderInfos)
+        protected void RenderByInfos(XUnitPt xShift, XUnitPt yShift, RenderInfo[]? renderInfos)
         {
             if (renderInfos == null)
                 return;
 
             foreach (RenderInfo renderInfo in renderInfos)
             {
-                XUnit savedX = renderInfo.LayoutInfo.ContentArea.X;
-                XUnit savedY = renderInfo.LayoutInfo.ContentArea.Y;
+                XUnitPt savedX = renderInfo.LayoutInfo.ContentArea.X;
+                XUnitPt savedY = renderInfo.LayoutInfo.ContentArea.Y;
                 renderInfo.LayoutInfo.ContentArea.X += xShift;
                 renderInfo.LayoutInfo.ContentArea.Y += yShift;
                 Renderer renderer = Create(_gfx, _documentRenderer, renderInfo, _fieldInfos);
@@ -141,7 +141,7 @@ namespace MigraDoc.Rendering
 #if DEBUG
             // TODO Investigate why we can come here with "null".
             if (renderer == null)
-                ((Action)(() => { }))();  // A place for a break point;
+                _ = typeof(int);  // A place for a break point;
 #endif
             return renderer!; // BUG??? => return type "Renderer?" // ?? NRT.ThrowOnNull<Renderer>();
         }
@@ -179,8 +179,8 @@ namespace MigraDoc.Rendering
             return renderer ?? NRT.ThrowOnNull<Renderer>();
         }
 
-        internal static readonly XUnit Tolerance = XUnit.FromPoint(0.001);
-        XUnit _maxElementHeight = -1;
+        internal static readonly XUnitPt Tolerance = 0.001;
+        XUnitPt _maxElementHeight = -1;
 
         protected DocumentObject _documentObject;
         protected DocumentRenderer _documentRenderer;

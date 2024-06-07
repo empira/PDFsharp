@@ -1,18 +1,17 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.Security;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.Rendering;
-using PdfSharp.Diagnostics;
-using PdfSharp.Pdf.Security;
 #if CORE
 using PdfSharp.Fonts;
 using PdfSharp.Snippets.Font;
+#endif
+#if WPF
+using System.IO;
 #endif
 
 namespace MigraDoc.Tests
@@ -89,8 +88,13 @@ namespace MigraDoc.Tests
                 public V4() : this(false)
                 { }
 
+#if NET6_0_OR_GREATER
                 protected V4(bool getSkipped) : base(x => Enum.GetName(x)!.StartsWith("V4", StringComparison.OrdinalIgnoreCase), getSkipped)
                 { }
+#else
+                protected V4(bool getSkipped) : base(x => Enum.GetName(typeof(TestOptionsEnum), x)!.StartsWith("V4", StringComparison.OrdinalIgnoreCase), getSkipped)
+                { }
+#endif
             }
             public class V4Skipped : V4
             {
@@ -103,8 +107,13 @@ namespace MigraDoc.Tests
                 public V5() : this(false)
                 { }
 
+#if NET6_0_OR_GREATER
                 protected V5(bool getSkipped) : base(x => Enum.GetName(x)!.StartsWith("V5", StringComparison.OrdinalIgnoreCase), getSkipped)
                 { }
+#else
+                protected V5(bool getSkipped) : base(x => Enum.GetName(typeof(TestOptionsEnum), x)!.StartsWith("V5", StringComparison.OrdinalIgnoreCase), getSkipped)
+                { }
+#endif
             }
             public class V5Skipped : V5
             {
@@ -121,11 +130,25 @@ namespace MigraDoc.Tests
 
                 protected TestDataBase(Func<TestOptionsEnum, bool>? condition = null, bool getSkipped = false)
                 {
+#if NET6_0_OR_GREATER
                     _data = Enum.GetValues<TestOptionsEnum>()
                         .Where(x =>
                             SkippedTestOptions.Contains(x) == getSkipped // Get Skipped or not skipped encryption configurations, like desired.
                             && (condition is null || condition(x))) // Get only the encryption configurations matching the desired condition, if given.
                         .Select(x => new object[] { x }).ToList();
+#else
+                    var enums = Enum.GetValues(typeof(TestOptionsEnum));
+                    var list = new List<TestOptionsEnum>();
+                    foreach (TestOptionsEnum e in enums)
+                    {
+                        list.Add(e);
+                    }
+                    _data = list
+                        .Where(x =>
+                            SkippedTestOptions.Contains(x) == getSkipped // Get Skipped or not skipped encryption configurations, like desired.
+                            && (condition is null || condition(x))) // Get only the encryption configurations matching the desired condition, if given.
+                        .Select(x => new object[] { x }).ToList();
+#endif
                 }
 
                 public IEnumerator<object[]> GetEnumerator() => _data.GetEnumerator();
@@ -133,19 +156,18 @@ namespace MigraDoc.Tests
             }
         }
 
-        
         /// <summary>
         /// A class containing the test configuration to avoid multiple parameters in many test methods and reduce refactoring need on changes of test configurations.
         /// Use ByEnum() to create options fromTestOptionsEnum inside the test.
         /// </summary>
         public class TestOptions
         {
-            public PdfStandardSecurityHandler.DefaultEncryption Encryption { get; private init; }
+            public PdfStandardSecurityHandler.DefaultEncryption Encryption { get; private set; }
 
             /// <summary>
             /// Encrypt the Metadata dictionary (default = true). Valid for Version 4 and 5.
             /// </summary>
-            public bool EncryptMetadata { get; private init; } = true;
+            public bool EncryptMetadata { get; private set; } = true;
 
             public string? UserPassword { get; private set; }
             public string? OwnerPassword { get; private set; }
@@ -161,12 +183,12 @@ namespace MigraDoc.Tests
                 UserPassword = userPassword;
                 OwnerPassword = ownerPassword;
             }
-            
+
             public static TestOptions ByEnum(TestOptionsEnum? @enum)
             {
                 return @enum switch
                 {
-                    TestOptionsEnum.None => new () { Encryption = PdfStandardSecurityHandler.DefaultEncryption.None },
+                    TestOptionsEnum.None => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.None },
                     TestOptionsEnum.Default => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.Default },
                     TestOptionsEnum.V1 => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.V1 },
                     TestOptionsEnum.V2With40Bits => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.V2With40Bits },
@@ -185,9 +207,6 @@ namespace MigraDoc.Tests
         public static Document CreateEmptyTestDocument()
         {
             var doc = new Document();
-#if CORE
-            GlobalFontSettings.FontResolver ??= NewFontResolver.Get();
-#endif
             return doc;
         }
 
@@ -212,9 +231,14 @@ namespace MigraDoc.Tests
             var pdfRenderer = new PdfDocumentRenderer { Document = document };
             pdfRenderer.RenderDocument();
 
+            SecureDocument(pdfRenderer.PdfDocument, options);
+
+            return pdfRenderer;
+        }
+        public static void SecureDocument(PdfDocument pdfDoc, TestOptions options)
+        {
             if (options.Encryption != PdfStandardSecurityHandler.DefaultEncryption.None)
             {
-                var pdfDoc = pdfRenderer.PdfDocument;
                 if (options.UserPassword is not null)
                     pdfDoc.SecuritySettings.UserPassword = options.UserPassword;
                 if (options.OwnerPassword is not null)
@@ -233,10 +257,14 @@ namespace MigraDoc.Tests
                 else if (options.Encryption != PdfStandardSecurityHandler.DefaultEncryption.Default)
                     securityHandler.SetEncryption(options.Encryption);
             }
-
-            return pdfRenderer;
         }
 
+        public static void WriteSecuredTestDocument(Document document, string filename, TestOptions options)
+        {
+            var pdfRenderer = RenderSecuredDocument(document, options);
+            pdfRenderer.Save(filename);
+        }
+        
         public static PdfDocumentRenderer RenderSecuredStandardTestDocument(TestOptions options)
         {
             return RenderSecuredDocument(CreateStandardTestDocument(), options);
@@ -258,7 +286,7 @@ namespace MigraDoc.Tests
         /// Adds a prefix to the filename, depending on the options Encryption and EncryptMetadata properties.
         /// Other information must be added manually to the filename parameter (this applies also to the use of user and/or owner password).
         /// </summary>
-        public static String AddPrefixToFilename(string filename, TestOptions? options = null)
+        public static string AddPrefixToFilename(string filename, TestOptions? options = null)
         {
             var prefix = GetFilenamePrefix(options);
 
@@ -272,13 +300,13 @@ namespace MigraDoc.Tests
         public static string AddSuffixToFilename(string filename, TestOptions? options = null)
         {
             var suffix = GetFilenamePrefix(options);
-            
+
             var extension = Path.GetExtension(filename);
             var filenameWithoutExtension = Path.GetFileNameWithoutExtension(filename);
             return $"{filenameWithoutExtension} {suffix}{extension}";
         }
 
-        private static string GetFilenamePrefix(TestOptions? options)
+        static string GetFilenamePrefix(TestOptions? options)
         {
             // mor information to file name scheme in SecurityTests class.
             var prefixSuffix = "S_";
@@ -289,11 +317,19 @@ namespace MigraDoc.Tests
             // Prefix for encrypted file.
             else
             {
+#if NET6_0_OR_GREATER
                 prefixSuffix += $"{Enum.GetName(options.Encryption)}"
                     .Replace("Default", "Def")
                     .Replace("Using", "_")
                     .Replace("With", "_")
                     .Replace("Bits", "B");
+#else
+                prefixSuffix += $"{Enum.GetName(typeof(PdfStandardSecurityHandler.DefaultEncryption), options.Encryption)}"
+                    .Replace("Default", "Def")
+                    .Replace("Using", "_")
+                    .Replace("With", "_")
+                    .Replace("Bits", "B");
+#endif
 
                 if (!options.EncryptMetadata)
                     prefixSuffix += "_XMeta";

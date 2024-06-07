@@ -1,6 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Drawing;
+
 namespace PdfSharp.Pdf
 {
     /// <summary>
@@ -19,13 +21,13 @@ namespace PdfSharp.Pdf
             get
             {
                 if (_trimMargins == null)
-                    _trimMargins = new TrimMargins();
+                    _trimMargins = new();
                 return _trimMargins;
             }
             set
             {
                 if (_trimMargins == null)
-                    _trimMargins = new TrimMargins();
+                    _trimMargins = new();
                 if (value != null)
                 {
                     _trimMargins.Left = value.Left;
@@ -34,10 +36,10 @@ namespace PdfSharp.Pdf
                     _trimMargins.Bottom = value.Bottom;
                 }
                 else
-                    _trimMargins.All = 0;
+                    _trimMargins.All = XUnit.Zero;
             }
         }
 
-        TrimMargins _trimMargins = new TrimMargins();
+        TrimMargins _trimMargins = new();
     }
 }

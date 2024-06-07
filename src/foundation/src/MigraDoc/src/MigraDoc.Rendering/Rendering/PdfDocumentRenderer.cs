@@ -2,11 +2,9 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics;
-#if WPF
-using System.IO;
-#endif
 using System.Reflection;
 using MigraDoc.DocumentObjectModel;
+using MigraDoc.Rendering.Internals;
 using MigraDoc.Rendering.Resources;
 using PdfSharp.Pdf;
 using PdfSharp.Drawing;
@@ -104,7 +102,7 @@ namespace MigraDoc.Rendering
             };
 
             if (prepareCompletely && _documentRenderer.FormattedDocument == null!)
-                _documentRenderer.PrepareDocument();
+                _documentRenderer.PrepareDocument(PdfDocument.RenderEvents);
         }
 
         /// <summary>
@@ -130,31 +128,23 @@ namespace MigraDoc.Rendering
         }
 
         /// <summary>
-        /// Renders the document into a PdfDocument containing all pages of the document.
+        /// Prepares the document for rendering.
         /// </summary>
         public void PrepareRenderPages()
         {
-            //if (this.documentRenderer == null)
             PrepareDocumentRenderer(true);
 
-            if (_pdfDocument == null)
-            {
-                _pdfDocument = CreatePdfDocument();
-                if (_document?.UseCmykColor ?? NRT.ThrowOnNull<bool>())
-                    _pdfDocument.Options.ColorMode = PdfColorMode.Cmyk;
-            }
-
-            // Add embedded files, that are defined in MigraDoc _document to PDFsharp _pdfDocument.
+            // Add embedded files that are defined in MigraDoc _document to PDFsharp PdfDocument.
+            var pdfDocument = PdfDocument;
             foreach (var item in _document?.EmbeddedFiles ?? NRT.ThrowOnNull<EmbeddedFiles>())
             {
                 if (item as EmbeddedFile is { } embeddedFile)
-                    _pdfDocument.AddEmbeddedFile(embeddedFile.Name, embeddedFile.Path);
+                    pdfDocument.AddEmbeddedFile(embeddedFile.Name, embeddedFile.Path);
                 else
                     NRT.ThrowOnNull<EmbeddedFile>();
             }
 
             WriteDocumentInformation();
-            //RenderPages(1, this.documentRenderer.FormattedDocument.PageCount);
         }
 
         /// <summary>
@@ -235,10 +225,29 @@ namespace MigraDoc.Rendering
         /// <remarks>A PDF document in memory is automatically created when printing before this property was set.</remarks>
         public PdfDocument PdfDocument
         {
-            get => _pdfDocument ?? NRT.ThrowOnNull<PdfDocument>();
+            get
+            {
+                if (_pdfDocument == null)
+                {
+                    _pdfDocument = CreatePdfDocument();
+                    if (_document?.UseCmykColor ?? throw TH.InvalidOperationException_DocumentOfRendererHasToBeSet())
+                        _pdfDocument.Options.ColorMode = PdfColorMode.Cmyk;
+                }
+
+                return _pdfDocument;
+            }
             set => _pdfDocument = value;
         }
+
         PdfDocument? _pdfDocument;
+
+        /// <summary>
+        /// Returns true, if the PdfDocument of this renderer is not yet set.
+        /// </summary>
+        public bool HasPdfDocument()
+        {
+            return _pdfDocument != null;
+        }
 
         /// <summary>
         /// Writes document information like author and subject to the PDF document.

@@ -1,10 +1,9 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Text;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Internals;
@@ -39,7 +38,7 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         public void Render(Document doc, string file, string workingDirectory)
         {
-#if true
+#if NET6_0_OR_GREATER
             var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
 #else
             Encoding? ansiEncoding;
@@ -50,8 +49,10 @@ namespace MigraDoc.RtfRendering
             }
             catch (NotSupportedException)
             {
+#if NET6_0_OR_GREATER
                 // Register provider if ANSI encoding is not available.
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+#endif
                 ansiEncoding = Encoding.GetEncoding(1252);
             }
 #endif
@@ -99,7 +100,11 @@ namespace MigraDoc.RtfRendering
             if (document.UseCmykColor)
                 throw new InvalidOperationException("Cannot create RTF document with CMYK colors.");
 
+#if NET6_0_OR_GREATER
             var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
+#else
+            var ansiEncoding = Encoding.GetEncoding(1252);
+#endif
             StreamWriter? streamWriter = null;
             try
             {
@@ -179,9 +184,7 @@ namespace MigraDoc.RtfRendering
         void Prepare()
         {
             _fontList.Clear();
-            //Fonts 
-            _fontList.Add("Symbol");
-            _fontList.Add("Wingdings");
+            //Fonts
             _fontList.Add("Courier New");
 
             _colorList.Clear();
@@ -328,7 +331,7 @@ namespace MigraDoc.RtfRendering
                 return (int)_fontList.IndexOf(fontName);
 
             //development purpose exception
-            throw new ArgumentException(@"Font does not exist in this document's font table.", "fontName");
+            throw new ArgumentException(@"Font does not exist in this document’s font table.", "fontName");
         }
 
         /// <summary>
@@ -340,7 +343,7 @@ namespace MigraDoc.RtfRendering
             int idx = (int)_colorList.IndexOf(clr);
             // Development purpose exception.
             if (idx < 0)
-                throw new ArgumentException(@"Color does not exist in this document's color table.", "color");
+                throw new ArgumentException(@"Color does not exist in this document’s color table.", "color");
             return idx;
         }
 
@@ -421,7 +424,7 @@ namespace MigraDoc.RtfRendering
             _rtfWriter.WriteControl("viewkind", 4);
             _rtfWriter.WriteControl("uc", 1);
 
-            //Em4-Space doesn't work without this:
+            //Em4-Space doesn’t work without this:
             _rtfWriter.WriteControl("lnbrkrule");
 
             //Footnotes only, no endnotes:
@@ -435,7 +438,7 @@ namespace MigraDoc.RtfRendering
 
             // Word cannot realize the mirror margins property for single sections,
             // although rtf control words exist for this purpose.
-            // Thus, the mirror margins property is set globally if it's true for the first section.
+            // Thus, the mirror margins property is set globally if it’s true for the first section.
             var sec = _document.Sections.First as Section;
             if (sec != null)
             {
@@ -476,7 +479,7 @@ namespace MigraDoc.RtfRendering
                 return;
 
             _rtfWriter.StartContent();
-            _rtfWriter.WriteControl("f", 2); // Second font is Courier New. See Prepare().
+            _rtfWriter.WriteControl("f", 0); // Font with ID 0 is Courier New. See Prepare().
             _rtfWriter.WriteControl("info");
             DocumentInfo info = _document.Info;
             if (!info.Values.Title.IsValueNullOrEmpty())

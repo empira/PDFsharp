@@ -11,15 +11,13 @@ using System.Windows.Media;
 #endif
 using PdfSharp.Pdf.Internal;
 using PdfSharp.Fonts;
-#if !EDF_CORE
 using PdfSharp.Drawing;
-#endif
+using PdfSharp.Internal;
 
 #pragma warning disable 0649
 
 namespace PdfSharp.Fonts.OpenType
 {
-    // TODO: Needs to be refactored #???
     /// <summary>
     /// Base class for all font descriptors.
     /// Currently only OpenTypeDescriptor is derived from this base class.
@@ -28,42 +26,15 @@ namespace PdfSharp.Fonts.OpenType
     {
         protected FontDescriptor(string key)
         {
-            _key = key;
+            Key = key;
         }
 
-        public string Key => _key;
-
-        readonly string _key;
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //public string FontFile
-        //{
-        //  get { return _fontFile; }
-        //  private set { _fontFile = value; }
-        //}
-        //string _fontFile;
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //public string FontType
-        //{
-        //  get { return _fontType; }
-        //  private set { _fontType = value; }
-        //}
-        //string _fontType;
+        public string Key { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        public string FontName
-        {
-            get => _fontName;
-            protected set => _fontName = value;
-        }
-        string _fontName = default!;
+        public string FontName2 { get; init; } = default!; // #NFM check format of this name. It is the name of the XFont or the name of XGlyphTypeface.
 
         ///// <summary>
         ///// 
@@ -136,8 +107,7 @@ namespace PdfSharp.Fonts.OpenType
         public bool IsFixedPitch
         {
             get;
-            private set;
-            // BUG: never set
+            init; // BUG: never set
         }
 
         /// <summary>
@@ -239,47 +209,24 @@ namespace PdfSharp.Fonts.OpenType
         /// </summary>
         public int LineSpacing { get; protected set; }
 
-        internal static string ComputeKey(XFont font)
-        {
-            return font.GlyphTypeface.Key;
-            //return ComputeKey(font.GlyphTypeface.Fontface.FullFaceName, font.Style);
-            //XGlyphTypeface glyphTypeface = font.GlyphTypeface;
-            //string key = glyphTypeface.Fontface.FullFaceName.ToLowerInvariant() +
-            //    (glyphTypeface.IsBold ? "/b" : "") + (glyphTypeface.IsItalic ? "/i" : "");
-            //return key;
-        }
+        internal static string ComputeFdKey(string name, XFontStyleEx style)
+            => ComputeFdKey(name,
+                (style & XFontStyleEx.Bold) != 0,
+                (style & XFontStyleEx.Italic) != 0);
 
-        internal static string ComputeKey(string name, XFontStyleEx style)
+        internal static string ComputeFdKey(string name, bool isBold, bool isItalic)
         {
-            return ComputeKey(name,
-                (style & XFontStyleEx.Bold) == XFontStyleEx.Bold,
-                (style & XFontStyleEx.Italic) == XFontStyleEx.Italic);
-        }
-
-        internal static string ComputeKey(string name, bool isBold, bool isItalic)
-        {
-#if true
-            // Attempt to make it faster.
-            if (!isBold && !isItalic)
-                return name.ToLowerInvariant() + '/';
-            else if (isBold && !isItalic)
-                return name.ToLowerInvariant() + "/b";
-            else if (!isBold && isItalic)
-                return name.ToLowerInvariant() + "/i";
-            else /*if (isBold && isItalic)*/
-                return name.ToLowerInvariant() + "/bi";
-#else
-            // TODO Is StringBuilder more efficient?
-            string key = name.ToLowerInvariant() + '/'
-                + (isBold ? "b" : "") + (isItalic ? "i" : "");
-            return key;
-#endif
-        }
-
-        internal static string ComputeKey(string name)
-        {
-            string key = name.ToLowerInvariant();
+            name = name.ToLowerInvariant();
+            var key = isBold switch
+            {
+                false when !isItalic => name + '/',
+                true when !isItalic => name + "/b",
+                false when isItalic => name + "/i",
+                _ => name + "/bi"
+            };
             return key;
         }
+
+        internal readonly int GlobalVersion = Globals.Global.Version;
     }
 }

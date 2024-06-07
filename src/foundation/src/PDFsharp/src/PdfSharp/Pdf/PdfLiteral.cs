@@ -46,7 +46,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Gets the value as literal string.
         /// </summary>
-        public string Value { get; } = String.Empty;
+        public string Value { get; } = "";
 
         /// <summary>
         /// Returns a string that represents the current value.

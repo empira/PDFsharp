@@ -1,4 +1,7 @@
-﻿// ReSharper disable once CheckNamespace
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+// ReSharper disable once CheckNamespace
 namespace PdfSharp.BigGustave
 {
     using System;
@@ -120,6 +123,7 @@ namespace PdfSharp.BigGustave
 
                 case 3:
                     return new Pixel(first, data[pixelStartIndex + 1], data[pixelStartIndex + 2], 255, false);
+
                 case 4:
                     switch (colorType)
                     {
@@ -135,16 +139,19 @@ namespace PdfSharp.BigGustave
                         default:
                             return new Pixel(first, data[pixelStartIndex + 1], data[pixelStartIndex + 2], data[pixelStartIndex + 3], false);
                     }
+
                 case 6:
                     return new Pixel(first, data[pixelStartIndex + 2], data[pixelStartIndex + 4], 255, false);
+
                 case 8:
                     return new Pixel(first, data[pixelStartIndex + 2], data[pixelStartIndex + 4], data[pixelStartIndex + 6], false);
+
                 default:
                     throw new InvalidOperationException($"Unrecognized number of bytes per pixel: {bytesPerPixel}.");
             }
         }
 
-        private static byte ToSingleByte(byte first, byte second)
+        static byte ToSingleByte(byte first, byte second)
         {
             var us = (first << 8) + second;
             var result = (byte)Math.Round((255 * us) / (double)UInt16.MaxValue);

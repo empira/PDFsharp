@@ -5,6 +5,9 @@ using MigraDoc.DocumentObjectModel.Tables;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.DocumentObjectModel.Shapes.Charts;
 
+// ReSharper disable ConvertIfStatementToNullCoalescingAssignment
+#pragma warning disable IDE0074 // Use compound assignment
+
 namespace MigraDoc.DocumentObjectModel.Visitors
 {
     /// <summary>
@@ -23,9 +26,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Flattens the the specified document object.
+        /// Flattens the specified document object.
         /// </summary>
-        protected void FlattenParagraphFormat(ParagraphFormat format, ParagraphFormat? refFormat)
+        protected static void FlattenParagraphFormat(ParagraphFormat format, ParagraphFormat? refFormat)
         {
             if (refFormat != null)
             {
@@ -51,6 +54,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 
                 if (values.LineSpacingRule is null)
                     values.LineSpacingRule = refValues.LineSpacingRule;
+
                 if (values.LineSpacing is null)
                     values.LineSpacing = refValues.LineSpacing;
 
@@ -79,7 +83,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                     }
                 }
                 else if (refValues.Font is not null)
-                    FlattenFont(values.Font, refValues.Font);
+                    VisitorBase.FlattenFont(values.Font, refValues.Font);
 
                 if (values.Shading is null)
                 {
@@ -110,9 +114,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Flattens the the specified document object.
+        /// Flattens the specified document object.
         /// </summary>
-        protected void FlattenListInfo(ListInfo listInfo, ListInfo refListInfo)
+        protected static void FlattenListInfo(ListInfo listInfo, ListInfo refListInfo)
         {
             if (listInfo.Values.ContinuePreviousList is null)
                 listInfo.Values.ContinuePreviousList = refListInfo.Values.ContinuePreviousList;
@@ -123,9 +127,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Flattens the the specified document object.
+        /// Flattens the specified document object.
         /// </summary>
-        protected void FlattenFont(Font font, Font refFont)  // BUG params must be not-nullable
+        protected static void FlattenFont(Font font, Font refFont)
         {
             if (font == null)
                 throw new ArgumentNullException(nameof(font));
@@ -151,9 +155,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Flattens the the specified document object.
+        /// Flattens the specified document object.
         /// </summary>
-        protected void FlattenShading(Shading shading, Shading refShading)
+        protected static void FlattenShading(Shading shading, Shading refShading)
         {
             //fClear?
             if (shading.Values.Visible is null)
@@ -163,9 +167,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Flattens the the specified document object.
+        /// Flattens the specified document object.
         /// </summary>
-        protected Border FlattenedBorderFromBorders(Border? border, Borders parentBorders)
+        protected static Border FlattenedBorderFromBorders(Border? border, Borders parentBorders)
         {
             if (border == null)
                 border = new Border(parentBorders);
@@ -186,9 +190,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Flattens the the specified document object.
+        /// Flattens the specified document object.
         /// </summary>
-        protected void FlattenBorders(Borders borders, Borders refBorders)
+        protected static void FlattenBorders(Borders borders, Borders refBorders)
         {
             borders.Values.Visible ??= refBorders.Values.Visible;
             if (borders.Values.Width.IsValueNullOrEmpty())
@@ -232,9 +236,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Flattens the the specified document object.
+        /// Flattens the specified document object.
         /// </summary>
-        protected void FlattenBorder(Border border, Border refBorder)
+        protected static void FlattenBorder(Border border, Border refBorder)
         {
             border.Values.Visible ??= refBorder.Values.Visible;
 
@@ -252,9 +256,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Flattens the the specified document object.
+        /// Flattens the specified document object.
         /// </summary>
-        protected void FlattenTabStops(TabStops tabStops, TabStops refTabStops)
+        protected static void FlattenTabStops(TabStops tabStops, TabStops refTabStops)
         {
             if (!tabStops.TabsCleared)
             {
@@ -278,9 +282,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Flattens the the specified document object.
+        /// Flattens the specified document object.
         /// </summary>
-        protected void FlattenPageSetup(PageSetup pageSetup, PageSetup refPageSetup)
+        protected static void FlattenPageSetup(PageSetup pageSetup, PageSetup refPageSetup)
         {
             if (pageSetup.Values.PageWidth.IsValueNullOrEmpty() && pageSetup.Values.PageHeight is null)
             {
@@ -355,21 +359,25 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Flattens the the specified document object.
+        /// Flattens the specified document object.
         /// </summary>
-        protected void FlattenHeaderFooter(HeaderFooter headerFooter, bool isHeader)
+#pragma warning disable IDE0060
+        protected static void FlattenHeaderFooter(HeaderFooter headerFooter, bool isHeader)
+#pragma warning restore IDE0060
         { }
 
         /// <summary>
-        /// Flattens the the specified document object.
+        /// Flattens the specified document object.
         /// </summary>
-        protected void FlattenFillFormat(FillFormat? fillFormat)
+#pragma warning disable IDE0060
+        protected static void FlattenFillFormat(FillFormat? fillFormat)
+#pragma warning restore IDE0060
         { }
 
         /// <summary>
-        /// Flattens the the specified document object.
+        /// Flattens the specified document object.
         /// </summary>
-        protected void FlattenLineFormat(LineFormat? lineFormat, LineFormat? refLineFormat)
+        protected static void FlattenLineFormat(LineFormat? lineFormat, LineFormat? refLineFormat)
         {
             if (refLineFormat != null && lineFormat != null)
             {
@@ -379,9 +387,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Flattens the the specified document object.
+        /// Flattens the specified document object.
         /// </summary>
-        protected void FlattenAxis(Axis? axis)
+        protected static void FlattenAxis(Axis? axis)
         {
             if (axis == null)
                 return;
@@ -390,9 +398,12 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             {
                 Values = { Width = 0.15 }
             };
-            if (axis.Values.HasMajorGridlines == true && axis.Values.MajorGridlines is not null)
+            //if (axis.Values.HasMajorGridlines == true && axis.Values.MajorGridlines is not null)
+            if (axis.Values is { HasMajorGridlines: true, MajorGridlines: not null })
                 FlattenLineFormat(axis.Values.MajorGridlines.Values.LineFormat, refLineFormat);
-            if (axis.Values.HasMinorGridlines == true && axis.Values.MinorGridlines is not null)
+
+            //if (axis.Values.HasMinorGridlines == true && axis.Values.MinorGridlines is not null)
+            if (axis.Values is { HasMinorGridlines: true, MinorGridlines: not null })
                 FlattenLineFormat(axis.Values.MinorGridlines.Values.LineFormat, refLineFormat);
 
             refLineFormat.Values.Width = 0.4;
@@ -412,17 +423,21 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Flattens the the specified document object.
+        /// Flattens the specified document object.
         /// </summary>
-        protected void FlattenPlotArea(PlotArea? plotArea)
+#pragma warning disable IDE0060
+        protected static void FlattenPlotArea(PlotArea? plotArea)
+#pragma warning restore IDE0060
         {
             // plotArea can be null.
         }
 
         /// <summary>
-        /// Flattens the the specified document object.
+        /// Flattens the specified document object.
         /// </summary>
-        protected void FlattenDataLabel(DataLabel? dataLabel)
+#pragma warning disable IDE0060 // Remove unused parameter
+        protected static void FlattenDataLabel(DataLabel? dataLabel)
+#pragma warning restore IDE0060 // Remove unused parameter
         { }
 
         // Chart
@@ -512,7 +527,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 
             ParagraphFormat format;
             var currentElementHolder = GetDocumentElementHolder(paragraph);
-            var style = document.Styles[paragraph.Values.Style ?? String.Empty];
+            var style = document.Styles[paragraph.Values.Style ?? ""];
             if (style != null)
                 format = ParagraphFormatFromStyle(style);
 
@@ -570,11 +585,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         internal override void VisitHeaderFooter(HeaderFooter headerFooter)
         {
             var document = headerFooter.Document;
-            string styleString;
-            if (headerFooter.IsHeader)
-                styleString = StyleNames.Header;
-            else
-                styleString = StyleNames.Footer;
+            var styleString = headerFooter.IsHeader ? StyleNames.Header : StyleNames.Footer;
 
             ParagraphFormat format;
             var style = document.Styles[headerFooter.Values.Style];
@@ -707,7 +718,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         /// Returns a paragraph format object initialized by the given style.
         /// It differs from style.ParagraphFormat if style is a character style.
         /// </summary>
-        ParagraphFormat ParagraphFormatFromStyle(Style style)
+        static ParagraphFormat ParagraphFormatFromStyle(Style style)
         {
             if (style.Type == StyleType.Character)
             {
@@ -930,15 +941,14 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             if (textArea?.Values.Elements == null)
                 return;
 
-            var document = textArea.Document;
+            _ = textArea.Document;
 
             ParagraphFormat parentFormat;
 
             if (textArea.Values.Style is not null)
             {
                 var style = textArea.Document.Styles[textArea.Style];
-                if (style == null)
-                    style = textArea.Document.Styles[StyleNames.InvalidStyleName] ?? NRT.ThrowOnNull<Style>();
+                style ??= textArea.Document.Styles[StyleNames.InvalidStyleName] ?? NRT.ThrowOnNull<Style>();
 
                 parentFormat = style.Values.ParagraphFormat ?? NRT.ThrowOnNull<ParagraphFormat>();
             }
@@ -958,10 +968,11 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             FlattenLineFormat(textArea.Values.LineFormat, null);
         }
 
-        DocumentObject GetDocumentElementHolder(DocumentObject docObj)
+        static DocumentObject GetDocumentElementHolder(DocumentObject docObj)
         {
             var docEls = (DocumentElements?)docObj.Parent ?? NRT.ThrowOnNull<DocumentElements>();
             return docEls.Parent ?? NRT.ThrowOnNull<DocumentObject>();
         }
     }
 }
+#pragma warning restore IDE0074 // Use compound assignment

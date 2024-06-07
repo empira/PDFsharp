@@ -26,7 +26,7 @@ namespace PdfSharp.Fonts.OpenType
             DirectoryEntry.Tag = TableTagNames.Loca;
         }
 
-        public IndexToLocationTable(OpenTypeFontface fontData)
+        public IndexToLocationTable(OpenTypeFontFace fontData)
             : base(fontData, Tag)
         {
             DirectoryEntry = _fontData!.TableDictionary[TableTagNames.Loca];
@@ -65,7 +65,7 @@ namespace PdfSharp.Fonts.OpenType
             }
             catch (Exception)
             {
-                GetType();
+                _ = typeof(int);
                 throw;
             }
         }

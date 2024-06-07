@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace PdfSharp.Internal
 {
     /// <summary>
+    /// Experimental throw helper.
     /// </summary>
     // ReSharper disable once InconsistentNaming
     static class TH
@@ -38,7 +39,7 @@ namespace PdfSharp.Internal
         //        ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
         //}
 
-        //private static ArgumentException GetArgumentException(ExceptionResource resource)
+        //static ArgumentException GetArgumentException(ExceptionResource resource)
         //{
         //    return new ArgumentException(GetResourceString(resource));
         //}

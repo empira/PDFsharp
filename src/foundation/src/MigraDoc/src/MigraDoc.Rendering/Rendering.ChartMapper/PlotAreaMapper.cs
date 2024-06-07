@@ -2,6 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 using MigraDoc.DocumentObjectModel;
+using MigraDoc.Rendering.Extensions;
 using PdfSharp.Charting;
 
 namespace MigraDoc.Rendering.ChartMapper
@@ -13,10 +14,10 @@ namespace MigraDoc.Rendering.ChartMapper
     {
         void MapObject(PlotArea plotArea, DocumentObjectModel.Shapes.Charts.PlotArea domPlotArea)
         {
-            plotArea.BottomPadding = domPlotArea.BottomPadding.Point;
-            plotArea.RightPadding = domPlotArea.RightPadding.Point;
-            plotArea.LeftPadding = domPlotArea.LeftPadding.Point;
-            plotArea.TopPadding = domPlotArea.TopPadding.Point;
+            plotArea.BottomPadding = domPlotArea.BottomPadding.ToXUnit();
+            plotArea.RightPadding = domPlotArea.RightPadding.ToXUnit();
+            plotArea.LeftPadding = domPlotArea.LeftPadding.ToXUnit();
+            plotArea.TopPadding = domPlotArea.TopPadding.ToXUnit();
 
             if (!domPlotArea.Values.LineFormat.IsValueNullOrEmpty())
                 LineFormatMapper.Map(plotArea.LineFormat, domPlotArea.LineFormat);

@@ -9,19 +9,23 @@ namespace PdfSharp.Pdf.Advanced
 {
     /// <summary>
     /// Represents a CIDFont dictionary.
+    /// The subtype can be CIDFontType0 or CIDFontType2.
+    /// PDFsharp only used CIDFontType2 which is a TrueType font program.
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     class PdfCIDFont : PdfFont
     {
         public PdfCIDFont(PdfDocument document)
             : base(document)
         { }
 
-        public PdfCIDFont(PdfDocument document, PdfFontDescriptor fontDescriptor, XFont font)
+        public PdfCIDFont(PdfDocument document, PdfFontDescriptor fontDescriptor /*, XFont font*/)
             : base(document)
         {
             Elements.SetName(Keys.Type, "/Font");
             Elements.SetName(Keys.Subtype, "/CIDFontType2");
-            PdfDictionary cid = new PdfDictionary();
+            // Create CIDSystemInfo dictionary.
+            PdfDictionary cid = new();
             cid.Elements.SetString("/Ordering", "Identity");
             cid.Elements.SetString("/Registry", "Adobe");
             cid.Elements.SetInteger("/Supplement", 0);
@@ -31,10 +35,11 @@ namespace PdfSharp.Pdf.Advanced
 
             FontDescriptor = fontDescriptor;
             // ReSharper disable once DoNotCallOverridableMethodsInConstructor
-            Owner.IrefTable.Add(fontDescriptor);
+            Owner.IrefTable.TryAdd(fontDescriptor);
             Elements[Keys.FontDescriptor] = fontDescriptor.Reference;
 
-            FontEncoding = font.PdfOptions.FontEncoding;
+            //FontEncoding = font.PdfOptions.FontEncoding;
+            FontEncoding = PdfFontEncoding.Unicode;
         }
 
         public PdfCIDFont(PdfDocument document, PdfFontDescriptor fontDescriptor, byte[] fontData)
@@ -42,7 +47,7 @@ namespace PdfSharp.Pdf.Advanced
         {
             Elements.SetName(Keys.Type, "/Font");
             Elements.SetName(Keys.Subtype, "/CIDFontType2");
-            PdfDictionary cid = new PdfDictionary();
+            PdfDictionary cid = new();
             cid.Elements.SetString("/Ordering", "Identity");
             cid.Elements.SetString("/Registry", "Adobe");
             cid.Elements.SetInteger("/Supplement", 0);
@@ -52,7 +57,8 @@ namespace PdfSharp.Pdf.Advanced
 
             FontDescriptor = fontDescriptor;
             // ReSharper disable once DoNotCallOverridableMethodsInConstructor
-            Owner.IrefTable.Add(fontDescriptor);
+            //Owner.IrefTable.Add(fontDescriptor);
+            Owner.IrefTable.TryAdd(fontDescriptor);
             Elements[Keys.FontDescriptor] = fontDescriptor.Reference;
 
             FontEncoding = PdfFontEncoding.Unicode;
@@ -70,32 +76,11 @@ namespace PdfSharp.Pdf.Advanced
         internal override void PrepareForSave()
         {
             base.PrepareForSave();
-
 #if DEBUG_
             if (FontDescriptor._descriptor.FontFace.loca == null)
-            {
-                GetType();
-            }
+                _ = typeof(int);
 #endif
-            // CID fonts must always be embedded. PDFsharp automatically embeds a subset.
-            OpenTypeFontface? subSet = null;
-            if (FontDescriptor._descriptor.FontFace.loca == null!)
-                subSet = FontDescriptor._descriptor.FontFace;
-            else
-                subSet = FontDescriptor._descriptor.FontFace.CreateFontSubSet(_cmapInfo!.GlyphIndices, true);
-            byte[] fontData = subSet.FontSource!.Bytes;
-            var fontStream = new PdfDictionary(Owner);
-            Owner.Internals.AddObject(fontStream);
-            FontDescriptor.Elements[PdfFontDescriptor.Keys.FontFile2] = fontStream.Reference;
-
-            fontStream.Elements["/Length1"] = new PdfInteger(fontData.Length);
-            if (!Owner.Options.NoCompression)
-            {
-                fontData = Filtering.FlateDecode.Encode(fontData, _document.Options.FlateEncodeMode);
-                fontStream.Elements["/Filter"] = new PdfName("/FlateDecode");
-            }
-            fontStream.Elements["/Length"] = new PdfInteger(fontData.Length);
-            fontStream.CreateStream(fontData);
+            FontDescriptor.PrepareForSave();
         }
 
         /// <summary>

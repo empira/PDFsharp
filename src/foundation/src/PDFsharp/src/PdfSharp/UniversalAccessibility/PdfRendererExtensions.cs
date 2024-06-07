@@ -7,7 +7,7 @@ using PdfSharp.Drawing.Pdf;
 namespace PdfSharp.UniversalAccessibility
 {
     /// <summary>
-    /// Helper class containing methods that are called on XGraphics object's XGraphicsPdfRenderer.
+    /// Helper class containing methods that are called on XGraphics object’s XGraphicsPdfRenderer.
     /// </summary>
     public static class PdfRendererExtensions
     {

@@ -4,7 +4,7 @@
 using System.Diagnostics;
 using PdfSharp.Drawing;
 using MigraDoc.DocumentObjectModel;
-
+using MigraDoc.Rendering.Extensions;
 using Font = PdfSharp.Charting.Font;
 using Underline = PdfSharp.Charting.Underline;
 
@@ -31,7 +31,7 @@ namespace MigraDoc.Rendering.ChartMapper
                 font.Name = domFont.Name;
             //if (!domFont.IsNull("Size"))
             if (!domFont.Values.Size.IsValueNullOrEmpty())
-                font.Size = domFont.Size.Point;
+                font.Size = domFont.Size.ToXUnit();
             font.Subscript = domFont.Subscript;
             font.Superscript = domFont.Superscript;
             font.Underline = (Underline)domFont.Underline;
