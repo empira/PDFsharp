@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System;
@@ -42,7 +42,7 @@ namespace MigraDoc.RtfRendering
         internal static string MakeValidBookmarkName(string originalName)
         {
             //Bookmarks (at least in Word) have the following limitations:
-            //1. First character must be a letter (umlauts und � are allowed)
+            //1. First character must be a letter (umlauts und ß are allowed)
             //2. All further characters must be letters, numbers or underscores. 
             //   For example, '-' is NOT allowed).
             StringBuilder strBuilder = new StringBuilder(originalName.Length);

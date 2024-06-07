@@ -425,7 +425,7 @@ namespace MigraDoc.DocumentObjectModel
         //        /// </summary>
         //        public class BorderEnumerator : IEnumerator<Border>
         //        {
-        //#warning This class must be checked with a unit test.
+        //#war/ning This class must be checked with a unit test.
         //            /// <summary>
         //            /// Creates a new BorderEnumerator.
         //            /// </summary>

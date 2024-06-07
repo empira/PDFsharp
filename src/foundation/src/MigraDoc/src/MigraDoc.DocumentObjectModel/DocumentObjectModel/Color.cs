@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using MigraDoc.DocumentObjectModel.Internals;
@@ -16,9 +16,9 @@ namespace MigraDoc.DocumentObjectModel
     {
         // Breaking change: Color.Empty was defined as RGB black with opacity of 0.
         // Sine v6.0 Color.Empty is a special value where _isCmyk is null and all other fields are 0.
-        // Therefore it depends now what 'new Color(0)' means. Set Capabilities.BackwardCompatibility.TreatArgbZeroAsEmpty
-        // to false and the constructor creates a an RGB black with opacity of 0 or set it
-        // to true and it creates an Color.Empty as in versions prior to v6.0.
+        // Therefore, it now depends on what 'new Color(0)' means. Set Capabilities.BackwardCompatibility.TreatArgbZeroAsEmpty
+        // to false and the constructor creates an RGB black with opacity of 0, or set it
+        // to true and it creates a Color.Empty as in versions prior to v6.0.
 
         /// <summary>
         /// Initializes a new instance of the Color class.
@@ -52,7 +52,12 @@ namespace MigraDoc.DocumentObjectModel
                 // Aqua == Cyan
                 // Fuchsia == Magenta
                 //var key = new Style();  ??? 
+#if NET6_0_OR_GREATER
                 StandardColors.TryAdd(d, c);
+#else
+                if (!StandardColors.ContainsKey(d))
+                    StandardColors.Add(d, c);
+#endif
             }
         }
 
@@ -167,7 +172,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Resets this instance, i.e. IsNull() will return true afterwards.
+        /// Resets this instance, i.e. IsNull() will return true afterward.
         /// </summary>
         void INullableValue.SetNull() => this = Empty;
 
@@ -285,13 +290,13 @@ namespace MigraDoc.DocumentObjectModel
             #region Excursion on checking a string to be empty
             // Even after 20+ years the compiler still calls op_Equality for comparing with "" instead
             // of checking 'color.Length == 0'. Microsoft uses in .NET always the comparison with 0
-            // because it is faster regarding to the documentation. I typically use String.IsNullOrEmpty,
+            // because it is faster according to the documentation. I typically use String.IsNullOrEmpty,
             // but in case I already know the string is not null I want to write 's == ""' or 's != ""' and
             // expect that the compiler create the fastest code for me. I know the operators are redefined and
             // call Equals which calls EqualsHelper which works on the underlying span. But comparing to "" is
             // a special case.
             //
-            // Over two decades I cannot see a reason why the substitution may not be save in any case.
+            // Over two decades I cannot see a reason why the substitution may not be safe in any case.
             // So I asked ChatGPT today:
             // 
             //   Why does the C# compiler does not replace a string comparision with "" with a length comparison to 0?
@@ -300,22 +305,22 @@ namespace MigraDoc.DocumentObjectModel
             //   The C# compiler does not automatically replace a string comparison with "" with a length comparison to 0
             //   because the two operations are not always equivalent.
             //   
-            //   While comparing a string to "" may seem like it's checking for an empty string, it's actually checking
+            //   While comparing a string to "" may seem like it’s checking for an empty string, it’s actually checking
             //   for a specific value of an empty string.This can be a problem if the empty string is represented by
             //   something other than "" in the code, such as null or whitespace.
             //   
             //   On the other hand, comparing the length of a string to 0 is always checking for an empty string,
-            //   regardless of how it's represented in the code. However, this operation can be less efficient than comparing
+            //   regardless of how it’s represented in the code. However, this operation can be less efficient than comparing
             //   a string to "", because it requires calculating the length of the string before doing the comparison.
             //   
             //   Therefore, the decision of whether to use a string comparison with "" or a length comparison to 0 should
             //   depend on the specific use case and the expected behavior of the code.In general, if you want to check if
-            //   a string is empty regardless of how it's represented, a length comparison to 0 is a safer choice.
+            //   a string is empty regardless of how it’s represented, a length comparison to 0 is a safer choice.
             //   But if you specifically want to check for an empty string represented by "", then a string comparison with ""
             //   may be more appropriate.
             //
             // Impressive answer, but still no explanation. There is no specific use case where a string with a length other
-            // then 0 is considered to be the empty string. I think Microsoft has a reason. If you know it send me a mail.
+            // than 0 is considered to be the empty string. I think Microsoft has a reason. If you know it send me a mail.
             #endregion
             if (color == "")
                 throw new ArgumentException(nameof(color));
@@ -323,7 +328,7 @@ namespace MigraDoc.DocumentObjectModel
             try
             {
                 uint clr;
-                // Must use Enum.Parse because Enum.IsDefined is case sensitive
+                // Must use Enum.Parse because Enum.IsDefined is case-sensitive
                 try
                 {
                     var obj = Enum.Parse(typeof(ColorName), color, true);
@@ -332,7 +337,7 @@ namespace MigraDoc.DocumentObjectModel
                 }
                 catch
                 {
-                    // Ignore exception because it's not a ColorName.
+                    // Ignore exception because it’s not a ColorName.
                 }
 
                 var numberStyle = NumberStyles.Integer;
@@ -340,13 +345,18 @@ namespace MigraDoc.DocumentObjectModel
                 if (number.StartsWith("0x", StringComparison.Ordinal))
                 {
                     numberStyle = NumberStyles.HexNumber;
+#if NET6_0_OR_GREATER || true
                     number = color[2..];
+#else
+                    number = color.Substring(2);
+#endif
                 }
                 else if (number.StartsWith("#", StringComparison.Ordinal))
                 {
                     numberStyle = NumberStyles.HexNumber;
                     switch (color.Length)
                     {
+#if NET6_0_OR_GREATER || true
                         case 9: // Format "#aarrggbb".
                             number = color[1..];
                             break;
@@ -357,8 +367,26 @@ namespace MigraDoc.DocumentObjectModel
                             var r = color[1..2];
                             var g = color[2..3];
                             var b = color[3..4];
-                            number = "ff" + r + r + g + g + b + b;
+                            number = "ff" + r + r +
+                                     g + g +
+                                     b + b;
                             break;
+#else
+                        case 9: // Format "#aarrggbb".
+                            number = color.Substring(1);
+                            break;
+                        case 7: // Format "#rrggbb".
+                            number = "ff" + color.Substring(1);
+                            break;
+                        case 4:  // Format "#rgb".
+                            var r = color.Substring(1, 1);
+                            var g = color.Substring(2, 1);
+                            var b = color.Substring(3, 1);
+                            number = "ff" + r + r +
+                                     g + g +
+                                     b + b;
+                            break;
+#endif
                         default:
                             throw new ArgumentException(DomSR.InvalidColorString(color), nameof(color));
                     }
@@ -476,8 +504,8 @@ namespace MigraDoc.DocumentObjectModel
             }
             else
             {
-                if (StandardColors.ContainsKey(_argb))
-                    return StandardColors[_argb];
+                if (StandardColors.TryGetValue(_argb, out var c))
+                    return c;
                 if ((_argb & 0xFF000000) == 0xFF000000)
                     return "RGB(" +
                            ((_argb & 0xFF0000) >> 16) + "," +

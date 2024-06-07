@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+Ôªø// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 #if GDI
@@ -61,10 +61,10 @@ namespace PdfSharp.Pdf.Advanced
 
             /// <summary>
             /// (Required) A code that determines how the color of the pattern cell is to be specified:
-            /// 1: Colored tiling pattern. The patternís content stream specifies the colors used to 
+            /// 1: Colored tiling pattern. The pattern‚Äôs content stream specifies the colors used to 
             /// paint the pattern cell. When the content stream begins execution, the current color
-            /// is the one that was initially in effect in the patternís parent content stream.
-            /// 2: Uncolored tiling pattern. The patternís content stream does not specify any color
+            /// is the one that was initially in effect in the pattern‚Äôs parent content stream.
+            /// 2: Uncolored tiling pattern. The pattern‚Äôs content stream does not specify any color
             /// information. Instead, the entire pattern cell is painted with a separately specified color
             /// each time the pattern is used. Essentially, the content stream describes a stencil
             /// through which the current color is to be poured. The content stream must not invoke
@@ -78,7 +78,7 @@ namespace PdfSharp.Pdf.Advanced
             /// <summary>
             /// (Required) A code that controls adjustments to the spacing of tiles relative to the device
             /// pixel grid:
-            /// 1: Constant spacing. Pattern cells are spaced consistentlyóthat is, by a multiple of a
+            /// 1: Constant spacing. Pattern cells are spaced consistently‚Äîthat is, by a multiple of a
             /// device pixel. To achieve this, the application may need to distort the pattern cell slightly
             /// by making small adjustments to XStep, YStep, and the transformation matrix. The amount
             /// of distortion does not exceed 1 device pixel.
@@ -95,7 +95,7 @@ namespace PdfSharp.Pdf.Advanced
             /// <summary>
             /// (Required) An array of four numbers in the pattern coordinate system giving the
             /// coordinates of the left, bottom, right, and top edges, respectively, of the pattern
-            /// cellís bounding box. These boundaries are used to clip the pattern cell.
+            /// cell‚Äôs bounding box. These boundaries are used to clip the pattern cell.
             /// </summary>
             [KeyInfo(KeyType.Rectangle | KeyType.Optional)]
             public const string BBox = "/BBox";
@@ -118,7 +118,7 @@ namespace PdfSharp.Pdf.Advanced
 
             /// <summary>
             /// (Required) A resource dictionary containing all of the named resources required by
-            /// the patternís content stream (see Section 3.7.2, ìResource Dictionariesî).
+            /// the pattern‚Äôs content stream (see Section 3.7.2, ‚ÄúResource Dictionaries‚Äù).
             /// </summary>
             [KeyInfo(KeyType.Dictionary | KeyType.Required)]
             public new const string Resources = "/Resources";

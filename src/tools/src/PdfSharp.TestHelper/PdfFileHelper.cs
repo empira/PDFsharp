@@ -1,28 +1,59 @@
-﻿using System;
-using System.Diagnostics;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+using System.Globalization;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.Advanced;
+using PdfSharp.TestHelper.Analysis.ContentStream;
 
 namespace PdfSharp.TestHelper
 {
     public static class PdfFileHelper
     {
-        public static string CreateTempFileName(string suffix)
+        /// <summary>
+        /// Gets the content stream of the specified page of the document as string.
+        /// </summary>
+        public static string GetPageContentStream(PdfDocument pdfDocument, int pageIdx)
         {
-            // ReSharper disable once StringLiteralTypo
-            return $"{suffix}-{Guid.NewGuid().ToString("N").ToUpperInvariant()}_tempfile.pdf";
+            var pdfPage = pdfDocument.Pages[pageIdx];
+            var contentReference = (PdfReference)pdfPage.Contents.Elements.Items[0];
+            var content = (PdfDictionary)contentReference.Value;
+            var contentStream = content.Stream.ToString();
+
+            return contentStream;
         }
 
-        public static void StartPdfViewer(string filename)
+        /// <summary>
+        /// Gets a ContentStreamEnumerator to inspect the elements inside
+        /// the content stream of the specified page of the document.
+        /// </summary>
+        public static ContentStreamEnumerator GetPageContentStreamEnumerator(PdfDocument pdfDocument, int pageIdx)
         {
-            var startInfo = new ProcessStartInfo(filename) { UseShellExecute = true };
-            Process.Start(startInfo);
+            var contentStream = GetPageContentStream(pdfDocument, pageIdx);
+            return new ContentStreamEnumerator(contentStream, pdfDocument);
         }
 
-        public static void StartPdfViewerIfDebugging(string filename)
+        /// <summary>
+        /// Returns the sequence of GlyphIds inside the given hex string.
+        /// </summary>
+        public static IEnumerable<string> GetHexStringAsGlyphIndices(string hexString)
         {
-            if (Debugger.IsAttached)
+            // Separate the hex string in its 4 hex digit GlyphIds.
+            var glyphIds = hexString.Chunk(4).Select(x =>
             {
-                StartPdfViewer(filename);
-            }
+                // Remove leading zeros...
+                var glyphIndex = new String(x.SkipWhile(c => c == '0').ToArray());
+                // ...but remain "0" for "0000".
+                if (String.IsNullOrEmpty(glyphIndex))
+                    glyphIndex = "0";
+                return glyphIndex;
+            });
+            return glyphIds;
+        }
+
+        internal static bool TryParseDouble(string? str, out double result)
+        {
+            return Double.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture.NumberFormat, out result);
         }
     }
 }

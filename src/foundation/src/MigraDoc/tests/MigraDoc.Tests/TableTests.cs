@@ -1,28 +1,22 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System.Diagnostics;
-using PdfSharp.Pdf;
 using MigraDoc.DocumentObjectModel;
-using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Rendering;
 using PdfSharp.Fonts;
+using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
 using Xunit;
 
 namespace MigraDoc.Tests
 {
-    [Collection("MGD")]
+    [Collection("PDFsharp")]
     public class TableTests
     {
         [Fact]
         public void Create_Table_Cell_with_Top_Border()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = new Document();
 
@@ -51,16 +45,67 @@ namespace MigraDoc.Tests
             pdfRenderer.RenderDocument();
 
             // Save the document...
-            var filename = PdfFileHelper.CreateTempFileName("HelloWorld");
+            var filename = PdfFileUtility.GetTempPdfFileName("TableTopBorder");
             pdfRenderer.PdfDocument.Save(filename);
             // ...and start a viewer.
-            PdfFileHelper.StartPdfViewerIfDebugging(filename);
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
 
 #if DEBUG___
             MigraDoc.DocumentObjectModel.IO.DdlWriter dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_2.mdddl");
             dw.WriteDocument(document);
             dw.Close();
 #endif
+        }
+
+        [Fact]
+        public void Create_a_cloned_table()
+        {
+            // Create a MigraDoc document.
+            var document = new Document();
+
+            // Add a section to the document.
+            var section = document.AddSection();
+
+            // Add a paragraph to the section.
+            var paragraph = section.AddParagraph("Dummy");
+
+            Style style = document.Styles[StyleNames.Normal]!;
+            style.Font.Name = "Arial";
+
+            var sec = document.LastSection;
+            var p = sec.AddParagraph("Creating a table");
+            var table = sec.AddTable();
+            table.Tag = "Original";
+            table.AddColumn("2cm");
+            table.AddColumn("2cm");
+            var row = table.AddRow();
+            row[0].AddParagraph("H1");
+            row[1].AddParagraph("H2");
+            row.HeadingFormat = true;
+            row = table.AddRow();
+            row[0].AddParagraph("C1");
+            row[1].AddParagraph("C2");
+            sec.AddParagraph("Cloned table");
+            var clone = table.Clone();
+            clone.Tag = "Clone";
+            sec.Add(clone);
+            sec.AddParagraph("End of table test");
+
+            // Create a renderer for the MigraDoc document.
+            var pdfRenderer = new PdfDocumentRenderer()
+            {
+                // Associate the MigraDoc document with a renderer.
+                Document = document
+            };
+
+            // Layout and render document to PDF.
+            pdfRenderer.RenderDocument();
+
+            // Save the document...
+            var filename = PdfFileUtility.GetTempPdfFileName("ClonedTable");
+            pdfRenderer.PdfDocument.Save(filename);
+            // ...and start a viewer.
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
     }
 }

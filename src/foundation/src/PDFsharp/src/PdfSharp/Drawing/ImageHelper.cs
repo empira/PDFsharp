@@ -19,7 +19,7 @@ namespace PdfSharp.Drawing
     /// </summary>
     static class ImageHelper
     {
-#if WPF && GDI
+#if WPF && GDI  // #KEEP for reference
         /// <summary>
         /// Creates a WPF bitmap source from an GDI image.
         /// </summary>
@@ -93,7 +93,7 @@ namespace PdfSharp.Drawing
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("ImageHelper.CreateBitmapSource failed:" + ex.Message);
+                De/bug.WriteLine("ImageHelper.CreateBitmapSource failed:" + ex.Message);
             }
             finally
             {

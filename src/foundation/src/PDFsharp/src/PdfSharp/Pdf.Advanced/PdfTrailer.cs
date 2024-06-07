@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.IO;
@@ -11,7 +11,8 @@ namespace PdfSharp.Pdf.Advanced
     /// Represents a PDF trailer dictionary. Even though trailers are dictionaries they never have a cross
     /// reference entry in PdfReferenceTable.
     /// </summary>
-    class PdfTrailer : PdfDictionary  // Reference: 3.4.4  File Trailer / Page 96
+    // Reference: 3.4.4  File Trailer / Page 96
+    class PdfTrailer : PdfDictionary
     {
         /// <summary>
         /// Initializes a new instance of PdfTrailer.
@@ -29,6 +30,7 @@ namespace PdfSharp.Pdf.Advanced
             : base(trailer._document)
         {
             _document = trailer._document;
+            SecurityHandlerInternal = trailer.SecurityHandlerInternal;
 
             // /ID [<09F877EBF282E9408ED1882A9A21D9F2><2A4938E896006F499AC1C2EA7BFB08E4>]
             // /Info 7 0 R
@@ -128,6 +130,11 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         /// <summary>
+        /// Gets or sets the PdfTrailer of the previous version in a PDF with incremental updates.
+        /// </summary>
+        public PdfTrailer? PreviousTrailer { get; set; }
+
+        /// <summary>
         /// Gets the standard security handler and creates it, if not existing.
         /// </summary>
         public PdfStandardSecurityHandler SecurityHandler
@@ -136,7 +143,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets the standard security handler, if existing and encryption is active.
         /// </summary>
-        public PdfStandardSecurityHandler? EffectiveSecurityHandler => (SecurityHandlerInternal ??= (PdfStandardSecurityHandler?)Elements.GetValue(Keys.Encrypt))?.GetIfEncryptionActive();
+        public PdfStandardSecurityHandler? EffectiveSecurityHandler => SecurityHandlerInternal?.GetIfEncryptionIsActive();
 
         /// <summary>
         /// Gets and sets the internally saved standard security handler.
@@ -149,11 +156,11 @@ namespace PdfSharp.Pdf.Advanced
             // HACK: 
             _elements?.Remove(Keys.XRefStm);
 
-            // Don't encrypt myself.
-            var securityHandler = writer.SecurityHandler;
-            writer.SecurityHandler = null;
+            // Donâ€™t encrypt myself.
+            var effectiveSecurityHandler = writer.EffectiveSecurityHandler;
+            writer.EffectiveSecurityHandler = null;
             base.WriteObject(writer);
-            writer.SecurityHandler = securityHandler;
+            writer.EffectiveSecurityHandler = effectiveSecurityHandler;
         }
 
         /// <summary>
@@ -161,15 +168,22 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal void Finish()
         {
+            PdfReference? iref;
             // /Root
-            var iref = _document.Trailer.Elements[Keys.Root] as PdfReference;
-            //if (iref != null && iref.Value == null)
-            if (iref is { Value: null })
+            var currentTrailer = _document.Trailer;
+            do
             {
-                iref = _document.IrefTable[iref.ObjectID];
-                Debug.Assert(iref is not null && iref.Value != null);
-                _document.Trailer.Elements[Keys.Root] = iref;
-            }
+                iref = currentTrailer.Elements[Keys.Root] as PdfReference;
+                //if (iref != null && iref.Value == null)
+                if (iref is { Value: null })
+                {
+                    iref = _document.IrefTable[iref.ObjectID];
+                    Debug.Assert(iref is not null && iref.Value != null);
+                    _document.Trailer.Elements[Keys.Root] = iref;
+                }
+
+                currentTrailer = currentTrailer.PreviousTrailer;
+            } while (currentTrailer != null);
 
             // /Info
             iref = _document.Trailer.Elements[Keys.Info] as PdfReference;
@@ -185,7 +199,7 @@ namespace PdfSharp.Pdf.Advanced
             if (iref != null)
             {
                 iref = _document.IrefTable[iref.ObjectID];
-                Debug.Assert(iref is not null && iref.Value != null);
+                Debug.Assert(iref?.Value != null);
                 _document.Trailer.Elements[Keys.Encrypt] = iref;
 
                 // The encryption dictionary (security handler) was read in before the XRefTable construction 
@@ -207,7 +221,7 @@ namespace PdfSharp.Pdf.Advanced
         internal class Keys : KeysBase  // Reference: TABLE 3.13  Entries in the file trailer dictionary / Page 97
         {
             /// <summary>
-            /// (Required; must not be an indirect reference) The total number of entries in the file’s 
+            /// (Required; must not be an indirect reference) The total number of entries in the fileâ€™s 
             /// cross-reference table, as defined by the combination of the original section and all
             /// update sections. Equivalently, this value is 1 greater than the highest object number
             /// used in the file.
@@ -233,13 +247,13 @@ namespace PdfSharp.Pdf.Advanced
             public const string Root = "/Root";
 
             /// <summary>
-            /// (Required if document is encrypted; PDF 1.1) The document’s encryption dictionary.
+            /// (Required if document is encrypted; PDF 1.1) The documentâ€™s encryption dictionary.
             /// </summary>
             [KeyInfo(KeyType.Dictionary | KeyType.Optional, typeof(PdfStandardSecurityHandler))]
             public const string Encrypt = "/Encrypt";
 
             /// <summary>
-            /// (Optional; must be an indirect reference) The document’s information dictionary.
+            /// (Optional; must be an indirect reference) The documentâ€™s information dictionary.
             /// </summary>
             [KeyInfo(KeyType.Dictionary | KeyType.Optional, typeof(PdfDocumentInformation))]
             public const string Info = "/Info";

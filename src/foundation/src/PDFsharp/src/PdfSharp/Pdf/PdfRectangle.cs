@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 #if GDI
@@ -309,11 +309,11 @@ namespace PdfSharp.Pdf
         }
 
         /// <summary>
-        /// Returns the rectangle as a string in the form «[x1 y1 x2 y2]».
+        /// Returns the rectangle as a string in the form Â«[x1 y1 x2 y2]Â».
         /// </summary>
         public override string ToString()
         {
-            const string format = Config.SignificantFigures3;
+            const string format = Config.SignificantDecimalPlaces3;
             return PdfEncoders.Format("[{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "}]", _x1, _y1, _x2, _y2);
         }
 
@@ -334,7 +334,7 @@ namespace PdfSharp.Pdf
         {
             get
             {
-                const string format = Config.SignificantFigures10;
+                const string format = Config.SignificantDecimalPlaces10;
                 return String.Format(CultureInfo.InvariantCulture,
                     "X1={0:" + format + "}, Y1={1:" + format + "}, X2={2:" + format + "}, Y2={3:" + format + "}", _x1, _y1, _x2, _y2);
             }

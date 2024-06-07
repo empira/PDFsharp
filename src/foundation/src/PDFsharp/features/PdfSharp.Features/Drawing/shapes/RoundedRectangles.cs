@@ -21,12 +21,8 @@ namespace PdfSharp.Features.Drawing
             shapeTypes.RenderSnippet(gfx);
 
             //SaveAndShowDocument(doc,"Test.pdf");
-            doc.Save("Test.pdf");
+            var filename = PdfFileUtility.GetTempPdfFileName("RoundedRectangles");
+            doc.Save(filename);
         }
-
-        //public override void Execute(Stream stream = null)
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }

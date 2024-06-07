@@ -15,7 +15,7 @@ namespace PdfSharp.Drawing.Internal
             // Only used for Core build.
             // TODO Enable for GDI and WPF for testing?
 #if WPF || GDI
-            // We don't handle any files for WPF or GDI+ build.
+            // We don’t handle any files for WPF or GDI+ build.
             return null;
 #endif
 
@@ -107,18 +107,9 @@ namespace PdfSharp.Drawing.Internal
                     // Each pixel is a grayscale sample. 1,2,4,8,16.
                     switch (bitDepth)
                     {
-                        //case 1:
-                        //    ii.Information.ImageFormat = ImageInformation.ImageFormats.Palette1;
-                        //    ii.Information.ColorsUsed = 2;
-                        //    break;
-                        //case 4:
-                        //    ii.Information.ImageFormat = ImageInformation.ImageFormats.Palette4;
-                        //    ii.Information.ColorsUsed = 16;
-                        //    break;
-                        //case 8:
-                        //    ii.Information.ImageFormat = ImageInformation.ImageFormats.Palette8;
-                        //    ii.Information.ColorsUsed = 256;
-                        //    break;
+                        case 8:
+                            ii.Information.ImageFormat = ImageInformation.ImageFormats.Grayscale8;
+                            break;
                         default:
                             throw new Exception($"Unsupported bit depth {bitDepth} for PNG color type {colorType}.");
                     }
@@ -143,6 +134,12 @@ namespace PdfSharp.Drawing.Internal
                     // Each pixel is a palette index; a PLTE chunk must appear. 1, 2, 4, 8.
                     switch (bitDepth)
                     {
+                        case 1:
+                            ii.Information.ImageFormat = ImageInformation.ImageFormats.Palette1;
+                            break;
+                        case 4:
+                            ii.Information.ImageFormat = ImageInformation.ImageFormats.Palette4;
+                            break;
                         case 8:
                             ii.Information.ImageFormat = ImageInformation.ImageFormats.Palette8;
                             break;
@@ -151,8 +148,18 @@ namespace PdfSharp.Drawing.Internal
                     }
                     break;
 
+                case 4:
+                    // Each pixel is a grayscale sample, followed by an alpha sample. 8, 16.
+                    switch (bitDepth)
+                    {
+                        case 8:
+                            ii.Information.ImageFormat = ImageInformation.ImageFormats.Grayscale8;
+                            break;
+                        default:
+                            throw new Exception($"Unsupported bit depth {bitDepth} for PNG color type {colorType}.");
+                    }
+                    break;
                 // TODO case 4:
-                // Each pixel is a grayscale sample, followed by an alpha sample. 8, 16.
 
                 case 6:
                     // Each pixel is an R,G,B triple, followed by an alpha sample. 8, 16.
@@ -173,9 +180,12 @@ namespace PdfSharp.Drawing.Internal
             // Now access the PNG pixels.
             // Png does not implement IDisposable.
             {
-                stream.OriginalStream.Position = 0;
+                if (stream.OriginalStream != null!)
+                    stream.OriginalStream.Position = 0;
                 var myVisitor = new MyVisitor();
-                var png = Png.Open(stream.OriginalStream, myVisitor);
+                var png = stream.OriginalStream != null ?
+                    Png.Open(stream.OriginalStream, myVisitor) :
+                    Png.Open(stream.Data, myVisitor);
 
                 if (png.Width != ii.Information.Width ||
                     png.Height != ii.Information.Height)
@@ -248,12 +258,143 @@ namespace PdfSharp.Drawing.Internal
                         }
                         break;
 
+                    case ImageInformation.ImageFormats.Palette1:
+                        {
+                            var hasAlpha = png.HasAlphaChannel;
+                            var palette = png.GetPalette();
+                            if (palette!.HasAlphaValues != hasAlpha)
+                                throw new Exception($"Unsupported PNG Palette4 image - internal error.");
+
+                            var lineBytes = (png.Width + 1) / 2;
+                            var length = lineBytes * png.Height;
+                            var data = new Byte[length];
+                            var alphaMask = hasAlpha ? new Byte[png.Width * png.Height] : null;
+                            ImagePrivateDataPng pngData;
+                            ii.Data = pngData = new ImagePrivateDataPng(data, alphaMask);
+                            ii.Data.Image = ii;
+
+                            uint colors = (uint)palette.Data.Length / 4;
+                            ii.Information.ColorsUsed = colors;
+                            pngData.PaletteData = new Byte[colors * 3];
+                            var alpha = hasAlpha ? new Byte[colors] : null;
+                            int offset = 0;
+                            for (int c = 0; c < colors; ++c)
+                            {
+                                var pel = palette.GetPixel(c);
+                                pngData.PaletteData[offset++] = pel.R;
+                                pngData.PaletteData[offset++] = pel.G;
+                                pngData.PaletteData[offset++] = pel.B;
+                                //if (hasAlpha)
+                                if (alpha != null)
+                                    alpha[c] = pel.A;
+                            }
+
+                            var alphaUsed = false;
+                            offset = 0;
+                            var offsetAlpha = 0;
+                            var bytesPerLine = (png.Width + 7) / 8;
+                            for (int y = 0; y < png.Height; ++y)
+                            {
+                                for (int x = 0; x < bytesPerLine; ++x)
+                                {
+                                    // TODO Add GetRow to PNG library? Performance optimization.
+                                    int pels = 0;
+                                    for (var index = 0; index < 8; ++index)
+                                    {
+                                        var pel = png.GetPixelIndex(x * 8 + index, y);
+                                        pels |= pel << (7 - index);
+                                        if (hasAlpha)
+                                        {
+                                            // alphaMask and alpha cannot be null here if hasAlpha is true. Suppress warnings in editor.
+                                            Debug.Assert(alphaMask != null, nameof(alphaMask) + " != null");
+                                            Debug.Assert(alpha != null, nameof(alpha) + " != null");
+
+                                            alphaMask[offsetAlpha] = alpha[pel];
+                                            alphaUsed |= alphaMask[offsetAlpha] != 255;
+                                            ++offsetAlpha;
+                                        }
+                                    }
+                                    data[offset] = (byte)pels;
+                                    ++offset;
+                                }
+                            }
+
+                            if (!alphaUsed)
+                                pngData.AlphaMask = null;
+                        }
+                        break;
+
+                    case ImageInformation.ImageFormats.Palette4:
+                        {
+                            var hasAlpha = png.HasAlphaChannel;
+                            var palette = png.GetPalette();
+                            if (palette!.HasAlphaValues != hasAlpha)
+                                throw new Exception($"Unsupported PNG Palette4 image - internal error.");
+
+                            var lineBytes = (png.Width + 1) / 2;
+                            var length = lineBytes * png.Height;
+                            var data = new Byte[length];
+                            var alphaMask = hasAlpha ? new Byte[png.Width * png.Height] : null;
+                            ImagePrivateDataPng pngData;
+                            ii.Data = pngData = new ImagePrivateDataPng(data, alphaMask);
+                            ii.Data.Image = ii;
+
+                            uint colors = (uint)palette.Data.Length / 4;
+                            ii.Information.ColorsUsed = colors;
+                            pngData.PaletteData = new Byte[colors * 3];
+                            var alpha = hasAlpha ? new Byte[colors] : null;
+                            int offset = 0;
+                            for (int c = 0; c < colors; ++c)
+                            {
+                                var pel = palette.GetPixel(c);
+                                pngData.PaletteData[offset++] = pel.R;
+                                pngData.PaletteData[offset++] = pel.G;
+                                pngData.PaletteData[offset++] = pel.B;
+                                //if (hasAlpha)
+                                if (alpha != null)
+                                    alpha[c] = pel.A;
+                            }
+
+                            var alphaUsed = false;
+                            offset = 0;
+                            var offsetAlpha = 0;
+                            for (int y = 0; y < png.Height; ++y)
+                            {
+                                for (int x = 0; x < png.Width; x += 2)
+                                {
+                                    // TODO Add GetRow to PNG library? Performance optimization.
+                                    var pel = png.GetPixelIndex(x, y);
+                                    var pel2 = x + 1 < png.Width ? png.GetPixelIndex(x + 1, y) : 0;
+                                    data[offset] = (byte)(pel2 + (pel << 4));
+                                    if (hasAlpha)
+                                    {
+                                        // alphaMask and alpha cannot be null here if hasAlpha is true. Suppress warnings in editor.
+                                        Debug.Assert(alphaMask != null, nameof(alphaMask) + " != null");
+                                        Debug.Assert(alpha != null, nameof(alpha) + " != null");
+
+                                        alphaMask[offsetAlpha] = alpha[pel];
+                                        alphaUsed |= alphaMask[offsetAlpha] != 255;
+                                        if (x + 1 < png.Width)
+                                        {
+                                            alphaMask[offsetAlpha] = alpha[pel2];
+                                            alphaUsed |= alphaMask[offsetAlpha] != 255;
+                                        }
+                                    }
+
+                                    ++offset;
+                                }
+                            }
+
+                            if (!alphaUsed)
+                                pngData.AlphaMask = null;
+                        }
+                        break;
+
                     case ImageInformation.ImageFormats.Palette8:
                         {
                             var hasAlpha = png.HasAlphaChannel;
                             var palette = png.GetPalette();
                             if (palette!.HasAlphaValues != hasAlpha)
-
                                 throw new Exception($"Unsupported PNG Palette8 image - internal error.");
 
                             var length = png.Width * png.Height;
@@ -304,7 +445,44 @@ namespace PdfSharp.Drawing.Internal
 
                             if (!alphaUsed)
                                 pngData.AlphaMask = null;
+                        }
+                        break;
 
+                    case ImageInformation.ImageFormats.Grayscale8:
+                        {
+                            var hasAlpha = png.HasAlphaChannel;
+
+                            var length = png.Width * png.Height;
+                            var data = new Byte[length];
+                            var alphaMask = hasAlpha ? new Byte[length] : null;
+                            ImagePrivateDataPng pngData;
+                            ii.Data = pngData = new ImagePrivateDataPng(data, alphaMask);
+                            ii.Data.Image = ii;
+
+                            var alphaUsed = false;
+                            var offset = 0;
+                            for (int y = 0; y < png.Height; ++y)
+                            {
+                                for (int x = 0; x < png.Width; ++x)
+                                {
+                                    // TODO Add GetRow to PNG library? Performance optimization.
+                                    var pel = png.GetPixel(x, y);
+                                    data[offset] = pel.R;
+                                    if (hasAlpha)
+                                    {
+                                        // alphaMask and alpha cannot be null here if hasAlpha is true. Suppress warnings in editor.
+                                        Debug.Assert(alphaMask != null, nameof(alphaMask) + " != null");
+
+                                        alphaMask[offset] = pel.A;
+                                        alphaUsed |= alphaMask[offset] != 255;
+                                    }
+
+                                    ++offset;
+                                }
+                            }
+
+                            if (!alphaUsed)
+                                pngData.AlphaMask = null;
                         }
                         break;
 

@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 namespace PdfSharp.Charting.Renderers
@@ -38,7 +38,7 @@ namespace PdfSharp.Charting.Renderers
             }
 
             // If the ratio between yMax to yMin is more than 1.2, the smallest number will be set too zero.
-            // It's Excel's behavior.
+            // It’s Excel’s behavior.
             if (yMin != 0)
             {
                 if (yMin < 0 && yMax < 0)

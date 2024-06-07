@@ -31,7 +31,7 @@ namespace MigraDoc.DocumentObjectModel
             => (Shading)DeepCopy();
 
         /// <summary>
-        /// Clears the Shading object. Additionally, 'Shading = null'
+        /// Clears the Shading object. Additionally, 'shading = null'
         /// is written to the DDL stream when serialized.
         /// </summary>
         public void Clear()
@@ -56,7 +56,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Gets the information if the shading is marked as cleared. Additionally, 'Shading = null'
+        /// Gets the information if the shading is marked as cleared. Additionally, 'shading = null'
         /// is written to the DDL stream when serialized.
         /// </summary>
         public bool IsCleared { get; private set; }

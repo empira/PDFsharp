@@ -1,14 +1,7 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.IO;
-#if NET_ZIP
 using System.IO.Compression;
-#else
-using PdfSharp.SharpZipLib.Zip.Compression;
-using PdfSharp.SharpZipLib.Zip.Compression.Streams;
-using PdfSharp.Pdf.Filters;
-#endif
 
 namespace PdfSharp.Pdf.Filters
 {
@@ -32,14 +25,17 @@ namespace PdfSharp.Pdf.Filters
         /// </summary>
         public byte[] Encode(byte[] data, PdfFlateEncodeMode mode)
         {
-            var ms = new MemoryStream();
+            using var ms = new MemoryStream();
 
-#if NET_ZIP
             CompressionLevel level;
             switch (mode)
             {
                 case PdfFlateEncodeMode.BestCompression:
+#if NET472 || NETSTANDARD2_0
+                    level = CompressionLevel.Optimal;
+#else
                     level = CompressionLevel.SmallestSize;
+#endif
                     break;
                 case PdfFlateEncodeMode.BestSpeed:
                     level = CompressionLevel.Fastest;
@@ -111,27 +107,15 @@ namespace PdfSharp.Pdf.Filters
             //
             //    The information in FLEVEL is not needed for decompression; it
             //    is there to indicate if recompression might be worthwhile.
-            ms.WriteByte(0xDA); // FLEVEL may not always be correct here, but that's okay.
+            ms.WriteByte(0xDA); // FLEVEL may not always be correct here, but that’s okay.
 
             using var zip = new DeflateStream(ms, level, true);
+            zip.Write(data, 0, data.Length);
+            // Flush has no effect on DeflateStream.
+            // Must call Close to ensure all bytes are written with .NET 4.7.2.
+            // Works with .NET 6 even without Close. But when adding support for .NET 4.7.2, we searched a while until we found that only the Close was needed.
+            zip.Close();
 
-            zip.Write(data, 0, data.Length);
-            zip.Flush();
-#else
-            int level = Deflater.DEFAULT_COMPRESSION;
-            switch (mode)
-            {
-                case PdfFlateEncodeMode.BestCompression:
-                    level = Deflater.BEST_COMPRESSION;
-                    break;
-                case PdfFlateEncodeMode.BestSpeed:
-                    level = Deflater.BEST_SPEED;
-                    break;
-            }
-            DeflaterOutputStream zip = new DeflaterOutputStream(ms, new Deflater(level, false));
-            zip.Write(data, 0, data.Length);
-            zip.Finish();
-#endif
             ms.Capacity = (int)ms.Length;
             return ms.GetBuffer();
         }
@@ -141,60 +125,32 @@ namespace PdfSharp.Pdf.Filters
         /// </summary>
         public override byte[] Decode(byte[] data, FilterParms? parms)
         {
-            var msInput = new MemoryStream(data);
-            var msOutput = new MemoryStream();
-#if NET_ZIP
+            using var msInput = new MemoryStream(data);
+            using var msOutput = new MemoryStream();
+
             // ReSharper disable once RedundantAssignment
             var header = new byte[]
             {
                 (byte)msInput.ReadByte(), // CMF (Compression Method and flags)
-                (byte)msInput.ReadByte() // Flags
+                (byte)msInput.ReadByte()  // Flags
             };
 #if true
             Debug.Assert((header[0] & 0xF) == 0x8); // Compression method must be deflate.
-            Debug.Assert((header[1] & 0x20) == 0); // DeflateStream does not support Adler32.
+            Debug.Assert((header[1] & 0x20) == 0);  // DeflateStream does not support Adler32.
 #endif
 
             using var zip = new DeflateStream(msInput, CompressionMode.Decompress, true);
             zip.CopyTo(msOutput);
             msOutput.Flush();
 
-#if true
             if (msOutput.Length >= 0)
             {
                 msOutput.Capacity = (int)msOutput.Length;
                 if (parms?.DecodeParms != null)
                     return StreamDecoder.Decode(msOutput.GetBuffer(), parms.DecodeParms);
             }
-#endif
 
             return msOutput.GetBuffer();
-#else
-            InflaterInputStream iis = new InflaterInputStream(msInput, new Inflater(false));
-            int cbRead;
-            byte[] abResult = new byte[32768];
-            do
-            {
-                cbRead = iis.Read(abResult, 0, abResult.Length);
-                if (cbRead > 0)
-                    msOutput.Write(abResult, 0, cbRead);
-            }
-            while (cbRead > 0);
-#if UWP
-            iis.Dispose();
-#else
-            iis.Close();
-#endif
-            msOutput.Flush();
-            if (msOutput.Length >= 0)
-            {
-                msOutput.Capacity = (int)msOutput.Length;
-                if (parms?.DecodeParms != null)
-                    return StreamDecoder.Decode(msOutput.GetBuffer(), parms.DecodeParms);
-                return msOutput.GetBuffer();
-            }
-            return null!; // NRT HACK
-#endif
         }
     }
 }

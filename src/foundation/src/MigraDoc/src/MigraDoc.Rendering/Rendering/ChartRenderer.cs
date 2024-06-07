@@ -30,7 +30,7 @@ namespace MigraDoc.Rendering
             _chart = (Chart)renderInfo.DocumentObject;
         }
 
-        FormattedTextArea? GetFormattedTextArea(TextArea? area, XUnit width)
+        FormattedTextArea? GetFormattedTextArea(TextArea? area, XUnitPt width)
         {
             if (area == null)
                 return null;
@@ -49,7 +49,7 @@ namespace MigraDoc.Rendering
             return GetFormattedTextArea(area, Double.NaN);
         }
 
-        void GetLeftRightVerticalPosition(out XUnit top, out XUnit bottom)
+        void GetLeftRightVerticalPosition(out XUnitPt top, out XUnitPt bottom)
         {
             //REM: Line width is still ignored while layouting charts.
             Area contentArea = _renderInfo.LayoutInfo.ContentArea;
@@ -68,12 +68,12 @@ namespace MigraDoc.Rendering
         {
             Area contentArea = _renderInfo.LayoutInfo.ContentArea;
             ChartFormatInfo formatInfo = (ChartFormatInfo)_renderInfo.FormatInfo;
-            XUnit top;
-            XUnit bottom;
+            XUnitPt top;
+            XUnitPt bottom;
             GetLeftRightVerticalPosition(out top, out bottom);
 
-            XUnit left = contentArea.X;
-            XUnit width = formatInfo.FormattedLeft?.InnerWidth ?? NRT.ThrowOnNull<XUnit>();
+            XUnitPt left = contentArea.X;
+            XUnitPt width = formatInfo.FormattedLeft?.InnerWidth ?? NRT.ThrowOnNull<XUnitPt>();
 
             return new Rectangle(left, top, width, bottom - top);
         }
@@ -84,10 +84,10 @@ namespace MigraDoc.Rendering
             var formatInfo = (ChartFormatInfo)_renderInfo.FormatInfo;
             GetLeftRightVerticalPosition(out var top, out var bottom);
 
-            //XUnit left = contentArea.X + contentArea.Width - formatInfo.FormattedRight.InnerWidth;
-            //XUnit width = formatInfo.FormattedRight.InnerWidth;
-            XUnit left = contentArea.X + contentArea.Width - formatInfo.FormattedRight?.InnerWidth ?? NRT.ThrowOnNull<XUnit, FormattedTextArea>();
-            XUnit width = formatInfo.FormattedRight?.InnerWidth ?? NRT.ThrowOnNull<XUnit, FormattedTextArea>();
+            //XUnitPt left = contentArea.X + contentArea.Width - formatInfo.FormattedRight.InnerWidth;
+            //XUnitPt width = formatInfo.FormattedRight.InnerWidth;
+            XUnitPt left = contentArea.X + contentArea.Width - formatInfo.FormattedRight?.InnerWidth ?? NRT.ThrowOnNull<XUnitPt, FormattedTextArea>();
+            XUnitPt width = formatInfo.FormattedRight?.InnerWidth ?? NRT.ThrowOnNull<XUnitPt, FormattedTextArea>();
 
             return new Rectangle(left, top, width, bottom - top);
         }
@@ -100,7 +100,7 @@ namespace MigraDoc.Rendering
             var left = contentArea.X;
             var top = contentArea.Y;
             var width = contentArea.Width;
-            var height = formatInfo.FormattedHeader?.InnerHeight ?? NRT.ThrowOnNull<XUnit>();
+            var height = formatInfo.FormattedHeader?.InnerHeight ?? NRT.ThrowOnNull<XUnitPt>();
 
             return new Rectangle(left, top, width, height);
         }
@@ -111,9 +111,9 @@ namespace MigraDoc.Rendering
             ChartFormatInfo formatInfo = (ChartFormatInfo)_renderInfo.FormatInfo;
 
             var left = contentArea.X;
-            var top = contentArea.Y + contentArea.Height - formatInfo.FormattedFooter?.InnerHeight ?? NRT.ThrowOnNull<XUnit>();
+            var top = contentArea.Y + contentArea.Height - formatInfo.FormattedFooter?.InnerHeight ?? NRT.ThrowOnNull<XUnitPt>();
             var width = contentArea.Width;
-            var height = formatInfo.FormattedFooter?.InnerHeight ?? NRT.ThrowOnNull<XUnit>();
+            var height = formatInfo.FormattedFooter?.InnerHeight ?? NRT.ThrowOnNull<XUnitPt>();
 
             return new Rectangle(left, top, width, height);
         }
@@ -123,15 +123,15 @@ namespace MigraDoc.Rendering
             Area contentArea = _renderInfo.LayoutInfo.ContentArea;
             ChartFormatInfo formatInfo = (ChartFormatInfo)_renderInfo.FormatInfo;
 
-            XUnit left;
-            XUnit right;
+            XUnitPt left;
+            XUnitPt right;
             GetTopBottomHorizontalPosition(out left, out right);
 
-            XUnit top = contentArea.Y;
+            XUnitPt top = contentArea.Y;
             if (formatInfo.FormattedHeader != null)
                 top += formatInfo.FormattedHeader.InnerHeight;
 
-            XUnit height = formatInfo.FormattedTop?.InnerHeight ?? NRT.ThrowOnNull<XUnit>();
+            XUnitPt height = formatInfo.FormattedTop?.InnerHeight ?? NRT.ThrowOnNull<XUnitPt>();
 
             return new Rectangle(left, top, right - left, height);
         }
@@ -143,11 +143,11 @@ namespace MigraDoc.Rendering
 
             GetTopBottomHorizontalPosition(out var left, out var right);
 
-            XUnit top = contentArea.Y + contentArea.Height - formatInfo.FormattedBottom?.InnerHeight ?? NRT.ThrowOnNull<XUnit>();
+            XUnitPt top = contentArea.Y + contentArea.Height - formatInfo.FormattedBottom?.InnerHeight ?? NRT.ThrowOnNull<XUnitPt>();
             if (formatInfo.FormattedFooter != null)
                 top -= formatInfo.FormattedFooter.InnerHeight;
 
-            XUnit height = formatInfo.FormattedBottom?.InnerHeight ?? NRT.ThrowOnNull<XUnit>();
+            XUnitPt height = formatInfo.FormattedBottom?.InnerHeight ?? NRT.ThrowOnNull<XUnitPt>();
             return new Rectangle(left, top, right - left, height);
         }
 
@@ -155,25 +155,25 @@ namespace MigraDoc.Rendering
         {
             Area contentArea = _renderInfo.LayoutInfo.ContentArea;
             ChartFormatInfo formatInfo = (ChartFormatInfo)_renderInfo.FormatInfo;
-            XUnit top = contentArea.Y;
+            XUnitPt top = contentArea.Y;
             if (formatInfo.FormattedHeader != null)
                 top += formatInfo.FormattedHeader.InnerHeight;
 
             if (formatInfo.FormattedTop != null)
                 top += formatInfo.FormattedTop.InnerHeight;
 
-            XUnit bottom = contentArea.Y + contentArea.Height;
+            XUnitPt bottom = contentArea.Y + contentArea.Height;
             if (formatInfo.FormattedFooter != null)
                 bottom -= formatInfo.FormattedFooter.InnerHeight;
 
             if (formatInfo.FormattedBottom != null)
                 bottom -= formatInfo.FormattedBottom.InnerHeight;
 
-            XUnit left = contentArea.X;
+            XUnitPt left = contentArea.X;
             if (formatInfo.FormattedLeft != null)
                 left += formatInfo.FormattedLeft.InnerWidth;
 
-            XUnit right = contentArea.X + contentArea.Width;
+            XUnitPt right = contentArea.X + contentArea.Width;
             if (formatInfo.FormattedRight != null)
                 right -= formatInfo.FormattedRight.InnerWidth;
 
@@ -209,7 +209,7 @@ namespace MigraDoc.Rendering
             //    => throw new InvalidOperationException("Must not be null here.");
         }
 
-        XUnit AlignVertically(VerticalAlignment vAlign, XUnit top, XUnit bottom, XUnit height)
+        XUnitPt AlignVertically(VerticalAlignment vAlign, XUnitPt top, XUnitPt bottom, XUnitPt height)
         {
             switch (vAlign)
             {
@@ -229,10 +229,10 @@ namespace MigraDoc.Rendering
         /// Used while formatting.
         /// </summary>
         /// <returns>The width of the top and bottom area</returns>
-        XUnit GetTopBottomWidth()
+        XUnitPt GetTopBottomWidth()
         {
             ChartFormatInfo formatInfo = (ChartFormatInfo)_renderInfo.FormatInfo;
-            XUnit width = _chart.Width.Point;
+            XUnitPt width = _chart.Width.Point;
             if (formatInfo.FormattedRight != null)
                 width -= formatInfo.FormattedRight.InnerWidth;
             if (formatInfo.FormattedLeft != null)
@@ -246,7 +246,7 @@ namespace MigraDoc.Rendering
         /// </summary>
         /// <param name="left">The left boundary of the top and bottom area</param>
         /// <param name="right">The right boundary of the top and bottom area</param>
-        void GetTopBottomHorizontalPosition(out XUnit left, out XUnit right)
+        void GetTopBottomHorizontalPosition(out XUnitPt left, out XUnitPt right)
         {
             var contentArea = _renderInfo.LayoutInfo.ContentArea;
             var formatInfo = (ChartFormatInfo)_renderInfo.FormatInfo;
@@ -269,14 +269,14 @@ namespace MigraDoc.Rendering
             var fillFormatRenderer = new FillFormatRenderer(textArea.Values.FillFormat, _gfx);
             fillFormatRenderer.Render(rect.X, rect.Y, rect.Width, rect.Height);
 
-            XUnit top = rect.Y;
-            top += textArea.TopPadding;
-            XUnit bottom = rect.Y + rect.Height;
-            bottom -= textArea.BottomPadding;
+            XUnitPt top = rect.Y;
+            top += textArea.TopPadding.Point;
+            XUnitPt bottom = rect.Y + rect.Height;
+            bottom -= textArea.BottomPadding.Point;
             top = AlignVertically(textArea.VerticalAlignment, top, bottom, area.ContentHeight);
 
-            XUnit left = rect.X;
-            left += textArea.LeftPadding;
+            XUnitPt left = rect.X;
+            left += textArea.LeftPadding.Point;
 
             RenderInfo[] renderInfos = area.GetRenderInfos();
             RenderByInfos(left, top, renderInfos);
@@ -320,17 +320,17 @@ namespace MigraDoc.Rendering
         {
             var chartFrame = ((ChartFormatInfo)_renderInfo.FormatInfo).ChartFrame ?? NRT.ThrowOnNull<ChartFrame>("BUG");
 
-            XUnit top = rect.Y;
-            top += area.TopPadding;
+            XUnitPt top = rect.Y;
+            top += area.TopPadding.Point;
 
-            XUnit bottom = rect.Y + rect.Height;
-            bottom -= area.BottomPadding;
+            XUnitPt bottom = rect.Y + rect.Height;
+            bottom -= area.BottomPadding.Point;
 
-            XUnit left = rect.X;
-            left += area.LeftPadding;
+            XUnitPt left = rect.X;
+            left += area.LeftPadding.Point;
 
-            XUnit right = rect.X + rect.Width;
-            right -= area.RightPadding;
+            XUnitPt right = rect.X + rect.Width;
+            right -= area.RightPadding.Point;
 
             chartFrame.Location = new XPoint(left, top);
             chartFrame.Size = new XSize(right - left, bottom - top);

@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc.DocumentObjectModel
@@ -21,7 +21,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         internal PageSetup(DocumentObject parent) : base(parent)
         {
-            BaseValues = new PageSetupValues(this); 
+            BaseValues = new PageSetupValues(this);
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace MigraDoc.DocumentObjectModel
         internal void Freeze() => _frozen = true;
 
         /// <summary>
-        /// Gets the page's size and height for the given PageFormat.
+        /// Gets the page’s size and height for the given PageFormat.
         /// </summary>
         public static void GetPageSize(PageFormat pageFormat, out Unit pageWidth, out Unit pageHeight)
         {
@@ -389,13 +389,37 @@ namespace MigraDoc.DocumentObjectModel
                 if (_defaultPageSetup == null)
                 {
 #if true
-                    var regionInfo = CultureInfo.CurrentCulture.Name.Length > 0 ?
-                        new RegionInfo(CultureInfo.CurrentCulture.Name) : null;
+                    // This is the default metric PageSetup. If we ever create a different one
+                    // for non-metric countries we have to write this information into MDDDL.
+                    // Currently, we only use this default values.
+                    _defaultPageSetup = new()
+                    {
+                        PageFormat = PageFormat.A4,
+                        SectionStart = BreakType.BreakNextPage,
+                        Orientation = Orientation.Portrait,
+                        PageWidth = "21cm",
+                        PageHeight = "29.7cm",
+                        TopMargin = "2.5cm",
+                        BottomMargin = "2cm",
+                        LeftMargin = "2.5cm",
+                        RightMargin = "2.5cm",
+                        HeaderDistance = "1.25cm",
+                        FooterDistance = "1.25cm",
+                        OddAndEvenPagesHeaderFooter = false,
+                        DifferentFirstPageHeaderFooter = false,
+                        MirrorMargins = false,
+                        HorizontalPageBreak = false
+                    };
+#else // #KEEP for reference if we create a non-metric setup and fix the MDDDL issue.
+                    // Check if the current country/region uses the metric system of measurement
+                    // and then use page format A4 anyway.
+                    var culture = CultureInfo.CurrentCulture;
+                    if (culture.IsNeutralCulture)
+                        culture = CultureInfo.InvariantCulture;
+
+                    var regionInfo = culture.Name.Length > 0 ? new RegionInfo(culture.Name) : null;
                     var isMetric = regionInfo?.IsMetric ?? true;
-#else
-                    var regionInfo = new RegionInfo(CultureInfo.CurrentCulture.Name);
-                    var isMetric = regionInfo.IsMetric;
-#endif
+
                 Metric:
                     if (isMetric)
                     {
@@ -422,11 +446,12 @@ namespace MigraDoc.DocumentObjectModel
                     }
                     else
                     {
-                        // TODO: Maybe useful in the future, but MDDDL now depends on the settings when is was created.
+                        // TODO: Maybe useful in the future, but MDDDL now depends on the settings when it was created.
                         // Just go to metric case.
                         isMetric = true;
                         goto Metric;
                     }
+#endif
                     _defaultPageSetup.Freeze();
                 }
                 return _defaultPageSetup;
@@ -496,7 +521,7 @@ namespace MigraDoc.DocumentObjectModel
         void EnsureNotFrozen()
         {
             // It is still possible to change DefaultPageSetup directly via Values,
-            // but that's your own bad luck.
+            // but that’s your own bad luck.
             if (_frozen)
                 throw new InvalidOperationException("DefaultPageSetup must not be changed. Change the PageSetup member of your Section. You can assign a Clone() of DefaultPageSetup to that PageSetup member as needed.");
         }

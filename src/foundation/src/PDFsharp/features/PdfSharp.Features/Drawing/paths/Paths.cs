@@ -27,5 +27,19 @@ namespace PdfSharp.Features.Drawing
         {
             RenderSnippetAsPdf(new Snippets.Drawing.PathText());
         }
+
+        public void PathWpf()
+        {
+            RenderSnippetAsPdf(new Snippets.Drawing.PathWpf());
+        }
+
+        protected override void RenderAllSnippets()
+        {
+            PathCurves();
+            PathMisc();
+            PathShapes();
+            PathText();
+            PathWpf();
+        }
     }
 }

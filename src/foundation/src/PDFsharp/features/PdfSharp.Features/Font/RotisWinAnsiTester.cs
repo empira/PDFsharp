@@ -16,7 +16,7 @@ using PdfSharp.Fonts;
 using PdfSharp.Quality;
 
 #pragma warning disable 1591
-namespace PdfSharp.Features
+namespace PdfSharp.Features.Font
 {
     public class RotisWinAnsiTester : Feature
     {
@@ -136,7 +136,7 @@ namespace PdfSharp.Features
         }
 
         /// <summary>
-        /// The internal names that uniquely identify a font's type faces (i.e. a physical font file).
+        /// The internal names that uniquely identify a font’s type faces (i.e. a physical font file).
         /// Used in the first parameter of the FontResolverInfo constructor.
         /// </summary>
         static class FaceNames
@@ -162,8 +162,8 @@ namespace PdfSharp.Features
         /// Converts specified information about a required typeface into a specific font.
         /// </summary>
         /// <param name="familyName">Name of the font family.</param>
-        /// <param name="isBold">Set to <c>true</c> when a bold fontface is required.</param>
-        /// <param name="isItalic">Set to <c>true</c> when an italic fontface is required.</param>
+        /// <param name="isBold">Set to <c>true</c> when a bold font face is required.</param>
+        /// <param name="isItalic">Set to <c>true</c> when an italic font face is required.</param>
         /// <returns>
         /// Information about the physical font, or null if the request cannot be satisfied.
         /// </returns>
@@ -201,7 +201,7 @@ namespace PdfSharp.Features
                 string? faceName = null;
 
                 // In this sample family names are case sensitive. You can relax this in your own implementation
-                // and make them case insensitive.
+                // and make them case-insensitive.
                 switch (lowerFamilyName)
                 {
 #if RotisSerifPro

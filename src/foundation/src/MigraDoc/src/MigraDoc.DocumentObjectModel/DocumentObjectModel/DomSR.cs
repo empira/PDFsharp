@@ -18,12 +18,12 @@ namespace MigraDoc.DocumentObjectModel
     {
         /// <summary>
         /// Loads the message from the resource associated with the enum type and formats it
-        /// using 'String.Format'. Because this function is intended to be used during error
+        /// using 'string.Format'. Because this function is intended to be used during error
         /// handling it never raises an exception.
         /// </summary>
         /// <param name="id">The type of the parameter identifies the resource
         /// and the name of the enum identifies the message in the resource.</param>
-        /// <param name="args">Parameters passed through 'String.Format'.</param>
+        /// <param name="args">Parameters passed through 'string.Format'.</param>
         /// <returns>The formatted message.</returns>
         public static string FormatMessage(DomMsgID id, params object[] args)
         {
@@ -186,10 +186,7 @@ namespace MigraDoc.DocumentObjectModel
             // ReSharper disable ConvertIfStatementToNullCoalescingExpression
             get
             {
-                if (_resmngr == null)
-                {
-                    _resmngr = new ResourceManager("MigraDoc.DocumentObjectModel.Resources.Messages", Assembly.GetExecutingAssembly());
-                }
+                _resmngr ??= new ResourceManager("MigraDoc.DocumentObjectModel.Resources.Messages", Assembly.GetExecutingAssembly());
                 return _resmngr;
             }
             // ReSharper restore ConvertIfStatementToNullCoalescingExpression

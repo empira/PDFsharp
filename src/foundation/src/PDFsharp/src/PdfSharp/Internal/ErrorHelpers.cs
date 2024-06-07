@@ -12,8 +12,27 @@ namespace PdfSharp.Internal
     // ReSharper disable once InconsistentNaming
     static class TH
     {
+        private const string SendUsTheFile = "\nPDFsharp cannot read this PDF file. " +
+            "If you think your file is a valid PDF file please send it to us so that we can fix this bug in the PDF parser.";
+
         public static InvalidOperationException InvalidOperationException_CouldNotFindMetadataDictionary() =>
-            new("Could not find document's metadata dictionary.");
+            new("Could not find document’s metadata dictionary." + SendUsTheFile);
+
+        #region Reader Messages
+
+        public static ObjectNotAvailableException ObjectNotAvailableException_CannotRetrieveStreamLength(Exception? innerException = null)
+        {
+            const string message = "Cannot retrieve stream length." + SendUsTheFile;
+            return innerException != null ? new(message, innerException) : new(message);
+        }
+        
+        public static InvalidOperationException InvalidOperationException_ReferencesOfObjectStreamNotYetRead() =>
+            new("References of object stream are not yet read." + SendUsTheFile);
+
+        public static PdfReaderException PdfReaderException_ObjectCouldNotBeFoundInObjectStreams() =>
+            new("Object could not be found in object streams." + SendUsTheFile);
+
+        #endregion
 
         #region Encryption Messages
 
@@ -61,7 +80,7 @@ namespace PdfSharp.Internal
         public static PdfReaderException PdfReaderException_CouldNotVerifyPWithPermsKey() =>
             new("The document seems to be not correctly encrypted. Could not verify P with Perms key.");
 
-        public static NotImplementedException NotImplementedException_EncryptEmbeddedFilesOnlyCurrentlyShutOff() =>
+        public static NotImplementedException NotImplementedException_EncryptEmbeddedFileStreamsOnlyCurrentlyShutOff() =>
             new("The current implementation is shut off, " +
                 "as it does not work correctly and produces PDF files common PDF readers cannot access the embedded file stream correctly.");
 
@@ -116,11 +135,11 @@ namespace PdfSharp.Internal
         public static ArgumentException ArgumentException_WrappingSASLprepException(Exception innerException) =>
             new("An error occurred while processing the password.", innerException);
 
-        public static ArgumentException ArgumentException_SASLprepProhibitedCharacter(int codepoint, int position) =>
-            new($"Prohibited character '0x{codepoint:X}' at position {position}.");
+        public static ArgumentException ArgumentException_SASLprepProhibitedCharacter(int codePoint, int position) =>
+            new($"Prohibited character '0x{codePoint:X}' at position {position}.");
 
-        public static ArgumentException ArgumentException_SASLprepProhibitedUnassignedCodepoint(int codepoint, int position) =>
-            new($"Prohibited unassigned code point '0x{codepoint:X}' at position {position}.");
+        public static ArgumentException ArgumentException_SASLprepProhibitedUnassignedCodepoint(int codePoint, int position) =>
+            new($"Prohibited unassigned code point '0x{codePoint:X}' at position {position}.");
 
         public static ArgumentException ArgumentException_SASLprepRandALCatAndLCatCharacters() =>
             new("Violation of bidirectional character requirements. String contains RandALCat characters, but also LCat characters.");

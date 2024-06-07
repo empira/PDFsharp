@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc
@@ -32,19 +32,13 @@ namespace MigraDoc
         /// </summary>
         public static readonly string VersionMinor = GitVersionInformation.Minor;
 
-        ///// <summary>
-        ///// The build number of the product.
-        ///// </summary>
-        //[Obsolete("Build version is not used anymore because we switched to Semantic Versioning. Use VersionPatch instead.")]
-        //public const string VersionBuild = "xxxxx";  // DELETE
-
         /// <summary>
         /// The patch number of the product.
         /// </summary>
         public static readonly string VersionPatch = GitVersionInformation.Patch;
 
         /// <summary>
-        /// The Version Prerelease String for NuGet.
+        /// The Version pre-release string for NuGet.
         /// </summary>
         public static readonly string VersionPreRelease = GitVersionInformation.NuGetPreReleaseTagV2;
 
@@ -60,9 +54,14 @@ namespace MigraDoc
         public static readonly string Version = GitVersionInformation.MajorMinorPatch;
 
         /// <summary>
+        /// The full semantic version number created by GitVersion.
+        /// </summary>
+        public static readonly string SemanticVersion = GitVersionInformation.SemVer;
+
+        /// <summary>
         /// The home page of this product.
         /// </summary>
-        public const string Url = "www.migradoc.net";
+        public const string Url = "www.pdfsharp.net";
 
         /// <summary>
         /// Unused.
@@ -72,7 +71,7 @@ namespace MigraDoc
         /// <summary>
         /// The company that created/owned the product.
         /// </summary>
-        public const string Company = "empira Software GmbH, Cologne Area (Germany)";
+        public const string Company = "empira Software GmbH, Troisdorf (Cologne Area), Germany";
 
         /// <summary>
         /// The name of the product.
@@ -82,7 +81,7 @@ namespace MigraDoc
         /// <summary>
         /// The copyright information.
         /// </summary>
-        public const string Copyright = "Copyright � 2001-2023 empira Software GmbH."; // Also used as NuGet Copyright.
+        public const string Copyright = "Copyright © 2001-2024 empira Software GmbH."; // Also used as NuGet Copyright.
 
         /// <summary>
         /// The trademark of the product.

@@ -358,7 +358,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Renders a trailing standard paragraph in case the last element in elements isn't a paragraph.
+        /// Renders a trailing standard paragraph in case the last element in elements isn’t a paragraph.
         /// (Some RTF elements need to close with a paragraph.)
         /// </summary>
         protected void RenderTrailingParagraph(DocumentElements elements)

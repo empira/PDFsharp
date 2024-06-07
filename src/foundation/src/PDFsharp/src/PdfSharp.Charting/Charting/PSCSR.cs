@@ -13,7 +13,7 @@ namespace PdfSharp.Charting
     class PSCSR
     {
         internal static string InvalidChartTypeForCombination(ChartType chartType) 
-            => Invariant($"ChartType '{chartType.ToString()}' not valid for combination of charts.");
+            => Invariant($"ChartType '{chartType}' not valid for combination of charts.");
 
         internal static string PercentNotSupportedByColumnDataLabel 
             => "Column data label cannot be set to 'Percent'.";

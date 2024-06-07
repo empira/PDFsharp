@@ -1,26 +1,29 @@
-﻿using FluentAssertions;
-using MigraDoc.DocumentObjectModel.Tables;
+﻿// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
 using PdfSharp.Fonts;
 using PdfSharp.Snippets.Font;
+using MigraDoc.DocumentObjectModel.Tables;
+using FluentAssertions;
 
 namespace MigraDoc.DocumentObjectModel.Tests.Helper
 {
     public class TestHelper
     {
-        public static void InitializeFontResolver()
-        {
-            GlobalFontSettings.FontResolver ??= NewFontResolver.Get();
-        }
+        //[Obsolete("Not needed anymore")]
+        //public static void InitializeFontResolver()
+        //{
+        //}
 
-        //[Obsolete("Not needed when using NewFontResolver")]
-        public static void InitializeFontResolverWithSegoeWpAsDefault(Document doc)
-        {
-            InitializeFontResolver();
+        //[Obsolete("Not needed anymore")]
+        //public static void InitializeFontResolverWithSegoeWpAsDefault(Document doc)
+        //{
+        //    InitializeFontResolver();
 
-            var style = doc.Styles[StyleNames.Normal];
-            style.Should().NotBeNull();
-            //style!.Font.Name = "segoe wp";
-        }
+        //    var style = doc.Styles[StyleNames.Normal];
+        //    style.Should().NotBeNull();
+        //    //style!.Font.Name = "segoe wp";
+        //}
 
         public static void RemoveStyles(Document doc)
         {

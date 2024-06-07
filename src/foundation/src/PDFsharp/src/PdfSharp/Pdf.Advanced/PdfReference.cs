@@ -55,7 +55,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Initializes a new PdfReference instance from the specified object identifier and file position.
         /// </summary>
-        public PdfReference(PdfObjectID objectID, int position)
+        public PdfReference(PdfObjectID objectID, SizeType position)
         {
             _objectID = objectID;
             _position = position;
@@ -73,11 +73,6 @@ namespace PdfSharp.Pdf.Advanced
 
             // Each line must be exactly 20 bytes long, otherwise Acrobat repairs the file.
             writer.WriteRaw(Invariant($"{_position:0000000000} {_objectID.GenerationNumber:00000} n \n"));
-
-            // DELETE
-            //string text = String.Format(CultureInfo.InvariantCulture, "{0:0000000000} {1:00000} n\n",
-            //  _position, _objectID.GenerationNumber); // InUse ? 'n' : 'f');
-            //writer.WriteRaw(text);
         }
 
         /// <summary>
@@ -97,11 +92,13 @@ namespace PdfSharp.Pdf.Advanced
             get => _objectID;
             set
             {
-                // Ignore redundant invocations.
-                if (_objectID == value)
-                    return;
+                // Makes no sense anymore.
+                //// Ignore redundant invocations.
+                //if (_objectID == value)
+                //    return;
 
                 _objectID = value;
+#if true_
                 if (Document != null)
                 {
                     //PdfXRefTable table = Document.xrefTable;
@@ -109,6 +106,7 @@ namespace PdfSharp.Pdf.Advanced
                     //objectID = value;
                     //table.Add(this);
                 }
+#endif
             }
         }
 
@@ -128,30 +126,24 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets or sets the file position of the related PdfObject.
         /// </summary>
-        public int Position
+        public SizeType Position
         {
             get => _position;
 #if true
             set
             {
+#if DEBUG_
                 if (value < 0)
-                    GetType();
+                    _ = typeof(int);
+#endif
                 Debug.Assert(value >= 0);
                 _position = value;
             }
 #else
-            set => _position = value;
+                set => _position = value;
 #endif
         }
-
-        int _position;  // I know it should be long, but I have never seen a 2GB PDF file.
-
-        //public bool InUse
-        //{
-        //  get {return inUse;}
-        //  set {inUse = value;}
-        //}
-        //bool inUse;
+        SizeType _position;
 
         /// <summary>
         /// Gets or sets the referenced PdfObject.
@@ -188,7 +180,7 @@ namespace PdfSharp.Pdf.Advanced
 #if DEBUG
                 if (_document == null)
                 {
-                    LogHost.Logger.LogDebug("Document of object {_objectID} is null.", _objectID);
+                    PdfSharpLogHost.Logger.LogDebug("Document of object {_objectID} is null.", _objectID);
                 }
 #endif
                 return _document!;
@@ -200,14 +192,11 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets a string representing the object identifier.
         /// </summary>
-        public override string ToString()
-        {
-            return _objectID + " R";
-        }
+        public override string ToString() => _objectID + " R";
 
         /// <summary>
         /// Dereferences the specified item. If the item is a PdfReference, the item is set
-        /// to the referenced value. Otherwise no action is taken.
+        /// to the referenced value. Otherwise, no action is taken.
         /// </summary>
         public static void Dereference(ref object item)
         {

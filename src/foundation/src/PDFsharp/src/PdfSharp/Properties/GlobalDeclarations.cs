@@ -1,16 +1,25 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.Runtime.CompilerServices;
+global using System.IO;
+
+#if USE_LONG_SIZE
+global using SizeType = System.Int64;
+#else
+global using SizeType = System.Int32;
+#endif
+
+global using static System.FormattableString;
+
+using System.Diagnostics.CodeAnalysis;
+//using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: ComVisible(false)]
+[assembly: SuppressMessage("LoggingGenerator", "SYSLIB1006:Multiple logging methods cannot use the same event ID within a class",
+    Justification = "We use logging event ids as documented, i.e. multiple times", Scope = "member"/*, Target = "~M:PdfSharp.Internal.Logging.LogMessages.XGraphicsCreated(Microsoft.Extensions.Logging.ILogger,System.String)"*/)]
 
 // TODO We should add a WPF Preview panel
 //#if WPF
 //[assembly: XmlnsDefinition("http://schemas.empira.com/pdfsharp/2010/xaml/presentation", "PdfSharp.Windows")]
 //#endif
-
-// Temporary HACK for PDFsharp Universal Accessibility.
-[assembly: InternalsVisibleTo("PdfSharp.UA")]
-[assembly: InternalsVisibleTo("PdfSharp.UA-wpf")]

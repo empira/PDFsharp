@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+ï»¿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc.DocumentObjectModel
@@ -54,42 +54,42 @@ namespace MigraDoc.DocumentObjectModel
 
         // ===== \symbol(...) =====
         /// <summary>
-        /// The Euro symbol €.
+        /// The Euro symbol â‚¬.
         /// </summary>
         Euro = 0xF8000001,
 
         /// <summary>
-        /// The copyright symbol ©.
+        /// The copyright symbol Â©.
         /// </summary>
         Copyright = 0xF8000002,
 
         /// <summary>
-        /// The trademark symbol ™.
+        /// The trademark symbol â„¢.
         /// </summary>
         Trademark = 0xF8000003,
 
         /// <summary>
-        /// The registered trademark symbol ®.
+        /// The registered trademark symbol Â®.
         /// </summary>
         RegisteredTrademark = 0xF8000004,
 
         /// <summary>
-        /// The bullet symbol •.
+        /// The bullet symbol â€¢.
         /// </summary>
         Bullet = 0xF8000005,
 
         /// <summary>
-        /// The not symbol ¬.
+        /// The not symbol Â¬.
         /// </summary>
         Not = 0xF8000006,
 
         /// <summary>
-        /// The em dash —.
+        /// The em dash â€”.
         /// </summary>
         EmDash = 0xF8000007,
 
         /// <summary>
-        /// The en dash –.
+        /// The en dash â€“.
         /// </summary>
         EnDash = 0xF8000008,
 

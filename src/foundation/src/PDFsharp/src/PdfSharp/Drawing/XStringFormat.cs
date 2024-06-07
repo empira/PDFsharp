@@ -45,11 +45,7 @@ namespace PdfSharp.Drawing
         /// Initializes a new instance of the <see cref="XStringFormat"/> class.
         /// </summary>
         public XStringFormat()
-        {
-//#if WPF
-//            GetType();  // Make ReSharper happy.
-//#endif
-        }
+        { }
 
         //TODO public StringFormat(StringFormat format);
         //public StringFormat(StringFormatFlags options);
@@ -69,7 +65,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public XStringAlignment Alignment
         {
-            get { return _alignment; }
+            get => _alignment;
             set
             {
                 _alignment = value;
@@ -165,7 +161,7 @@ namespace PdfSharp.Drawing
                 //_stringFormat.FormatFlags = (StringFormatFlags)_formatFlags;
 
                 // Bugfix: Set MeasureTrailingSpaces to get the correct width with Graphics.MeasureString().
-                // Before, MeasureString() didn't include blanks in width calculation, which could result in text overflowing table or page border before wrapping. $MaOs
+                // Before, MeasureString() didn’t include blanks in width calculation, which could result in text overflowing table or page border before wrapping. $MaOs
                 _stringFormat.FormatFlags = _stringFormat.FormatFlags | StringFormatFlags.MeasureTrailingSpaces;
             }
             return _stringFormat;

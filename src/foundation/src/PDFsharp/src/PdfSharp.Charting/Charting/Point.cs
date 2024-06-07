@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 namespace PdfSharp.Charting
@@ -20,15 +20,15 @@ namespace PdfSharp.Charting
         public Point(double value) : this()
             => Value = value;
 
-        /// <summary>
-        /// Initializes a new instance of the Point class with a string value.
-        /// </summary>
-        public Point(string value) : this()
-        {
-            // = "34.5 23.9"
-            Value = 0; // BUG: Not implemented
-            throw new NotImplementedException("Point from string.");
-        }
+        ///// <summary>
+        ///// Initializes a new instance of the Point class with a string value.
+        ///// </summary>
+        //public Point(string value) : this()
+        //{
+        //    // = "34.5 23.9"
+        //    Value = 0; // BUG: Not implemented
+        //    throw new NotImplementedException("Point from string.");
+        //}
 
         /// <summary>
         /// Creates a deep copy of this object.
@@ -56,7 +56,7 @@ namespace PdfSharp.Charting
         }
 
         /// <summary>
-        /// Gets the line format of the data point's border.
+        /// Gets the line format of the data point’s border.
         /// </summary>
         public LineFormat LineFormat => _lineFormat ??= new LineFormat(this);
         // ReSharper disable once InconsistentNaming because this is old code

@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 namespace PdfSharp.Pdf.Annotations
@@ -36,7 +36,7 @@ namespace PdfSharp.Pdf.Annotations
         Print = 1 << (3 - 1),
 
         /// <summary>
-        /// (PDF 1.3) If set, do not scale the annotation’s appearance to match the magnification
+        /// (PDF 1.3) If set, do not scale the annotationâ€™s appearance to match the magnification
         /// of the page. The location of the annotation on the page (defined by the
         /// upper-left corner of its annotation rectangle) remains fixed, regardless of the
         /// page magnification. See below for further discussion.
@@ -44,7 +44,7 @@ namespace PdfSharp.Pdf.Annotations
         NoZoom = 1 << (4 - 1),
 
         /// <summary>
-        /// (PDF 1.3) If set, do not rotate the annotation’s appearance to match the rotation
+        /// (PDF 1.3) If set, do not rotate the annotationâ€™s appearance to match the rotation
         /// of the page. The upper-left corner of the annotation rectangle remains in a fixed
         /// location on the page, regardless of the page rotation. See below for further discussion.
         /// </summary>
@@ -71,7 +71,7 @@ namespace PdfSharp.Pdf.Annotations
         /// <summary>
         /// (PDF 1.4) If set, do not allow the annotation to be deleted or its properties
         /// (including position and size) to be modified by the user. However, this flag does
-        /// not restrict changes to the annotation’s contents, such as the value of a form
+        /// not restrict changes to the annotationâ€™s contents, such as the value of a form
         /// field.
         /// </summary>
         Locked = 1 << (8 - 1),

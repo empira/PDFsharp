@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics;
@@ -18,7 +18,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Renders a section's headers and footers to RTF.
+        /// Renders a section’s headers and footers to RTF.
         /// </summary>
         /* The MigraDoc DOM page setup properties, the MigraDoc DOM headers and the
          * RTF Controls For left, right and first header/footer 
@@ -59,8 +59,8 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Sets the PageSetup (It stems from the section the HeadersFooters are used in).
-        /// Caution: This PageSetup might differ from the one the "parent" section's got
+        /// Sets the PageSetup (it stems from the section the HeadersFooters are used in).
+        /// Caution: This PageSetup might differ from the one the "parent" section’s got
         /// for inheritance reasons.
         /// </summary>
         internal PageSetup PageSetup

@@ -8,6 +8,10 @@ README.md
 
 ## Comments
 
+### #CHECK_BEFORE_RELEASE
+
+Check the code here before you finalize the code for a release branch.
+
 ### DELETE yyyy-mm-dd
 
 Here is code that was replaced by newer code and should be deleted in the future.
@@ -39,4 +43,4 @@ for better reliability.
 
 ### TEST
 
-Here is code that should be coved by (more) unit tests.
+Here is code that should be covered by (more) unit tests.

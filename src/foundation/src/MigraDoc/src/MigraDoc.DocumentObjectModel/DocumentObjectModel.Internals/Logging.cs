@@ -35,7 +35,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
         public static EventId Update = new(1002, "Updated");
         public static EventId Delete = new(1003, "Deleted");
 
-        // These are also valid EventId instances, as there's
+        // These are also valid EventId instances, as there’s
         // an implicit conversion from int to an EventId
         public const int Details = 3000;
         public const int Error = 3001;

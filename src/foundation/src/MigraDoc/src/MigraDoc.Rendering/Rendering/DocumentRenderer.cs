@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics;
@@ -10,6 +10,7 @@ using MigraDoc.DocumentObjectModel.Visitors;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.DocumentObjectModel.Tables;
 using MigraDoc.Rendering.Resources;
+using PdfSharp.Events;
 
 namespace MigraDoc.Rendering
 {
@@ -19,22 +20,17 @@ namespace MigraDoc.Rendering
     /// <remarks>
     /// One prepared instance of this class can serve to render several output formats.
     /// </remarks>
-    public class DocumentRenderer
+    /// <remarks>
+    /// Initializes a new instance of the DocumentRenderer class.
+    /// </remarks>
+    /// <param name="document">The MigraDoc document to render.</param>
+    public class DocumentRenderer(Document document)
     {
         /// <summary>
-        /// Initializes a new instance of the DocumentRenderer class.
-        /// </summary>
-        /// <param name="document">The MigraDoc document to render.</param>
-        public DocumentRenderer(Document document)
-        {
-            _document = document;
-            WorkingDirectory = null!;
-        }
-
-        /// <summary>
         /// Prepares this instance for rendering.
+        /// Commit renderEvents to allow RenderTextEvent calls.
         /// </summary>
-        public void PrepareDocument()
+        public void PrepareDocument(RenderEvents? renderEvents = null)
         {
             var visitor = new PdfFlattenVisitor();
             visitor.Visit(_document);
@@ -43,7 +39,7 @@ namespace MigraDoc.Rendering
             _previousListNumbers[ListType.NumberList3] = 0;
             _formattedDocument = new FormattedDocument(_document, this);
 
-            XGraphics gfx = XGraphics.CreateMeasureContext(new XSize(2000, 2000), XGraphicsUnit.Point, XPageDirection.Downwards);
+            var gfx = XGraphics.CreateMeasureContext(new XSize(2000, 2000), XGraphicsUnit.Point, XPageDirection.Downwards, renderEvents);
 
             _previousListInfo = null;
             _formattedDocument.Format(gfx);
@@ -112,7 +108,6 @@ namespace MigraDoc.Rendering
                 var renderInfos = _formattedDocument.GetRenderInfos(page);
                 if (renderInfos != null)
                 {
-                    //foreach (RenderInfo renderInfo in renderInfos)
                     int count = renderInfos.Length;
                     for (int idx = 0; idx < count; idx++)
                     {
@@ -131,7 +126,7 @@ namespace MigraDoc.Rendering
         {
             var renderInfos = FormattedDocument.GetRenderInfos(page);
             if (renderInfos == null)
-                return Array.Empty<DocumentObject>();
+                return [];
 
             int count = renderInfos.Length;
             var documentObjects = new DocumentObject[count];
@@ -155,7 +150,7 @@ namespace MigraDoc.Rendering
         /// <param name="width">The width.</param>
         /// <param name="documentObject">The document object to render. Can be paragraph, table, or shape.</param>
         /// <remarks>This function is still in an experimental state.</remarks>
-        public void RenderObject(XGraphics graphics, XUnit xPosition, XUnit yPosition, XUnit width, DocumentObject documentObject)
+        public void RenderObject(XGraphics graphics, XUnitPt xPosition, XUnitPt yPosition, XUnitPt width, DocumentObject documentObject)
         {
             if (graphics == null)
                 throw new ArgumentNullException(nameof(graphics));
@@ -163,8 +158,8 @@ namespace MigraDoc.Rendering
             if (documentObject == null)
                 throw new ArgumentNullException(nameof(documentObject));
 
-            if (!(documentObject is Shape) && !(documentObject is Table) &&
-                !(documentObject is Paragraph))
+            if (documentObject is not Shape && documentObject is not Table &&
+                documentObject is not Paragraph)
                 throw new ArgumentException(Messages2.ObjectNotRenderable, nameof(documentObject));
 
             var renderer = Renderer.Create(graphics, this, documentObject, null);
@@ -181,7 +176,7 @@ namespace MigraDoc.Rendering
         /// <summary>
         /// Gets or sets the working directory for rendering.
         /// </summary>
-        public string WorkingDirectory { get; set; }
+        public string WorkingDirectory { get; set; } = null!;
 
         void RenderHeader(XGraphics graphics, int page)
         {
@@ -210,9 +205,9 @@ namespace MigraDoc.Rendering
             var renderInfos = formattedFooter.GetRenderInfos();
 
             // The footer is bottom-aligned and grows with its contents. topY specifies the Y position where the footer begins.
-            XUnit topY = footerArea.Y + footerArea.Height - RenderInfo.GetTotalHeight(renderInfos);
-            // offsetY specifies the offset (amount of movement) for all footer items. It's the difference between topY and the position calculated for the first item.
-            XUnit offsetY = 0;
+            XUnitPt topY = footerArea.Y + footerArea.Height - RenderInfo.GetTotalHeight(renderInfos);
+            // offsetY specifies the offset (amount of movement) for all footer items. It’s the difference between topY and the position calculated for the first item.
+            XUnitPt offsetY = 0;
             bool notFirst = false;
 
             var fieldInfos = FormattedDocument.GetFieldInfos(page);
@@ -233,7 +228,7 @@ namespace MigraDoc.Rendering
             }
         }
 
-        internal void AddOutline(int level, string title, PdfPage? destinationPage, XPoint position)
+        internal static void AddOutline(int level, string title, PdfPage? destinationPage, XPoint position)
         {
             if (level < 1 || destinationPage == null)
                 return;
@@ -259,7 +254,7 @@ namespace MigraDoc.Rendering
             AddOutline(outlines, title, destinationPage, position);
         }
 
-        PdfOutline AddOutline(PdfOutlineCollection outlines, string title, PdfPage destinationPage, XPoint position)
+        static PdfOutline AddOutline(PdfOutlineCollection outlines, string title, PdfPage destinationPage, XPoint position)
         {
             var outline = outlines.Add(title, destinationPage, true);
             outline.Left = position.X;
@@ -299,7 +294,7 @@ namespace MigraDoc.Rendering
 
         ListInfo? _previousListInfo;
         readonly Dictionary<ListType, int> _previousListNumbers = new(3);
-        readonly Document _document;
+        readonly Document _document = document;
 
         /// <summary>
         /// Gets or sets the print date, i.e. the rendering date.
@@ -309,27 +304,22 @@ namespace MigraDoc.Rendering
         /// <summary>
         /// Arguments for the PrepareDocumentProgressEvent which is called while a document is being prepared (you can use this to display a progress bar).
         /// </summary>
-        public class PrepareDocumentProgressEventArgs : EventArgs
+        /// <remarks>
+        /// Initializes a new instance of the <see cref="PrepareDocumentProgressEventArgs"/> class.
+        /// </remarks>
+        /// <param name="value">The current step in document preparation.</param>
+        /// <param name="maximum">The latest step in document preparation.</param>
+        public class PrepareDocumentProgressEventArgs(int value, int maximum) : EventArgs
         {
             /// <summary>
             /// Indicates the current step reached in document preparation.
             /// </summary>
-            public int Value;
-            /// <summary>
-            /// Indicates the final step in document preparation. The quotient of Value and Maximum can be used to calculate a percentage (e. g. for use in a progress bar).
-            /// </summary>
-            public int Maximum;
+            public int Value = value;
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="PrepareDocumentProgressEventArgs"/> class.
+            /// Indicates the final step in document preparation. The quotient of Value and Maximum can be used to calculate a percentage (e.g. for use in a progress bar).
             /// </summary>
-            /// <param name="value">The current step in document preparation.</param>
-            /// <param name="maximum">The latest step in document preparation.</param>
-            public PrepareDocumentProgressEventArgs(int value, int maximum)
-            {
-                Value = value;
-                Maximum = maximum;
-            }
+            public int Maximum = maximum;
         }
 
         /// <summary>

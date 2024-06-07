@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.IO;
@@ -134,7 +134,7 @@ namespace PdfSharp.Pdf
 
         internal override void WriteObject(PdfWriter writer)
         {
-            ((Action)(() => { }))();
+            _ = typeof(int);  // Suppress warning for next line.
             base.WriteObject(writer);
         }
 
@@ -168,7 +168,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// (Root and leaf nodes only; required in leaf nodes; present in the root node if and only if Kids is not present)
             /// An array of the form
-            ///      [key1 value1 key2 value2 � keyn valuen]
+            ///      [key1 value1 key2 value2 … keyn valuen]
             /// where each keyi is a string and the corresponding valuei is the object associated with that key.
             /// The keys are sorted in lexical order, as described below.
             /// </summary>

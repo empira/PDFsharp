@@ -44,7 +44,12 @@ namespace PdfSharp.Pdf
             // Preserve "ï»¿" if text is UTF8 encoded.
             var i = stream.IndexOf(begin, StringComparison.Ordinal);
             var pos = i + begin.Length;
+#if NET6_0_OR_GREATER || true
             stream = stream[..pos] + "xxx" + stream[(pos + 3)..];
+#else
+            stream = stream.Substring(0, pos) + "xxx" + stream.Substring(pos + 3);
+#endif
+
             byte[] bytes = Encoding.UTF8.GetBytes(stream);
             bytes[pos++] = (byte)'ï';
             bytes[pos++] = (byte)'»';
@@ -93,7 +98,7 @@ namespace PdfSharp.Pdf
                       </rdf:Description>
                     </rdf:RDF>
                   </x:xmpmeta>
-                <?xpacket end="w"?>                
+                <?xpacket end="w"?>
                 """;
 #else
             // Does not exist anymore.
@@ -162,12 +167,12 @@ namespace PdfSharp.Pdf
                 <?xpacket begin="ï»¿" id="W5M0MpCehiHzreSzNTczkc9d"?>
                   <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="3.1-701">
                     <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-                    
+
                       <rdf:Description rdf:about=""  xmlns:pdf="http://ns.adobe.com/pdf/1.3/">
                         <pdf:Producer>{producer}</pdf:Producer>
                         <pdf:Keywords>Tag1 Tag 2 Tag3</pdf:Keywords>
                       </rdf:Description>
-                      
+
                       <rdf:Description rdf:about=""  xmlns:dc="http://purl.org/dc/elements/1.1/">
                         <dc:title>
                           <rdf:Alt>
@@ -185,21 +190,21 @@ namespace PdfSharp.Pdf
                           </rdf:Alt>
                         </dc:description>
                       </rdf:Description>
-                      
+
                       <rdf:Description rdf:about=""  xmlns:xmp="http://ns.adobe.com/xap/1.0/">
                         <xmp:CreatorTool>{creator}</xmp:CreatorTool>
                         <xmp:CreateDate>{creationDate}</xmp:CreateDate>
                         <xmp:ModifyDate>{modificationDate}</xmp:ModifyDate>
                       </rdf:Description>
-                      
+
                       <rdf:Description rdf:about=""  xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/">
                         <xmpMM:DocumentID>uuid:{documentId}</xmpMM:DocumentID>
                         <xmpMM:InstanceID>uuid:{instanceId}</xmpMM:InstanceID>
                       </rdf:Description>
-                   
+
                     </rdf:RDF>
                   </x:xmpmeta>
-                <?xpacket end="w"?>                
+                <?xpacket end="w"?>
                 """;
         }
 

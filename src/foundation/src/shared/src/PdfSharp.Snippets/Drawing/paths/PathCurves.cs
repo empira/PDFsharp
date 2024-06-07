@@ -1,7 +1,6 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using PdfSharp.Pdf;
 using PdfSharp.Drawing;
 using PdfSharp.Quality;
 
@@ -12,6 +11,7 @@ namespace PdfSharp.Snippets.Drawing
         public PathCurves()
         {
             Title = "Path Curves";
+            PathName = "snippets/drawing/paths/Curves";
         }
 
         public override void RenderSnippet(XGraphics gfx)
@@ -46,7 +46,7 @@ namespace PdfSharp.Snippets.Drawing
                 DrawArtBox(gfx);
 
                 var path = new XGraphicsPath();
-                path.AddArc(new XPoint(60,60), new XPoint(180,120), new XSize(60, 50), 60, false,XSweepDirection.Clockwise);
+                path.AddArc(new XPoint(60, 60), new XPoint(180, 120), new XSize(60, 50), 60, false, XSweepDirection.Clockwise);
                 gfx.DrawPath(XPens.DarkBlue, path);
             }
             EndBox(gfx);

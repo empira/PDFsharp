@@ -1,4 +1,11 @@
-﻿using MigraDoc.GrammarByExample;
+﻿// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
+using MigraDoc.GrammarByExample;
+using PdfSharp.Diagnostics;
+using PdfSharp.Fonts;
+using PdfSharp.Snippets.Font;
+
 using Xunit;
 
 namespace GdiGrammarByExample
@@ -7,7 +14,7 @@ namespace GdiGrammarByExample
     /// Grammar by example unit test class.
     /// </summary>
     // ReSharper disable InconsistentNaming
-    [Collection("GBE")]
+    [Collection("PDFsharp")]
     public class DdlGBE_Paragraph_Layout : DdlGbeTestBase, IClassFixture<GbeFixture>
     {
         public DdlGBE_Paragraph_Layout(GbeFixture fixture)
@@ -20,7 +27,7 @@ namespace GdiGrammarByExample
             InitializeTest(_fixture, "Paragraph-Layout", 2, 0);
         }
 
-        [Fact]
+        [SkippableFact]
 #if CORE
         public void DDL_Grammar_By_Example_Paragraph_Layout()
 #elif GDI
@@ -29,7 +36,25 @@ namespace GdiGrammarByExample
         public void WPF_DDL_Grammar_By_Example_Paragraph_Layout()
 #endif
         {
-            RunTest();
+            Skip.If(SkippableTests.SkipSlowTests());
+            if (!PdfSharp.Capabilities.Build.IsCoreBuild)
+            {
+                RunTest();
+            }
+            else
+            {
+                // This test requires Wingdings font, so we set FailsafeFontResolver as fallback.
+                PdfSharpCore.ResetAll();
+                try
+                {
+                    GlobalFontSettings.FallbackFontResolver = new FailsafeFontResolver();
+                    RunTest();
+                }
+                finally
+                {
+                    PdfSharpCore.ResetAll();
+                }
+            }
         }
         // ReSharper restore InconsistentNaming
 

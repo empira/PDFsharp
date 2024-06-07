@@ -1,4 +1,7 @@
-﻿// ReSharper disable once CheckNamespace
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+// ReSharper disable once CheckNamespace
 namespace PdfSharp.BigGustave
 {
     using System.Collections.Generic;
@@ -37,7 +40,7 @@ namespace PdfSharp.BigGustave
             }
 
             // The Adler-32 checksum is stored as s2*65536 + s1.
-            return s2 * 65536 + s1;
+            return (s2 << 16) + s1;
         }
     }
 }
