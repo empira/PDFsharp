@@ -78,7 +78,9 @@ namespace PdfSharp.Pdf.Signatures
             return cert.PublicKey.Oid.Value switch
             {
                 RSA => cert.GetRSAPrivateKey(),
+#if NET6_0_OR_GREATER
                 DSA => cert.GetDSAPrivateKey(),
+#endif
                 ECC => cert.GetECDsaPrivateKey(),
                 _ => throw new NotImplementedException(),
             };
