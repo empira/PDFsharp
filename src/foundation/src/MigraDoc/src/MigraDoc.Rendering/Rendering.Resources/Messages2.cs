@@ -120,7 +120,6 @@ namespace MigraDoc.Rendering.Resources
             catch (Exception /*ex*/)
             {
                 //message = "INTERNAL ERROR while formatting error message: " + ex;
-                //ex.GetType();
                 message = "INTERNAL ERROR while formatting error message: " + id;
             }
             return message;

@@ -1,10 +1,7 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
-#if WPF
-using System.IO;
-#endif
 using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Pdf.Advanced
@@ -101,7 +98,7 @@ namespace PdfSharp.Pdf.Advanced
 
         /// <summary>
         /// Returns the PdfReference of the specified object, or null if the object is not in the
-        /// document's object table.
+        /// document’s object table.
         /// </summary>
         public static PdfReference? GetReference(PdfObject obj)
         {
@@ -191,7 +188,7 @@ namespace PdfSharp.Pdf.Advanced
         {
             if (obj == null)
                 throw new ArgumentNullException(nameof(obj));
-            if (obj.Owner == null)
+            if (obj.Owner == null!)
                 obj.Document = _document;
             else if (obj.Owner != _document)
                 throw new InvalidOperationException("Object does not belong to this document.");
@@ -215,9 +212,9 @@ namespace PdfSharp.Pdf.Advanced
 
         /// <summary>
         /// Returns an array containing the specified object as first element follows by its transitive
-        /// closure. The closure of an object are all objects that can be reached by indirect references. 
+        /// closure. The closure of an object are all objects that can be reached by indirect references.
         /// The transitive closure is the result of applying the calculation of the closure to a closure
-        /// as long as no new objects came along. This is e.g. useful for getting all objects belonging 
+        /// as long as no new objects came along. This is e.g. useful for getting all objects belonging
         /// to the resources of a page.
         /// </summary>
         public PdfObject[] GetClosure(PdfObject obj)

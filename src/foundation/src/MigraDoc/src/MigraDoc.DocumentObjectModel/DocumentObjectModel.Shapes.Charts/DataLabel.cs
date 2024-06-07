@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc.DocumentObjectModel.Shapes.Charts
@@ -68,7 +68,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
 
         /// <summary>
         /// Gets or sets the Style for the DataLabel.
-        /// Only the Font-associated part of the Style's ParagraphFormat is used.
+        /// Only the Font-associated part of the Style’s ParagraphFormat is used.
         /// </summary>
         public string Style
         {

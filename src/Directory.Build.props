@@ -9,12 +9,24 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <!-- Enable Build Acceleration in Visual Studio. -->
+    <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+    <!--
+    If you target a framework earlier than .NET 5 (including .NET Framework and .NET Standard),
+    you should set ProduceReferenceAssembly to true in order to speed incremental builds.
+    If you multi-target and any target is before .NET 5, you need this.
+    Even if you target .NET 5 or later, having this property is fine.
+    -->
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <DefaultItemExcludes>*.ncrunchproject;*.DotSettings</DefaultItemExcludes>
 
     <Product>PDFsharp</Product>
     <Company>empira Software</Company>
-    <Copyright>© 2023 empira</Copyright>
+    <Copyright>© 2024 empira</Copyright>
     <Authors>PDFsharp Team</Authors>
     <Owners>empira Software GmbH</Owners>
   </PropertyGroup>

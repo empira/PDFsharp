@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.IO;
@@ -33,7 +33,7 @@ namespace PdfSharp.Pdf
         public override string ToString() => "null";
 
         /// <summary>
-        /// Writes the keyword «null».
+        /// Writes the keyword Â«nullÂ».
         /// </summary>
         internal override void WriteObject(PdfWriter writer)
         {

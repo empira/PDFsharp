@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.Advanced;
@@ -353,7 +353,11 @@ namespace PdfSharp.Pdf.AcroForms
                 if (String.IsNullOrEmpty(name))
                     return null;
 
+#if NET6_0_OR_GREATER
                 int dot = name.IndexOf('.', StringComparison.Ordinal);
+#else
+                int dot = name.IndexOf(".", StringComparison.Ordinal);
+#endif
                 string prefix = dot == -1 ? name : name.Substring(0, dot);
                 string suffix = dot == -1 ? "" : name.Substring(dot + 1);
 
@@ -454,7 +458,7 @@ namespace PdfSharp.Pdf.AcroForms
             /// (Optional; PDF 1.3) An alternate field name, to be used in place of the actual
             /// field name wherever the field must be identified in the user interface (such as
             /// in error or status messages referring to the field). This text is also useful
-            /// when extracting the document’s contents in support of accessibility to disabled
+            /// when extracting the documentâ€™s contents in support of accessibility to disabled
             /// users or for other purposes.
             /// </summary>
             [KeyInfo(KeyType.TextString | KeyType.Optional)]
@@ -475,7 +479,7 @@ namespace PdfSharp.Pdf.AcroForms
             public const string Ff = "/Ff";
 
             /// <summary>
-            /// (Optional; inheritable) The field’s value, whose format varies depending on
+            /// (Optional; inheritable) The fieldâ€™s value, whose format varies depending on
             /// the field type; see the descriptions of individual field types for further information.
             /// </summary>
             [KeyInfo(KeyType.Various | KeyType.Optional)]
@@ -489,7 +493,7 @@ namespace PdfSharp.Pdf.AcroForms
             public const string DV = "/DV";
 
             /// <summary>
-            /// (Optional; PDF 1.2) An additional-actions dictionary defining the field’s behavior
+            /// (Optional; PDF 1.2) An additional-actions dictionary defining the fieldâ€™s behavior
             /// in response to various trigger events. This entry has exactly the same meaning as
             /// the AA entry in an annotation dictionary.
             /// </summary>
@@ -502,7 +506,7 @@ namespace PdfSharp.Pdf.AcroForms
             /// (Required; inheritable) A resource dictionary containing default resources
             /// (such as fonts, patterns, or color spaces) to be used by the appearance stream.
             /// At a minimum, this dictionary must contain a Font entry specifying the resource
-            /// name and font dictionary of the default font for displaying the field’s text.
+            /// name and font dictionary of the default font for displaying the fieldâ€™s text.
             /// </summary>
             [KeyInfo(KeyType.Dictionary | KeyType.Required)]
             public const string DR = "/DR";
@@ -510,7 +514,7 @@ namespace PdfSharp.Pdf.AcroForms
             /// <summary>
             /// (Required; inheritable) The default appearance string, containing a sequence of
             /// valid page-content graphics or text state operators defining such properties as
-            /// the field’s text size and color.
+            /// the fieldâ€™s text size and color.
             /// </summary>
             [KeyInfo(KeyType.String | KeyType.Required)]
             public const string DA = "/DA";

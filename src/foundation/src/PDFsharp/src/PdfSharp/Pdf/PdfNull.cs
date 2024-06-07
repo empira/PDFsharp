@@ -6,7 +6,7 @@ using PdfSharp.Pdf.IO;
 namespace PdfSharp.Pdf
 {
     /// <summary>
-    /// Represents a indirect reference that is not in the cross reference table.
+    /// Represents an indirect reference that is not in the cross-reference table.
     /// </summary>
     public sealed class PdfNull : PdfItem
     {

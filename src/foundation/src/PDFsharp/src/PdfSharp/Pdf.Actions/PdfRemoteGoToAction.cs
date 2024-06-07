@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+Ôªø// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.IO;
@@ -32,7 +32,7 @@ namespace PdfSharp.Pdf.Actions
         /// Creates a link to another document.
         /// </summary>
         /// <param name="documentPath">The path to the target document.</param>
-        /// <param name="destinationName">The named destination's name in the target document.</param>
+        /// <param name="destinationName">The named destination‚Äôs name in the target document.</param>
         /// <param name="newWindow">True, if the destination document shall be opened in a new window.
         /// If not set, the viewer application should behave in accordance with the current user preference.</param>
         public static PdfRemoteGoToAction CreateRemoteGoToAction(string documentPath, string destinationName, bool? newWindow = null)
@@ -88,15 +88,15 @@ namespace PdfSharp.Pdf.Actions
             //public const string S = "/S";
 
             /// <summary>
-            /// (Required) The destination to jump to (see Section 8.5.3, ìAction Typesî).
+            /// (Required) The destination to jump to (see Section 8.5.3, ‚ÄúAction Types‚Äù).
             /// </summary>
             [KeyInfo(KeyType.String | KeyType.Dictionary | KeyType.Required)]
             //[KeyInfo(KeyType.FileSpecification | KeyType.Required)] // File Specifications are not yet implemented.
             public const string F = "/F";
 
             /// <summary>
-            /// (Required) The destination to jump to (see Section 8.2.1, ìDestinationsî).
-            /// If the value is an array defining an explicit destination (as described under ìExplicit Destinationsî on page 582),
+            /// (Required) The destination to jump to (see Section 8.2.1, ‚ÄúDestinations‚Äù).
+            /// If the value is an array defining an explicit destination (as described under ‚ÄúExplicit Destinations‚Äù on page 582),
             /// its first element must be a page number within the remote document rather than an indirect reference to a page object
             /// in the current document. The first page is numbered 0.
             /// </summary>

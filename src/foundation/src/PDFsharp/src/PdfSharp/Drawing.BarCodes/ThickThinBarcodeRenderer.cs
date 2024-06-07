@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System;
@@ -151,7 +151,7 @@ namespace PdfSharp.Drawing.BarCodes
         /// Gets the width of a thick or a thin line (or gap). CalcLineWidth must have been called before.
         /// </summary>
         /// <param name="info"></param>
-        /// <param name="isThick">Determines whether a thick line's width shall be returned.</param>
+        /// <param name="isThick">Determines whether a thick line’s width shall be returned.</param>
         internal double GetBarWidth(BarCodeRenderInfo info, bool isThick)
         {
             if (isThick)

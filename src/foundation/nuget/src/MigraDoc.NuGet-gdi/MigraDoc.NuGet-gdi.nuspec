@@ -1,37 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
-	<metadata>
-		<id>$id$</id>
-		<version>$version$</version>
-		<description>$description$</description>
-		<summary>$summary$</summary>
-		<authors>$authors$</authors>
-		<owners>$owners$</owners>
-		<projectUrl>$projectUrl$</projectUrl>
-		<license type="expression">MIT</license>
-		<icon>images\MigraDoc-128x128.png</icon>
-		<readme>README.md</readme>
-		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<releaseNotes>$releaseNotes$</releaseNotes>
-		<copyright>$copyright$</copyright>
-		<tags>$tags$</tags>
-		<repository type="git" url="https://github.com/empira/PDFsharp" branch="master" commit="" />
-		<title>$title$</title>
-		<dependencies>
-			<group targetFramework="net6.0-windows7.0">
-        <dependency id="Microsoft.Extensions.Logging" version="6.0.0" />
-        <dependency id="Microsoft.Extensions.Logging.Console" version="6.0.0" />
-			</group>
-		</dependencies>
-		<frameworkReferences>
-			<group targetFramework="net6.0-windows7.0">
-				<frameworkReference name="Microsoft.WindowsDesktop.App.WindowsForms" />
-			</group>
-		</frameworkReferences>
-	</metadata>
-	<files>
-		<file src="bin\$config$\net6.0-windows\**\*.*" target="lib\net6.0-windows7.0\" exclude="**\*NuGet*"/>
-		<file src="README.md" />
-		<file src="..\..\..\..\..\assets\migradoc\images\MigraDoc-128x128.png" target="images\" />
-	</files>
+    <metadata>
+        <id>$id$</id>
+        <version>$version$</version>
+        <description>$description$</description>
+        <summary>$summary$</summary>
+        <authors>$authors$</authors>
+        <owners>$owners$</owners>
+        <projectUrl>$projectUrl$</projectUrl>
+        <license type="expression">MIT</license>
+        <icon>images\MigraDoc-128x128.png</icon>
+        <readme>README.md</readme>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <releaseNotes>$releaseNotes$</releaseNotes>
+        <copyright>$copyright$</copyright>
+        <tags>$tags$</tags>
+        <repository type="git" url="https://github.com/empira/PDFsharp" branch="master" commit="" />
+        <title>$title$</title>
+        <dependencies>
+            <group targetFramework="net6.0-windows7.0">
+                <dependency id="Microsoft.Extensions.Logging" version="6.0.0" />
+            </group>
+            <group targetFramework="net472">
+                <dependency id="Microsoft.Extensions.Logging" version="6.0.0" />
+            </group>
+        </dependencies>
+        <frameworkReferences>
+            <group targetFramework="net6.0-windows7.0">
+                <frameworkReference name="Microsoft.WindowsDesktop.App.WindowsForms" />
+            </group>
+            <group targetFramework="net472">
+                <!--<frameworkReference name="Microsoft.WindowsDesktop.App.WindowsForms" />-->
+            </group>
+        </frameworkReferences>
+    </metadata>
+    <files>
+        <file src="bin\$config$\net6.0-windows\**\*.*" target="lib\net6.0-windows7.0\" exclude="**\*NuGet*"/>
+        <file src="bin\$config$\net472-windows\**\*.*" target="lib\net472\" exclude="**\*NuGet*"/>
+        <file src="README.md" />
+        <file src="..\..\..\..\..\assets\migradoc\images\MigraDoc-128x128.png" target="images\" />
+    </files>
 </package>

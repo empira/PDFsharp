@@ -10,12 +10,16 @@ namespace PdfSharp.Pdf.IO
     {
 #pragma warning disable 1591
         None,
-        Comment, Null, Integer, UInteger, Real, Boolean, String, HexString, UnicodeString, UnicodeHexString,
+        Comment, Null, Integer, LongInteger, Real, Boolean, String, HexString, UnicodeString, UnicodeHexString,
         Name, Keyword,
         BeginStream, EndStream,
         BeginArray, EndArray,
         BeginDictionary, EndDictionary,
         Obj, EndObj, R, XRef, Trailer, StartXRef, Eof,
+        
+        // The lexer now can parse references in the form "nnn ggg R"
+        // as a symbol in one step.
+        ObjRef
 #pragma warning restore 1591
     }
 }

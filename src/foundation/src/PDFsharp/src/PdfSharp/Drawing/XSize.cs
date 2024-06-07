@@ -318,7 +318,7 @@ namespace PdfSharp.Drawing
         {
             get
             {
-                const string format = Config.SignificantFigures10;
+                const string format = Config.SignificantDecimalPlaces10;
                 return String.Format(CultureInfo.InvariantCulture,
                     "size=({2}{0:" + format + "}, {1:" + format + "})",
                     _width, _height, IsEmpty ? "Empty " : "");

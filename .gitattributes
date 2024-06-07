@@ -49,4 +49,23 @@
 *.dbproj text=auto
 *.sln text=auto eol=crlf
 
+# Some more extensions required for git under Linux
+.editorconfig text=auto
+.gitattributes text=auto
+.gitignore text=auto
+LICENSE text=auto
+*.config text=auto
+*.DotSettings text=auto
+*.json text=auto
+*.md text=auto
+*.nuspec text=auto
+*.props text=auto
+*.ps1 text=auto
+*.restext text=auto
+*.settings text=auto
+*.txt text=auto
+*.xaml text=auto
+*.yaml text=auto
+*.yml text=auto
+
 *.sh eol=lf

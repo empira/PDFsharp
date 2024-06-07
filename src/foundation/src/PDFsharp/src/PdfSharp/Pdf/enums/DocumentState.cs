@@ -1,8 +1,6 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-
 namespace PdfSharp.Pdf
 {
     /// <summary>
@@ -25,5 +23,10 @@ namespace PdfSharp.Pdf
         /// The document is disposed.
         /// </summary>
         Disposed = 0x8000,
+
+        /// <summary>
+        /// The document was saved and cannot be modified anymore.
+        /// </summary>
+        Saved = 0x1000,
     }
 }

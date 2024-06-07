@@ -39,7 +39,7 @@ namespace MigraDoc.Rendering
             //      bool cmyk = false; // BUG CMYK
             //      if (_borders.Document != null)
             //        cmyk = _borders.Document.UseCmykColor;
-            //#if DEBUG
+            //#if DEBUG_
             //      else
             //        GetT ype();
             //#endif
@@ -62,7 +62,7 @@ namespace MigraDoc.Rendering
             return style;
         }
 
-        internal XUnit GetWidth(BorderType type)
+        internal XUnitPt GetWidth(BorderType type)
         {
             if (_borders == null!)
                 return 0;
@@ -121,9 +121,9 @@ namespace MigraDoc.Rendering
         /// <param name="left">The left position of the border.</param>
         /// <param name="top">The top position of the border.</param>
         /// <param name="height">The height on which to render the border.</param>
-        internal void RenderVertically(BorderType type, XUnit left, XUnit top, XUnit height)
+        internal void RenderVertically(BorderType type, XUnitPt left, XUnitPt top, XUnitPt height)
         {
-            XUnit borderWidth = GetWidth(type);
+            XUnitPt borderWidth = GetWidth(type);
             if (borderWidth == 0)
                 return;
 
@@ -140,9 +140,9 @@ namespace MigraDoc.Rendering
         /// <param name="left">The left position of the border.</param>
         /// <param name="top">The top position of the border.</param>
         /// <param name="width">The width on which to render the border.</param>
-        internal void RenderHorizontally(BorderType type, XUnit left, XUnit top, XUnit width)
+        internal void RenderHorizontally(BorderType type, XUnitPt left, XUnitPt top, XUnitPt width)
         {
-            XUnit borderWidth = GetWidth(type);
+            XUnitPt borderWidth = GetWidth(type);
             if (borderWidth == 0)
                 return;
 
@@ -152,9 +152,9 @@ namespace MigraDoc.Rendering
                 _gfx.DrawLine(pen, left + width, top, left, top);
         }
 
-        internal void RenderDiagonally(BorderType type, XUnit left, XUnit top, XUnit width, XUnit height)
+        internal void RenderDiagonally(BorderType type, XUnitPt left, XUnitPt top, XUnitPt width, XUnitPt height)
         {
-            XUnit borderWidth = GetWidth(type);
+            XUnitPt borderWidth = GetWidth(type);
             if (borderWidth == 0)
                 return;
 
@@ -177,7 +177,7 @@ namespace MigraDoc.Rendering
             _gfx.Restore(state);
         }
 
-        internal void RenderRounded(RoundedCorner roundedCorner, XUnit x, XUnit y, XUnit width, XUnit height)
+        internal void RenderRounded(RoundedCorner roundedCorner, XUnitPt x, XUnitPt y, XUnitPt width, XUnitPt height)
         {
             if (roundedCorner == RoundedCorner.None)
                 return;
@@ -198,8 +198,8 @@ namespace MigraDoc.Rendering
 
             x -= borderWidth / 2;
             y -= borderWidth / 2;
-            XUnit ellipseWidth = width * 2 + borderWidth;
-            XUnit ellipseHeight = height * 2 + borderWidth;
+            XUnitPt ellipseWidth = width * 2 + borderWidth;
+            XUnitPt ellipseHeight = height * 2 + borderWidth;
 
             switch (roundedCorner)
             {

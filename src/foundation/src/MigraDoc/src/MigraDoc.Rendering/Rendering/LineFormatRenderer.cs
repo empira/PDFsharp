@@ -35,7 +35,7 @@ namespace MigraDoc.Rendering
 #endif
         }
 
-        internal XUnit GetWidth()
+        internal XUnitPt GetWidth()
         {
             if (_lineFormat == null!)
                 return 0;
@@ -53,9 +53,9 @@ namespace MigraDoc.Rendering
             return 0;
         }
 
-        internal void Render(XUnit xPosition, XUnit yPosition, XUnit width, XUnit height)
+        internal void Render(XUnitPt xPosition, XUnitPt yPosition, XUnitPt width, XUnitPt height)
         {
-            XUnit lineWidth = GetWidth();
+            XUnitPt lineWidth = GetWidth();
             if (lineWidth > 0)
             {
                 var pen = GetPen(lineWidth);
@@ -64,7 +64,7 @@ namespace MigraDoc.Rendering
             }
         }
 
-        XPen? GetPen(XUnit width)
+        XPen? GetPen(XUnitPt width)
         {
             if (width == 0)
                 return null;

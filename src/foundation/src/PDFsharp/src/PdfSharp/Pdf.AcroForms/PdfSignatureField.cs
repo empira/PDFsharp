@@ -1,6 +1,7 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Pdf.IO;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf.Annotations;
 
@@ -68,6 +69,23 @@ namespace PdfSharp.Pdf.AcroForms
         }
 
         /// <summary>
+        /// Writes a key/value pair of this signature field dictionary.
+        /// </summary>
+        internal override void WriteDictionaryElement(PdfWriter writer, PdfName key)
+        {
+            // Don’t encrypt Contents key’s value (PDF Reference 2.0: 7.6.2, Page 71).
+            if (key.Value == Keys.Contents)
+            {
+                var effectiveSecurityHandler = writer.EffectiveSecurityHandler;
+                writer.EffectiveSecurityHandler = null;
+                base.WriteDictionaryElement(writer, key);
+                writer.EffectiveSecurityHandler = effectiveSecurityHandler;
+            }
+            else
+                base.WriteDictionaryElement(writer, key);
+        }
+
+        /// <summary>
         /// Predefined keys of this dictionary.
         /// The description comes from PDF 1.4 Reference.
         /// </summary>
@@ -82,7 +100,7 @@ namespace PdfSharp.Pdf.AcroForms
 
             /// <summary>
             /// (Required; inheritable) The name of the signature handler to be used for
-            /// authenticating the field�s contents, such as Adobe.PPKLite, Entrust.PPKEF,
+            /// authenticating the field’s contents, such as Adobe.PPKLite, Entrust.PPKEF,
             /// CICI.SignIt, or VeriSign.PPKVS.
             /// </summary>
             [KeyInfo(KeyType.Name | KeyType.Required)]
@@ -130,7 +148,7 @@ namespace PdfSharp.Pdf.AcroForms
             public const string Location = "/Location";
 
             /// <summary>
-            /// (Optional) The reason for the signing, such as (I agree�).
+            /// (Optional) The reason for the signing, such as (I agree…).
             /// </summary>
             [KeyInfo(KeyType.TextString | KeyType.Optional)]
             public const string Reason = "/Reason";

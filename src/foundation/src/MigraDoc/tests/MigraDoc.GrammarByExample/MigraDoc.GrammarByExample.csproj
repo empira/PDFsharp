@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net6.0;net472</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -19,6 +19,10 @@
     <None Remove="TestResults\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\MigraDoc.Tests\Extensions\XunitHelper.cs" Link="Extensions\XunitHelper.cs" />
+  </ItemGroup>
+
   <!--<ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit.runner.visualstudio">
@@ -28,10 +32,16 @@
   </ItemGroup>-->
 
   <ItemGroup>
+    <Folder Include="Extensions\" />
     <Folder Include="tests\" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Xunit.SkippableFact" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper\PdfSharp.TestHelper.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets\PdfSharp.Snippets.csproj" />
     <ProjectReference Include="..\..\src\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
     <ProjectReference Include="..\..\src\MigraDoc.Rendering\MigraDoc.Rendering.csproj" />

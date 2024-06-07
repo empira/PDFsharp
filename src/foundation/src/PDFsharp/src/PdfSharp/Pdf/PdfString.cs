@@ -1,7 +1,8 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
+using PdfSharp.Internal;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Internal;
 
@@ -51,7 +52,8 @@ namespace PdfSharp.Pdf
         MacExpertEncoding = PdfStringFlags.MacExpertEncoding,
 
         /// <summary>
-        /// The characters of the string are Unicode characters.
+        /// The characters of the string are Unicode code units.
+        /// Each char of the string is either a BMP code point or a high or low surrogate.
         /// </summary>
         Unicode = PdfStringFlags.Unicode,
     }
@@ -118,7 +120,7 @@ namespace PdfSharp.Pdf
             switch (encoding)
             {
                 case PdfStringEncoding.RawEncoding:
-                    CheckRawEncoding(value);
+                    AssertRawEncoding(value);
                     break;
 
                 case PdfStringEncoding.StandardEncoding:
@@ -128,7 +130,7 @@ namespace PdfSharp.Pdf
                     break;
 
                 case PdfStringEncoding.WinAnsiEncoding:
-                    CheckRawEncoding(value);
+                    AssertRawEncoding(value);
                     break;
 
                 case PdfStringEncoding.MacRomanEncoding:
@@ -169,7 +171,7 @@ namespace PdfSharp.Pdf
 
         internal PdfStringFlags Flags => _flags;
 
-        readonly PdfStringFlags _flags;
+        PdfStringFlags _flags;
 
         /// <summary>
         /// Gets the string value.
@@ -178,15 +180,148 @@ namespace PdfSharp.Pdf
 
         string? _value;
 
-        /// <summary>
-        /// Gets or sets the string value for encryption purposes.
-        /// </summary>
-        internal byte[] EncryptionValue
+        internal static byte[] ToRawBytes(string? value)
         {
-            // TODO: Unicode case is not handled!
-            get => _value == null ? Array.Empty<byte>() : PdfEncoders.RawEncoding.GetBytes(_value);
-            // BUG: May lead to trouble with the value semantics of PdfString
-            set => _value = PdfEncoders.RawEncoding.GetString(value, 0, value.Length);
+            return value == null ? [] : PdfEncoders.RawEncoding.GetBytes(value);
+        }
+
+        internal static string FromRawBytes(byte[] value)
+        {
+            return PdfEncoders.RawEncoding.GetString(value, 0, value.Length);
+        }
+
+        internal static string FromRawBytes(byte[] value, ref PdfStringFlags flagsToUpdate, PdfStringEncoding? encoding = null)
+        {
+            if (encoding != null)
+                ChangeEncoding(ref flagsToUpdate, encoding.Value);
+            return FromRawBytes(value);
+        }
+
+        static void ChangeEncoding(ref PdfStringFlags flagsToUpdate, PdfStringEncoding encoding)
+        {
+            if (flagsToUpdate == (PdfStringFlags)encoding)
+                return;
+
+            flagsToUpdate = flagsToUpdate - (flagsToUpdate & PdfStringFlags.EncodingMask) + (PdfStringFlags)encoding;
+        }
+
+        internal byte[] GetRawBytes() => ToRawBytes(_value);
+
+        internal void SetRawBytes(byte[] value, PdfStringEncoding? encoding = null)
+        {
+            _value = FromRawBytes(value, ref _flags, encoding);
+        }
+
+        /// <summary>
+        /// Checks this PdfString for valid BOMs and rereads it with the specified Unicode encoding.
+        /// </summary>
+        internal bool TryRereadAsUnicode()
+        {
+            return TryRereadAsUnicode(ref _value, ref _flags);
+        }
+
+        /// <summary>
+        /// Checks string for valid BOMs and rereads it with the specified Unicode encoding.
+        /// The referenced PdfStringFlags are updated according to the encoding.
+        /// </summary>
+        internal static bool TryRereadAsUnicode(ref string? value, ref PdfStringFlags flagsToUpdate)
+        {
+            var result = TryRereadAsUnicode(ref value);
+
+            if (result)
+                ChangeEncoding(ref flagsToUpdate, PdfStringEncoding.Unicode);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Checks string for valid BOMs and rereads it with the specified Unicode encoding.
+        /// </summary>
+        static bool TryRereadAsUnicode(ref string? value)
+        {
+            // UTF-16BE Unicode strings start with U+FEFF ("þÿ"). There can be empty strings with UTF-16BE prefix.
+#if NET6_0_OR_GREATER || true
+            // Check for UTF-16BE encoding.
+            // ---
+            // Fun fact (Jan 2024): The following line of code was originally suggested by ReSharper, but the new
+            // JetBrains AI Assistant considered it as illegal C# because of '..' in the array pattern.
+            // ChatGPT 4 however explains the next line correctly.
+            if (value is ['\xFE', '\xFF', ..])
+#else
+            if (value.Length >= 2 && value[0] == '\xFE' && value[1] == '\xFF')
+#endif
+            {
+#if DEBUG && true
+                // Q: Does this code compile on every target framework?
+                // A: No, System.Index is missing. But we can add the source code in PdfSharp.System to make it work.
+                _ = value is ['\xFE', '\xFF', ..];
+#endif
+                // Combine two ANSI characters to get one Unicode character.
+                var temp = new StringBuilder(value);
+                var length = temp.Length;
+                if ((length & 1) == 1)
+                {
+                    // #PRD Issue a warning
+                    // TODO What does the PDF Reference say about this case? Assume (char)0 or treat the file as corrupted?
+                    temp.Append(0);  // BUG: definitely wrong. Last character is multiplied with 256.
+                    ++length;
+                    DebugBreak.Break();
+                }
+
+                var unicodeValue = new StringBuilder();
+                for (var i = 2; i < length; i += 2)
+                {
+                    unicodeValue.Append((char)(256 * temp[i] + temp[i + 1]));
+                }
+                value = unicodeValue.ToString();
+                return true;
+            }
+
+#if false // UTF-16LE is not defined as valid text string encoding in PDF reference.
+            // Adobe Reader also supports UTF-16LE.
+#if NET6_0_OR_GREATER || true
+            if (value is ['\xFF', '\xFE', ..])
+#else
+            if (value.Length >= 2 && value[0] == '\xFF' && value[1] == '\xFE')
+#endif
+            {
+                // Combine two ANSI characters to get one Unicode character.
+                var temp = new StringBuilder(value);
+                var length = temp.Length;
+                if ((length & 1) == 1)
+                {
+                    // TODO What does the PDF Reference say about this case? Assume (char)0 or treat the file as corrupted?
+                    temp.Append(0);  // See BE case. But this is correct here.
+                    ++length;
+                    DebugBreak.Break();
+                }
+
+                var unicodeValue = new StringBuilder();
+                for (var i = 2; i < length; i += 2)
+                {
+                    unicodeValue.Append((char)(256 * temp[i + 1] + temp[i]));
+                }
+                value = unicodeValue.ToString();
+                return true;
+            }
+#endif
+
+            // UTF-8 Unicode strings start with U+EFBBBF ("ï»¿").
+#if NET6_0_OR_GREATER || true
+            if (value is ['\xEF', '\xBB', '\xBF', ..])
+#else
+            if (value.Length >= 3 && value[0] == '\xEF' && value[1] == '\xBB' && value[2] == '\xBF')
+#endif
+            {
+                // UTF8 is not implemented as Encoding for PdfStrings. After conversion, value holds the UTF-16 representation.
+                // We return true, so it will be handled as UTF-16 from now.
+                var rawBytes = ToRawBytes(value[3..]);
+                value = System.Text.Encoding.UTF8.GetString(rawBytes);
+
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -253,7 +388,8 @@ namespace PdfSharp.Pdf
             '\xF0', '\xF1', '\xF2', '\xF3', '\xF4', '\xF5', '\xF6', '\xF7', '\xF8', '\xF9', '\xFA', '\xFB', '\xFC', '\xFD', '\xFE', '\xFF',
         };
 
-        static void CheckRawEncoding(string s)
+        [Conditional("DEBUG")]
+        static void AssertRawEncoding(string s)
         {
             if (String.IsNullOrEmpty(s))
                 return;

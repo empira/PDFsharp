@@ -5,6 +5,7 @@ namespace PdfSharp.Drawing
 {
     /// <summary>
     /// Specifies style information applied to text.
+    /// Note that this enum was named XFontStyle in PDFsharp versions prior to 6.0.
     /// </summary>
     [Flags]
     public enum XFontStyleEx  // Same values as System.Drawing.FontStyle.

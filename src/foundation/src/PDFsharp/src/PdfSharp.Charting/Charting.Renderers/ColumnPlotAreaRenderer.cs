@@ -47,7 +47,7 @@ namespace PdfSharp.Charting.Renderers
             LineFormatRenderer lineFormatRenderer;
 
             // Under some circumstances it is possible that no zero base line will be drawn,
-            // e. g. because of unfavorable minimum/maximum scale and/or major tick, so force to draw
+            // e.g. because of unfavorable minimum/maximum scale and/or major tick, so force to draw
             // a zero base line if necessary.
             if (cri.YAxisRendererInfo?.MajorGridlinesLineFormat != null ||
                 cri.YAxisRendererInfo?.MinorGridlinesLineFormat != null)

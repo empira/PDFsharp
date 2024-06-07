@@ -40,7 +40,7 @@ namespace MigraDoc.Rendering.UnitTest
         }
 
         /// <summary>
-        /// Creates thousand paragraphs.
+        /// Creates a thousand paragraphs.
         /// </summary>
         public static void A1000Paragraphs(string outputFile)
         {

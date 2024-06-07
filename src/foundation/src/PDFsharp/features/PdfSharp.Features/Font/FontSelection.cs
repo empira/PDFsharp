@@ -4,6 +4,7 @@
 using PdfSharp.Quality;
 
 #pragma warning disable 1591
+
 namespace PdfSharp.Features
 {
     public class FontSelection : Feature

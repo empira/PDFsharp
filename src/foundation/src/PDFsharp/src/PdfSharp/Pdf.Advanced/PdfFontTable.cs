@@ -7,15 +7,17 @@ namespace PdfSharp.Pdf.Advanced
 {
     enum FontType
     {
+        Undefined = 0,
+
         /// <summary>
         /// TrueType with WinAnsi encoding.
         /// </summary>
-        TrueType = 1,
+        TrueTypeWinAnsi = 1,  // #RENAME better name
 
         /// <summary>
         /// TrueType with Identity-H or Identity-V encoding (Unicode).
         /// </summary>
-        Type0 = 2,
+        Type0Unicode = 2,  // #RENAME better name
     }
 
     /// <summary>
@@ -33,22 +35,18 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets a PdfFont from an XFont. If no PdfFont already exists, a new one is created.
         /// </summary>
-        public PdfFont GetFont(XFont font)
+        public PdfFont GetOrCreateFont(XGlyphTypeface glyphTypeface, FontType fontType)
         {
-            var selector = font.Selector;
-            if (selector == null)
-            {
-                selector = ComputeKey(font); //new FontSelector(font);
-                font.Selector = selector;
-            }
-
+            // TODO: The selector should be the glyph typeface key plus the font type key.
+            var selector = ComputePdfFontKey(glyphTypeface, fontType);
             if (!_fonts.TryGetValue(selector, out var pdfFont))
             {
-                if (font.Unicode)
-                    pdfFont = new PdfType0Font(Owner, font, font.IsVertical);
+                if (fontType == FontType.Type0Unicode)
+                    pdfFont = new PdfType0Font(Owner, glyphTypeface, false);
+                else if (fontType == FontType.TrueTypeWinAnsi)
+                    pdfFont = new PdfTrueTypeFont(Owner, glyphTypeface);
                 else
-                    pdfFont = new PdfTrueTypeFont(Owner, font);
-                //pdfFont.Document = _document;
+                    throw new InvalidOperationException($"Invalid font type '{fontType.ToString()}'.");
                 Debug.Assert(pdfFont.Owner == Owner);
                 _fonts[selector] = pdfFont;
             }
@@ -61,7 +59,9 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public PdfFont GetFont(string idName, byte[] fontData)
         {
-            Debug.Assert(false);
+            Debug.Assert(false, "Should not come here anymore.");
+            return null!;
+#if true_
             //FontSelector selector = new FontSelector(idName);
             string selector = null; // ComputeKey(font); //new FontSelector(font);
             if (!_fonts.TryGetValue(selector, out var pdfFont))
@@ -75,6 +75,7 @@ namespace PdfSharp.Pdf.Advanced
                 _fonts[selector] = pdfFont;
             }
             return pdfFont;
+#endif
         }
 #endif
 
@@ -84,40 +85,45 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public PdfFont? TryGetFont(string idName)
         {
-            Debug.Assert(false);
+            Debug.Assert(false, "Should not come here anymore.");
+            return null;
+
+#if true_
             //FontSelector selector = new FontSelector(idName);
             string selector = null;
             _fonts.TryGetValue(selector, out var pdfFont);
             return pdfFont;
-        }
-
-        internal static string ComputeKey(XFont font)
-        {
-            // TODO Check if StringBuilder is more efficient here.
-            var glyphTypeface = font.GlyphTypeface;
-#if true
-            // Attempt to make it more efficient.
-            var bold = glyphTypeface.IsBold;
-            var italic = glyphTypeface.IsItalic;
-            if (!bold && !italic)
-                return glyphTypeface.Fontface.FullFaceName.ToLowerInvariant() + font.Unicode;
-            else if (bold && !italic)
-                return glyphTypeface.Fontface.FullFaceName.ToLowerInvariant() + "/b" + font.Unicode;
-            else if (!bold && italic)
-                return glyphTypeface.Fontface.FullFaceName.ToLowerInvariant() + "/i" + font.Unicode;
-            // else if (bold && italic)
-            return glyphTypeface.Fontface.FullFaceName.ToLowerInvariant() + "/b/i" + font.Unicode;
-#else
-            string key = glyphTypeface.Fontface.FullFaceName.ToLowerInvariant() +
-                (glyphTypeface.IsBold ? "/b" : "") + (glyphTypeface.IsItalic ? "/i" : "") + font.Unicode;
-            return key;
 #endif
         }
 
+        internal static string ComputePdfFontKey(XGlyphTypeface glyphTypeface, FontType fontType)
+        {
+            // fontType must be defined to compute the key.
+            Debug.Assert(fontType is FontType.TrueTypeWinAnsi or FontType.Type0Unicode);
+
+            // TODO Check if StringBuilder is more efficient here.
+            //var glyphTypeface = font.GlyphTypeface;
+
+            // #NFM Use gtk here. But the gtk without simulation flags.
+
+            var faceName = glyphTypeface.FontFace.FullFaceName.ToLowerInvariant();
+            var bold = glyphTypeface.IsBold;
+            var italic = glyphTypeface.IsItalic;
+            var type = fontType == FontType.TrueTypeWinAnsi ? "+A" : "+U";
+            var key = bold switch
+            {
+                false when !italic => faceName + type,
+                true when !italic => faceName + "/b" + type,
+                false when italic => faceName + "/i" + type,
+                _ => faceName + "/bi" + type
+            };
+            return key;
+        }
+
         /// <summary>
-        /// Map from PdfFontSelector to PdfFont.
+        /// Map from PdfFont selector to PdfFont.
         /// </summary>
-        readonly Dictionary<string, PdfFont> _fonts = new Dictionary<string, PdfFont>();
+        readonly Dictionary<string, PdfFont> _fonts = [];
 
         public void PrepareForSave()
         {

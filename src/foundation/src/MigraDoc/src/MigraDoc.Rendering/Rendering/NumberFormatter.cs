@@ -3,6 +3,8 @@
 
 using System.Diagnostics;
 using System.Globalization;
+using Microsoft.Extensions.Logging;
+using MigraDoc.Logging;
 using MigraDoc.Rendering.Resources;
 
 namespace MigraDoc.Rendering
@@ -28,7 +30,8 @@ namespace MigraDoc.Rendering
         {
             if (Math.Abs(number) > 32768)
             {
-                Debug.WriteLine(Messages2.NumberTooLargeForRoman(number), "warning");
+                MigraDocLogHost.PdfRenderingLogger.LogWarning(Messages2.NumberTooLargeForRoman(number));
+                //Debug.WriteLine(Messages2.NumberTooLargeForRoman(number), "warning");
                 return number.ToString(CultureInfo.InvariantCulture);
             }
             if (number == 0)
@@ -63,7 +66,8 @@ namespace MigraDoc.Rendering
         {
             if (Math.Abs(number) > 32768)
             {
-                Debug.WriteLine(Messages2.NumberTooLargeForLetters(number));
+                MigraDocLogHost.PdfRenderingLogger.LogWarning(Messages2.NumberTooLargeForLetters(number));
+                //Debug.WriteLine(Messages2.NumberTooLargeForLetters(number));
                 return number.ToString();
             }
 

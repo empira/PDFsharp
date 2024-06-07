@@ -45,14 +45,8 @@ namespace PdfSharp.Pdf.Internal
             return byteCount;
         }
 
-        public override int GetMaxByteCount(int charCount)
-        {
-            return charCount * 2;
-        }
+        public override int GetMaxByteCount(int charCount) => charCount * 2;
 
-        public override int GetMaxCharCount(int byteCount)
-        {
-            return byteCount / 2;
-        }
+        public override int GetMaxCharCount(int byteCount) => byteCount / 2;
     }
 }

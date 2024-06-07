@@ -14,7 +14,7 @@ namespace PdfSharp.Fonts.OpenType
     // ReSharper disable once InconsistentNaming because "I" stands for "indirect", not "interface".
     sealed class IRefFontTable : OpenTypeFontTable
     {
-        public IRefFontTable(OpenTypeFontface fontData, OpenTypeFontTable fontTable)
+        public IRefFontTable(OpenTypeFontFace fontData, OpenTypeFontTable fontTable)
             : base(null, fontTable.DirectoryEntry.Tag)
         {
             _fontData = fontData;

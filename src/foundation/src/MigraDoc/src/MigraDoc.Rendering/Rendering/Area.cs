@@ -13,12 +13,12 @@ namespace MigraDoc.Rendering
         /// <summary>
         /// Gets the left boundary of the area.
         /// </summary>
-        public abstract XUnit X { get; internal set; }
+        public abstract XUnitPt X { get; internal set; }
 
         /// <summary>
         /// Gets the top boundary of the area.
         /// </summary>
-        public abstract XUnit Y { get; internal set; }
+        public abstract XUnitPt Y { get; internal set; }
 
         /// <summary>
         /// Gets the largest fitting rect with the given y position and height.
@@ -29,17 +29,17 @@ namespace MigraDoc.Rendering
         /// The largest fitting rect with the given y position and height.
         /// Null if yPosition exceeds the area.
         /// </returns>
-        internal abstract Rectangle? GetFittingRect(XUnit yPosition, XUnit height);
+        internal abstract Rectangle? GetFittingRect(XUnitPt yPosition, XUnitPt height);
 
         /// <summary>
         /// Gets or sets the height of the smallest rectangle containing the area. 
         /// </summary>
-        public abstract XUnit Height { get; internal set; }
+        public abstract XUnitPt Height { get; internal set; }
 
         /// <summary>
         /// Gets or sets the width of the smallest rectangle containing the area. 
         /// </summary>
-        public abstract XUnit Width { get; internal set; }
+        public abstract XUnitPt Width { get; internal set; }
 
         /// <summary>
         /// Returns the union of this area and the given one.
@@ -53,7 +53,7 @@ namespace MigraDoc.Rendering
         /// </summary>
         /// <param name="verticalOffset">The measure of lowering.</param>
         /// <returns>The lowered Area.</returns>
-        internal abstract Area Lower(XUnit verticalOffset);
+        internal abstract Area Lower(XUnitPt verticalOffset);
     }
 
     class Rectangle : Area
@@ -65,7 +65,7 @@ namespace MigraDoc.Rendering
         /// <param name="y">Upper bound of the rectangle.</param>
         /// <param name="width">Width of the rectangle.</param>
         /// <param name="height">Height of the rectangle.</param>
-        internal Rectangle(XUnit x, XUnit y, XUnit width, XUnit height)
+        internal Rectangle(XUnitPt x, XUnitPt y, XUnitPt width, XUnitPt height)
         {
             _x = x;
             _y = y;
@@ -91,7 +91,7 @@ namespace MigraDoc.Rendering
         /// <param name="yPosition">Top boundary of the requested rectangle.</param>
         /// <param name="height">Height of the requested rectangle.</param>
         /// <returns>The largest fitting rect with the given y position and height, or null if the requested height does not fit.</returns>
-        internal override Rectangle? GetFittingRect(XUnit yPosition, XUnit height)
+        internal override Rectangle? GetFittingRect(XUnitPt yPosition, XUnitPt height)
         {
             if (yPosition + height > _y + _height + Renderer.Tolerance)
                 return null;
@@ -102,46 +102,42 @@ namespace MigraDoc.Rendering
         /// <summary>
         /// Gets or sets the left boundary of the rectangle. 
         /// </summary>
-        public override XUnit X
+        public override XUnitPt X
         {
             get => _x;
             internal set => _x = value;
         }
-
-        XUnit _x;
+        XUnitPt _x;
 
         /// <summary>
         /// Gets or sets the top boundary of the rectangle. 
         /// </summary>
-        public override XUnit Y
+        public override XUnitPt Y
         {
             get => _y;
             internal set => _y = value;
         }
-
-        XUnit _y;
+        XUnitPt _y;
 
         /// <summary>
         /// Gets or sets the width of the rectangle. 
         /// </summary>
-        public override XUnit Width
+        public override XUnitPt Width
         {
             get => _width;
             internal set => _width = value;
         }
-
-        XUnit _width;
+        XUnitPt _width;
 
         /// <summary>
         /// Gets or sets the height of the rectangle. 
         /// </summary>
-        public override XUnit Height
+        public override XUnitPt Height
         {
             get => _height;
             internal set => _height = value;
         }
-
-        XUnit _height;
+        XUnitPt _height;
 
         /// <summary>
         /// Returns the union of the rectangle and the given area.
@@ -154,14 +150,14 @@ namespace MigraDoc.Rendering
                 return this;
 
             // This implementation is of course not correct, but it works for our purposes.
-            XUnit minTop = Math.Min(_y, area.Y);
-            XUnit minLeft = Math.Min(_x, area.X);
-            XUnit maxRight = Math.Max(_x + _width, area.X + area.Width);
-            XUnit maxBottom = Math.Max(_y + _height, area.Y + area.Height);
+            XUnitPt minTop = Math.Min(_y, area.Y);
+            XUnitPt minLeft = Math.Min(_x, area.X);
+            XUnitPt maxRight = Math.Max(_x + _width, area.X + area.Width);
+            XUnitPt maxBottom = Math.Max(_y + _height, area.Y + area.Height);
             return new Rectangle(minLeft, minTop, maxRight - minLeft, maxBottom - minTop);
         }
 
-        internal override Area Lower(XUnit verticalOffset) 
+        internal override Area Lower(XUnitPt verticalOffset) 
             => new Rectangle(_x, _y + verticalOffset, _width, _height - verticalOffset);
     }
 }

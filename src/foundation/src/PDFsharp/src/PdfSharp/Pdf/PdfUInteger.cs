@@ -6,22 +6,26 @@ using PdfSharp.Pdf.IO;
 namespace PdfSharp.Pdf
 {
     /// <summary>
-    /// Represents a direct unsigned integer value.
+    /// Represents a direct 32-bit unsigned integer value.
     /// </summary>
     [DebuggerDisplay("({" + nameof(Value) + "})")]
+    [Obsolete("This class is deprecated and will be removed.")]
     public sealed class PdfUInteger : PdfNumber, IConvertible
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfUInteger"/> class.
         /// </summary>
         public PdfUInteger()
-        { }
+        {
+            IsInteger = true;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfUInteger"/> class.
         /// </summary>
         public PdfUInteger(uint value)
         {
+            IsInteger = true;
             Value = value;
         }
 
@@ -44,7 +48,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Writes the integer as string.
         /// </summary>
-        internal override void WriteObject(PdfWriter writer) 
+        internal override void WriteObject(PdfWriter writer)
             => writer.Write(this);
 
         #region IConvertible Members
@@ -52,13 +56,13 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Converts the value of this instance to an equivalent 64-bit unsigned integer.
         /// </summary>
-        public ulong ToUInt64(IFormatProvider? provider) 
+        public ulong ToUInt64(IFormatProvider? provider)
             => Convert.ToUInt64(Value);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 8-bit signed integer.
         /// </summary>
-        public sbyte ToSByte(IFormatProvider? provider) 
+        public sbyte ToSByte(IFormatProvider? provider)
             => throw new InvalidCastException();
 
         /// <summary>
@@ -83,43 +87,43 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Converts the value of this instance to an equivalent Boolean value.
         /// </summary>
-        public bool ToBoolean(IFormatProvider? provider) 
+        public bool ToBoolean(IFormatProvider? provider)
             => Convert.ToBoolean(Value);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 32-bit signed integer.
         /// </summary>
-        public int ToInt32(IFormatProvider? provider) 
+        public int ToInt32(IFormatProvider? provider)
             => Convert.ToInt32(Value);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 16-bit unsigned integer.
         /// </summary>
-        public ushort ToUInt16(IFormatProvider? provider) 
+        public ushort ToUInt16(IFormatProvider? provider)
             => Convert.ToUInt16(Value);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 16-bit signed integer.
         /// </summary>
-        public short ToInt16(IFormatProvider? provider) 
+        public short ToInt16(IFormatProvider? provider)
             => Convert.ToInt16(Value);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent <see cref="T:System.String"></see>.
         /// </summary>
-        string IConvertible.ToString(IFormatProvider? provider) 
+        string IConvertible.ToString(IFormatProvider? provider)
             => Value.ToString(provider);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent 8-bit unsigned integer.
         /// </summary>
-        public byte ToByte(IFormatProvider? provider) 
+        public byte ToByte(IFormatProvider? provider)
             => Convert.ToByte(Value);
 
         /// <summary>
         /// Converts the value of this instance to an equivalent Unicode character.
         /// </summary>
-        public char ToChar(IFormatProvider? provider) 
+        public char ToChar(IFormatProvider? provider)
             => Convert.ToChar(Value);
 
         /// <summary>
@@ -150,7 +154,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Converts the value of this instance to an equivalent 32-bit unsigned integer.
         /// </summary>
-        public uint ToUInt32(IFormatProvider? provider) 
+        public uint ToUInt32(IFormatProvider? provider)
             => Convert.ToUInt32(Value);
 
         #endregion

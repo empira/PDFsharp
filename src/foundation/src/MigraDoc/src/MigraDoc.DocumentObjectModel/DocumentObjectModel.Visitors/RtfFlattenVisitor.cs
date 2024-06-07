@@ -25,7 +25,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 if (formattedText.Values.Font is null)
                     formattedText.Font = format.Values.Font?.Clone() ?? NRT.ThrowOnNull<Font>(); // BUG Throwing if format.Values.Font is null
                 else if (format.Values.Font is not null)
-                    FlattenFont(formattedText.Values.Font, format.Values.Font);
+                    VisitorBase.FlattenFont(formattedText.Values.Font, format.Values.Font);
             }
         }
 
@@ -35,7 +35,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             if (hyperlink.Values.Font is null)
                 hyperlink.Font = styleFont.Clone();
             else
-                FlattenFont(hyperlink.Values.Font, styleFont);
+                VisitorBase.FlattenFont(hyperlink.Values.Font, styleFont);
         }
     }
 }
