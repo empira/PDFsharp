@@ -61,8 +61,10 @@ namespace PdfSharp.Pdf.Signatures
 
         public PdfSignatureHandler(ISigner signer, PdfSignatureOptions options)
         {
-            ArgumentNullException.ThrowIfNull(signer);
-            ArgumentNullException.ThrowIfNull(options);
+            if (signer is null)
+                throw new ArgumentNullException(nameof(signer));
+            if (options is null)
+                throw new ArgumentNullException(nameof(options));
 
             if (options.PageIndex < 0)
                 throw new ArgumentOutOfRangeException($"Signature page index cannot be negative.");
