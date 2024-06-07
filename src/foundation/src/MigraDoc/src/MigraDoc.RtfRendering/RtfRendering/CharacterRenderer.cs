@@ -37,7 +37,7 @@ namespace MigraDoc.RtfRendering
                     case SymbolName.Blank:
                         for (int i = 0; i < count; ++i)
                             _rtfWriter.WriteBlank();
-                        //WriteText wouldn't work if there was a control before.
+                        //WriteText wouldn’t work if there was a control before.
                         break;
 
                     case SymbolName.Bullet:
@@ -54,7 +54,7 @@ namespace MigraDoc.RtfRendering
                         for (int i = 0; i < count; ++i)
                         {
                             _rtfWriter.WriteControl("u", "8195");
-                            //I don't know why, but it works:
+                            //I don’t know why, but it works:
                             _rtfWriter.WriteHex(0x20);
                         }
                         break;
@@ -63,7 +63,7 @@ namespace MigraDoc.RtfRendering
                         for (int i = 0; i < count; ++i)
                         {
                             _rtfWriter.WriteControl("u", "8197");
-                            //I don't know why, but it works:
+                            //I don’t know why, but it works:
                             _rtfWriter.WriteHex(0x20);
                         }
                         break;
@@ -72,7 +72,7 @@ namespace MigraDoc.RtfRendering
                         for (int i = 0; i < count; ++i)
                         {
                             _rtfWriter.WriteControl("u", "8194");
-                            //I don't know why, but it works:
+                            //I don’t know why, but it works:
                             _rtfWriter.WriteHex(0x20);
                         }
                         break;

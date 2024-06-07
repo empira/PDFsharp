@@ -53,43 +53,43 @@ namespace MigraDoc.Rendering
         Rectangle CalcContentRect()
         {
             LineFormatRenderer lfr = new LineFormatRenderer(_textFrame.LineFormat, _gfx);
-            XUnit lineWidth = lfr.GetWidth();
-            XUnit width;
-            XUnit xOffset = lineWidth / 2;
-            XUnit yOffset = lineWidth / 2;
+            XUnitPt lineWidth = lfr.GetWidth();
+            XUnitPt width;
+            XUnitPt xOffset = lineWidth / 2;
+            XUnitPt yOffset = lineWidth / 2;
 
             if (_textFrame.Orientation == TextOrientation.Horizontal ||
               _textFrame.Orientation == TextOrientation.HorizontalRotatedFarEast)
             {
                 width = _textFrame.Width.Point;
-                xOffset += _textFrame.MarginLeft;
-                yOffset += _textFrame.MarginTop;
+                xOffset += _textFrame.MarginLeft.Point;
+                yOffset += _textFrame.MarginTop.Point;
                 width -= xOffset;
-                width -= _textFrame.MarginRight + lineWidth / 2;
+                width -= _textFrame.MarginRight.Point + lineWidth / 2;
             }
             else
             {
                 width = _textFrame.Height.Point;
                 if (_textFrame.Orientation == TextOrientation.Upward)
                 {
-                    xOffset += _textFrame.MarginBottom;
-                    yOffset += _textFrame.MarginLeft;
+                    xOffset += _textFrame.MarginBottom.Point;
+                    yOffset += _textFrame.MarginLeft.Point;
                     width -= xOffset;
-                    width -= _textFrame.MarginTop + lineWidth / 2;
+                    width -= _textFrame.MarginTop.Point + lineWidth / 2;
                 }
                 else
                 {
-                    xOffset += _textFrame.MarginTop;
-                    yOffset += _textFrame.MarginRight;
+                    xOffset += _textFrame.MarginTop.Point;
+                    yOffset += _textFrame.MarginRight.Point;
                     width -= xOffset;
-                    width -= _textFrame.MarginBottom + lineWidth / 2;
+                    width -= _textFrame.MarginBottom.Point + lineWidth / 2;
                 }
             }
-            XUnit height = double.MaxValue;
+            XUnitPt height = double.MaxValue;
             return new Rectangle(xOffset, yOffset, width, height);
         }
 
-        XUnit ContentHeight => _contentHeight;
+        XUnitPt ContentHeight => _contentHeight;
 
         bool IAreaProvider.PositionVertically(LayoutInfo layoutInfo) => false;
 
@@ -107,7 +107,7 @@ namespace MigraDoc.Rendering
                     return false;
 
                 case ElementAlignment.Far:
-                    XUnit xPos = rect.X + rect.Width;
+                    XUnitPt xPos = rect.X + rect.Width;
                     xPos -= layoutInfo.ContentArea.Width;
                     xPos -= layoutInfo.MarginRight;
                     layoutInfo.ContentArea.X = xPos;
@@ -129,7 +129,7 @@ namespace MigraDoc.Rendering
         List<RenderInfo>? _renderInfos;
         XGraphics _gfx = null!;
         bool _isFirstArea;
-        XUnit _contentHeight;
+        XUnitPt _contentHeight;
         readonly DocumentRenderer _documentRenderer;
     }
 }

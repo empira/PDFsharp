@@ -1,14 +1,7 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Diagnostics;
-using System.IO;
-using PdfSharp.Drawing;
 using PdfSharp.Fonts;
-using PdfSharp.Pdf;
-using PdfSharp.Quality;
-using PdfSharp.Snippets.Font;
 
 namespace PdfSharp.Snippets.Font
 {
@@ -36,7 +29,7 @@ namespace PdfSharp.Snippets.Font
         }
 
         /// <summary>
-        /// The internal names that uniquely identify a font's type faces (i.e. a physical font file).
+        /// The internal names that uniquely identify a font’s type faces (i.e. a physical font file).
         /// Used in the first parameter of the FontResolverInfo constructor.
         /// </summary>
         static class FaceNames
@@ -52,8 +45,8 @@ namespace PdfSharp.Snippets.Font
         /// Converts specified information about a required typeface into a specific font.
         /// </summary>
         /// <param name="familyName">Name of the font family.</param>
-        /// <param name="isBold">Set to <c>true</c> when a bold fontface is required.</param>
-        /// <param name="isItalic">Set to <c>true</c> when an italic fontface is required.</param>
+        /// <param name="isBold">Set to <c>true</c> when a bold font face is required.</param>
+        /// <param name="isItalic">Set to <c>true</c> when an italic font face is required.</param>
         /// <returns>
         /// Information about the physical font, or null if the request cannot be satisfied.
         /// </returns>
@@ -68,8 +61,8 @@ namespace PdfSharp.Snippets.Font
 
             string? faceName = null;
 
-            // In this sample family names are case sensitive. You can relax this in your own implementation
-            // and make them case insensitive.
+            // In this sample family names are case-sensitive. You can relax this in your own implementation
+            // and make them case-insensitive.
             switch (familyName.ToLower())
             {
                 case FamilyNames.Oblivious:
@@ -84,9 +77,10 @@ namespace PdfSharp.Snippets.Font
             if (faceName != null)
                 return new FontResolverInfo(faceName, simulateBold, simulateItalic);
 
-            // Return null means that the typeface cannot be resolved and PDFsharp stops working.
-            // Alternatively forward call to PlatformFontResolver.
-            return FailsafeFontResolver.ResolveTypeface(familyName, isBold, isItalic);
+            //// Return null means that the typeface cannot be resolved and PDFsharp stops working.
+            //// Alternatively forward call to PlatformFontResolver.
+            //return FailsafeFontResolver.ResolveTypeface(familyName, isBold, isItalic);
+            return null;
         }
 
         /// <summary>
@@ -101,18 +95,16 @@ namespace PdfSharp.Snippets.Font
             // Note: PDFsharp never calls GetFont twice with the same face name.
 
             // Return the bytes of a font.
-            switch (faceName)
+            return faceName switch
             {
-                case FaceNames.Oblivious:
-                    return ExoticFontsDataHelper.Oblivious;
-
-                case FaceNames.XFiles:
-                    return ExoticFontsDataHelper.XFiles;
-            }
-            // PDFsharp never calls GetFont with a face name that was not returned by ResolveTypeface.
-            return FailsafeFontResolver.GetFont(faceName);
+                FaceNames.Oblivious => ExoticFontsDataHelper.Oblivious,
+                FaceNames.XFiles => ExoticFontsDataHelper.XFiles,
+                // PDFsharp never calls GetFont with a face name that was not returned by ResolveTypeface.
+                //_ => FailsafeFontResolver.GetFont(faceName)
+                _ => null
+            };
         }
 
-        static readonly FailsafeFontResolver FailsafeFontResolver = new FailsafeFontResolver();
+        //static readonly FailsafeFontResolver FailsafeFontResolver = new();
     }
 }

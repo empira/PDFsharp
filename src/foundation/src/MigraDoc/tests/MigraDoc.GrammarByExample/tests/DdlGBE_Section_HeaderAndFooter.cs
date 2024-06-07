@@ -1,4 +1,7 @@
-﻿using MigraDoc.GrammarByExample;
+﻿// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
+using MigraDoc.GrammarByExample;
 using Xunit;
 
 namespace GdiGrammarByExample
@@ -7,7 +10,7 @@ namespace GdiGrammarByExample
     /// Grammar by example unit test class.
     /// </summary>
     // ReSharper disable InconsistentNaming
-    [Collection("GBE")]
+    [Collection("PDFsharp")]
     public class DdlGBE_Section_HeaderAndFooter : DdlGbeTestBase, IClassFixture<GbeFixture>
     {
         public DdlGBE_Section_HeaderAndFooter(GbeFixture fixture)
@@ -20,6 +23,7 @@ namespace GdiGrammarByExample
             InitializeTest(_fixture, "Section-HeaderAndFooter", 19, 0x7FFF0);
         }
 
+        //[SkippableFact]
         [Fact(Skip = "Disabled until /Annots bug is fixed")]
 #if CORE
         public void DDL_Grammar_By_Example_Section_HeaderAndFooter()
@@ -29,6 +33,7 @@ namespace GdiGrammarByExample
         public void WPF_DDL_Grammar_By_Example_Section_HeaderAndFooter()
 #endif
         {
+            Skip.If(SkippableTests.SkipSlowTests());
             RunTest();
         }
         // ReSharper restore InconsistentNaming

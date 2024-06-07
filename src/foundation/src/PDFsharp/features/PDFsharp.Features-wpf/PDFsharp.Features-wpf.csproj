@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <RootNamespace>PDFsharp.Features</RootNamespace>
     <UseWPF>true</UseWPF>
@@ -13,6 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper-wpf\PdfSharp.TestHelper-wpf.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Quality-wpf\PdfSharp.Quality-wpf.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets-wpf\PdfSharp.Snippets-wpf.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.WPFonts\PdfSharp.WPFonts.csproj" />
@@ -21,21 +22,32 @@
 
   <ItemGroup>
     <Compile Include="..\PdfSharp.Features\Drawing\graphics\GraphicsFromImage.cs" Link="Drawing\graphics\GraphicsFromImage.cs" />
+    <Compile Include="..\PdfSharp.Features\Drawing\graphics\GraphicsUnit.cs" Link="Drawing\graphics\GraphicsUnit.cs" />
     <Compile Include="..\PdfSharp.Features\Drawing\lines\Lines1.cs" Link="Drawing\lines\Lines1.cs" />
     <Compile Include="..\PdfSharp.Features\Drawing\paths\Paths.cs" Link="Drawing\paths\Paths.cs" />
     <Compile Include="..\PdfSharp.Features\Drawing\shapes\RoundedRectangles.cs" Link="Drawing\shapes\RoundedRectangles.cs" />
+    <Compile Include="..\PdfSharp.Features\Drawing\text\AutoFontEncoding.cs" Link="Drawing\text\AutoFontEncoding.cs" />
+    <Compile Include="..\PdfSharp.Features\Drawing\text\NotoSans.cs" Link="Drawing\text\NotoSans.cs" />
+    <Compile Include="..\PdfSharp.Features\Drawing\text\SurrogateChars.cs" Link="Drawing\text\SurrogateChars.cs" />
+    <Compile Include="..\PdfSharp.Features\Drawing\text\SymbolFonts.cs" Link="Drawing\text\SymbolFonts.cs" />
+    <Compile Include="..\PdfSharp.Features\Font\encoding\Encodings.cs" Link="Font\encoding\Encodings.cs" />
     <Compile Include="..\PdfSharp.Features\Font\FontResolving.cs" Link="Font\FontResolving.cs" />
     <Compile Include="..\PdfSharp.Features\Font\FontSelection.cs" Link="Font\FontSelection.cs" />
     <Compile Include="..\PdfSharp.Features\Font\RenderInstalledFonts.cs" Link="Font\RenderInstalledFonts.cs" />
     <Compile Include="..\PdfSharp.Features\Font\RotisWinAnsiTester.cs" Link="Font\RotisWinAnsiTester.cs" />
     <Compile Include="..\PdfSharp.Features\IO\Info.cs" Link="IO\Info.cs" />
+    <Compile Include="..\PdfSharp.Features\IO\LargePdfFiles.cs" Link="IO\LargePdfFiles.cs" />
     <Compile Include="..\PdfSharp.Features\IO\ObjectStreams.cs" Link="IO\ObjectStreams.cs" />
-    <Compile Include="..\PdfSharp.Features\Pdf\annotations\LinkAnnotations.cs" Link="Pdf\annotations\LinkAnnotations.cs" />
+    <Compile Include="..\PdfSharp.Features\PdfSharpFeatures.cs" Link="PdfSharpFeatures.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="..\..\..\..\..\..\assets\pdfsharp-6.x\fonts\SampleFonts\Oblivious.ttf" Link="assets\fonts\Oblivious.ttf" />
     <EmbeddedResource Include="..\..\..\..\..\..\assets\pdfsharp-6.x\fonts\SampleFonts\xfiles.ttf" Link="assets\fonts\xfiles.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
   </ItemGroup>
 
   <ItemGroup>

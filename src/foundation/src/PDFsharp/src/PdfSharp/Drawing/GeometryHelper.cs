@@ -121,7 +121,7 @@ namespace PdfSharp.Drawing
             else if (α == 360 && β > 0)
                 α = 0;
 
-            // Scanling factor.
+            // Scaling factor.
             double δx = width / 2;
             double δy = height / 2;
 
@@ -239,7 +239,7 @@ namespace PdfSharp.Drawing
                         AppendPartialArcQuadrant(points, x, y, width, height, ξ1, ξ2, PathStart.Ignore1st, matrix);
                     }
 
-                    // Don't stop immediately if arc is greater than 270 degrees.
+                    // Don’t stop immediately if arc is greater than 270 degrees.
                     if (currentQuadrant == endQuadrant && smallAngle)
                         break;
                     smallAngle = true;
@@ -525,7 +525,7 @@ namespace PdfSharp.Drawing
 
             // We have to chop the arc into the computed number of pieces.  For cPieces=2 and 4 we could 
             // have uses the half-angle trig formulas, but for pieces=3 it requires solving a cubic
-            // equation; the performance difference is not worth the extra code, so we'll get the angle, 
+            // equation; the performance difference is not worth the extra code, so we’ll get the angle, 
             // divide it, and get its sine and cosine. 
 
             Debug.Assert(pieces > 0);
@@ -551,15 +551,15 @@ namespace PdfSharp.Drawing
         * 
         * Function Description: 
         *
-        * Get the distance from a circular arc's endpoints to the control points of the 
-        * Bezier arc that approximates it, as a fraction of the arc's radius.
+        * Get the distance from a circular arc’s endpoints to the control points of the 
+        * Bezier arc that approximates it, as a fraction of the arc’s radius.
         *
-        * Since the result is relative to the arc's radius, it depends strictly on the
-        * arc's angle. The arc is assumed to be of 90 degrees of less, so the angle is 
+        * Since the result is relative to the arc’s radius, it depends strictly on the
+        * arc’s angle. The arc is assumed to be of 90 degrees of less, so the angle is 
         * determined by the cosine of that angle, which is derived from rDot = the dot
         * product of two radius vectors.  We need the Bezier curve that agrees with 
-        * the arc's points and tangents at the ends and midpoint.  Here we compute the 
-        * distance from the curve's endpoints to its control points.
+        * the arc’s points and tangents at the ends and midpoint.  Here we compute the 
+        * distance from the curve’s endpoints to its control points.
         * 
         * Since we are looking for the relative distance, we can work on the unit
         * circle. Place the center of the circle at the origin, and put the X axis as
@@ -590,7 +590,7 @@ namespace PdfSharp.Drawing
         public static double
         GetBezierDistance(  // Return the distance as a fraction of the radius
             double dot,    // In: The dot product of the two radius vectors
-            double radius) // In: The radius of the arc's circle (optional=1)
+            double radius) // In: The radius of the arc’s circle (optional=1)
         {
             double radSquared = radius * radius;  // Squared radius
 
@@ -641,7 +641,7 @@ namespace PdfSharp.Drawing
         //  Notes:    This utility computes the Bézier approximation for an elliptical arc as it is defined 
         //            in the SVG arc spec. The ellipse from which the arc is carved is axis-aligned in its
         //            own coordinates, and defined there by its x and y radii. The rotation angle defines 
-        //            how the ellipse's axes are rotated relative to our x axis. The start and end points 
+        //            how the ellipse’s axes are rotated relative to our x axis. The start and end points 
         //            define one of 4 possible arcs; the sweep and large-arc flags determine which one of
         //            these arcs will be chosen. See SVG spec for details. 
         //
@@ -661,10 +661,10 @@ namespace PdfSharp.Drawing
 
             pieces = -1;
 
-            // In the following, the line segment between the arc's start and
+            // In the following, the line segment between the arc’s start and
             // end points is referred to as "the chord".
 
-            // Transform 1: Shift the origin to the chord's midpoint.
+            // Transform 1: Shift the origin to the chord’s midpoint.
             double x = (xEnd - xStart) / 2;
             double y = (yEnd - yStart) / 2;
 
@@ -692,7 +692,7 @@ namespace PdfSharp.Drawing
                 return null;
             }
 
-            // Transform 2: Rotate to the ellipse's coordinate system.
+            // Transform 2: Rotate to the ellipse’s coordinate system.
             rotationAngle = -rotationAngle * Calc.Deg2Rad;
 
             double cos = Math.Cos(rotationAngle);
@@ -707,15 +707,15 @@ namespace PdfSharp.Drawing
             y /= yRadius;
 
             // We get to the center of that circle along a vector perpendicular to the chord
-            // from the origin, which is the chord's midpoint. By Pythagoras, the length of that
+            // from the origin, which is the chord’s midpoint. By Pythagoras, the length of that
             // vector is sqrt(1 - (half chord)^2).
 
             halfChord2 = x * x + y * y;   // Now in the circle coordinates.
 
             if (halfChord2 > 1)
             {
-                // The chord is longer than the circle's diameter; we scale the radii uniformly so
-                // that the chord will be a diameter. The center will then be the chord's midpoint,
+                // The chord is longer than the circle’s diameter; we scale the radii uniformly so
+                // that the chord will be a diameter. The center will then be the chord’s midpoint,
                 // which is now the origin.
                 r = Math.Sqrt(halfChord2);
                 xRadius *= r;
@@ -729,8 +729,8 @@ namespace PdfSharp.Drawing
             }
             else
             {
-                // The length of (-y,x) or (x,-y) is sqrt(rHalfChord2), and we want a vecto
-                // of length sqrt(1 - rHalfChord2), so we'll multiply it by:
+                // The length of (-y,x) or (x,-y) is sqrt(rHalfChord2), and we want a vector
+                // of length sqrt(1 - rHalfChord2), so we’ll multiply it by:
                 r = Math.Sqrt((1 - halfChord2) / halfChord2);
                 //if (isLargeArc != (eSweepDirection == SweepDirection.Clockwise))
                 if (isLargeArc != isClockwise)
@@ -749,7 +749,7 @@ namespace PdfSharp.Drawing
             }
 
             // Transformation 4: shift the origin to the center of the circle, which then becomes
-            // the unit circle. Since the chord's midpoint is the origin, the start point is (-x, -y)
+            // the unit circle. Since the chord’s midpoint is the origin, the start point is (-x, -y)
             // and the endpoint is (x, y).
             XPoint ptStart = new XPoint(-x - xCenter, -y - yCenter);
             XPoint ptEnd = new XPoint(x - xCenter, y - yCenter);
@@ -762,7 +762,7 @@ namespace PdfSharp.Drawing
 
             if (!isZeroCenter)
             {
-                // Prepend the translation that will take the origin to the circle's center.
+                // Prepend the translation that will take the origin to the circle’s center.
                 matToEllipse.OffsetX += (matToEllipse.M11 * xCenter + matToEllipse.M21 * yCenter);
                 matToEllipse.OffsetY += (matToEllipse.M12 * xCenter + matToEllipse.M22 * yCenter);
             }
@@ -784,7 +784,7 @@ namespace PdfSharp.Drawing
             // Add the arc pieces, except for the last 
             for (int idx = 1; idx < pieces; idx++)
             {
-                // Get the arc piece's endpoint
+                // Get the arc piece’s endpoint
                 var ptPieceEnd = new XPoint(ptStart.X * cosArcAngle - ptStart.Y * sinArcAngle, ptStart.X * sinArcAngle + ptStart.Y * cosArcAngle);
                 vecToBez2 = new XVector(-bezDist * ptPieceEnd.Y, bezDist * ptPieceEnd.X);
 

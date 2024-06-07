@@ -5,6 +5,7 @@
 using System.IO;
 #endif
 using Microsoft.Extensions.Logging;
+using PdfSharp.Drawing;
 using PdfSharp.Logging;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
@@ -22,8 +23,31 @@ namespace PdfSharp.Quality
         /// <param name="snippet">A code snippet.</param>
         protected void RenderSnippetAsPdf(Snippet snippet)
         {
+            //snippet.RenderSnippetAsPdf(WidthInPoint, HeightInPoint, XGraphicsUnit.Presentation);
             snippet.RenderSnippetAsPdf();
-            snippet.SaveAndShowFile(snippet.PdfBytes, "", true);
+            snippet.SaveAndShowFile(snippet.PdfBytes, snippet.PathName, true);
+        }
+
+        /// <summary>
+        /// Renders a code snippet to PDF.
+        /// </summary>
+        /// <param name="snippet"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="graphicsUnit"></param>
+        /// <param name="pageDirection"></param>
+        protected void RenderSnippetAsPdf(Snippet snippet, XUnit width, XUnit height, XGraphicsUnit graphicsUnit, XPageDirection pageDirection)
+        {
+            snippet.RenderSnippetAsPdf(width, height, graphicsUnit, pageDirection);
+            snippet.SaveAndShowFile(snippet.PdfBytes, snippet.PathName, true);
+        }
+
+        /// <summary>
+        /// Renders all code snippets to PDF.
+        /// </summary>
+        protected virtual void RenderAllSnippets()
+        {
+            // Do nothing in base class.
         }
 
         /// <summary>
@@ -63,6 +87,7 @@ namespace PdfSharp.Quality
                 stream.Position = 0;
                 filename = null;
             }
+
             return filename;
         }
 
@@ -73,13 +98,14 @@ namespace PdfSharp.Quality
         /// <param name="filenameTag">The filename tag.</param>
         protected string SaveAndShowDocument(PdfDocument document, string filenameTag)
         {
+            return PdfFileUtility.SaveAndShowDocument(document, filenameTag);
+
             // Save the PDF document...
-            var filename = SaveDocument(document, filenameTag);
+            //var filename = SaveDocument(document, filenameTag);
 
-            // ... and start a viewer.
-            Process.Start(new ProcessStartInfo(filename) { UseShellExecute = true });
-
-            return filename;
+            //// ... and start a viewer.
+            //PdfFileUtility.ShowDocument(filename);
+            //return filename;
         }
 
         /// <summary>
@@ -89,9 +115,13 @@ namespace PdfSharp.Quality
         /// <param name="filenameTag">The tag of the PDF file.</param>
         protected string SaveDocument(PdfDocument document, string filenameTag)
         {
-            var filename = Invariant($"{Guid.NewGuid():N}_{filenameTag}_tempfile.pdf");
-            document.Save(filename);
-            return filename;
+            return PdfFileUtility.SaveDocument(document, filenameTag);
+
+            //string filename = filenameTag;
+            //if (!filenameTag.Contains("_tempfile"))
+            //    filename = Invariant($"{Guid.NewGuid():N}_{filenameTag}_tempfile.pdf");
+            //document.Save(filename);
+            //return filename;
         }
 
         /// <summary>
@@ -115,47 +145,34 @@ namespace PdfSharp.Quality
                 {
                     outDocument.AddPage(page);
                 }
+
                 outDocument.Save(outFilename);
             }
             catch (Exception ex)
             {
-                LogHost.Logger.LogError(ex, $"{nameof(ReadWritePdfDocument)} failed with file '{{filename}}'.", filename);
+                LogHost.Logger.LogError(ex, $"{nameof(ReadWritePdfDocument)} failed with file '{{filename}}'.",
+                    filename);
                 throw;
             }
+
             return outFilename;
         }
 
-#if true_
-        Task<ProcessorArchitecture> WhatProcessor()
-        {
-            var t = new TaskCompletionSource<ProcessorArchitecture>();
-            var w = new WebView();
-            w.AllowedScriptNotifyUris = WebView.AnyScriptNotifyUri;
-            w.NavigateToString("<html />");
-            NotifyEventHandler h = null;
-            h = (s, e) =>
-            {
-                // http://blogs.msdn.com/b/ie/archive/2012/07/12/ie10-user-agent-string-update.aspx
-                // IE10 on Windows RT: Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; ARM; Trident/6.0;)
-                // 32-bit IE10 on 64-bit Windows: Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; WOW64; Trident/6.0)
-                // 64-bit IE10 on 64-bit Windows: Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Win64; x64; Trident/6.0)
-                // 32-bit IE10 on 32-bit Windows: Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0) 
-                try
-                {
-                    if (e.Value.Contains("ARM;"))
-                        t.SetResult(Windows.System.ProcessorArchitecture.Arm);
-                    else if (e.Value.Contains("WOW64;") || e.Value.Contains("Win64;") || e.Value.Contains("x64;"))
-                        t.SetResult(Windows.System.ProcessorArchitecture.X64);
-                    else
-                        t.SetResult(Windows.System.ProcessorArchitecture.X86);
-                }
-                catch (Exception ex) { t.SetException(ex); }
-                finally { /* release */ w.ScriptNotify -= h; }
-            };
-            w.ScriptNotify += h;
-            w.InvokeScript("execScript", new[] { "window.external.notify(navigator.userAgent); " });
-            return t.Task;
-        }
-#endif
+        ///// <summary>
+        ///// Creates and sets a logger factory for test code.
+        ///// </summary>
+        //public static void SetDefaultLoggerFactory()
+        //{
+        //    if (_defaultLoggerFactory != null)
+        //        return;
+
+        //    _defaultLoggerFactory = LoggerFactory.Create(builder =>
+        //    {
+        //        builder
+        //            .AddConsole();
+        //    });
+        //    LogHost.Factory = _defaultLoggerFactory;
+        //}
+        //static ILoggerFactory? _defaultLoggerFactory;
     }
 }

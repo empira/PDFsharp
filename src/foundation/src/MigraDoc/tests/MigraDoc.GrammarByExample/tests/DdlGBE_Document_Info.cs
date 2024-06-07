@@ -1,4 +1,7 @@
-﻿using MigraDoc.GrammarByExample;
+﻿// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
+using MigraDoc.GrammarByExample;
 using Xunit;
 
 namespace GdiGrammarByExample
@@ -7,7 +10,7 @@ namespace GdiGrammarByExample
     /// Grammar by example unit test class.
     /// </summary>
     // ReSharper disable InconsistentNaming
-    [Collection("GBE")]
+    [Collection("PDFsharp")]
     public class DdlGBE_Document_Info : DdlGbeTestBase, IClassFixture<GbeFixture>
     {
         public DdlGBE_Document_Info(GbeFixture fixture)
@@ -20,7 +23,7 @@ namespace GdiGrammarByExample
             InitializeTest(_fixture, "Document-Info", 1, 0);
         }
 
-        [Fact]
+        [SkippableFact]
 #if CORE
         public void DDL_Grammar_By_Example_Document_Info()
 #elif GDI
@@ -29,6 +32,7 @@ namespace GdiGrammarByExample
         public void WPF_DDL_Grammar_By_Example_Document_Info()
 #endif
         {
+            Skip.If(SkippableTests.SkipSlowTests());
             RunTest();
         }
         // ReSharper restore InconsistentNaming

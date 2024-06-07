@@ -12,18 +12,18 @@ namespace MigraDoc.Rendering
     /// </summary>
     struct VerticalLineInfo
     {
-        internal VerticalLineInfo(XUnit height, XUnit descent, XUnit inherentlineSpace)
+        internal VerticalLineInfo(XUnitPt height, XUnitPt descent, XUnitPt inherentlineSpace)
         {
             Height = height;
             Descent = descent;
             InherentLineSpace = inherentlineSpace;
         }
 
-        public XUnit Height;
+        public XUnitPt Height;
 
-        public XUnit Descent;
+        public XUnitPt Descent;
 
-        public XUnit InherentLineSpace;
+        public XUnitPt InherentLineSpace;
     }
 
     /// <summary>
@@ -33,8 +33,8 @@ namespace MigraDoc.Rendering
     {
         public ParagraphIterator? StartIter;
         public ParagraphIterator? EndIter;
-        public XUnit WordsWidth;
-        public XUnit LineWidth;
+        public XUnitPt WordsWidth;
+        public XUnitPt LineWidth;
         public int BlankCount;
         public VerticalLineInfo Vertical;
         public List<TabOffset> TabOffsets;

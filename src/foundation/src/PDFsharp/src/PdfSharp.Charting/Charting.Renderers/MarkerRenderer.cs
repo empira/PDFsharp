@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
@@ -19,7 +19,7 @@ namespace PdfSharp.Charting.Renderers
             if (rendererInfo.MarkerStyle == MarkerStyle.None)
                 return;
 
-            double size = rendererInfo.MarkerSize;
+            double size = rendererInfo.MarkerSize.Point;
             double size2 = size / 2;
             double x0, y0, x1, y1;
             double g;
@@ -114,7 +114,7 @@ namespace PdfSharp.Charting.Renderers
                         double outerCircle = size / 2;
                         double innerCircle = size / 5;
                         // outer circle
-                        double rad = -(Math.PI / 2); // 90°
+                        double rad = -(Math.PI / 2); // 90Â°
                         for (int idx = 0; idx < 10; idx += 2)
                         {
                             points[idx].X = pos.X + outerCircle * Math.Cos(rad);
@@ -123,7 +123,7 @@ namespace PdfSharp.Charting.Renderers
                         }
 
                         // inner circle
-                        rad = -(Math.PI / 4); // 45°
+                        rad = -(Math.PI / 4); // 45Â°
                         double x = innerCircle * Math.Cos(rad);
                         double y = innerCircle * Math.Sin(rad);
                         points[1].X = pos.X + x;

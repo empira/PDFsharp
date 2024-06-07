@@ -56,7 +56,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         //public const int NoErrorNumber = -1;
 
         /// <summary>
-        /// Returns a String that represents the current DdlReaderError.
+        /// Returns a string that represents the current DdlReaderError.
         /// </summary>
         public override string ToString()
         {

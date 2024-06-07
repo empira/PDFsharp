@@ -26,7 +26,7 @@ namespace PdfSharp.Pdf
         UseThumbs,
 
         /// <summary>
-        /// Full-screen mode, with no menu bar, windowcontrols, or any other window visible.
+        /// Full-screen mode, with no menu bar, window controls, or any other window visible.
         /// </summary>
         FullScreen,
 

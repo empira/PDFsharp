@@ -1,4 +1,7 @@
-﻿// ReSharper disable once CheckNamespace
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+// ReSharper disable once CheckNamespace
 namespace PdfSharp.BigGustave
 {
     using System.Collections.Generic;
@@ -8,7 +11,7 @@ namespace PdfSharp.BigGustave
         /// <summary>
         /// For a given pass number (1 indexed) the scanline indexes of the lines included in that pass in the 8x8 grid.
         /// </summary>
-        private static readonly IReadOnlyDictionary<int, int[]> PassToScanlineGridIndex = new Dictionary<int, int[]>
+        static readonly IReadOnlyDictionary<int, int[]> PassToScanlineGridIndex = new Dictionary<int, int[]>
         {
             { 1, new []{ 0 } },
             { 2, new []{ 0 } },
@@ -19,7 +22,7 @@ namespace PdfSharp.BigGustave
             { 7, new[] { 1, 3, 5, 7 } }
         };
 
-        private static readonly IReadOnlyDictionary<int, int[]> PassToScanlineColumnIndex = new Dictionary<int, int[]>
+        static readonly IReadOnlyDictionary<int, int[]> PassToScanlineColumnIndex = new Dictionary<int, int[]>
         {
             { 1, new []{ 0 } },
             { 2, new []{ 4 } },

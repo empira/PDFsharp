@@ -1,30 +1,35 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.Diagnostics;
-using System.Reflection;
+using Microsoft.Extensions.Logging;
 using PdfSharp;
 using PdfSharp.Drawing;
-using PdfSharp.Fonts;
+using PdfSharp.Logging;
 using PdfSharp.Pdf;
-using PdfSharp.Pdf.IO;
-using PdfSharp.Snippets.Font;
+using PdfSharp.Quality;
 
 namespace HelloWorld
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] _)
         {
-            var targetFrameworkAttribute = Assembly.GetExecutingAssembly()
-                .GetCustomAttributes(typeof(System.Runtime.Versioning.TargetFrameworkAttribute), false)
-                .SingleOrDefault();
+            // Set a logger factory.
+            // https://docs.pdfsharp.net/link/logging.html
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .AddFilter("PDFsharp", LogLevel.Warning)
+                    .AddFilter(_ => true)
+                    .AddConsole();
+            });
+            LogHost.Factory = loggerFactory;
 
             // Create a new PDF document.
             var document = new PdfDocument();
             document.Info.Title = "Created with PDFsharp";
-            document.Info.Author = "xxxöäüß";  // TODO Write a test for non ASCII characters in Info.
-            document.Info.Subject = "s xxxöäüß";
+            document.Info.Author = "PDFsharp team";
+            document.Info.Subject = "Hello, World!";
 
             // Create an empty page in this document.
             var page = document.AddPage();
@@ -33,8 +38,8 @@ namespace HelloWorld
             var gfx = XGraphics.FromPdfPage(page);
 
             // Draw two lines with a red default pen.
-            var width = page.Width;
-            var height = page.Height;
+            var width = page.Width.Point;
+            var height = page.Height.Point;
             gfx.DrawLine(XPens.Red, 0, 0, width, height);
             gfx.DrawLine(XPens.Red, width, 0, 0, height);
 
@@ -42,41 +47,19 @@ namespace HelloWorld
             var r = width / 5;
             gfx.DrawEllipse(new XPen(XColors.Red, 1.5), XBrushes.White, new XRect(width / 2 - r, height / 2 - r, 2 * r, 2 * r));
 
-            //var bytes = PdfSharp.WPFonts.FontDataHelper.SegoeWP;
-
-            if (Capabilities.Build.IsCoreBuild)
-                GlobalFontSettings.FontResolver = new FailsafeFontResolver();
-
             // Create a font.
             var font = new XFont("Times New Roman", 20, XFontStyleEx.BoldItalic);
-            //var font = new XFont("Segoe WP", 20, XFontStyleEx.Regular);
-            //var font = new XFont("Arial", 20, XFontStyleEx.Regular);
 
             // Draw the text.
             gfx.DrawString("Hello, PDFsharp!", font, XBrushes.Black,
-                new XRect(0, 0, page.Width, page.Height), XStringFormats.Center);
-
-            // Draw branch.
-            gfx.DrawString(GitVersionInformation.BranchName, font, XBrushes.Black,
-                new XRect(0, 50, page.Width, page.Height), XStringFormats.Center);
-
+                new XRect(0, 0, width, height), XStringFormats.Center);
+    
             // Save the document...
-            //const string filename = "HelloWorld.pdf";
-            var dir = System.IO.Directory.GetCurrentDirectory();
-            // Following line has worked, but now it caused exception
-            //var filename2 = $"HelloWorld-{Guid.NewGuid():N).ToUpperInvariant()}_tempfile.pdf";
-            var filename = $"HelloWorld-{Guid.NewGuid().ToString("N").ToUpperInvariant()}_tempfile.pdf";
-            filename = System.IO.Path.Combine(dir, filename);
-            Console.WriteLine($"Filename='{filename}'");
-            document.Save(filename);
-            // ...and start a viewer.
-            Process.Start(new ProcessStartInfo(filename) { UseShellExecute = true });
-            //Process.Start(processStartInfo);
-        }
+            var fullName = PdfFileUtility.GetTempPdfFullFileName("PdfSharpSamples/HelloWorld/HelloWorld" + Capabilities.Build.BuildTag);
+            document.Save(fullName);
 
-        static void ProvidePassword(PdfPasswordProviderArgs args)
-        {
-            args.GetType();
+            // ...and start a viewer.
+            PdfFileUtility.ShowDocument(fullName);
         }
     }
 }

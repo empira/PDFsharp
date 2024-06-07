@@ -42,9 +42,9 @@ namespace PdfSharp.Quality
 
                 pdfDocument.Save(path);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ex.GetType();
+                _ = typeof(int);
             }
         }
     }

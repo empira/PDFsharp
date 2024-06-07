@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using MigraDoc.DocumentObjectModel.Visitors;
@@ -109,7 +109,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
             => Elements.Add(image);
 
         /// <summary>
-        /// Gets or sets the Margin between the text frame's content and its left edge.
+        /// Gets or sets the Margin between the text frame’s content and its left edge.
         /// </summary>
         public Unit MarginLeft
         {
@@ -118,7 +118,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
 
         /// <summary>
-        /// Gets or sets the Margin between the text frame's content and its right edge.
+        /// Gets or sets the Margin between the text frame’s content and its right edge.
         /// </summary>
         public Unit MarginRight
         {
@@ -127,7 +127,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
 
         /// <summary>
-        /// Gets or sets the Margin between the text frame's content and its top edge.
+        /// Gets or sets the Margin between the text frame’s content and its top edge.
         /// </summary>
         public Unit MarginTop
         {
@@ -136,7 +136,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
 
         /// <summary>
-        /// Gets or sets the Margin between the text frame's content and its bottom edge.
+        /// Gets or sets the Margin between the text frame’s content and its bottom edge.
         /// </summary>
         public Unit MarginBottom
         {
@@ -159,7 +159,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
 
         /// <summary>
-        /// Gets or sets the text orientation for the text frame's content.
+        /// Gets or sets the text orientation for the text frame’s content.
         /// </summary>
         public TextOrientation Orientation
         {
@@ -168,7 +168,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
 
         /// <summary>
-        /// The document elements that build the text frame's content.
+        /// The document elements that build the text frame’s content.
         /// </summary>
         public DocumentElements Elements
         {

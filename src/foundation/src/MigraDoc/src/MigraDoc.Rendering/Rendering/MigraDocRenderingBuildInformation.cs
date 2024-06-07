@@ -32,6 +32,19 @@ namespace MigraDoc.Rendering
         public static string AssemblyTitle
             => ((AssemblyTitleAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyTitleAttribute), false)[0]).Title;
 
+#if !NET6_0_OR_GREATER
+        /// <summary>
+        /// Gets the target platform attribute value.
+        /// </summary>
+        public static string TargetPlatform
+        {
+            get
+            {
+                // Hack since TargetPlatformAttribute is not available.
+                return "Unknown Target Platform";
+            }
+        }
+#else
         /// <summary>
         /// Gets the target platform attribute value.
         /// </summary>
@@ -43,5 +56,6 @@ namespace MigraDoc.Rendering
                 return attribute.Length == 1 ? ((TargetPlatformAttribute)attribute[0]).PlatformName : "";
             }
         }
+#endif
     }
 }

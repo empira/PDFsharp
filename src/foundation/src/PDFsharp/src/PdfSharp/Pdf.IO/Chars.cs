@@ -13,7 +13,7 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// The EOF marker.
         /// </summary>
-        public const char EOF = (char)65535; //unchecked((char)(-1));
+        public const char EOF = Char.MaxValue;
 
         /// <summary>
         /// The null byte.
@@ -147,7 +147,8 @@ namespace PdfSharp.Pdf.IO
         public const char Bar = '|';
 
         /// <summary>
-        /// The back slash.
+        /// The backslash.
+        /// Called REVERSE SOLIDUS in Adobe specs.
         /// </summary>
         public const char BackSlash = '\\';
 

@@ -20,7 +20,7 @@ namespace MigraDoc.Rendering
             RealizeBrush();
         }
 
-        internal void Render(XUnit x, XUnit y, XUnit width, XUnit height)
+        internal void Render(XUnitPt x, XUnitPt y, XUnitPt width, XUnitPt height)
         {
             if (/*_shading == null! ||*/ _brush == null)
                 return;
@@ -28,7 +28,7 @@ namespace MigraDoc.Rendering
             _gfx.DrawRectangle(_brush, x.Point, y.Point, width.Point, height.Point);
         }
 
-        internal void Render(XUnit x, XUnit y, XUnit width, XUnit height, RoundedCorner roundedCorner)
+        internal void Render(XUnitPt x, XUnitPt y, XUnitPt width, XUnitPt height, RoundedCorner roundedCorner)
         {
             // If there is no rounded corner, we can use the usual Render method.
             if (roundedCorner == RoundedCorner.None)

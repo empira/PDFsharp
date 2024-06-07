@@ -25,7 +25,7 @@ namespace PdfSharp.Fonts.OpenType
             }
         }
 
-        public GenericFontTable(OpenTypeFontface fontData, string tag)
+        public GenericFontTable(OpenTypeFontFace fontData, string tag)
           : base(fontData, tag)
         {
             _fontData = fontData;

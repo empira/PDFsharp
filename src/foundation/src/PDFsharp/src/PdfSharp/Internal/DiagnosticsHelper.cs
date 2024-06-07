@@ -1,14 +1,12 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
 #if GDI
 using System.Drawing;
 #endif
 #if WPF
 using System.Windows;
 #endif
-using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
@@ -21,27 +19,36 @@ namespace PdfSharp.Internal
     /// </summary>
     static class DiagnosticsHelper
     {
-        public static void HandleNotImplemented(string message)
+        public static void HandleNotImplemented(string message, FeatureNotAvailableBehavior behavior)
         {
-            string text = "Not implemented: " + message;
-            switch (Diagnostics.NotImplementedBehavior)
+            // We do not use LoggerMessage here because this function should only be invoked during development.
+
+            //string text = "Not implemented: " + message;
+            const string prefix = "Feature not available: {message}";
+            //const string category = "FeatureNotAvailable";
+            switch (behavior)
             {
-                case NotImplementedBehavior.DoNothing:
+                case FeatureNotAvailableBehavior.SilentlyIgnore:
+                    // Do nothing.
                     break;
 
-                case NotImplementedBehavior.Log:
-                    LogHost.CreateLogger<NotImplementedBehavior>().LogWarning(message);
+                case FeatureNotAvailableBehavior.LogInformation:
+                    PdfSharpLogHost.Logger.LogInformation(PdfSharpEvent.Placeholder, prefix, message);
                     break;
 
-                case NotImplementedBehavior.LogError:
-                    LogHost.CreateLogger<NotImplementedBehavior>().LogError(message);
+                case FeatureNotAvailableBehavior.LogWarning:
+                    PdfSharpLogHost.Logger.LogWarning(PdfSharpEventId.Placeholder, prefix, message);
                     break;
 
-                case NotImplementedBehavior.Throw:
-                    throw new NotSupportedException(text);
+                case FeatureNotAvailableBehavior.LogError:
+                    PdfSharpLogHost.Logger.LogError(PdfSharpEventId.Placeholder, prefix, message);
+                    break;
+
+                case FeatureNotAvailableBehavior.ThrowException:
+                    throw new NotSupportedException($"Feature not available: {message}");
 
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(message), "Behavior does not exist.");
             }
         }
 
@@ -75,17 +82,9 @@ namespace PdfSharp.Internal
     public static class DebugBreak
     {
         /// <summary>
-        /// Call Debugger.Break() if a debugger is attached.
-        /// </summary>
-        public static void Break()
-        {
-            Break(false);
-        }
-
-        /// <summary>
         /// Call Debugger.Break() if a debugger is attached or when always is set to true.
         /// </summary>
-        public static void Break(bool always)
+        public static void Break(bool always = false)
         {
 #if DEBUG
             if (always || Debugger.IsAttached)
@@ -114,6 +113,19 @@ namespace PdfSharp.Internal
         public static string GetFontCachesState()
         {
             return FontFactory.GetFontCachesState();
+        }
+
+        /// <summary>
+        /// Get stretch and weight from a glyph typeface.
+        /// </summary>
+        public static (string Stretch, string Weight) TryGetStretchAndWeight(XGlyphTypeface glyphTypeface)
+        {
+            var bold = glyphTypeface.IsBold ? " (bold)" : "";
+
+            var stretch = XFontStretches.FontStretchFromFaceName(glyphTypeface.FaceName);
+            var weight = XFontWeights.FontWeightFromFaceName(glyphTypeface.FaceName);
+
+            return (stretch.ToString(), weight.ToString() + bold);
         }
     }
 }

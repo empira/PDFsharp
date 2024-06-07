@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0-windows7.0</TargetFramework>
+        <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
         <RootNamespace>MigraDoc.GrammarByExample_GDI</RootNamespace>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <UseWindowsForms>true</UseWindowsForms>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
@@ -61,6 +62,7 @@
         <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Table_Inheritance.cs" Link="tests\DdlGBE_Table_Inheritance.cs" />
         <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_Table_Layout.cs" Link="tests\DdlGBE_Table_Layout.cs" />
         <Compile Include="..\MigraDoc.GrammarByExample\tests\DdlGBE_TextFrame_Layout.cs" Link="tests\DdlGBE_TextFrame_Layout.cs" />
+        <Compile Include="..\MigraDoc.Tests\Extensions\XunitHelper.cs" Link="Extensions\XunitHelper.cs" />
     </ItemGroup>
 
     <!--<ItemGroup>
@@ -72,13 +74,22 @@
   </ItemGroup>-->
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper-gdi\PdfSharp.TestHelper-gdi.csproj" />
+        <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets-gdi\PdfSharp.Snippets-gdi.csproj" />
         <ProjectReference Include="..\..\src\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
         <ProjectReference Include="..\..\src\MigraDoc.Rendering-gdi\MigraDoc.Rendering-gdi.csproj" />
     </ItemGroup>
 
     <ItemGroup>
         <Folder Include="helper\" />
+        <Folder Include="Extensions\" />
+        <Folder Include="helper\" />
         <Folder Include="tests\" />
+        <Folder Include="tests\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Xunit.SkippableFact" />
     </ItemGroup>
 
     <ItemGroup>

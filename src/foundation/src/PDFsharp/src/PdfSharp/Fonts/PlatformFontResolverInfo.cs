@@ -13,6 +13,8 @@ using WpfTypeface = System.Windows.Media.Typeface;
 using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
 #endif
 
+// ReSharper disable ConvertToPrimaryConstructor
+
 namespace PdfSharp.Fonts
 {
     /// <summary>
@@ -50,7 +52,7 @@ namespace PdfSharp.Fonts
         /// <summary>
         /// Gets the GDI font.
         /// </summary>
-        public Font GdiFont { get; }
+        public GdiFont GdiFont { get; }
 
 #endif
 #if WPF

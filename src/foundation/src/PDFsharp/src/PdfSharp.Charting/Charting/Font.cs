@@ -43,7 +43,7 @@ namespace PdfSharp.Charting
         /// <summary>
         /// Gets or sets the name of the font.
         /// </summary>
-        public string Name { get; set; } = String.Empty;
+        public string Name { get; set; } = "";
 
         /// <summary>
         /// Gets or sets the size of the font.

@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0-windows7.0</TargetFramework>
+        <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
-        <Nullable>Enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -21,7 +20,13 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Compile Include="..\MigraDoc.Tests\ChartTests.cs" Link="ChartTests.cs" />
+        <Compile Include="..\MigraDoc.Tests\CultureAndRegionTests.cs" Link="CultureAndRegionTests.cs" />
+        <Compile Include="..\MigraDoc.Tests\Extensions\XunitHelper.cs" Link="Extensions\XunitHelper.cs" />
         <Compile Include="..\MigraDoc.Tests\Helper\TestHelper.cs" Link="Helper\TestHelper.cs" />
         <Compile Include="..\MigraDoc.Tests\ImageFormats.cs" Link="ImageFormats.cs" />
         <Compile Include="..\MigraDoc.Tests\MultipleFooters.cs" Link="MultipleFooters.cs" />
@@ -29,18 +34,16 @@
         <Compile Include="..\MigraDoc.Tests\SecurityTestHelper.cs" Link="SecurityTestHelper.cs" />
         <Compile Include="..\MigraDoc.Tests\SecurityTests.cs" Link="SecurityTests.cs" />
         <Compile Include="..\MigraDoc.Tests\SpaceBeforeTests.cs" Link="SpaceBeforeTests.cs" />
+        <Compile Include="..\MigraDoc.Tests\TableTests.cs" Link="TableTests.cs" />
         <Compile Include="..\MigraDoc.Tests\TextTests.cs" Link="TextTests.cs" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="..\MigraDoc.Tests\README.md" Link="README.md" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper\PdfSharp.TestHelper.csproj" />
+        <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper-gdi\PdfSharp.TestHelper-gdi.csproj" />
         <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-gdi\PdfSharp-gdi.csproj" />
         <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp.Charting-gdi\PdfSharp.Charting-gdi.csproj" />
         <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets-gdi\PdfSharp.Snippets-gdi.csproj" />
+        <ProjectReference Include="..\..\..\shared\src\PdfSharp.Testing-gdi\PdfSharp.Testing-gdi.csproj" />
         <ProjectReference Include="..\..\src\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
         <ProjectReference Include="..\..\src\MigraDoc.Rendering-gdi\MigraDoc.Rendering-gdi.csproj" />
         <ProjectReference Include="..\..\src\MigraDoc.RtfRendering-gdi\MigraDoc.RtfRendering-gdi.csproj" />
@@ -48,6 +51,13 @@
 
     <ItemGroup>
       <Folder Include="Helper\" />
+      <Folder Include="Extensions\" />
+      <Folder Include="Helper\" />
     </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Xunit.SkippableFact" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Console" />
+	</ItemGroup>
 
 </Project>

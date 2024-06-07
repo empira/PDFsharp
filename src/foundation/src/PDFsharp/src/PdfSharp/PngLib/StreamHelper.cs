@@ -1,4 +1,7 @@
-﻿// ReSharper disable once CheckNamespace
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+// ReSharper disable once CheckNamespace
 namespace PdfSharp.BigGustave
 {
     using System;
@@ -26,7 +29,7 @@ namespace PdfSharp.BigGustave
             stream.WriteByte((byte)value);
         }
 
-        private static byte ReadOrTerminate(Stream stream)
+        static byte ReadOrTerminate(Stream stream)
         {
             var b = stream.ReadByte();
 

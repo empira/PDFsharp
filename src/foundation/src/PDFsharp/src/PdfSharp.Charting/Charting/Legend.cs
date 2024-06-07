@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System.ComponentModel;
@@ -50,7 +50,7 @@ namespace PdfSharp.Charting
 
         #region Properties
         /// <summary>
-        /// Gets the line format of the legend's border.
+        /// Gets the line format of the legend’s border.
         /// </summary>
         public LineFormat LineFormat => _lineFormat ??= new LineFormat(this);
         // ReSharper disable once InconsistentNaming because this is old code

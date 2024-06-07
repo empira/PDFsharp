@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net472</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="TestResults\**" />
+    <EmbeddedResource Remove="TestResults\**" />
+    <None Remove="TestResults\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\..\..\..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\PdfSharp.Fonts\PdfSharp.Fonts.csproj" />
+    <ProjectReference Include="..\..\src\PdfSharp.Quality\PdfSharp.Quality.csproj" />
+    <ProjectReference Include="..\..\src\PdfSharp.System\PdfSharp.System.csproj" />
+  </ItemGroup>
+
+</Project>

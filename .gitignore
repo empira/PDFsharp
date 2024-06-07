@@ -51,3 +51,4 @@ InternalAgentState.json
 /nuget.config
 *.log
 *tempfile.*
+launchsettings.json

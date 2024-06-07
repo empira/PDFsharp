@@ -1,21 +1,22 @@
-using MigraDoc.DocumentObjectModel.Fields;
-using MigraDoc.Rendering;
+// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
 using PdfSharp.Fonts;
 using PdfSharp.Snippets.Font;
+using PdfSharp.Quality;
 using PdfSharp.TestHelper;
+using MigraDoc.DocumentObjectModel.Fields;
+using MigraDoc.Rendering;
 using Xunit;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
+    [Collection("PDFsharp")]
     public class TextFrames
     {
         [Fact]
         public void Create_TextFrames()
         {
-#if CORE
-            GlobalFontSettings.FontResolver = NewFontResolver.Get();
-#endif
-
             // Create a MigraDoc document.
             var document = CreateDocument();
 
@@ -26,9 +27,8 @@ namespace MigraDoc.DocumentObjectModel.Tests
             //// This setting has no effect on the RTF renderer.
             //const bool unicode = false;
 
-#if DEBUG___
+#if DEBUG_
             var ddl = MigraDoc.DocumentObjectModel.IO.DdlWriter.WriteToString(document);
-            //GetType();
 #endif
 
             // Create a renderer for the MigraDoc document.
@@ -42,10 +42,10 @@ namespace MigraDoc.DocumentObjectModel.Tests
             pdfRenderer.RenderDocument();
 
             // Save the document...
-            var filename = PdfFileHelper.CreateTempFileName("HelloWorld");
+            var filename = PdfFileUtility.GetTempPdfFileName("Create_TextFrames");
             pdfRenderer.PdfDocument.Save(filename);
             // ...and start a viewer.
-            PdfFileHelper.StartPdfViewerIfDebugging(filename);
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
         /// <summary>

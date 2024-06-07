@@ -1,6 +1,7 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Drawing;
 using PdfSharp.Pdf.Actions;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Internal;
@@ -42,7 +43,8 @@ namespace PdfSharp.Pdf.Annotations
         /// </summary>
         /// <param name="rect">The link area in default page coordinates.</param>
         /// <param name="destinationPage">The one-based destination page number.</param>
-        public static PdfLinkAnnotation CreateDocumentLink(PdfRectangle rect, int destinationPage)
+        /// <param name="point">The position in the destination page.</param>
+        public static PdfLinkAnnotation CreateDocumentLink(PdfRectangle rect, int destinationPage, XPoint? point = null)
         {
             if (destinationPage < 1)
                 throw new ArgumentException("Invalid destination page in call to CreateDocumentLink: page number is one-based and must be 1 or higher.", nameof(destinationPage));
@@ -51,18 +53,20 @@ namespace PdfSharp.Pdf.Annotations
             link._linkType = LinkType.Document;
             link.Rectangle = rect;
             link._destPage = destinationPage;
+            link._point = point;
             return link;
         }
 
         int _destPage;
         LinkType _linkType;
         string _url = "";
+        private XPoint? _point = null;
 
         /// <summary>
         /// Creates a link within the current document using a named destination.
         /// </summary>
         /// <param name="rect">The link area in default page coordinates.</param>
-        /// <param name="destinationName">The named destination's name.</param>
+        /// <param name="destinationName">The named destination’s name.</param>
         public static PdfLinkAnnotation CreateDocumentLink(PdfRectangle rect, string destinationName)
         {
             var link = new PdfLinkAnnotation
@@ -81,7 +85,7 @@ namespace PdfSharp.Pdf.Annotations
         /// </summary>
         /// <param name="rect">The link area in default page coordinates.</param>
         /// <param name="documentPath">The path to the target document.</param>
-        /// <param name="destinationName">The named destination's name in the target document.</param>
+        /// <param name="destinationName">The named destination’s name in the target document.</param>
         /// <param name="newWindow">True, if the destination document shall be opened in a new window.
         /// If not set, the viewer application should behave in accordance with the current user preference.</param>
         public static PdfLinkAnnotation CreateDocumentLink(PdfRectangle rect, string documentPath, string destinationName, bool? newWindow = null)
@@ -195,8 +199,16 @@ namespace PdfSharp.Pdf.Annotations
                         destIndex = Owner.PageCount;
                     destIndex--;
                     dest = Owner.Pages[destIndex];
-                    //pdf.AppendFormat("/Dest[{0} 0 R/XYZ null null 0]\n", dest.ObjectID);
-                    Elements[Keys.Dest] = new PdfLiteral("[{0} 0 R/XYZ null null 0]", dest.ObjectNumber);
+                    ////pdf.AppendFormat("/Dest[{0} 0 R/XYZ null null 0]\n", dest.ObjectID);
+                    //Elements[Keys.Dest] = new PdfLiteral("[{0} 0 R/XYZ null null 0]", dest.ObjectNumber);
+                    if (_point.HasValue)
+                    {
+                        Elements[Keys.Dest] = new PdfLiteral(Invariant($"[{dest.ObjectNumber} 0 R /XYZ {_point.Value.X} {_point.Value.Y} 0]") /*, dest.ObjectNumber, _point.Value.X, _point.Value.Y*/);
+                    }
+                    else
+                    {
+                        Elements[Keys.Dest] = new PdfLiteral(Invariant($"[{dest.ObjectNumber} 0 R /XYZ null null 0]") /*, dest.ObjectNumber*/);
+                    }
                     break;
 
                 case LinkType.NamedDestination:
@@ -206,7 +218,7 @@ namespace PdfSharp.Pdf.Annotations
                 case LinkType.Web:
                     //pdf.AppendFormat("/A<</S/URI/URI{0}>>\n", PdfEncoders.EncodeAsLiteral(url));
                     Elements[PdfAnnotation.Keys.A] = new PdfLiteral("<</S/URI/URI{0}>>", //PdfEncoders.EncodeAsLiteral(url));
-                        PdfEncoders.ToStringLiteral(_url, PdfStringEncoding.WinAnsiEncoding, writer.SecurityHandler));
+                        PdfEncoders.ToStringLiteral(_url, PdfStringEncoding.WinAnsiEncoding, writer.EffectiveSecurityHandler));
                     break;
 
                 case LinkType.File:
@@ -214,7 +226,7 @@ namespace PdfSharp.Pdf.Annotations
                     //  PdfEncoders.EncodeAsLiteral(url));
                     Elements[PdfAnnotation.Keys.A] = new PdfLiteral("<</Type/Action/S/Launch/F<</Type/Filespec/F{0}>> >>",
                         //PdfEncoders.EncodeAsLiteral(url));
-                        PdfEncoders.ToStringLiteral(_url, PdfStringEncoding.WinAnsiEncoding, writer.SecurityHandler));
+                        PdfEncoders.ToStringLiteral(_url, PdfStringEncoding.WinAnsiEncoding, writer.EffectiveSecurityHandler));
                     break;
             }
             base.WriteObject(writer);
@@ -239,11 +251,11 @@ namespace PdfSharp.Pdf.Annotations
             public const string Dest = "/Dest";
 
             /// <summary>
-            /// (Optional; PDF 1.2) The annotation�s highlighting mode, the visual effect to be
+            /// (Optional; PDF 1.2) The annotation’s highlighting mode, the visual effect to be
             /// used when the mouse button is pressed or held down inside its active area:
             /// N (None) No highlighting.
             /// I (Invert) Invert the contents of the annotation rectangle.
-            /// O (Outline) Invert the annotation�s border.
+            /// O (Outline) Invert the annotation’s border.
             /// P (Push) Display the annotation as if it were being pushed below the surface of the page.
             /// Default value: I.
             /// Note: In PDF 1.1, highlighting is always done by inverting colors inside the annotation rectangle.

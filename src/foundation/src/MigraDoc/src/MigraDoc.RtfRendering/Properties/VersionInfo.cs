@@ -3,8 +3,6 @@
 
 namespace MigraDoc.RtfRendering
 {
-    using MigraDoc.RtfRendering;
-
     class VersionInfo
     {
         public static readonly string Title = "MigraDoc.RtfRendering.dll";

@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 namespace PdfSharp
@@ -6,7 +6,7 @@ namespace PdfSharp
     /// <summary>
     /// Version information for all PDFsharp related assemblies.
     /// </summary>
-    // TODO: These literals are not in sync with the NuGet meta data. Should be fixed.
+    // TODO: These literals are not in sync with the NuGet metadata. Should be fixed.
     public static class PdfSharpProductVersionInformation
     {
         // Cannot use const string anymore because GitVersionInformation used static string.
@@ -32,19 +32,13 @@ namespace PdfSharp
         /// </summary>
         public static readonly string VersionMinor = GitVersionInformation.Minor;
 
-        ///// <summary>
-        ///// The build number of the product.
-        ///// </summary>
-        //[Obsolete("Build version is not used anymore because we switched to Semantic Versioning. Use VersionPatch instead.")]
-        //public const string VersionBuild = "xxxxx";  // DELETE
-
         /// <summary>
         /// The patch number of the product.
         /// </summary>
         public static readonly string VersionPatch = GitVersionInformation.Patch;
 
         /// <summary>
-        /// The Version PreRelease String for NuGet.
+        /// The Version PreRelease string for NuGet.
         /// </summary>
         public static readonly string VersionPreRelease = GitVersionInformation.NuGetPreReleaseTagV2;
 
@@ -65,6 +59,11 @@ namespace PdfSharp
         public static readonly string Version = GitVersionInformation.MajorMinorPatch;
 
         /// <summary>
+        /// The full semantic version number created by GitVersion.
+        /// </summary>
+        public static readonly string SemanticVersion = GitVersionInformation.SemVer;
+
+        /// <summary>
         /// The home page of this product.
         /// </summary>
         public const string Url = "www.pdfsharp.net";
@@ -77,7 +76,7 @@ namespace PdfSharp
         /// <summary>
         /// The company that created/owned the product.
         /// </summary>
-        public const string Company = "empira Software GmbH, Cologne Area (Germany)";
+        public const string Company = "empira Software GmbH, Troisdorf (Cologne Area), Germany";
 
         /// <summary>
         /// The name of the product.
@@ -87,7 +86,7 @@ namespace PdfSharp
         /// <summary>
         /// The copyright information.
         /// </summary>
-        public const string Copyright = "Copyright � 2005-2023 empira Software GmbH.";
+        public const string Copyright = "Copyright © 2005-2024 empira Software GmbH.";
 
         /// <summary>
         /// The trademark of the product.

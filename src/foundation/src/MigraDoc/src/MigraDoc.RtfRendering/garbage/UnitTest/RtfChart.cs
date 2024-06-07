@@ -1,3 +1,6 @@
+//// MigraDoc - Creating Documents on the Fly
+//// See the LICENSE file in the solution root for more information.
+
 //using MigraDoc.DocumentObjectModel;
 //using MigraDoc.DocumentObjectModel.IO;
 
@@ -34,7 +37,7 @@
 //      docRenderer.Render(doc, "RtfChart.txt");
 //      DdlWriter.SerializeToFile(doc, "RtfChart.mdddl");
 //      System.IO.File.Copy("RtfChart.txt", "RtfChart.rtf", true);
-//      System.Diagnostics.Process.Start("RtfChart.txt");
+//      System.Diagnostics.Process.St art("RtfChart.txt");
 //    }
 //  }
 //}

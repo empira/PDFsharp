@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+ï»¿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc.DocumentObjectModel
@@ -13,76 +13,76 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// A regular blank.
         /// </summary>
-        public static readonly Character Blank = new Character(SymbolName.Blank);
+        public static readonly Character Blank = new(SymbolName.Blank);
         /// <summary>
         /// An n-width blank.
         /// </summary>
-        public static readonly Character En = new Character(SymbolName.En);
+        public static readonly Character En = new(SymbolName.En);
         /// <summary>
         /// An em-width blank.
         /// </summary>
-        public static readonly Character Em = new Character(SymbolName.Em);
+        public static readonly Character Em = new(SymbolName.Em);
         /// <summary>
         /// A blank that is a quarter of em wide.
         /// </summary>
-        public static readonly Character EmQuarter = new Character(SymbolName.EmQuarter);
+        public static readonly Character EmQuarter = new(SymbolName.EmQuarter);
         /// <summary>
         /// A blank that is a quarter of em wide.
         /// </summary>
-        public static readonly Character Em4 = new Character(SymbolName.Em4);
+        public static readonly Character Em4 = new(SymbolName.Em4);
 
         // ===== Used to serialize as \tab, \linebreak =====
         /// <summary>
         /// A tabulator.
         /// </summary>
-        public static readonly Character Tab = new Character(SymbolName.Tab);
+        public static readonly Character Tab = new(SymbolName.Tab);
         /// <summary>
         /// A line break.
         /// </summary>
-        public static readonly Character LineBreak = new Character(SymbolName.LineBreak);
+        public static readonly Character LineBreak = new(SymbolName.LineBreak);
         //public static readonly Character MarginBreak         = new Character(SymbolName.MarginBreak);
 
         // ===== \symbol =====
         /// <summary>
-        /// The Euro symbol €.
+        /// The Euro symbol â‚¬.
         /// </summary>
-        public static readonly Character Euro = new Character(SymbolName.Euro);
+        public static readonly Character Euro = new(SymbolName.Euro);
         /// <summary>
-        /// The copyright symbol ©.
+        /// The copyright symbol Â©.
         /// </summary>
-        public static readonly Character Copyright = new Character(SymbolName.Copyright);
+        public static readonly Character Copyright = new(SymbolName.Copyright);
         /// <summary>
-        /// The trademark symbol ™.
+        /// The trademark symbol â„¢.
         /// </summary>
-        public static readonly Character Trademark = new Character(SymbolName.Trademark);
+        public static readonly Character Trademark = new(SymbolName.Trademark);
         /// <summary>
-        /// The registered trademark symbol ®.
+        /// The registered trademark symbol Â®.
         /// </summary>
-        public static readonly Character RegisteredTrademark = new Character(SymbolName.RegisteredTrademark);
+        public static readonly Character RegisteredTrademark = new(SymbolName.RegisteredTrademark);
         /// <summary>
-        /// The bullet symbol •.
+        /// The bullet symbol â€¢.
         /// </summary>
-        public static readonly Character Bullet = new Character(SymbolName.Bullet);
+        public static readonly Character Bullet = new(SymbolName.Bullet);
         /// <summary>
-        /// The not symbol ¬.
+        /// The not symbol Â¬.
         /// </summary>
-        public static readonly Character Not = new Character(SymbolName.Not);
+        public static readonly Character Not = new(SymbolName.Not);
         /// <summary>
-        /// The em dash —.
+        /// The em dash â€”.
         /// </summary>
-        public static readonly Character EmDash = new Character(SymbolName.EmDash);
+        public static readonly Character EmDash = new(SymbolName.EmDash);
         /// <summary>
-        /// The en dash –.
+        /// The en dash â€“.
         /// </summary>
-        public static readonly Character EnDash = new Character(SymbolName.EnDash);
-        /// <summary>
-        /// A no-break space.
-        /// </summary>
-        public static readonly Character NonBreakableBlank = new Character(SymbolName.NonBreakableBlank);
+        public static readonly Character EnDash = new(SymbolName.EnDash);
         /// <summary>
         /// A no-break space.
         /// </summary>
-        public static readonly Character HardBlank = new Character(SymbolName.HardBlank);
+        public static readonly Character NonBreakableBlank = new(SymbolName.NonBreakableBlank);
+        /// <summary>
+        /// A no-break space.
+        /// </summary>
+        public static readonly Character HardBlank = new(SymbolName.HardBlank);
 
         /// <summary>
         /// Initializes a new instance of the Character class.
@@ -171,7 +171,7 @@ namespace MigraDoc.DocumentObjectModel
                 {
                     if (SymbolName == SymbolName.Blank)
                     {
-                        //Note: Don't try to optimize it by leaving away the braces in case a single space is added.
+                        //Note: Donâ€™t try to optimize it by leaving away the braces in case a single space is added.
                         //This would lead to confusion with '(' in directly following text.
                         text = "\\space(" + Count + ")";
                     }

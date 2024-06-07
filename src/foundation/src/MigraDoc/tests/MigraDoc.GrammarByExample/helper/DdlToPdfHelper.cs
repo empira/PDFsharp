@@ -1,10 +1,7 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System;
 using System.Diagnostics;
-using System.IO;
-using System.Text;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.Rendering;
 using PdfSharp;
@@ -150,7 +147,7 @@ namespace MigraDocTests.Helpers
                     var page = pdfResultDocument.AddPage(); // Page from generated PDF.
                     page.Orientation = landscape ? PageOrientation.Landscape : PageOrientation.Portrait;
                     var gfx = XGraphics.FromPdfPage(page);
-                    var box = new XRect(0, 0, page.Width, page.Height);
+                    var box = new XRect(0, 0, page.Width.Point, page.Height.Point);
 
                     // Copy page.
                     CopyPdfPage(inputDocument1, gfx, i + 1, box);
@@ -162,7 +159,7 @@ namespace MigraDocTests.Helpers
 
                     pageOrg.Orientation = page.Orientation;
                     var gfxOrg = XGraphics.FromPdfPage(pageOrg);
-                    var boxOrg = new XRect(0, 0, pageOrg.Width, pageOrg.Height);
+                    var boxOrg = new XRect(0, 0, pageOrg.Width.Point, pageOrg.Height.Point);
 
                     // Copy page.
                     CopyPdfPage(inputDocument2, gfxOrg, i + 1, boxOrg);
@@ -193,8 +190,8 @@ namespace MigraDocTests.Helpers
                     var gfx = XGraphics.FromPdfPage(page);
                     //gfx.DrawRectangle(XBrushes.GhostWhite, new XRect(0, 0, 1000, 1000));
 
-                    double width = page.Width;
-                    double height = page.Height;
+                    double width = page.Width.Point;
+                    double height = page.Height.Point;
                     if (landscape)
                     {
                         // Landscape.

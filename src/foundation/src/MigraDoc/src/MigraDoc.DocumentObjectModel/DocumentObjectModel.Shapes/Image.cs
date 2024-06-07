@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc.DocumentObjectModel.Shapes
@@ -114,6 +114,16 @@ namespace MigraDoc.DocumentObjectModel.Shapes
             get => Values.Resolution ?? 0.0;
             set => Values.Resolution = value;
         }
+
+        /// <summary>
+        /// Gets or sets a flag indicating whether image interpolation is to be performed.
+        /// Defaults to true.
+        /// </summary>
+        public bool Interpolate
+        {
+            get => Values.Interpolate ?? true;
+            set => Values.Interpolate = value;
+        }
         //#endregion
 
         /// <summary>
@@ -134,18 +144,21 @@ namespace MigraDoc.DocumentObjectModel.Shapes
                 serializer.WriteSimpleAttribute("LockAspectRatio", LockAspectRatio);
             if (Values.Resolution is not null)
                 serializer.WriteSimpleAttribute("Resolution", Resolution);
+            if (Values.Interpolate is not null)
+                serializer.WriteSimpleAttribute("Interpolate", Interpolate);
+
             Values.PictureFormat?.Serialize(serializer);
 
             serializer.EndAttributes(pos);
         }
 
         /// <summary>
-        /// Gets the concrete image path, taking into account the DOM document's DdlFile and
+        /// Gets the concrete image path, taking into account the DOM document’s DdlFile and
         /// ImagePath properties as well as the given working directory (which can be null).
         /// </summary>
         public string GetFilePath(string workingDir)
         {
-            if (Name.StartsWith("base64:", StringComparison.Ordinal)) // The file is stored in the string here, so we don't have to add a path.
+            if (Name.StartsWith("base64:", StringComparison.Ordinal)) // The file is stored in the string here, so we don’t have to add a path.
                 return Name;
 
             string filePath;
@@ -224,6 +237,12 @@ namespace MigraDoc.DocumentObjectModel.Shapes
             /// See enclosing document object class for documentation of this property.
             /// </summary>
             public double? Resolution { get; set; }
+
+            /// <summary>
+            /// Gets or sets the internal nullable implementation value of the enclosing document object property.
+            /// See enclosing document object class for documentation of this property.
+            /// </summary>
+            public bool? Interpolate { get; set; }
         }
     }
 }

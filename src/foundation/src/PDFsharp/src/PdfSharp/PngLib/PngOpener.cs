@@ -1,4 +1,7 @@
-﻿#nullable enable annotations
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+#nullable enable annotations
 
 // ReSharper disable once CheckNamespace
 namespace PdfSharp.BigGustave
@@ -135,13 +138,13 @@ namespace PdfSharp.BigGustave
             }
         }
 
-        private static HeaderValidationResult HasValidHeader(Stream stream)
+        static HeaderValidationResult HasValidHeader(Stream stream)
         {
             return new HeaderValidationResult(stream.ReadByte(), stream.ReadByte(), stream.ReadByte(), stream.ReadByte(),
                 stream.ReadByte(), stream.ReadByte(), stream.ReadByte(), stream.ReadByte());
         }
 
-        private static bool TryReadChunkHeader(Stream stream, out ChunkHeader chunkHeader)
+        static bool TryReadChunkHeader(Stream stream, out ChunkHeader chunkHeader)
         {
             chunkHeader = default;
 
@@ -160,7 +163,7 @@ namespace PdfSharp.BigGustave
             return true;
         }
 
-        private static ImageHeader ReadImageHeader(Stream stream, byte[] crc)
+        static ImageHeader ReadImageHeader(Stream stream, byte[] crc)
         {
             if (!TryReadChunkHeader(stream, out var header))
             {

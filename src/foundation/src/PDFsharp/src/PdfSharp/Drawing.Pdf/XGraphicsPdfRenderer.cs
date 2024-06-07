@@ -4,7 +4,9 @@
 #define ITALIC_SIMULATION
 
 using System.Text;
+using Microsoft.Extensions.Logging;
 using PdfSharp.Events;
+using PdfSharp.Fonts.Internal;
 #if GDI
 using System.Drawing.Drawing2D;
 #endif
@@ -20,9 +22,11 @@ using SysSize = Windows.Foundation.Size;
 #endif
 using PdfSharp.Fonts.OpenType;
 using PdfSharp.Internal;
+using PdfSharp.Logging;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Internal;
 using PdfSharp.Pdf.Advanced;
+using PdfSharp.Pdf.IO;
 
 // ReSharper disable RedundantNameQualifier
 // ReSharper disable CompareOfFloatsByEqualityOperator
@@ -111,7 +115,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawLines(XPen pen, XPoint[] points)
         {
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
             if (pen == null)
                 throw new ArgumentNullException(nameof(pen));
@@ -124,7 +128,7 @@ namespace PdfSharp.Drawing.Pdf
 
             Realize(pen);
 
-            const string format = Config.SignificantFigures4;
+            const string format = Config.SignificantDecimalPlaces4;
             AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
             for (int idx = 1; idx < count; idx++)
                 AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", points[idx].X, points[idx].Y);
@@ -143,7 +147,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawBeziers(XPen pen, XPoint[] points)
         {
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
             if (pen == null)
                 throw new ArgumentNullException(nameof(pen));
@@ -159,7 +163,7 @@ namespace PdfSharp.Drawing.Pdf
 
             Realize(pen);
 
-            const string format = Config.SignificantFigures4;
+            const string format = Config.SignificantDecimalPlaces4;
             AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
             for (int idx = 1; idx < count; idx += 3)
                 AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
@@ -175,7 +179,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawCurve(XPen pen, XPoint[] points, double tension)
         {
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
             if (pen == null)
                 throw new ArgumentNullException(nameof(pen));
@@ -193,7 +197,7 @@ namespace PdfSharp.Drawing.Pdf
 
             Realize(pen);
 
-            const string format = Config.SignificantFigures4;
+            const string format = Config.SignificantDecimalPlaces4;
             AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
             if (count == 2)
             {
@@ -215,7 +219,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawArc(XPen pen, double x, double y, double width, double height, double startAngle, double sweepAngle)
         {
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
             if (pen == null)
                 throw new ArgumentNullException(nameof(pen));
@@ -231,14 +235,14 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawRectangle(XPen? pen, XBrush? brush, double x, double y, double width, double height)
         {
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
             if (pen == null && brush == null)
             {    // ReSharper disable once NotResolvedInText
                 throw new ArgumentNullException("pen and brush");
             }
 
-            const string format = Config.SignificantFigures3;
+            const string format = Config.SignificantDecimalPlaces4;
 
             Realize(pen, brush);
             //AppendFormat123("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} re\n", x, y, width, -height);
@@ -269,7 +273,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawRoundedRectangle(XPen? pen, XBrush? brush, double x, double y, double width, double height, double ellipseWidth, double ellipseHeight)
         {
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
             XGraphicsPath path = new XGraphicsPath();
             path.AddRoundedRectangle(x, y, width, height, ellipseWidth, ellipseHeight);
@@ -281,7 +285,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawEllipse(XPen? pen, XBrush? brush, double x, double y, double width, double height)
         {
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
             Realize(pen, brush);
 
@@ -297,7 +301,7 @@ namespace PdfSharp.Drawing.Pdf
             double y0 = rect.Y + δy;
 
             // Approximate an ellipse by drawing four cubic splines.
-            const string format = Config.SignificantFigures4;
+            const string format = Config.SignificantDecimalPlaces4;
             AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", x0 + δx, y0);
             AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
               x0 + δx, y0 + fy, x0 + fx, y0 + δy, x0, y0 + δy);
@@ -315,7 +319,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawPolygon(XPen? pen, XBrush? brush, XPoint[] points, XFillMode fillmode)
         {
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
             Realize(pen, brush);
 
@@ -323,7 +327,7 @@ namespace PdfSharp.Drawing.Pdf
             if (points.Length < 2)
                 throw new ArgumentException(PSSR.PointArrayAtLeast(2), nameof(points));
 
-            const string format = Config.SignificantFigures4;
+            const string format = Config.SignificantDecimalPlaces4;
             AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
             for (int idx = 1; idx < count; idx++)
                 AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", points[idx].X, points[idx].Y);
@@ -337,11 +341,11 @@ namespace PdfSharp.Drawing.Pdf
           double startAngle, double sweepAngle)
         {
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
             Realize(pen, brush);
 
-            const string format = Config.SignificantFigures4;
+            const string format = Config.SignificantDecimalPlaces4;
             AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", x + width / 2, y + height / 2);
             AppendPartialArc(x, y, width, height, startAngle, sweepAngle, PathStart.LineTo1st, new XMatrix());
             AppendStrokeFill(pen, brush, XFillMode.Alternate, true);
@@ -352,7 +356,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawClosedCurve(XPen? pen, XBrush? brush, XPoint[] points, double tension, XFillMode fillmode)
         {
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
             int count = points.Length;
             if (count == 0)
@@ -365,7 +369,7 @@ namespace PdfSharp.Drawing.Pdf
 
             Realize(pen, brush);
 
-            const string format = Config.SignificantFigures4;
+            const string format = Config.SignificantDecimalPlaces4;
             AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
             if (count == 2)
             {
@@ -388,7 +392,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawPath(XPen? pen, XBrush? brush, XGraphicsPath path)
         {
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
             if (pen == null && brush == null)
                 throw new ArgumentNullException(nameof(pen));
@@ -428,7 +432,9 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawString(string s, XFont font, XBrush brush, XRect rect, XStringFormat format)
         {
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.DrawString });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.DrawString });  // @PDF/UA
+
+            font.CheckVersion();
 
             double x = rect.X;
             double y = rect.Y;
@@ -436,14 +442,71 @@ namespace PdfSharp.Drawing.Pdf
             double lineSpace = font.GetHeight();
             double cyAscent = lineSpace * font.CellAscent / font.CellSpace;
             double cyDescent = lineSpace * font.CellDescent / font.CellSpace;
-            double width = _gfx.MeasureString(s, font).Width;
 
             bool italicSimulation = (font.GlyphTypeface.StyleSimulations & XStyleSimulations.ItalicSimulation) != 0;
             bool boldSimulation = (font.GlyphTypeface.StyleSimulations & XStyleSimulations.BoldSimulation) != 0;
             bool strikeout = (font.Style & XFontStyleEx.Strikeout) != 0;
             bool underline = (font.Style & XFontStyleEx.Underline) != 0;
 
-            Realize(font, brush, boldSimulation ? 2 : 0);
+            //var otDescriptor = font.OpenTypeDescriptor;
+            //var ids = otDescriptor.GlyphIndicesFromCodepoints(codePoints);
+            //var codeRun = new CharacterCodeRun(ids);
+            var codePoints = font.IsSymbolFont
+                ? UnicodeHelper.SymbolCodePointsFromString(s, font.OpenTypeDescriptor)
+                : UnicodeHelper.Utf32FromString(s /*, font.AnsiEncoding*/);
+            var glyphTypeface = font.GlyphTypeface;
+            var otDescriptor = font.OpenTypeDescriptor;
+            var codePointsWithGlyphIndices = otDescriptor.GlyphIndicesFromCodePoints(codePoints);
+
+            // Invoke RenderEvent.
+            var args = new RenderTextEventArgs(Owner)
+            {
+                Font = font,
+                CodePointGlyphIndexPairs = codePointsWithGlyphIndices
+            };
+
+            Owner.RenderEvents.OnRenderTextEvent(this, args);
+            codePointsWithGlyphIndices = args.CodePointGlyphIndexPairs;
+            if (args.ReevaluateGlyphIndices)
+            {
+                codePoints = args.CodePointGlyphIndexPairs.Select(x => x.CodePoint).ToArray();
+                codePointsWithGlyphIndices = otDescriptor.GlyphIndicesFromCodePoints(codePoints);
+            }
+
+            // Decide text encoding.
+            FontType fontType;
+            bool isAnsi;
+            if (font.IsSymbolFont)
+            {
+                // For the sake of simplicity we use glyph encoding for symbol fonts.
+                fontType = FontType.Type0Unicode;
+                isAnsi = false;
+            }
+            else
+            {
+                if (font.AutoEncoding)
+                {
+                    // Can we use WinAnsi encoding?
+                    isAnsi = AnsiEncoding.IsAnsi(codePoints);
+                    fontType = isAnsi ? FontType.TrueTypeWinAnsi : FontType.Type0Unicode;
+                }
+                else
+                {
+                    fontType = font.FontTypeFromUnicodeFlag;
+                    isAnsi = fontType == FontType.TrueTypeWinAnsi;
+                }
+            }
+
+            //Realize(font, brush, boldSimulation ? 2 : 0);
+            //Realize(glyphTypeface, font.Size, brush, boldSimulation ? 2 : 0, font.FontTypeFromUnicodeFlag);
+            Realize(glyphTypeface, font.Size, brush, boldSimulation ? 2 : 0, fontType);
+            var realizedFont = _gfxState.RealizedFont;
+            Debug.Assert(realizedFont != null);
+            realizedFont.AddChars(codePointsWithGlyphIndices);
+
+            //double width = _gfx.MeasureString(s, font).Width;
+            double width = FontHelper.MeasureString(codePointsWithGlyphIndices, font).Width;
+            //Debug.Assert(widthOld == width2);
 
             switch (format.Alignment)
             {
@@ -504,56 +567,38 @@ namespace PdfSharp.Drawing.Pdf
                 }
             }
 
-            var realizedFont = _gfxState.RealizedFont;
-            Debug.Assert(realizedFont != null);
-            realizedFont.AddChars(s);
-
-            const string format2 = Config.SignificantFigures4;
-            OpenTypeDescriptor descriptor = realizedFont.FontDescriptor._descriptor;
-
-            string? text = null;
-            if (font.Unicode)
+            string? text;
+            if (isAnsi)
             {
-                var sb = new StringBuilder();
-                bool isSymbolFont = descriptor.FontFace.cmap.symbol;
-                for (int idx = 0; idx < s.Length; idx++)
+                // Use ANSI character encoding.
+                var length = codePoints.Length;
+                byte[] bytes = new byte[length];
+                for (int idx = 0; idx < length; idx++)
                 {
-                    if (char.IsLowSurrogate(s, idx))
-                        continue; // Ignore second char of Surrogate Pair.
-
-                    char ch = s[idx];
-                    if (isSymbolFont)
-                    {
-                        // Remap ch for symbol fonts.
-                        ch = (char)(ch | (descriptor.FontFace.os2.usFirstCharIndex & 0xFF00));  // @@@ refactor
-                    }
-
-                    if (char.IsHighSurrogate(ch))
-                    {
-                        var glyphIdUnsigned = descriptor.CharCodeToGlyphIndex(ch, s[idx + 1]);
-                        var glyphID = BitConverter.ToInt32(BitConverter.GetBytes(glyphIdUnsigned), 0);
-                        sb.Append(char.ConvertFromUtf32(glyphID));
-                    }
-                    else
-                    {
-                        var glyphID = descriptor.CharCodeToGlyphIndex(ch);
-                        sb.Append((char)glyphID);
-                    }
+                    ref var item = ref codePoints[idx];
+                    //Debug.Assert(item.Character == item.Codepoint);
+                    var ch = AnsiEncoding.UnicodeToAnsi((char)item);
+                    bytes[idx] = (byte)ch;
                 }
-                s = sb.ToString();
-
-                byte[] bytes = PdfEncoders.RawUnicodeEncoding.GetBytes(s);
-                bytes = PdfEncoders.FormatStringLiteral(bytes, true, false, true, null);
-                text = PdfEncoders.RawEncoding.GetString(bytes, 0, bytes.Length);
+                //bytes = PdfEncoders.WinAnsiEncoding.GetBytes(s);
+                text = PdfEncoders.ToStringLiteral(bytes, false, null);
             }
             else
             {
-                byte[] bytes = PdfEncoders.WinAnsiEncoding.GetBytes(s);
-                text = PdfEncoders.ToStringLiteral(bytes, false, null);
+                // Use Unicode glyph encoding.
+                int length = codePointsWithGlyphIndices.Length;
+                var bytes = new byte[2 * length];
+                for (int idx = 0; idx < length; idx++)
+                {
+                    ref var item = ref codePointsWithGlyphIndices[idx];
+                    bytes[idx * 2] = (byte)((item.GlyphIndex & 0xFF00) >>> 8);
+                    bytes[idx * 2 + 1] = (byte)(item.GlyphIndex & 0xFF);
+                }
+                text = PdfEncoders.ToHexStringLiteral(bytes, true, false, null);
             }
 
             // Map absolute position to PDF world space.
-            XPoint pos = new XPoint(x, y);
+            var pos = new XPoint(x, y);
             pos = WorldToView(pos);
 
             double verticalOffset = 0;
@@ -564,20 +609,34 @@ namespace PdfSharp.Drawing.Pdf
                 //verticalOffset = font.Size * Const.BoldEmphasis / 2;
             }
 
+            // Select the number of decimal places used for the relative text positioning.
+            const string formatTj = Config.SignificantDecimalPlaces4;
 #if ITALIC_SIMULATION
             if (italicSimulation)
             {
                 if (_gfxState.ItalicSimulationOn)
-                {
+                {   // Case: Simulate Italic and simulation is already on.
+
+                    // Build format string only once.
+                    s_format1 ??= "{0:" + formatTj + "} {1:" + formatTj + "} Td\n{2} Tj\n";
+
                     AdjustTdOffset(ref pos, verticalOffset, true);
-                    AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} Td\n{2} Tj\n", pos.X, pos.Y, text);
+                    // earlier:
+                    //AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} Td\n{2} Tj\n", pos.X, pos.Y, text);
+                    AppendFormatArgs(s_format1, pos.X, pos.Y, text);
                 }
                 else
-                {
+                {   // Case: Simulate Italic and turn simulation on.
+
+                    s_format2 ??= "{0:" + formatTj + "} {1:" + formatTj + "} {2:" + formatTj + "} {3:" + formatTj + "} {4:"
+                                  + formatTj + "} {5:" + formatTj + "} Tm\n{6} Tj\n";
+
                     // Italic simulation is done by skewing characters 20° to the right.
                     var m = new XMatrix(1, 0, Const.ItalicSkewAngleSinus, 1, pos.X, pos.Y);
-                    AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} {2:" + format2 + "} {3:" + format2 + "} {4:" + format2 + "} {5:" + format2 + "} Tm\n{6} Tj\n",
-                        m.M11, m.M12, m.M21, m.M22, m.OffsetX, m.OffsetY, text);
+                    // earlier:
+                    //AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} {2:" + format2 + "} {3:" + format2 + "} {4:" + format2 + "} {5:" + format2 + "} Tm\n{6} Tj\n",
+                    //    m.M11, m.M12, m.M21, m.M22, m.OffsetX, m.OffsetY, text);
+                    AppendFormatArgs(s_format2, m.M11, m.M12, m.M21, m.M22, m.OffsetX, m.OffsetY, text);
                     _gfxState.ItalicSimulationOn = true;
                     AdjustTdOffset(ref pos, verticalOffset, false);
                 }
@@ -585,17 +644,30 @@ namespace PdfSharp.Drawing.Pdf
             else
             {
                 if (_gfxState.ItalicSimulationOn)
-                {
+                {   // Case: Do not simulate Italic but simulation is currently on.
+
+                    // Same as format2, but keep code clear.
+                    s_format3 ??= "{0:" + formatTj + "} {1:" + formatTj + "} {2:" + formatTj + "} {3:" + formatTj + "} {4:"
+                                  + formatTj + "} {5:" + formatTj + "} Tm\n{6} Tj\n";
+
                     var m = new XMatrix(1, 0, 0, 1, pos.X, pos.Y);
-                    AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} {2:" + format2 + "} {3:" + format2 + "} {4:" + format2 + "} {5:" + format2 + "} Tm\n{6} Tj\n",
-                        m.M11, m.M12, m.M21, m.M22, m.OffsetX, m.OffsetY, text);
+                    // earlier:
+                    //AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} {2:" + format2 + "} {3:" + format2 + "} {4:" + format2 + "} {5:" + format2 + "} Tm\n{6} Tj\n",
+                    //    m.M11, m.M12, m.M21, m.M22, m.OffsetX, m.OffsetY, text);
+                    AppendFormatArgs(s_format3, m.M11, m.M12, m.M21, m.M22, m.OffsetX, m.OffsetY, text);
                     _gfxState.ItalicSimulationOn = false;
                     AdjustTdOffset(ref pos, verticalOffset, false);
                 }
                 else
-                {
+                {   // Case: Do not simulate Italic and simulation is already off.
+
+                    // Same as format1, but keep code clear.
+                    s_format4 ??= "{0:" + formatTj + "} {1:" + formatTj + "} Td\n{2} Tj\n";
+
                     AdjustTdOffset(ref pos, verticalOffset, false);
-                    AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} Td {2} Tj\n", pos.X, pos.Y, text);
+                    // earlier:
+                    //AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} Td {2} Tj\n", pos.X, pos.Y, text);
+                    AppendFormatArgs(s_format4, pos.X, pos.Y, text);
                 }
             }
 #else
@@ -604,8 +676,8 @@ namespace PdfSharp.Drawing.Pdf
 #endif
             if (underline)
             {
-                double underlinePosition = lineSpace * realizedFont.FontDescriptor._descriptor.UnderlinePosition / font.CellSpace;
-                double underlineThickness = lineSpace * realizedFont.FontDescriptor._descriptor.UnderlineThickness / font.CellSpace;
+                double underlinePosition = lineSpace * realizedFont.FontDescriptor.Descriptor.UnderlinePosition / font.CellSpace;
+                double underlineThickness = lineSpace * realizedFont.FontDescriptor.Descriptor.UnderlineThickness / font.CellSpace;
                 //DrawRectangle(null, brush, x, y - underlinePosition, width, underlineThickness);
                 double underlineRectY = Gfx.PageDirection == XPageDirection.Downwards
                     ? y - underlinePosition
@@ -615,8 +687,8 @@ namespace PdfSharp.Drawing.Pdf
 
             if (strikeout)
             {
-                double strikeoutPosition = lineSpace * realizedFont.FontDescriptor._descriptor.StrikeoutPosition / font.CellSpace;
-                double strikeoutSize = lineSpace * realizedFont.FontDescriptor._descriptor.StrikeoutSize / font.CellSpace;
+                double strikeoutPosition = lineSpace * realizedFont.FontDescriptor.Descriptor.StrikeoutPosition / font.CellSpace;
+                double strikeoutSize = lineSpace * realizedFont.FontDescriptor.Descriptor.StrikeoutSize / font.CellSpace;
                 //DrawRectangle(null, brush, x, y - strikeoutPosition - strikeoutSize, width, strikeoutSize);
                 double strikeoutRectY = Gfx.PageDirection == XPageDirection.Downwards
                     ? y - strikeoutPosition
@@ -624,6 +696,12 @@ namespace PdfSharp.Drawing.Pdf
                 DrawRectangle(null, brush, x, strikeoutRectY, width, strikeoutSize);
             }
         }
+        // ReSharper disable InconsistentNaming
+        static string? s_format1;
+        static string? s_format2;
+        static string? s_format3;
+        static string? s_format4;
+        // ReSharper restore InconsistentNaming
 
         public void DrawString(string s, XGlyphTypeface typeface, XBrush brush, XRect rect, XStringFormat format)
         {
@@ -668,12 +746,12 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawImage(XImage image, double x, double y, double width, double height)
         {
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
-            const string format = Config.SignificantFigures4;
+            const string format = Config.SignificantDecimalPlaces4;
 
             string name = Realize(image);
-            if (!(image is XForm))
+            if (image is not XForm form)
             {
                 if (_gfx.PageDirection == XPageDirection.Downwards)
                 {
@@ -690,18 +768,18 @@ namespace PdfSharp.Drawing.Pdf
             {
                 BeginPage();
 
-                XForm form = (XForm)image;
                 form.Finish();
 
                 PdfFormXObject pdfForm = Owner.FormTable.GetForm(form);
 
-                double cx = width / image.PointWidth;
-                double cy = height / image.PointHeight;
+                double cx = width / form.PointWidth;
+                double cy = height / form.PointHeight;
 
                 if (cx != 0 && cy != 0)
                 {
-                    var xForm = image as XPdfForm;
-                    // Reset colors in this graphics state. Usually PDF images should set them, but in rare cases they don't which may result in changed colors inside the image.
+                    var xForm = form as XPdfForm;
+                    // Reset colors in this graphics state. Usually PDF images should set them.
+                    // But in rare cases they aren’t which may result in changed colors inside the image.
                     var resetColor = xForm != null ? "\n0 g\n0 G\n" : " ";
 
                     if (_gfx.PageDirection == XPageDirection.Downwards)
@@ -732,9 +810,9 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawImage(XImage image, XRect destRect, XRect srcRect, XGraphicsUnit srcUnit)
         {
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
 
-            const string format = Config.SignificantFigures4;
+            const string format = Config.SignificantDecimalPlaces4;
 
             double x = destRect.X;
             double y = destRect.Y;
@@ -742,7 +820,7 @@ namespace PdfSharp.Drawing.Pdf
             double height = destRect.Height;
 
             string name = Realize(image);
-            if (!(image is XForm))
+            if (image is not XForm form)
             {
                 if (_gfx.PageDirection == XPageDirection.Downwards)
                 {
@@ -759,18 +837,17 @@ namespace PdfSharp.Drawing.Pdf
             {
                 BeginPage();
 
-                XForm form = (XForm)image;
                 form.Finish();
 
                 PdfFormXObject pdfForm = Owner.FormTable.GetForm(form);
 
-                double cx = width / image.PointWidth;
-                double cy = height / image.PointHeight;
+                double cx = width / form.PointWidth;
+                double cy = height / form.PointHeight;
 
                 if (cx != 0 && cy != 0)
                 {
-                    var xForm = image as XPdfForm;
-                    // Reset colors in this graphics state. Usually PDF images should set them, but in rare cases they don't which may result in changed colors inside the image.
+                    var xForm = form as XPdfForm;
+                    // Reset colors in this graphics state. Usually PDF images should set them, but in rare cases they don’t and this may result in changed colors inside the image.
                     var resetColor = xForm != null ? "\n0 g\n0 G\n" : " ";
 
                     if (_gfx.PageDirection == XPageDirection.Downwards)
@@ -796,7 +873,7 @@ namespace PdfSharp.Drawing.Pdf
             }
         }
 
-#endregion
+        #endregion
 
         // --------------------------------------------------------------------------------------------
 
@@ -843,7 +920,7 @@ namespace PdfSharp.Drawing.Pdf
 
         #region Transformation
 
-        //public void SetPageTransform(XPageDirection direction, XPoint origion, XGraphicsUnit unit)
+        //public void SetPageTransform(XPageDirection direction, XPoint origin, XGraphicsUnit unit)
         //{
         //  if (_gfxStateStack.Count > 0)
         //    throw new InvalidOperationException("PageTransformation can be modified only when the graphics stack is empty.");
@@ -1023,7 +1100,7 @@ namespace PdfSharp.Drawing.Pdf
                         AppendPartialArcQuadrant(x, y, width, height, ξ1, ξ2, PathStart.Ignore1st, matrix);
                     }
 
-                    // Don't stop immediately if arc is greater than 270 degrees
+                    // Don’t stop immediately if arc is greater than 270 degrees
                     if (currentQuadrant == endQuadrant && smallAngle)
                         break;
 
@@ -1122,7 +1199,7 @@ namespace PdfSharp.Drawing.Pdf
             sinβ = Math.Sin(β);
             double cosβ = Math.Cos(β);
 
-            const string format = Config.SignificantFigures3;
+            const string format = Config.SignificantDecimalPlaces4;
             XPoint pt1, pt2, pt3;
             if (!reflect)
             {
@@ -1178,7 +1255,7 @@ namespace PdfSharp.Drawing.Pdf
         void AppendPartialArc(SysPoint point1, SysPoint point2, double rotationAngle,
             SysSize size, bool isLargeArc, SweepDirection sweepDirection, PathStart pathStart)
         {
-            const string format = Config.SignificantFigures4;
+            const string format = Config.SignificantDecimalPlaces4;
 
             Debug.Assert(pathStart == PathStart.Ignore1st);
 
@@ -1204,7 +1281,7 @@ namespace PdfSharp.Drawing.Pdf
         /// </summary>
         void AppendCurveSegment(XPoint pt0, XPoint pt1, XPoint pt2, XPoint pt3, double tension3)
         {
-            const string format = Config.SignificantFigures4;
+            const string format = Config.SignificantDecimalPlaces4;
             AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
                 pt1.X + tension3 * (pt2.X - pt0.X), pt1.Y + tension3 * (pt2.Y - pt0.Y),
                 pt2.X - tension3 * (pt3.X - pt1.X), pt2.Y - tension3 * (pt3.Y - pt1.Y),
@@ -1382,7 +1459,7 @@ namespace PdfSharp.Drawing.Pdf
 #if CORE || GDI
         void AppendPath(XPoint[] points, Byte[] types)
         {
-            const string format = Config.SignificantFigures4;
+            const string format = Config.SignificantDecimalPlaces4;
             int count = points.Length;
             if (count == 0)
                 return;
@@ -1395,10 +1472,10 @@ namespace PdfSharp.Drawing.Pdf
                 const byte PathPointTypeLine = 1; // line
                 const byte PathPointTypeBezier = 3; // default Bezier (= cubic Bezier)
                 const byte PathPointTypePathTypeMask = 0x07; // type mask (lowest 3 bits).
-                //const byte PathPointTypeDashMode = 0x10; // currently in dash mode.
-                //const byte PathPointTypePathMarker = 0x20; // a marker for the path.
+                                                             //const byte PathPointTypeDashMode = 0x10; // currently in dash mode.
+                                                             //const byte PathPointTypePathMarker = 0x20; // a marker for the path.
                 const byte PathPointTypeCloseSubpath = 0x80; // closed flag
-                // ReSharper restore InconsistentNaming
+                                                             // ReSharper restore InconsistentNaming
 
                 byte type = types[idx];
                 switch (type & PathPointTypePathTypeMask)
@@ -1436,21 +1513,22 @@ namespace PdfSharp.Drawing.Pdf
         /// </summary>
         internal void AppendPath(PathGeometry geometry)
         {
-            const string format = Config.SignificantFigures4;
+            const string format = Config.SignificantDecimalPlaces4;
 
             foreach (PathFigure figure in geometry.Figures)
             {
 #if DEBUG
-                //#warning For DdlGBE_Chart_Layout (WPF) execution sticks at this Assertion.
+                //#war/ning For DdlGBE_Chart_Layout (WPF) execution sticks at this Assertion.
                 // The empty Figure is added via XGraphicsPath.CurrentPathFigure Getter.
-                // Some methods like XGraphicsPath.AddRectangle() or AddLine() use this empty Figure to add Segments, others like AddEllipse() don't.
+                // Some methods like XGraphicsPath.AddRectangle() or AddLine() use this empty Figure to add Segments, others like AddEllipse() don’t.
                 // Here, _pathGeometry.AddGeometry() of course ignores this first Figure and adds a second.
-                // Encapsulate relevant Add methods to delete a first empty Figure or move the Addition of an first empty Figure to a GetOrCreateCurrentPathFigure() or simply remove Assertion?
+                // Encapsulate relevant Add methods to delete a first empty Figure or move the Addition of a first empty Figure to a GetOrCreateCurrentPathFigure()
+                // or simply remove Assertion?
                 // Look for:
                 // MAOS4STLA: CurrentPathFigure.
 
                 if (figure.Segments.Count == 0)
-                    42.GetType();
+                    _ = typeof(int);
                 Debug.Assert(figure.Segments.Count > 0);
 #endif
                 // Skip the Move if the segment is empty. Workaround for empty segments.
@@ -1458,81 +1536,142 @@ namespace PdfSharp.Drawing.Pdf
                 if (figure.Segments.Count > 0)
                 {
                     // Move to start point.
-                    SysPoint currentPoint = figure.StartPoint;
+                    var currentPoint = figure.StartPoint;
                     AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", currentPoint.X, currentPoint.Y);
 
                     foreach (PathSegment segment in figure.Segments)
                     {
-                        Type type = segment.GetType();
-                        if (type == typeof(LineSegment))
+                        switch (segment)
                         {
-                            // Draw a single line.
-                            SysPoint point = ((LineSegment)segment).Point;
-                            currentPoint = point;
-                            AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", point.X, point.Y);
-                        }
-                        else if (type == typeof(PolyLineSegment))
-                        {
-                            // Draw connected lines.
-                            PointCollection points = ((PolyLineSegment)segment).Points;
-                            foreach (SysPoint point in points)
-                            {
-                                currentPoint = point;
-                                AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", point.X, point.Y);
-                            }
-                        }
-                        else if (type == typeof(BezierSegment))
-                        {
-                            // Draw Bézier curve.
-                            BezierSegment seg = (BezierSegment)segment;
-                            SysPoint point1 = seg.Point1;
-                            SysPoint point2 = seg.Point2;
-                            SysPoint point3 = seg.Point3;
-                            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
-                                point1.X, point1.Y, point2.X, point2.Y, point3.X, point3.Y);
-                            currentPoint = point3;
-                        }
-                        else if (type == typeof(PolyBezierSegment))
-                        {
-                            // Draw connected Bézier curves.
-                            PointCollection points = ((PolyBezierSegment)segment).Points;
-                            int count = points.Count;
-                            if (count > 0)
-                            {
-                                Debug.Assert(count % 3 == 0, "Number of Points in PolyBezierSegment are not a multiple of 3.");
-                                for (int idx = 0; idx < count - 2; idx += 3)
+                            case LineSegment lineSegment:
                                 {
-                                    SysPoint point1 = points[idx];
-                                    SysPoint point2 = points[idx + 1];
-                                    SysPoint point3 = points[idx + 2];
+                                    // Draw a single line.
+                                    var point = lineSegment.Point;
+                                    AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", point.X, point.Y);
+                                    currentPoint = point;
+                                }
+                                break;
+
+                            case PolyLineSegment polyLineSegment:
+                                {
+                                    // Draw connected lines.
+                                    var points = polyLineSegment.Points;
+                                    foreach (SysPoint point in points)
+                                    {
+                                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", point.X, point.Y);
+                                    }
+                                    currentPoint = points[^1];
+                                }
+                                break;
+
+                            case BezierSegment bezierSegment:
+                                {
+                                    // Draw Bézier curve.
+                                    var point1 = bezierSegment.Point1;
+                                    var point2 = bezierSegment.Point2;
+                                    var point3 = bezierSegment.Point3;
                                     AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
                                         point1.X, point1.Y, point2.X, point2.Y, point3.X, point3.Y);
+                                    currentPoint = point3;
                                 }
-                                currentPoint = points[count - 1];
-                            }
+                                break;
+
+                            case PolyBezierSegment polyBezierSegment:
+                                {
+                                    // Draw connected Bézier curves.
+                                    var points = polyBezierSegment.Points;
+                                    int count = points.Count;
+                                    if (count > 0)
+                                    {
+                                        Debug.Assert(count % 3 == 0, "Number of points in PolyBezierSegment are not a multiple of 3.");
+                                        for (int idx = 0; idx < count - 2; idx += 3)
+                                        {
+                                            var point1 = points[idx];
+                                            var point2 = points[idx + 1];
+                                            var point3 = points[idx + 2];
+                                            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                                                point1.X, point1.Y, point2.X, point2.Y, point3.X, point3.Y);
+                                        }
+                                        currentPoint = points[count - 1];
+                                    }
+                                }
+                                break;
+
+                            case ArcSegment arcSegment:
+                                {
+                                    // Draw partial arc.
+                                    AppendPartialArc(currentPoint, arcSegment.Point, arcSegment.RotationAngle, arcSegment.Size,
+                                        arcSegment.IsLargeArc, arcSegment.SweepDirection, PathStart.Ignore1st);
+                                    currentPoint = arcSegment.Point;
+                                }
+                                break;
+
+                            case QuadraticBezierSegment quadraticBezierSegment:
+                                {
+                                    /*
+                                        For PDF and GDI+ it must be converted to a cubic Bézier curve. I.e. the one control point
+                                        from the quadratic curve must be converted into the 2 control points of the cubic curve.
+
+                                        Here is how to do it from GPT 4:
+
+                                        To convert a quadratic Bézier curve to a cubic one, you need to adjust the control points of the
+                                        cubic curve so that it mimics the shape of the original quadratic curve. Here’s how to do it:
+
+                                        Assume that your quadratic Bézier curve is defined by the points P0, P1, and P2, where P0 and P2
+                                        are the endpoints and P1 is the control point.
+
+                                        The cubic Bézier curve is defined by four points: C0, C1, C2, and C3. C0 is identical to P0,
+                                        and C3 is identical to P2. That is, the endpoints of the curves remain the same.
+
+                                        The two new control points, C1 and C2, need to be calculated. You can find them using the following formulas:
+                                    
+                                        C1 = (2/3) * P1 + (1/3) * P0
+                                        C2 = (2/3) * P1 + (1/3) * P2
+
+                                        These calculations position the control points C1 and C2 so that the cubic curve retains the same shape as the original quadratic curve.
+                                    */
+
+                                    // Draw Bézier curve from quadratic Bézier curve.
+                                    var point1 = quadraticBezierSegment.Point1;
+                                    var point2 = quadraticBezierSegment.Point2;
+                                    var controlPoints = QuadraticToCubic(currentPoint.X, currentPoint.Y, point1.X, point1.Y, point2.X, point2.Y);
+                                    AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                                        controlPoints.C1X, controlPoints.C1Y, controlPoints.C2X, controlPoints.C2Y, point2.X, point2.Y);
+                                    currentPoint = point2;
+                                }
+                                break;
+
+                            case PolyQuadraticBezierSegment polyQuadraticBezierSegment:
+                                {
+                                    // Draw connected Bézier curves from quadratic Bézier curves.
+                                    var points = polyQuadraticBezierSegment.Points;
+
+                                    int count = points.Count;
+                                    if (count > 0)
+                                    {
+                                        Debug.Assert(count % 2 == 0, "Number of points in PolyQuadraticBezierSegment are not a multiple of 2.");
+                                        for (int idx = 0; idx < count - 1; idx += 2)
+                                        {
+                                            var point1 = points[idx];
+                                            var point2 = points[idx + 1];
+                                            var controlPoints = QuadraticToCubic(currentPoint.X, currentPoint.Y, point1.X, point1.Y, point2.X, point2.Y);
+
+                                            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                                                controlPoints.C1X, controlPoints.C1Y, controlPoints.C2X, controlPoints.C2Y, point2.X, point2.Y);
+                                            currentPoint = point2;
+                                        }
+                                    }
+                                }
+                                break;
                         }
-                        else if (type == typeof(ArcSegment))
+                        continue;
+
+                        (double C1X, double C1Y, double C2X, double C2Y) QuadraticToCubic(double p0X, double p0Y, double p1X, double p1Y, double p2X, double p2Y)
                         {
-                            // Draw arc.
-                            ArcSegment seg = (ArcSegment)segment;
-                            AppendPartialArc(currentPoint, seg.Point, seg.RotationAngle, seg.Size, seg.IsLargeArc, seg.SweepDirection, PathStart.Ignore1st);
-                            currentPoint = seg.Point;
-                        }
-                        else if (type == typeof(QuadraticBezierSegment))
-                        {
-                            QuadraticBezierSegment seg = (QuadraticBezierSegment)segment;
-                            currentPoint = seg.Point2;
-                            // IMPROVE: Undone because XGraphics has no such curve type.
-                            // Easy to implement, but not worthy enough.
-                            throw new NotImplementedException("AppendPath with QuadraticBezierSegment.");
-                        }
-                        else if (type == typeof(PolyQuadraticBezierSegment))
-                        {
-                            PolyQuadraticBezierSegment seg = (PolyQuadraticBezierSegment)segment;
-                            currentPoint = seg.Points[^1];
-                            // IMPROVE: Undone because XGraphics has no such curve type.
-                            // Easy to implement, but not worthy enough.
-                            throw new NotImplementedException("AppendPath with PolyQuadraticBezierSegment.");
+                            const double oneThird = 1 / 3d;
+                            const double twoThirds = 2 / 3d;
+                            return (twoThirds * p1X + oneThird * p0X, twoThirds * p1Y + oneThird * p0Y,
+                                twoThirds * p1X + oneThird * p2X, twoThirds * p1Y + oneThird * p2Y);
                         }
                     }
                     if (figure.IsClosed)
@@ -1718,7 +1857,7 @@ namespace PdfSharp.Drawing.Pdf
                     {
                         Debug.Assert(_gfxState.RealizedCtm.IsIdentity);
                         //_gfxState.RealizedCtm = DefaultViewMatrix;
-                        const string format = Config.SignificantFigures7;
+                        const string format = Config.SignificantDecimalPlaces7;
                         double[] cm = DefaultViewMatrix.GetElements();
                         AppendFormatArgs("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} cm ",
                                      cm[0], cm[1], cm[2], cm[3], cm[4], cm[5]);
@@ -1759,7 +1898,7 @@ namespace PdfSharp.Drawing.Pdf
                     // Save initial graphic state.
                     SaveState();
                     // Set page transformation.
-                    const string format = Config.SignificantFigures7;
+                    const string format = Config.SignificantDecimalPlaces7;
                     double[] cm = DefaultViewMatrix.GetElements();
                     AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} cm ",
                         cm[0], cm[1], cm[2], cm[3], cm[4], cm[5]);
@@ -1768,7 +1907,7 @@ namespace PdfSharp.Drawing.Pdf
         }
 
         /// <summary>
-        /// Ends the content stream, i.e. ends the text mode and balances the graphic state stack.
+        /// Ends the content stream, i.e. ends the text mode, balances the graphic state stack and removes the trailing line feed.
         /// </summary>
         void EndPage()
         {
@@ -1780,6 +1919,15 @@ namespace PdfSharp.Drawing.Pdf
 
             while (_gfxStateStack.Count != 0)
                 RestoreState();
+
+            // Remove the trailing line feed. The stream content shall end with the last line without entering a new one,
+            // while adding the end-of-line marker before the 'endstream' keyword is the job of PdfWriter.
+            if (_content.Length > 0)
+            {
+                var lastIdx = _content.Length - 1;
+                if (_content[^1] == Chars.LF)
+                    _content.Remove(lastIdx, 1);
+            }
         }
 
         /// <summary>
@@ -1843,24 +1991,22 @@ namespace PdfSharp.Drawing.Pdf
         /// <summary>
         /// Makes the specified pen the current graphics object.
         /// </summary>
-        void Realize(XPen pen)
-            => Realize(pen, null);
+        void Realize(XPen pen) => Realize(pen, null);
 
         /// <summary>
         /// Makes the specified brush the current graphics object.
         /// </summary>
-        void Realize(XBrush brush)
-            => Realize(null, brush);
+        void Realize(XBrush brush) => Realize(null, brush);
 
         /// <summary>
         /// Makes the specified font and brush the current graphics objects.
         /// </summary>
-        void Realize(XFont font, XBrush brush, int renderingMode)
+        void Realize(XGlyphTypeface glyphTypeface, double emSize, XBrush brush, int renderingMode, FontType fontType)
         {
             BeginPage();
             RealizeTransform();
             BeginTextMode();
-            _gfxState.RealizeFont(font, brush, renderingMode);
+            _gfxState.RealizeFont(glyphTypeface, emSize, brush, renderingMode, fontType);
         }
 
         /// <summary>
@@ -2025,7 +2171,7 @@ namespace PdfSharp.Drawing.Pdf
             get
             {
                 if (_page != null!)
-                    return new XSize(_page.Width, _page.Height);
+                    return new XSize(_page.Width.Point, _page.Height.Point);
                 return _form.Size;
             }
         }
@@ -2033,11 +2179,11 @@ namespace PdfSharp.Drawing.Pdf
         /// <summary>
         /// Gets the resource name of the specified font within this page or form.
         /// </summary>
-        internal string GetFontName(XFont font, out PdfFont pdfFont)
+        internal string GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont)
         {
             if (_page != null!)
-                return _page.GetFontName(font, out pdfFont);
-            return _form.GetFontName(font, out pdfFont);
+                return _page.GetFontName(glyphTypeface, fontType, out pdfFont);
+            return _form.GetFontName(glyphTypeface, fontType, out pdfFont);
         }
 
         /// <summary>
@@ -2055,7 +2201,7 @@ namespace PdfSharp.Drawing.Pdf
         /// </summary>
         internal string GetFormName(XForm form)
         {
-            if (_page != null)
+            if (_page != null!)
                 return _page.GetFormName(form);
             return _form.GetFormName(form);
         }
@@ -2064,9 +2210,9 @@ namespace PdfSharp.Drawing.Pdf
         internal PdfPage _page = default!;
         internal XForm _form = default!;
         internal PdfColorMode _colorMode;
-        XGraphicsPdfPageOptions _options;
+        readonly XGraphicsPdfPageOptions _options;
         XGraphics _gfx;
-        internal readonly StringBuilder _content = default!;
+        internal readonly StringBuilder _content;
         // ReSharper restore InconsistentNaming
 
         /// <summary>

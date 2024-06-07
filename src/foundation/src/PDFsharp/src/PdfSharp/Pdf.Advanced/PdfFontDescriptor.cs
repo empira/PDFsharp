@@ -1,7 +1,9 @@
-// PDFsharp - A .NET library for processing PDF
+Ôªø// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System;
+using System.Text;
+using PdfSharp.Fonts;
 using PdfSharp.Fonts.OpenType;
 
 namespace PdfSharp.Pdf.Advanced
@@ -73,30 +75,32 @@ namespace PdfSharp.Pdf.Advanced
     /// </summary>
     public sealed class PdfFontDescriptor : PdfDictionary
     {
-        internal PdfFontDescriptor(PdfDocument document, OpenTypeDescriptor descriptor)
+        internal PdfFontDescriptor(PdfDocument document, OpenTypeDescriptor otDescriptor)
             : base(document)
         {
-            _descriptor = descriptor;
+            Descriptor = otDescriptor;
+            _cmapInfo = new CMapInfo(otDescriptor);
+
             Elements.SetName(Keys.Type, "/FontDescriptor");
 
-            Elements.SetInteger(Keys.Ascent, _descriptor.DesignUnitsToPdf(_descriptor.Ascender));
-            Elements.SetInteger(Keys.CapHeight, _descriptor.DesignUnitsToPdf(_descriptor.CapHeight));
-            Elements.SetInteger(Keys.Descent, _descriptor.DesignUnitsToPdf(_descriptor.Descender));
-            Elements.SetInteger(Keys.Flags, (int)FlagsFromDescriptor(_descriptor));
+            Elements.SetInteger(Keys.Ascent, Descriptor.DesignUnitsToPdf(Descriptor.Ascender));
+            Elements.SetInteger(Keys.CapHeight, Descriptor.DesignUnitsToPdf(Descriptor.CapHeight));
+            Elements.SetInteger(Keys.Descent, Descriptor.DesignUnitsToPdf(Descriptor.Descender));
+            Elements.SetInteger(Keys.Flags, (int)FlagsFromDescriptor(Descriptor));
             Elements.SetRectangle(Keys.FontBBox, new PdfRectangle(
-              _descriptor.DesignUnitsToPdf(_descriptor.XMin),
-              _descriptor.DesignUnitsToPdf(_descriptor.YMin),
-              _descriptor.DesignUnitsToPdf(_descriptor.XMax),
-              _descriptor.DesignUnitsToPdf(_descriptor.YMax)));
+              Descriptor.DesignUnitsToPdf(Descriptor.XMin),
+              Descriptor.DesignUnitsToPdf(Descriptor.YMin),
+              Descriptor.DesignUnitsToPdf(Descriptor.XMax),
+              Descriptor.DesignUnitsToPdf(Descriptor.YMax)));
             // not here, done in PdfFont later... 
             //Elements.SetName(Keys.FontName, "abc"); //descriptor.FontName);
-            Elements.SetReal(Keys.ItalicAngle, _descriptor.ItalicAngle);
-            Elements.SetInteger(Keys.StemV, _descriptor.StemV);
-            Elements.SetInteger(Keys.XHeight, _descriptor.DesignUnitsToPdf(_descriptor.XHeight));
+            Elements.SetReal(Keys.ItalicAngle, Descriptor.ItalicAngle);
+            Elements.SetInteger(Keys.StemV, Descriptor.StemV);
+            Elements.SetInteger(Keys.XHeight, Descriptor.DesignUnitsToPdf(Descriptor.XHeight));
         }
 
         //HACK OpenTypeDescriptor descriptor
-        internal OpenTypeDescriptor _descriptor;
+        internal OpenTypeDescriptor Descriptor { get; }
 
         /// <summary>
         /// Gets or sets the name of the font.
@@ -110,18 +114,76 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets a value indicating whether this instance is symbol font.
         /// </summary>
-        public bool IsSymbolFont => _isSymbolFont;
-
-        bool _isSymbolFont;
+        public bool IsSymbolFont { get; private set; }
 
         // HACK FlagsFromDescriptor(OpenTypeDescriptor descriptor)
         PdfFontDescriptorFlags FlagsFromDescriptor(OpenTypeDescriptor descriptor)
         {
             PdfFontDescriptorFlags flags = 0;
-            _isSymbolFont = descriptor.FontFace.cmap.symbol;
-            flags |= descriptor.FontFace.cmap.symbol ? PdfFontDescriptorFlags.Symbolic : PdfFontDescriptorFlags.Nonsymbolic;
+            IsSymbolFont = descriptor.IsSymbolFont;
+            flags |= descriptor.IsSymbolFont ? PdfFontDescriptorFlags.Symbolic : PdfFontDescriptorFlags.Nonsymbolic;
             return flags;
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the cmap table must be added to the
+        /// font subset.
+        /// </summary>
+        internal bool AddCmapTable { get; set; }
+        
+        /// <summary>
+        /// Gets the CMapInfo for PDF font descriptor.
+        /// It contains all characters, ANSI and Unicode.
+        /// </summary>
+        internal CMapInfo CMapInfo
+        {
+            get => _cmapInfo ?? NRT.ThrowOnNull<CMapInfo>();
+            //set => _cmapInfo2 = value;
+        }
+        CMapInfo _cmapInfo;
+
+        internal override void PrepareForSave()
+        {
+            // Shared by ANSI and Unicode encoded PDF fonts. So we maybe get called twice.
+            if (_prepared)
+                return;
+            _prepared = true;
+            
+            var pdfFontFile = new PdfFontProgram(Owner);
+            pdfFontFile.CreateFontFileAndAddToDescriptor(this, _cmapInfo, !AddCmapTable);
+        }
+        bool _prepared;
+
+        /// <summary>
+        /// Adds a tag of exactly six uppercase letters to the font name 
+        /// according to PDF Reference Section 5.5.3 'Font Subsets'.
+        /// </summary>
+        internal string CreateEmbeddedFontSubsetName(string name)
+        {
+        TryAgain:
+            var s = new StringBuilder(64);
+            byte[] bytes = Guid.NewGuid().ToByteArray();
+            for (int idx = 0; idx < 6; idx++)
+                s.Append((char)('A' + bytes[idx] % 26));
+            s.Append('+');
+            if (name.StartsWith("/", StringComparison.Ordinal))
+                s.Append(name.Substring(1));
+            else
+                s.Append(name);
+            var newName = s.ToString();
+            // The probability is low for a single document
+            // with a handful of fonts, but it is better to check.
+#if NET6_0_OR_GREATER_
+            if (!_fontSubsetNames.TryAdd(newName, null))
+                goto TryAgain;
+#else
+            if (_fontSubsetNames.ContainsKey(newName))
+                goto TryAgain;
+            _fontSubsetNames.Add(newName, null);
+#endif
+            return newName;
+        }
+        readonly Dictionary<string, object?> _fontSubsetNames = [];
 
         /// <summary>
         /// Predefined keys of this dictionary.
@@ -180,7 +242,7 @@ namespace PdfSharp.Pdf.Advanced
             public const string Flags = "/Flags";
 
             /// <summary>
-            /// (Required, except for Type 3 fonts) A rectangle (see Section 3.8.4, ìRectanglesî),
+            /// (Required, except for Type 3 fonts) A rectangle (see Section 3.8.4, ‚ÄúRectangles‚Äù),
             /// expressed in the glyph coordinate system, specifying the font bounding box. This 
             /// is the smallest rectangle enclosing the shape that would result if all of the 
             /// glyphs of the font were placed with their origins coincident and then filled.
@@ -190,8 +252,8 @@ namespace PdfSharp.Pdf.Advanced
 
             /// <summary>
             /// (Required) The angle, expressed in degrees counterclockwise from the vertical, of
-            /// the dominant vertical strokes of the font. (For example, the 9-oíclock position is 90 
-            /// degrees, and the 3-oíclock position is ñ90 degrees.) The value is negative for fonts 
+            /// the dominant vertical strokes of the font. (For example, the 9-o‚Äôclock position is 90 
+            /// degrees, and the 3-o‚Äôclock position is ‚Äì90 degrees.) The value is negative for fonts 
             /// that slope to the right, as almost all italic fonts do.
             /// </summary>
             [KeyInfo(KeyType.Real | KeyType.Required)]
@@ -226,7 +288,7 @@ namespace PdfSharp.Pdf.Advanced
             public const string CapHeight = "/CapHeight";
 
             /// <summary>
-            /// (Optional) The fontís x height: the vertical coordinate of the top of flat nonascending
+            /// (Optional) The font‚Äôs x height: the vertical coordinate of the top of flat nonascending
             /// lowercase letters (like the letter x), measured from the baseline, in fonts that have 
             /// Latin characters. Default value: 0.
             /// </summary>
@@ -261,7 +323,7 @@ namespace PdfSharp.Pdf.Advanced
 
             /// <summary>
             /// (Optional) The width to use for character codes whose widths are not specified in a 
-            /// font dictionaryís Widths array. This has a predictable effect only if all such codes 
+            /// font dictionary‚Äôs Widths array. This has a predictable effect only if all such codes 
             /// map to glyphs whose actual widths are the same as the value of the MissingWidth entry.
             /// Default value: 0.
             /// </summary>
@@ -289,7 +351,7 @@ namespace PdfSharp.Pdf.Advanced
 
             /// <summary>
             /// (Optional; meaningful only in Type 1 fonts; PDF 1.1) A string listing the character
-            /// names defined in a font subset. The names in this string must be in PDF syntaxóthat is,
+            /// names defined in a font subset. The names in this string must be in PDF syntax‚Äîthat is,
             /// each name preceded by a slash (/). The names can appear in any order. The name .notdef
             /// should be omitted; it is assumed to exist in the font subset. If this entry is absent,
             /// the only indication of a font subset is the subset tag in the FontName entry.

@@ -8,7 +8,7 @@ global using static System.FormattableString; // Used for Invariant($"…")
 
 namespace PdfSharp.Internal
 {
-    internal class Configuration
-    {
-    }
+    //internal class Configuration
+    //{
+    //}
 }

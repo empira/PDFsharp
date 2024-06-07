@@ -21,6 +21,20 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
+        /// Gets or sets the user-defined culture used for date formatting and decimal tabstop alignment.
+        /// Note for RTF rendering: Decimal tabstop alignment is done in the viewing application and always depends on the system regional settings,
+        /// as culture or separators cannot be saved in rtf.
+        /// </summary>
+        public CultureInfo? Culture { get; set; }
+
+        /// <summary>
+        /// Gets the actual culture used for date formatting and decimal tabstop alignment.
+        /// Note for RTF rendering: Decimal tabstop alignment is done in the viewing application and always depends on the system regional settings,
+        /// as culture or separators cannot be saved in rtf.
+        /// </summary>
+        public CultureInfo EffectiveCulture => Culture ?? CultureInfo.CurrentCulture;
+
+        /// <summary>
         /// Creates a deep copy of this object.
         /// </summary>
         public new Document Clone()
@@ -128,7 +142,11 @@ namespace MigraDoc.DocumentObjectModel
                 // TODO: LastTable, etc., docu
                 var sections = Values.Sections;
                 if (sections is { Count: > 0 })
+#if NET6_0_OR_GREATER || true
                     return sections[^1];
+#else
+                    return sections[sections.Count - 1];
+#endif
 
                 return Capabilities.BackwardCompatibility.DoNotCreateLastSection ? null! : AddSection();
             }
