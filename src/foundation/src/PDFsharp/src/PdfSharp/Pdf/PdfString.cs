@@ -430,11 +430,11 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Position of the first byte of this string in PdfWriter's Stream
         /// </summary>
-        public int PositionStart { get; internal set; }
+        public long PositionStart { get; internal set; }
 
         /// <summary>
         /// Position of the last byte of this string in PdfWriter's Stream
         /// </summary>
-        public int PositionEnd { get; internal set; }
+        public long PositionEnd { get; internal set; }
     }
 }

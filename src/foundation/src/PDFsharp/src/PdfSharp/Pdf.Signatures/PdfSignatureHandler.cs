@@ -121,16 +121,16 @@ namespace PdfSharp.Pdf.Signatures
         /// <returns></returns>
         private (RangedStream rangedStream, PdfArray byteRangeArray) GetRangeToSignAndByteRangeArray(Stream stream, int verboseExtraSpaceSeparatorLength)
         {
-            int firstRangeOffset = 0,
+            long firstRangeOffset = 0,
                 firstRangeLength = signatureFieldContentsPdfString.PositionStart + verboseExtraSpaceSeparatorLength,
                 secondRangeOffset = signatureFieldContentsPdfString.PositionEnd,
                 secondRangeLength = (int)stream.Length - signatureFieldContentsPdfString.PositionEnd;
 
             var byteRangeArray = new PdfArray();
-            byteRangeArray.Elements.Add(new PdfInteger(firstRangeOffset));
-            byteRangeArray.Elements.Add(new PdfInteger(firstRangeLength));
-            byteRangeArray.Elements.Add(new PdfInteger(secondRangeOffset));
-            byteRangeArray.Elements.Add(new PdfInteger(secondRangeLength));
+            byteRangeArray.Elements.Add(new PdfLongInteger(firstRangeOffset));
+            byteRangeArray.Elements.Add(new PdfLongInteger(firstRangeLength));
+            byteRangeArray.Elements.Add(new PdfLongInteger(secondRangeOffset));
+            byteRangeArray.Elements.Add(new PdfLongInteger(secondRangeLength));
 
             var rangedStream = new RangedStream(stream, new List<RangedStream.Range>()
             {
@@ -149,7 +149,7 @@ namespace PdfSharp.Pdf.Signatures
             var fakeSignature = Enumerable.Repeat((byte)0x00/*padded with zeros, as recommended (trailing zeros have no incidence on signature decoding)*/, knownSignatureLengthInBytesByPdfVersion[Document.Version]).ToArray();
             var fakeSignatureAsRawString = PdfEncoders.RawEncoding.GetString(fakeSignature, 0, fakeSignature.Length);
             signatureFieldContentsPdfString = new PdfString(fakeSignatureAsRawString, PdfStringFlags.HexLiteral); // has to be a hex string
-            signatureFieldByteRangePdfArray = new PdfArrayWithPadding(Document, byteRangePaddingLength, new PdfInteger(0), new PdfInteger(0), new PdfInteger(0), new PdfInteger(0));
+            signatureFieldByteRangePdfArray = new PdfArrayWithPadding(Document, byteRangePaddingLength, new PdfLongInteger(0), new PdfLongInteger(0), new PdfLongInteger(0), new PdfLongInteger(0));
             //Document.Internals.AddObject(signatureFieldByteRange);
 
             var signatureDictionary = GetSignatureDictionary(signatureFieldContentsPdfString, signatureFieldByteRangePdfArray);
