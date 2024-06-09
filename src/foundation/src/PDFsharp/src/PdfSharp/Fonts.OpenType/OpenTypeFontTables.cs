@@ -24,7 +24,6 @@ namespace PdfSharp.Fonts.OpenType
     /// </summary>
     enum WinEncodingId
     {
-#if true
         Symbol = 0,
         UnicodeUSC_2 = 1,
         //ShiftJIS = 2,
@@ -33,9 +32,6 @@ namespace PdfSharp.Fonts.OpenType
         //Wansung = 5,
         //Johab = 6,
         UnicodeUSC_4 = 10
-#else
-        Symbol, Unicode
-#endif
     }
 
     /// <summary>
@@ -94,8 +90,6 @@ namespace PdfSharp.Fonts.OpenType
 
                 for (int idx = 0; idx < segCount; idx++)
                     endCount[idx] = _fontData.ReadUShort();
-
-                //ASSERT_CONDITION(m_EndCount[segs - 1] == 0xFFFF, "Out of Index");
 
                 // Read reserved pad.
                 _fontData.ReadUShort();

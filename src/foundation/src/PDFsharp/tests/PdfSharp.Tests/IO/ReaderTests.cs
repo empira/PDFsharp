@@ -1,22 +1,22 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FluentAssertions;
+using PdfSharp.Diagnostics;
+using PdfSharp.Drawing;
+using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Quality;
+using PdfSharp.Snippets.Font;
+using PdfSharp.TestHelper;
 using Xunit;
 
-namespace PdfSharp.Tests
+namespace PdfSharp.Tests.IO
 {
     [Collection("PDFsharp")]
     public class ReaderTests
@@ -37,7 +37,7 @@ namespace PdfSharp.Tests
         public void Read_invalid_file()
         {
             var data = new byte[32];
-            for(int i = 0; i < data.Length;i++)
+            for (int i = 0; i < data.Length; i++)
                 data[i] = (byte)(33 + i);
 
             using var stream = new MemoryStream(data);

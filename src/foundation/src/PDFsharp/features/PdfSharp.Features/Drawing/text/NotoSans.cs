@@ -29,7 +29,6 @@ namespace PdfSharp.Features.Drawing
 
             //var filename = IOHelper.CreateTemporaryPdfFileName(nameof(Ensure_one_PdfFontDescriptor_per_FontFace));
 
-
             var root = IOUtility.GetSolutionRoot();
             Debug.Assert(root != null);
             var assets = Path.Combine(root, @"assets\fonts\Noto\Noto_Sans\static");

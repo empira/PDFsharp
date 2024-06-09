@@ -22,7 +22,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\foundation\src\PDFsharp\src\PdfSharp-gdi\PdfSharp-gdi.csproj" />
-    <ProjectReference Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.Snippets-gdi\PdfSharp.Snippets-gdi.csproj" />
+    <ProjectReference Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.Quality-gdi\PdfSharp.Quality-gdi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
   </ItemGroup>
 
 </Project>

@@ -1,24 +1,21 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-#if WPF
 using System.IO;
-#endif
 using System.Reflection;
-using System.Runtime.InteropServices;
 using PdfSharp.Diagnostics;
 using PdfSharp.Drawing;
+using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Filters;
 using PdfSharp.Pdf.IO;
-using PdfSharp.Fonts;
 using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
 using Xunit;
 
-namespace PdfSharp.Tests
+namespace PdfSharp.Tests.Drawing
 {
     [Collection("PDFsharp")]
     public class ImageTests
@@ -108,7 +105,7 @@ namespace PdfSharp.Tests
             gfx.DrawImage(image, 100, 100, 100, 100);
 
             // Save the document...
-            string filename = PdfFileUtility.GetTempPdfFileName("HelloImageWorld");
+            string filename = PdfFileUtility.GetTempPdfFileName("ImageTests");
             document.Save(filename);
             // ...and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
@@ -167,7 +164,7 @@ namespace PdfSharp.Tests
                 "PDFsharp/images/samples/jpeg/TruecolorNoAlpha.jpg",
                 "PDFsharp/images/samples/jpeg/windows7problem.jpg"
             };
-            
+
             // Attempt to avoid "Out of memory" under .NET 4.7.2.
             GC.Collect();
             GC.WaitForFullGCComplete();
@@ -185,7 +182,7 @@ namespace PdfSharp.Tests
             }
 
             // Save the document.
-            string filename = PdfFileUtility.GetTempPdfFileName("HelloImageWorld");
+            string filename = PdfFileUtility.GetTempPdfFileName("FlateDecodeImageTest");
             document.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 

@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 namespace PdfSharp.Pdf
@@ -20,7 +20,7 @@ namespace PdfSharp.Pdf
         { }
 
         /// <summary>
-        /// Gets or sets the document's title.
+        /// Gets or sets the document’s title.
         /// </summary>
         public string Title
         {
@@ -97,7 +97,7 @@ namespace PdfSharp.Pdf
         internal sealed class Keys : KeysBase
         {
             /// <summary>
-            /// (Optional; PDF 1.1) The document�s title.
+            /// (Optional; PDF 1.1) The document’s title.
             /// </summary>
             [KeyInfo(KeyType.String | KeyType.Optional)]
             public const string Title = "/Title";

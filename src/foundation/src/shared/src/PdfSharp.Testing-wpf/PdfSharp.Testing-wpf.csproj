@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+      <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
+    <RootNamespace>PdfSharp.Testing_wpf</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\PdfSharp.Testing\FontResolver\UnitTestFontResolver.cs" Link="FontResolver\UnitTestFontResolver.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="FontResolver\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-wpf\PdfSharp-wpf.csproj" />
+    <ProjectReference Include="..\PdfSharp.Quality-wpf\PdfSharp.Quality-wpf.csproj" />
+  </ItemGroup>
+
+</Project>

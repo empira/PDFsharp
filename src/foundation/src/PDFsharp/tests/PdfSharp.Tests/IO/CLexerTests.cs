@@ -4,13 +4,19 @@
 using System.IO;
 using System.Text;
 using FluentAssertions;
+using PdfSharp.Diagnostics;
+using PdfSharp.Drawing;
+using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Content;
 using PdfSharp.Pdf.Content.Objects;
+using PdfSharp.Quality;
+using PdfSharp.Snippets.Font;
+using PdfSharp.TestHelper;
 using Xunit;
 
-namespace PdfSharp.Tests
+namespace PdfSharp.Tests.IO
 {
     [Collection("PDFsharp")]
     public class CLexerTests

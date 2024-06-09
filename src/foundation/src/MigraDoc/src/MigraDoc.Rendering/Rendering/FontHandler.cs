@@ -10,7 +10,7 @@ using MigraDoc.DocumentObjectModel;
 namespace MigraDoc.Rendering
 {
     /// <summary>
-    /// Helps measuring and handling fonts.
+    /// Helps to measure and handle fonts.
     /// </summary>
     class FontHandler
     {
@@ -31,7 +31,7 @@ namespace MigraDoc.Rendering
 #if DEBUG_
             if (StringComparer.OrdinalIgnoreCase.Compare(font.Name, "Segoe UI Semilight") == 0
                 && (style & XFontStyleEx.BoldItalic) == XFontStyleEx.Italic)
-                font.GetType();
+                _ = typeof(int);
 #endif
             var xFont = new XFont(font.Name, font.Size.Point, style);
 #if DEBUG_

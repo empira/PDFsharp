@@ -12,6 +12,8 @@ using Microsoft.Extensions.Logging;
 using MigraDoc.DocumentObjectModel;
 using PdfSharp;
 using PdfSharp.Drawing;
+using PdfSharp.FontResolver;
+using PdfSharp.Fonts;
 using PdfSharp.Logging;
 using PdfSharp.TestHelper;
 using PdfSharp.TestHelper.Analysis.ContentStream;
@@ -20,8 +22,19 @@ using static MigraDoc.Tests.SecurityTestHelper;
 namespace MigraDoc.Tests
 {
     [Collection("PDFsharp")]
-    public class SecurityTests
+    public class SecurityTests : IDisposable
     {
+        public SecurityTests()
+        {
+            GlobalFontSettings.ResetFontManagement();
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+        }
+        
+        public void Dispose()
+        {
+            GlobalFontSettings.ResetFontManagement();
+        }
+
         // Notice: Test opening files written by these tests in Adobe Acrobat Reader after changes that may affect encryption.
         // These tests are not able to test the correct encryption of these files, even if decryption with these tests works.
         //
@@ -482,7 +495,7 @@ namespace MigraDoc.Tests
 
         [SkippableTheory]
         [InlineData(TestOptionsEnum.V5)]
-        // Older encryption versions don't support these password values. Passwords for revision 4 and earlier are up to 32 characters in length.
+        // Older encryption versions don’t support these password values. Passwords for revision 4 and earlier are up to 32 characters in length.
         public void Test_Password_Long(TestOptionsEnum optionsEnum)
         {
             Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
@@ -511,7 +524,7 @@ namespace MigraDoc.Tests
 
         [SkippableTheory]
         [InlineData(TestOptionsEnum.V5)] // Explicitly test SASLprep, which is used in encryption version 5.
-        // Older encryption versions don't support these password values. Passwords for revision 4 and earlier are limited to characters in the PDFDocEncoding character set.
+        // Older encryption versions don’t support these password values. Passwords for revision 4 and earlier are limited to characters in the PDFDocEncoding character set.
         public void Test_Password_Unicode(TestOptionsEnum optionsEnum)
         {
             Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
@@ -544,6 +557,9 @@ namespace MigraDoc.Tests
             OpenPdf(filenameRead);
         }
 
+        /// <summary>
+        /// Tests to embed a not encrypted file in an encrypted file.
+        /// </summary>
         [SkippableTheory]
         [InlineData(TestOptionsEnum.Default)] // Testing with one encryption version should do it.
         public void Test_EmbeddedFile_WrapperEncrypted(TestOptionsEnum optionsEnum)
@@ -588,6 +604,9 @@ namespace MigraDoc.Tests
             OpenPdf(filenameRead);
         }
 
+        /// <summary>
+        /// Tests to embed an encrypted file in a not encrypted file.
+        /// </summary>
         [SkippableTheory]
         [InlineData(TestOptionsEnum.Default)] // Testing with one encryption version should do it.
         public void Test_EmbeddedFile_EmbEncrypted(TestOptionsEnum optionsEnum)
@@ -632,6 +651,9 @@ namespace MigraDoc.Tests
             OpenPdf(filenameRead);
         }
 
+        /// <summary>
+        /// Tests to embed an encrypted file in an encrypted file.
+        /// </summary>
         [SkippableTheory]
         [InlineData(TestOptionsEnum.Default)] // Testing with one encryption version should do it.
         public void Test_EmbeddedFile_BothEncrypted(TestOptionsEnum optionsEnum)
@@ -676,19 +698,22 @@ namespace MigraDoc.Tests
             OpenPdf(filenameRead);
         }
 #if true
-        const string SkippedTestEmbeddedFilesMessage = "The feature to encrypt embedded files only is not yet correctly implemented. The resulting files may not be readyble with PDF readers.";
+        const string SkippedTestEmbeddedFilesMessage = "The feature to encrypt embedded file streams only is not yet correctly implemented. The resulting files may not be readyble with PDF readers.";
 
         [SkippableTheory]
         [ClassData(typeof(TestData.V4), Skip = SkippedTestEmbeddedFilesMessage)]
         [ClassData(typeof(TestData.V5), Skip = SkippedTestEmbeddedFilesMessage)]
 #else
+        /// <summary>
+        /// Tests to embed a not encrypted file in an encrypted file, in which only embedded file streams shall be encrypted.
+        /// </summary>
         [SkippableTheory]
         [ClassData(typeof(TestData.V4))]
         [ClassData(typeof(TestData.V5))]
         [ClassData(typeof(TestData.V4Skipped), Skip = SkippedTestOptionsMessage)]
         [ClassData(typeof(TestData.V5Skipped), Skip = SkippedTestOptionsMessage)]
 #endif
-        public void Test_EmbeddedFile_OnlyEFEncrypted(TestOptionsEnum optionsEnum)
+        public void Test_EmbeddedFile_OnlyEmbeddedFileStreamsEncrypted(TestOptionsEnum optionsEnum)
         {
             Skip.If(true || SkippableTests.SkipSlowTestsUnderDotNetFramework());
 
@@ -720,7 +745,7 @@ namespace MigraDoc.Tests
 
             var pdfRenderer = RenderSecuredDocument(document, options);
             var pdfDocument = pdfRenderer.PdfDocument;
-            pdfDocument.SecurityHandler.EncryptEmbeddedFilesOnly();
+            pdfDocument.SecurityHandler.EncryptEmbeddedFileStreamsOnly();
             pdfRenderer.Save(filename);
 
             // Read encrypted file and write it without encryption.
@@ -814,8 +839,7 @@ namespace MigraDoc.Tests
 
                 // The randomizedTestStringCount should be big enough for a good chance to create encrypted strings that seem to begin with a Unicode BOM.
                 // These strings are an important test case to ensure reread as unicode is done after decryption.
-                const int randomizedTestStringCount = 100000; 
-
+                const int randomizedTestStringCount = 100000;
 
                 // Define test strings. Avoid spaces, hyphens or other characters that may split the strings in two objects in the page content stream.
                 var testStrings = new List<string>
@@ -846,7 +870,7 @@ namespace MigraDoc.Tests
 
                 var doc = CreateEmptyTestDocument();
 
-#if CORE
+#if CORE___remove
                 var font = new XFont("Arial", 10);
 #else
                 var font = new XFont("Segoe UI Emoji", 10);
@@ -897,19 +921,19 @@ namespace MigraDoc.Tests
                 var encryptedFile = AddPrefixToFilename("Test_Strings w U.pdf", options);
                 pdfRenderer.Save(encryptedFile);
 
-
                 // Open the saved file
                 pdfDocument = PdfReader.Open(encryptedFile, PasswordUserDefault);
 
                 // Ensure entries in DocumentInformation have not changed.
                 var documentInfo = pdfDocument.Info;
-                // We don't know the saved CreationDate exactly, but it should be less than 5 seconds ago.
+                // We don’t know the saved CreationDate exactly, but it should be less than 5 seconds ago.
                 (documentInfo.CreationDate - date).TotalMilliseconds.Should().BeLessThan(5000, "PDF CreationDate should be less than 5 seconds ago.");
                 documentInfo.Creator.Should().Be(MigraDocProductVersionInformation.Creator, "PDF Creator should match");
-                documentInfo.Producer.Should().Be($"{PdfSharpProductVersionInformation.Creator} under {RuntimeInformation.OSDescription}", "PDF Producer should match");
+                //documentInfo.Producer.Should().Be($"{PdfSharpProductVersionInformation.Creator} under {RuntimeInformation.OSDescription}", "PDF Producer should match");
+                documentInfo.Producer.Should().StartWith(PdfSharpProductVersionInformation.Creator, "PDF Producer should match");
 
 
-                // Analyze the drawn text in the PDF's content stream.
+                // Analyze the drawn text in the PDF’s content stream.
                 pageLineCount = 0;
                 var pageIdx = 0;
                 ContentStreamEnumerator? streamEnumerator = null;
@@ -941,7 +965,6 @@ namespace MigraDoc.Tests
                 }
                 streamEnumerator!.Text.MoveAndGetNext(true, out _).Should().BeFalse();
 
-
                 // Check the test strings saved in CustomValues dictionary.
                 dict = pdfDocument.CustomValues;
                 for (var i = 0; i < testStrings.Count; i++)
@@ -954,7 +977,6 @@ namespace MigraDoc.Tests
                     pdfString.Should().NotBeNull();
                     pdfString!.Value.Should().Be(testString, $"test string {i} should match in CustomValues dictionary");
                 }
-
 
                 // Inspect log entries for not containing cryptographic exception entries.
                 var pdfSharpLogger = listLoggerProvider.GetLogger("PDFsharp");

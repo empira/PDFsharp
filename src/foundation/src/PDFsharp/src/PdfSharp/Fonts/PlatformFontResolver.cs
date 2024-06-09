@@ -27,7 +27,8 @@ namespace PdfSharp.Fonts
     /// <summary>
     /// Default platform specific font resolving.
     /// </summary>
-    public static class PlatformFontResolver
+    public static class 
+        PlatformFontResolver
     {
         /// <summary>
         /// Resolves the typeface by generating a font resolver info.

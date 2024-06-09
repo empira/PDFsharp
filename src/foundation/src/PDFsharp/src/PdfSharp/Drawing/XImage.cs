@@ -187,8 +187,8 @@ namespace PdfSharp.Drawing
 
         XImage(Stream stream)
         {
-            // Create a dummy unique path.
-            _path = "*" + Guid.NewGuid().ToString("B");
+            //// Create a dummy unique path.
+            //_path = "*" + Guid.NewGuid().ToString("B");
 
             // TODO: Create a fingerprint of the bytes in the stream to identify identical images.
 #if GDI
@@ -495,7 +495,7 @@ namespace PdfSharp.Drawing
                 //string filename = GetImageFilename(_wpfImage);
                 // WPF treats all images as images.
                 // We give JPEG images a special treatment.
-                // Test if it's a JPEG.
+                // Test if it’s a JPEG.
                 bool isJpeg = IsJpeg; // TestJpeg(filename);
                 if (isJpeg)
                 {
@@ -1231,7 +1231,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Initializes the GDI helper.
         /// We use GDI+ to detect if image is JPEG.
-        /// If so, we also determine if it's CMYK and we read the image bytes.
+        /// If so, we also determine if it’s CMYK and we read the image bytes.
         /// </summary>
         void InitializeGdiHelper()
         {

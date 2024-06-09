@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 #if true_  // Not yet implemented-
@@ -69,7 +69,7 @@ namespace PdfSharp.Pdf.Advanced
             /// <summary>
             /// (Required) The PostScript name of the font. For Type 1 fonts, this is usually
             /// the value of the FontName entry in the font program; for more information.
-            /// The Post-Script name of the font can be used to find the font’s definition in 
+            /// The Post-Script name of the font can be used to find the fontâ€™s definition in 
             /// the consumer application or its environment. It is also the name that is used when
             /// printing to a PostScript output device.
             /// </summary>
@@ -78,14 +78,14 @@ namespace PdfSharp.Pdf.Advanced
 
             /// <summary>
             /// (Required except for the standard 14 fonts) The first character code defined 
-            /// in the font’s Widths array.
+            /// in the fontâ€™s Widths array.
             /// </summary>
             [KeyInfo(KeyType.Integer)]
             public const string FirstChar = "/FirstChar";
 
             /// <summary>
             /// (Required except for the standard 14 fonts) The last character code defined
-            /// in the font’s Widths array.
+            /// in the fontâ€™s Widths array.
             /// </summary>
             [KeyInfo(KeyType.Integer)]
             public const string LastChar = "/LastChar";
@@ -104,7 +104,7 @@ namespace PdfSharp.Pdf.Advanced
 
             /// <summary>
             /// (Required except for the standard 14 fonts; must be an indirect reference)
-            /// A font descriptor describing the font’s metrics other than its glyph widths.
+            /// A font descriptor describing the fontâ€™s metrics other than its glyph widths.
             /// Note: For the standard 14 fonts, the entries FirstChar, LastChar, Widths, and 
             /// FontDescriptor must either all be present or all be absent. Ordinarily, they are
             /// absent; specifying them enables a standard font to be overridden.
@@ -113,10 +113,10 @@ namespace PdfSharp.Pdf.Advanced
             public new const string FontDescriptor = "/FontDescriptor";
 
             /// <summary>
-            /// (Optional) A specification of the font’s character encoding if different from its
+            /// (Optional) A specification of the fontâ€™s character encoding if different from its
             /// built-in encoding. The value of Encoding is either the name of a predefined
             /// encoding (MacRomanEncoding, MacExpertEncoding, or WinAnsiEncoding, as described in 
-            /// Appendix D) or an encoding dictionary that specifies differences from the font’s
+            /// Appendix D) or an encoding dictionary that specifies differences from the fontâ€™s
             /// built-in encoding or from a specified predefined encoding.
             /// </summary>
             [KeyInfo(KeyType.Name | KeyType.Dictionary)]

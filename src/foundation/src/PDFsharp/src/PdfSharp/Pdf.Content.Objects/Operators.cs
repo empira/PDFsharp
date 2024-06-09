@@ -1,6 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using System.Reflection.Emit;
+
 namespace PdfSharp.Pdf.Content.Objects
 {
     /// <summary>
@@ -69,8 +71,16 @@ namespace PdfSharp.Pdf.Content.Objects
         /// <param name="name">The name.</param>
         public static COperator OperatorFromName(string name)
         {
+#if true
+            if (StringToOpCode.TryGetValue(name, out var opCode))
+            {
+                return new(opCode);
+            }
+            Debug.Assert(false, "Unknown operator in PDF content stream.");
+            return null!;
+#else
             COperator? op = null;
-            OpCode? opcode = StringToOpCode[name];
+            OpCode? opcode = StringToOpCode[name];  // Use TryGetValue.
             if (opcode != null)
             {
                 op = new(opcode);
@@ -80,6 +90,7 @@ namespace PdfSharp.Pdf.Content.Objects
                 Debug.Assert(false, "Unknown operator in PDF content stream.");
             }
             return op;
+#endif
         }
 
         /// <summary>
@@ -87,15 +98,15 @@ namespace PdfSharp.Pdf.Content.Objects
         /// </summary>
         static OpCodes()
         {
-            StringToOpCode = new();
+
             for (int idx = 0; idx < ops.Length; idx++)
             {
-                OpCode op = ops[idx];
+                var op = ops[idx];
                 StringToOpCode.Add(op.Name, op);
             }
         }
 
-        static readonly Dictionary<string, OpCode> StringToOpCode;
+        private static readonly Dictionary<string, OpCode> StringToOpCode = [];
 
         // ReSharper disable InconsistentNaming
         // ReSharper disable StringLiteralTypo
@@ -326,16 +337,16 @@ namespace PdfSharp.Pdf.Content.Objects
         /// Array of all OpCodes.
         /// </summary>
         static readonly OpCode[] ops =
-            { 
-                // Must be defined behind the code above to ensure that the values are initialized.
-                Dictionary,
-                b, B, bx, Bx, BDC, BI, BMC, BT, BX, c, cm, CS, cs, d, d0, d1, Do,
-                DP, EI, EMC, ET, EX, f, F, fx, G, g, gs, h, i, ID, j, J, K, k, l, m, M, MP,
-                n, q, Q, re, RG, rg, ri, s, S, SC, sc, SCN, scn, sh,
-                Tx, Tc, Td, TD, Tf, Tj, TJ, TL, Tm, Tr, Ts, Tw, Tz, v, w, W, Wx, y,
-                QuoteSingle, 
-                QuoteDouble,
-            };
+        [
+            // Must be defined behind the code above to ensure that the values are initialized.
+            Dictionary,
+            b, B, bx, Bx, BDC, BI, BMC, BT, BX, c, cm, CS, cs, d, d0, d1, Do,
+            DP, EI, EMC, ET, EX, f, F, fx, G, g, gs, h, i, ID, j, J, K, k, l, m, M, MP,
+            n, q, Q, re, RG, rg, ri, s, S, SC, sc, SCN, scn, sh,
+            Tx, Tc, Td, TD, Tf, Tj, TJ, TL, Tm, Tr, Ts, Tw, Tz, v, w, W, Wx, y,
+            QuoteSingle,
+            QuoteDouble
+        ];
         // ReSharper restore StringLiteralTypo
         // ReSharper restore InconsistentNaming
     }

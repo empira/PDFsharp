@@ -11,6 +11,7 @@ using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.Rendering;
 using Xunit;
+using FluentAssertions;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
@@ -63,7 +64,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
             // Create one document containing all results.
             var sumDoc = new PdfDocument();
             var exceptions = new List<Exception>();
-
 
             // Create documents for different offsets.
             for (var offset = 15; offset <= 95; offset += 5)
@@ -234,11 +234,9 @@ namespace MigraDoc.DocumentObjectModel.Tests
                 { new Character { SymbolName = SymbolName.LineBreak }, "Line break Character"}
             };
 
-
             // Create one document containing all results.
             var sumDoc = new PdfDocument();
             var exceptions = new List<Exception>();
-
 
             // Create documents for different trailing objects.
             foreach (var trailingObject in trailingObjects)
@@ -301,7 +299,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
                     borders.Visible = true;
                     borders.DistanceFromTop = Unit.FromMillimeter(10);
                     borders.DistanceFromBottom = Unit.FromMillimeter(10);
-
 
                     // Render document and add it to sumDoc.
                     var pdfRenderer = new PdfDocumentRenderer { Document = document };
@@ -371,6 +368,228 @@ namespace MigraDoc.DocumentObjectModel.Tests
             // Finally throw occurred exceptions.
             if (exceptions.Any())
                 throw new AggregateException(exceptions);
+        }
+
+        [Fact]
+        public void Test_LineSpacingRule()
+        {
+            var document = new Document();
+
+            var style = document.Styles[StyleNames.Heading1];
+            style!.ParagraphFormat.Font.Size = 16;
+            style.ParagraphFormat.Font.Bold = true;
+            style.ParagraphFormat.SpaceBefore = Unit.FromPoint(8);
+            style.ParagraphFormat.SpaceAfter = Unit.FromPoint(8);
+
+            var section = document.AddSection();
+
+            const string newLineWord = "Loreetp";
+            const string bigWord = "Loreetq";
+
+            const string headingFontSizes = "FontSize10_14_10";
+            var headingsLineSpacing = new Dictionary<LineSpacingRule, String>();
+
+
+            var paragraph = section.AddParagraph(headingFontSizes);
+            paragraph.Style = StyleNames.Heading1;
+            {
+                paragraph = section.AddParagraph($"{newLineWord} ad et luptat. {bigWord} ad et. Duis niamconsecte digna facilla reros delit utat augait eratie mod. " +
+                                                 $"{newLineWord} ad et luptat. {bigWord} ad et. Duis niamconsecte digna facilla reros delit utat augait eratie mod. " +
+                                                 $"{newLineWord} ad et luptat. {bigWord} ad et. Duis niamconsecte digna facilla reros delit utat augait eratie mod.");
+                paragraph.Format.Font.Size = 10;
+
+                paragraph = section.AddParagraph($"{newLineWord} ad et luptat. {bigWord} ad et. Duis niamconsecte digna facilla. " +
+                                                 $"{newLineWord} ad et luptat. {bigWord} ad et. Duis niamconsecte digna facilla. " +
+                                                 $"{newLineWord} ad et luptat. {bigWord} ad et. Duis niamconsecte digna facilla.");
+                paragraph.Format.Font.Size = 14;
+
+                paragraph = section.AddParagraph($"{newLineWord} ad et luptat. {bigWord} ad et. Duis niamconsecte digna facilla reros delit utat augait eratie mod. " +
+                                                 $"{newLineWord} ad et luptat. {bigWord} ad et. Duis niamconsecte digna facilla reros delit utat augait eratie mod. " +
+                                                 $"{newLineWord} ad et luptat. {bigWord} ad et. Duis niamconsecte digna facilla reros delit utat augait eratie mod.");
+                paragraph.Format.Font.Size = 10;
+            }
+
+
+            var lineSpacingRules = new List<LineSpacingRule> { LineSpacingRule.Single, LineSpacingRule.Exactly, LineSpacingRule.AtLeast, LineSpacingRule.OnePtFive, LineSpacingRule.Double, LineSpacingRule.Multiple };
+
+            foreach (var lineSpacingRule in lineSpacingRules)
+            {
+                if (lineSpacingRule == LineSpacingRule.OnePtFive)
+                    section.AddPageBreak();
+
+                var heading = $"LineSpacing{lineSpacingRule}";
+                headingsLineSpacing.Add(lineSpacingRule, heading);
+
+                paragraph = section.AddParagraph(heading);
+                paragraph.Style = StyleNames.Heading1;
+                {
+                    paragraph = section.AddParagraph($"{newLineWord} ad et luptat. {bigWord} ad et. Duis niamconsecte digna facilla reros delit utat augait eratie mod. " +
+                                                     $"{newLineWord} ad et luptat. {bigWord} ad et. Duis niamconsecte digna facilla reros delit utat augait eratie mod. " +
+                                                     $"{newLineWord} ad et luptat. ");
+                    paragraph.Format.Font.Size = 10;
+                    paragraph.Format.LineSpacingRule = lineSpacingRule;
+                    if (lineSpacingRule == LineSpacingRule.Multiple)
+                        paragraph.Format.LineSpacing = 3;
+                    else if (lineSpacingRule == LineSpacingRule.Exactly)
+                        paragraph.Format.LineSpacing = 10;
+                    if (lineSpacingRule == LineSpacingRule.AtLeast)
+                        paragraph.Format.LineSpacing = 14;
+                    var ft = paragraph.AddFormattedText(bigWord);
+                    ft.Font.Size = 14;
+                    paragraph.AddText(" ad et. Duis niamconsecte digna facilla reros delit utat augait eratie. " +
+                                      $"{newLineWord} ad et luptat. {bigWord} ad et. Duis niamconsecte digna facilla reros delit utat augait eratie mod. " +
+                                      $"{newLineWord} ad et luptat. {bigWord} ad et. Duis niamconsecte digna facilla reros delit utat augait eratie mod.");
+                }
+            }
+
+
+            // Create a renderer for the MigraDoc document.
+            var pdfRenderer = new PdfDocumentRenderer()
+            {
+                // Associate the MigraDoc document with a renderer.
+                Document = document
+            };
+
+            // Layout and render document to PDF.
+            pdfRenderer.RenderDocument();
+
+            var pdfDocument = pdfRenderer.PdfDocument;
+            pdfDocument.Options.CompressContentStreams = false;
+
+            // Save the document...
+            var filename = PdfFileUtility.GetTempPdfFileName("Test_LineSpacingRule");
+            pdfRenderer.PdfDocument.Save(filename);
+            // ...and start a viewer.
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
+
+
+            // Analyze the drawn text in the PDF’s content stream.
+            var streamEnumerator = PdfFileHelper.GetPageContentStreamEnumerator(pdfDocument, 0);
+
+            var offsetPrecision = 0.01;
+
+
+            // Get default line spacings for 10 and 14 pt and calculate ascender and descender differences.
+            streamEnumerator.Text.MoveAndGetNext(x => x.Text == headingFontSizes, true, out _).Should().BeTrue();
+
+            // Lines with font size 10.
+            streamEnumerator.Text.MoveAndGetNext(x => x.Text == newLineWord, true, out var textInfo).Should().BeTrue();
+            var lastY = textInfo!.Y;
+
+            streamEnumerator.Text.MoveAndGetNext(x => x.Text == newLineWord, true, out textInfo).Should().BeTrue();
+            var offsetSize10 = lastY - textInfo!.Y;
+            lastY = textInfo.Y;
+
+            streamEnumerator.Text.MoveAndGetNext(x => x.Text == newLineWord, true, out textInfo).Should().BeTrue();
+            var offset = lastY - textInfo!.Y;
+            offset.Should().BeApproximately(offsetSize10, offsetPrecision);
+            lastY = textInfo.Y;
+
+            // Lines with font size 14.
+            streamEnumerator.Text.MoveAndGetNext(x => x.Text == newLineWord, true, out textInfo).Should().BeTrue();
+            var offsetSize14After10 = lastY - textInfo!.Y;
+            offsetSize14After10.Should().BeGreaterThan(offsetSize10, "offset to 14 pt line after 10 pt line should be greater than offset between 10 pt lines.");
+            lastY = textInfo.Y;
+
+            streamEnumerator.Text.MoveAndGetNext(x => x.Text == newLineWord, true, out textInfo).Should().BeTrue();
+            var offsetSize14 = lastY - textInfo!.Y;
+            offsetSize14.Should().BeGreaterThan(offsetSize10, "offset between 14 pt lines should be greater than offset between 10 pt lines.");
+            offsetSize14.Should().BeGreaterThan(offsetSize14After10, "offset between 14 pt lines should be greater than offset to 14 pt line after 10 pt line.");
+            lastY = textInfo.Y;
+
+            streamEnumerator.Text.MoveAndGetNext(x => x.Text == newLineWord, true, out textInfo).Should().BeTrue();
+            offset = lastY - textInfo!.Y;
+            offset.Should().BeApproximately(offsetSize14, offsetPrecision);
+            lastY = textInfo.Y;
+            
+            // Lines with font size 10.
+            streamEnumerator.Text.MoveAndGetNext(x => x.Text == newLineWord, true, out textInfo).Should().BeTrue();
+            var offsetSize10After14 = lastY - textInfo!.Y;
+            offsetSize10After14.Should().BeGreaterThan(offsetSize10, "offset to 10 pt line after 14 pt line should be greater than offset between 10 pt lines.");
+            offsetSize10After14.Should().BeLessThan(offsetSize14, "offset to 10 pt line after 14 pt line should be less than offset between 14 pt lines.");
+            offsetSize10After14.Should().BeLessThan(offsetSize14After10, "offset to 10 pt line after 14 pt line (contains 10 pt ascender and 14 pt descender) should be less than " +
+                                                                         "offset to 14 pt line after 10 pt line (contains 14 pt ascender and 10 pt descender).");
+            lastY = textInfo.Y;
+
+            streamEnumerator.Text.MoveAndGetNext(x => x.Text == newLineWord, true, out textInfo).Should().BeTrue();
+            offset = lastY - textInfo!.Y;
+            offset.Should().BeApproximately(offsetSize10, offsetPrecision);
+            lastY = textInfo.Y;
+
+            streamEnumerator.Text.MoveAndGetNext(x => x.Text == newLineWord, true, out textInfo).Should().BeTrue();
+            offset = lastY - textInfo!.Y;
+            offset.Should().BeApproximately(offsetSize10, offsetPrecision);
+
+            var ascenderDifference = offsetSize14After10 - offsetSize10; // The 14 pt ascender is bigger as the 10 pt ascender by this value.
+            var descenderDifference = offsetSize10After14 - offsetSize10; // The 14 pt descender is bigger as the 10 pt descender by this value.
+            
+
+            // Inspect the line spacing examples.
+            foreach (var lineSpacingRule in lineSpacingRules)
+            {
+                if (lineSpacingRule == LineSpacingRule.OnePtFive)
+                    streamEnumerator = PdfFileHelper.GetPageContentStreamEnumerator(pdfDocument, 1);
+
+                var heading = headingsLineSpacing[lineSpacingRule];
+                streamEnumerator.Text.MoveAndGetNext(x => x.Text == heading, true, out _).Should().BeTrue();
+
+
+                double usualOffset, before14Offset, after14Offset;
+
+                if (lineSpacingRule == LineSpacingRule.Exactly)
+                {
+                    // Exact value is set.
+                    usualOffset = 10;
+                    before14Offset = 10;
+                    after14Offset = 10;
+                }
+                else if (lineSpacingRule == LineSpacingRule.AtLeast)
+                {
+                    usualOffset = 14; // At least value 14 is greater than arial.GetHeight() for 10 pt (11.499023 pt).
+                    before14Offset = offsetSize10 + ascenderDifference; // Default calculation (see below) is greater than 14.
+                    after14Offset = offsetSize14 - ascenderDifference + (14 - offsetSize10); // Default calculation (see below) plus the difference the at least 14 pt line is greater than a 10 pt line.
+                }
+                else
+                {
+                    // Default calculation.
+                    var factor = lineSpacingRule switch
+                    {
+                        LineSpacingRule.OnePtFive => 1.5,
+                        LineSpacingRule.Double => 2,
+                        LineSpacingRule.Multiple => 3,
+                        _ => 1
+                    };
+
+                    usualOffset = offsetSize10 * factor; // Between 10 pt lines, multiply the 10 pt offset with the factor.
+                    before14Offset = offsetSize10 * factor + ascenderDifference; // The offset to the big word line is the line spacing of the line before (the 10 pt offset * factor)
+                                                                                 // plus the ascenderDifference, as the big word line’s first word starts lower by this.
+                    after14Offset = offsetSize14 * factor - ascenderDifference; // The offset after the big word line is its line spacing (the 14 pt offset * factor)
+                                                                                // minus the ascenderDifference, as the big word line’s first word started lower by this.
+                }
+
+                // Inspect the lines.
+                streamEnumerator.Text.MoveAndGetNext(x => x.Text == newLineWord, true, out textInfo).Should().BeTrue();
+                lastY = textInfo!.Y;
+
+                streamEnumerator.Text.MoveAndGetNext(x => x.Text == newLineWord, true, out textInfo).Should().BeTrue();
+                offset = lastY - textInfo!.Y;
+                offset.Should().BeApproximately(usualOffset, offsetPrecision);
+                lastY = textInfo.Y;
+
+                streamEnumerator.Text.MoveAndGetNext(x => x.Text == newLineWord, true, out textInfo).Should().BeTrue();
+                offset = lastY - textInfo!.Y;
+                offset.Should().BeApproximately(before14Offset, offsetPrecision);
+                lastY = textInfo.Y;
+
+                streamEnumerator.Text.MoveAndGetNext(x => x.Text == newLineWord, true, out textInfo).Should().BeTrue();
+                offset = lastY - textInfo!.Y;
+                offset.Should().BeApproximately(after14Offset, offsetPrecision);
+                lastY = textInfo.Y;
+
+                streamEnumerator.Text.MoveAndGetNext(x => x.Text == newLineWord, true, out textInfo).Should().BeTrue();
+                offset = lastY - textInfo!.Y;
+                offset.Should().BeApproximately(usualOffset, offsetPrecision);
+            }
         }
     }
 }

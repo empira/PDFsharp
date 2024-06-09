@@ -43,7 +43,6 @@ namespace MigraDoc.Tests.Extensions
 
             XUnitPt xUnitPt2Pt = XUnitPt.FromPoint(d2);
 
-
             // ToXUnit(Unit)
             XUnit unit2PtAsXUnit = unit2Pt.ToXUnit();
 
@@ -63,7 +62,6 @@ namespace MigraDoc.Tests.Extensions
             unit2CmPtAsXUnit.IsSameValue(xUnit2CmPt).Should().BeTrue();
             unit2CmPcAsXUnit.IsSameValue(xUnit2CmPt).Should().BeTrue(); // There is no Pica unit in XUnit. Therefore, unit2CmPc converted to XUnit should be point.
 
-
             // ToUnit(XUnit)
             Unit xUnit2PtAsUnit = xUnit2Pt.ToUnit();
 
@@ -80,7 +78,6 @@ namespace MigraDoc.Tests.Extensions
             (xUnit2CmInAsUnit == unit2CmIn).Should().BeTrue();
             (xUnit2CmPtAsUnit == unit2CmPt).Should().BeTrue();
             (xUnit2CmPuAsUnit == unit2CmPt).Should().BeTrue(); // There is no Presentation unit in Unit. Therefore, xUnit2CmPu converted to Unit should be point.
-
 
             // ToXUnitPt(Unit)
             XUnitPt unit2PtAsXUnitPt = unit2Pt.ToXUnitPt();

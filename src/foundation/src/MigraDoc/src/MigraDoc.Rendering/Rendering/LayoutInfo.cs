@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
@@ -35,22 +35,22 @@ namespace MigraDoc.Rendering
         internal bool KeepTogether { get; set; }
 
         /// <summary>
-        /// The space that shall be kept free above the element's content.
+        /// The space that shall be kept free above the element’s content.
         /// </summary>
         internal virtual XUnitPt MarginTop { get; set; }
 
         /// <summary>
-        /// The space that shall be kept free right to the element's content.
+        /// The space that shall be kept free right to the element’s content.
         /// </summary>
         internal XUnitPt MarginRight { get; set; }
 
         /// <summary>
-        /// The space that shall be kept free below the element's content.
+        /// The space that shall be kept free below the element’s content.
         /// </summary>
         internal XUnitPt MarginBottom { get; set; }
 
         /// <summary>
-        /// The space that shall be kept free left to the element's content.
+        /// The space that shall be kept free left to the element’s content.
         /// </summary>
         internal XUnitPt MarginLeft { get; set; }
 

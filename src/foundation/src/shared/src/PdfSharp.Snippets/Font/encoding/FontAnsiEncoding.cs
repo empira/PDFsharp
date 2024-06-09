@@ -61,7 +61,7 @@ namespace PdfSharp.Snippets.Font
             for (int idx = 0; idx <= 255; idx++)
             {
                 if (idx == 129)
-                    _ = GetType();
+                    _ = typeof(int);
 
                 ansi[0] = (byte)idx;
 
@@ -163,7 +163,7 @@ namespace PdfSharp.Snippets.Font
             new AnsiTable(80, '\u0050', 'P', "Uppercase P"),
             new AnsiTable(81, '\u0051', 'Q', "Uppercase Q"),
             new AnsiTable(82, '\u0052', 'R', "Uppercase R"),
-            new AnsiTable(83, '\u0053', 'S', "Uppercase S"),
+            new AnsiTable(83, '\u0053', 's', "Uppercase S"),
             new AnsiTable(84, '\u0054', 'T', "Uppercase T"),
             new AnsiTable(85, '\u0055', 'U', "Uppercase U"),
             new AnsiTable(86, '\u0056', 'V', "Uppercase V"),

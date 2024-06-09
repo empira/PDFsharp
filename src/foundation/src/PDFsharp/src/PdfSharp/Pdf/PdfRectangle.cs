@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 #if GDI
@@ -309,7 +309,7 @@ namespace PdfSharp.Pdf
         }
 
         /// <summary>
-        /// Returns the rectangle as a string in the form «[x1 y1 x2 y2]».
+        /// Returns the rectangle as a string in the form Â«[x1 y1 x2 y2]Â».
         /// </summary>
         public override string ToString()
         {

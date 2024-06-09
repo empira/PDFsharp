@@ -27,12 +27,12 @@ namespace PdfSharp
         #region Helper functions
         ///// <summary>
         ///// Loads the message from the resource associated with the enum type and formats it
-        ///// using 'String.Format'. Because this function is intended to be used during error
+        ///// using 'string.Format'. Because this function is intended to be used during error
         ///// handling it never raises an exception.
         ///// </summary>
         ///// <param name="id">The type of the parameter identifies the resource
         ///// and the name of the enum identifies the message in the resource.</param>
-        ///// <param name="args">Parameters passed through 'String.Format'.</param>
+        ///// <param name="args">Parameters passed through 'string.Format'.</param>
         ///// <returns>The formatted message.</returns>
         //public static string Format(PSMsgID id, params object[] args)
         //{
@@ -50,22 +50,22 @@ namespace PdfSharp
         //    return message;
         //}
 
-        public static string Format(string format, params object[] args)
-        {
-            if (format == null)
-                throw new ArgumentNullException(nameof(format));
+        //public static string Format(string format, params object[] args)
+        //{
+        //    if (format == null)
+        //        throw new ArgumentNullException(nameof(format));
 
-            string message;
-            try
-            {
-                message = String.Format(format, args);
-            }
-            catch (Exception ex)
-            {
-                message = $"UNEXPECTED ERROR while formatting message '{format}': {ex}";
-            }
-            return message;
-        }
+        //    string message;
+        //    try
+        //    {
+        //        message = String.Format(format, args);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        message = $"UNEXPECTED ERROR while formatting message '{format}': {ex}";
+        //    }
+        //    return message;
+        //}
 
         ///// <summary>
         ///// Gets the localized message identified by the specified DomMsgID.
@@ -89,17 +89,14 @@ namespace PdfSharp
 
         public static string SetValueMustNotBeNull => "The set value property must not be null.";
 
-        public static string InvalidValue(int val, string name, int min, int max)
-        {
-            return Format("{0} is not a valid value for {1}. {1} should be greater than or equal to {2} and less than or equal to {3}.",
-              val, name, min, max);
-        }
+        public static string InvalidValue(int val, string name, int min, int max) 
+            => Invariant($"{val} is not a valid value for {name}. {name} should be greater than or equal to {min} and less than or equal to {max}.");
 
         public static string ObsoleteFunctionCalled => "The function is obsolete and must not be called.";
 
         public static string OwningDocumentRequired => "The PDF object must belong to a PdfDocument, but property Document is null.";
 
-        public static string FileNotFound(string path) => Format("The file '{0}' does not exist.", path);
+        public static string FileNotFound(string path) => $"The file '{path}' does not exist.";
 
         public static string FontDataReadOnly => "Font data is read-only.";
 
@@ -111,21 +108,21 @@ namespace PdfSharp
 
         // ----- XGraphics ----------------------------------------------------------------------------
 
-        public static string PointArrayEmpty 
+        public static string PointArrayEmpty
             => "The PointF array must not be empty.";
 
-        public static string PointArrayAtLeast(int count) 
-            => Format("The point array must contain {0} or more points.", count);
+        public static string PointArrayAtLeast(int count)
+            => Invariant($"The point array must contain {count} or more points.");
 
         public static string NeedPenOrBrush => "XPen or XBrush or both must not be null.";
 
-        public static string CannotChangeImmutableObject(string typename) 
+        public static string CannotChangeImmutableObject(string typename)
             => $"You cannot change this immutable {typename} object.";
 
-        public static string FontAlreadyAdded(string fontName) 
+        public static string FontAlreadyAdded(string fontName)
             => $"FontFace with the name '{fontName}' already added to font collection.";
 
-        public static string NotImplementedForFontsRetrievedWithFontResolver(string name) 
+        public static string NotImplementedForFontsRetrievedWithFontResolver(string name)
             => $"Not implemented for font '{name}', because it was retrieved with font resolver.";
 
         #endregion
@@ -160,7 +157,7 @@ namespace PdfSharp
 
         public static string MultiplePageInsert => "The page cannot be added to this document because the document already owned this page.";
 
-        public static string UnexpectedTokenInPdfFile => "Unexpected token in PDF file. The PDF file may be corrupt. If it is not, please send us the file for service.";
+        public static string UnexpectedTokenInPdfFile => "Unexpected token in PDF file. The PDF file may be corrupt. If it is not, please send us the file for service (issues (at) pdfsharp.net).";
 
         public static string InappropriateColorSpace(PdfColorMode colorMode, XColorSpace colorSpace)
         {
@@ -205,7 +202,7 @@ namespace PdfSharp
 
         public static string CannotGetGlyphTypeface(string fontName)
         {
-            return Format("Cannot get a matching glyph typeface for font '{0}'.", fontName);
+            return Invariant($"Cannot get a matching glyph typeface for font '{fontName}'.");
         }
 
         // ----- PdfParser ----------------------------------------------------------------------------

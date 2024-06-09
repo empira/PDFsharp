@@ -9,7 +9,6 @@ using SysPoint = System.Windows.Point;
 using PdfSharp.Drawing;
 using PdfSharp.Quality;
 
-
 namespace PdfSharp.Snippets.Drawing
 {
     public class PathWpf : Snippet

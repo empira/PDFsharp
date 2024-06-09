@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 #if GDI
@@ -17,7 +17,7 @@ namespace PdfSharp.Drawing
     /// Represents a combination of XFontFamily, XFontWeight, XFontStyleEx, and XFontStretch.
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
-    public class XTypeface  // Note: In english, it's spelled 'typeface', but 'font face'.
+    public class XTypeface  // Note: In English, it’s spelled 'typeface', but 'font face'.
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="XTypeface"/> class.

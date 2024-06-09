@@ -31,18 +31,19 @@ namespace PdfSharp.Tests.Fonts
         // A font only exists for a special font resolver
         const string XFilesName = "XFiles";
 
-        public void Dispose()
+        public FontResolverTests()
         {
-            // Tear down this test class.
             GlobalFontSettings.ResetFontManagement();
         }
 
+        public void Dispose()
+        {
+            GlobalFontSettings.ResetFontManagement();
+        }
 
         [Fact]
         public void No_FontResolver_set()
         {
-            GlobalFontSettings.ResetFontManagement();
-
             // No FFR.
             DummyShouldFail();
 
@@ -121,8 +122,6 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void No_FontResolver_set_and_multiple_creations()
         {
-            GlobalFontSettings.ResetFontManagement();
-
             // No FFR.
             DummyShouldFail();
 
@@ -166,8 +165,6 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void No_FontResolver_set_and_multiple_creations2()
         {
-            GlobalFontSettings.ResetFontManagement();
-
             var arial0 = new XFont(ArialName, 10, XFontStyleEx.Regular);
             var arial1 = new XFont(ArialName, 10, XFontStyleEx.Italic);
             var arial = new XFont(ArialName, 10, XFontStyleEx.Bold);
@@ -230,9 +227,8 @@ namespace PdfSharp.Tests.Fonts
         }
 
         [Fact]
-        public void Test_FailSaveFontResolver_as_fallback_font_resolver()
+        public void Test_FailsafeFontResolver_as_fallback_font_resolver()
         {
-            GlobalFontSettings.ResetFontManagement();
             GlobalFontSettings.FallbackFontResolver = new FailsafeFontResolver();
 
             // Resolved in FFR.
@@ -270,7 +266,6 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void TestXFilesFontResolver1_used_as_main_font_resolver()
         {
-            GlobalFontSettings.ResetFontManagement();
             GlobalFontSettings.FontResolver = new TestXFilesFontResolver1();
 
             // No FFR.
@@ -300,7 +295,6 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void TestXFilesFontResolver1_used_as_main_font_resolver_with_fallback()
         {
-            GlobalFontSettings.ResetFontManagement();
             GlobalFontSettings.FontResolver = new TestXFilesFontResolver1();
             GlobalFontSettings.FallbackFontResolver = new FailsafeFontResolver();
 
@@ -328,7 +322,6 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void TestXFilesFontResolver2_used_as_main_font_resolver()
         {
-            GlobalFontSettings.ResetFontManagement();
             GlobalFontSettings.FontResolver = new TestXFilesFontResolver2();
 
             // No FFR.
@@ -378,7 +371,6 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void TestXFilesFontResolver2_used_as_main_font_resolver_with_fallback()
         {
-            GlobalFontSettings.ResetFontManagement();
             GlobalFontSettings.FontResolver = new TestXFilesFontResolver2();
             GlobalFontSettings.FallbackFontResolver = new FailsafeFontResolver();
 
@@ -421,7 +413,6 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void TestXFilesFontResolver2_used_as_fallback()
         {
-            GlobalFontSettings.ResetFontManagement();
             GlobalFontSettings.FontResolver = new TestXFilesFontResolver1();
             GlobalFontSettings.FallbackFontResolver = new TestXFilesFontResolver2();
 
@@ -441,7 +432,6 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void TestXFilesFontResolver3_used_as_main_font_resolver()
         {
-            GlobalFontSettings.ResetFontManagement();
             GlobalFontSettings.FontResolver = new TestXFilesFontResolver3();
             //GlobalFontSettings.FallbackFontResolver = new TestXFilesFontResolver2();
 
@@ -458,7 +448,6 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void TestXFilesFontResolver3_used_as_main_font_resolver_with_fallback()
         {
-            GlobalFontSettings.ResetFontManagement();
             GlobalFontSettings.FontResolver = new TestXFilesFontResolver3();
             GlobalFontSettings.FallbackFontResolver = new FailsafeFontResolver();
 
@@ -475,7 +464,6 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void Test_test()
         {
-            GlobalFontSettings.ResetFontManagement();
             //GlobalFontSettings.FontResolver = new TestXFilesFontResolver1();
             //GlobalFontSettings.FallbackFontResolver = new TestXFilesFontResolver2();
 

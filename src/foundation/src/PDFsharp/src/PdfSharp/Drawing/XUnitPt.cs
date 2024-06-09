@@ -4,8 +4,8 @@
 namespace PdfSharp.Drawing
 {
     /// <summary>
-    /// Represents a value with a unit of measure in point (1/72 inch). The structure converts implicitly from and to
-    /// double.
+    /// Represents a value with a unit of measure in point (1/72 inch).
+    /// The structure converts implicitly from and to double.
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public struct XUnitPt : IFormattable, IComparable<XUnitPt>, IComparable
@@ -18,8 +18,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Gets or sets the raw value of the object, which is always measured in point for XUnitPt.
         /// </summary>
-
-        public double Value;
+        public double Value { get; set; }
 
         /// <summary>
         /// Gets or sets the value in point.
@@ -144,7 +143,7 @@ namespace PdfSharp.Drawing
         /// To compare by value tolerating rounding errors, use IsSameValue() or code like Math.Abs(a.Pt - b.Pt) &lt; 1e-5.
         /// </summary>
         // ReSharper disable CompareOfFloatsByEqualityOperator
-        public static bool operator ==(XUnitPt value1, XUnitPt value2) => value1.Value == value2.Value;
+        public static bool operator ==(XUnitPt l, XUnitPt r) => l.Value == r.Value;
         // ReSharper restore CompareOfFloatsByEqualityOperator
 
         /// <summary>
@@ -152,7 +151,7 @@ namespace PdfSharp.Drawing
         /// To compare by value tolerating rounding errors, use IsSameValue() or code like Math.Abs(a.Pt - b.Pt) &lt; 1e-5.
         /// </summary>
         // ReSharper disable CompareOfFloatsByEqualityOperator
-        public static bool operator !=(XUnitPt value1, XUnitPt value2) => value1.Value != value2.Value;
+        public static bool operator !=(XUnitPt l, XUnitPt r) => l.Value != r.Value;
         // ReSharper restore CompareOfFloatsByEqualityOperator
 
         /// <summary>

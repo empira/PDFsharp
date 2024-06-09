@@ -37,7 +37,7 @@ while **Segoe UI Emoji** contains only one face.
 ### Typeface
 A Typeface refers to a complete set of characters that are unified by a common design ethos.
 
-(It seems in english it is *typeface* but *font face*. Looks strange for me as a German. TODO: Change source code and file names.)
+(It seems in English it is *typeface* but *font face*. Looks strange to me as a German. TODO: Change source code and file names.)
 
 ### Typeface vs font
 Typeface and font or font face are often used similarly. In general, a typeface is something more abstract about
@@ -123,7 +123,7 @@ PDFsharp only supports TrueType font files. TrueType font collections and OpenTy
 
 ### XStyleSimulations
 The class **XStyleSimulation** describes the simulation style of a font.
-Bold, Italic, or both can be simulated for a font that don't have this faces physically.
+Bold, Italic, or both can be simulated for a font that doesn’t have these faces physically.
 The concept was taken from WPF.
 PDFsharp only simules the italic face by sloping the font 20 degrees to the right.
 

@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics;
@@ -116,7 +116,7 @@ namespace MigraDoc.Rendering
             if (roundedCorner == RoundedCorner.BottomLeft || roundedCorner == RoundedCorner.BottomRight)
                 secondaryBorderType = BorderType.Bottom;
 
-            // If both borders don't exist, there's nothing to do and we should not create one by accessing it.
+            // If both borders don’t exist, there’s nothing to do, and we should not create one by accessing it.
             if (!cell.Borders.HasBorder(primaryBorderType) && !cell.Borders.HasBorder(secondaryBorderType))
                 return;
 
@@ -254,12 +254,10 @@ namespace MigraDoc.Rendering
                 y += CalcMaxTopBorderWidth(0);
 
 #if true
-            // !!!new 18-03-09 Attempt to fix an exception. begin
             if (!_bottomBorderMap.TryGetValue(cellRowIndex, out var upperBorderPos))
             {
-                //GetType();
+                //_ = typeof(int);
             }
-            // !!!new 18-03-09 Attempt to fix an exception. end
 #else
             XUnitPt upperBorderPos = _bottomBorderMap[cell.Row.Index];
 #endif
@@ -269,12 +267,10 @@ namespace MigraDoc.Rendering
                 y -= _bottomBorderMap[_startRow];
 
 #if true
-            // !!!new 18-03-09 Attempt to fix an exception. begin
             if (!_bottomBorderMap.TryGetValue(cellRowIndex + cell.MergeDown + 1, out var lowerBorderPos))
             {
-                //GetType();
+                //_ = typeof(int);
             }
-            // !!!new 18-03-09 Attempt to fix an exception. end
 #else
             XUnitPt lowerBorderPos = _bottomBorderMap[cellRowIndex + cell.MergeDown + 1];
 #endif
@@ -341,7 +337,7 @@ namespace MigraDoc.Rendering
             {
                 // InitFormat is called for every page. Some tasks must be performed only once. Do them here.
 
-                // Equalize the two borders, that are used to determine a rounded corner's border.
+                // Equalize the two borders, that are used to determine a rounded corner’s border.
                 // This way the innerWidth of the cell, which is got by the saved _formattedCells, is the same regardless of which corner relevant border is set.
                 foreach (var row in _table.Rows.Cast<Row>())
                 {
@@ -400,7 +396,7 @@ namespace MigraDoc.Rendering
             _renderInfo = new TableRenderInfo();
             InitFormat(area, previousFormatInfo);
 
-            // Don't take any Rows higher then MaxElementHeight
+            // Don’t take any Rows higher then MaxElementHeight
             XUnitPt topHeight = CalcStartingHeight();
             XUnitPt offset;
             if (_startRow > _lastHeaderRow + 1 &&
@@ -418,7 +414,7 @@ namespace MigraDoc.Rendering
             {
                 bool firstProbe = probeRow == _startRow;
                 probeRow = _connectedRowsMap[probeRow];
-                // Don't take any Rows higher then MaxElementHeight
+                // Don’t take any Rows higher then MaxElementHeight
                 XUnitPt probeHeight = _bottomBorderMap[probeRow + 1] - offset;
                 // First test whether MaxElementHeight has been set.
                 if (MaxElementHeight > 0 && firstProbe && probeHeight > MaxElementHeight - Tolerance)
@@ -709,17 +705,12 @@ namespace MigraDoc.Rendering
                 if (cell.Row.Index + cell.MergeDown == minMergedCell.Row.Index + minMergedCell.MergeDown)
                 {
                     FormattedCell formattedCell = _formattedCells[cell];
-                    // !!!new 18-03-09 Attempt to fix an exception. begin
-                    // if (cell.Row.Index < _bottomBorderMap.Count)
                     {
-                        // !!!new 18-03-09 Attempt to fix an exception. end
 #if true
-                        // !!!new 18-03-09 Attempt to fix an exception. begin
                         if (!_bottomBorderMapOld.TryGetValue(cell.Row.Index, out var topBorderPos))
                         {
-                            //GetType();
+                            //_ = typeof(int);
                         }
-                        // !!!new 18-03-09 Attempt to fix an exception. end
 #else
                     XUnitPt topBorderPos = _bottomBorderMapOld[cell.Row.Index];
 #endif
@@ -727,9 +718,7 @@ namespace MigraDoc.Rendering
                         bottomBorderPos += CalcBottomBorderWidth(cell);
                         if (bottomBorderPos > maxBottomBorderPosition)
                             maxBottomBorderPosition = bottomBorderPos;
-                        // !!!new 18-03-09 Attempt to fix an exception. begin
                     }
-                    // !!!new 18-03-09 Attempt to fix an exception. end
                 }
             }
             _bottomBorderMapOld.Add(minMergedCell.Row!.Index + minMergedCell.MergeDown + 1, maxBottomBorderPosition);
@@ -792,7 +781,6 @@ namespace MigraDoc.Rendering
             else
                 first = false;
 
-            //foreach (Cell cell in _mergedCells)
             int cells = _mergedCells.Count;
             for (int idx = skipIndex; idx < cells; ++idx)
             {
@@ -814,17 +802,12 @@ namespace MigraDoc.Rendering
                 if (rowIndex + cell.MergeDown == minRowIndexPlusMergeDown)
                 {
                     FormattedCell formattedCell = _formattedCells[cell];
-                    // !!!new 18-03-09 Attempt to fix an exception. begin
-                    // if (cell.Row.Index < _bottomBorderMap.Count)
                     {
-                        // !!!new 18-03-09 Attempt to fix an exception. end
 #if true
-                        // !!!new 18-03-09 Attempt to fix an exception. begin
                         if (!_bottomBorderMap.TryGetValue(rowIndex, out var topBorderPos))
                         {
-                            //GetType();
+                            //_ = typeof(int);
                         }
-                        // !!!new 18-03-09 Attempt to fix an exception. end
 #else
                     XUnitPt topBorderPos = _bottomBorderMap[rowIndex];
 #endif
@@ -832,16 +815,13 @@ namespace MigraDoc.Rendering
                         bottomBorderPos += CalcBottomBorderWidth(cell);
                         if (bottomBorderPos > maxBottomBorderPosition)
                             maxBottomBorderPosition = bottomBorderPos;
-                        // !!!new 18-03-09 Attempt to fix an exception. begin
                     }
-                    // !!!new 18-03-09 Attempt to fix an exception. end
                 }
             }
 
             if (_bottomBorderMap.TryGetValue(minRowIndexPlusMergeDown + 1, out var temp))
             {
                 // We can only come here if all cells of a row are "hidden" by MergeDown in rows above.
-                //GetType();
                 Debug.Assert(temp == maxBottomBorderPosition);
                 lastBorderRow = 0;
                 foreach (int key in _bottomBorderMap.Keys)
@@ -857,13 +837,13 @@ namespace MigraDoc.Rendering
                 if (f)
                 {
                     if (maxBottomBorderPosition != tempUnit)
-                        GetType();
+                        _ = typeof(int);
                     Debug.Assert(maxBottomBorderPosition == tempUnit);
                 }
                 else
                 {
-                    GetType();
-                    Debug.Assert(false, "Unexpected mismatch");
+                    _ = typeof(int);
+                    Debug.Assert(false, "Unexpected mismatch.");
                 }
 #endif
                 _bottomBorderMap.Add(minRowIndexPlusMergeDown + 1, maxBottomBorderPosition);

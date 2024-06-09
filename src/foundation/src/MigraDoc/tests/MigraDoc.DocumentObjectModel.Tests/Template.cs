@@ -11,6 +11,7 @@ using Xunit;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
+    [Collection("PDFsharp")]
     public class Template
     {
         [Fact]

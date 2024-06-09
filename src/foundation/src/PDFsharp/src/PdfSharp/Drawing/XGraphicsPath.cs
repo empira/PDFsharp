@@ -1284,7 +1284,7 @@ namespace PdfSharp.Drawing
             figure.Segments.Add(segment);
             _pathGeometry.Figures.Add(figure);
 #endif
-            // StartFigure() isn't needed because AddGeometry() implicitly starts a new figure,
+            // StartFigure() isn’t needed because AddGeometry() implicitly starts a new figure,
             // but CloseFigure() is needed for the next adding not to continue this figure.
             CloseFigure();
 #endif
@@ -1316,7 +1316,7 @@ namespace PdfSharp.Drawing
             // TODO: fill mode unclear here
 #if true
             PathGeometry.AddGeometry(GeometryHelper.CreatePolygonGeometry(points, XFillMode.Alternate, true));
-            CloseFigure(); // StartFigure() isn't needed because AddGeometry() implicitly starts a new figure, but CloseFigure() is needed for the next adding not to continue this figure.
+            CloseFigure(); // StartFigure() isn’t needed because AddGeometry() implicitly starts a new figure, but CloseFigure() is needed for the next adding not to continue this figure.
 #else
             AddPolygon(XGraphics.MakeXPointArray(points, 0, points.Length));
 #endif
@@ -1380,7 +1380,7 @@ namespace PdfSharp.Drawing
             _pathGeometry.Figures.Add(figure);
 #endif
             // TODO: NOT NEEDED
-            //CloseFigure(); // StartFigure() isn't needed because AddGeometry() implicitly starts a new figure, but CloseFigure() is needed for the next adding not to continue this figure.
+            //CloseFigure(); // StartFigure() isn’t needed because AddGeometry() implicitly starts a new figure, but CloseFigure() is needed for the next adding not to continue this figure.
 #endif
         }
 
@@ -1891,7 +1891,7 @@ namespace PdfSharp.Drawing
                     //y += -formattedText.Baseline + (cyAscent * 2 / 4) + layoutRect.Height / 2;
 
                     // GDI seems to make it this simple:
-                    // TODO: Check WPF's vertical alignment and make all implementations fit. $MaOs
+                    // TODO: Check WPF’s vertical alignment and make all implementations fit. $MaOs
                     y += layoutRect.Height / 2 - lineSpace / 2;
                     break;
 

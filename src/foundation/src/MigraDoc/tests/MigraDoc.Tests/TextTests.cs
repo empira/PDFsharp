@@ -100,7 +100,6 @@ namespace MigraDoc.Tests
                                                  "No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test 12345 ");
             paragraph.Format.Font.Bold = true;
 
-
             var filename = IOUtility.GetTempFileName("DocumentWithNoBreakHyphen", null);
 
             var pdfFilename = filename + ".pdf";
@@ -136,7 +135,7 @@ namespace MigraDoc.Tests
             rtfRenderer.Render(document, filename + ".rtf", Environment.CurrentDirectory);
 
 
-            // Analyze the drawn text in the PDF's content stream.
+            // Analyze the drawn text in the PDF’s content stream.
             var streamEnumerator = PdfFileHelper.GetPageContentStreamEnumerator(pdfDocument, 0);
 
             streamEnumerator.Text.MoveAndGetNext(true, out var textInfo).Should().BeTrue();
@@ -219,7 +218,6 @@ namespace MigraDoc.Tests
             paragraph.AddText("Heading level 2 with no-break hyphen replaced by hyphen character");
             paragraph.Style = StyleNames.Heading2;
 
-
             var filename = IOUtility.GetTempFileName("DocumentWithNoBreakHyphenBeforeTabs", null);
 
             var pdfFilename = filename + ".pdf";
@@ -250,7 +248,7 @@ namespace MigraDoc.Tests
             var rtfRenderer = new RtfDocumentRenderer();
             rtfRenderer.Render(document, filename + ".rtf", Environment.CurrentDirectory);
 
-            // Analyze the drawn text in the PDF's content stream.
+            // Analyze the drawn text in the PDF’s content stream.
             var streamEnumerator = PdfFileHelper.GetPageContentStreamEnumerator(pdfDocument, 0);
 
             // Ensure that all Heading text objects are positioned at the same x value.
@@ -352,7 +350,7 @@ namespace MigraDoc.Tests
                 PdfFileUtility.ShowDocumentIfDebugging(pdfFilename);
 
                 // In RTF, decimal tabstop alignment is done in the viewing application and always depends on the system regional settings,
-                // as culture or separators cannot be saved in rtf. Therefore, we don't need to assign cultureInfo and output RTF only once.
+                // as culture or separators cannot be saved in rtf. Therefore, we don’t need to assign cultureInfo and output RTF only once.
                 if (cultureInfo == null)
                 {
                     var rtfFilename = String.Format(filenamePattern, null, "rtf");
@@ -361,7 +359,7 @@ namespace MigraDoc.Tests
                 }
 
 
-                // Analyze the drawn text in the PDF's content stream.
+                // Analyze the drawn text in the PDF’s content stream.
 
                 // The horizontal position of the first line ("0.0").
                 var firstLineX = 150.344;
@@ -391,12 +389,12 @@ namespace MigraDoc.Tests
                             if (lineCount == 1)
                             {
                                 var isAtFirstLineX = textInfo.IsAtXPosition(firstLineX);
-                                isAtFirstLineX.Should().BeTrue($"first text line's (\"0.0\") horizontal offset should be '{firstLineX}' instead of '{textInfo.X}'");
+                                isAtFirstLineX.Should().BeTrue($"first text line’s (\"0.0\") horizontal offset should be '{firstLineX}' instead of '{textInfo.X}'");
                                 continue;
                             }
 
                             var isAtOtherLinesX = textInfo.IsAtXPosition(expectedOtherLinesX);
-                            isAtOtherLinesX.Should().BeTrue($"the other line's horizontal offset should be '{expectedOtherLinesX}' instead of '{textInfo.X}'");
+                            isAtOtherLinesX.Should().BeTrue($"the other line’s horizontal offset should be '{expectedOtherLinesX}' instead of '{textInfo.X}'");
                         }
                     }
 

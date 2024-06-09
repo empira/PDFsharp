@@ -25,6 +25,7 @@ namespace PdfSharp.Pdf.IO
         /// The PDF stream is completely read into memory, but cannot be modified. This mode preserves the
         /// original internal structure of the document and is useful for analyzing existing PDF files.
         /// </summary>
+        [Obsolete("ReadOnly is not implemented, use Import instead.")]
         ReadOnly,
 
         /// <summary>

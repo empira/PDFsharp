@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 //#if GDI
@@ -245,7 +245,7 @@ namespace PdfSharp.Fonts
             // Example command that should return a full file path to FreeSansBoldOblique.ttf:
             //     fc-match -f '%{file}\n' 'FreeSans:Bold:Oblique:fontformat=TrueType' : file
             //
-            // Caveat: fc-match *always* returns a "next best" match or default font, even if it's bad.
+            // Caveat: fc-match *always* returns a "next best" match or default font, even if it’s bad.
             // Caveat: some preprocessing/refactoring needed to produce a pattern fc-match can understand.
             // Caveat: fontconfig needs additional configuration to know about WSL having Windows Fonts available at /mnt/c/Windows/Fonts.
 

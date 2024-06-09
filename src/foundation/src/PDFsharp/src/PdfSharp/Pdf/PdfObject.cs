@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.Advanced;
@@ -213,7 +213,7 @@ namespace PdfSharp.Pdf
                 Debug.Assert(elements[idx].XRef.Document != null);
                 Debug.Assert(elements[idx].Document != null);
                 if (elements[idx].ObjectID.ObjectNumber == 12)
-                    GetType();
+                    _ = typeof(int);
             }
 #endif
             // 1st loop. Replace all objects by their clones.
@@ -250,7 +250,7 @@ namespace PdfSharp.Pdf
                 Debug.Assert(elements[idx]._iref.Document != null);
                 Debug.Assert(resources[idx].Document != null);
                 if (elements[idx].ObjectID.ObjectNumber == 12)
-                    GetType();
+                    _ = typeof(int);
             }
 #endif
 
@@ -289,7 +289,7 @@ namespace PdfSharp.Pdf
                 Debug.Assert(elements[idx].XRef.Document != null);
                 Debug.Assert(elements[idx].Document != null);
                 if (elements[idx].ObjectID.ObjectNumber == 12)
-                    GetType();
+                    _ = typeof(int);
             }
 #endif
             // 1st loop. Already imported objects are reused and new ones are cloned.
@@ -302,7 +302,7 @@ namespace PdfSharp.Pdf
                 {
 #if DEBUG_
                     if (obj.ObjectID.ObjectNumber == 5894)
-                        obj.GetType();
+                        _ = typeof(int);
 #endif
                     // Case: External object was already imported.
                     PdfReference iref = importedObjectTable[obj.ObjectID];
@@ -345,7 +345,7 @@ namespace PdfSharp.Pdf
                 Debug.Assert(elements[idx].IsIndirect == false);
                 Debug.Assert(elements[idx].Owner != null);
                 //if (elements[idx].ObjectID.ObjectNumber == 12)
-                //    GetType();
+                //    _ = typeof(int);
             }
 #endif
             // 2nd loop. Fix up indirect references that still refers to the external document.
@@ -424,7 +424,7 @@ namespace PdfSharp.Pdf
                             // The item is something else, e.g. a name.
                             // Nothing to do.
 
-                            // ...but let's double check this case in DEBUG build.
+                            // ...but let’s double check this case in DEBUG build.
                             DebugCheckNonObjects(item);
                         }
                     }
@@ -484,7 +484,7 @@ namespace PdfSharp.Pdf
                             // The item is something else, e.g. a name.
                             // Nothing to do.
 
-                            // ...but let's double check this case in DEBUG build.
+                            // ...but let’s double check this case in DEBUG build.
                             DebugCheckNonObjects(item);
                         }
                     }

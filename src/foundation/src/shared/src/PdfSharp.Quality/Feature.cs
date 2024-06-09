@@ -158,21 +158,21 @@ namespace PdfSharp.Quality
             return outFilename;
         }
 
-        /// <summary>
-        /// Creates and sets a logger factory for test code.
-        /// </summary>
-        public static void SetDefaultLoggerFactory()
-        {
-            if (_defaultLoggerFactory != null)
-                return;
+        ///// <summary>
+        ///// Creates and sets a logger factory for test code.
+        ///// </summary>
+        //public static void SetDefaultLoggerFactory()
+        //{
+        //    if (_defaultLoggerFactory != null)
+        //        return;
 
-            _defaultLoggerFactory = LoggerFactory.Create(builder =>
-            {
-                builder
-                    .AddConsole();
-            });
-            LogHost.Factory = _defaultLoggerFactory;
-        }
-        static ILoggerFactory? _defaultLoggerFactory;
+        //    _defaultLoggerFactory = LoggerFactory.Create(builder =>
+        //    {
+        //        builder
+        //            .AddConsole();
+        //    });
+        //    LogHost.Factory = _defaultLoggerFactory;
+        //}
+        //static ILoggerFactory? _defaultLoggerFactory;
     }
 }

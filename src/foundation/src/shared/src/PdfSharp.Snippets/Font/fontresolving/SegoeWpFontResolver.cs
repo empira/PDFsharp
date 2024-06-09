@@ -79,7 +79,7 @@ namespace PdfSharp.Snippets.Font
                 switch (lowercaseFamilyName)
                 {
                     case FamilyNames.SegoeWPLight:
-                        // Just for demonstration use 'Semilight' if bold is requested.
+                        // Just for demonstration use 'semilight' if bold is requested.
                         if (isBold)
                             goto case FamilyNames.SegoeWPSemilight;
                         faceName = FaceNames.SegoeWPLight;
@@ -155,7 +155,7 @@ namespace PdfSharp.Snippets.Font
                 FaceNames.SegoeWPBlack => PdfSharp.WPFonts.FontDataHelper.SegoeWPBlack,
                 // PDFsharp never calls GetFont with a face name that was not returned
                 // by ResolveTypeface.
-                _ => null  // Never comes here, but compiler needs it to be happy.
+                _ => null  // Comes here if faceName is from another font resolver.
             };
         }
     }

@@ -35,7 +35,7 @@ namespace PdfSharp.Fonts.OpenType
     /// Represents an OpenType font face in memory.
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
-    sealed class OpenTypeFontFace  // Note: In english, it's spelled 'typeface', but 'font face'.
+    sealed class OpenTypeFontFace  // Note: In English, it’s spelled 'typeface', but 'font face'.
     {
         // Implementation Notes
         // OpenTypeFontFace represents a 'decompiled' font file in memory.

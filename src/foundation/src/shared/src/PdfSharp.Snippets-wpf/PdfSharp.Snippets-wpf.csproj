@@ -87,8 +87,8 @@
     <Folder Include="assets\PDFs\" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <None Include="..\PdfSharp.Snippets\assets\fonts\LICENSE.md" Link="assets\fonts\LICENSE.md" />
-  </ItemGroup>
+  </ItemGroup>-->
 
 </Project>

@@ -33,7 +33,6 @@ namespace PdfSharp.Snippets.Drawing
 
             EndPdfPage();
 
-
             // Page 2 - mm
             gfx = BeginPdfPage(XUnit.FromPoint(WidthInPoint), XUnit.FromPoint(HeightInPoint), XGraphicsUnit.Millimeter);
 

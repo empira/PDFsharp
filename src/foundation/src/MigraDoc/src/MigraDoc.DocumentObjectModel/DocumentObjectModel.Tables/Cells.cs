@@ -92,7 +92,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         }
 
         /// <summary>
-        /// Resizes this cells' list if necessary.
+        /// Resizes these cells¹ list if necessary.
         /// </summary>
         void Resize(int index)
         {
@@ -111,7 +111,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the meta-object of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

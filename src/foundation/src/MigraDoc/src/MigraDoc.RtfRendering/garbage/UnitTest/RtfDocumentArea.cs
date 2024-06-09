@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+ï»¿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System;
@@ -430,14 +430,14 @@ namespace MigraDoc.RtfRendering.UnitTest
     }
 
     [UnitTestFunction]
-    public static void TestVermögensverwaltung()
+    public static void TestVermÃ¶gensverwaltung()
     {
-      Document doc = DocumentObjectModel.IO.DdlReader.DocumentFromFile("Vermögensverwaltung.mdddl"); //, null);
+      Document doc = DocumentObjectModel.IO.DdlReader.DocumentFromFile("VermÃ¶gensverwaltung.mdddl"); //, null);
       DocumentRenderer docRndrr = new DocumentRenderer();
-      docRndrr.Render(doc, "RtfVermögensverwaltung.txt", null);
-      File.Copy("RtfVermögensverwaltung.txt", "RtfVermögensverwaltung.rtf", true);
-      System.Diagnostics.http://localhost:8093/link/download-assets.html("RtfVermögensverwaltung.txt");
-      DdlWriter.WriteToFile(doc, "RtfVermögensverwaltung.mdddl");
+      docRndrr.Render(doc, "RtfVermÃ¶gensverwaltung.txt", null);
+      File.Copy("RtfVermÃ¶gensverwaltung.txt", "RtfVermÃ¶gensverwaltung.rtf", true);
+      System.Diagnostics.http://localhost:8093/link/download-assets.html("RtfVermÃ¶gensverwaltung.txt");
+      DdlWriter.WriteToFile(doc, "RtfVermÃ¶gensverwaltung.mdddl");
     }
 
  //[UnitTestFunction]
@@ -497,15 +497,15 @@ namespace MigraDoc.RtfRendering.UnitTest
     }
 
     //[UnitTestFunction]
-    public static void TestDiagrammBroschüre()
+    public static void TestDiagrammBroschÃ¼re()
     {
       /*
-      Document doc = DocumentObjectModel.IO.DdlReader.DocumentFromFile("DiagrammBroschüre.mdddl", null);
+      Document doc = DocumentObjectModel.IO.DdlReader.DocumentFromFile("DiagrammBroschÃ¼re.mdddl", null);
       DocumentRenderer docRndrr = new DocumentRenderer();
-      docRndrr.Render(doc, "RtfDiagrammBroschüre.txt", null);
-      File.Copy("RtfDiagrammBroschüre.txt", "RtfDiagrammBroschüre.rtf", true);
-      System.Diagnostics.http://localhost:8093/link/download-assets.html("RtfDiagrammBroschüre.txt");
-      DdlWriter.WriteToFile(doc, "RtfDiagrammBroschüre.mdddl");
+      docRndrr.Render(doc, "RtfDiagrammBroschÃ¼re.txt", null);
+      File.Copy("RtfDiagrammBroschÃ¼re.txt", "RtfDiagrammBroschÃ¼re.rtf", true);
+      System.Diagnostics.http://localhost:8093/link/download-assets.html("RtfDiagrammBroschÃ¼re.txt");
+      DdlWriter.WriteToFile(doc, "RtfDiagrammBroschÃ¼re.mdddl");
       */
     }
 

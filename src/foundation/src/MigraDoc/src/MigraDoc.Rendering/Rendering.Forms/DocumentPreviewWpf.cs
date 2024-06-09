@@ -20,9 +20,6 @@ namespace MigraDoc.Rendering.Forms
     [Obsolete("This class will be removed soon.")]
     public delegate void PagePreviewEventHandler(object sender, EventArgs e);
 
-    //#if DEBUG
-    //#warning Diese Klasse wird nicht implementiert werden. Sie wird nur mitcompiliert, weil sonst QBX Reha nicht gebaut werden kann. //PdfSharp.Forms.PagePreview not yet implemented
-    //#endif
     /// <summary>
     ///   Represents a Windows control to display a MigraDoc document.
     /// </summary>
@@ -296,7 +293,7 @@ namespace MigraDoc.Rendering.Forms
         //MigraDoc.DocumentObjectModel.Document document;
 
         /// <summary>
-        ///   Gets the underlying DocumentRenderer of the document currently in preview, or null, if no rederer exists. You can use this renderer for printing or creating PDF file. This evades the necessity to format the document a second time when you want to print it and convert it into PDF.
+        ///   Gets the underlying DocumentRenderer of the document currently in preview, or null, if no renderer exists. You can use this renderer for printing or creating PDF file. This evades the necessity to format the document a second time when you want to print it and convert it into PDF.
         /// </summary>
         public DocumentRenderer Renderer
         {
@@ -357,7 +354,7 @@ namespace MigraDoc.Rendering.Forms
             }
         }
 
-        //internal int zoomPercen = 100;
+        //internal int zoomPercent = 100;
 
         /// <summary>
         ///   Makes zoom factor smaller.

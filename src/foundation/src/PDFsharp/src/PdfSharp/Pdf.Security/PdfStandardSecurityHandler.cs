@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Internal;
@@ -151,9 +151,9 @@ namespace PdfSharp.Pdf.Security
         /// <summary>
         /// Returns this SecurityHandler, if it shall be written to PDF (if an encryption is chosen).
         /// </summary>
-        internal PdfStandardSecurityHandler? GetIfEncryptionActive() => IsEncrypted ? this : null;
+        internal PdfStandardSecurityHandler? GetIfEncryptionIsActive() => IsEncrypted ? this : null;
 
-        internal bool IsEncrypted => _encryption != null;
+        bool IsEncrypted => _encryption != null;
 
         /// <summary>
         /// Sets the user password of the document.
@@ -518,11 +518,11 @@ namespace PdfSharp.Pdf.Security
 
         internal override void WriteObject(PdfWriter writer)
         {
-            // Don't encrypt myself.
-            var securityHandler = writer.SecurityHandler;
-            writer.SecurityHandler = null;
+            // Don’t encrypt myself.
+            var effectiveSecurityHandler = writer.EffectiveSecurityHandler;
+            writer.EffectiveSecurityHandler = null;
             base.WriteObject(writer);
-            writer.SecurityHandler = securityHandler;
+            writer.EffectiveSecurityHandler = effectiveSecurityHandler;
         }
 
         /// <summary>
@@ -637,13 +637,13 @@ namespace PdfSharp.Pdf.Security
         }
 
         /// <summary>
-        /// Encrypts embedded file streams only by setting a crypt filter only in the security handler's EFF key and
-        /// setting the crypt filter's AuthEvent Key to /EFOpen, in order authenticate embedded file streams when accessing the embedded file.
+        /// Encrypts embedded file streams only by setting a crypt filter only in the security handler’s EFF key and
+        /// setting the crypt filter’s AuthEvent Key to /EFOpen, in order authenticate embedded file streams when accessing the embedded file.
         /// </summary>
-        public void EncryptEmbeddedFilesOnly()
+        public void EncryptEmbeddedFileStreamsOnly()
         {
 #if true
-            throw TH.NotImplementedException_EncryptEmbeddedFilesOnlyCurrentlyShutOff();
+            throw TH.NotImplementedException_EncryptEmbeddedFileStreamsOnlyCurrentlyShutOff();
 #else
             // TODO: Find and fix error in order to produce files readable by common PDF readers. When done enable SecurityTests.Test_OnlyEmbeddedFileStreamEncrypted().
 
@@ -790,7 +790,7 @@ namespace PdfSharp.Pdf.Security
         }
 
         /// <summary>
-        /// Sets the dictionary's explicitly set crypt filter to the Identity crypt filter.
+        /// Sets the dictionary’s explicitly set crypt filter to the Identity crypt filter.
         /// </summary>
         public void SetIdentityCryptFilter(PdfDictionary dictionary)
         {
@@ -798,7 +798,7 @@ namespace PdfSharp.Pdf.Security
         }
 
         /// <summary>
-        /// Sets the dictionary's explicitly set crypt filter to the desired crypt filter.
+        /// Sets the dictionary’s explicitly set crypt filter to the desired crypt filter.
         /// </summary>
         public void SetCryptFilter(PdfDictionary dictionary, string cryptFilterName)
         {

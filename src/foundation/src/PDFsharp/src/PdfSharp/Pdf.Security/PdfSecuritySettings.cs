@@ -49,6 +49,11 @@ namespace PdfSharp.Pdf.Security
         }
 
         /// <summary>
+        /// Returns true, if the standard security handler exists and encryption is active.
+        /// </summary>
+        public bool IsEncrypted => EffectiveSecurityHandler != null;
+
+        /// <summary>
         /// Determines whether the document can be saved.
         /// </summary>
         internal bool CanSave(ref string message)

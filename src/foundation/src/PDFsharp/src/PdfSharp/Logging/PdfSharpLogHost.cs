@@ -53,8 +53,12 @@ namespace PdfSharp.Logging
         {
             get
             {
-                CheckFactoryHasChanged();
-                return _documentProcessingLogger ??= LogHost.CreateLogger(PdfSharpLogCategory.DocumentProcessing);
+                // We do not need lock, because even creating two loggers has no negative effects.
+                //lock (typeof(MigraDocLogHost)) // Keep for documenting that it is by design not to lock.
+                {
+                    CheckFactoryHasChanged();
+                    return _documentProcessingLogger ??= LogHost.CreateLogger(PdfSharpLogCategory.DocumentProcessing);
+                }
             }
         }
         static ILogger? _documentProcessingLogger;
@@ -66,8 +70,11 @@ namespace PdfSharp.Logging
         {
             get
             {
-                CheckFactoryHasChanged();
-                return _imageProcessingLogger ??= LogHost.CreateLogger(PdfSharpLogCategory.ImageProcessing);
+                //lock (typeof(MigraDocLogHost)) // Keep for documenting that it is by design not to lock.
+                {
+                    CheckFactoryHasChanged();
+                    return _imageProcessingLogger ??= LogHost.CreateLogger(PdfSharpLogCategory.ImageProcessing);
+                }
             }
         }
         static ILogger? _imageProcessingLogger;
@@ -79,8 +86,11 @@ namespace PdfSharp.Logging
         {
             get
             {
-                CheckFactoryHasChanged();
-                return _fontManagementLogger ??= LogHost.CreateLogger(PdfSharpLogCategory.FontManagement);
+                //lock (typeof(MigraDocLogHost)) // Keep for documenting that it is by design not to lock.
+                {
+                    CheckFactoryHasChanged();
+                    return _fontManagementLogger ??= LogHost.CreateLogger(PdfSharpLogCategory.FontManagement);
+                }
             }
         }
         static ILogger? _fontManagementLogger;
@@ -92,8 +102,11 @@ namespace PdfSharp.Logging
         {
             get
             {
-                CheckFactoryHasChanged();
-                return _pdfReadingLogger ??= LogHost.CreateLogger(PdfSharpLogCategory.PdfReading);
+                //lock (typeof(MigraDocLogHost)) // Keep for documenting that it is by design not to lock.
+                {
+                    CheckFactoryHasChanged();
+                    return _pdfReadingLogger ??= LogHost.CreateLogger(PdfSharpLogCategory.PdfReading);
+                }
             }
         }
         static ILogger? _pdfReadingLogger;

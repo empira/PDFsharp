@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+ï»¿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
@@ -249,7 +249,7 @@ namespace MigraDoc.DocumentObjectModel
                 {
                     // Does not work.
                     // if (IsBlankRequired(this .lastChar, _text[0]))
-                    //   _text = "·" + _text;
+                    //   _text = "Â·" + _text;
                 }
                 else
                 {
@@ -265,7 +265,7 @@ namespace MigraDoc.DocumentObjectModel
                 if (_linePos > LineBreakBeyond)
                 {
                     fLineBreak = true;
-                    //this .textWriter.Write("//¶");  // for debugging only
+                    //this .textWriter.Write("//Â¶");  // for debugging only
                 }
                 else
                     _lastChar = text[len - 1];

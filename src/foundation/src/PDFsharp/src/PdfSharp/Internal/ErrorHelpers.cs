@@ -16,19 +16,16 @@ namespace PdfSharp.Internal
             "If you think your file is a valid PDF file please send it to us so that we can fix this bug in the PDF parser.";
 
         public static InvalidOperationException InvalidOperationException_CouldNotFindMetadataDictionary() =>
-            new("Could not find document's metadata dictionary." + SendUsTheFile);
+            new("Could not find document’s metadata dictionary." + SendUsTheFile);
 
         #region Reader Messages
 
-        public static ObjectNotAvailableException ObjectNotAvailableException_CannotRetrieveStreamLengthByNow(Exception? innerException = null)
+        public static ObjectNotAvailableException ObjectNotAvailableException_CannotRetrieveStreamLength(Exception? innerException = null)
         {
-            const string message = "Cannot retrieve stream length from stream object." + SendUsTheFile;
+            const string message = "Cannot retrieve stream length." + SendUsTheFile;
             return innerException != null ? new(message, innerException) : new(message);
         }
-
-        public static ObjectNotAvailableException ObjectNotAvailableException_CannotRetrieveStreamLength() =>
-            new("Cannot retrieve stream length." + SendUsTheFile);
-
+        
         public static InvalidOperationException InvalidOperationException_ReferencesOfObjectStreamNotYetRead() =>
             new("References of object stream are not yet read." + SendUsTheFile);
 
@@ -83,7 +80,7 @@ namespace PdfSharp.Internal
         public static PdfReaderException PdfReaderException_CouldNotVerifyPWithPermsKey() =>
             new("The document seems to be not correctly encrypted. Could not verify P with Perms key.");
 
-        public static NotImplementedException NotImplementedException_EncryptEmbeddedFilesOnlyCurrentlyShutOff() =>
+        public static NotImplementedException NotImplementedException_EncryptEmbeddedFileStreamsOnlyCurrentlyShutOff() =>
             new("The current implementation is shut off, " +
                 "as it does not work correctly and produces PDF files common PDF readers cannot access the embedded file stream correctly.");
 

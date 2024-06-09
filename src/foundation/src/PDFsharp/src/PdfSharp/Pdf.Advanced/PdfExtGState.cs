@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+Ôªø// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 #if GDI
@@ -207,7 +207,7 @@ namespace PdfSharp.Pdf.Advanced
             public const string Type = "/Type";
 
             /// <summary>
-            /// (Optional; PDF 1.3) The line width (see ìLine Widthî on page 185).
+            /// (Optional; PDF 1.3) The line width (see ‚ÄúLine Width‚Äù on page 185).
             /// </summary>
             [KeyInfo(KeyType.Real | KeyType.Optional)]
             public const string LW = "/LW";
@@ -348,7 +348,7 @@ namespace PdfSharp.Pdf.Advanced
             public const string ca = "/ca";
 
             /// <summary>
-            /// (Optional; PDF 1.4) The alpha source flag (ìalpha is shapeî), specifying whether 
+            /// (Optional; PDF 1.4) The alpha source flag (‚Äúalpha is shape‚Äù), specifying whether 
             /// the current soft mask and alpha constant are to be interpreted as shape values (true)
             /// or opacity values (false).
             /// </summary>

@@ -207,14 +207,14 @@ namespace PdfSharp.Drawing
         /// Returns the object as string using the format information.
         /// The unit of measure is appended to the end of the string.
         /// </summary>
-        public string ToString(IFormatProvider? formatProvider) 
+        public string ToString(IFormatProvider? formatProvider)
             => Value.ToString(formatProvider) + GetSuffix();
 
         /// <summary>
         /// Returns the object as string using the specified format and format information.
         /// The unit of measure is appended to the end of the string.
         /// </summary>
-        string IFormattable.ToString(string? format, IFormatProvider? formatProvider) 
+        string IFormattable.ToString(string? format, IFormatProvider? formatProvider)
             => Value.ToString(format, formatProvider) + GetSuffix();
 
         /// <summary>
@@ -271,6 +271,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public static implicit operator XUnit(string value)
         {
+
             XUnit unit = default;
             value = value.Trim();
 
@@ -327,19 +328,21 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Converts an int to an XUnit object with type set to point.
         /// </summary>
-        [Obsolete("Implicit conversion from int is obsolete, because it led to misunderstandings and unexpected behavior. Provide the unit by FromPoint() or use XUnitPt instead.")]
+        [Obsolete("In PDFsharp 6.1 implicit conversion from int is marked obsolete, because it led to misunderstandings and unexpected behavior. " +
+                  "Provide the unit by XUnit.FromPoint() or use the new class XUnitPt instead.")]
         public static implicit operator XUnit(int value) => new(value/*, XGraphicsUnit.Point*/);
 
         /// <summary>
         /// Converts a double to an XUnit object with type set to point.
         /// </summary>
-        [Obsolete("Implicit conversion from double is obsolete, because it led to misunderstandings and unexpected behavior. Provide the unit by FromPoint() or use XUnitPt instead.")]
+        [Obsolete("In PDFsharp 6.1 implicit conversion from double is marked obsolete, because it led to misunderstandings and unexpected behavior. "+
+                  "Provide the unit by XUnit.FromPoint() or use the new class XUnitPt instead.")]
         public static implicit operator XUnit(double value) => new(value/*, XGraphicsUnit.Point*/);
 
         /// <summary>
         /// Converts an XUnit object to a double value as point.
         /// </summary>
-        [Obsolete("Implicit conversion to double is obsolete, because it led to misunderstandings and unexpected behavior. Use the Point property instead.")]
+        [Obsolete("In PDFsharp 6.1 implicit conversion to double is marked obsolete, because it led to misunderstandings and unexpected behavior. Use the XUnit.Point property instead.")]
         public static implicit operator double(XUnit value) => value.PointValue;
 
         /// <summary>
@@ -347,14 +350,14 @@ namespace PdfSharp.Drawing
         /// To compare by value tolerating rounding errors, use IsSameValue() or code like Math.Abs(a.Pt - b.Pt) &lt; 1e-5.
         /// </summary>
         // ReSharper disable CompareOfFloatsByEqualityOperator
-        public static bool operator ==(XUnit value1, XUnit value2) => value1.Type == value2.Type && value1.Value == value2.Value;
+        public static bool operator ==(XUnit l, XUnit r) => l.Type == r.Type && l.Value == r.Value;
         // ReSharper restore CompareOfFloatsByEqualityOperator
 
         /// <summary>
         /// Memberwise comparison checking exact value und unit.
         /// To compare by value tolerating rounding errors, use IsSameValue() or code like Math.Abs(a.Pt - b.Pt) &lt; 1e-5.
         /// </summary>
-        public static bool operator !=(XUnit value1, XUnit value2) => !(value1 == value2);
+        public static bool operator !=(XUnit l, XUnit r) => !(l == r);
 
         /// <summary>
         /// Compares two XUnit values.
@@ -380,7 +383,7 @@ namespace PdfSharp.Drawing
         /// Returns the negative value of an XUnit.
         /// </summary>
         public static XUnit operator -(XUnit value) => new(-value.Value, value.Type);
-        
+
         /// <summary>
         /// Adds an XUnit to an XUnit.
         /// </summary>
@@ -523,7 +526,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <value>The debugger display.</value>
         // ReSharper disable UnusedMember.Local
-        string DebuggerDisplay=> Invariant($"{Value:0.######} {GetSuffix()}");
+        string DebuggerDisplay => Invariant($"{Value:0.######} {GetSuffix()}");
         // ReSharper restore UnusedMember.Local
     }
 }

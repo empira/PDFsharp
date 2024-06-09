@@ -67,12 +67,12 @@ namespace PdfSharp.Fonts
         public int MaxCodePoint = Int32.MinValue;
 
         /// <summary>
-        /// Maps a Unicode code point to a glyph id.
+        /// Maps a Unicode code point to a glyph ID.
         /// </summary>
         public Dictionary<int, ushort> CodePointsToGlyphIndices = [];
 
         /// <summary>
-        /// Collects all use glyph ids. Value is not used.
+        /// Collects all used glyph IDs. Value is not used.
         /// </summary>
         public Dictionary<ushort, object?> GlyphIndices = [];
     }

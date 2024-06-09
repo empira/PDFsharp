@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
@@ -120,7 +120,7 @@ namespace PdfSharp.Pdf
             switch (encoding)
             {
                 case PdfStringEncoding.RawEncoding:
-                    CheckRawEncoding(value);
+                    AssertRawEncoding(value);
                     break;
 
                 case PdfStringEncoding.StandardEncoding:
@@ -130,7 +130,7 @@ namespace PdfSharp.Pdf
                     break;
 
                 case PdfStringEncoding.WinAnsiEncoding:
-                    CheckRawEncoding(value);
+                    AssertRawEncoding(value);
                     break;
 
                 case PdfStringEncoding.MacRomanEncoding:
@@ -239,7 +239,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         static bool TryRereadAsUnicode(ref string? value)
         {
-            // UTF-16BE Unicode strings start with U+FEFF ("��"). There can be empty strings with UTF-16BE prefix.
+            // UTF-16BE Unicode strings start with U+FEFF ("þÿ"). There can be empty strings with UTF-16BE prefix.
 #if NET6_0_OR_GREATER || true
             // Check for UTF-16BE encoding.
             // ---
@@ -306,7 +306,7 @@ namespace PdfSharp.Pdf
             }
 #endif
 
-            // UTF-8 Unicode strings start with U+EFBBBF ("﻿").
+            // UTF-8 Unicode strings start with U+EFBBBF ("ï»¿").
 #if NET6_0_OR_GREATER || true
             if (value is ['\xEF', '\xBB', '\xBF', ..])
 #else
@@ -388,7 +388,8 @@ namespace PdfSharp.Pdf
             '\xF0', '\xF1', '\xF2', '\xF3', '\xF4', '\xF5', '\xF6', '\xF7', '\xF8', '\xF9', '\xFA', '\xFB', '\xFC', '\xFD', '\xFE', '\xFF',
         };
 
-        static void CheckRawEncoding(string s)
+        [Conditional("DEBUG")]
+        static void AssertRawEncoding(string s)
         {
             if (String.IsNullOrEmpty(s))
                 return;

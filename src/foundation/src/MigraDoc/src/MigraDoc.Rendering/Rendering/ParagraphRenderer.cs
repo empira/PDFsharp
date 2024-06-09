@@ -106,7 +106,7 @@ namespace MigraDoc.Rendering
         internal override void Render()
         {
             InitRendering();
-            if ((int)_paragraph.Format.OutlineLevel >= 1 && _gfx.PdfPage != null) // Don't call GetOutlineTitle() in vain
+            if ((int)_paragraph.Format.OutlineLevel >= 1 && _gfx.PdfPage != null) // Don’t call GetOutlineTitle() in vain
                 DocumentRenderer.AddOutline((int)_paragraph.Format.OutlineLevel, GetOutlineTitle(), _gfx.PdfPage, GetDestinationPosition());
 
             RenderShading();
@@ -259,7 +259,7 @@ namespace MigraDoc.Rendering
                     PageBreakBefore = _paragraph.Format.PageBreakBefore,
                     MarginTop = _paragraph.Format.SpaceBefore.Point,
                     MarginBottom = _paragraph.Format.SpaceAfter.Point,
-                    //Don't confuse margins with left or right indent.
+                    //Don’t confuse margins with left or right indent.
                     //Indents are invisible for the layouter.
                     MarginRight = 0,
                     MarginLeft = 0,
@@ -273,7 +273,7 @@ namespace MigraDoc.Rendering
         /// <summary>
         /// Adjusts the current x position to the given tab stop if possible.
         /// </summary>
-        /// <returns>True if the text doesn't fit the line anymore and the tab causes a line break.</returns>
+        /// <returns>True if the text doesn’t fit the line anymore and the tab causes a line break.</returns>
         FormatResult FormatTab()
         {
             // For Tabs in Justified context
@@ -758,7 +758,7 @@ namespace MigraDoc.Rendering
                     _lastTabPassed = true;
 
                 // If a DocumentObjectCollection is returned as a leaf, it is obviously empty.
-                // There is no need to render an empty DocumentObjectCollection. Also, RenderElement() will throw an exception, because it doesn't contain implementations for DocumentObjectCollections. So we better won't call it for them.
+                // There is no need to render an empty DocumentObjectCollection. Also, RenderElement() will throw an exception, because it doesn’t contain implementations for DocumentObjectCollections. So we better won¹t call it for them.
                 if (_currentLeaf.Current is not DocumentObjectCollection)
                     RenderElement(_currentLeaf.Current);
 
@@ -1217,7 +1217,7 @@ namespace MigraDoc.Rendering
                         {
                             page.AddDocumentLink(new PdfRectangle(rect), hyperlink.BookmarkName);
                         }
-                        // Otherwise use page from bookmark's fieldInfo.
+                        // Otherwise use page from bookmark’s fieldInfo.
                         else
                         {
                             var pageRef = _fieldInfos?.GetPhysicalPageNumber(hyperlink.BookmarkName) ?? NRT.ThrowOnNull<int>();
@@ -1302,7 +1302,6 @@ namespace MigraDoc.Rendering
                 Font font = CurrentDomFont;
                 XFont xFont = CurrentFont;
 
-                // $MaOs BUG: For LineSpacingRule.AtLeast the text should be positioned at the line bottom. Maybe verticalInfo.InherentlineSpace does not contain the lineSpacing value in this case.
                 double setLineSpace = verticalInfo.InherentLineSpace;
                 double standardFontLineSpace = xFont.GetHeight();
 
@@ -1631,8 +1630,8 @@ namespace MigraDoc.Rendering
         /// <returns></returns>
         FormatResult FormatElement(DocumentObject docObj)
         {
-            // Check for available space in the area must be made for each element and explicitly for the last paragraph's element, because in formatting phase,
-            // BottomBorderOffset contains the actual last line's bottom border offset value only for the last paragraph's object.
+            // Check for available space in the area must be made for each element and explicitly for the last paragraph’s element, because in formatting phase,
+            // BottomBorderOffset contains the actual last line’s bottom border offset value only for the last paragraph’s object.
             var newVertInfo = CalcVerticalInfo(CurrentFont);
             var fittingRect = _formattingArea.GetFittingRect(_currentYPosition, newVertInfo.Height + BottomBorderOffset);
             if (fittingRect == null)
@@ -2006,7 +2005,7 @@ namespace MigraDoc.Rendering
         {
             if (GetListSymbol(out var symbol, out var font))
             {
-                _currentVerticalInfo = CalcVerticalInfo(font);
+                _currentVerticalInfo = CalcVerticalInfo(font, true);
                 _currentXPosition += _gfx.MeasureString(symbol, font, StringFormat).Width;
                 FormatTab();
             }
@@ -2118,11 +2117,6 @@ namespace MigraDoc.Rendering
             if (_lastFont == currentFont)
             {
                 width = _blankWidth;
-#if DEBUG_
-                if (MeasureString(" ") != width)
-                    throw new InvalidOperationException("Check FormatBlank.");
-                //Debug.Assert(MeasureString(" ") == width);
-#endif
             }
             else
             {
@@ -2365,7 +2359,7 @@ namespace MigraDoc.Rendering
 
         /// <summary>
         /// Gets the bottom border offset for the last line, else 0.
-        /// While formatting, the actual border offset for the last line is only returned for the last paragraph's element.
+        /// While formatting, the actual border offset for the last line is only returned for the last paragraph’s element.
         /// </summary>
         XUnitPt BottomBorderOffset
         {
@@ -2396,55 +2390,88 @@ namespace MigraDoc.Rendering
             return CalcVerticalInfo(CurrentFont);
         }
 
-        VerticalLineInfo CalcVerticalInfo(XFont font)
+        VerticalLineInfo CalcVerticalInfo(XFont font, bool isListSymbol = false)
         {
-            ParagraphFormat paragraphFormat = _paragraph.Format;
-            LineSpacingRule spacingRule = paragraphFormat.LineSpacingRule;
-            XUnitPt lineHeight = 0;
-
-            XUnitPt descent = FontHandler.GetDescent(font);
-            descent = Math.Max(_currentVerticalInfo.Descent, descent);
+            var paragraphFormat = _paragraph.Format;
+            var lineSpacingRule = paragraphFormat.LineSpacingRule;
 
             XUnitPt singleLineSpace = font.GetHeight();
             var imageRenderInfo = CurrentImageRenderInfo;
             if (imageRenderInfo != null)
                 singleLineSpace = singleLineSpace - FontHandler.GetAscent(font) + imageRenderInfo.LayoutInfo.ContentArea.Height;
 
-            XUnitPt inherentLineSpace = Math.Max(_currentVerticalInfo.InherentLineSpace, singleLineSpace);
-            switch (spacingRule)
+            XUnitPt inherentLineSpace, lineHeight;
+            if (lineSpacingRule == LineSpacingRule.Exactly)
             {
-                case LineSpacingRule.Single:
-                    lineHeight = singleLineSpace;
-                    break;
+                // singleLineSpace shall be exactly _paragraph.Format.LineSpacing.
+                singleLineSpace = _paragraph.Format.LineSpacing.ToXUnitPt();
 
-                case LineSpacingRule.OnePtFive:
-                    lineHeight = 1.5 * singleLineSpace;
-                    break;
+                // Set inherentLineSpace and lineHeight to the same exact value.
+                inherentLineSpace = singleLineSpace;
+                lineHeight = singleLineSpace;
 
-                case LineSpacingRule.Double:
-                    lineHeight = 2.0 * singleLineSpace;
-                    break;
-
-                case LineSpacingRule.Multiple:
-                    lineHeight = _paragraph.Format.LineSpacing.Point * singleLineSpace;
-                    break;
-
-                case LineSpacingRule.AtLeast:
-                    lineHeight = Math.Max(singleLineSpace, _paragraph.Format.LineSpacing.Point);
-                    break;
-
-                case LineSpacingRule.Exactly:
-                    lineHeight = _paragraph.Format.LineSpacing.Point;
-                    inherentLineSpace = _paragraph.Format.LineSpacing.Point;
-                    break;
             }
-            lineHeight = Math.Max(_currentVerticalInfo.Height, lineHeight);
+            else if (lineSpacingRule == LineSpacingRule.AtLeast)
+            {
+                // singleLineSpace shall be at least _paragraph.Format.LineSpacing.Point.
+                singleLineSpace = Math.Max(singleLineSpace, _paragraph.Format.LineSpacing.Point);
+
+                // Set inherentLineSpace and lineHeight to the same maximum value. This way the space resulting from the difference
+                // between original singleLineSpace and _paragraph.Format.LineSpacing.Point will be located at the top of the text line.
+                inherentLineSpace = singleLineSpace;
+                inherentLineSpace = Math.Max(inherentLineSpace, _currentVerticalInfo.InherentLineSpace);
+                lineHeight = inherentLineSpace;
+            }
+            else
+            {
+                var factor = lineSpacingRule switch
+                {
+                    LineSpacingRule.OnePtFive => 1.5,
+                    LineSpacingRule.Double => 2.0,
+                    LineSpacingRule.Multiple => _paragraph.Format.LineSpacing.Point,
+                    _ => 1
+                };
+
+                // Set inherentLineSpace to the maximum original singleLineSpace value and...
+                inherentLineSpace = singleLineSpace;
+                inherentLineSpace = Math.Max(inherentLineSpace, _currentVerticalInfo.InherentLineSpace);
+
+                // ...set lineHeight to the maximum multiplied singleLineSpace value. This way the space resulting from the difference
+                // between original and multiplied singleLineSpace value will be located at the bottom of the text line.
+                lineHeight = singleLineSpace * factor;
+                lineHeight = Math.Max(lineHeight, _currentVerticalInfo.Height);
+            }
+            
+            XUnitPt descent;
+            if (lineSpacingRule == LineSpacingRule.Exactly)
+            {
+                // Set descent to the scaled paragraph’s font descent once for text positioning.
+                // Like in word, we have a fixed baseline position this way, even if the line contains FormattedTests with a bigger descents.
+                if (_currentVerticalInfo.Descent == XUnitPt.Zero)
+                {
+                    var paragraphFont = FontHandler.FontToXFont(_paragraph.Format.Font);
+                    descent = FontHandler.GetDescent(paragraphFont);
+
+                    // In word, the baseline position seems to be scaled to the set line spacing. Same here with the descent for text positioning. 
+                    var factor = singleLineSpace.Point / paragraphFont.Size;
+                    descent *= factor;
+                }
+                else
+                    descent = _currentVerticalInfo.Descent;
+            }
+            else
+            {
+                // Set descent to the maximum font descent for text positioning.
+                descent = isListSymbol ? 0 : FontHandler.GetDescent(font); // Ignore descent for bullet glyphs.
+                descent = Math.Max(descent, _currentVerticalInfo.Descent);
+            }
+
             if (MaxElementHeight > 0)
-                lineHeight = Math.Min(MaxElementHeight - Tolerance, lineHeight);
+                lineHeight = Math.Min(lineHeight, MaxElementHeight - Tolerance);
 
             return new(lineHeight, descent, inherentLineSpace);
         }
-
+        
         /// <summary>
         /// The font used for the current paragraph element.
         /// </summary>

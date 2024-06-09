@@ -7,6 +7,7 @@ using FluentAssertions;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
+    [Collection("PDFsharp")]
     public class AdvancedTests
     {
         [Fact]

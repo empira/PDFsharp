@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
@@ -149,7 +149,7 @@ namespace PdfSharp.Charting.Renderers
         protected const double EntrySpacing = 5;
 
         /// <summary>
-        /// Default line width used for the legend's border.
+        /// Default line width used for the legend’s border.
         /// </summary>
         protected const double DefaultLineWidth = 0.14; // 0.05 mm
     }

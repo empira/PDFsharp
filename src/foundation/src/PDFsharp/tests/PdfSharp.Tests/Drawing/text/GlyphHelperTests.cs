@@ -1,24 +1,31 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.Diagnostics;
 using FluentAssertions;
 using PdfSharp.Drawing;
+using PdfSharp.FontResolver;
 using PdfSharp.Fonts;
-using PdfSharp.Fonts.Internal;
-using PdfSharp.Pdf;
-using PdfSharp.Snippets.Font;
-using PdfSharp.TestHelper;
 using Xunit;
 
 namespace PdfSharp.Tests.Drawing
 {
     [Collection("PDFsharp")]
-    public class GlyphHelperTests
+    public class GlyphHelperTests : IDisposable
     {
         const int Euro = '€';
         const int SmilingFaceWithHearts = 0x_0001_F970;  // 😍
         //const int RedRose = 0x_0001_F339;  // 🌹
+
+        public GlyphHelperTests()
+        {
+            GlobalFontSettings.ResetFontManagement();
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+        }
+
+        public void Dispose()
+        {
+            GlobalFontSettings.ResetFontManagement();
+        }
 
         [Fact]
         public void GlyphIndexFromCodePoint_Test()
@@ -30,17 +37,17 @@ namespace PdfSharp.Tests.Drawing
             glyphIndex1 = GlyphHelper.GlyphIndexFromCodePoint(SmilingFaceWithHearts, font1);
             glyphIndex1.Should().Be(0);
 
-#if !CORE
+            //#if !CORE
             var font2 = new XFont("Segoe UI Emoji", 10);
             var glyphIndex2 = GlyphHelper.GlyphIndexFromCodePoint(Euro, font2);
             glyphIndex2.Should().Be(189);
 
             glyphIndex2 = GlyphHelper.GlyphIndexFromCodePoint(SmilingFaceWithHearts, font2);
             glyphIndex2.Should().Be(10441);
-#endif
+            //#endif
         }
 
-        [Fact(Skip = "Need Segoe UI Emoji here")]
+        [Fact]
         public void GlyphIndicesFromString_Test()
         {
             const string s1 = "Hello";
@@ -53,6 +60,7 @@ namespace PdfSharp.Tests.Drawing
 
             glyphIndexes = GlyphHelper.GlyphIndicesFromString(s2, font);
             glyphIndexes.Length.Should().Be(s2.Length - 6);
+
         }
 
         [Fact]

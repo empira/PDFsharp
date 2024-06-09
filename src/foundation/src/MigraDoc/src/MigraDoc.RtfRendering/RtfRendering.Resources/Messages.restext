@@ -12,5 +12,5 @@ ChartFreelyPlacedInWrongContext = Chart is being ignored. A chart can be placed 
 ImageNotFound = Image '{0}' could not be found.
 ImageNotReadable = Image '{0}' could not be read. Inner Exception:\n{1}.
 ImageTypeNotSupported = Type of image '{0}' is not supported.
-CharacterNotAllowedInDateFormat = The character '{0}' is not allowed in a date field's format string and will be ignored.
+CharacterNotAllowedInDateFormat = The character '{0}' is not allowed in a date field’s format string and will be ignored.
 InvalidNumericFieldFormat = '{0}' is not a valid format for a numeric field und will be ignored.

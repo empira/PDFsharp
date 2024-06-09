@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System.Globalization;
@@ -207,7 +207,7 @@ namespace PdfSharp.Charting.Renderers
         }
 
         /// <summary>
-        /// Initializes the rendererInfo's xvalues. If not set by the user xvalues will be simply numbers
+        /// Initializes the rendererInfo’s xvalues. If not set by the user xvalues will be simply numbers
         /// from minimum scale + 1 to maximum scale.
         /// </summary>
         void InitXValues(AxisRendererInfo rendererInfo)

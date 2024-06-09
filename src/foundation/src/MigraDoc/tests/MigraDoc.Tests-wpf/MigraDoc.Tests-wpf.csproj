@@ -40,14 +40,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="..\MigraDoc.Tests\README.md" Link="README.md" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper-wpf\PdfSharp.TestHelper-wpf.csproj" />
         <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-wpf\PdfSharp-wpf.csproj" />
         <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp.Charting-wpf\PdfSharp.Charting-wpf.csproj" />
         <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets-wpf\PdfSharp.Snippets-wpf.csproj" />
+        <ProjectReference Include="..\..\..\shared\src\PdfSharp.Testing-wpf\PdfSharp.Testing-wpf.csproj" />
         <ProjectReference Include="..\..\src\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
         <ProjectReference Include="..\..\src\MigraDoc.Rendering-wpf\MigraDoc.Rendering-wpf.csproj" />
         <ProjectReference Include="..\..\src\MigraDoc.RtfRendering-wpf\MigraDoc.RtfRendering-wpf.csproj" />
@@ -61,6 +58,7 @@
 
     <ItemGroup>
       <PackageReference Include="Xunit.SkippableFact" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Console" />
     </ItemGroup>
 
 </Project>

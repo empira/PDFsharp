@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Fonts;
@@ -238,7 +238,7 @@ namespace PdfSharp.Drawing
         //}
 
         /// <summary>
-        /// Gets the name of the font's name table.
+        /// Gets the name of the font’s name table.
         /// </summary>
         public string FontName => _fontName;
 

@@ -33,7 +33,7 @@ namespace PdfSharp.Pdf.Internal
 
         public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
         {
-            PdfDocToUnicode.GetType();
+            _ = typeof(int);
             throw new NotImplementedException("GetChars");
             //for (; byteCount > 0; byteIndex++, charIndex++, byteCount--)
             //  chars[charIndex] = (char)bytes[byteIndex];

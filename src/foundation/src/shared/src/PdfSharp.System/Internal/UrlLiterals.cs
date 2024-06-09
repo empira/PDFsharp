@@ -19,5 +19,12 @@ namespace PdfSharp.Internal
         /// "https://docs.pdfsharp.net/link/download-assets.html"
         /// </summary>
         public const string LinkToAssetsDoc = DocsPdfSharpUrl + "link/download-assets.html";
+
+        /// <summary>
+        /// URL for missing font resolver.
+        /// "https://docs.pdfsharp.net/link/font-resolving.html"
+        /// </summary>
+        public const string LinkToFontResolving = DocsPdfSharpUrl + "link/font-resolving.html";
+
     }
 }

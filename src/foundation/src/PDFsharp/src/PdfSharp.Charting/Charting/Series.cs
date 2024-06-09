@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
@@ -138,7 +138,7 @@ namespace PdfSharp.Charting
         public XColor MarkerBackgroundColor { get; set; } = XColor.Empty;
 
         /// <summary>
-        /// Gets or sets the chart type of the series if it's intended to be different than the
+        /// Gets or sets the chart type of the series if it’s intended to be different than the
         /// global chart type.
         /// </summary>
         public ChartType ChartType

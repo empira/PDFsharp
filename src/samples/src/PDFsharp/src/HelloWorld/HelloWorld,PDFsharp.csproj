@@ -12,7 +12,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\foundation\src\PDFsharp\src\PdfSharp\PdfSharp.csproj" />
-    <ProjectReference Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.Snippets\PdfSharp.Snippets.csproj" />
+    <ProjectReference Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.Quality\PdfSharp.Quality.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
   </ItemGroup>
 
 </Project>

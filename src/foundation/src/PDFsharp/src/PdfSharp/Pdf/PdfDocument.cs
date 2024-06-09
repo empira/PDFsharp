@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System.Runtime.InteropServices;
@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using PdfSharp.Drawing;
 using PdfSharp.Events;
 using PdfSharp.Fonts.Internal;
-using PdfSharp.Internal.Logging;
 using PdfSharp.Logging;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Internal;
@@ -64,7 +63,7 @@ namespace PdfSharp.Pdf
 
         /// <summary>
         /// Creates a new PDF document using the specified stream.
-        /// The stream won't be used until the document is closed. At that time the document is saved automatically.
+        /// The stream won’t be used until the document is closed. At that time the document is saved automatically.
         /// Do not call Save for documents created with this constructor, just call Close.
         /// To open an existing PDF file, use the PdfReader class.
         /// </summary>
@@ -150,13 +149,13 @@ namespace PdfSharp.Pdf
         public object? Tag { get; set; }
 
         /// <summary>
-        /// Encapsulates the document's events.
+        /// Encapsulates the document’s events.
         /// </summary>
         public DocumentEvents Events => _documentEvents ??= new();
         DocumentEvents? _documentEvents;
 
         /// <summary>
-        /// Encapsulates the document's render events.
+        /// Encapsulates the document’s render events.
         /// </summary>
         public RenderEvents RenderEvents => _renderEvents ??= new();
         RenderEvents? _renderEvents;
@@ -368,7 +367,7 @@ namespace PdfSharp.Pdf
                     PdfReference iref = irefs[idx];
 #if DEBUG_
                     if (iref.ObjectNumber == 378)
-                        GetType();
+                        _ = typeof(int);
 #endif
                     iref.Position = writer.Position;
                     iref.Value.WriteObject(writer);
@@ -485,17 +484,17 @@ namespace PdfSharp.Pdf
                 info.Creator = PdfSharpProductVersionInformation.Producer;
 
             // We set Producer if it is not yet set.
-#if DEBUG
-            var pdfProducer = $"{PdfSharpProductVersionInformation.Creator} under {RuntimeInformation.OSDescription}";
-#else
             var pdfProducer = PdfSharpProductVersionInformation.Creator;
+#if DEBUG
+            // Add OS suffix only in DEBUG build.
+            pdfProducer += $" under {RuntimeInformation.OSDescription}";
 #endif
-            //pdfProducer = $"{GitVersionInformation.SemVer} under {RuntimeInformation.OSDescription}";
-
             // Keep original producer if file was imported. This is 'PDF created by' in Adobe Reader.
             string producer = info.Producer;
             if (producer.Length == 0)
+            {
                 producer = pdfProducer;
+            }
             else
             {
                 // Prevent endless concatenation if file is edited with PDFsharp more than once.
@@ -885,9 +884,9 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Adds a named destination to the document.
         /// </summary>
-        /// <param name="destinationName">The Named Destination's name.</param>
+        /// <param name="destinationName">The Named Destination’s name.</param>
         /// <param name="destinationPage">The page to navigate to.</param>
-        /// <param name="parameters">The PdfNamedDestinationParameters defining the named destination's parameters.</param>
+        /// <param name="parameters">The PdfNamedDestinationParameters defining the named destination’s parameters.</param>
         public void AddNamedDestination(string destinationName, int destinationPage, PdfNamedDestinationParameters parameters)
             => Internals.Catalog.Names.AddNamedDestination(destinationName, destinationPage, parameters);
 
@@ -974,6 +973,9 @@ namespace PdfSharp.Pdf
 
             public readonly string ID = document._guid.ToString("B").ToUpper();
 
+            
+            
+            
             public override bool Equals(object? obj)
             {
                 if (obj is DocumentHandle handle)

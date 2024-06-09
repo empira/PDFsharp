@@ -280,7 +280,7 @@ namespace MigraDoc.Rendering.Windows
         }
 
         /// <summary>
-        /// Encapsulates the document's render events.
+        /// Encapsulates the document’s render events.
         /// </summary>
         public RenderEvents? RenderEvents { get; private set; }
 

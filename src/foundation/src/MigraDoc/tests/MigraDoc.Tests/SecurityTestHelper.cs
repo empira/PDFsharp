@@ -156,7 +156,6 @@ namespace MigraDoc.Tests
             }
         }
 
-
         /// <summary>
         /// A class containing the test configuration to avoid multiple parameters in many test methods and reduce refactoring need on changes of test configurations.
         /// Use ByEnum() to create options fromTestOptionsEnum inside the test.

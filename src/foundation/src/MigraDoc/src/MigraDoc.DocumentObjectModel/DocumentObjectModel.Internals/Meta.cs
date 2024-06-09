@@ -283,11 +283,6 @@ namespace MigraDoc.DocumentObjectModel.Internals
 
             foreach (var propInfo in propInfos)
             {
-#if DEBUG_
-                string name = propInfo.Name;
-                if (name == "Font")
-                    name.GetType();
-#endif
                 DVAttribute? attr = null;
                 var dvs = (DVAttribute[])propInfo.GetCustomAttributes(typeof(DVAttribute), false);
                 if (dvs.Length == 1)

@@ -351,8 +351,8 @@ namespace PdfSharp.Quality
             using var stream = File.Create(filepath);
             {
                 stream.Write(sourceBytes, 0, sourceBytes.Length);
-                // Stream must be closed here, otherwise it cannot being copied under Linux.
-                // To me, it is not clear what's the difference with windows.
+                // Stream must be closed here, otherwise it cannot be copied under Linux.
+                // To me, it is not clear what’s the difference with Windows.
                 stream.Close();
             }
 
@@ -367,7 +367,7 @@ namespace PdfSharp.Quality
         //    if (sourceBytes is null)
         //        throw new ArgumentNullException(nameof(sourceBytes));
 
-        //    // Add generated filename, if filepath is only a directory (doesn't contain a file extension).
+        //    // Add generated filename, if filepath is only a directory (doesn’t contain a file extension).
         //    return String.IsNullOrEmpty(Path.GetExtension(filepath))
         //        ? Path.Combine(filepath, GenerateFilename(sourceBytes))
         //        : filepath;

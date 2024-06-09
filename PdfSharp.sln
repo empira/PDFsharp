@@ -194,6 +194,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{76BA9372-6
 		docs\BoilerplateText.md = docs\BoilerplateText.md
 		docs\DevNotes.md = docs\DevNotes.md
 		docs\MakeNewReleaseNotes.md = docs\MakeNewReleaseNotes.md
+		docs\xUnitRunnerSettings.md = docs\xUnitRunnerSettings.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A1AE894D-9061-44F0-8268-328AC41F403A}"
@@ -246,6 +247,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dev", "dev", "{BA039CC9-132
 		dev\update-local-nuget-packages-release.ps1 = dev\update-local-nuget-packages-release.ps1
 		dev\_update-local-nuget-packages.ps1 = dev\_update-local-nuget-packages.ps1
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.Testing-gdi", "src\foundation\src\shared\src\PdfSharp.Testing-gdi\PdfSharp.Testing-gdi.csproj", "{C7CCB288-8372-41AD-9F65-6224CE0D6358}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.Testing-wpf", "src\foundation\src\shared\src\PdfSharp.Testing-wpf\PdfSharp.Testing-wpf.csproj", "{1F9EE0B3-4BA1-4CE4-9301-1735732B61B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -505,6 +510,14 @@ Global
 		{D17FA884-98B9-41E2-AB27-2603F79000F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D17FA884-98B9-41E2-AB27-2603F79000F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D17FA884-98B9-41E2-AB27-2603F79000F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7CCB288-8372-41AD-9F65-6224CE0D6358}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7CCB288-8372-41AD-9F65-6224CE0D6358}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7CCB288-8372-41AD-9F65-6224CE0D6358}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7CCB288-8372-41AD-9F65-6224CE0D6358}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F9EE0B3-4BA1-4CE4-9301-1735732B61B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F9EE0B3-4BA1-4CE4-9301-1735732B61B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F9EE0B3-4BA1-4CE4-9301-1735732B61B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F9EE0B3-4BA1-4CE4-9301-1735732B61B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -602,6 +615,8 @@ Global
 		{D5A4EB68-4E71-4AAE-8A77-AACC46A55A14} = {A1AE894D-9061-44F0-8268-328AC41F403A}
 		{D17FA884-98B9-41E2-AB27-2603F79000F5} = {DE458BB2-5942-4588-A74A-AE9CA86F284C}
 		{BA039CC9-132E-4103-BB47-87C3E3398F82} = {31FE507C-F342-4DA4-9BE5-B3D2ED93E9CC}
+		{C7CCB288-8372-41AD-9F65-6224CE0D6358} = {DE458BB2-5942-4588-A74A-AE9CA86F284C}
+		{1F9EE0B3-4BA1-4CE4-9301-1735732B61B6} = {DE458BB2-5942-4588-A74A-AE9CA86F284C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D5FF5562-3C79-434B-B951-B84542D01625}

@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using MigraDoc.DocumentObjectModel.Visitors;
@@ -184,7 +184,7 @@ namespace MigraDoc.DocumentObjectModel
         /// Adds a new Hyperlink of Type "ExternalBookmark", i.e. the target is a Bookmark in an external PDF Document.
         /// </summary>
         /// <param name="filename">The path to the target document.</param>
-        /// <param name="bookmarkName">The Named Destination's name in the target document.</param>
+        /// <param name="bookmarkName">The Named Destination’s name in the target document.</param>
         /// <param name="newWindow">Defines if the HyperlinkType ExternalBookmark shall be opened in a new window.
         /// If not set, the viewer application should behave in accordance with the current user preference.</param>
         public Hyperlink AddHyperlink(string filename, string bookmarkName, HyperlinkTargetWindow newWindow = HyperlinkTargetWindow.UserPreference)

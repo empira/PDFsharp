@@ -1,6 +1,9 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using Microsoft.Extensions.Logging;
+using PdfSharp.Logging;
+
 namespace PdfSharp.Internal
 {
     /// <summary>
@@ -11,18 +14,28 @@ namespace PdfSharp.Internal
     {
         public static void EnterGdiPlus()
         {
-            //if (_fontFactoryLockCount > 0)
-            //    throw new InvalidOperationException("");
 
             Monitor.Enter(GdiPlusLock);
-            _gdiPlusLockCount++;
+            //Interlocked.Increment(ref _gdiPlusLockCount);
+            _gdiPlusLockCount++;  // Is atomic because we have the lock.
+            
+            if (IsFontFactoryLockedByCurrentThread)
+            {
+                // This should not happen by design.
+                PdfSharpLogHost.Logger.LogCritical("Entered GDI+ lock while FontFactory lock is also taken.");
+            }
         }
 
         public static void ExitGdiPlus()
         {
-            _gdiPlusLockCount--;
+            Interlocked.Decrement(ref _gdiPlusLockCount);
             Monitor.Exit(GdiPlusLock);
         }
+
+        public static bool IsGdiPlusLockedByCurrentThread => Monitor.IsEntered(GdiPlusLock);
+        
+        public static bool IsGdiPlusLookTaken() => _gdiPlusLockCount > 0;
+
 
         static readonly object GdiPlusLock = new();
         static int _gdiPlusLockCount;
@@ -32,7 +45,13 @@ namespace PdfSharp.Internal
         public static void EnterFontFactory()
         {
             Monitor.Enter(FontFactoryLock);
-            _fontFactoryLockCount++;
+            _fontFactoryLockCount++;  // Is atomic because we have the lock.
+
+            if (IsGdiPlusLockedByCurrentThread)
+            {
+                // This should not happen by design.
+                PdfSharpLogHost.Logger.LogCritical("Entered FontFactory lock while GDI+ lock is also taken.");
+            }
         }
 
         public static void ExitFontFactory()
@@ -41,10 +60,11 @@ namespace PdfSharp.Internal
             Monitor.Exit(FontFactoryLock);
         }
 
+        public static bool IsFontFactoryLockedByCurrentThread => Monitor.IsEntered(FontFactoryLock);
+
         public static bool IsFontFactoryLookTaken() => _fontFactoryLockCount > 0;
         
         static readonly object FontFactoryLock = new();
-        //[ThreadStatic] // StL: ??? - makes no sense
         static int _fontFactoryLockCount;
     }
 }

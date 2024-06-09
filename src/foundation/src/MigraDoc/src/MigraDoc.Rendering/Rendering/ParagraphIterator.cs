@@ -98,7 +98,7 @@ namespace MigraDoc.Rendering
         /// Returns the next iterator in the tree pointing to a leaf.
         /// </summary>
         /// <remarks>This function is intended to receive the renderable objects of a paragraph.
-        /// Thus, empty ParagraphElement objects (which are collections) don't count as leafs.</remarks>
+        /// Thus, empty ParagraphElement objects (which are collections) don’t count as leafs.</remarks>
         internal ParagraphIterator? GetNextLeaf()
         {
             // Move up to appropriate parent element.

@@ -3,8 +3,8 @@
 
 namespace MigraDoc
 {
-
     /// <summary>
+    /// UNDER CONSTRUCTION - DO NOT USE.
     /// Capabilities.Fonts.IsAvailable.GlyphToPath
     /// </summary>
     public static class Capabilities

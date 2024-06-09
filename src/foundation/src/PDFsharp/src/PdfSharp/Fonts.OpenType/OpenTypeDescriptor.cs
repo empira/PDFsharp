@@ -122,7 +122,7 @@ namespace PdfSharp.Fonts.OpenType
             // No documentation found how to get the set vertical stems width from the
             // TrueType tables.
             // The following formula comes from PDFlib Lite source code. Acrobat 5.0 sets
-            // /StemV to 0 always. I think the value doesn't matter.
+            // /StemV to 0 always. I think the value doesn’t matter.
             //float weight = (float)(image.os2.usWeightClass / 65.0f);
             //stemV = (int)(50 + weight * weight);  // MAGIC
             StemV = 0;
@@ -131,7 +131,7 @@ namespace PdfSharp.Fonts.OpenType
 
             // Calculate Ascent, Descent, Leading and LineSpacing like in WPF Source Code (see FontDriver.ReadBasicMetrics)
 
-            // OS/2 is an optional table, but we can't determine if it is existing in this font.
+            // OS/2 is an optional table, but we can’t determine if it is existing in this font.
             bool os2SeemsToBeEmpty = FontFace.os2.sTypoAscender == 0 && FontFace.os2.sTypoDescender == 0 && FontFace.os2.sTypoLineGap == 0;
             //Debug.Assert(!os2SeemsToBeEmpty); // Are there fonts without OS/2 table?
 
@@ -160,7 +160,7 @@ namespace PdfSharp.Fonts.OpenType
                 // normally negative whereas we want a positive value; however some fonts get the sign wrong
                 // so instead of just negating we take the absolute value.
                 int descender = Math.Abs(FontFace.hhea.descender);
-                // Comment from WPF: get the lineGap field and make sure it's >= 0 
+                // Comment from WPF: get the lineGap field and make sure it’s >= 0 
                 int lineGap = Math.Max((short)0, FontFace.hhea.lineGap);
 
                 if (!os2SeemsToBeEmpty)
@@ -180,7 +180,7 @@ namespace PdfSharp.Fonts.OpenType
                     // should be the sum of the Mac ascender, descender, and lineGap unless the resulting value would
                     // be less than the cell height (winAscent + winDescent) in which case we use the cell height.
                     // See also http://www.microsoft.com/typography/otspec/recom.htm.
-                    // Note that in theory it's valid for the baseline-to-baseline distance to be less than the cell
+                    // Note that in theory it’s valid for the baseline-to-baseline distance to be less than the cell
                     // height. However, Windows has never allowed this for TrueType fonts, and fonts built for Windows
                     // sometimes rely on this behavior and get the hha values wrong or set them all to zero.
                     LineSpacing = Math.Max(lineGap + ascender + descender, winAscent + winDescent);

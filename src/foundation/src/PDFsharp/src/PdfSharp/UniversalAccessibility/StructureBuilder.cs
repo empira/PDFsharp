@@ -87,7 +87,7 @@ namespace PdfSharp.UniversalAccessibility
         /// </summary>
         /// <param name="tag">The structure type to be created.</param>
         /// <param name="altText">The alternative text for this illustration.</param>
-        /// <param name="boundingBox">The element's bounding box.</param>
+        /// <param name="boundingBox">The element’s bounding box.</param>
         public void BeginElement(PdfIllustrationElementTag tag, string altText, XRect boundingBox)
         {
             BeginIllustrationElement(tag.ToString(), altText, boundingBox);
@@ -213,7 +213,7 @@ namespace PdfSharp.UniversalAccessibility
         }
 
         /// <summary>
-        /// Ends all open marked contents that have a marked content with id.
+        /// Ends all open marked contents that have a marked content with ID.
         /// </summary>
         public void EndMarkedContentsWithId()
         {
@@ -224,7 +224,7 @@ namespace PdfSharp.UniversalAccessibility
                 item.EndItem();
                 _elementStack.Pop();
 
-                // Call EndMarkedContentsWithId() for item's parent.
+                // Call EndMarkedContentsWithId() for item’s parent.
                 EndMarkedContentsWithId();
             }
             else
@@ -312,7 +312,7 @@ namespace PdfSharp.UniversalAccessibility
         /// <summary>
         /// Creates a new parent element array for the current page and adds it to the ParentTree, if not yet existing.
         /// Adds the structure element to the index of mcid to the parent element array .
-        /// Sets the page's "/StructParents" key to the index of the parent element array in the ParentTree.
+        /// Sets the page’s "/StructParents" key to the index of the parent element array in the ParentTree.
         /// </summary>
         /// <param name="ste">The structure element to be added to the parent tree.</param>
         /// <param name="mcid">The MCID of the current marked content (this is equal to the index of the entry in the parent tree node).</param>
@@ -377,7 +377,7 @@ namespace PdfSharp.UniversalAccessibility
 
         /// <summary>
         /// Adds the structure element to the ParentTree.
-        /// Sets the annotation's "/StructParent" key to the index of the structure element in the ParentTree.
+        /// Sets the annotation’s "/StructParent" key to the index of the structure element in the ParentTree.
         /// </summary>
         /// <param name="ste">The structure element to be added to the parent tree.</param>
         /// <param name="annotation">The annotation to be added.</param>

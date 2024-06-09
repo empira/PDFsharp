@@ -71,14 +71,14 @@ namespace PdfSharp.Internal
             // Hex formatting does not work with type Char. It must be cast to integer.
             string message =
                 Invariant($"Unexpected character '0x{ch:x4}' in PDF stream. The file may be corrupted. ") +
-                    "If you think this is a bug in PDFsharp, please send us your PDF file.\n" + dump;
+                    "If you think this is a bug in PDFsharp, please send us your PDF file (issues (at) pdfsharp.net).\n" + dump;
             ThrowParserException(message);
         }
         public static void HandleUnexpectedToken(string token, string dump)
         {
             string message =
                 Invariant($"Unexpected token '{token}' in PDF stream. The file may be corrupted. ") +
-                    "If you think this is a bug in PDFsharp, please send us your PDF file.\n" + dump;
+                    "If you think this is a bug in PDFsharp, please send us your PDF file (issues (at) pdfsharp.net).\n" + dump;
             ThrowParserException(message);
         }
 
@@ -111,7 +111,7 @@ namespace PdfSharp.Internal
         {
             string message = String.Format(CultureInfo.InvariantCulture,
                 "Unexpected character '0x{0:x4}' in content stream. The stream may be corrupted or the feature is not implemented. " +
-                "If you think this is a bug in PDFsharp, please send us your PDF file.", (int)ch);
+                "If you think this is a bug in PDFsharp, please send us your PDF file (issues (at) pdfsharp.net).", (int)ch);
             ThrowContentReaderException(message);
         }
     }

@@ -33,8 +33,7 @@ namespace PdfSharp.Drawing.Pdf
             return state;
         }
 
-        object ICloneable.Clone()
-            => Clone();
+        object ICloneable.Clone() => Clone();
 
         internal int Level;
 

@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
@@ -45,20 +45,20 @@ namespace PdfSharp.Tests.Encodings
         [Fact]
         public void AnsiEncodingTest()
         {
-            var copyright = (int)'©';
+            var copyright = (int)'Â©';
             copyright.Should().Be('\u00A9');
 
-            var euro = (int)'€';
+            var euro = (int)'â‚¬';
             euro.Should().Be('\u20AC');
 
             var ansiEncoding = PdfEncoders.WinAnsiEncoding;
 
             // Test syntax of collection expression.
-            var xx = ansiEncoding.GetBytes((char[])['©', '€'], 0, 2);
-            var yy = new[] { '©', '€' };
-            char[] zz = ['©', '€'];
+            var xx = ansiEncoding.GetBytes((char[])['Â©', 'â‚¬'], 0, 2);
+            var yy = new[] { 'Â©', 'â‚¬' };
+            char[] zz = ['Â©', 'â‚¬'];
 
-            var bytes = ansiEncoding.GetBytes(new[] { '©', '€' }, 0, 2);
+            var bytes = ansiEncoding.GetBytes(new[] { 'Â©', 'â‚¬' }, 0, 2);
             bytes[0].Should().Be((int)'\u00A9');
             bytes[1].Should().Be((int)'\u0080');
         }
@@ -71,24 +71,28 @@ namespace PdfSharp.Tests.Encodings
             // Implementation was verified with .NET Ansi encoding.
             Encoding dotnetImplementation = GetDotNetAnsiEncoding()!;
             Encoding pdfSharpImplementation = PdfEncoders.WinAnsiEncoding;
-            if (dotnetImplementation == null!)
-                return;
+            //if (dotnetImplementation == null!)
+            //    return;
 
             // It took some time for me to understand why this cannot work :-)
-            // int[] x = [0..255, 333];  // error CS0029: Cannot implicitly convert type 'System.Range' to 'int'
+            // int[] x = [0..255, 333];  // error CS0029: Cannot implicitly convert type 'system.Range' to 'int'
 
-                // Check ANSI characters.
+            // Check ANSI characters.
             for (int i = 0; i <= 255; i++)
             {
-                if (i == 0x81)
-                    _ = typeof(int);  // A NOP for a break point.
-
                 byte[] b = [(byte)i];
                 char[] ch1 = dotnetImplementation.GetChars(b, 0, 1);
                 char[] ch2 = pdfSharpImplementation.GetChars(b, 0, 1);
 
-                if (ch1[0] != ch2[0])
+                var char1 = ch1[0];
+                var char2 = ch2[0];
+
+                //if (i == 0x81)
+                if (nonAnsi.FirstOrDefault(x => x == i) != default)
                     _ = typeof(int);  // A NOP for a break point.
+
+                if (ch1[0] != ch2[0])
+                    _ = typeof(int);
 
                 ch1[0].Should().Be(ch2[0]);
 
@@ -126,8 +130,8 @@ namespace PdfSharp.Tests.Encodings
             // Implementation was verified with .NET Ansi encoding.
             Encoding dotnetImplementation = GetDotNetAnsiEncoding()!;
             Encoding pdfSharpImplementation = PdfEncoders.WinAnsiEncoding;
-            if (dotnetImplementation == null!)
-                return;
+            //if (dotnetImplementation == null!)
+            //    return;
 
             int[] abc = new int[128];
             for (int i = 0, ach = 128; i <= 127; i++, ach++)
@@ -141,13 +145,12 @@ namespace PdfSharp.Tests.Encodings
                 if (i == 0x80)
                     _ = typeof(int);  // A NOP for a break point.
 
-                char[] ch = new char[] { (char)i };
+                char[] ch = [(char)i];
                 byte[] b1 = dotnetImplementation.GetBytes(ch, 0, 1);
                 byte[] b2 = pdfSharpImplementation.GetBytes(ch, 0, 1);
                 char ch2 = (char)b2[0];
                 int l1 = b1.Length;
                 int l2 = b2.Length;
-
 
                 if (b1.Length != b2.Length || b1.Length > 1 || b1[0] != b2[0])
                     _ = typeof(int);  // A NOP for a break point.
@@ -172,9 +175,9 @@ namespace PdfSharp.Tests.Encodings
         Encoding? GetDotNetAnsiEncoding()
         {
 #if NET6_0_OR_GREATER
-            return CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
+            return CodePagesEncodingProvider.Instance.GetEncoding(1252);
 #else
-            return null;
+            return Encoding.GetEncoding(1252);
 #endif
         }
     }
