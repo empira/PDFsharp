@@ -4,7 +4,10 @@
 #if WPF
 using System.IO;
 #endif
+#if NET6_0_OR_GREATER
+using System.Net.Http;
 using System.Net.Http.Headers;
+#endif
 using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
@@ -20,11 +23,23 @@ namespace PdfSharp.Pdf.Signatures
         private X509Certificate2 _certificate { get; init; }
         private Uri? _timeStampAuthorityUri { get; init; }
 
+        public DefaultSigner(X509Certificate2 Certificate)
+        {
+            _certificate = Certificate;
+        }
+
+#if NET6_0_OR_GREATER
+        /// <summary>
+        /// using a TimeStamp Authority to add timestamp to signature, only on net6+ for now due to available classes for Rfc3161
+        /// </summary>
+        /// <param name="Certificate"></param>
+        /// <param name="timeStampAuthorityUri"></param>
         public DefaultSigner(X509Certificate2 Certificate, Uri? timeStampAuthorityUri = null)
         {
             _certificate = Certificate;
             _timeStampAuthorityUri = timeStampAuthorityUri;
         }
+#endif
 
         public byte[] GetSignedCms(Stream stream, int pdfVersion)
         {
@@ -40,8 +55,10 @@ namespace PdfSharp.Pdf.Signatures
 
             signedCms.ComputeSignature(signer, true);
 
+#if NET6_0_OR_GREATER
             if (_timeStampAuthorityUri is not null)
                 Task.Run(() => AddTimestampFromTSAAsync(signedCms)).Wait();
+#endif
 
             var bytes = signedCms.Encode();
 
@@ -53,6 +70,7 @@ namespace PdfSharp.Pdf.Signatures
             return _certificate.GetNameInfo(X509NameType.SimpleName, false);
         }
 
+#if NET6_0_OR_GREATER
         private async Task AddTimestampFromTSAAsync(SignedCms signedCms)
         {
             // Generate our nonce to identify the pair request-response
@@ -91,7 +109,12 @@ namespace PdfSharp.Pdf.Signatures
             var timestampToken = request.ProcessResponse(data, out _);
 
             // The RFC3161 sign certificate is separate to the contents that was signed, we need to add it to the unsigned attributes.
+#if NET6_0_OR_GREATER
             newSignerInfo.AddUnsignedAttribute(new AsnEncodedData(SignatureTimeStampOin, timestampToken.AsSignedCms().Encode()));
+#else
+            newSignerInfo.UnsignedAttributes.Add(new AsnEncodedData(SignatureTimeStampOin, timestampToken.AsSignedCms().Encode()));
+#endif
         }
+#endif
     }
 }

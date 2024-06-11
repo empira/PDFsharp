@@ -100,7 +100,7 @@
     <PackageVersion Include="Moq" Version="4.16.1" />
     <PackageVersion Include="NCrunch.Framework" Version="4.7.0.4" />
     <!-- Signature packages -->
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="7.0.3" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="8.0.0" />
     <PackageVersion Include="BouncyCastle.Cryptography" Version="2.2.1" />
     <!-- Other packages -->
     <!--<PackageVersion Include="Dapper" Version="2.0.123" />-->
