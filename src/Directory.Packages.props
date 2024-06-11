@@ -101,7 +101,7 @@
     <PackageVersion Include="NCrunch.Framework" Version="4.7.0.4" />
     <!-- Signature packages -->
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="8.0.0" />
-    <PackageVersion Include="BouncyCastle.Cryptography" Version="2.2.1" />
+    <PackageVersion Include="BouncyCastle.Cryptography" Version="2.4.0" />
     <!-- Other packages -->
     <!--<PackageVersion Include="Dapper" Version="2.0.123" />-->
     <PackageVersion Include="System.IO.Abstractions" Version="13.2.47" />
