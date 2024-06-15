@@ -450,7 +450,7 @@ namespace PdfSharp.Pdf.IO
                     "All references saved in IrefTable should have been created when their referred PdfObject has been accessible.");
 
                 // Get and update object’s references.
-                FinishItemReferences(iref.Value, _document, finishedObjects);
+                FinishItemReferences(iref.Value, iref, _document, finishedObjects);
             }
 
             // why setting it here AND in Trailer.Finish ??
@@ -526,7 +526,7 @@ namespace PdfSharp.Pdf.IO
                 }
 
                 // Get and update item’s references.
-                FinishItemReferences(item, _document, finishedObjects);
+                FinishItemReferences(item, containingReference, _document, finishedObjects);
             }
         }
 
@@ -549,7 +549,7 @@ namespace PdfSharp.Pdf.IO
                 }
 
                 // Get and update item’s references.
-                FinishItemReferences(item, _document, finishedObjects);
+                FinishItemReferences(item, containingReference, _document, finishedObjects);
             }
         }
 
