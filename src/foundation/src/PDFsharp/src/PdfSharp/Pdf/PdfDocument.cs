@@ -1,4 +1,4 @@
-﻿// PDFsharp - A .NET library for processing PDF
+// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System.Runtime.InteropServices;
@@ -19,12 +19,24 @@ using PdfSharp.UniversalAccessibility;
 
 namespace PdfSharp.Pdf
 {
+    internal class PdfDocumentEventArgs : EventArgs
+    {
+        public PdfDocumentEventArgs(PdfWriter writer)
+        {
+            Writer = writer;
+        }
+
+        public PdfWriter Writer { get; set; }
+    }
+
     /// <summary>
     /// Represents a PDF document.
     /// </summary>
     [DebuggerDisplay("(Name={" + nameof(Name) + "})")]  // A name makes debugging easier
     public sealed class PdfDocument : PdfObject, IDisposable
     {
+        internal event EventHandler BeforeSave = (s, e) => { };
+        internal event EventHandler<PdfDocumentEventArgs> AfterSave = (s, e) => { };
 #if DEBUG_
         static PdfDocument()
         {
@@ -220,7 +232,7 @@ namespace PdfSharp.Pdf
             if (!CanModify)
                 throw new InvalidOperationException(PSSR.CannotModify);
 
-            using Stream stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
+            using Stream stream = new FileStream(path, FileMode.Create, FileAccess.ReadWrite/*Read access needed for SignatureHandler*/, FileShare.None);
             Save(stream);
         }
 
@@ -312,6 +324,8 @@ namespace PdfSharp.Pdf
         {
             PdfSharpLogHost.Logger.PdfDocumentSaved(Name);
 
+            BeforeSave(this, EventArgs.Empty);
+
             if (_pages == null || _pages.Count == 0)
             {
                 if (OutStream != null)
@@ -376,6 +390,8 @@ namespace PdfSharp.Pdf
             {
                 if (writer != null!)
                 {
+                    AfterSave(this, new PdfDocumentEventArgs(writer));
+
                     writer.Stream.Flush();
                     // DO NOT CLOSE WRITER HERE
                 }
