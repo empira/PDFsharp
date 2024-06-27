@@ -83,10 +83,21 @@ namespace PdfSharp.Pdf.Advanced
                         else
                             image._path = "*" + Guid.NewGuid().ToString("B");
                     }
+#if GDI
+                    else if (image._gdiImage != null!)
+                    {
+                        MemoryStream ms = new MemoryStream();
+                        image._gdiImage.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
+                        var md5 = System.Security.Cryptography.MD5.Create();
+                        var hash = md5.ComputeHash(ms);
+                        image._path = "*md5:" + HashToString(hash);
+                    }
+#endif
                     else if (image._stream != null!)
                     {
                         if (image._stream is MemoryStream ms)
                         {
+                            ms.Seek(0, SeekOrigin.Begin);
                             var md5 = System.Security.Cryptography.MD5.Create();
                             var hash = md5.ComputeHash(ms);
                             image._path = "*md5:" + HashToString(hash);
@@ -97,13 +108,6 @@ namespace PdfSharp.Pdf.Advanced
                             image._path = "*" + Guid.NewGuid().ToString("B");
                         }
                     }
-#if GDI
-                    else if (image._gdiImage != null!)
-                    {
-                        // TODO Use hash code.
-                        image._path = "*" + Guid.NewGuid().ToString("B");
-                    }
-#endif
 #if WPF
                     else if (image.Memory != null)
                     {
