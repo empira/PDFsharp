@@ -88,6 +88,7 @@ namespace PdfSharp.Pdf.Advanced
                         if (image._stream is MemoryStream ms)
                         {
                             var md5 = System.Security.Cryptography.MD5.Create();
+                            ms.Position = 0; // Set stream position before calculating the hash.
                             var hash = md5.ComputeHash(ms);
                             image._path = "*md5:" + HashToString(hash);
                         }

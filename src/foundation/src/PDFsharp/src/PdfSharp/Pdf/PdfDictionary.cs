@@ -378,6 +378,44 @@ namespace PdfSharp.Pdf
                 => GetInteger(key, false);
 
             /// <summary>
+            /// Converts the specified value to unsigned integer.
+            /// If the value does not exist, the function returns 0.
+            /// If the value is not convertible, the function throws an InvalidCastException.
+            /// </summary>
+            public uint GetUnsignedInteger(string key, bool create)
+            {
+                object? obj = this[key];
+                if (obj == null)
+                {
+                    if (create)
+                        this[key] = new PdfInteger();
+                    return 0;
+                }
+
+                if (obj is PdfNull)
+                    return 0;
+
+                if (obj is PdfReference reference)
+                    obj = reference.Value;
+
+                return obj switch
+                {
+                    PdfInteger integer => (uint)integer.Value,
+                    PdfIntegerObject integerObject => (uint)integerObject.Value,
+                    PdfLongInteger longInteger => longInteger.Value is >= 0 and <= uint.MaxValue ? (uint)longInteger.Value : throw new InvalidCastException("GetUnsignedInteger: Long integer object is not an integer."),
+                    _ => throw new InvalidCastException("GetUnsignedInteger: Object is not an integer.")
+                };
+            }
+
+            /// <summary>
+            /// Converts the specified value to integer.
+            /// If the value does not exist, the function returns 0.
+            /// If the value is not convertible, the function throws an InvalidCastException.
+            /// </summary>
+            public uint GetUnsignedInteger(string key)
+                => GetUnsignedInteger(key, false);
+
+            /// <summary>
             /// Sets the entry to a direct integer value.
             /// </summary>
             public void SetInteger(string key, int value)

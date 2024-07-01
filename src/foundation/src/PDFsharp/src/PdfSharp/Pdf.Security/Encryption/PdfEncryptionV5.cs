@@ -517,7 +517,7 @@ namespace PdfSharp.Pdf.Security.Encryption
             var ownerValue = PdfEncoders.RawEncoding.GetBytes(SecurityHandler.Elements.GetString(PdfStandardSecurityHandler.Keys.O));
             var ownerEValue = PdfEncoders.RawEncoding.GetBytes(SecurityHandler.Elements.GetString(PdfStandardSecurityHandler.Keys.OE));
 
-            var permissionsValue = (uint)SecurityHandler.Elements.GetInteger(PdfStandardSecurityHandler.Keys.P);
+            var permissionsValue = SecurityHandler.Elements.GetUnsignedInteger(PdfStandardSecurityHandler.Keys.P);
             var permsValue = PdfEncoders.RawEncoding.GetBytes(SecurityHandler.Elements.GetString(PdfStandardSecurityHandler.Keys.Perms));
 
             EncryptMetadata = (SecurityHandler.Elements[PdfStandardSecurityHandler.Keys.EncryptMetadata] as PdfBoolean)?.Value ?? true; // GetBoolean() returns false if not existing, but default is true.

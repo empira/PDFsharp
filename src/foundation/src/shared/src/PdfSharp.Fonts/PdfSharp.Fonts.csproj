@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netstandard2.0;net472-windows</TargetFrameworks>
+    <TargetFrameworks>net6.0;netstandard2.0;net472</TargetFrameworks>
     <RootNamespace>PdfSharp</RootNamespace>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>

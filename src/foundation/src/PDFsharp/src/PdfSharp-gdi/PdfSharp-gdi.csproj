@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>library</OutputType>
-    <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
+    <TargetFrameworks>net6.0-windows;net472</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <RootNamespace>PdfSharp</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
@@ -16,11 +16,11 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472-windows|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472|AnyCPU'">
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472-windows|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472|AnyCPU'">
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
 
@@ -311,6 +311,7 @@
     <Compile Include="..\PdfSharp\Pdf.Security\Encryption\PdfEncryptionV5.cs" Link="Pdf.Security\Encryption\PdfEncryptionV5.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\Encryption\RC4.cs" Link="Pdf.Security\Encryption\RC4.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\Encryption\SASLprep.cs" Link="Pdf.Security\Encryption\SASLprep.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Security\enums\PdfDefaultEncryption.cs" Link="Pdf.Security\enums\PdfDefaultEncryption.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\enums\PdfUserAccessPermission.cs" Link="Pdf.Security\enums\PdfUserAccessPermission.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\CryptFilterBase.cs" Link="Pdf.Security\CryptFilterBase.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\IdentityCryptFilter.cs" Link="Pdf.Security\IdentityCryptFilter.cs" />
