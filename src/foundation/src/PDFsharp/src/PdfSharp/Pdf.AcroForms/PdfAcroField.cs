@@ -34,6 +34,10 @@ namespace PdfSharp.Pdf.AcroForms
                 string name = Elements.GetString(Keys.T);
                 return name;
             }
+            set
+            {
+                Elements.SetString(Keys.T, value);
+            }
         }
 
         /// <summary>
@@ -267,6 +271,10 @@ namespace PdfSharp.Pdf.AcroForms
         /// </summary>
         public sealed class PdfAcroFieldCollection : PdfArray
         {
+            PdfAcroFieldCollection(PdfDocument document)
+                : base(document)
+            { }
+
             PdfAcroFieldCollection(PdfArray array)
                 : base(array)
             { }

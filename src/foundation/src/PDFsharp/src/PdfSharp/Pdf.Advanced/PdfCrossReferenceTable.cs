@@ -27,10 +27,46 @@ namespace PdfSharp.Pdf.Advanced
         public Dictionary<PdfObjectID, PdfReference> ObjectTable = [];
 
         /// <summary>
+        /// Used to collect modified objects for incremental updates
+        /// </summary>
+        public Dictionary<PdfObjectID, PdfReference> ModifiedObjects = [];
+
         /// Gets or sets a value indicating whether this table is under construction.
         /// It is true while reading a PDF file.
         /// </summary>
         internal bool IsUnderConstruction { get; set; }
+
+        internal bool ReadyForModification { get; set; }
+
+        internal void MarkAsModified(PdfReference? pdfReference)
+        {
+            if (pdfReference == null || !ReadyForModification)
+                return;
+
+            if (pdfReference.ObjectID.IsEmpty)
+                throw new ArgumentException("ObjectID must not be empty", nameof(pdfReference.ObjectID));
+
+            ModifiedObjects[pdfReference.ObjectID] = pdfReference;
+        }
+
+        /// <summary>
+        /// Used to temporarily ignore modifications to objects<br></br>
+        /// (i.e. when doing type-transformations that do not change the structure of the document)
+        /// </summary>
+        /// <param name="action"></param>
+        internal void IgnoreModify(Action action)
+        {
+            var prev = ReadyForModification;
+            ReadyForModification = false;
+            try
+            {
+                action();
+            }
+            finally
+            {
+                ReadyForModification = prev;
+            }
+        }
 
         /// <summary>
         /// Adds a cross-reference entry to the table. Used when parsing the trailer.
@@ -58,6 +94,9 @@ namespace PdfSharp.Pdf.Advanced
 #endif
             }
             ObjectTable.Add(iref.ObjectID, iref);
+
+            if (ReadyForModification && _document.IsAppending)
+                ModifiedObjects[iref.ObjectID] = iref;
         }
 
         /// <summary>
@@ -77,6 +116,9 @@ namespace PdfSharp.Pdf.Advanced
                 throw new InvalidOperationException("Object already in table.");
 
             ObjectTable.Add(value.ObjectID, value.ReferenceNotNull);
+
+            if (ReadyForModification && _document.IsAppending)
+                ModifiedObjects[value.ObjectID] = value.ReferenceNotNull;
         }
 
         /// <summary>

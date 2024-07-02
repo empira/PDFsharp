@@ -33,7 +33,11 @@ namespace PdfSharp.Pdf.IO
         /// call the Info property at the imported document. This option is very fast and needs less memory
         /// and is e.g. useful for browsing information about a collection of PDF documents in a user interface.
         /// </summary>
-        [Obsolete("InformationOnly is not implemented, use Import instead.")]
-        InformationOnly,
+        InformationOnly,  // TODO: not yet implemented
+
+        /// <summary>
+        /// Comparable to <see cref="Modify"/> but changes are appended to the document when saving
+        /// </summary>
+        Append
     }
 }

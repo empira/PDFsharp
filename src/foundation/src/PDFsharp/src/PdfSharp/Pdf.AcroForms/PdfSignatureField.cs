@@ -2,6 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.IO;
+using PdfSharp.Pdf.Signatures;
 
 namespace PdfSharp.Pdf.AcroForms
 {
@@ -15,32 +16,44 @@ namespace PdfSharp.Pdf.AcroForms
         /// </summary>
         internal PdfSignatureField(PdfDocument document)
             : base(document)
-        { }
+        {
+            Elements[PdfAcroField.Keys.FT] = new PdfName("/Sig");
+        }
 
         internal PdfSignatureField(PdfDictionary dict)
             : base(dict)
         { }
 
         /// <summary>
-        /// Writes a key/value pair of this signature field dictionary.
+        /// Gets or sets the value for this field
         /// </summary>
-        internal override void WriteDictionaryElement(PdfWriter writer, PdfName key)
+        public new PdfSignatureValue? Value
         {
-            // Don’t encrypt Contents key’s value (PDF Reference 2.0: 7.6.2, Page 71).
-            if (key.Value == Keys.Contents)
+            get
             {
-                var effectiveSecurityHandler = writer.EffectiveSecurityHandler;
-                writer.EffectiveSecurityHandler = null;
-                base.WriteDictionaryElement(writer, key);
-                writer.EffectiveSecurityHandler = effectiveSecurityHandler;
+                if (sigValue is null)
+                {
+                    var dict = Elements.GetValue(PdfAcroField.Keys.V) as PdfDictionary;
+                    if (dict is not null)
+                        sigValue = new PdfSignatureValue(dict);
+                }
+                return sigValue;
             }
-            else
-                base.WriteDictionaryElement(writer, key);
+            set
+            {
+                if (value is not null)
+                    Elements.SetReference(PdfAcroField.Keys.V, value);
+                else
+                    Elements.Remove(PdfAcroField.Keys.V);
+            }
         }
+        PdfSignatureValue? sigValue;
 
         /// <summary>
         /// Predefined keys of this dictionary.
-        /// The description comes from PDF 1.4 Reference.
+        /// The description comes from PDF 1.4 Reference.<br></br>
+        /// TODO: These are wrong !
+        /// The keys are for a <see cref="PdfSignatureValue"/>, not for a <see cref="PdfSignatureField"/>
         /// </summary>
         public new class Keys : PdfAcroField.Keys
         {
