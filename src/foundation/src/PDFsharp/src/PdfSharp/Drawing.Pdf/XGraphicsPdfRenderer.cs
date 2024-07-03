@@ -976,13 +976,8 @@ namespace PdfSharp.Drawing.Pdf
                 int xCount = (int)Math.Ceiling(xRect.Value.Width / image.PixelWidth);
                 int yCount = (int)Math.Ceiling(xRect.Value.Height / image.PixelHeight);
 
-                XGraphicsContainer container;
-#if GDI
-                container = _gfx.BeginContainer(xRect.Value, xRect.Value, XGraphicsUnit.Point);
-#else
-                container = new XGraphicsContainer();
-#endif
-                BeginContainer(container, xRect.Value, xRect.Value, XGraphicsUnit.Point);
+                XGraphicsContainer container = _gfx.BeginContainer(xRect.Value, xRect.Value, XGraphicsUnit.Point);
+
                 //I think it should be XCombineMode.Intersect
                 SetClip(graphicsPath, XCombineMode.Intersect);
                 for (int i = 0; i < xCount; i++)
