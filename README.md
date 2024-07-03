@@ -1,7 +1,7 @@
 ﻿# PDFsharp & MigraDoc 6
 
-Version **6.1.0**  
-Published **2024-05-28**
+Version **6.1.1**  
+Published **2024-07-01**
 
 This is a version of the **PDFsharp** project, the main project of PDFsharp & MigraDoc 6 with updates for C# 12 and .NET 6.
 

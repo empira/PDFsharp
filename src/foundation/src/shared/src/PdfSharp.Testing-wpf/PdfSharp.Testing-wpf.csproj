@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-      <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
+      <TargetFrameworks>net6.0-windows;net472</TargetFrameworks>
     <RootNamespace>PdfSharp.Testing_wpf</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>

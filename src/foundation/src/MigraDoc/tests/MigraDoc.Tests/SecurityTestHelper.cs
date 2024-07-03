@@ -162,7 +162,7 @@ namespace MigraDoc.Tests
         /// </summary>
         public class TestOptions
         {
-            public PdfStandardSecurityHandler.DefaultEncryption Encryption { get; private set; }
+            public PdfDefaultEncryption Encryption { get; init; }
 
             /// <summary>
             /// Encrypt the Metadata dictionary (default = true). Valid for Version 4 and 5.
@@ -188,17 +188,17 @@ namespace MigraDoc.Tests
             {
                 return @enum switch
                 {
-                    TestOptionsEnum.None => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.None },
-                    TestOptionsEnum.Default => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.Default },
-                    TestOptionsEnum.V1 => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.V1 },
-                    TestOptionsEnum.V2With40Bits => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.V2With40Bits },
-                    TestOptionsEnum.V2With128Bits => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.V2With128Bits },
-                    TestOptionsEnum.V4UsingRC4 => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.V4UsingRC4 },
-                    TestOptionsEnum.V4UsingRC4WithoutMetadata => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.V4UsingRC4, EncryptMetadata = false },
-                    TestOptionsEnum.V4UsingAES => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.V4UsingAES },
-                    TestOptionsEnum.V4UsingAESWithoutMetadata => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.V4UsingAES, EncryptMetadata = false },
-                    TestOptionsEnum.V5 => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.V5 },
-                    TestOptionsEnum.V5WithoutMetadata => new() { Encryption = PdfStandardSecurityHandler.DefaultEncryption.V5, EncryptMetadata = false },
+                    TestOptionsEnum.None => new() { Encryption = PdfDefaultEncryption.None },
+                    TestOptionsEnum.Default => new() { Encryption = PdfDefaultEncryption.Default },
+                    TestOptionsEnum.V1 => new() { Encryption = PdfDefaultEncryption.V1 },
+                    TestOptionsEnum.V2With40Bits => new() { Encryption = PdfDefaultEncryption.V2With40Bits },
+                    TestOptionsEnum.V2With128Bits => new() { Encryption = PdfDefaultEncryption.V2With128Bits },
+                    TestOptionsEnum.V4UsingRC4 => new() { Encryption = PdfDefaultEncryption.V4UsingRC4 },
+                    TestOptionsEnum.V4UsingRC4WithoutMetadata => new() { Encryption = PdfDefaultEncryption.V4UsingRC4, EncryptMetadata = false },
+                    TestOptionsEnum.V4UsingAES => new() { Encryption = PdfDefaultEncryption.V4UsingAES },
+                    TestOptionsEnum.V4UsingAESWithoutMetadata => new() { Encryption = PdfDefaultEncryption.V4UsingAES, EncryptMetadata = false },
+                    TestOptionsEnum.V5 => new() { Encryption = PdfDefaultEncryption.V5 },
+                    TestOptionsEnum.V5WithoutMetadata => new() { Encryption = PdfDefaultEncryption.V5, EncryptMetadata = false },
                     _ => throw new ArgumentOutOfRangeException(nameof(@enum), @enum, null)
                 };
             }
@@ -237,7 +237,7 @@ namespace MigraDoc.Tests
         }
         public static void SecureDocument(PdfDocument pdfDoc, TestOptions options)
         {
-            if (options.Encryption != PdfStandardSecurityHandler.DefaultEncryption.None)
+            if (options.Encryption != PdfDefaultEncryption.None)
             {
                 if (options.UserPassword is not null)
                     pdfDoc.SecuritySettings.UserPassword = options.UserPassword;
@@ -247,14 +247,14 @@ namespace MigraDoc.Tests
                 var securityHandler = pdfDoc.SecurityHandler;
 
                 // Encryptions to initialize manually with additional options.
-                if (options.Encryption == PdfStandardSecurityHandler.DefaultEncryption.V4UsingRC4)
+                if (options.Encryption == PdfDefaultEncryption.V4UsingRC4)
                     securityHandler.SetEncryptionToV4UsingRC4(options.EncryptMetadata);
-                else if (options.Encryption == PdfStandardSecurityHandler.DefaultEncryption.V4UsingAES)
+                else if (options.Encryption == PdfDefaultEncryption.V4UsingAES)
                     securityHandler.SetEncryptionToV4UsingAES(options.EncryptMetadata);
-                else if (options.Encryption == PdfStandardSecurityHandler.DefaultEncryption.V5)
+                else if (options.Encryption == PdfDefaultEncryption.V5)
                     securityHandler.SetEncryptionToV5(options.EncryptMetadata);
                 // Encryptions to initialize through enum. Default encryption is already set, so we avoid to set it again.
-                else if (options.Encryption != PdfStandardSecurityHandler.DefaultEncryption.Default)
+                else if (options.Encryption != PdfDefaultEncryption.Default)
                     securityHandler.SetEncryption(options.Encryption);
             }
         }
@@ -312,7 +312,7 @@ namespace MigraDoc.Tests
             var prefixSuffix = "S_";
 
             // Prefix for non-encrypted file.
-            if (options is null || options.Encryption is PdfStandardSecurityHandler.DefaultEncryption.None)
+            if (options is null || options.Encryption is PdfDefaultEncryption.None)
                 prefixSuffix += "_No";
             // Prefix for encrypted file.
             else
@@ -324,7 +324,7 @@ namespace MigraDoc.Tests
                     .Replace("With", "_")
                     .Replace("Bits", "B");
 #else
-                prefixSuffix += $"{Enum.GetName(typeof(PdfStandardSecurityHandler.DefaultEncryption), options.Encryption)}"
+                prefixSuffix += $"{Enum.GetName(typeof(PdfDefaultEncryption), options.Encryption)}"
                     .Replace("Default", "Def")
                     .Replace("Using", "_")
                     .Replace("With", "_")

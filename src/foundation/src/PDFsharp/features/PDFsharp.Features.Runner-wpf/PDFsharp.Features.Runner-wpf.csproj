@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
+    <TargetFrameworks>net6.0-windows;net472</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <RootNamespace>PDFsharp.Features</RootNamespace>
     <UseWPF>true</UseWPF>

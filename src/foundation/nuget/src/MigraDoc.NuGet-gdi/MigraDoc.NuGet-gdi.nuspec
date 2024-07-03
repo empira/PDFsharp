@@ -36,7 +36,7 @@
     </metadata>
     <files>
         <file src="bin\$config$\net6.0-windows\**\*.*" target="lib\net6.0-windows7.0\" exclude="**\*NuGet*"/>
-        <file src="bin\$config$\net472-windows\**\*.*" target="lib\net472\" exclude="**\*NuGet*"/>
+        <file src="bin\$config$\net472\**\*.*" target="lib\net472\" exclude="**\*NuGet*"/>
         <file src="README.md" />
         <file src="..\..\..\..\..\assets\migradoc\images\MigraDoc-128x128.png" target="images\" />
     </files>
