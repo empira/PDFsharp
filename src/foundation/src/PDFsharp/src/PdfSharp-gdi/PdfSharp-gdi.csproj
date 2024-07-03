@@ -256,6 +256,7 @@
     <Compile Include="..\PdfSharp\Pdf.Annotations\enums\PdfAnnotationFlags.cs" Link="Pdf.Annotations\enums\PdfAnnotationFlags.cs" />
     <Compile Include="..\PdfSharp\Pdf.Annotations\enums\PdfRubberStampAnnotationIcon.cs" Link="Pdf.Annotations\enums\PdfRubberStampAnnotationIcon.cs" />
     <Compile Include="..\PdfSharp\Pdf.Annotations\enums\PdfTextAnnotationIcon.cs" Link="Pdf.Annotations\enums\PdfTextAnnotationIcon.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Annotations\IAnnotationAppearanceHandler.cs" Link="Pdf.Annotations\IAnnotationAppearanceHandler.cs" />
     <Compile Include="..\PdfSharp\Pdf.Annotations\PdfAnnotation.cs" Link="Pdf.Annotations\PdfAnnotation.cs" />
     <Compile Include="..\PdfSharp\Pdf.Annotations\PdfAnnotations.cs" Link="Pdf.Annotations\PdfAnnotations.cs" />
     <Compile Include="..\PdfSharp\Pdf.Annotations\PdfGenericAnnotation.cs" Link="Pdf.Annotations\PdfGenericAnnotation.cs" />
@@ -320,6 +321,14 @@
     <Compile Include="..\PdfSharp\Pdf.Security\PdfSecurityHandler.cs" Link="Pdf.Security\PdfSecurityHandler.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\PdfSecuritySettings.cs" Link="Pdf.Security\PdfSecuritySettings.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\PdfStandardSecurityHandler.cs" Link="Pdf.Security\PdfStandardSecurityHandler.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Signatures\BouncySigner.cs" Link="Pdf.Signatures\BouncySigner.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Signatures\DefaultSignatureAppearanceHandler.cs" Link="Pdf.Signatures\DefaultSignatureAppearanceHandler.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Signatures\DefaultSigner.cs" Link="Pdf.Signatures\DefaultSigner.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Signatures\ISigner.cs" Link="Pdf.Signatures\ISigner.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Signatures\PdfArrayWithPadding.cs" Link="Pdf.Signatures\PdfArrayWithPadding.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Signatures\PdfSignatureHandler.cs" Link="Pdf.Signatures\PdfSignatureHandler.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Signatures\PdfSignatureOptions.cs" Link="Pdf.Signatures\PdfSignatureOptions.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Signatures\RangedStream.cs" Link="Pdf.Signatures\RangedStream.cs" />
     <Compile Include="..\PdfSharp\Pdf.Structure\PdfAttributesBase.cs" Link="Pdf.Structure\PdfAttributesBase.cs" />
     <Compile Include="..\PdfSharp\Pdf.Structure\PdfLayoutAttributes.cs" Link="Pdf.Structure\PdfLayoutAttributes.cs" />
     <Compile Include="..\PdfSharp\Pdf.Structure\PdfMarkedContentReference.cs" Link="Pdf.Structure\PdfMarkedContentReference.cs" />
@@ -425,4 +434,8 @@
     <InternalsVisibleTo Include="PDFsharp.TestHelper-gdi, PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
+    <PackageReference Include="BouncyCastle.Cryptography" />
+  </ItemGroup>
 </Project>
