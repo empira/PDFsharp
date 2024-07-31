@@ -27,10 +27,51 @@ namespace PdfSharp.Pdf.Advanced
         public Dictionary<PdfObjectID, PdfReference> ObjectTable = [];
 
         /// <summary>
+        /// Used to collect modified objects for incremental updates
+        /// </summary>
+        internal Dictionary<PdfObjectID, PdfReference> ModifiedObjects = [];
+
+        /// <summary>
+        /// Used to collect deleted objects for incremental updates
+        /// </summary>
+        internal HashSet<PdfObjectID> DeletedObjects = [];
+
         /// Gets or sets a value indicating whether this table is under construction.
         /// It is true while reading a PDF file.
         /// </summary>
         internal bool IsUnderConstruction { get; set; }
+
+        internal bool ReadyForModification { get; set; }
+
+        internal void MarkAsModified(PdfReference? pdfReference)
+        {
+            if (pdfReference == null || !ReadyForModification)
+                return;
+
+            if (pdfReference.ObjectID.IsEmpty)
+                throw new ArgumentException("ObjectID must not be empty", nameof(pdfReference.ObjectID));
+
+            ModifiedObjects[pdfReference.ObjectID] = pdfReference;
+        }
+
+        /// <summary>
+        /// Used to temporarily ignore modifications to objects<br></br>
+        /// (i.e. when doing type-transformations that do not change the structure of the document)
+        /// </summary>
+        /// <param name="action"></param>
+        internal void IgnoreModify(Action action)
+        {
+            var prev = ReadyForModification;
+            ReadyForModification = false;
+            try
+            {
+                action();
+            }
+            finally
+            {
+                ReadyForModification = prev;
+            }
+        }
 
         /// <summary>
         /// Adds a cross-reference entry to the table. Used when parsing the trailer.
@@ -58,6 +99,12 @@ namespace PdfSharp.Pdf.Advanced
 #endif
             }
             ObjectTable.Add(iref.ObjectID, iref);
+
+            // new objects must be treated like modified objects for incremental updates
+            if (ReadyForModification && _document.IsAppending)
+            {
+                ModifiedObjects[iref.ObjectID] = iref;
+            }
         }
 
         /// <summary>
@@ -77,6 +124,12 @@ namespace PdfSharp.Pdf.Advanced
                 throw new InvalidOperationException("Object already in table.");
 
             ObjectTable.Add(value.ObjectID, value.ReferenceNotNull);
+
+            // new objects must be treated like modified objects for incremental updates
+            if (ReadyForModification && _document.IsAppending)
+            {
+                ModifiedObjects[value.ObjectID] = value.ReferenceNotNull;
+            }
         }
 
         /// <summary>
@@ -231,8 +284,7 @@ namespace PdfSharp.Pdf.Advanced
                 ids.Add(iref.ObjectNumber, 0);
             }
 
-            //
-            Dictionary<PdfReference, int> refs = new Dictionary<PdfReference, int>();
+            var refs = new Dictionary<PdfReference, int>();
             foreach (PdfReference iref in irefs)
             {
                 refs.Add(iref, 0);
@@ -264,7 +316,10 @@ namespace PdfSharp.Pdf.Advanced
 #endif
 
             MaxObjectNumber = 0;
+            // remember list of currently known object-IDs
+            var allObjectIds = new HashSet<PdfObjectID>(ObjectTable.Keys);
             ObjectTable.Clear();
+            DeletedObjects.Clear();
             foreach (PdfReference iref in irefs)
             {
                 // This if is needed for corrupt PDF files from the wild.
@@ -275,6 +330,12 @@ namespace PdfSharp.Pdf.Advanced
                     ObjectTable.Add(iref.ObjectID, iref);
                     MaxObjectNumber = Math.Max(MaxObjectNumber, iref.ObjectNumber);
                 }
+            }
+            // if initial object-ID is not in the list of final objects, mark as deleted
+            foreach (var objId in allObjectIds)
+            {
+                if (!ObjectTable.ContainsKey(objId))
+                    DeletedObjects.Add(objId);
             }
             //CheckConsistence();
             removed -= ObjectTable.Count;

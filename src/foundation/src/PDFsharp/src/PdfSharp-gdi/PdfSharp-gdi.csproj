@@ -320,7 +320,16 @@
     <Compile Include="..\PdfSharp\Pdf.Security\PdfSecurityHandler.cs" Link="Pdf.Security\PdfSecurityHandler.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\PdfSecuritySettings.cs" Link="Pdf.Security\PdfSecuritySettings.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\PdfStandardSecurityHandler.cs" Link="Pdf.Security\PdfStandardSecurityHandler.cs" />
-    <Compile Include="..\PdfSharp\Pdf.Structure\PdfAttributesBase.cs" Link="Pdf.Structure\PdfAttributesBase.cs" />
+
+	<Compile Include="..\PdfSharp\Pdf.Signatures\DefaultSignatureRenderer.cs" Link="Pdf.Signatures\DefaultSignatureRenderer.cs" />
+	<Compile Include="..\PdfSharp\Pdf.Signatures\DefaultSigner.cs" Link="Pdf.Signatures\DefaultSigner.cs" />
+	<Compile Include="..\PdfSharp\Pdf.Signatures\ISignatureRenderer.cs" Link="Pdf.Signatures\ISignatureRenderer.cs" />
+	<Compile Include="..\PdfSharp\Pdf.Signatures\ISigner.cs" Link="Pdf.Signatures\ISigner.cs" />
+	<Compile Include="..\PdfSharp\Pdf.Signatures\PdfSignatureOptions.cs" Link="Pdf.Signatures\PdfSignatureOptions.cs" />
+	<Compile Include="..\PdfSharp\Pdf.Signatures\PdfSignatureValue.cs" Link="Pdf.Signatures\PdfSignatureValue.cs" />
+	<Compile Include="..\PdfSharp\Pdf.Signatures\PdfSigner.cs" Link="Pdf.Signatures\PdfSigner.cs" />
+    
+	<Compile Include="..\PdfSharp\Pdf.Structure\PdfAttributesBase.cs" Link="Pdf.Structure\PdfAttributesBase.cs" />
     <Compile Include="..\PdfSharp\Pdf.Structure\PdfLayoutAttributes.cs" Link="Pdf.Structure\PdfLayoutAttributes.cs" />
     <Compile Include="..\PdfSharp\Pdf.Structure\PdfMarkedContentReference.cs" Link="Pdf.Structure\PdfMarkedContentReference.cs" />
     <Compile Include="..\PdfSharp\Pdf.Structure\PdfMarkInformation.cs" Link="Pdf.Structure\PdfMarkInformation.cs" />
@@ -420,7 +429,12 @@
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="System.Formats.Asn1" />
+		<PackageReference Include="System.Security.Cryptography.Pkcs" />
+	</ItemGroup>
+
+	<ItemGroup>
     <InternalsVisibleTo Include="PDFsharp.Tests-gdi, PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
     <InternalsVisibleTo Include="PDFsharp.TestHelper-gdi, PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
   </ItemGroup>

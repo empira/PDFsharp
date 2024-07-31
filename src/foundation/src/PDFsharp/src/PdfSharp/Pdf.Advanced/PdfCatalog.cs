@@ -68,7 +68,7 @@ namespace PdfSharp.Pdf.Advanced
                 if (_pages == null)
                 {
                     _pages = (PdfPages?)Elements.GetValue(Keys.Pages, VCF.CreateIndirect) ?? NRT.ThrowOnNull<PdfPages>();
-                    if (Owner.IsImported)
+                    if (Owner.IsImported && Owner._openMode != PdfDocumentOpenMode.Append)
                         _pages.FlattenPageTree();
                 }
                 return _pages;
@@ -152,13 +152,30 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets the AcroForm dictionary of this document.
         /// </summary>
-        public PdfAcroForm AcroForm
+        public PdfAcroForm? AcroForm
         {
             get
             {
                 if (_acroForm == null)
-                    _acroForm = (PdfAcroForm?)Elements.GetValue(Keys.AcroForm)??NRT.ThrowOnNull<PdfAcroForm>();
+                    _acroForm = (PdfAcroForm?)Elements.GetValue(Keys.AcroForm);
                 return _acroForm;
+            }
+            internal set
+            {
+                if (value != null)
+                {
+                    if (!value.IsIndirect)
+                        throw new InvalidOperationException("Setting the AcroForm requires an indirect object");
+                    Elements.SetReference(Keys.AcroForm, value);
+                    _acroForm = value;
+                }
+                else
+                {
+                    if (AcroForm != null && AcroForm.Reference != null)
+                        _document.IrefTable.Remove(AcroForm.Reference);
+                    Elements.Remove(Keys.AcroForm);
+                    _acroForm = null;
+                }
             }
         }
         PdfAcroForm? _acroForm;

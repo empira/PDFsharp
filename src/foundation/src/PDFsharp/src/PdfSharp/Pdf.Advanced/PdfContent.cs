@@ -38,7 +38,7 @@ namespace PdfSharp.Pdf.Advanced
             : base(dict)
         {
             // A PdfContent dictionary is always unfiltered.
-            Decode();
+            Owner.IrefTable.IgnoreModify(Decode);   // decode modifies the object, ignore that
         }
 
         /// <summary>
@@ -135,7 +135,8 @@ namespace PdfSharp.Pdf.Advanced
                     //Elements["/Filter"] = new PdfName("/FlateDecode");
                     Elements.SetName("/Filter", "/FlateDecode");
                 }
-                Elements.SetInteger("/Length", Stream.Length);
+                // avoid adding this to "ModifiedObjects" while saving (caused "CollectionWasModified"-Exception)
+                Owner.IrefTable.IgnoreModify(() => Elements.SetInteger("/Length", Stream.Length));
             }
 
             base.WriteObject(writer);

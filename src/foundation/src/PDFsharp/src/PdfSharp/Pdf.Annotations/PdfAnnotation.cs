@@ -83,7 +83,7 @@ namespace PdfSharp.Pdf.Annotations
         /// </summary>
         public PdfRectangle Rectangle
         {
-            get => Elements.GetRectangle(Keys.Rect, true);
+            get => Elements.GetRectangle(Keys.Rect);
             set
             {
                 Elements.SetRectangle(Keys.Rect, value);

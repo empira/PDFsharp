@@ -191,7 +191,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfRectangle MediaBox
         {
-            get => Elements.GetRectangle(InheritablePageKeys.MediaBox, true);
+            get => Elements.GetRectangle(InheritablePageKeys.MediaBox);
             set => Elements.SetRectangle(InheritablePageKeys.MediaBox, value);
         }
 
@@ -200,7 +200,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfRectangle CropBox
         {
-            get => Elements.GetRectangle(InheritablePageKeys.CropBox, true);
+            get => Elements.GetRectangle(InheritablePageKeys.CropBox);
             set => Elements.SetRectangle(InheritablePageKeys.CropBox, value);
         }
 
@@ -209,7 +209,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfRectangle BleedBox
         {
-            get => Elements.GetRectangle(Keys.BleedBox, true);
+            get => Elements.GetRectangle(Keys.BleedBox);
             set => Elements.SetRectangle(Keys.BleedBox, value);
         }
 
@@ -218,7 +218,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfRectangle ArtBox
         {
-            get => Elements.GetRectangle(Keys.ArtBox, true);
+            get => Elements.GetRectangle(Keys.ArtBox);
             set => Elements.SetRectangle(Keys.ArtBox, value);
         }
 
@@ -227,7 +227,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfRectangle TrimBox
         {
-            get => Elements.GetRectangle(Keys.TrimBox, true);
+            get => Elements.GetRectangle(Keys.TrimBox);
             set => Elements.SetRectangle(Keys.TrimBox, value);
         }
 
@@ -631,7 +631,7 @@ namespace PdfSharp.Pdf
             if (TransparencyUsed && !Elements.ContainsKey(Keys.Group) &&
                 _document.Options.ColorMode != PdfColorMode.Undefined)
             {
-                var group = new PdfDictionary();
+                var group = new PdfDictionary(Owner);
                 Elements["/Group"] = group;
                 if (_document.Options.ColorMode != PdfColorMode.Cmyk)
                     group.Elements.SetName("/CS", "/DeviceRGB");
