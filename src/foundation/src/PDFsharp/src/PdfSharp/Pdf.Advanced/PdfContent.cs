@@ -135,7 +135,8 @@ namespace PdfSharp.Pdf.Advanced
                     //Elements["/Filter"] = new PdfName("/FlateDecode");
                     Elements.SetName("/Filter", "/FlateDecode");
                 }
-                Elements.SetInteger("/Length", Stream.Length);
+                // avoid adding this to "ModifiedObjects" while saving (caused "CollectionWasModified"-Exception)
+                Owner.IrefTable.IgnoreModify(() => Elements.SetInteger("/Length", Stream.Length));
             }
 
             base.WriteObject(writer);

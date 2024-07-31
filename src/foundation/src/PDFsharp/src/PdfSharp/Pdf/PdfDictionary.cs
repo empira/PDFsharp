@@ -603,7 +603,7 @@ namespace PdfSharp.Pdf
             /// Sets the entry to a direct rectangle value, represented by an array with four values.
             /// </summary>
             public void SetRectangle(string key, PdfRectangle rect)
-                => _elements[key] = rect;
+                => this[key] = rect;
 
             /// Converts the specified value to XMatrix.
             /// If the value does not exist, the function returns an identity matrix.
@@ -644,7 +644,7 @@ namespace PdfSharp.Pdf
             /// Sets the entry to a direct matrix value, represented by an array with six values.
             /// </summary>
             public void SetMatrix(string key, XMatrix matrix)
-                => _elements[key] = PdfLiteral.FromMatrix(matrix);
+                => this[key] = PdfLiteral.FromMatrix(matrix);
 
             /// <summary>
             /// Converts the specified value to DateTime.
@@ -692,7 +692,7 @@ namespace PdfSharp.Pdf
             /// Sets the entry to a direct datetime value.
             /// </summary>
             public void SetDateTime(string key, DateTime value)
-                => _elements[key] = new PdfDate(value);
+                => this[key] = new PdfDate(value);
 
             internal int GetEnumFromName(string key, object defaultValue, bool create)
             {
@@ -719,7 +719,7 @@ namespace PdfSharp.Pdf
             {
                 if (value is not Enum)
                     throw new ArgumentException(nameof(value));
-                _elements[key] = new PdfName("/" + value);
+                this[key] = new PdfName("/" + value);
             }
 
             /// <summary>
@@ -1048,7 +1048,7 @@ namespace PdfSharp.Pdf
                 "You try to set an indirect object directly into a dictionary.");
 
                 // HACK?
-                _elements[key] = value;
+                this[key] = value;
             }
 
             /// <summary>
@@ -1173,8 +1173,21 @@ namespace PdfSharp.Pdf
 #endif
                     if (value is PdfObject { IsIndirect: true } obj)
                         value = obj.Reference;
-                    _elements[key] = value;
-                    _ownerDictionary.SetModified(true);
+                    else if (value is PdfDictionary dict)
+                        dict.ContainingReference = _ownerDictionary.Reference ?? _ownerDictionary.ContainingReference;
+                    else if (value is PdfArray ary)
+                        ary.ContainingReference = _ownerDictionary.Reference ?? _ownerDictionary.ContainingReference;
+                    // minor optimzation
+                    if (_ownerDictionary.Owner.IsAppending && _ownerDictionary.Owner.IrefTable.ReadyForModification)
+                    {
+                        var prevItem = _elements.ContainsKey(key) ? this[key] : null;
+                        _elements[key] = value;
+                        // incremental updates: do not mark as modified if we don't have to
+                        if (value != prevItem)
+                            _ownerDictionary.SetModified(true);
+                    }
+                    else
+                        _elements[key] = value;
                 }
             }
 
@@ -1197,11 +1210,22 @@ namespace PdfSharp.Pdf
                             throw new ArgumentException("A dictionary with stream cannot be a direct value.");
                     }
 #endif
-
                     if (value is PdfObject { IsIndirect: true } obj)
                         value = obj.Reference;
-                    _elements[key.Value] = value;
-                    _ownerDictionary.SetModified(true);
+                    else if (value is PdfDictionary vdict)
+                        vdict.ContainingReference = _ownerDictionary.Reference ?? _ownerDictionary.ContainingReference;
+                    else if (value is PdfArray varray)
+                        varray.ContainingReference = _ownerDictionary.Reference ?? _ownerDictionary.ContainingReference;
+                    // minor optimzation
+                    if (_ownerDictionary.Owner.IsAppending && _ownerDictionary.Owner.IrefTable.ReadyForModification)
+                    {
+                        var prevItem = _elements.ContainsKey(key.Value) ? this[key.Value] : null;
+                        // incremental updates: do not mark as modified if we don't have to
+                        if (value != prevItem)
+                            _ownerDictionary.SetModified(true);
+                    }
+                    else
+                        _elements[key.Value] = value;
                 }
             }
 
@@ -1273,6 +1297,10 @@ namespace PdfSharp.Pdf
                 // If object is indirect automatically convert value to reference.
                 if (value is PdfObject { IsIndirect: true } obj)
                     value = obj.Reference;
+                else if (value is PdfDictionary dict)
+                    dict.ContainingReference = _ownerDictionary.Reference ?? _ownerDictionary.ContainingReference;
+                else if (value is PdfArray ary)
+                    ary.ContainingReference = _ownerDictionary.Reference ?? _ownerDictionary.ContainingReference;
 
                 _elements.Add(key, value);
                 _ownerDictionary.SetModified(true);

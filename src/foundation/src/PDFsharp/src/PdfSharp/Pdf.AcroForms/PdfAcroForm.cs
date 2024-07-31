@@ -40,6 +40,33 @@ namespace PdfSharp.Pdf.AcroForms
         PdfAcroField.PdfAcroFieldCollection? _fields;
 
         /// <summary>
+        /// Gets the flattened field-hierarchy of this AcroForm
+        /// </summary>
+        public IEnumerable<PdfAcroField> GetAllFields()
+        {
+            var fields = new List<PdfAcroField>();
+            if (Fields != null)
+            {
+                for (var i = 0; i < Fields.Elements.Count; i++)
+                {
+                    var field = Fields[i];
+                    TraverseFields(field, ref fields);
+                }
+            }
+            return fields;
+        }
+
+        private static void TraverseFields(PdfAcroField parentField, ref List<PdfAcroField> fieldList)
+        {
+            fieldList.Add(parentField);
+            for (var i = 0; i < parentField.Fields.Elements.Count; i++)
+            {
+                var field = parentField.Fields[i];
+                TraverseFields(field, ref fieldList);
+            }
+        }
+
+        /// <summary>
         /// Predefined keys of this dictionary. 
         /// The description comes from PDF 1.4 Reference.
         /// </summary>

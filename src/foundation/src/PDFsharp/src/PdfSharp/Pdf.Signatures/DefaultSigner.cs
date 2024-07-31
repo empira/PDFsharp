@@ -1,10 +1,13 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-#if WPF
-using System.IO;
-#endif
+#if NET6_0_OR_GREATER
+
 using System.Net.Http.Headers;
+#if WPF
+    using System.Net.Http;
+#endif
+#endif
 using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;

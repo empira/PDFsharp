@@ -413,8 +413,32 @@ namespace PdfSharp.Pdf
                 {
                     if (value == null!)
                         throw new ArgumentNullException(nameof(value));
-                    _elements[index] = value;
-                    _ownerArray?.SetModified(true);
+                    if (index < 0 || index >= _elements.Count)
+                        throw new ArgumentOutOfRangeException(nameof(index), $"Index ({index}) must be greater than or equal to zero and less than {_elements.Count}.");
+                    
+                    // no need to set ContainingReference for indirect objcets
+                    if (!(value is PdfObject { IsIndirect: true }))
+                    {
+                        if (value is PdfDictionary dict)
+                            dict.ContainingReference = _ownerArray?.Reference ?? _ownerArray?.ContainingReference;
+                        else if (value is PdfArray ary)
+                            ary.ContainingReference = _ownerArray?.Reference ?? _ownerArray?.ContainingReference;
+                    }
+                    // TODO: use reference of indirect objects as in PdfDictionary ?
+                    //if (value is PdfObject { IsIndirect: true } obj)
+                    //    value = obj.Reference!;
+
+                    // minor optimization
+                    if (_ownerArray != null && _ownerArray.Owner.IsAppending && _ownerArray.Owner.IrefTable.ReadyForModification)
+                    {
+                        var prevItem = this[index];
+                        _elements[index] = value;
+                        // incremental updates: do not mark as modified if we don't have to
+                        if (value != prevItem)
+                            _ownerArray?.SetModified(true);
+                    }
+                    else
+                        _elements[index] = value;
                 }
             }
 

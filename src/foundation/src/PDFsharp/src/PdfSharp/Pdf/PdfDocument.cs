@@ -31,7 +31,7 @@ namespace PdfSharp.Pdf
         /// <param name="writer"></param>
         internal delegate void AfterSaveCallback(PdfWriter writer);
 
-        internal AfterSaveCallback AfterSave;
+        internal AfterSaveCallback? AfterSave;
 
 #if DEBUG_
         static PdfDocument()
@@ -411,6 +411,7 @@ namespace PdfSharp.Pdf
         /// If the document was not modified, this method does nothing.<br></br>
         /// </summary>
         /// <remarks>
+        /// See chapters 7.5.6 and H.7 in PdfReference (1.7) for details on incremental updates<br></br>
         /// Note that when updating a document that is <b>linearized</b>, the document will no longer be linearized
         /// as the update changes the file-length and may invalidate the existing hint-tables.<br></br>
         /// Acrobat(Reader) may complain that the file is damaged and need to be repaired.<br></br>
@@ -418,7 +419,10 @@ namespace PdfSharp.Pdf
         /// <param name="writer"></param>
         internal void SaveIncrementally(PdfWriter writer)
         {
-            if (IrefTable.ModifiedObjects.Count == 0)
+            IrefTable.Compact();
+
+            // nothing changed or deleted ? nothing to do here
+            if (IrefTable.ModifiedObjects.Count == 0 && IrefTable.DeletedObjects.Count == 0)
                 return;
 
             _securitySettings?.EffectiveSecurityHandler?.PrepareForWriting();
@@ -427,30 +431,47 @@ namespace PdfSharp.Pdf
             // there may be the line "%%EOF" at the end of the file, make sure we start on a new line
             writer.WriteRaw('\n');
 
-            var objects = new List<Tuple<int, int, long>>(IrefTable.ModifiedObjects.Count);
-
-            foreach (var iref in IrefTable.ModifiedObjects.Values.OrderBy(it => it.ObjectNumber))
+            var xrefEntries = new List<Tuple<int, int, long, char>>(IrefTable.ModifiedObjects.Count + IrefTable.DeletedObjects.Count);
+            // write updated objects
+            foreach (var iref in IrefTable.ModifiedObjects.Values)
             {
                 iref.Position = writer.Position;
                 iref.Value.WriteObject(writer);
-                objects.Add(new (iref.ObjectNumber, iref.GenerationNumber, iref.Position));
+                xrefEntries.Add(new(iref.ObjectNumber, iref.GenerationNumber, iref.Position, 'n'));
             }
+            // add deleted objects to the mix
+            var deleteObjectsOrdered = new List<PdfObjectID>(IrefTable.DeletedObjects);
+            deleteObjectsOrdered.Sort((a, b) => a.ObjectNumber.CompareTo(b.ObjectNumber));
+            for (var i = 0; i < deleteObjectsOrdered.Count; i++)
+            {
+                var objId = deleteObjectsOrdered[i];
+                // "position"-value of deleted objects are the object-numbers of the next deleted object
+                var nextDeletedObjectNumber = i + 1 < deleteObjectsOrdered.Count
+                    ? deleteObjectsOrdered[i + 1].ObjectNumber : 0;
+                // increment generation number of deleted objects
+                xrefEntries.Add(new(objId.ObjectNumber, objId.GenerationNumber + 1, nextDeletedObjectNumber, 'f'));
+            }
+            // sort by object number
+            xrefEntries.Sort((a, b) => a.Item1.CompareTo(b.Item1));
+            // if we have deleted objetcs, use first one as head for new xref-table
+            var nextFreeObject = deleteObjectsOrdered.Count > 0 ? deleteObjectsOrdered[0].ObjectNumber : 0;
+            
             SizeType startxref = writer.Position;
 
             writer.WriteRaw("xref\n");
 
             writer.WriteRaw(Invariant($"0 1\n"));
-            writer.WriteRaw(Invariant($"{0:0000000000} {65535:00000} f \n"));
+            writer.WriteRaw(Invariant($"{nextFreeObject:0000000000} {65535:00000} f \n"));
 
             // build chunks of consecutively numbered objects
             var startIndex = 0;
-            var chunk = new List<Tuple<int, int, long>>(objects.Count);
+            var chunk = new List<Tuple<int, int, long, char>>(xrefEntries.Count);
             do
             {
                 chunk.Clear();
-                chunk.AddRange(objects.Skip(startIndex).TakeWhile((it, idx) =>
+                chunk.AddRange(xrefEntries.Skip(startIndex).TakeWhile((it, idx) =>
                 {
-                    return idx == 0 || it.Item1 == objects[idx + startIndex - 1].Item1 + 1;
+                    return idx == 0 || it.Item1 == xrefEntries[idx + startIndex - 1].Item1 + 1;
                 }));
                 startIndex += chunk.Count;
 
@@ -458,9 +479,9 @@ namespace PdfSharp.Pdf
                 foreach (var element in chunk)
                 {
                     // Acrobat is very pedantic; it must be exactly 20 bytes per line.
-                    writer.WriteRaw(Invariant($"{element.Item3:0000000000} {element.Item2:00000} n \n"));
+                    writer.WriteRaw(Invariant($"{element.Item3:0000000000} {element.Item2:00000} {element.Item4} \n"));
                 }
-            } while (startIndex < objects.Count);
+            } while (startIndex < xrefEntries.Count);
 
             var newTrailer = new PdfTrailer(this);
             // copy all entries from the previous trailer, as specified in the spec

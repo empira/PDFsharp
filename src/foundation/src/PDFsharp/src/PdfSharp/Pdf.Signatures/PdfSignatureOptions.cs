@@ -36,6 +36,10 @@ namespace PdfSharp.Pdf.Signatures
         /// </summary>
         public string? Reason { get; set; }
 
+        /// <summary>
+        /// Create a certification signature. Not yet implemented.<br></br>
+        /// See chapter 12.8 (Digital Signatures) in Pdf Reference (DocMDP / FieldMDP)
+        /// </summary>
         public bool Certify { get; set; }
 
         /// <summary>
