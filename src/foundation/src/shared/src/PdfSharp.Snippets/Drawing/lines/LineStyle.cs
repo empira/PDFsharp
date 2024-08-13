@@ -53,7 +53,7 @@ namespace PdfSharp.Snippets.Drawing
 
                 // Custom pattern
                 //pen.DashStyle = XDashStyle.Custom;
-                pen.DashPattern = new[] { 3, 1, 2.5, 1.5 };
+                pen.DashPattern = [3, 1, 2.5, 1.5];
                 pen.Width = 7;
 
                 pen.DashOffset = 1;

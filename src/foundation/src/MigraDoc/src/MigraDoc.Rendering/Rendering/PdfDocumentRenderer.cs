@@ -3,11 +3,10 @@
 
 using System.Diagnostics;
 using System.Reflection;
-using MigraDoc.DocumentObjectModel;
-using MigraDoc.Rendering.Internals;
-using MigraDoc.Rendering.Resources;
 using PdfSharp.Pdf;
 using PdfSharp.Drawing;
+using MigraDoc.DocumentObjectModel;
+using MigraDoc.Rendering.Internals;
 
 namespace MigraDoc.Rendering
 {
@@ -26,19 +25,19 @@ namespace MigraDoc.Rendering
         /// Initializes a new instance of the <see cref="PdfDocumentRenderer"/> class.
         /// </summary>
         /// <param name="unicode">If true Unicode encoding is used for all text. If false, WinAnsi encoding is used.</param>
-        [Obsolete("Code is always unicode.")]
+        [Obsolete("Code is always Unicode.")]
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         public PdfDocumentRenderer(bool unicode)
         {
             if (unicode is false)
-                throw new ArgumentException("Text is always rendered as unicode.");
+                throw new ArgumentException("Text is always rendered as Unicode.");
         }
 
         /// <summary>
         /// Gets a value indicating whether the text is rendered as Unicode.
         /// Returns true because text is rendered always in unicode.
         /// </summary>
-        [Obsolete("Code is always unicode.")]
+        [Obsolete("Code is always Unicode.")]
         public bool Unicode => true;
 
         /// <summary>
@@ -94,7 +93,7 @@ namespace MigraDoc.Rendering
         void PrepareDocumentRenderer(bool prepareCompletely)
         {
             if (_document == null)
-                throw new InvalidOperationException(Messages2.PropertyNotSetBefore("DocumentRenderer", MethodBase.GetCurrentMethod()!.Name));
+                throw new InvalidOperationException(MdPdfMsgs.PropertyNotSetBefore(nameof(Document), MethodBase.GetCurrentMethod()!.Name).Message);
 
             _documentRenderer ??= new(_document)
             {
@@ -203,6 +202,28 @@ namespace MigraDoc.Rendering
                 pdfPage.Width = pageInfo.Width;
                 pdfPage.Height = pageInfo.Height;
                 pdfPage.Orientation = pageInfo.Orientation;
+
+#if true_
+                // Starting with 6.2.0, PDFsharp sometimes swaps width and height when setting the orientation.
+                // This code ensures that MigraDoc gets the Width and Height it asks for.
+                if (pageInfo.Orientation == PageOrientation.Portrait)
+                {
+                    // Make sure page sizes are correct, but ignore pdfPage orientation here.
+                    // Assign Width and Height again if they do not match.
+                    if (pdfPage.Width.Point != pageInfo.Width)
+                        pdfPage.Width = pageInfo.Width;
+                    if (pdfPage.Height.Point != pageInfo.Height)
+                        pdfPage.Height = pageInfo.Height;
+                }
+                else
+                {
+                    // Assign Width to Height and vice versa if they do not match.
+                    if (pdfPage.Width.Point != pageInfo.Height)
+                        pdfPage.Width = pageInfo.Height;
+                    if (pdfPage.Height.Point != pageInfo.Width)
+                        pdfPage.Height = pageInfo.Width;
+                }
+#endif
 
                 using var gfx = XGraphics.FromPdfPage(pdfPage);
                 DocumentRenderer.RenderPage(gfx, pageNr);

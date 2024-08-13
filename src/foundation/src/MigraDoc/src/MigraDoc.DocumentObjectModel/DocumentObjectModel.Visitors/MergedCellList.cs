@@ -60,9 +60,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                             if (clmIdx + mergeRight >= columns)
                                 throw TH.InvalidOperationException_MergeRightTooLarge(rwIdx, clmIdx, mergeRight);
 
-                            for (int idxMergedRows = 0; idxMergedRows <= mergeDown; ++idxMergedRows)
+                            for (int idxMergedRows = 0; idxMergedRows <= mergeDown; idxMergedRows++)
                             {
-                                for (int idxMergedColumns = 0; idxMergedColumns <= mergeRight; ++idxMergedColumns)
+                                for (int idxMergedColumns = 0; idxMergedColumns <= mergeRight; idxMergedColumns++)
                                 {
                                     flags[rwIdx + idxMergedRows, clmIdx + idxMergedColumns] = true;
                                 }
@@ -426,7 +426,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                         if (cell2.Row.Index == cell.Row.Index)
                             return cell2;
                     }
-                    for (int index = cellIdx + 1; index < Count; ++index)
+                    for (int index = cellIdx + 1; index < Count; index++)
                     {
                         var currCell = this[index];
                         if (IsNeighbor(cell, currCell, position))
@@ -435,7 +435,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                     break;
 
                 case NeighborPosition.Bottom:
-                    for (int index = cellIdx + 1; index < Count; ++index)
+                    for (int index = cellIdx + 1; index < Count; index++)
                     {
                         var currCell = this[index];
                         if (IsNeighbor(cell, currCell, position))
@@ -501,7 +501,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 if (cell2.Row.Index == cell.Row.Index)
                     return cell2;
             }
-            for (var index = cellIdx + 2; index < Count; ++index)
+            for (var index = cellIdx + 2; index < Count; index++)
             {
                 var currCell = this[index];
                 if (IsNeighborRight(cell, currCell))
@@ -516,7 +516,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             if (cell.Row.Index + cell.MergeDown == cell.Table.Rows.Count - 1)
                 return null;
 
-            for (var index = cellIdx + 1; index < Count; ++index)
+            for (var index = cellIdx + 1; index < Count; index++)
             {
                 var currCell = this[index];
                 if (IsNeighborBottom(cell, currCell))

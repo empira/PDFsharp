@@ -1,7 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net472</TargetFrameworks>
+    <TargetFrameworks>net6.0;net462</TargetFrameworks>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\PdfSharp.Shared\PdfSharp.Shared.csproj" />
+    <ProjectReference Include="..\..\src\PdfSharp.System\PdfSharp.System.csproj" />
     <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper\PdfSharp.TestHelper.csproj" />
     <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp.Charting\PdfSharp.Charting.csproj" />
     <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp\PdfSharp.csproj" />

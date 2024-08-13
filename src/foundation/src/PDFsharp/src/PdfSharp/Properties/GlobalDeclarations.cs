@@ -2,6 +2,8 @@
 // See the LICENSE file in the solution root for more information.
 
 global using System.IO;
+global using PdfSharp.Internal;
+
 
 #if USE_LONG_SIZE
 global using SizeType = System.Int64;

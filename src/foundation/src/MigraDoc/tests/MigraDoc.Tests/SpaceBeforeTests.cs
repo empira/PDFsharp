@@ -91,9 +91,9 @@ namespace MigraDoc.Tests
             paragraph.Add(new DateField { Format = "yyyy/MM/dd HH:mm:ss" });
             paragraph.Format.Alignment = ParagraphAlignment.Center;
 
-            for (int i = 1; i <= 10; ++i)
+            for (int idx = 1; idx <= 10; idx++)
             {
-                paragraph = header.AddParagraph("Paragraph " + i);
+                paragraph = header.AddParagraph("Paragraph " + idx);
                 paragraph.Format.Alignment = ParagraphAlignment.Center;
             }
 

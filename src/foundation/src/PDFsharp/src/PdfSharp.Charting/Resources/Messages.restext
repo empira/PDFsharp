@@ -1,4 +1,10 @@
-﻿; PDFsharp string resources (English)
+﻿; ==========================
+; === NOT IN USE ANYMORE ===
+; ==========================
+
+-- create a syntax error if accidentally compiled --
+
+; PDFsharp string resources (English)
 ;
 ;
 

@@ -9,6 +9,7 @@ using PdfSharp.Pdf.Internal;
 namespace PdfSharp.Pdf
 {
     // TODO: Make code more readable with PDF 1.7 strings: text string, ASCII string, byte string etc.
+    // See [xx]()
 
     /// <summary>
     /// Determines the encoding of a PdfString or PdfStringObject.
@@ -240,16 +241,15 @@ namespace PdfSharp.Pdf
         static bool TryRereadAsUnicode(ref string? value)
         {
             // UTF-16BE Unicode strings start with U+FEFF ("þÿ"). There can be empty strings with UTF-16BE prefix.
-#if NET6_0_OR_GREATER || true
+            // Old code:
+            //   if (value.Length >= 2 && value[0] == '\xFE' && value[1] == '\xFF')
+            //
             // Check for UTF-16BE encoding.
             // ---
             // Fun fact (Jan 2024): The following line of code was originally suggested by ReSharper, but the new
             // JetBrains AI Assistant considered it as illegal C# because of '..' in the array pattern.
             // ChatGPT 4 however explains the next line correctly.
             if (value is ['\xFE', '\xFF', ..])
-#else
-            if (value.Length >= 2 && value[0] == '\xFE' && value[1] == '\xFF')
-#endif
             {
 #if DEBUG && true
                 // Q: Does this code compile on every target framework?
@@ -277,13 +277,12 @@ namespace PdfSharp.Pdf
                 return true;
             }
 
-#if false // UTF-16LE is not defined as valid text string encoding in PDF reference.
-            // Adobe Reader also supports UTF-16LE.
-#if NET6_0_OR_GREATER || true
+#if true // UTF-16LE is not defined as valid text string encoding in PDF reference.
             if (value is ['\xFF', '\xFE', ..])
+                throw new NotImplementedException("Found UTF-16LE string. Please send us the PDF file and we will fix it (issues (at) pdfsharp.net).");
 #else
-            if (value.Length >= 2 && value[0] == '\xFF' && value[1] == '\xFE')
-#endif
+            // Adobe Reader also supports UTF-16LE.
+            if (value is ['\xFF', '\xFE', ..])
             {
                 // Combine two ANSI characters to get one Unicode character.
                 var temp = new StringBuilder(value);
@@ -307,11 +306,7 @@ namespace PdfSharp.Pdf
 #endif
 
             // UTF-8 Unicode strings start with U+EFBBBF ("ï»¿").
-#if NET6_0_OR_GREATER || true
             if (value is ['\xEF', '\xBB', '\xBF', ..])
-#else
-            if (value.Length >= 3 && value[0] == '\xEF' && value[1] == '\xBB' && value[2] == '\xBF')
-#endif
             {
                 // UTF8 is not implemented as Encoding for PdfStrings. After conversion, value holds the UTF-16 representation.
                 // We return true, so it will be handled as UTF-16 from now.
@@ -340,8 +335,9 @@ namespace PdfSharp.Pdf
 #endif
         }
 
+#if true_ 
         /// <summary>
-        /// Hack for document encoded bookmarks.
+        /// H/ack for document encoded bookmarks.
         /// </summary>
         public string ToStringFromPdfDocEncoded()
         {
@@ -367,9 +363,10 @@ namespace PdfSharp.Pdf
                 sb.Append(bytes[idx]);
             return sb.ToString();
         }
+#endif
 
         static readonly char[] Encode =
-        {
+        [
             '\x00', '\x01', '\x02', '\x03', '\x04', '\x05', '\x06', '\x07', '\x08', '\x09', '\x0A', '\x0B', '\x0C', '\x0D', '\x0E', '\x0F',
             '\x10', '\x11', '\x12', '\x13', '\x14', '\x15', '\x16', '\x17', '\x18', '\x19', '\x1A', '\x1B', '\x1C', '\x1D', '\x1E', '\x1F',
             '\x20', '\x21', '\x22', '\x23', '\x24', '\x25', '\x26', '\x27', '\x28', '\x29', '\x2A', '\x2B', '\x2C', '\x2D', '\x2E', '\x2F',
@@ -385,8 +382,8 @@ namespace PdfSharp.Pdf
             '\xC0', '\xC1', '\xC2', '\xC3', '\xC4', '\xC5', '\xC6', '\xC7', '\xC8', '\xC9', '\xCA', '\xCB', '\xCC', '\xCD', '\xCE', '\xCF',
             '\xD0', '\xD1', '\xD2', '\xD3', '\xD4', '\xD5', '\xD6', '\xD7', '\xD8', '\xD9', '\xDA', '\xDB', '\xDC', '\xDD', '\xDE', '\xDF',
             '\xE0', '\xE1', '\xE2', '\xE3', '\xE4', '\xE5', '\xE6', '\xE7', '\xE8', '\xE9', '\xEA', '\xEB', '\xEC', '\xED', '\xEE', '\xEF',
-            '\xF0', '\xF1', '\xF2', '\xF3', '\xF4', '\xF5', '\xF6', '\xF7', '\xF8', '\xF9', '\xFA', '\xFB', '\xFC', '\xFD', '\xFE', '\xFF',
-        };
+            '\xF0', '\xF1', '\xF2', '\xF3', '\xF4', '\xF5', '\xF6', '\xF7', '\xF8', '\xF9', '\xFA', '\xFB', '\xFC', '\xFD', '\xFE', '\xFF'
+        ];
 
         [Conditional("DEBUG")]
         static void AssertRawEncoding(string s)

@@ -34,29 +34,18 @@ namespace MigraDoc.DocumentObjectModel.Internals
 #else
             int dot = name.IndexOf(".", StringComparison.Ordinal);
 #endif
-#if NET6_0_OR_GREATER || true
             if (dot == 0)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
             string? trail = null;
             if (dot > 0)
             {
                 trail = name[(dot + 1)..];
                 name = name[..dot];
             }
-#else
-            if (dot == 0)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
-            string? trail = null;
-            if (dot > 0)
-            {
-                trail = name.Substring(dot + 1);
-                name = name.Substring(0, dot);
-            }
-#endif
 
             var vd = ValueDescriptors[name];
             if (vd == null)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
 
             var value = vd.GetValue(dom, flags);
             if (value == null && flags == GV.GetNull)  //??? also for GV.ReadOnly?
@@ -66,9 +55,9 @@ namespace MigraDoc.DocumentObjectModel.Internals
             if (trail != null)
             {
                 if (value == null || trail == "")
-                    throw new ArgumentException(DomSR.InvalidValueName(name));
+                    throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
                 if (value is not DocumentObject doc)
-                    throw new ArgumentException(DomSR.InvalidValueName(name));
+                    throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
                 value = doc.GetValue(trail, flags);
             }
             return value;
@@ -86,21 +75,16 @@ namespace MigraDoc.DocumentObjectModel.Internals
             int dot = name.IndexOf(".", StringComparison.Ordinal);
 #endif
             if (dot == 0)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
             string? trail = null;
             if (dot > 0)
             {
-#if NET6_0_OR_GREATER || true
                 trail = name[(dot + 1)..];
                 name = name[..dot];
-#else
-                trail = name.Substring(dot + 1);
-                name = name.Substring(0, dot);
-#endif
             }
             var vd = ValueDescriptors[name];
             if (vd == null)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
 
             if (trail != null)
             {
@@ -138,7 +122,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
 
             var vd = ValueDescriptors[name];
             if (vd == null)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
 
             vd.SetNull(dom);
         }
@@ -159,22 +143,17 @@ namespace MigraDoc.DocumentObjectModel.Internals
             int dot = name.IndexOf(".", StringComparison.Ordinal);
 #endif
             if (dot == 0)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
             string? trail = null;
             if (dot > 0)
             {
-#if NET6_0_OR_GREATER || true
                 trail = name[(dot + 1)..];
                 name = name[..dot];
-#else
-                trail = name.Substring(dot + 1);
-                name = name.Substring(0, dot);
-#endif
             }
 
             var vd = ValueDescriptors[name];
             if (vd == null)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
 
 #if true
             if (trail == null)
@@ -185,9 +164,9 @@ namespace MigraDoc.DocumentObjectModel.Internals
                 return true;
 
             if (/*value == null || */trail == "")
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
             if (value is not DocumentObject doc)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
 
             return doc.IsNull(trail);
 #else

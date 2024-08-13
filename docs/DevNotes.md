@@ -1,4 +1,8 @@
-# Developer notes
+﻿# Developer notes
+
+
+„“ ’ ‚‘ »« ›‹ – | · × ² ³ ½ € † … | ✔ ✘ ↯ ± − × ÷ ⋅ √ ≠ ≤ ≥ ≡ | ® © ← ↑ → ↓ ↔ ↕ ∅ |";
+“English” | „German“ | ‘English’ | ‚German‘
 
 ## Do this first
 

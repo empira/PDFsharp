@@ -179,7 +179,7 @@ namespace MigraDoc.DocumentObjectModel
             if (val != null)
             {
                 if (val.Parent != null)
-                    throw new ArgumentException(DomSR.ParentAlreadySet(val, this));
+                    throw new ArgumentException(MdDomMsgs.ParentAlreadySet(val, this).Message);
 
                 val.Parent = this;
                 val._document = null;

@@ -483,7 +483,7 @@ namespace MigraDoc.DocumentObjectModel
         internal override void Serialize(Serializer serializer)
         {
             int count = Count;
-            for (int index = 0; index < count; ++index)
+            for (int index = 0; index < count; index++)
             {
                 DocumentObject element = this[index]!;
                 element.Serialize(serializer);

@@ -166,13 +166,13 @@ namespace MigraDoc.DocumentObjectModel.Shapes
             if (!String.IsNullOrEmpty(workingDir))
                 filePath = workingDir;
             else
-                filePath = Directory.GetCurrentDirectory() + "\\";
+                filePath = Directory.GetCurrentDirectory() + "/";
 
             if (!Document.Values.ImagePath.IsValueNullOrEmpty())
             {
-                string? foundfile = ImageHelper.GetImageName(filePath, Name, Document.ImagePath);
-                if (foundfile != null)
-                    filePath = foundfile;
+                string? foundFile = ImageHelper.GetImageName(filePath, Name, Document.ImagePath);
+                if (foundFile != null)
+                    filePath = foundFile;
                 else
                     filePath = Path.Combine(filePath, Name);
             }

@@ -42,6 +42,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{18E75E2F-2
 	ProjectSection(SolutionItems) = preProject
 		src\foundation\src\PDFsharp\docs\AboutFonts.md = src\foundation\src\PDFsharp\docs\AboutFonts.md
 		src\foundation\src\PDFsharp\docs\AboutImages.md = src\foundation\src\PDFsharp\docs\AboutImages.md
+		src\foundation\src\PDFsharp\docs\Coding-Issues.md = src\foundation\src\PDFsharp\docs\Coding-Issues.md
 		src\foundation\src\PDFsharp\docs\GlobalStuff.md = src\foundation\src\PDFsharp\docs\GlobalStuff.md
 		src\foundation\src\PDFsharp\docs\Notebook.md = src\foundation\src\PDFsharp\docs\Notebook.md
 		src\foundation\src\PDFsharp\docs\PortingNotes.md = src\foundation\src\PDFsharp\docs\PortingNotes.md
@@ -59,6 +60,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D564E33D
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{9EB8E8CC-3BA3-4B0F-B853-5B2443C40015}"
+	ProjectSection(SolutionItems) = preProject
+		AboutLineSpacing.md = AboutLineSpacing.md
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MigraDoc.Tests", "src\foundation\src\MigraDoc\tests\MigraDoc.Tests\MigraDoc.Tests.csproj", "{CA022FCC-7A23-4759-8789-9FC86C805557}"
 EndProject
@@ -191,6 +195,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PDFsharp.NuGet-wpf", "src\f
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{76BA9372-65AE-479C-AEF7-D50E6B486CEF}"
 	ProjectSection(SolutionItems) = preProject
+		docs\BeforeReleases.md = docs\BeforeReleases.md
 		docs\BoilerplateText.md = docs\BoilerplateText.md
 		docs\DevNotes.md = docs\DevNotes.md
 		docs\MakeNewReleaseNotes.md = docs\MakeNewReleaseNotes.md
@@ -251,6 +256,29 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.Testing-gdi", "src\foundation\src\shared\src\PdfSharp.Testing-gdi\PdfSharp.Testing-gdi.csproj", "{C7CCB288-8372-41AD-9F65-6224CE0D6358}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.Testing-wpf", "src\foundation\src\shared\src\PdfSharp.Testing-wpf\PdfSharp.Testing-wpf.csproj", "{1F9EE0B3-4BA1-4CE4-9301-1735732B61B6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "psf", "psf", "{D2B0EC1F-CF81-4756-B20C-9BB786A151E0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.Cryptography", "src\foundation\src\shared\src\PdfSharp.Crytography\PdfSharp.Cryptography.csproj", "{2BA35CF7-9851-4B19-A170-0B66BE87ACE5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Signatures", "Signatures", "{8CE97B3D-BECA-436D-86EC-E053A99E3A81}"
+	ProjectSection(SolutionItems) = preProject
+		docs\Signatures\CertificateCreation.md = docs\Signatures\CertificateCreation.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{C39DF31C-2938-4EC3-B50D-52FFA8453866}"
+	ProjectSection(SolutionItems) = preProject
+		docs\changes\v6.2.0-log.md = docs\changes\v6.2.0-log.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CopyAsLink", "src\tools\src\CopyAsLink\CopyAsLink.csproj", "{60D307AC-D7D6-4AA4-BF9F-DDC6809CBCC7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.Shared", "src\foundation\src\shared\src\PdfSharp.Shared\PdfSharp.Shared.csproj", "{8C20115B-AA17-41A7-837D-F5CFD286DFC9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MigraDoc", "MigraDoc", "{08BB5B79-D6B5-4EEF-8D37-77FBD0F04AA6}"
+	ProjectSection(SolutionItems) = preProject
+		docs\MigraDoc\AboutLineSpacing.md = docs\MigraDoc\AboutLineSpacing.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -518,6 +546,18 @@ Global
 		{1F9EE0B3-4BA1-4CE4-9301-1735732B61B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F9EE0B3-4BA1-4CE4-9301-1735732B61B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F9EE0B3-4BA1-4CE4-9301-1735732B61B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BA35CF7-9851-4B19-A170-0B66BE87ACE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BA35CF7-9851-4B19-A170-0B66BE87ACE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BA35CF7-9851-4B19-A170-0B66BE87ACE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BA35CF7-9851-4B19-A170-0B66BE87ACE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60D307AC-D7D6-4AA4-BF9F-DDC6809CBCC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60D307AC-D7D6-4AA4-BF9F-DDC6809CBCC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60D307AC-D7D6-4AA4-BF9F-DDC6809CBCC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60D307AC-D7D6-4AA4-BF9F-DDC6809CBCC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C20115B-AA17-41A7-837D-F5CFD286DFC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C20115B-AA17-41A7-837D-F5CFD286DFC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C20115B-AA17-41A7-837D-F5CFD286DFC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C20115B-AA17-41A7-837D-F5CFD286DFC9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -617,6 +657,13 @@ Global
 		{BA039CC9-132E-4103-BB47-87C3E3398F82} = {31FE507C-F342-4DA4-9BE5-B3D2ED93E9CC}
 		{C7CCB288-8372-41AD-9F65-6224CE0D6358} = {DE458BB2-5942-4588-A74A-AE9CA86F284C}
 		{1F9EE0B3-4BA1-4CE4-9301-1735732B61B6} = {DE458BB2-5942-4588-A74A-AE9CA86F284C}
+		{D2B0EC1F-CF81-4756-B20C-9BB786A151E0} = {18E75E2F-2A27-408C-BC02-9B68D7F0817F}
+		{2BA35CF7-9851-4B19-A170-0B66BE87ACE5} = {DE458BB2-5942-4588-A74A-AE9CA86F284C}
+		{8CE97B3D-BECA-436D-86EC-E053A99E3A81} = {76BA9372-65AE-479C-AEF7-D50E6B486CEF}
+		{C39DF31C-2938-4EC3-B50D-52FFA8453866} = {76BA9372-65AE-479C-AEF7-D50E6B486CEF}
+		{60D307AC-D7D6-4AA4-BF9F-DDC6809CBCC7} = {CC13B431-6963-480F-8C21-1F78A220A399}
+		{8C20115B-AA17-41A7-837D-F5CFD286DFC9} = {DE458BB2-5942-4588-A74A-AE9CA86F284C}
+		{08BB5B79-D6B5-4EEF-8D37-77FBD0F04AA6} = {76BA9372-65AE-479C-AEF7-D50E6B486CEF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D5FF5562-3C79-434B-B951-B84542D01625}

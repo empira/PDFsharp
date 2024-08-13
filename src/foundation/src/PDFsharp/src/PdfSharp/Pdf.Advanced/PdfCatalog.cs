@@ -69,7 +69,11 @@ namespace PdfSharp.Pdf.Advanced
                 {
                     _pages = (PdfPages?)Elements.GetValue(Keys.Pages, VCF.CreateIndirect) ?? NRT.ThrowOnNull<PdfPages>();
                     if (Owner.IsImported)
+                    {
                         _pages.FlattenPageTree();
+                        //foreach (var page in _pages)
+                        //    page.InitPageSize();
+                    }
                 }
                 return _pages;
             }
@@ -157,7 +161,7 @@ namespace PdfSharp.Pdf.Advanced
             get
             {
                 if (_acroForm == null)
-                    _acroForm = (PdfAcroForm?)Elements.GetValue(Keys.AcroForm)??NRT.ThrowOnNull<PdfAcroForm>();
+                    _acroForm = (PdfAcroForm?)Elements.GetValue(Keys.AcroForm) ?? NRT.ThrowOnNull<PdfAcroForm>();
                 return _acroForm;
             }
         }
@@ -189,7 +193,8 @@ namespace PdfSharp.Pdf.Advanced
                 _pages.PrepareForSave();
 
             // Create outline objects.
-            if (_outline != null && _outline.Outlines.Count > 0)
+            //if (_outline != null && _outline.Outlines.Count > 0)
+            if (_outline is { Outlines.Count: > 0 })
             {
                 if (Elements[Keys.PageMode] == null)
                     PageMode = PdfPageMode.UseOutlines;
@@ -343,7 +348,7 @@ namespace PdfSharp.Pdf.Advanced
 
             /// <summary>
             /// (Optional; PDF 1.4; must be an indirect reference) A metadata stream 
-            /// containing metadata  for the document.
+            /// containing metadata for the document.
             /// </summary>
             [KeyInfo("1.4", KeyType.Dictionary | KeyType.Optional | KeyType.MustBeIndirect)]
             public const string Metadata = "/Metadata";

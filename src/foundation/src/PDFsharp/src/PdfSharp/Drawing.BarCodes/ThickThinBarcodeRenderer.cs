@@ -13,7 +13,7 @@ namespace PdfSharp.Drawing.BarCodes
         /// <summary>
         /// Initializes a new instance of the <see cref="ThickThinBarCode"/> class.
         /// </summary>
-        public ThickThinBarCode(string code, XSize size, CodeDirection direction)
+        protected ThickThinBarCode(string code, XSize size, CodeDirection direction)
             : base(code, size, direction)
         { }
 
@@ -22,7 +22,7 @@ namespace PdfSharp.Drawing.BarCodes
             base.InitRendering(info);
             CalcThinBarWidth(info);
             info.BarHeight = Size.Height;
-            // HACK in ThickThinBarCode
+            // HACK in ThickThinBarCode.
             if (TextLocation != TextLocation.None)
                 info.BarHeight *= 4.0 / 5;
 

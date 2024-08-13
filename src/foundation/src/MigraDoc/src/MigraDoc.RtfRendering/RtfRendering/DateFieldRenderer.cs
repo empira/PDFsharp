@@ -8,7 +8,6 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Logging;
-using MigraDoc.RtfRendering.Resources;
 
 namespace MigraDoc.RtfRendering
 {
@@ -104,7 +103,7 @@ namespace MigraDoc.RtfRendering
                         format = dtfInfo.SortableDateTimePattern;
                         break;
 
-                    //TODO: Output universal time for u und U.
+                    //TODO: Output universal time for u and U.
                     case "u":
                         format = dtfInfo.UniversalSortableDateTimePattern;
                         break;
@@ -141,7 +140,7 @@ namespace MigraDoc.RtfRendering
                         if (isEscaped)
                         {
                             //Doesn’t work in Word format strings.
-                            MigraDocLogHost.RtfRenderingLogger.LogWarning(Messages2.CharacterNotAllowedInDateFormat(c));
+                            MigraDocLogHost.RtfRenderingLogger.LogWarning(MdRtfMsgs.CharacterNotAllowedInDateFormat(c).Message);
                             //Debug.WriteLine(Messages2.CharacterNotAllowedInDateFormat(c), "warning");
                             isEscaped = false;
                         }

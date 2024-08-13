@@ -8,7 +8,6 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 #endif
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.GrammarByExample;
-using PdfSharp.Fonts;
 using PdfSharp.Quality;
 #if CORE
 using PdfSharp.Snippets.Font;
@@ -110,7 +109,7 @@ namespace GdiGrammarByExample
         internal static string WslPathHack(string path)
         {
 #if !NET6_0_OR_GREATER
-            // .NET 4.7.2 or .NETStandard 2.0, for Windows only.
+            // .NET 4.6.2 or .NETStandard 2.0, for Windows only.
             return path;
 #else
             if (OperatingSystem.IsWindows())
@@ -119,7 +118,7 @@ namespace GdiGrammarByExample
             }
             if (OperatingSystem.IsLinux())
             {
-                // Hack: Assume WSL and use drive C:\ instead of D:\.
+                // Assume WSL and use drive C:\ instead of D:\.
                 return path.Replace(@"D:\", "/mnt/c/").Replace('\\', '/');
             }
 

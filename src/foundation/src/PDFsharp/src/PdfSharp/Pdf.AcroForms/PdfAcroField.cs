@@ -125,13 +125,13 @@ namespace PdfSharp.Pdf.AcroForms
         /// </summary>
         public string[] GetDescendantNames()
         {
-            List<string> names = new List<string>();
+            List<string> names = [];
             if (HasKids)
             {
                 PdfAcroFieldCollection fields = Fields;
                 fields.GetDescendantNames(ref names, null);
             }
-            List<string> temp = new List<string>();
+            List<string> temp = [];
             foreach (string name in names)
                 temp.Add(name);
             return temp.ToArray();
@@ -267,7 +267,7 @@ namespace PdfSharp.Pdf.AcroForms
         /// </summary>
         public sealed class PdfAcroFieldCollection : PdfArray
         {
-            PdfAcroFieldCollection(PdfArray array)
+            internal PdfAcroFieldCollection(PdfArray array)
                 : base(array)
             { }
 

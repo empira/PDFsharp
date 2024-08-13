@@ -160,7 +160,7 @@ namespace PdfSharp.Drawing.Internal
                         break;
                     }
                     identifier.Append((char)c);
-                    ++idx;
+                    idx++;
                 } while (idx < length);
 
                 var id = identifier.ToString();
@@ -191,7 +191,7 @@ namespace PdfSharp.Drawing.Internal
                         break;
                     }
                     identifier.Append((char)c);
-                    ++idx;
+                    idx++;
                 } while (idx < length);
 
                 var id = identifier.ToString();
@@ -200,7 +200,7 @@ namespace PdfSharp.Drawing.Internal
                     return false;
                 }
 
-                ++idx;
+                idx++;
                 if (idx + 3 < length && stream.GetDWord(idx, true) == 0x3842494d) // 8BIM
                 {
                     return true;

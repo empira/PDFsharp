@@ -1,6 +1,7 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Internal;
 using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Pdf
@@ -28,7 +29,7 @@ namespace PdfSharp.Pdf
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
             if (value.Length == 0 || value[0] != '/')
-                throw new ArgumentException(PSSR.NameMustStartWithSlash);
+                throw new ArgumentException(PsMsgs.NameMustStartWithSlash);
 
             _value = value;
         }

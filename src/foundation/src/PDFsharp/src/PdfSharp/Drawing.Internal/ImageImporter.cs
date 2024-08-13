@@ -14,7 +14,7 @@ namespace PdfSharp.Drawing.Internal
         /// <summary>
         /// Gets the image importer.
         /// </summary>
-        public static ImageImporter GetImageImporter()
+        public static ImageImporter GetImageImporter()  // StL: To what kind of design pattern this function identifies itself?
         {
             return new ImageImporter();
         }
@@ -39,8 +39,7 @@ namespace PdfSharp.Drawing.Internal
             }
             // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception)
-            {
-            }
+            { }
 
             if (length < -1 || length > Int32.MaxValue)
                 throw new InvalidOperationException($"Image files with a size of {length} bytes are not supported. Use image files smaller than 2 GiB.");
@@ -61,7 +60,7 @@ namespace PdfSharp.Drawing.Internal
             return TryImageImport(helper);
         }
 
-        private ImportedImage? TryImageImport(StreamReaderHelper helper)
+        ImportedImage? TryImageImport(StreamReaderHelper helper)
         {
             // Try all registered importers to see if any of them can handle the image.
             foreach (var importer in _importers)
@@ -74,7 +73,6 @@ namespace PdfSharp.Drawing.Internal
             return null;
         }
 #endif
-
-        readonly List<IImageImporter> _importers = new();
+        readonly List<IImageImporter> _importers = [];
     }
 }

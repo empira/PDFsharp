@@ -486,7 +486,7 @@ namespace MigraDoc.DocumentObjectModel
 
             int startIdx = 0;
             List<Paragraph> paragraphs = new List<Paragraph>();
-            for (int idx = 0; idx < Elements.Count; ++idx)
+            for (int idx = 0; idx < Elements.Count; idx++)
             {
                 var element = Elements[idx];
                 if (element is Character)
@@ -530,7 +530,7 @@ namespace MigraDoc.DocumentObjectModel
             var paragraphElements = new ParagraphElements();
             if (Values.Elements is not null)
             {
-                for (int idx = startIdx; idx <= endIdx; ++idx)
+                for (int idx = startIdx; idx <= endIdx; idx++)
                     paragraphElements.Add((DocumentObject)Values.Elements[idx]!.Clone()); // BUG??? "!" added.
             }
             return paragraphElements;

@@ -34,8 +34,7 @@ namespace PdfSharp.Drawing.Internal
             }
             // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception)
-            {
-            }
+            { }
             return null;
 #endif
         }
@@ -111,7 +110,7 @@ namespace PdfSharp.Drawing.Internal
                             ii.Information.ImageFormat = ImageInformation.ImageFormats.Grayscale8;
                             break;
                         default:
-                            throw new Exception($"Unsupported bit depth {bitDepth} for PNG color type {colorType}.");
+                            throw new InvalidOperationException($"Unsupported bit depth {bitDepth} for PNG color type {colorType}.");
                     }
                     // ReSharper disable once HeuristicUnreachableCode
 #pragma warning disable CS0162
@@ -126,7 +125,7 @@ namespace PdfSharp.Drawing.Internal
                             ii.Information.ImageFormat = ImageInformation.ImageFormats.RGB24;
                             break;
                         default:
-                            throw new Exception($"Unsupported bit depth {bitDepth} for PNG color type {colorType}.");
+                            throw new InvalidOperationException($"Unsupported bit depth {bitDepth} for PNG color type {colorType}.");
                     }
                     break;
 
@@ -144,7 +143,7 @@ namespace PdfSharp.Drawing.Internal
                             ii.Information.ImageFormat = ImageInformation.ImageFormats.Palette8;
                             break;
                         default:
-                            throw new Exception($"Unsupported bit depth {bitDepth} for PNG color type {colorType}.");
+                            throw new InvalidOperationException($"Unsupported bit depth {bitDepth} for PNG color type {colorType}.");
                     }
                     break;
 
@@ -156,7 +155,7 @@ namespace PdfSharp.Drawing.Internal
                             ii.Information.ImageFormat = ImageInformation.ImageFormats.Grayscale8;
                             break;
                         default:
-                            throw new Exception($"Unsupported bit depth {bitDepth} for PNG color type {colorType}.");
+                            throw new InvalidOperationException($"Unsupported bit depth {bitDepth} for PNG color type {colorType}.");
                     }
                     break;
                 // TODO case 4:
@@ -169,28 +168,29 @@ namespace PdfSharp.Drawing.Internal
                             ii.Information.ImageFormat = ImageInformation.ImageFormats.ARGB32;
                             break;
                         default:
-                            throw new Exception($"Unsupported bit depth {bitDepth} for PNG color type {colorType}.");
+                            throw new InvalidOperationException($"Unsupported bit depth {bitDepth} for PNG color type {colorType}.");
                     }
                     break;
 
                 default:
-                    throw new Exception($"Unsupported PNG color type {colorType}.");
+                    throw new InvalidOperationException($"Unsupported PNG color type {colorType}.");
             }
 
             // Now access the PNG pixels.
             // Png does not implement IDisposable.
             {
-                if (stream.OriginalStream != null!)
+                // Do not use OriginalStream if we have Data.
+                if (stream.Data == null! && stream.OriginalStream != null!)
                     stream.OriginalStream.Position = 0;
                 var myVisitor = new MyVisitor();
-                var png = stream.OriginalStream != null ?
+                var png = stream.Data == null! && stream.OriginalStream != null ?
                     Png.Open(stream.OriginalStream, myVisitor) :
-                    Png.Open(stream.Data, myVisitor);
+                    Png.Open(stream.Data!, myVisitor);
 
                 if (png.Width != ii.Information.Width ||
                     png.Height != ii.Information.Height)
                 {
-                    throw new Exception($"Unsupported PNG image - internal error.");
+                    throw new InvalidOperationException($"Unsupported PNG image - internal error.");
                 }
 
                 if (myVisitor.IsValid)
@@ -213,12 +213,12 @@ namespace PdfSharp.Drawing.Internal
                             if (png.HasAlphaChannel != true &&
                                 ii.Information.ImageFormat == ImageInformation.ImageFormats.ARGB32)
                             {
-                                throw new Exception($"Unsupported PNG ARGB32 image - internal error.");
+                                throw new InvalidOperationException($"Unsupported PNG ARGB32 image - internal error.");
                             }
                             if (png.HasAlphaChannel != false &&
                                 ii.Information.ImageFormat == ImageInformation.ImageFormats.RGB24)
                             {
-                                throw new Exception($"Unsupported PNG RGB24 image - internal error.");
+                                throw new InvalidOperationException($"Unsupported PNG RGB24 image - internal error.");
                             }
 
                             bool hasMask = ii.Information.ImageFormat == ImageInformation.ImageFormats.ARGB32;
@@ -263,7 +263,7 @@ namespace PdfSharp.Drawing.Internal
                             var hasAlpha = png.HasAlphaChannel;
                             var palette = png.GetPalette();
                             if (palette!.HasAlphaValues != hasAlpha)
-                                throw new Exception($"Unsupported PNG Palette4 image - internal error.");
+                                throw new InvalidOperationException($"Unsupported PNG Palette4 image - internal error.");
 
                             var lineBytes = (png.Width + 1) / 2;
                             var length = lineBytes * png.Height;
@@ -299,7 +299,7 @@ namespace PdfSharp.Drawing.Internal
                                 {
                                     // TODO Add GetRow to PNG library? Performance optimization.
                                     int pels = 0;
-                                    for (var index = 0; index < 8; ++index)
+                                    for (var index = 0; index < 8; index++)
                                     {
                                         var pel = png.GetPixelIndex(x * 8 + index, y);
                                         pels |= pel << (7 - index);
@@ -329,7 +329,7 @@ namespace PdfSharp.Drawing.Internal
                             var hasAlpha = png.HasAlphaChannel;
                             var palette = png.GetPalette();
                             if (palette!.HasAlphaValues != hasAlpha)
-                                throw new Exception($"Unsupported PNG Palette4 image - internal error.");
+                                throw new InvalidOperationException($"Unsupported PNG Palette4 image - internal error.");
 
                             var lineBytes = (png.Width + 1) / 2;
                             var length = lineBytes * png.Height;
@@ -395,7 +395,7 @@ namespace PdfSharp.Drawing.Internal
                             var hasAlpha = png.HasAlphaChannel;
                             var palette = png.GetPalette();
                             if (palette!.HasAlphaValues != hasAlpha)
-                                throw new Exception($"Unsupported PNG Palette8 image - internal error.");
+                                throw new InvalidOperationException($"Unsupported PNG Palette8 image - internal error.");
 
                             var length = png.Width * png.Height;
                             var data = new Byte[length];
@@ -438,7 +438,6 @@ namespace PdfSharp.Drawing.Internal
                                         alphaMask[offset] = alpha[pel];
                                         alphaUsed |= alphaMask[offset] != 255;
                                     }
-
                                     ++offset;
                                 }
                             }
@@ -487,7 +486,7 @@ namespace PdfSharp.Drawing.Internal
                         break;
 
                     default:
-                        throw new Exception($"Unsupported PNG format {ii.Information.ImageFormat}.");
+                        throw new InvalidOperationException($"Unsupported PNG format {ii.Information.ImageFormat}.");
                 }
             }
 

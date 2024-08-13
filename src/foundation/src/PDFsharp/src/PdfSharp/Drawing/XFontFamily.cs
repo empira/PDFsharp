@@ -222,8 +222,8 @@ namespace PdfSharp.Drawing
 #endif
             return FontHelper.IsStyleAvailable(this, xStyle);
 #endif
-#if UWP
-            throw new InvalidOperationException("In UWP build it is the responsibility of the developer to provide all required font faces.");
+#if WUI
+            throw new InvalidOperationException("In WUI build it is the responsibility of the developer to provide all required font faces.");
 #endif
         }
 

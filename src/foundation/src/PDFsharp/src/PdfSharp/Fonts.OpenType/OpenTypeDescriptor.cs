@@ -14,7 +14,6 @@ using System.Windows;
 using PdfSharp.Pdf.Internal;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts.Internal;
-using PdfSharp.Internal;
 using PdfSharp.Logging;
 
 namespace PdfSharp.Fonts.OpenType
@@ -132,7 +131,7 @@ namespace PdfSharp.Fonts.OpenType
             // Calculate Ascent, Descent, Leading and LineSpacing like in WPF Source Code (see FontDriver.ReadBasicMetrics)
 
             // OS/2 is an optional table, but we can’t determine if it is existing in this font.
-            bool os2SeemsToBeEmpty = FontFace.os2.sTypoAscender == 0 && FontFace.os2.sTypoDescender == 0 && FontFace.os2.sTypoLineGap == 0;
+            bool os2SeemsToBeEmpty = FontFace.os2 is { sTypoAscender: 0, sTypoDescender: 0, sTypoLineGap: 0 };
             //Debug.Assert(!os2SeemsToBeEmpty); // Are there fonts without OS/2 table?
 
             bool dontUseWinLineMetrics = (FontFace.os2.fsSelection & 128) != 0;
@@ -214,7 +213,6 @@ namespace PdfSharp.Fonts.OpenType
             //flags = image.
 
             Encoding ansi = PdfEncoders.WinAnsiEncoding;
-
             Encoding unicode = Encoding.Unicode;
             byte[] bytes = new byte[256];
 
@@ -288,7 +286,7 @@ namespace PdfSharp.Fonts.OpenType
                 if (ch <= cmap.endCount[seg])
                     break;
             }
-            //Debug.Assert(seg < segCount);
+
             if (seg == segCount)
                 return 0;
 
@@ -477,17 +475,17 @@ namespace PdfSharp.Fonts.OpenType
             if (codePoints == null!)
                 return [];
 
-            int length = codePoints.Length;
-            if (length == 0)
+            int count = codePoints.Length;
+            if (count == 0)
                 return [];
 
-            var result = new CodePointGlyphIndexPair[length];
+            var result = new CodePointGlyphIndexPair[count];
             int iRes = 0;
 
             // Is the font a symbol font?
             if (IsSymbolFont)
             {
-                for (int idx = 0; idx < length; idx++)
+                for (int idx = 0; idx < count; idx++)
                 {
                     ref var item = ref result[iRes++];
                     int codePoint = codePoints[idx];
@@ -508,33 +506,35 @@ namespace PdfSharp.Fonts.OpenType
             else
             {
                 // It is not a symbol font, i.e. it is a regular open type font.
-                for (int idx = 0; idx < length; idx++)
+                for (int idx = 0; idx < count; idx++)
                 {
-
                     ref var item = ref result[iRes++];
                     item.CodePoint = codePoints[idx];
-
-                    //if (useAnsiCharactersOnly)
-                    //{
-                    //    var ansi = AnsiEncoding.UnicodeToAnsi(ch);
-                    //    if (ansi == '\uFFFF')
-                    //    {
-                    //        PdfSharpLogHost.FontManagementLogger.LogDebug("Unexpected low surrogate found: 0x{Char:X2}", ch);
-                    //        result[iRes++] = new CodepointGlyphID(ch, ch, 0);  // unclear what to do
-                    //    }
-                    //    else
-                    //    {
-                    //        result[iRes++] = new CodepointGlyphID(ch, ch, 0);  // unclear what to do
-                    //    }
-                    //    continue;
-                    //}
-
                     item.GlyphIndex = item.CodePoint < UnicodeHelper.UnicodePlane01Start
                         ? BmpCodepointToGlyphIndex((char)item.CodePoint)
                         : CodepointToGlyphIndex(item.CodePoint);
                 }
             }
             return result;
+        }
+
+        public ColorTable.GlyphRecord?[] GlyphColorRecordsFromGlyphIndices(CodePointGlyphIndexPair[] pairs)
+        {
+            if (pairs == null!)
+                return [];
+
+            int count = pairs.Length;
+            if (count == 0)
+                return [];
+
+            var glyphRecords = new ColorTable.GlyphRecord?[count];
+
+            for (int idx = 0; idx < count; idx++)
+            {
+                glyphRecords[idx] = GetColorRecord(pairs[idx].GlyphIndex);
+            }
+
+            return glyphRecords;
         }
 
         /// <summary>
@@ -558,6 +558,22 @@ namespace PdfSharp.Fonts.OpenType
 
             // Used | instead of + because of: http://pdfsharp.codeplex.com/workitem/15954
             return (char)(ch | (FontFace.os2.usFirstCharIndex & 0xFF00));
+        }
+
+        /// <summary>
+        /// Gets the color-record of the glyph with the specified index.
+        /// </summary>
+        /// <param name="glyphIndex"></param>
+        /// <returns>The color-record for the specified glyph or null, if the specified glyph has no color record.</returns>
+        public ColorTable.GlyphRecord? GetColorRecord(int glyphIndex)
+        {
+            // Both tables COLR and CPAL are required according to the spec.
+            // ref: https://learn.microsoft.com/en-us/typography/opentype/spec/colr
+            if (FontFace is { cpal: not null, colr: not null })
+            {
+                return FontFace.colr.GetLayers(glyphIndex);
+            }
+            return null;
         }
     }
 }

@@ -221,7 +221,7 @@ namespace PdfSharp.Pdf.Advanced
                 get
                 {
                     if (_index == -1 || _index >= _contents.Elements.Count)
-                        throw new InvalidOperationException(PSSR.ListEnumCurrentOutOfRange);
+                        throw new InvalidOperationException(PsMsgs.ListEnumCurrentOutOfRange);
                     return _currentElement??throw new InvalidOperationException("Current called before MoveNext.");
                 }
             }

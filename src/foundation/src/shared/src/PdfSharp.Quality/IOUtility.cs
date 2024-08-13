@@ -12,7 +12,7 @@ namespace PdfSharp.Quality
 {
     /// <summary>
     /// Static utility functions for file IO.
-    /// These function are intended for unit test und sample in a solution code only.
+    /// These functions are intended for unit tests and samples in solution code only.
     /// </summary>
     public static class IOUtility
     {
@@ -364,15 +364,12 @@ namespace PdfSharp.Quality
                         if (assetsVersion >= requiredAssetsVersion)
                             return;
                         throw new IOException(
-                            Invariant(
-                                $"The required assets version is {requiredAssetsVersion}, but the current version is just {assetsVersion}. ") +
+                            Invariant($"The required assets version is {requiredAssetsVersion}, but the current version is just {assetsVersion}. ") +
                             AssetsInfo);
                     }
                 }
 
-                throw new IOException(
-                    $"The assets version file '{AssetsVersionFileName}' does not exist in the assets folder. " +
-                    AssetsInfo);
+                throw new IOException($"The assets version file '{AssetsVersionFileName}' does not exist in the assets folder. " + AssetsInfo);
             }
 
             throw new IOException(@"The assets folder does not exist. " + AssetsInfo);

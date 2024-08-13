@@ -210,7 +210,6 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         /// <param name="unit"></param>
         /// <param name="rtfUnit"></param>
-        /// <returns></returns>
         internal static int ToRtfUnit(Unit unit, RtfUnit rtfUnit)
         {
             switch (rtfUnit)

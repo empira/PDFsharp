@@ -1,8 +1,12 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+#if WPF
 using System.IO;
+using System.Net.Http;
+#endif
 using System.Reflection;
+using FluentAssertions;
 using PdfSharp.Diagnostics;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
@@ -165,7 +169,7 @@ namespace PdfSharp.Tests.Drawing
                 "PDFsharp/images/samples/jpeg/windows7problem.jpg"
             };
 
-            // Attempt to avoid "Out of memory" under .NET 4.7.2.
+            // Attempt to avoid "Out of memory" under .NET 4.6.2.
             GC.Collect();
             GC.WaitForFullGCComplete();
 
@@ -232,7 +236,7 @@ namespace PdfSharp.Tests.Drawing
         [Fact]
         void PDF_with_Image_from_stream()
         {
-            // Attempt to avoid "image file locked" under .NET 4.7.2.
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
             GC.Collect();
             GC.WaitForFullGCComplete();
 
@@ -255,9 +259,42 @@ namespace PdfSharp.Tests.Drawing
                 PdfFileUtility.ShowDocumentIfDebugging(filename);
             }
 
-            // Attempt to avoid "image file locked" under .NET 4.7.2.
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
             GC.Collect();
             GC.WaitForFullGCComplete();
         }
+
+#if NET6_0_OR_GREATER
+        [Fact]
+        async Task PDF_with_Image_from_http_stream()
+        {
+            {
+                var document = new PdfDocument();
+                var page = document.AddPage();
+                var gfx = XGraphics.FromPdfPage(page);
+
+                using var client = new HttpClient();
+                await using var imageStream =
+                    await client.GetStreamAsync("https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png").ConfigureAwait(false);
+
+#if WPF
+                XImage xImage = null!;
+                // ReSharper disable once AccessToDisposedClosure
+                Action createImage = () => xImage = XImage.FromStream(imageStream);
+                createImage.Should().Throw<InvalidOperationException>();
+#else
+                var xImage = XImage.FromBitmapImageStreamThatCannotSeek(imageStream);
+                gfx.DrawImage(xImage, 100, 100, 100, 100);
+
+                // Save the document...
+                var filename = PdfFileUtility.GetTempPdfFileName("ImageFromStream");
+                document.Save(filename);
+                // ...and start a viewer.
+                PdfFileUtility.ShowDocumentIfDebugging(filename);
+#endif
+
+            }
+        }
+#endif
     }
 }

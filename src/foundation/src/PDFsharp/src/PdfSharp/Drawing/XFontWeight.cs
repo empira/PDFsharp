@@ -22,7 +22,7 @@ namespace PdfSharp.Drawing
         //public static XFontWeight FromOpenTypeWeight(int weightValue)
         //{
         //  if (weightValue < 1 || weightValue > 999)
-        //    throw new ArgumentOutOfRangeException("weightValue", "Parameter must be between 1 and 999.");
+        //    throw new ArgumentOutOfRangeException(nameof(weightValue), "Parameter must be between 1 and 999.");
         //  return new XFontWeight(weightValue);
         //}
 

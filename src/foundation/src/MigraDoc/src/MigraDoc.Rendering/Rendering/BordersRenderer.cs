@@ -237,11 +237,11 @@ namespace MigraDoc.Rendering
                     break;
 
                 case BorderStyle.DashLargeGap:
-                    pen.DashPattern = new double[] { 3, 3 };
+                    pen.DashPattern = [3, 3];
                     break;
 
                 case BorderStyle.DashSmallGap:
-                    pen.DashPattern = new double[] { 5, 1 };
+                    pen.DashPattern = [5, 1];
                     break;
 
                 case BorderStyle.Dot:

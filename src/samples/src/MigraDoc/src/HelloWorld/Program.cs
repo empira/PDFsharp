@@ -21,7 +21,7 @@ namespace HelloWorld
     {
         static void Main()
         {
-            if (PdfSharp.Capabilities.Build.IsCoreBuild)
+            if (Capabilities.Build.IsCoreBuild)
                 GlobalFontSettings.FontResolver = new FailsafeFontResolver();
 
             // Create a MigraDoc document.

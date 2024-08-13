@@ -41,7 +41,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
                 if (IsValidName(value))
                     Values.Name = value;
                 else
-                    throw new ArgumentException(DomSR.InvalidInfoFieldName(value));
+                    throw new ArgumentException(MdDomMsgs.InvalidInfoFieldName(value).Message);
             }
         }
 
@@ -75,7 +75,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
         {
             string str = "\\field(Info)";
             if (Name == "")
-                throw new InvalidOperationException(DomSR.MissingObligatoryProperty("Name", "InfoField"));
+                throw new InvalidOperationException(MdDomMsgs.MissingObligatoryProperty(nameof(Name), nameof(InfoField)).Message);
             str += "[Name = \"" + Name + "\"]";
 
             serializer.Write(str);

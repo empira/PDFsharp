@@ -832,11 +832,7 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
 
             var bottomBorderPart = rowBorderParts[3];
             bottomBorderPart.Should().StartWith("b", "last border should be bottom border");
-#if NET6_0_OR_GREATER || true
             bottomBorderPart[1..].Should().Be(rtfHeadingBottomString, "heading bottom border should be defined heading bottom border");
-#else
-            bottomBorderPart.Substring(1).Should().Be(rtfHeadingBottomString, "heading bottom border should be defined heading bottom border");
-#endif
 
             // Row 1.
             rowBorderParts = rowsByBorders[1];
@@ -848,11 +844,7 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
 
             bottomBorderPart = rowBorderParts[3];
             bottomBorderPart.Should().StartWith("b", "last border should be bottom border");
-#if NET6_0_OR_GREATER || true
             bottomBorderPart[1..].Should().Be(rtfBottomString, "row 1 bottom border should be defined content bottom border");
-#else
-            bottomBorderPart.Substring(1).Should().Be(rtfBottomString, "row 1 bottom border should be defined content bottom border");
-#endif
 
             // Row 2-4.
             for (var r = 2; r < 5; r++)
@@ -861,19 +853,11 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
 
                 topBorderPart = rowBorderParts[0];
                 topBorderPart.Should().StartWith("t", "first border should be top border");
-#if NET6_0_OR_GREATER || true
                 topBorderPart[1..].Should().Be(rtfBottomString, $"row {r} top border should be the defined content bottom border of the top neighbor row");
-#else
-                topBorderPart.Substring(1).Should().Be(rtfBottomString, $"row {r} top border should be the defined content bottom border of the top neighbor row");
-#endif
 
                 bottomBorderPart = rowBorderParts[3];
                 bottomBorderPart.Should().StartWith("b", "last border should be bottom border");
-#if NET6_0_OR_GREATER || true
                 bottomBorderPart[1..].Should().Be(rtfBottomString, $"row {r} bottom border should be defined content bottom border");
-#else
-                bottomBorderPart.Substring(1).Should().Be(rtfBottomString, $"row {r} bottom border should be defined content bottom border");
-#endif
             }
         }
     }

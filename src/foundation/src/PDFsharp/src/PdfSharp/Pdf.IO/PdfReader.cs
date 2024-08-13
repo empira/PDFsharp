@@ -282,7 +282,7 @@ namespace PdfSharp.Pdf.IO
                 _document = new PdfDocument(lexer);
                 _document._state |= DocumentState.Imported;
                 _document._openMode = openMode;
-                _document._fileSize = stream.Length;
+                _document.FileSize = stream.Length;
 
                 // Get file version.
                 byte[] header = new byte[1024];
@@ -290,7 +290,7 @@ namespace PdfSharp.Pdf.IO
                 var _ = stream.Read(header, 0, 1024);
                 _document._version = GetPdfFileVersion(header);
                 if (_document._version == 0)
-                    throw new InvalidOperationException(PSSR.InvalidPdf);
+                    throw new InvalidOperationException(PsMsgs.InvalidPdf);
 
                 // Set IsUnderConstruction for IrefTable to true. This allows Parser.ParseObject() to insert placeholder references for objects not yet known.
                 // This is necessary for documents with objects saved in objects streams, which are read and decoded after reading the file level PdfObjects.
@@ -303,7 +303,7 @@ namespace PdfSharp.Pdf.IO
                 _document.Trailer = parser.ReadTrailer();
                 if (_document.Trailer == null!)
                     ParserDiagnostics.ThrowParserException(
-                        "Invalid PDF file: no trailer found."); // TODO L10N using PSSR.
+                        "Invalid PDF file: no trailer found."); // TODO L10N using PsMsgs
                 // References available by now: All references to file-level objects.
                 // Reference.Values available by now: All trailers and cross-reference streams (which are not encrypted by definition). 
 
@@ -340,9 +340,9 @@ namespace PdfSharp.Pdf.IO
                         else
                         {
                             if (password == null)
-                                throw new PdfReaderException(PSSR.PasswordRequired);
+                                throw new PdfReaderException(PsMsgs.PasswordRequired);
                             else
-                                throw new PdfReaderException(PSSR.InvalidPassword);
+                                throw new PdfReaderException(PsMsgs.InvalidPassword);
                         }
                     }
                     else if (validity == PasswordValidity.UserPassword && openMode == PdfDocumentOpenMode.Modify)
@@ -357,7 +357,7 @@ namespace PdfSharp.Pdf.IO
                             goto TryAgain;
                         }
                         else
-                            throw new PdfReaderException(PSSR.OwnerPasswordRequired);
+                            throw new PdfReaderException(PsMsgs.OwnerPasswordRequired);
                     }
                     // ReSharper restore RedundantIfElseBlock
                 }
@@ -498,7 +498,7 @@ namespace PdfSharp.Pdf.IO
 
         void FinishChildReferences(PdfDictionary dictionary, HashSet<PdfObject> finishedObjects)
         {
-            // Dictionary elements are modified inside loop. Avoid "Collection was modified; enumeration operation may not execute" error occuring in net 4.7.2.
+            // Dictionary elements are modified inside loop. Avoid "Collection was modified; enumeration operation may not execute" error occuring in net 4.6.2.
             // There is no way to access KeyValuePairs via index natively to use a for loop with.
             // Instead, enumerate Keys and get value via Elements[key], which shall be O(1).
             foreach (var key in dictionary.Elements.Keys)

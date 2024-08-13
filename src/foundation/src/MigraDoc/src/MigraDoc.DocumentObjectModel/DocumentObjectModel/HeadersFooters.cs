@@ -82,14 +82,15 @@ namespace MigraDoc.DocumentObjectModel
             }
         }
 
-        /// <summary>
-        /// Determines whether a particular header or footer exists.
-        /// </summary>
-        [Obsolete("Uses IsNull and should be avoided.")] // BUG???
-        public bool HasHeaderFooter(HeaderFooterIndex index)
-        {
-            return !IsNull(index.ToString());
-        }
+        // #DELETE
+        ///// <summary>
+        ///// Determines whether a particular header or footer exists.
+        ///// </summary>
+        //[Obsolete("Uses IsNull and should be avoided.")] // BUG???
+        //public bool HasHeaderFooter(HeaderFooterIndex index)
+        //{
+        //    return !IsNull(index.ToString());
+        //}
 
         /// <summary>
         /// Determines whether a particular header or footer exists.

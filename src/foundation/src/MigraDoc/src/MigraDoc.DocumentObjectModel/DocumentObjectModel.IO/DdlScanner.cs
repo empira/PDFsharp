@@ -25,20 +25,20 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// </summary>
         internal DdlScanner(string documentFileName, string ddl, DdlReaderErrors errors)
         {
-            _errors = errors;
+            //_errors = errors; Not (yet?) used.
 
-            _documentPath = documentFileName;
+            DocumentPath = documentFileName;
             _strDocument = ddl;
             _ddlLength = _strDocument.Length;
             _idx = 0;
             _idxLine = 1;
             _idxLinePos = 0;
 
-            _documentFileName = documentFileName;
+            DocumentFileName = documentFileName;
 
-            _nCurDocumentIndex = _idx;
-            _nCurDocumentLine = _idxLine;
-            _nCurDocumentLinePos = _idxLinePos;
+            //_curDocumentIndex = _idx; Not (yet?) used.
+            CurrentLine = _idxLine;
+            CurrentLinePos = _idxLinePos;
 
             ScanNextChar();
         }
@@ -59,62 +59,62 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// </returns>
         internal Symbol ReadCode()
         {
-            Again:
-            _symbol = Symbol.None;
-            _tokenType = TokenType.None;
-            _token = "";
+        Again:
+            Symbol = Symbol.None;
+            TokenType = TokenType.None;
+            Token = "";
 
             MoveToNonWhiteSpace();
             SaveCurDocumentPos();
 
             if (_currChar == Chars.Null)
             {
-                _symbol = Symbol.Eof;
+                Symbol = Symbol.Eof;
                 return Symbol.Eof;
             }
 
             if (IsIdentifierChar(_currChar, true))
             {
                 // Token is identifier.
-                _symbol = ScanIdentifier();
-                _tokenType = TokenType.Identifier;
-                // Some keywords do not start with a backslash: true, false, and null.
-                Symbol sym = KeyWords.SymbolFromName(_token);
+                Symbol = ScanIdentifier();
+                TokenType = TokenType.Identifier;
+                // Some keywords do not start with a backslash:
+                // true, false, and null.
+                var sym = KeyWords.SymbolFromName(Token);
                 if (sym != Symbol.None)
                 {
-                    _symbol = sym;
-                    _tokenType = TokenType.KeyWord;
+                    Symbol = sym;
+                    TokenType = TokenType.KeyWord;
                 }
             }
             else if (_currChar == '"')
             {
                 // Token is string literal.
-                _token += ScanStringLiteral();
-                _symbol = Symbol.StringLiteral;
-                _tokenType = TokenType.StringLiteral;
+                Token += ScanStringLiteral();
+                Symbol = Symbol.StringLiteral;
+                TokenType = TokenType.StringLiteral;
             }
             //NYI: else if (IsNumber())
             //      symbol = ScanNumber(false);
             else if (IsDigit(_currChar) ||
-                     _currChar == '-' && IsDigit(_nextChar) ||
-                     _currChar == '+' && IsDigit(_nextChar))
+                     _currChar is '-' or '+' && IsDigit(_nextChar))
             {
                 // Token is number literal.
-                _symbol = ScanNumber(false);
-                _tokenType = _symbol == Symbol.RealLiteral ? TokenType.RealLiteral : TokenType.IntegerLiteral;
+                Symbol = ScanNumber(false);
+                TokenType = Symbol == Symbol.RealLiteral ? TokenType.RealLiteral : TokenType.IntegerLiteral;
             }
             else if (_currChar == '.' && IsDigit(_nextChar))
             {
                 // Token is real literal.
-                _symbol = ScanNumber(true);
-                _tokenType = TokenType.RealLiteral;
+                Symbol = ScanNumber(true);
+                TokenType = TokenType.RealLiteral;
             }
             else if (_currChar == '\\')
             {
                 // Token is keyword or escaped character.
-                _token = "\\";
-                _symbol = ScanKeyword();
-                _tokenType = _symbol != Symbol.None ? TokenType.KeyWord : TokenType.None;
+                Token = "\\";
+                Symbol = ScanKeyword();
+                TokenType = Symbol != Symbol.None ? TokenType.KeyWord : TokenType.None;
             }
             else if (_currChar == '/' && _nextChar == '/')
             {
@@ -126,16 +126,16 @@ namespace MigraDoc.DocumentObjectModel.IO
             {
                 // Token is verbatim string literal.
                 ScanNextChar();
-                _token += ScanVerbatimStringLiteral();
-                _symbol = Symbol.StringLiteral;
-                _tokenType = _symbol != Symbol.None ? TokenType.StringLiteral : TokenType.None;
+                Token += ScanVerbatimStringLiteral();
+                Symbol = Symbol.StringLiteral;
+                TokenType = Symbol != Symbol.None ? TokenType.StringLiteral : TokenType.None;
             }
             else
             {
                 // Punctuator or syntax error.
-                _symbol = ScanPunctuator();
+                Symbol = ScanPunctuator();
             }
-            return _symbol;
+            return Symbol;
         }
 
         /// <summary>
@@ -337,17 +337,17 @@ namespace MigraDoc.DocumentObjectModel.IO
             if (_emptyLine)
             {
                 _emptyLine = false;
-                _symbol = Symbol.EmptyLine;
-                _tokenType = TokenType.None;
-                _token = "";
+                Symbol = Symbol.EmptyLine;
+                TokenType = TokenType.None;
+                Token = "";
                 return Symbol.EmptyLine;
             }
 
             // Init for scanning.
-            _prevSymbol = _symbol;
-            _symbol = Symbol.None;
-            _tokenType = TokenType.None;
-            _token = "";
+            _prevSymbol = Symbol;
+            Symbol = Symbol.None;
+            TokenType = TokenType.None;
+            Token = "";
 
             // Save where we are
             SaveCurDocumentPos();
@@ -355,7 +355,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             // Check for EOF.
             if (_currChar == Chars.Null)
             {
-                _symbol = Symbol.Eof;
+                Symbol = Symbol.Eof;
                 return Symbol.Eof;
             }
 
@@ -372,7 +372,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                         return ReadPlainText(rootLevel);
                 }
                 // Either key word or syntax error.
-                _token = "\\";
+                Token = "\\";
                 return ScanKeyword();
             }
 
@@ -381,14 +381,14 @@ namespace MigraDoc.DocumentObjectModel.IO
             {
                 case '{':
                     AppendAndScanNextChar();
-                    _symbol = Symbol.BraceLeft;
-                    _tokenType = TokenType.OperatorOrPunctuator;
+                    Symbol = Symbol.BraceLeft;
+                    TokenType = TokenType.OperatorOrPunctuator;
                     return Symbol.BraceLeft;  // Syntax error in any case.
 
                 case '}':
                     AppendAndScanNextChar();
-                    _symbol = Symbol.BraceRight;
-                    _tokenType = TokenType.OperatorOrPunctuator;
+                    Symbol = Symbol.BraceRight;
+                    TokenType = TokenType.OperatorOrPunctuator;
                     return Symbol.BraceRight;
             }
 
@@ -399,10 +399,10 @@ namespace MigraDoc.DocumentObjectModel.IO
                 if (MoveToNextParagraphContentLine(rootLevel))
                 {
                     // Paragraph continues in next line. Simulate the read of a blank to separate words.
-                    _token = " ";
+                    Token = " ";
                     if (IgnoreLineBreak())
-                        _token = "";
-                    _symbol = Symbol.Text;
+                        Token = "";
+                    Symbol = Symbol.Text;
                     return Symbol.Text;
                 }
                 else
@@ -410,15 +410,15 @@ namespace MigraDoc.DocumentObjectModel.IO
                     // Paragraph ends here. Return NewLine or BraceRight.
                     if (_currChar != Chars.BraceRight)
                     {
-                        _symbol = Symbol.EmptyLine;
-                        _tokenType = TokenType.None; //???
+                        Symbol = Symbol.EmptyLine;
+                        TokenType = TokenType.None; //???
                         return Symbol.EmptyLine;
                     }
                     else
                     {
                         AppendAndScanNextChar();
-                        _symbol = Symbol.BraceRight;
-                        _tokenType = TokenType.OperatorOrPunctuator;
+                        Symbol = Symbol.BraceRight;
+                        TokenType = TokenType.OperatorOrPunctuator;
                         return Symbol.BraceRight;
                     }
                 }
@@ -472,6 +472,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                             loop = false;
                             break;
                     }
+
                     continue;
                 }
 
@@ -502,8 +503,8 @@ namespace MigraDoc.DocumentObjectModel.IO
                     if (MoveToNextParagraphContentLine(rootLevel))
                     {
                         // Paragraph continues in next line. Add a blank to separate words.
-                        if (!_token.EndsWith(" ", StringComparison.Ordinal))
-                            _token += ' ';
+                        if (!Token.EndsWith(" ", StringComparison.Ordinal))
+                            Token += ' ';
                         continue;
                     }
                     else
@@ -515,7 +516,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                     }
                 }
 
-                ValidCharacter:
+            ValidCharacter:
                 // Compress multiple blanks to one
                 if (_currChar == ' ')
                 {
@@ -524,6 +525,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                         ScanNextChar();
                         continue;
                     }
+
                     foundSpace = true;
                 }
                 else
@@ -532,8 +534,8 @@ namespace MigraDoc.DocumentObjectModel.IO
                 AppendAndScanNextChar();
             }
 
-            _symbol = Symbol.Text;
-            _tokenType = TokenType.Text;
+            Symbol = Symbol.Text;
+            TokenType = TokenType.Text;
             return Symbol.Text;
         }
 
@@ -542,9 +544,9 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// </summary>
         internal Symbol MoveToCode()
         {
-            if (_symbol == Symbol.None || _symbol == Symbol.CR /*|| this .symbol == Symbol.comment*/)
+            if (Symbol is Symbol.None or Symbol.CR /*|| this .symbol == Symbol.comment*/)
                 ReadCode();
-            return _symbol;
+            return Symbol;
         }
 
         /// <summary>
@@ -554,7 +556,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// </summary>
         internal bool MoveToParagraphContent()
         {
-            Again:
+        Again:
             MoveToNonWhiteSpace();
             if (_currChar == Chars.Slash && _nextChar == Chars.Slash)
             {
@@ -703,7 +705,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             char ch = ScanNextChar();
             while (ch != Chars.Null && ch != Chars.LF)
             {
-                _token += _currChar;
+                Token += _currChar;
                 ch = ScanNextChar();
             }
             ScanNextChar(); // read beyond EOL
@@ -713,64 +715,57 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Gets the current symbol.
         /// </summary>
-        internal Symbol Symbol => _symbol;
+        internal Symbol Symbol { get; private set; } = Symbol.None;
 
         /// <summary>
         /// Gets the current token type.
         /// </summary>
-        internal TokenType TokenType => _tokenType;
+        internal TokenType TokenType { get; private set; } = TokenType.None;
 
         /// <summary>
         /// Gets the current token.
         /// </summary>
-        internal string Token => _token;
+        internal string Token { get; private set; } = "";
 
         /// <summary>
         /// Interpret current token as integer literal.
         /// </summary>
-        /// <returns></returns>
         internal int GetTokenValueAsInt()
         {
-            if (_symbol == Symbol.IntegerLiteral)
-                return Int32.Parse(_token, CultureInfo.InvariantCulture);
+            if (Symbol == Symbol.IntegerLiteral)
+                return Int32.Parse(Token, CultureInfo.InvariantCulture);
 
-            if (_symbol == Symbol.HexIntegerLiteral)
+            if (Symbol == Symbol.HexIntegerLiteral)
             {
-                string number = _token.Substring(2);
+                string number = Token.Substring(2);
                 return Int32.Parse(number, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture);
             }
-            //TODO NiSc Check?
-            //Check.Assert(false);
+            Debug.Assert(false, "Should not come here.");
             return 0;
         }
 
         /// <summary>
         /// Interpret current token as unsigned integer literal.
         /// </summary>
-        /// <returns></returns>
         internal uint GetTokenValueAsUInt()
         {
-            if (_symbol == Symbol.IntegerLiteral)
-                return UInt32.Parse(_token, CultureInfo.InvariantCulture);
+            if (Symbol == Symbol.IntegerLiteral)
+                return UInt32.Parse(Token, CultureInfo.InvariantCulture);
 
-            if (_symbol == Symbol.HexIntegerLiteral)
+            if (Symbol == Symbol.HexIntegerLiteral)
             {
-                string number = _token.Substring(2);
+                string number = Token.Substring(2);
                 return UInt32.Parse(number, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture);
             }
-            //TODO NiSc Check.
-            //Check.Assert(false);
+            Debug.Assert(false, "Should not come here.");
             return 0;
         }
 
         /// <summary>
         /// Interpret current token as real literal.
         /// </summary>
-        /// <returns></returns>
-        internal double GetTokenValueAsReal()
-        {
-            return Double.Parse(_token, CultureInfo.InvariantCulture);
-        }
+        internal double GetTokenValueAsReal() 
+            => Double.Parse(Token, CultureInfo.InvariantCulture);
 
         /// <summary>
         /// Gets the current character or EOF.
@@ -794,7 +789,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             }
             else
             {
-                SkipChar:
+            SkipChar:
                 _currChar = _strDocument[_idx++];
                 _nextChar = _ddlLength <= _idx ? Chars.Null : _strDocument[_idx];
 
@@ -806,7 +801,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                         _idxLinePos = 0;
                         break;
 
-                    // ignore CR
+                    // Ignore CR
                     case Chars.CR:
                         if (_nextChar == Chars.LF)
                         {
@@ -844,7 +839,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// </summary>
         internal char AppendAndScanNextChar()
         {
-            _token += _currChar;
+            Token += _currChar;
             return ScanNextChar();
         }
 
@@ -857,7 +852,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             char ch = ScanNextChar();
             while (ch != Chars.Null && ch != Chars.CR && ch != Chars.LF)
             {
-                _token += _currChar;
+                Token += _currChar;
                 ch = ScanNextChar();
             }
         }
@@ -865,42 +860,30 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Is character in '0' ... '9'.
         /// </summary>
-        internal static bool IsDigit(char ch)
-        {
-            return Char.IsDigit(ch);
-        }
+        internal static bool IsDigit(char ch) 
+            => Char.IsDigit(ch);
 
         /// <summary>
         /// Is character a hexadecimal digit.
         /// </summary>
-        internal static bool IsHexDigit(char ch)
-        {
-            return Char.IsDigit(ch) || (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f');
-        }
+        internal static bool IsHexDigit(char ch) 
+            => Char.IsDigit(ch) || ch is >= 'A' and <= 'F' || ch is >= 'a' and <= 'f';
 
         /// <summary>
         /// Is character an octal digit.
         /// </summary>
         internal static bool IsOctDigit(char ch)
-        {
-            return Char.IsDigit(ch) && ch < '8';
-        }
+            => Char.IsDigit(ch) && ch < '8';
 
         /// <summary>
         /// Is character an alphabetic letter.
         /// </summary>
-        internal static bool IsLetter(char ch)
-        {
-            return Char.IsLetter(ch);
-        }
+        internal static bool IsLetter(char ch) => Char.IsLetter(ch);
 
         /// <summary>
         /// Is character a white space.
         /// </summary>
-        internal static bool IsWhiteSpace(char ch)
-        {
-            return Char.IsWhiteSpace(ch);
-        }
+        internal static bool IsWhiteSpace(char ch) => Char.IsWhiteSpace(ch);
 
         /// <summary>
         /// Is character an identifier character. First character can be letter or underscore, following
@@ -917,10 +900,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Is character the end of file character.
         /// </summary>
-        internal static bool IsEof(char ch)
-        {
-            return ch == Chars.Null;
-        }
+        internal static bool IsEof(char ch) => ch == Chars.Null;
 
         //internal bool IsNumber();
         //internal bool IsFormat();
@@ -1027,14 +1007,13 @@ namespace MigraDoc.DocumentObjectModel.IO
             if (IsParagraphElement(symbol))
                 return true;
 
-            // All document elements except pagebreak.
+            // All document elements except page break.
             if (IsDocumentElement(symbol))
             {
                 if (symbol == Symbol.PageBreak)
                     return false;
                 return true;
             }
-
             return false;
         }
 
@@ -1056,22 +1035,22 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Gets the current filename of the document.
         /// </summary>
-        internal string DocumentFileName => _documentFileName;
+        internal string DocumentFileName { get; }
 
         /// <summary>
         /// Gets the current path of the document.
         /// </summary>
-        internal string DocumentPath => _documentPath;
+        internal string DocumentPath { get; }
 
         /// <summary>
         /// Gets the current scanner line in the document.
         /// </summary>
-        internal int CurrentLine => _nCurDocumentLine;
+        internal int CurrentLine { get; private set; }
 
         /// <summary>
         /// Gets the current scanner column in the document.
         /// </summary>
-        internal int CurrentLinePos => _nCurDocumentLinePos;
+        internal int CurrentLinePos { get; private set; }
 
         /// <summary>
         /// Scans an identifier.
@@ -1091,7 +1070,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         Symbol ScanNumber(bool mantissa)
         {
             char ch = _currChar;
-            _token += _currChar;
+            Token += _currChar;
 
             ScanNextChar();
             if (!mantissa && ch == '0' && (_currChar == 'x' || _currChar == 'X'))
@@ -1119,7 +1098,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// </summary>
         Symbol ReadHexNumber()
         {
-            _token = "0x";
+            Token = "0x";
             ScanNextChar();
             while (_currChar != Chars.Null)
             {
@@ -1144,7 +1123,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             // \- is a soft hyphen == char(173).
             if (ch == '-')
             {
-                _token += "-";
+                Token += "-";
                 ScanNextChar();
                 return Symbol.SoftHyphen;
             }
@@ -1152,8 +1131,8 @@ namespace MigraDoc.DocumentObjectModel.IO
             // \( is a shortcut for symbol.
             if (ch == '(')
             {
-                _token += "(";
-                _symbol = Symbol.Chr;
+                Token += "(";
+                Symbol = Symbol.Chr;
                 return Symbol.Chr; // Shortcut for \chr(
             }
 
@@ -1166,12 +1145,11 @@ namespace MigraDoc.DocumentObjectModel.IO
                 return Symbol.Chr;
             }
 #endif
-
             while (!IsEof(ch) && IsIdentifierChar(ch, false))
                 ch = AppendAndScanNextChar();
 
-            _symbol = KeyWords.SymbolFromName(_token);
-            return _symbol;
+            Symbol = KeyWords.SymbolFromName(Token);
+            return Symbol;
         }
 
         /// <summary>
@@ -1265,7 +1243,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                 case '+':
                     if (_nextChar == '=')
                     {
-                        _token += _currChar;
+                        Token += _currChar;
                         ScanNextChar();
                         sym = Symbol.PlusAssign;
                     }
@@ -1276,7 +1254,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                 case '-':
                     if (_nextChar == '=')
                     {
-                        _token += _currChar;
+                        Token += _currChar;
                         ScanNextChar();
                         sym = Symbol.MinusAssign;
                     }
@@ -1300,7 +1278,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                     sym = Symbol.Eof;
                     return sym;
             }
-            _token += _currChar;
+            Token += _currChar;
             ScanNextChar();
             return sym;
         }
@@ -1309,7 +1287,6 @@ namespace MigraDoc.DocumentObjectModel.IO
         ///// <summary>
         ///// Scans string literals used as identifiers.
         ///// </summary>
-        ///// <returns></returns>
         //protected string ReadRawString()  //ScanStringLiteralIdentifier
         //{
         //  string str = "";
@@ -1355,7 +1332,6 @@ namespace MigraDoc.DocumentObjectModel.IO
                 str += ch;
                 ch = ScanNextChar();
             }
-
             ScanNextChar();
             return str;
         }
@@ -1430,8 +1406,6 @@ namespace MigraDoc.DocumentObjectModel.IO
                                 if (hexNrCount <= 2)
                                     str.Append("?????"); //(char)AscULongFromHexString(hexString);
                                 else
-                                    //throw new DdlParserException(DdlErrorLevel.Error,
-                                    //    DomSR.GetString(DomMsgID.EscapeSequenceNotAllowed), DomMsgID.EscapeSequenceNotAllowed);
                                     throw TH.DdlParserException_EscapeSequenceNotAllowed(str.ToString());
                             }
                             break;
@@ -1456,14 +1430,10 @@ namespace MigraDoc.DocumentObjectModel.IO
                         //  break;
 
                         default:
-                            //throw new DdlParserException(DdlErrorLevel.Error,
-                            //  DomSR.GetString(DomMsgID.EscapeSequenceNotAllowed), DomMsgID.EscapeSequenceNotAllowed);
                             throw TH.DdlParserException_EscapeSequenceNotAllowed(str.ToString());
                     }
                 }
                 else if (_currChar is Chars.Null or Chars.CR or Chars.LF)
-                    //throw new DdlParserException(DdlErrorLevel.Error,
-                    //  DomSR.GetString(DomMsgID.NewlineInString), DomMsgID.NewlineInString);
                     throw TH.DdlParserException_NewlineInString();
                 else
                     str.Append(_currChar);
@@ -1479,17 +1449,13 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// </summary>
         void SaveCurDocumentPos()
         {
-            _nCurDocumentIndex = _idx - 1;
-            _nCurDocumentLine = _idxLine;
-            _nCurDocumentLinePos = _idxLinePos;
+            //_curDocumentIndex = _idx - 1; Not (yet?) used.
+            CurrentLine = _idxLine;
+            CurrentLinePos = _idxLinePos;
         }
 
-        int _nCurDocumentIndex;
-        int _nCurDocumentLine;
-        int _nCurDocumentLinePos;
+        //int _curDocumentIndex; Not(yet?) used.
 
-        readonly string _documentFileName;
-        readonly string _documentPath;
         readonly string _strDocument;
         readonly int _ddlLength;
         int _idx;
@@ -1498,12 +1464,9 @@ namespace MigraDoc.DocumentObjectModel.IO
 
         char _currChar;
         char _nextChar;
-        string _token = "";
-        Symbol _symbol = Symbol.None;
         Symbol _prevSymbol = Symbol.None;
-        TokenType _tokenType = TokenType.None;
         bool _emptyLine;
 
-        DdlReaderErrors _errors;
+        //DdlReaderErrors _errors; Not (yet?) used.
     }
 }

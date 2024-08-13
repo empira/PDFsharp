@@ -61,7 +61,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         internal override void Serialize(Serializer serializer)
         {
             int count = Count;
-            for (int index = 0; index < count; ++index)
+            for (int index = 0; index < count; index++)
             {
                 if (this[index] is not Point point)
                     serializer.Write("null, ");

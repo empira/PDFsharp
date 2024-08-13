@@ -69,7 +69,7 @@ namespace MigraDoc.DocumentObjectModel
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
             if (name == "")
-                throw new ArgumentException("name");
+                throw new ArgumentException(nameof(name));
 
             if (name.ToLower().StartsWith("font", StringComparison.Ordinal))
                 return ParagraphFormat.GetValue(name);
@@ -132,7 +132,7 @@ namespace MigraDoc.DocumentObjectModel
             set
             {
                 if (value == null || value == "" && !String.IsNullOrEmpty(Values.BaseStyle))
-                    throw new ArgumentException(DomSR.EmptyBaseStyle);
+                    throw new ArgumentException(MdDomMsgs.EmptyBaseStyle.Message);
 
                 // Self assignment is allowed. Treat null like "".
                 if (value == "" && String.IsNullOrEmpty(Values.BaseStyle)) // BUG???

@@ -9,6 +9,7 @@ using System.Text;
 using FluentAssertions;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
+using PdfSharp.Internal;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Internal;
 using PdfSharp.Quality;
@@ -33,18 +34,22 @@ namespace PdfSharp.Tests.Build
 #endif
 
         [Fact(Skip = "Do not run this test always.")]
+        //[Fact]
         public void Check_CS_files_for_non_ASCII_characters()
         {
 #if NET6_0_OR_GREATER || CORE
             return;
 #else
+#if DEBUG
+            _ = BuildInformation.BuildVersionNumber;
+#endif
             var folder = IOUtility.GetAssetsPath();
             folder.Should().NotBeNull();
             Debug.Assert(folder != null);
 
             folder = Path.Combine(folder, "../src/");
 
-#if true
+#if true_
             folder = @"D:\repos\emp\PDFsharp-COPY\";
 #endif
 

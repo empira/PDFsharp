@@ -14,8 +14,7 @@ namespace MigraDoc.DocumentObjectModel
         public static string? GetImageName(string root, string filename, string imagePath)
         {
             List<string> subfolders = new(imagePath.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries));
-            subfolders.Add("");
-
+            
             foreach (string subfolder in subfolders)
             {
                 string fullname = Path.Combine(Path.Combine(root, subfolder), filename);
@@ -32,14 +31,14 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public static bool InSubfolder(string root, string filename, string imagePath, string referenceFilename)
         {
-            List<string> subfolders = new List<string>(imagePath.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
+            List<string> subfolders = new List<string>(imagePath.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
             subfolders.Add("");
 
             foreach (string subfolder in subfolders)
             {
-                string fullname = System.IO.Path.Combine(System.IO.Path.Combine(root, subfolder), filename);
+                string fullname = System.IO.Path.Combine(Path.Combine(root, subfolder), filename);
                 string realFile = ExtractPageNumber(fullname, out _);
-                if (System.IO.File.Exists(realFile))
+                if (File.Exists(realFile))
                 {
                     if (fullname == referenceFilename)
                         return true;
@@ -76,13 +75,8 @@ namespace MigraDoc.DocumentObjectModel
                         if (path.IndexOf(".", StringComparison.Ordinal) != -1)
 #endif
                         {
-#if NET6_0_OR_GREATER || true
                             pageNumber = Int32.Parse(path[(length + 1)..]);
                             path = path[..length];
-#else
-                            pageNumber = Int32.Parse(path.Substring(length + 1));
-                            path = path.Substring(0, length);
-#endif
                         }
                     }
                 }

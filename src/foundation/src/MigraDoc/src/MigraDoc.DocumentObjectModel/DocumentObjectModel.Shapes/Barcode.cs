@@ -108,7 +108,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         internal override void Serialize(Serializer serializer)
         {
             if (String.IsNullOrEmpty(Values.Code))
-                throw new InvalidOperationException(DomSR.MissingObligatoryProperty("Name", "BookmarkField"));
+                throw new InvalidOperationException(MdDomMsgs.MissingObligatoryProperty(nameof(Code), nameof(Barcode)).Message);
 
             serializer.WriteLine("\\barcode(\"" + Code + "\")");
 

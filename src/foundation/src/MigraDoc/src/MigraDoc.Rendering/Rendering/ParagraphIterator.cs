@@ -173,7 +173,8 @@ namespace MigraDoc.Rendering
             if (newIndex < 0)
                 return null;
 
-            List<int> indices = new(parIterator._positionIndices) { newIndex };//(Array_List)parIterator.positionIndices.Clone();
+            //List<int> indices = new(parIterator._positionIndices) { newIndex };
+            List<int> indices = [..parIterator._positionIndices, newIndex];
 
             var obj = GetNodeObject(parEls[newIndex] ?? NRT.ThrowOnNull<DocumentObject>());
             var iterator = new ParagraphIterator(_rootNode, obj, indices);
@@ -275,13 +276,8 @@ namespace MigraDoc.Rendering
         {
             get
             {
-#if NET6_0_OR_GREATER || true
                 if (_positionIndices.Count != 0)
                     return _positionIndices[^1];
-#else
-                if (_positionIndices.Count != 0)
-                    return _positionIndices[_positionIndices.Count - 1];
-#endif
                 return -1;
             }
         }

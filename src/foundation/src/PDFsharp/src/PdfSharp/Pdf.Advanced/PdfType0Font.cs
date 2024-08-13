@@ -86,7 +86,7 @@ namespace PdfSharp.Pdf.Advanced
             BaseFont = otDescriptor.FontName;
 
             // CID fonts are always embedded
-            if (!BaseFont.Contains("+"))  // HACK in PdfType0Font
+            if (!BaseFont.Contains("+"))  // H/ACK in PdfType0Font
                 BaseFont = FontDescriptor.CreateEmbeddedFontSubsetName(BaseFont);
 
             FontDescriptor.FontName = BaseFont;

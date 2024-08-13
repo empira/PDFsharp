@@ -52,7 +52,6 @@ namespace PdfSharp.Pdf.AcroForms
         internal override void GetDescendantNames(ref List<string> names, string? partialName)
         {
             string t = Elements.GetString(PdfAcroField.Keys.T);
-            // HACK: ??? 
             if (t == "")
                 t = "???";
             Debug.Assert(t != "");

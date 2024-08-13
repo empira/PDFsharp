@@ -21,7 +21,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 #if true
             // New version without sorted list.
             int count = elements.Count;
-            for (int idx = 0; idx < count; ++idx)
+            for (int idx = 0; idx < count; idx++)
             {
                 if (elements[idx] is Paragraph paragraph)
                 {
@@ -41,7 +41,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 #else
             SortedList splitParaList = new SortedList();
 
-            for (int idx = 0; idx < elements.Count; ++idx)
+            for (int idx = 0; idx < elements.Count; idx++)
             {
                 Paragraph paragraph = elements[idx] as Paragraph;
                 if (paragraph != null)
@@ -53,7 +53,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             }
 
             int insertedObjects = 0;
-            for (int idx = 0; idx < splitParaList.Count; ++idx)
+            for (int idx = 0; idx < splitParaList.Count; idx++)
             {
                 int insertPosition = (int)splitParaList.GetKey(idx);
                 Paragraph[] paragraphs = (Paragraph[])splitParaList.GetByIndex(idx);
@@ -78,7 +78,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             List<int> textIndices = new List<int>();
             if (elements is ParagraphElements)
             {
-                for (int idx = 0; idx < elements.Count; ++idx)
+                for (int idx = 0; idx < elements.Count; idx++)
                 {
                     if (elements[idx] is Text)
                         textIndices.Add(idx);
@@ -236,7 +236,6 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         /// Get the font for the parent of a given object.
         /// </summary>
         /// <param name="obj">The object to start with.</param>
-        /// <returns></returns>
         /// <exception cref="InvalidOperationException">Exception that is thrown of the parent object is neither Paragraph nor Hyperlink or FormattedText.</exception>
         protected Font? GetParentFont(DocumentObject obj)
         {

@@ -1324,6 +1324,115 @@ namespace MigraDoc.DocumentObjectModel.Tests
             }
         }
 
+        [Theory] // Generate Section with no, one and two paragraphs, to use and avoid direct paragraph content in section.
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        public void Test_WriteAndReadMdddl_Section_Three_Headers_And_Paragraphs(int paragraphCount)
+        {
+            var doc = new Document();
+
+            TestHelper.RemoveStyles(doc);
+
+            // Set desired value in doc and write MDDDL.
+            var section = doc.AddSection();
+            section.Headers.Primary.AddParagraph("PrimaryHeaderText");
+            section.Headers.FirstPage.AddParagraph("FirstPageHeaderText");
+            section.Headers.EvenPage.AddParagraph("EvenPageHeaderText");
+
+            doc.Values.Sections.Should().HaveCount(1);
+            section.Should().Be(doc.Sections.First);
+
+            var headers = section.Values.Headers;
+            headers.Should().NotBeNull();
+
+            var primaryHeader = headers!.Values.Primary;
+            primaryHeader.Should().NotBeNull();
+            primaryHeader!.Elements.Should().HaveCount(1);
+
+            var firstPageHeader = headers!.Values.FirstPage;
+            firstPageHeader.Should().NotBeNull();
+            firstPageHeader!.Elements.Should().HaveCount(1);
+
+            var evenPageHeader = headers!.Values.EvenPage;
+            evenPageHeader.Should().NotBeNull();
+            evenPageHeader!.Elements.Should().HaveCount(1);
+
+            for (var i = 0; i < paragraphCount; i++)
+                section.AddParagraph($"ParagraphText{i + 1}");
+
+            var mdddl = DdlWriter.WriteToString(doc);
+
+            mdddl.Should().Contain("\\primaryheader");
+            mdddl.Should().Contain("\\firstpageheader");
+            mdddl.Should().Contain("\\evenpageheader");
+
+            // For 0 there is no paragraph, for 1 the paragraph content is added directly to section due to MDDDL optimization.
+            if (paragraphCount < 2)
+                mdddl.Should().NotContain("\\paragraph");
+            else
+                mdddl.Should().Contain("\\paragraph");
+
+            // Read Mdddl and check if desired value is restored correctly.
+            var docRead = DdlReader.DocumentFromString(mdddl);
+            docRead.Values.Sections.Should().HaveCount(1);
+
+            var sectionRead = docRead.Values.Sections!.First as Section;
+            sectionRead.Should().NotBeNull();
+
+            var headersRead = sectionRead!.Values.Headers;
+            headersRead.Should().NotBeNull();
+
+            var primaryHeaderRead = headersRead!.Values.Primary;
+            primaryHeaderRead.Should().NotBeNull();
+            primaryHeaderRead!.Elements.Should().HaveCount(1);
+
+            var primaryHeaderParagraphRead = primaryHeaderRead.Elements.First as Paragraph;
+            primaryHeaderParagraphRead.Should().NotBeNull();
+
+            var primaryHeaderTextRead = primaryHeaderParagraphRead!.Elements.First as Text;
+            primaryHeaderTextRead.Should().NotBeNull();
+            primaryHeaderTextRead!.Content.Should().Be("PrimaryHeaderText");
+
+            var firstPageHeaderRead = headersRead!.Values.FirstPage;
+            firstPageHeaderRead.Should().NotBeNull();
+            firstPageHeaderRead!.Elements.Should().HaveCount(1);
+
+            var firstPageHeaderParagraphRead = firstPageHeaderRead.Elements.First as Paragraph;
+            firstPageHeaderParagraphRead.Should().NotBeNull();
+
+            var firstPageHeaderTextRead = firstPageHeaderParagraphRead!.Elements.First as Text;
+            firstPageHeaderTextRead.Should().NotBeNull();
+            firstPageHeaderTextRead!.Content.Should().Be("FirstPageHeaderText");
+
+            var evenPageHeaderRead = headersRead!.Values.EvenPage;
+            evenPageHeaderRead.Should().NotBeNull();
+            evenPageHeaderRead!.Elements.Should().HaveCount(1);
+
+            var evenPageHeaderParagraphRead = evenPageHeaderRead.Elements.First as Paragraph;
+            evenPageHeaderParagraphRead.Should().NotBeNull();
+
+            var evenPageHeaderTextRead = evenPageHeaderParagraphRead!.Elements.First as Text;
+            evenPageHeaderTextRead.Should().NotBeNull();
+            evenPageHeaderTextRead!.Content.Should().Be("EvenPageHeaderText");
+            
+            if (paragraphCount == 0)
+            {
+                sectionRead.Elements.Should().HaveCount(0);
+                return;
+            }
+
+            for (var i = 0; i < paragraphCount; i++)
+            {
+                var paragraphRead = sectionRead.Elements[i] as Paragraph;
+                paragraphRead.Should().NotBeNull();
+
+                var textRead = paragraphRead!.Elements.First as Text;
+                textRead.Should().NotBeNull();
+                textRead!.Content.Should().Be($"ParagraphText{i + 1}");
+            }
+        }
+
         [Fact(Skip = "Escaping bug in current implementation")]
         public void Test_Write_And_Read_MDDDL_CommentEscaping()
         {

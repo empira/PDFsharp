@@ -58,7 +58,7 @@ namespace PdfSharp.Pdf.Advanced
             // Get import page
             var importPages = importedObjectTable.ExternalDocument!.Pages; // NRT
             if (pdfForm.PageNumber < 1 || pdfForm.PageNumber > importPages.Count)
-                PSSR.ImportPageNumberOutOfRange(pdfForm.PageNumber, importPages.Count, form._path);
+                PsMsgs.ImportPageNumberOutOfRange(pdfForm.PageNumber, importPages.Count, form._path);
             PdfPage importPage = importPages[pdfForm.PageNumber - 1];
 
             // Import resources

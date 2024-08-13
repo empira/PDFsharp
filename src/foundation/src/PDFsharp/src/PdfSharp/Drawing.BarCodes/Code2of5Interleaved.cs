@@ -47,18 +47,18 @@ namespace PdfSharp.Drawing.BarCodes
         }
 
         static readonly bool[][] Lines =
-        {
-            new [] {false, false, true, true, false},
-            new [] {true, false, false, false, true},
-            new [] {false, true, false, false, true},
-            new [] {true, true, false, false, false},
-            new [] {false, false, true, false, true},
-            new [] {true, false, true, false, false},
-            new [] {false, true, true, false, false},
-            new [] {false, false, false, true, true},
-            new [] {true, false, false, true, false},
-            new [] {false, true, false, true, false},
-        };
+        [
+            [false, false, true, true, false],
+            [true, false, false, false, true],
+            [false, true, false, false, true],
+            [true, true, false, false, false],
+            [false, false, true, false, true],
+            [true, false, true, false, false],
+            [false, true, true, false, false],
+            [false, false, false, true, true],
+            [true, false, false, true, false],
+            [false, true, false, true, false]
+        ];
 
         /// <summary>
         /// Renders the bar code.
@@ -133,7 +133,7 @@ namespace PdfSharp.Drawing.BarCodes
             int digitForGaps = Int32.Parse(Text[info.CurrPosInString + 1].ToString());
             bool[] linesArray = Lines[digitForLines];
             bool[] gapsArray = Lines[digitForGaps];
-            for (int idx = 0; idx < 5; ++idx)
+            for (int idx = 0; idx < 5; idx++)
             {
                 RenderBar(info, linesArray[idx]);
                 RenderGap(info, gapsArray[idx]);
@@ -149,7 +149,7 @@ namespace PdfSharp.Drawing.BarCodes
         {
 #if true_
             if (text == null)
-                throw new ArgumentNullException("text");
+                throw new ArgumentNullException(nameof(text));
 
             if (text == "")
                 throw new ArgumentException(BcgSR.Invalid2Of5Code(text));

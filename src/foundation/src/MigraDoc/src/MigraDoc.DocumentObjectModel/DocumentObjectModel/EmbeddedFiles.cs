@@ -39,7 +39,7 @@ namespace MigraDoc.DocumentObjectModel
         internal override void Serialize(Serializer serializer)
         {
             var count = Count;
-            for (var index = 0; index < count; ++index)
+            for (var index = 0; index < count; index++)
             {
                 var embeddedFile = this[index];
                 embeddedFile.Serialize(serializer);

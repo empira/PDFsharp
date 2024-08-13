@@ -36,14 +36,53 @@ namespace PdfSharp.Drawing
             FontEncoding = encoding;
         }
 
-        //DELETE
         /// <summary>
         /// Initializes a new instance of the <see cref="XPdfFontOptions"/> class.
         /// </summary>
         public XPdfFontOptions(PdfFontEmbedding embedding)
         {
-            FontEmbedding = PdfFontEmbedding.TryComputeSubset;
+            FontEmbedding = embedding;
             FontEncoding = PdfFontEncoding.Automatic;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XPdfFontOptions"/> class.
+        /// </summary>
+        public XPdfFontOptions(PdfFontEncoding encoding, PdfFontEmbedding embedding, PdfFontColoredGlyphs coloredGlyphs)
+        {
+            FontEncoding = encoding;
+            FontEmbedding = embedding;
+            ColoredGlyphs = coloredGlyphs;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XPdfFontOptions"/> class.
+        /// </summary>
+        public XPdfFontOptions(PdfFontEmbedding embedding, PdfFontColoredGlyphs coloredGlyphs)
+        {
+            FontEmbedding = embedding;
+            FontEncoding = PdfFontEncoding.Unicode;
+            ColoredGlyphs = coloredGlyphs;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XPdfFontOptions"/> class.
+        /// </summary>
+        public XPdfFontOptions(PdfFontEncoding encoding, PdfFontColoredGlyphs coloredGlyphs)
+        {
+            FontEmbedding = PdfFontEmbedding.TryComputeSubset;
+            FontEncoding = encoding;
+            ColoredGlyphs = coloredGlyphs;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XPdfFontOptions"/> class.
+        /// </summary>
+        public XPdfFontOptions(PdfFontColoredGlyphs coloredGlyphs)
+        {
+            FontEmbedding = PdfFontEmbedding.TryComputeSubset;
+            FontEncoding = PdfFontEncoding.Unicode;
+            ColoredGlyphs = coloredGlyphs;
         }
 
         /// <summary>
@@ -55,6 +94,11 @@ namespace PdfSharp.Drawing
         /// Gets a value indicating how the font is encoded.
         /// </summary>
         public PdfFontEncoding FontEncoding { get; }
+
+        /// <summary>
+        /// Gets a value indicating how the font is encoded.
+        /// </summary>
+        public PdfFontColoredGlyphs ColoredGlyphs { get; }
 
         /// <summary>
         /// Gets the default options with WinAnsi encoding and always font embedding.

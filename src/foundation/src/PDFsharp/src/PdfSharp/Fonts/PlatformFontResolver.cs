@@ -79,11 +79,11 @@ namespace PdfSharp.Fonts
             if (fontSource == null || wpfFontFamily == null || wpfTypeface == null || wpfGlyphTypeface == null)
                 return null;
 #endif
-#if UWP
+#if WUI
             //GlyphTypeface wpfGlyphTypeface;
             XFontSource fontSource = null;//CreateFontSource(familyName, isBold, isItalic, out wpfGlyphTypeface, typefaceKey);
 #endif
-#if GDI || WPF || UWP
+#if GDI || WPF || WUI
             // If no such font exists return null. PDFsharp will fail.
             // Re/Sharper disable once ConditionIsAlwaysTrueOrFalse because code is under construction.
             if (fontSource == null)
@@ -310,7 +310,7 @@ namespace PdfSharp.Fonts
                 }
 
                 //if (!WpfTypeface.TryGetGlyphTypeface(out glyphTypeface))
-                //    throw new InvalidOperationException(PSSR.CannotGetGlyphTypeface(familyName));
+                //    throw new InvalidOperationException(PsMgs.CannotGetGlyphTypeface(familyName));
             }
 #endif
             wpfFontFamily ??= new WpfFontFamily(familyName);
@@ -327,7 +327,7 @@ namespace PdfSharp.Fonts
         }
 #endif
 
-#if UWP
+#if WUI
         internal static XFontSource CreateFontSource(string familyName, bool isBold, bool isItalic, string typefaceKey)
         {
             throw new NotImplementedException();

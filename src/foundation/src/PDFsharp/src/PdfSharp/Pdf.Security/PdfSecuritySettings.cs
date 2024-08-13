@@ -64,7 +64,7 @@ namespace PdfSharp.Pdf.Security
             {
                 if (String.IsNullOrEmpty(effectiveSecurityHandler.UserPassword) && String.IsNullOrEmpty(effectiveSecurityHandler.OwnerPassword))
                 {
-                    message = PSSR.UserOrOwnerPasswordRequired;
+                    message = PsMsgs.UserOrOwnerPasswordRequired;
                     return false;
                 }
             }

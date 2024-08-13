@@ -5,12 +5,11 @@ using System.Diagnostics;
 using System.Text;
 using MigraDoc.DocumentObjectModel;
 using PdfSharp.Pdf;
+using PdfSharp.Pdf.Advanced;
 using PdfSharp.Drawing;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.Rendering.Extensions;
-using MigraDoc.Rendering.Resources;
-using PdfSharp.Pdf.Advanced;
 
 namespace MigraDoc.Rendering
 {
@@ -113,7 +112,7 @@ namespace MigraDoc.Rendering
             RenderBorders();
 
             ParagraphFormatInfo parFormatInfo = (ParagraphFormatInfo)_renderInfo.FormatInfo;
-            for (int idx = 0; idx < parFormatInfo.LineCount; ++idx)
+            for (int idx = 0; idx < parFormatInfo.LineCount; idx++)
             {
                 LineInfo lineInfo = parFormatInfo.GetLineInfo(idx);
                 _isLastLine = (idx == parFormatInfo.LineCount - 1);
@@ -147,7 +146,7 @@ namespace MigraDoc.Rendering
                     {
                         if (_phase == Phase.Formatting)
                             return "XX";
-                        return Messages2.BookmarkNotDefined(pageRefField.Name);
+                        return MdPdfMsgs.BookmarkNotDefined(pageRefField.Name).Message;
                     }
                 }
                 else if (field is SectionField)
@@ -548,11 +547,7 @@ namespace MigraDoc.Rendering
                     }
 
                     if (decimalPosIndex >= 0)
-#if NET6_0_OR_GREATER || true
                         word = word[..decimalPosIndex];
-#else
-                        word = word.Substring(0, decimalPosIndex);
-#endif
 
                     XUnitPt wordLength = MeasureString(word);
                     notFitting = _currentXPosition + wordLength >= _formattingArea.X + _formattingArea.Width + Tolerance;
@@ -1039,7 +1034,7 @@ namespace MigraDoc.Rendering
         {
             string sym = GetSymbol(character);
             string completeWord = sym;
-            for (int idx = 1; idx < character.Count; ++idx)
+            for (int idx = 1; idx < character.Count; idx++)
                 completeWord += sym;
 
             RenderWord(completeWord);
@@ -1627,7 +1622,6 @@ namespace MigraDoc.Rendering
         /// Processes the elements when formatting.
         /// </summary>
         /// <param name="docObj"></param>
-        /// <returns></returns>
         FormatResult FormatElement(DocumentObject docObj)
         {
             // Check for available space in the area must be made for each element and explicitly for the last paragraph’s element, because in formatting phase,

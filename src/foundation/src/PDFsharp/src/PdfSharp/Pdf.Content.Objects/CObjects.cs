@@ -3,6 +3,7 @@
 
 using System.Collections;
 using System.Text;
+using PdfSharp.Internal;
 
 namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
 {
@@ -557,7 +558,7 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
                 if (String.IsNullOrEmpty(value))
                     throw new ArgumentNullException(nameof(value));
                 if (value[0] != '/')
-                    throw new ArgumentException(PSSR.NameMustStartWithSlash);
+                    throw new ArgumentException(PsMsgs.NameMustStartWithSlash);
                 _name = value;
             }
         }

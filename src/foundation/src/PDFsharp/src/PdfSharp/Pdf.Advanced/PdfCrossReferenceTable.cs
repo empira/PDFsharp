@@ -43,18 +43,20 @@ namespace PdfSharp.Pdf.Advanced
             // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd because it would not build with .NET Framework.
             if (ObjectTable.ContainsKey(iref.ObjectID))
             {
-#if true_
-                // Really happens with existing (bad) PDF files.
-                // See file 'Detaljer.ARGO.KOD.rev.B.pdf' from https://github.com/ststeiger/PdfSharpCore/issues/362
-                throw new InvalidOperationException("Object already in table.");
-#else
+#if true
+                var oldIref = ObjectTable.First(x => x.Key == iref.ObjectID).Value;
+
                 // We remove the existing one and use the latter reference.
-                // HACK: This is just a quick fix that may not be the best solution in all cases.
+                // Choosing the latter reference may not be the best solution in all cases.
                 // On GitHub user packdat provides a PR that orders objects. This code is not yet integrated,
                 // because releasing 6.1.0 had a higher priority. We will fix this in 6.2.0.
-                // However, this quick fix is better than throwing an exception in all cases.
-                PdfSharpLogHost.PdfReadingLogger.LogError("Object '{ObjectID}' already exists in xref table. The latter one is used.", iref.ObjectID);
+                // However, using the last added object and logging an error is better than throwing an exception in all cases.
+                PdfSharpLogHost.PdfReadingLogger.LogError("Object '{ObjectID}' already exists in xref table’s objects, referring to position {Position}. The latter one referring to position {Position} is used. " +
+                                                          "This should not occur. If somebody came here, please send us your PDF file so that we can fix it (issues (at) pdfsharp.net.", oldIref.ObjectID, oldIref.Position, iref.Position);
+
                 ObjectTable.Remove(iref.ObjectID);
+#else
+                throw new InvalidOperationException("Object already in table.");
 #endif
             }
             ObjectTable.Add(iref.ObjectID, iref);

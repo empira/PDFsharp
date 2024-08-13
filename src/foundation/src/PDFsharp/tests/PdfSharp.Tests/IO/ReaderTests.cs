@@ -3,18 +3,16 @@
 
 using System.Diagnostics;
 using System.Globalization;
+#if WPF
 using System.IO;
-using FluentAssertions;
-using PdfSharp.Diagnostics;
+#endif
 using PdfSharp.Drawing;
-using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Quality;
-using PdfSharp.Snippets.Font;
-using PdfSharp.TestHelper;
 using Xunit;
+using FluentAssertions;
 
 namespace PdfSharp.Tests.IO
 {
@@ -225,6 +223,80 @@ namespace PdfSharp.Tests.IO
             var filename = PdfFileUtility.GetTempPdfFileName("Custom_properties");
             doc4.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
+        }
+
+        [Fact]
+        public void Read_and_modify_PDF_file_PageOrientation_test()
+        {
+            // This test creates all 8 possible variations of A4 pages.
+            // Step 1 draws a red frame around the page.
+            // Step 2 draws a narrower, yellow frame around the page.
+            // Step 3 draws a narrow, green frame around the page.
+            // All frames should be visible after step 3 and should be around the edges of the pages.
+            var document = new PdfDocument();
+
+            // There are 4 possible values for rotation and 2 options for orientation.
+            // We create 8 pages to cover all cases.
+            for (int i = 0; i < 8; ++i)
+            {
+                var page = document.AddPage();
+                page.Size = PageSize.A4;
+                page.Rotate = i % 4 * 90;
+                page.Orientation = (i / 4) switch
+                {
+                    0 => PageOrientation.Portrait,
+                    1 => PageOrientation.Landscape,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+                DrawPageFrame(page, XColors.Red, 20,
+                    $"Page {i + 1} - Rotate {page.Rotate} - Orientation {page.Orientation}");
+            }
+
+            // Save the document...
+            string filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationTestStep1");
+            document.Save(filename);
+
+            // Read the document from step 1.
+            document = PdfReader.Open(filename, PdfDocumentOpenMode.Modify);
+            for (int i = 0; i < 8; ++i)
+            {
+                var page = document.Pages[i];
+#if true_  // can be deleted now
+                // Modifying the PDF works with this hack.
+                page.Orientation = PageOrientation.Portrait; // Always set "Portrait" for imported pages.
+#endif
+                DrawPageFrame(page, XColors.Yellow, 10);
+            }
+
+            // Save the document...
+            filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationTestStep2");
+            document.Save(filename);
+
+            // Read the document from step 2.
+            document = PdfReader.Open(filename, PdfDocumentOpenMode.Modify);
+            for (int i = 0; i < 8; ++i)
+            {
+                var page = document.Pages[i];
+                DrawPageFrame(page, XColors.Green, 5);
+            }
+
+            // Save the document...
+            filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationTestStep3");
+            document.Save(filename);
+
+            static void DrawPageFrame(PdfPage page, XColor color, Int32 width, string? label = null)
+            {
+                // Draw a frame around the page. Add an optional label.
+                using var gfx = XGraphics.FromPdfPage(page);
+                var pen = new XPen(XColors.OrangeRed, 10) { LineCap = XLineCap.Round };
+                gfx.DrawLine(pen, 0, 0, 200, 200);
+                gfx.DrawRectangle(new XPen(color, width), new XRect(0, 0, page.Width.Point, page.Height.Point));
+                if (!String.IsNullOrWhiteSpace(label))
+                {
+                    var font = new XFont("Verdana", 10, XFontStyleEx.Regular);
+                    gfx.DrawString(label ?? "", font, XBrushes.Firebrick, 20, 20);
+                }
+            }
         }
     }
 }

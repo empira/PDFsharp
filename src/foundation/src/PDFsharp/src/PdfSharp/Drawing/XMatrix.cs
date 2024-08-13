@@ -84,8 +84,8 @@ namespace PdfSharp.Drawing
         public double[] GetElements()
         {
             if (_type == XMatrixTypes.Identity)
-                return new double[] { 1, 0, 0, 1, 0, 0 };
-            return new[] { _m11, _m12, _m21, _m22, _offsetX, _offsetY };
+                return [1, 0, 0, 1, 0, 0];
+            return [_m11, _m12, _m21, _m22, _offsetX, _offsetY];
         }
 
         /// <summary>
@@ -391,7 +391,7 @@ namespace PdfSharp.Drawing
         public void Rotate(double angle)
         {
             throw new InvalidOperationException("Temporarily out of order.");
-            //angle = angle % 360.0;
+            //angle %= 360.0;
             //this *= CreateRotationRadians(angle * Const.Deg2Rad);
         }
 
@@ -400,7 +400,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public void RotateAppend(double angle) // TODO: will become default Rotate
         {
-            angle = angle % 360.0;
+            angle %= 360.0;
             this *= CreateRotationRadians(angle * Const.Deg2Rad);
         }
 
@@ -409,7 +409,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public void RotatePrepend(double angle)
         {
-            angle = angle % 360.0;
+            angle %= 360.0;
             this = CreateRotationRadians(angle * Const.Deg2Rad) * this;
         }
 
@@ -421,7 +421,7 @@ namespace PdfSharp.Drawing
             if (_type == XMatrixTypes.Identity)
                 this = CreateIdentity();
 
-            angle = angle * Const.Deg2Rad;
+            angle *= Const.Deg2Rad;
             double cos = Math.Cos(angle);
             double sin = Math.Sin(angle);
             if (order == XMatrixOrder.Append)
@@ -463,7 +463,7 @@ namespace PdfSharp.Drawing
         public void RotateAt(double angle, double centerX, double centerY)
         {
             throw new InvalidOperationException("Temporarily out of order.");
-            //angle = angle % 360.0;
+            //angle %= 360.0;
             //this *= CreateRotationRadians(angle * Const.Deg2Rad, centerX, centerY);
         }
 
@@ -472,7 +472,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public void RotateAtAppend(double angle, double centerX, double centerY) // TODO: will become default
         {
-            angle = angle % 360.0;
+            angle %= 360.0;
             this *= CreateRotationRadians(angle * Const.Deg2Rad, centerX, centerY);
         }
 
@@ -481,7 +481,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public void RotateAtPrepend(double angle, double centerX, double centerY)
         {
-            angle = angle % 360.0;
+            angle %= 360.0;
             this = CreateRotationRadians(angle * Const.Deg2Rad, centerX, centerY) * this;
         }
 
@@ -520,7 +520,7 @@ namespace PdfSharp.Drawing
         {
             if (order == XMatrixOrder.Append)
             {
-                angle = angle % 360.0;
+                angle %= 360.0;
                 this *= CreateRotationRadians(angle * Const.Deg2Rad, point.X, point.Y);
 
                 //Translate(point.X, point.Y, order);
@@ -529,7 +529,7 @@ namespace PdfSharp.Drawing
             }
             else
             {
-                angle = angle % 360.0;
+                angle %= 360.0;
                 this = CreateRotationRadians(angle * Const.Deg2Rad, point.X, point.Y) * this;
             }
 
@@ -604,8 +604,8 @@ namespace PdfSharp.Drawing
         public void Skew(double skewX, double skewY)
         {
             throw new InvalidOperationException("Temporarily out of order.");
-            //skewX = skewX % 360.0;
-            //skewY = skewY % 360.0;
+            //skewX %= 360.0;
+            //skewY %= 360.0;
             //this *= CreateSkewRadians(skewX * Const.Deg2Rad, skewY * Const.Deg2Rad);
         }
 
@@ -614,8 +614,8 @@ namespace PdfSharp.Drawing
         /// </summary>
         public void SkewAppend(double skewX, double skewY)
         {
-            skewX = skewX % 360.0;
-            skewY = skewY % 360.0;
+            skewX %= 360.0;
+            skewY %= 360.0;
             this *= CreateSkewRadians(skewX * Const.Deg2Rad, skewY * Const.Deg2Rad);
         }
 
@@ -624,8 +624,8 @@ namespace PdfSharp.Drawing
         /// </summary>
         public void SkewPrepend(double skewX, double skewY)
         {
-            skewX = skewX % 360.0;
-            skewY = skewY % 360.0;
+            skewX %= 360.0;
+            skewY %= 360.0;
             this = CreateSkewRadians(skewX * Const.Deg2Rad, skewY * Const.Deg2Rad) * this;
         }
 
@@ -637,7 +637,7 @@ namespace PdfSharp.Drawing
             double x = point.X;
             double y = point.Y;
             MultiplyPoint(ref x, ref y);
-            return new XPoint(x, y);
+            return new(x, y);
         }
 
         /// <summary>
@@ -687,7 +687,7 @@ namespace PdfSharp.Drawing
         public void TransformPoints(System.Drawing.Point[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
             if (IsIdentity)
                 return;
@@ -710,7 +710,7 @@ namespace PdfSharp.Drawing
         public void TransformPoints(System.Windows.Point[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
             if (IsIdentity)
                 return;
@@ -734,7 +734,7 @@ namespace PdfSharp.Drawing
             double x = vector.X;
             double y = vector.Y;
             MultiplyVector(ref x, ref y);
-            return new XVector(x, y);
+            return new(x, y);
         }
 
         /// <summary>
@@ -764,7 +764,7 @@ namespace PdfSharp.Drawing
         public void TransformVectors(PointF[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
             if (IsIdentity)
                 return;
@@ -1158,7 +1158,7 @@ namespace PdfSharp.Drawing
         }
 
         /// <summary>
-        /// Converts this XMatrix to a human readable string.
+        /// Converts this XMatrix to a human-readable string.
         /// </summary>
         public override string ToString()
         {
@@ -1166,7 +1166,7 @@ namespace PdfSharp.Drawing
         }
 
         /// <summary>
-        /// Converts this XMatrix to a human readable string.
+        /// Converts this XMatrix to a human-readable string.
         /// </summary>
         public string ToString(IFormatProvider provider)
         {
@@ -1174,7 +1174,7 @@ namespace PdfSharp.Drawing
         }
 
         /// <summary>
-        /// Converts this XMatrix to a human readable string.
+        /// Converts this XMatrix to a human-readable string.
         /// </summary>
         string IFormattable.ToString(string? format, IFormatProvider? provider)
         {

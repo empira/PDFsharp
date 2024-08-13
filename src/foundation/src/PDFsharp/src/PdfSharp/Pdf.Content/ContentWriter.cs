@@ -75,7 +75,7 @@ namespace PdfSharp.Pdf.Content
             //AppendBlank(rawString[0]);
             byte[] bytes = PdfEncoders.RawEncoding.GetBytes(rawString);
             _stream!.Write(bytes, 0, bytes.Length);
-            _stream!.Write(new byte[] { (byte)'\n' }, 0, 1);
+            _stream!.Write([(byte)'\n'], 0, 1);
             _lastCat = GetCategory((char)bytes[bytes.Length - 1]);
         }
 
@@ -95,7 +95,7 @@ namespace PdfSharp.Pdf.Content
             set => _indent = value;
         }
         protected int _indent = 2;
-         int _writeIndent = 0;
+        int _writeIndent = 0;
 
         /// <summary>
         /// Increases indent level.

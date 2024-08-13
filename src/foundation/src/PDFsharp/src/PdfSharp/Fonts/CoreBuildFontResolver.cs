@@ -194,14 +194,22 @@ namespace PdfSharp.Fonts
 
             if (_isWindows == null)
             {
+#if NET462
+                _isWindows = true;
+#else
                 // May be too simple.
                 _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+#endif
             }
 
             if (_isLinux == null)
             {
+#if NET462
+                _isLinux = false;
+#else
                 // May be too simple.
                 _isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+#endif
             }
 
             if (_isWindows.Value)

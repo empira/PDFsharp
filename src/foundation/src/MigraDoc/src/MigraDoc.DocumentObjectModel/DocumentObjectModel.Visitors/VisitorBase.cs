@@ -273,7 +273,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             {
                 TabStop tabStop = tabStops[i];
                 if (!tabStop.AddTab)
-                    tabStops.RemoveObjectAt(i);
+                    tabStops.RemoveObjectAt(i--);
             }
 
             // The TabStopCollection is complete now.

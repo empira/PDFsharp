@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0-windows;net472</TargetFrameworks>
+    <TargetFrameworks>net6.0-windows;net8.0-windows;net462</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <RootNamespace>PdfSharp.Snippets</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
@@ -68,6 +68,7 @@
     <Compile Include="..\PdfSharp.Snippets\IO\creation\PdfFileCreator.cs" Link="IO\creation\PdfFileCreator.cs" />
     <Compile Include="..\PdfSharp.Snippets\IO\security\Passwords.cs" Link="IO\security\Passwords.cs" />
     <Compile Include="..\PdfSharp.Snippets\Pdf\annotations\LinkAnnotations.cs" Link="Pdf\annotations\LinkAnnotations.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Pdf\signatures\BouncyCastleSigner.cs" Link="Pdf\signatures\BouncyCastleSigner.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -76,6 +77,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
+    <PackageReference Include="BouncyCastle.Cryptography" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PdfSharp.Shared\PdfSharp.Shared.csproj" />
+    <ProjectReference Include="..\PdfSharp.System\PdfSharp.System.csproj" />
     <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-gdi\PdfSharp-gdi.csproj" />
     <ProjectReference Include="..\PdfSharp.Quality-gdi\PdfSharp.Quality-gdi.csproj" />
     <ProjectReference Include="..\PdfSharp.WPFonts\PdfSharp.WPFonts.csproj" />

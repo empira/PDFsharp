@@ -25,7 +25,7 @@ namespace PdfSharp.UniversalAccessibility
         /// <param name="tag">The structure type to be created.</param>
         public void BeginElement(PdfGroupingElementTag tag)
         {
-            BeginGroupingElement(tag.ToString());
+            BeginGroupingElement(TagToString(tag));
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace PdfSharp.UniversalAccessibility
         /// <param name="tag">The structure type to be created.</param>
         public void BeginElement(PdfBlockLevelElementTag tag)
         {
-            BeginBlockLevelElement(tag.ToString());
+            BeginBlockLevelElement(TagToString(tag));
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace PdfSharp.UniversalAccessibility
         /// <param name="tag">The structure type to be created.</param>
         public void BeginElement(PdfInlineLevelElementTag tag)
         {
-            BeginInlineLevelElement(tag.ToString());
+            BeginInlineLevelElement(TagToString(tag));
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace PdfSharp.UniversalAccessibility
         /// <param name="boundingBox">The element’s bounding box.</param>
         public void BeginElement(PdfIllustrationElementTag tag, string altText, XRect boundingBox)
         {
-            BeginIllustrationElement(tag.ToString(), altText, boundingBox);
+            BeginIllustrationElement(TagToString(tag), altText, boundingBox);
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace PdfSharp.UniversalAccessibility
         public void BeginElement(PdfLinkAnnotation linkAnnotation, string altText)
         {
             EndMarkedContentsWithId();
-            var ste = CreateStructureElement(PdfInlineLevelElementTag.Link.ToString());
+            var ste = CreateStructureElement(TagToString(PdfInlineLevelElementTag.Link));
             var item = new InlineLevelItem(ste) { EndMark = true };
             _elementStack.Push(item);
             item.BeginItem();
@@ -173,14 +173,15 @@ namespace PdfSharp.UniversalAccessibility
             => _elementStack.MostInnerStructureElement.Elements.SetString(PdfStructureElement.Keys.E, expandedText);
 
         /// <summary>
-        /// Sets the content of the "/Lang" (language) key. The chosen language is used for all children of the current structure element until a child has a new language defined.
+        /// Sets the content of the "/Lang" (language) key.
+        /// The chosen language is used for all children of the current structure element until a child has a new language defined.
         /// </summary>
         /// <param name="language">The language of the structure element and its children.</param>
         public void SetLanguage(string language)
             => _elementStack.MostInnerStructureElement.Elements.SetString(PdfStructureElement.Keys.Lang, language);
 
         /// <summary>
-        /// Sets the rowspan of a table cell.
+        /// Sets the row span of a table cell.
         /// </summary>
         /// <param name="rowSpan">The number of spanning cells.</param>
         public void SetRowSpan(int rowSpan)
@@ -334,10 +335,10 @@ namespace PdfSharp.UniversalAccessibility
 
             // Get /StructParents of Page.
             var structParentsItem = UaManager.CurrentPage.Elements.GetValue(PdfPage.Keys.StructParents);
-            var hasStructparents = structParentsItem != null;
+            var hasStructParents = structParentsItem != null;
 
             // Create it, if necessary.
-            if (!hasStructparents)
+            if (!hasStructParents)
             {
                 UaManager.CurrentPage.Elements.SetInteger(PdfPage.Keys.StructParents, parentTreeNextKey);
                 structTreeRoot.Elements.SetInteger(PdfStructureTreeRoot.Keys.ParentTreeNextKey, parentTreeNextKey + 1);
@@ -347,7 +348,7 @@ namespace PdfSharp.UniversalAccessibility
 
             // Get the PdfArray for this page in parentTreeRootNums.
             var isInParentTree = parentTreeRootNums.Elements.OfType<PdfInteger>().Any(x => x.Value == structParents.Value);
-            Debug.Assert(hasStructparents == isInParentTree);
+            Debug.Assert(hasStructParents == isInParentTree);
 
             // Create it, if necessary.
             if (!isInParentTree)
@@ -501,12 +502,92 @@ namespace PdfSharp.UniversalAccessibility
             current.OnDraw();
         }
 
-        internal ContentWriter Content { get { return new ContentWriter(UaManager.CurrentGraphics); } }
+        internal ContentWriter Content => new(UaManager.CurrentGraphics);
+
+#pragma warning disable CS0618 // Type or member is obsolete
+
+        string TagToString(PdfGroupingElementTag tag)
+        {
+            return tag switch
+            {
+                PdfGroupingElementTag.Document => nameof(PdfGroupingElementTag.Document),
+                PdfGroupingElementTag.Part => nameof(PdfGroupingElementTag.Part),
+                PdfGroupingElementTag.Art or PdfGroupingElementTag.Article => nameof(PdfGroupingElementTag.Art),
+                PdfGroupingElementTag.Sect or PdfGroupingElementTag.Section => nameof(PdfGroupingElementTag.Sect),
+                PdfGroupingElementTag.Div or PdfGroupingElementTag.Division => nameof(PdfGroupingElementTag.Div),
+                PdfGroupingElementTag.BlockQuote or PdfGroupingElementTag.BlockQuotation => nameof(PdfGroupingElementTag.BlockQuote),
+                PdfGroupingElementTag.Caption => nameof(PdfGroupingElementTag.Caption),
+                PdfGroupingElementTag.TOC or PdfGroupingElementTag.TableOfContents => nameof(PdfGroupingElementTag.TOC),
+                PdfGroupingElementTag.TOCI or PdfGroupingElementTag.TableOfContentsItem => nameof(PdfGroupingElementTag.TOCI),
+                PdfGroupingElementTag.Index => nameof(PdfGroupingElementTag.Index),
+                PdfGroupingElementTag.NonStruct or PdfGroupingElementTag.NonstructuralElement => nameof(PdfGroupingElementTag.NonStruct),
+                PdfGroupingElementTag.Private or PdfGroupingElementTag.PrivateElement => nameof(PdfGroupingElementTag.Private),
+                _ => throw new InvalidOperationException($"Invalid tag value '{(int)tag}'")
+            };
+        }
+
+        string TagToString(PdfBlockLevelElementTag tag)
+        {
+            return tag switch
+            {
+                PdfBlockLevelElementTag.P or PdfBlockLevelElementTag.Paragraph => nameof(PdfBlockLevelElementTag.P),
+                PdfBlockLevelElementTag.H or PdfBlockLevelElementTag.Heading => nameof(PdfBlockLevelElementTag.H),
+                PdfBlockLevelElementTag.H1 or PdfBlockLevelElementTag.Heading1 => nameof(PdfBlockLevelElementTag.H1),
+                PdfBlockLevelElementTag.H2 or PdfBlockLevelElementTag.Heading2 => nameof(PdfBlockLevelElementTag.H2),
+                PdfBlockLevelElementTag.H3 or PdfBlockLevelElementTag.Heading3 => nameof(PdfBlockLevelElementTag.H3),
+                PdfBlockLevelElementTag.H4 or PdfBlockLevelElementTag.Heading4 => nameof(PdfBlockLevelElementTag.H4),
+                PdfBlockLevelElementTag.H5 or PdfBlockLevelElementTag.Heading5 => nameof(PdfBlockLevelElementTag.H5),
+                PdfBlockLevelElementTag.H6 or PdfBlockLevelElementTag.Heading6 => nameof(PdfBlockLevelElementTag.H6),
+                PdfBlockLevelElementTag.L or PdfBlockLevelElementTag.List => nameof(PdfBlockLevelElementTag.L),
+                PdfBlockLevelElementTag.Lbl or PdfBlockLevelElementTag.Label => nameof(PdfBlockLevelElementTag.Lbl),
+                PdfBlockLevelElementTag.LI or PdfBlockLevelElementTag.ListItem => nameof(PdfBlockLevelElementTag.LI),
+                PdfBlockLevelElementTag.LBody or PdfBlockLevelElementTag.ListBody => nameof(PdfBlockLevelElementTag.LBody),
+                PdfBlockLevelElementTag.Table => nameof(PdfBlockLevelElementTag.Table),
+                PdfBlockLevelElementTag.TR or PdfBlockLevelElementTag.TableRow => nameof(PdfBlockLevelElementTag.TR),
+                PdfBlockLevelElementTag.TH or PdfBlockLevelElementTag.TableHeaderCell => nameof(PdfBlockLevelElementTag.TH),
+                PdfBlockLevelElementTag.TD or PdfBlockLevelElementTag.TableDataCell => nameof(PdfBlockLevelElementTag.TD),
+                PdfBlockLevelElementTag.THead or PdfBlockLevelElementTag.TableHeadRowGroup => nameof(PdfBlockLevelElementTag.THead),
+                PdfBlockLevelElementTag.TBody or PdfBlockLevelElementTag.TableBodyRowGroup => nameof(PdfBlockLevelElementTag.TBody),
+                PdfBlockLevelElementTag.TFoot or PdfBlockLevelElementTag.TableFooterRowGroup => nameof(PdfBlockLevelElementTag.TFoot),
+                _ => throw new InvalidOperationException($"Invalid tag value '{(int)tag}'")
+            };
+        }
+
+        string TagToString(PdfInlineLevelElementTag tag)
+        {
+            return tag switch
+            {
+                PdfInlineLevelElementTag.Span => nameof(PdfInlineLevelElementTag.Span),
+                PdfInlineLevelElementTag.Quote or PdfInlineLevelElementTag.Quotation => nameof(PdfInlineLevelElementTag.Quote),
+                PdfInlineLevelElementTag.Note => nameof(PdfInlineLevelElementTag.Note),
+                PdfInlineLevelElementTag.Reference => nameof(PdfInlineLevelElementTag.Reference),
+                PdfInlineLevelElementTag.BibEntry or PdfInlineLevelElementTag.BibliographyEntry => nameof(PdfInlineLevelElementTag.BibEntry),
+                PdfInlineLevelElementTag.Code => nameof(PdfInlineLevelElementTag.Code),
+                PdfInlineLevelElementTag.Link => nameof(PdfInlineLevelElementTag.Link),
+                PdfInlineLevelElementTag.Annot or PdfInlineLevelElementTag.Annotation => nameof(PdfInlineLevelElementTag.Annot),
+                PdfInlineLevelElementTag.Ruby => nameof(PdfInlineLevelElementTag.Ruby),
+                PdfInlineLevelElementTag.Warichu => nameof(PdfInlineLevelElementTag.Warichu),
+                _ => throw new InvalidOperationException($"Invalid tag value '{(int)tag}'")
+            };
+        }
+
+        string TagToString(PdfIllustrationElementTag tag)
+        {
+            return tag switch
+            {
+                PdfIllustrationElementTag.Figure => nameof(PdfIllustrationElementTag.Figure),
+                PdfIllustrationElementTag.Formula => nameof(PdfIllustrationElementTag.Formula),
+                PdfIllustrationElementTag.Form => nameof(PdfIllustrationElementTag.Form),
+                _ => throw new InvalidOperationException($"Invalid tag value '{(int)tag}'")
+            };
+        }
+
+#pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         /// Used to write text directly to the content stream.
         /// </summary>
-        public class ContentWriter
+        internal class ContentWriter
         {
             /// <summary>
             /// Constructor.

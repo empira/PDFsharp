@@ -15,7 +15,7 @@ using System.Windows.Media;
 using SysPoint = System.Windows.Point;
 using SysSize = System.Windows.Size;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media;
 using SysPoint = Windows.Foundation.Point;
 using SysSize = Windows.Foundation.Size;
@@ -23,6 +23,7 @@ using SysSize = Windows.Foundation.Size;
 using PdfSharp.Fonts.OpenType;
 using PdfSharp.Internal;
 using PdfSharp.Logging;
+using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Internal;
 using PdfSharp.Pdf.Advanced;
@@ -104,7 +105,7 @@ namespace PdfSharp.Drawing.Pdf
         /// </summary>
         public void DrawLine(XPen pen, double x1, double y1, double x2, double y2)
         {
-            DrawLines(pen, new XPoint[] { new(x1, y1), new(x2, y2) });
+            DrawLines(pen, [new(x1, y1), new(x2, y2)]);
         }
 
         // ----- DrawLines ----------------------------------------------------------------------------
@@ -139,7 +140,7 @@ namespace PdfSharp.Drawing.Pdf
 
         public void DrawBezier(XPen pen, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)
         {
-            DrawBeziers(pen, new XPoint[] { new(x1, y1), new(x2, y2), new(x3, y3), new(x4, y4) });
+            DrawBeziers(pen, [new(x1, y1), new(x2, y2), new(x3, y3), new(x4, y4)]);
         }
 
         // ----- DrawBeziers --------------------------------------------------------------------------
@@ -239,7 +240,7 @@ namespace PdfSharp.Drawing.Pdf
 
             if (pen == null && brush == null)
             {    // ReSharper disable once NotResolvedInText
-                throw new ArgumentNullException("pen and brush");
+                throw new ArgumentNullException(nameof(pen) + " and " + nameof(brush));
             }
 
             const string format = Config.SignificantDecimalPlaces4;
@@ -325,7 +326,7 @@ namespace PdfSharp.Drawing.Pdf
 
             int count = points.Length;
             if (points.Length < 2)
-                throw new ArgumentException(PSSR.PointArrayAtLeast(2), nameof(points));
+                throw new ArgumentException(PsMsgs.PointArrayAtLeast(2), nameof(points));
 
             const string format = Config.SignificantDecimalPlaces4;
             AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
@@ -420,7 +421,7 @@ namespace PdfSharp.Drawing.Pdf
                 AppendPath(path._pathGeometry);
             AppendStrokeFill(pen, brush, path.FillMode, false);
 #endif
-#if UWP
+#if WUI
             Realize(pen, brush);
             AppendPath(path._pathGeometry);
             AppendStrokeFill(pen, brush, path.FillMode, false);
@@ -443,10 +444,15 @@ namespace PdfSharp.Drawing.Pdf
             double cyAscent = lineSpace * font.CellAscent / font.CellSpace;
             double cyDescent = lineSpace * font.CellDescent / font.CellSpace;
 
-            bool italicSimulation = (font.GlyphTypeface.StyleSimulations & XStyleSimulations.ItalicSimulation) != 0;
+            //bool italicSimulation = (font.GlyphTypeface.StyleSimulations & XStyleSimulations.ItalicSimulation) != 0;
             bool boldSimulation = (font.GlyphTypeface.StyleSimulations & XStyleSimulations.BoldSimulation) != 0;
-            bool strikeout = (font.Style & XFontStyleEx.Strikeout) != 0;
-            bool underline = (font.Style & XFontStyleEx.Underline) != 0;
+            //bool strikeout = (font.Style & XFontStyleEx.Strikeout) != 0;
+            //bool underline = (font.Style & XFontStyleEx.Underline) != 0;
+
+            // Invoke PrepareTextEvent.
+            var args2 = new PrepareTextEventArgs(Owner, font, s);
+            Owner.RenderEvents.OnPrepareTextEvent(this, args2);
+            s = args2.Text;
 
             //var otDescriptor = font.OpenTypeDescriptor;
             //var ids = otDescriptor.GlyphIndicesFromCodepoints(codePoints);
@@ -458,18 +464,14 @@ namespace PdfSharp.Drawing.Pdf
             var otDescriptor = font.OpenTypeDescriptor;
             var codePointsWithGlyphIndices = otDescriptor.GlyphIndicesFromCodePoints(codePoints);
 
-            // Invoke RenderEvent.
-            var args = new RenderTextEventArgs(Owner)
-            {
-                Font = font,
-                CodePointGlyphIndexPairs = codePointsWithGlyphIndices
-            };
+            // Invoke RenderTextEvent.
+            var args = new RenderTextEventArgs(Owner, font, codePointsWithGlyphIndices);
 
             Owner.RenderEvents.OnRenderTextEvent(this, args);
             codePointsWithGlyphIndices = args.CodePointGlyphIndexPairs;
             if (args.ReevaluateGlyphIndices)
             {
-                codePoints = args.CodePointGlyphIndexPairs.Select(x => x.CodePoint).ToArray();
+                codePoints = args.CodePointGlyphIndexPairs.Select(pair => pair.CodePoint).ToArray();
                 codePointsWithGlyphIndices = otDescriptor.GlyphIndicesFromCodePoints(codePoints);
             }
 
@@ -567,36 +569,156 @@ namespace PdfSharp.Drawing.Pdf
                 }
             }
 
-            string? text;
-            if (isAnsi)
+            var glyphCount = codePoints.Length;
+            // Check font whether colored glyphs are opt-in.
+            bool isDefaultCase = font.PdfOptions.ColoredGlyphs == PdfFontColoredGlyphs.None;
+        DefaultCase:
+            if (isDefaultCase)
             {
-                // Use ANSI character encoding.
-                var length = codePoints.Length;
-                byte[] bytes = new byte[length];
-                for (int idx = 0; idx < length; idx++)
+                string text;
+                if (isAnsi)
                 {
-                    ref var item = ref codePoints[idx];
-                    //Debug.Assert(item.Character == item.Codepoint);
-                    var ch = AnsiEncoding.UnicodeToAnsi((char)item);
-                    bytes[idx] = (byte)ch;
+                    // Use ANSI character encoding.
+                    byte[] bytes = new byte[glyphCount];
+                    for (int idx = 0; idx < glyphCount; idx++)
+                    {
+                        ref var item = ref codePoints[idx];
+                        var ch = AnsiEncoding.UnicodeToAnsi((char)item);
+                        bytes[idx] = (byte)ch;
+                    }
+                    text = PdfEncoders.ToStringLiteral(bytes, false, null);
                 }
-                //bytes = PdfEncoders.WinAnsiEncoding.GetBytes(s);
-                text = PdfEncoders.ToStringLiteral(bytes, false, null);
-            }
-            else
-            {
-                // Use Unicode glyph encoding.
-                int length = codePointsWithGlyphIndices.Length;
-                var bytes = new byte[2 * length];
-                for (int idx = 0; idx < length; idx++)
+                else
                 {
-                    ref var item = ref codePointsWithGlyphIndices[idx];
-                    bytes[idx * 2] = (byte)((item.GlyphIndex & 0xFF00) >>> 8);
-                    bytes[idx * 2 + 1] = (byte)(item.GlyphIndex & 0xFF);
+                    // Use Unicode glyph encoding.
+                    var bytes = new byte[2 * glyphCount];
+                    for (int idx = 0; idx < glyphCount; idx++)
+                    {
+                        ref var item = ref codePointsWithGlyphIndices[idx];
+                        bytes[idx * 2] = (byte)((item.GlyphIndex & 0xFF00) >>> 8);
+                        bytes[idx * 2 + 1] = (byte)(item.GlyphIndex & 0xFF);
+                    }
+                    text = PdfEncoders.ToHexStringLiteral(bytes, true, false, null);
                 }
-                text = PdfEncoders.ToHexStringLiteral(bytes, true, false, null);
+                RenderText(text, font, brush, x, y, width);
+                return;
             }
 
+            // Get glyph color records for all glyph indices.
+            var glyphColorRecords = otDescriptor.GlyphColorRecordsFromGlyphIndices(codePointsWithGlyphIndices);
+
+            isDefaultCase = glyphColorRecords.All(item => item is null);
+            if (isDefaultCase)
+            {
+                // There is no glyph index with a glyph color record.
+                goto DefaultCase;
+            }
+
+            // Case: At least one glyph is colorized, e.g. an emoji in an emoji font.
+
+            // We split the text based on whether special color-handling is required for a glyph.
+            List<List<GlyphIndexGlyphColorRecordPair>> textParts = [];
+            var partGlyphs = new List<GlyphIndexGlyphColorRecordPair>();
+            var isColorized = false;
+            for (int idx = 0; idx < glyphCount; idx++)
+            {
+                ref var cp = ref codePointsWithGlyphIndices[idx];
+                ref var cr = ref glyphColorRecords[idx];
+
+                // If glyph is colored, render individually, else add to list.
+                if (cr != null || (cr == null && isColorized))
+                {
+                    if (partGlyphs.Count > 0)
+                        textParts.Add(partGlyphs);
+                    partGlyphs = [];
+                    isColorized = cr is not null;
+                }
+                partGlyphs.Add(new(cp.GlyphIndex, cr));
+            }
+            if (partGlyphs.Count > 0)
+                textParts.Add(partGlyphs);
+
+            Debug.Assert(textParts.Sum(p => p.Count) == glyphCount, "Character count mismatch.");
+
+            const string format2 = Config.SignificantDecimalPlaces4;
+            var layerBytes = new byte[2];
+            foreach (var textPart in textParts)
+            {
+                // textPart is either a single item having a color-record or 1-n items without color.
+                // if (textPart is [{ ColorRecord: not null } _]) ...when pattern matching is over the top. At least for me.
+                if (textPart.Count == 1 && textPart[0].ColorRecord != null)
+                {
+                    var chunkWidth = 0.0;
+                    var glyphRecord = textPart[0].ColorRecord!.Value;
+                    for (var i = 0; i < glyphRecord.numLayers; i++)
+                    {
+                        var layer = otDescriptor.FontFace.colr!.layerRecords[i + glyphRecord.firstLayerIndex];
+                        var cp = new CodePointGlyphIndexPair(layer.glyphId, layer.glyphId);
+                        // 0xffff is a special entry denoting the current foreground-color.
+                        if (layer.paletteIndex != 0xffff)
+                        {
+                            var color = otDescriptor.FontFace.cpal!.colorRecords[layer.paletteIndex];
+                            _gfxState.RealizeBrush(new XSolidBrush(color), _colorMode, 0, 0);
+                        }
+                        else
+                        {
+                            _gfxState.RealizeBrush(brush, _colorMode, 0, 0);
+                        }
+                        realizedFont.AddChars([cp]);
+                        var partWidth = otDescriptor.GlyphIndexToEmWidth(layer.glyphId, font.Size);
+                        chunkWidth = Math.Max(chunkWidth, partWidth);
+                        layerBytes[0] = (byte)((layer.glyphId & 0xFF00) >>> 8);
+                        layerBytes[1] = (byte)(layer.glyphId & 0xFF);
+                        var text = PdfEncoders.ToHexStringLiteral(layerBytes, true, false, null);
+                        if (i == 0)
+                        {
+                            var pos = new XPoint(x, y);
+                            pos = WorldToView(pos);
+                            AdjustTdOffset(ref pos, 0, false);
+                            AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} Td {2} Tj\n", pos.X, pos.Y, text);
+                        }
+                        else
+                        {
+                            // Rest of the layers are rendered on top of the first layer.
+                            AppendFormatArgs("0 0 Td {0} Tj\n", text);
+                        }
+                    }
+                    x += chunkWidth;
+                }
+                else
+                {
+                    Debug.Assert(textPart.All(p => p.ColorRecord == null), "Colors should be null here.");
+
+                    width = 0.0;
+                    var bytes = new byte[textPart.Count * 2];
+                    for (var idx = 0; idx < textPart.Count; idx++)
+                    {
+                        var cp = textPart[idx];
+                        width += otDescriptor.GlyphIndexToWidth(cp.GlyphIndex);
+                        bytes[idx * 2] = (byte)((cp.GlyphIndex & 0xFF00) >>> 8);
+                        bytes[idx * 2 + 1] = (byte)(cp.GlyphIndex & 0xFF);
+                    }
+                    width = width * font.Size / otDescriptor.UnitsPerEm;
+                    var text = PdfEncoders.ToHexStringLiteral(bytes, true, false, null);
+                    _gfxState.RealizeBrush(brush, _colorMode, 0, 0);
+                    RenderText(text, font, brush, x, y, width);
+                    x += width;
+                }
+            }
+        }
+
+        void RenderText(string text, XFont font, XBrush brush, double x, double y, double width)
+        {
+            double lineSpace = font.GetHeight();
+            double cyAscent = lineSpace * font.CellAscent / font.CellSpace;
+            double cyDescent = lineSpace * font.CellDescent / font.CellSpace;
+
+            bool italicSimulation = (font.GlyphTypeface.StyleSimulations & XStyleSimulations.ItalicSimulation) != 0;
+            bool boldSimulation = (font.GlyphTypeface.StyleSimulations & XStyleSimulations.BoldSimulation) != 0;
+            bool strikeout = (font.Style & XFontStyleEx.Strikeout) != 0;
+            bool underline = (font.Style & XFontStyleEx.Underline) != 0;
+
+            var realizedFont = _gfxState.RealizedFont!;
             // Map absolute position to PDF world space.
             var pos = new XPoint(x, y);
             pos = WorldToView(pos);
@@ -696,6 +818,7 @@ namespace PdfSharp.Drawing.Pdf
                 DrawRectangle(null, brush, x, strikeoutRectY, width, strikeoutSize);
             }
         }
+
         // ReSharper disable InconsistentNaming
         static string? s_format1;
         static string? s_format2;
@@ -1030,7 +1153,7 @@ namespace PdfSharp.Drawing.Pdf
         public void WriteComment(string comment)
         {
             comment = comment.Replace("\n", "\n% ");
-            // TODO: Some more checks necessary?
+            // Nothing right of '% ' can break a PDF file.
             Append("% " + comment + "\n");
         }
 
@@ -1251,7 +1374,7 @@ namespace PdfSharp.Drawing.Pdf
             }
         }
 
-#if WPF || UWP
+#if WPF || WUI
         void AppendPartialArc(SysPoint point1, SysPoint point2, double rotationAngle,
             SysSize size, bool isLargeArc, SweepDirection sweepDirection, PathStart pathStart)
         {
@@ -1457,7 +1580,7 @@ namespace PdfSharp.Drawing.Pdf
 #endif
 
 #if CORE || GDI
-        void AppendPath(XPoint[] points, Byte[] types)
+        void AppendPath(XPoint[] points, byte[] types)
         {
             const string format = Config.SignificantDecimalPlaces4;
             int count = points.Length;
@@ -1468,14 +1591,14 @@ namespace PdfSharp.Drawing.Pdf
             {
                 // ReSharper disable InconsistentNaming
                 // From GDI+ documentation:
-                const byte PathPointTypeStart = 0; // move
-                const byte PathPointTypeLine = 1; // line
-                const byte PathPointTypeBezier = 3; // default Bezier (= cubic Bezier)
+                const byte PathPointTypeStart = 0;  // move
+                const byte PathPointTypeLine = 1;   // line
+                const byte PathPointTypeBezier = 3; // default Bézier (= cubic Bézier)
                 const byte PathPointTypePathTypeMask = 0x07; // type mask (lowest 3 bits).
-                                                             //const byte PathPointTypeDashMode = 0x10; // currently in dash mode.
-                                                             //const byte PathPointTypePathMarker = 0x20; // a marker for the path.
+                //const byte PathPointTypeDashMode = 0x10; // currently in dash mode.
+                //const byte PathPointTypePathMarker = 0x20; // a marker for the path.
                 const byte PathPointTypeCloseSubpath = 0x80; // closed flag
-                                                             // ReSharper restore InconsistentNaming
+                // ReSharper restore InconsistentNaming
 
                 byte type = types[idx];
                 switch (type & PathPointTypePathTypeMask)
@@ -1507,7 +1630,7 @@ namespace PdfSharp.Drawing.Pdf
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Appends the content of a PathGeometry object.
         /// </summary>

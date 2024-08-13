@@ -49,6 +49,7 @@ namespace PdfSharp
     {
         static Capabilities()
         {
+            _ = PdfSharp.Internal.FooBarEnum3.xxx;
 #if DEBUG_
             var x = Capabilities.IsAvailable.GlyphsToPathFrom(new XFontFamily("test"));
 
@@ -68,7 +69,7 @@ namespace PdfSharp
             PdfSharpLogHost.Logger.LogInformation("All PDFsharp capability settings are about to be reset.");
 
             Action.GlyphsToPath = FeatureNotAvailableBehavior.SilentlyIgnore;
-            
+
             // ... TODO
         }
 
@@ -142,10 +143,28 @@ namespace PdfSharp
 #endif
 
             public static string Framework
-#if NET6_0_OR_GREATER
+#if NET10_0_OR_GREATER
+                => "10.0";
+#elif NET9_0_OR_GREATER
+                => "9.0";
+#elif NET8_0_OR_GREATER
+                => "8.0";
+#elif NET7_0_OR_GREATER
+                => "7.0";
+#elif NET6_0_OR_GREATER
                 => "6.0";
-#else
+#elif NET481
+                => "4.8";
+#elif NET472
                 => "4.7";
+#elif NET462
+                => "4.6";
+#elif NETSTANDARD2_1
+                => "2.1";
+#elif NETSTANDARD2_0
+                => "2.0";
+#else
+                => "0.0";
 #endif
         }
 

@@ -51,7 +51,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         internal override void Serialize(Serializer serializer)
         {
             int count = Count;
-            for (int index = 0; index < count; ++index)
+            for (int index = 0; index < count; index++)
             {
                 var xSeries = this[index] as XSeries;
                 xSeries?.Serialize(serializer);

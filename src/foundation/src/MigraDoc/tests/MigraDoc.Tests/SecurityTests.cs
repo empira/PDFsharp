@@ -1,7 +1,6 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System.Runtime.InteropServices;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Security;
@@ -17,7 +16,8 @@ using PdfSharp.Fonts;
 using PdfSharp.Logging;
 using PdfSharp.TestHelper;
 using PdfSharp.TestHelper.Analysis.ContentStream;
-using static MigraDoc.Tests.SecurityTestHelper;
+using static PdfSharp.TestHelper.SecurityTestHelper;
+using static MigraDoc.Tests.Helper.SecurityTestHelper;
 
 namespace MigraDoc.Tests
 {

@@ -17,7 +17,7 @@ using WpfTypeface = System.Windows.Media.Typeface;
 using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
 using WpfStyleSimulations = System.Windows.Media.StyleSimulations;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media;
 #endif
 using Microsoft.Extensions.Logging;
@@ -115,7 +115,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if UWP
+#if WUI
         XGlyphTypeface(string key, XFontFamily fontFamily, XFontSource fontSource, XStyleSimulations styleSimulations)
         {
             _key = key;
@@ -201,7 +201,7 @@ namespace PdfSharp.Drawing
                 WpfTypeface? wpfTypeface = null;
                 WpfGlyphTypeface? wpfGlyphTypeface = null;
 #endif
-#if UWP
+#if WUI
                 // Nothing to do.
 #endif
                 // Now create the font family at the first.
@@ -229,7 +229,7 @@ namespace PdfSharp.Drawing
                     wpfGlyphTypeface = platformFontResolverInfo.WpfGlyphTypeface;
                     fontFamily = XFontFamily.GetOrCreateFromWpf(wpfFontFamily);
 #endif
-#if UWP
+#if WUI
                     fontFamily = null;
 #endif
                 }
@@ -255,7 +255,7 @@ namespace PdfSharp.Drawing
 #if WPF
                 glyphTypeface = new XGlyphTypeface(typefaceKey, fontFamily, fontSource, fontResolverInfo.StyleSimulations, wpfTypeface, wpfGlyphTypeface);
 #endif
-#if UWP
+#if WUI
                 glyphTypeface = new XGlyphTypeface(typefaceKey, fontFamily, fontSource, fontResolverInfo.StyleSimulations);
 #endif
                 GlyphTypefaceCache.AddGlyphTypeface(glyphTypeface);
@@ -452,19 +452,11 @@ namespace PdfSharp.Drawing
         {
             string name = DisplayName;
             int ich = name.IndexOf("bold", StringComparison.OrdinalIgnoreCase);
-#if NET6_0_OR_GREATER || true
             if (ich > 0)
                 name = name[..ich] + name.Substring(ich + 4, name.Length - ich - 4);
             ich = name.IndexOf("italic", StringComparison.OrdinalIgnoreCase);
             if (ich > 0)
                 name = name[..ich] + name.Substring(ich + 6, name.Length - ich - 6);
-#else
-            if (ich > 0)
-                name = name.Substring(0, ich) + name.Substring(ich + 4, name.Length - ich - 4);
-            ich = name.IndexOf("italic", StringComparison.OrdinalIgnoreCase);
-            if (ich > 0)
-                name = name.Substring(0, ich) + name.Substring(ich + 6, name.Length - ich - 6);
-#endif
             //name = name.Replace(" ", "");
             name = name.Trim();
             name += GetFaceNameSuffix();

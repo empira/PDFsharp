@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0;netstandard2.0</TargetFrameworks>
     <NoBuild>true</NoBuild>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <SignAssembly>True</SignAssembly>
@@ -25,6 +25,7 @@
     <ProjectReference Include="..\..\..\src\MigraDoc\src\MigraDoc.RtfRendering\MigraDoc.RtfRendering.csproj" />
     <ProjectReference Include="..\..\..\src\PDFsharp\src\PdfSharp.Charting\PdfSharp.Charting.csproj" />
     <ProjectReference Include="..\..\..\src\PDFsharp\src\PdfSharp\PdfSharp.csproj" />
+    <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.Crytography\PdfSharp.Cryptography.csproj" />
     <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.Quality\PdfSharp.Quality.csproj" />
     <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.Snippets\PdfSharp.Snippets.csproj" />
     <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.System\PdfSharp.System.csproj" />

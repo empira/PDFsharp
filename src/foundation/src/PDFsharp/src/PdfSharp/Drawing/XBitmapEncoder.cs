@@ -12,7 +12,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media.Imaging;
 #endif
 

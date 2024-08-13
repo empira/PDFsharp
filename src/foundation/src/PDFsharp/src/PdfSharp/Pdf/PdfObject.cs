@@ -51,10 +51,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Creates a copy of this object. The clone does not belong to a document, i.e. its owner and its iref are null.
         /// </summary>
-        public new PdfObject Clone()
-        {
-            return (PdfObject)Copy();
-        }
+        public new PdfObject Clone() => (PdfObject)Copy();
 
         /// <summary>
         /// Implements the copy mechanism. Must be overridden in derived classes.
@@ -108,8 +105,7 @@ namespace PdfSharp.Pdf
             var objectID = new PdfObjectID(objectNumber, generationNumber);
 
             // TODO: check imported
-            if (_iref == null)
-                _iref = _document.IrefTable[objectID];
+            _iref ??= _document.IrefTable[objectID];
             if (_iref == null)
             {
                 // ReSharper disable once ObjectCreationAsStatement because the new object is set to this object

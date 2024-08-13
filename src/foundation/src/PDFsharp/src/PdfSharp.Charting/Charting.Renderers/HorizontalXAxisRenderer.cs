@@ -115,7 +115,7 @@ namespace PdfSharp.Charting.Renderers
                 startPos.Y += xari.MajorTickMarkWidth;
             foreach (var xs in (xari.XValues ?? throw new InvalidOperationException()).Cast<XSeries>()) // BUG???
             {
-                for (int idx = 0; idx < countTickLabels && idx < xs.Count; ++idx)
+                for (int idx = 0; idx < countTickLabels && idx < xs.Count; idx++)
                 {
                     var xv = xs[idx];
                     if (xv != null!)
@@ -227,8 +227,8 @@ namespace PdfSharp.Charting.Renderers
             {
                 rendererInfo.XValues = new XValues();
                 XSeries xs = rendererInfo.XValues.AddXSeries();
-                for (double i = rendererInfo.MinimumScale + 1; i <= rendererInfo.MaximumScale; ++i)
-                    xs.Add(i.ToString(rendererInfo.TickLabelsFormat));
+                for (double idx = rendererInfo.MinimumScale + 1; idx <= rendererInfo.MaximumScale; idx++)
+                    xs.Add(idx.ToString(rendererInfo.TickLabelsFormat));
             }
         }
 

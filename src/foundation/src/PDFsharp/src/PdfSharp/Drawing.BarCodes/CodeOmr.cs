@@ -132,7 +132,7 @@ namespace PdfSharp.Drawing.BarCodes
         //    case MarkDistance.Inch2_8:
         //      return XUnit.FromInch(2.0 / 8.0);
         //    default:
-        //      throw new ArgumentOutOfRangeException("markDistance");
+        //      throw new ArgumentOutOfRangeException(nameof(markDistance));
         //  }
         //}
 

@@ -1,6 +1,6 @@
 ﻿This is a version of PDFsharp using .NET 6.
 The package ’PdfSharp’ can be used on any platform including Windows and Linux. The Target Frameworks are ’net6.0’ and ’netstandard2.0’.
 The packages ’PDFsharp-gdi’ and ’PDFsharp-wpf’ can be used under Windows only. The Target Frameworks are ’net6.0-windows’ and ’net472’.
-We also publish packages that contain PDFsharp plus MigraDoc.
+We also publish packages that contain MigraDoc and reference the corresponding PDFsharp package.
 See the project docs site for further information:
-https://docs.pdfsharp.net/link/readme-v6.1.html
+https://docs.pdfsharp.net/link/readme-v6.2.html

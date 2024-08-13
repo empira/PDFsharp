@@ -25,7 +25,7 @@ namespace MigraDoc.DocumentObjectModel
         public Unit(double value, UnitType type)
         {
             if (!Enum.IsDefined(typeof(UnitType), type))
-                throw new /*InvalidEnum*/ArgumentException(DomSR.InvalidEnumValue(type), nameof(type));
+                throw new /*InvalidEnum*/ArgumentException(MdDomMsgs.InvalidEnumValue(type).Message, nameof(type));
 
             _value = (float)value;
             _type = type;
@@ -460,22 +460,14 @@ namespace MigraDoc.DocumentObjectModel
             unit._value = 1;
             try
             {
-#if NET6_0_OR_GREATER || true
                 unit._value = float.Parse(value[..valLen].Trim(), CultureInfo.InvariantCulture);
-#else
-                unit._value = float.Parse(value.Substring(0, valLen).Trim(), CultureInfo.InvariantCulture);
-#endif
             }
             catch (FormatException ex)
             {
-                throw new ArgumentException(DomSR.InvalidUnitValue(value), ex);
+                throw new ArgumentException(MdDomMsgs.InvalidUnitValue(value).Message, ex);
             }
 
-#if NET6_0_OR_GREATER || true
             var typeStr = value[valLen..].Trim().ToLower();
-#else
-            var typeStr = value.Substring(valLen).Trim().ToLower();
-#endif
             unit._type = UnitType.Point;
             switch (typeStr)
             {
@@ -501,7 +493,7 @@ namespace MigraDoc.DocumentObjectModel
                     break;
 
                 default:
-                    throw new ArgumentException(DomSR.InvalidUnitType(typeStr));
+                    throw new ArgumentException(MdDomMsgs.InvalidUnitType(typeStr).Message);
             }
 
             return unit;
@@ -555,7 +547,7 @@ namespace MigraDoc.DocumentObjectModel
             => (float)value.Point;
 
         /// <summary>
-        /// Memberwise comparison checking exact value und unit.
+        /// Memberwise comparison checking exact value and unit.
         /// To compare by value tolerating rounding errors, use IsSameValue() or code like Math.Abs(a.Point - b.Point) &lt; 1e-5.
         /// </summary>
         public static bool operator ==(Unit l, Unit r)
@@ -567,7 +559,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Memberwise comparison checking exact value und unit.
+        /// Memberwise comparison checking exact value and unit.
         /// To compare by value tolerating rounding errors, use IsSameValue() or code like Math.Abs(a.Point - b.Point) &lt; 1e-5.
         /// </summary>
         public static bool operator ==(Unit? l, Unit? r)
@@ -582,14 +574,14 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Memberwise comparison checking exact value und unit.
+        /// Memberwise comparison checking exact value and unit.
         /// To compare by value tolerating rounding errors, use code like Math.Abs(a.Point - b.Point) &lt; 1e-5.
         /// </summary>
         public static bool operator !=(Unit l, Unit r)
             => !(l == r);
 
         /// <summary>
-        /// Memberwise comparison checking exact value und unit.
+        /// Memberwise comparison checking exact value and unit.
         /// To compare by value tolerating rounding errors, use code like Math.Abs(a.Point - b.Point) &lt; 1e-5.
         /// </summary>
         public static bool operator !=(Unit? l, Unit? r)
@@ -634,7 +626,7 @@ namespace MigraDoc.DocumentObjectModel
         /// Compares two Unit? values.
         /// </summary>
         public static bool operator <=(Unit? l, Unit? r) => Compare(l, r) <= 0;
-        
+
         /// <summary>
         /// Returns the negative value of a Unit.
         /// </summary>
@@ -839,7 +831,7 @@ namespace MigraDoc.DocumentObjectModel
 
                 default:
                     if (!Enum.IsDefined(typeof(UnitType), type))
-                        throw new ArgumentException(DomSR.InvalidUnitType(type.ToString()));
+                        throw new ArgumentException(MdDomMsgs.InvalidUnitType(type.ToString()).Message);
 
                     // Remember missing unit type.
                     Debug.Assert(false, "Missing unit type.");

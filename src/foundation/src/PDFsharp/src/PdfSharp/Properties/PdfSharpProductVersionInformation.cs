@@ -1,6 +1,8 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+#pragma warning disable 0436
+
 namespace PdfSharp
 {
     /// <summary>
@@ -221,8 +223,8 @@ namespace PdfSharp
         // Hybrid - for testing only
         public const string Technology = "-h";
 #error Should not come here anymore. May be revived in the future.
-#elif UWP
-        // UWP - Universal Windows Platform
+#elif WUI
+        // WUI - Universal Windows Platform
         public const string Technology = "-uwp";
 #endif
     }

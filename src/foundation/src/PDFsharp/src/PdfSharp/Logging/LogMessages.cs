@@ -12,10 +12,12 @@ namespace PdfSharp.Logging
     /// </summary>
     public static class PdfSharpEventId  // draft...
     {
-        public const int DocumentCreate = StartId + 0;
-        public const int PageCreate = StartId + 1;
-        public const int GraphicsCreate = StartId + 2;
-        public const int FontCreate = StartId + 3;
+        public const int DocumentCreated = StartId + 1;
+        public const int DocumentSaved = StartId + 2;
+        public const int PageCreated = StartId + 3;
+        public const int PageAdded = StartId + 4;
+        public const int GraphicsCreated = StartId + 5;
+        public const int FontCreated = StartId + 6;
 
         public const int PdfReaderIssue = StartId + 10;
 
@@ -25,22 +27,26 @@ namespace PdfSharp.Logging
 
     public static class PdfSharpEventName
     {
-        public const string DocumentCreate = "Document creation";
-        public const string PageCreate = "Page creation";
-        public const string GraphicsCreate = "Graphics creation";
-        public const string FontCreate = "Font creation";
+        public const string DocumentCreated = "Document created";
+        public const string DocumentSaved = "Document saved";
+        public const string PageCreated = "Page created";
+        public const string PageAdded = "Page creation2";
+        public const string GraphicsCreated = "Graphics created";
+        public const string FontCreated = "Font created";
 
         public const string PdfReaderIssue = "PDF reader issue";
     }
 
     public static class PdfSharpEvent
     {
-        public static EventId DocumentCreate = new(PdfSharpEventId.DocumentCreate, PdfSharpEventName.DocumentCreate);
-        public static EventId PageCreate = new(PdfSharpEventId.PageCreate, PdfSharpEventName.PageCreate);
-        public static EventId FontCreate = new(PdfSharpEventId.FontCreate, PdfSharpEventName.FontCreate);
+        public static EventId DocumentCreate = new(PdfSharpEventId.DocumentCreated, PdfSharpEventName.DocumentCreated);
+        public static EventId DocumentSaved = new(PdfSharpEventId.DocumentSaved, PdfSharpEventName.DocumentSaved);
+        public static EventId PageCreate = new(PdfSharpEventId.PageCreated, PdfSharpEventName.PageCreated);
+        public static EventId PageAdded = new(PdfSharpEventId.PageAdded, PdfSharpEventName.PageAdded);
+        public static EventId FontCreate = new(PdfSharpEventId.FontCreated, PdfSharpEventName.FontCreated);
 
         public static EventId PdfReaderIssue = new(PdfSharpEventId.PdfReaderIssue, PdfSharpEventName.PdfReaderIssue);
-        
+
         public static EventId Placeholder = new(999999, "Placeholder");
     }
 
@@ -53,40 +59,40 @@ namespace PdfSharp.Logging
 
         [LoggerMessage(
             Level = LogLevel.Information,
-            EventId = PdfSharpEventId.DocumentCreate,
-            EventName = PdfSharpEventName.DocumentCreate,
+            EventId = PdfSharpEventId.DocumentCreated,
+            EventName = PdfSharpEventName.DocumentCreated,
             Message = "New PDF document '{DocumentName}' created.")]
-        public static partial void PdfDocumentCreated(this ILogger logger, 
+        public static partial void PdfDocumentCreated(this ILogger logger,
             string? documentName);
 
         [LoggerMessage(
             Level = LogLevel.Information,
-            EventId = PdfSharpEventId.DocumentCreate,
-            EventName = PdfSharpEventName.DocumentCreate,
+            EventId = PdfSharpEventId.DocumentSaved,
+            EventName = PdfSharpEventName.DocumentSaved,
             Message = "PDF document '{documentName}' saved.")]
         public static partial void PdfDocumentSaved(this ILogger logger,
             string? documentName);
 
         [LoggerMessage(
             Level = LogLevel.Information,
-            EventId = PdfSharpEventId.PageCreate,
-            EventName = PdfSharpEventName.PageCreate,
+            EventId = PdfSharpEventId.PageCreated,
+            EventName = PdfSharpEventName.PageCreated,
             Message = "New PDF page added to document '{documentName}'.")]
-        public static partial void NewPdfPageAdded(this ILogger logger,
+        public static partial void NewPdfPageCreated(this ILogger logger,
             string? documentName);
 
         [LoggerMessage(
             Level = LogLevel.Information,
-            EventId = PdfSharpEventId.PageCreate,
-            EventName = PdfSharpEventName.PageCreate,
+            EventId = PdfSharpEventId.PageAdded,
+            EventName = PdfSharpEventName.PageAdded,
             Message = "Existing PDF page added to document '{documentName}'.")]
         public static partial void ExistingPdfPageAdded(this ILogger logger,
             string? documentName);
 
         [LoggerMessage(
             Level = LogLevel.Information,
-            EventId = PdfSharpEventId.GraphicsCreate,
-            EventName = PdfSharpEventName.GraphicsCreate,
+            EventId = PdfSharpEventId.GraphicsCreated,
+            EventName = PdfSharpEventName.GraphicsCreated,
             Message = "New XGraphics created from '{source}'.")]
         public static partial void XGraphicsCreated(this ILogger logger,
             string? source);

@@ -1,5 +1,7 @@
-# Notebook
+﻿# Notebook
 
+
+## Changes in 6.2
 
 
 ## Changes in 6.1
@@ -7,7 +9,6 @@
 * PDFsharp now not depends on Debug and Console logger anymore
 * Support for .NET Standard and .NET Framework 4.72
 * Logging factory can be set.
-
 
 ## New C# features
 
@@ -28,8 +29,8 @@ PDFsharp currently uses the following:
     }
     #endif
   ```
-  See [manuelroemer/IsExternalInit](https://github.com/manuelroemer/IsExternalInit). Why a NuGet package
-  with an empty class?
+  See [manuelroemer/IsExternalInit](https://github.com/manuelroemer/IsExternalInit).
+  Why a NuGet package with an empty class?
 
 * **Indices and ranges**  
   The new range and index from end operator make C# code more readable.

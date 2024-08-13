@@ -62,9 +62,9 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         /// </summary>
         internal override void Serialize(Serializer serializer)
         {
-            var axisObject = Parent as Axis;
+            var axisObject = Parent as Axis ?? throw new InvalidOperationException("Parent is not of type Axis.");
 
-            var pos = serializer.BeginContent(axisObject!.CheckGridlines(this)); // HACK // BUG: What if Parent is not Axis?
+            var pos = serializer.BeginContent(axisObject.CheckGridlines(this)); // H/ACK // BUG: What if Parent is not Axis?
 
             Values.LineFormat?.Serialize(serializer);
 

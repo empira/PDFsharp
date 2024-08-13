@@ -334,7 +334,7 @@ namespace PdfSharp.Pdf.IO
                 symbol = ScanNextToken();
             }
             if (fromObjectStream is false && symbol != Symbol.EndObj)
-                ParserDiagnostics.ThrowParserException(PSSR.UnexpectedToken(_lexer.Token));
+                ParserDiagnostics.ThrowParserException(PsMsgs.UnexpectedToken(_lexer.Token));
             return pdfObject ?? NRT.ThrowOnNull<PdfObject>();
         }
 
@@ -362,7 +362,8 @@ namespace PdfSharp.Pdf.IO
             int streamLength = GetStreamLength(dict, suppressObjectOrderExceptions);
             if (SuppressExceptions.HasError(suppressObjectOrderExceptions))
                 return;
-
+//#warning THHO4STLA What to do if startPosition + streamLength is larger than length of stream? => Better not show "Please send us your PDF file" but another error message.
+// TODO THHO4STLA What to do if startPosition + streamLength is larger than length of stream? => Better not show "Please send us your PDF file" but another error message.
             int retryCount = 0;
         RetryReadStream:
             // Step 3: We try to read the stream content.
@@ -618,7 +619,7 @@ namespace PdfSharp.Pdf.IO
             {
                 var val = items[idx];
                 if (val is not PdfName)
-                    ParserDiagnostics.ThrowParserException("Name expected."); // TODO L10N using PSSR.
+                    ParserDiagnostics.ThrowParserException("Name expected."); // TODO L10N using PsMsgs
 
                 string key = val.ToString() ?? NRT.ThrowOnNull<string>();
                 val = items[idx + 1];
@@ -761,7 +762,7 @@ namespace PdfSharp.Pdf.IO
                         return items;
                 }
             }
-            ParserDiagnostics.ThrowParserException("Unexpected end of file."); // TODO L10N using PSSR.
+            ParserDiagnostics.ThrowParserException("Unexpected end of file."); // TODO L10N using PsMsgs
             return items;  // Dummy code.
         }
 
@@ -859,7 +860,7 @@ namespace PdfSharp.Pdf.IO
             if (symbol == Symbol.LongInteger)
             {
                 // Should not happen or is a bug in the parser.
-                Debug.Assert(false, "ReadInteger founds a long integer.");
+                Debug.Assert(false, "ReadInteger found a long integer.");
             }
 
             if (symbol == Symbol.R)
@@ -1095,7 +1096,7 @@ namespace PdfSharp.Pdf.IO
                         var objectStream = ReadObjectStream(objectStreamReference!, suppressObjectOrderExceptions);
                         if (SuppressExceptions.HasError(suppressObjectOrderExceptions))
                         {
-                            // Exceptional case: Reset objectStreamReference.Value back to null, because it could not be read properly and that may cause further errors.
+                            // Exceptional case: Reset objectStreamReference. Value back to null, because it could not be read properly and that may cause further errors.
                             objectStreamReference?.SetObject(null!);
 
                             // Try it again in the next round.
@@ -1183,7 +1184,7 @@ namespace PdfSharp.Pdf.IO
                     _ = typeof(int);
 #endif
                 int offset = ReadInteger() + first;  // Calculate absolute offset.
-                header[idx] = new int[] { number, offset };
+                header[idx] = [number, offset];
             }
             return header;
         }
@@ -1317,7 +1318,7 @@ namespace PdfSharp.Pdf.IO
                                 {
                                     // File is corrupt, but try to recover it by using the ID we found at the location.
                                     idToUse = idChecked;
-                                    //ParserDiagnostics.ThrowParserException("Invalid entry in XRef table, ID=" + id + ", Generation=" + generation + ", Position=" + position + ", ID of referenced object=" + idChecked + ", Generation of referenced object=" + generationChecked);  // TODO L10N using PSSR.
+                                    //ParserDiagnostics.ThrowParserException("Invalid entry in XRef table, ID=" + id + ", Generation=" + generation + ", Position=" + position + ", ID of referenced object=" + idChecked + ", Generation of referenced object=" + generationChecked);  // TODO L10N using PsMsgs
                                 }
                                 var message = Invariant(
                                     $"Object ID mismatch: Object at position {position} has ID '{id}' according to xref table and ID '{idChecked}' at its position of file.");
@@ -1367,7 +1368,6 @@ namespace PdfSharp.Pdf.IO
         /// <param name="generation">The generation from the XRef table.</param>
         /// <param name="idChecked">The identifier found in the PDF file.</param>
         /// <param name="generationChecked">The generation found in the PDF file.</param>
-        /// <returns></returns>
         bool CheckXRefTableEntry(SizeType position, int id, int generation, out int idChecked, out int generationChecked)
         {
             SizeType origin = _lexer.Position;
@@ -1383,7 +1383,7 @@ namespace PdfSharp.Pdf.IO
                 //string token = _lexer.Token;
                 Symbol symbol = _lexer.ScanNextToken(false);
                 if (symbol != Symbol.Obj)
-                    ParserDiagnostics.ThrowParserException(Invariant($"Invalid entry in XRef table, ID={id} {generation} at position={position}")); // TODO L10N using PSSR.
+                    ParserDiagnostics.ThrowParserException(Invariant($"Invalid entry in XRef table, ID={id} {generation} at position={position}")); // TODO L10N using PsMsgs
 
                 if (id != idChecked || generation != generationChecked)
                     return false;
@@ -1394,7 +1394,7 @@ namespace PdfSharp.Pdf.IO
             }
             catch (Exception ex)
             {
-                ParserDiagnostics.ThrowParserException("Invalid entry in XRef table, ID=" + id + ", Generation=" + generation + ", Position=" + position, ex); // TODO L10N using PSSR.
+                ParserDiagnostics.ThrowParserException("Invalid entry in XRef table, ID=" + id + ", Generation=" + generation + ", Position=" + position, ex); // TODO L10N using PsMsgs
             }
             finally
             {
@@ -1443,13 +1443,35 @@ namespace PdfSharp.Pdf.IO
             ReadStreamFromXRefTable(xrefStream);
 #endif
 
-            var iref = new PdfReference(xrefStream)
+            // Usually, the cross-reference stream and its reference have not been read yet.
+            if (!xrefTable.Contains(objectID))
             {
-                ObjectID = objectID,
-                Value = xrefStream,
-                Position = xrefStart
-            };
-            xrefTable.Add(iref);
+                var iref = new PdfReference(xrefStream)
+                {
+                    ObjectID = objectID,
+                    Value = xrefStream,
+                    Position = xrefStart
+                };
+                xrefTable.Add(iref);
+            }
+            // If a cross-reference stream B is referenced in the /Prev key of another cross-reference stream A dictionary,
+            // it doesn’t have to be referenced in the cross-reference stream A itself.
+            // But if it is, its reference has been already created, when reading all the cross-reference stream A
+            // references. So we reuse this reference here, but set the value,
+            // as the object itself has not been read, when reading the references.
+            else
+            {
+                var oldIref = xrefTable.AllReferences.First(x => x.ObjectID == objectID);
+                oldIref.Value = xrefStream;
+
+                if (oldIref.Position != xrefStart)
+                {
+                    PdfSharpLogHost.PdfReadingLogger.LogError("Object '{ObjectID}' already exists in xref table’s references, referring to position {Position}. The latter one referring to position {Position} is used. " +
+                                                              "This should not occur. If somebody came here, please send us your PDF file so that we can fix it (issues (at) pdfsharp.net.", oldIref.ObjectID, oldIref.Position, xrefStart);
+
+                    oldIref.Position = xrefStart;
+                }
+            }
 
             Debug.Assert(xrefStream.Stream != null);
             //string sValue = new RawEncoding().GetString(xrefStream.Stream.UnfilteredValue,);
@@ -1485,7 +1507,7 @@ namespace PdfSharp.Pdf.IO
                 // Setup with default values.
                 subsectionCount = 1;
                 subsections = new int[subsectionCount][];
-                subsections[0] = new int[] { 0, size }; // HACK: What is size? Contradiction in PDF reference.
+                subsections[0] = [0, size]; // HACK: What is size? Contradiction in PDF reference.
                 subsectionEntryCount = size;
             }
             else
@@ -1496,14 +1518,14 @@ namespace PdfSharp.Pdf.IO
                 subsections = new int[subsectionCount][];
                 for (int idx = 0; idx < subsectionCount; idx++)
                 {
-                    subsections[idx] = new int[] { index.Elements.GetInteger(2 * idx), index.Elements.GetInteger(2 * idx + 1) };
+                    subsections[idx] = [index.Elements.GetInteger(2 * idx), index.Elements.GetInteger(2 * idx + 1)];
                     subsectionEntryCount += subsections[idx][1];
                 }
             }
 
             // W key.
             Debug.Assert(w?.Elements.Count == 3);
-            int[] wsize = { w.Elements.GetInteger(0), w.Elements.GetInteger(1), w.Elements.GetInteger(2) };
+            int[] wsize = [w.Elements.GetInteger(0), w.Elements.GetInteger(1), w.Elements.GetInteger(2)];
             int wsum = StreamHelper.WSize(wsize);
 #if DEBUG_
             if (wsum * subsectionEntryCount != bytes.Length)
@@ -1571,14 +1593,14 @@ namespace PdfSharp.Pdf.IO
                             //// Even if it is restricted, an object can exist in more than one subsection.
                             //// (PDF Reference Implementation Notes 15).
 
-                            SizeType position = item.Field2;
+                            SizeType position = (SizeType)item.Field2;
                             objectID = ReadObjectNumber(position);
 #if DEBUG_
                             if (objectID.ObjectNumber == 1074)
                                 _ = typeof(int);
 #endif
                             Debug.Assert(objectID.GenerationNumber == item.Field3);
-
+                            
                             // Ignore the latter one.
                             if (!xrefTable.Contains(objectID))
                             {

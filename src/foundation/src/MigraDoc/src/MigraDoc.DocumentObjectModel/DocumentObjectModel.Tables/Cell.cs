@@ -84,9 +84,8 @@ namespace MigraDoc.DocumentObjectModel.Tables
             // Lazy execution makes properties slow. Calculate frequently required property values in advance.
             if (Parent is Cells cells)
             {
-                _table = cells.Table;
-
                 _row = cells.Row;
+                _table = cells.Table;
             }
         }
 
@@ -176,7 +175,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
                     return _clm;
                 if (/*_clm == null &&*/ Parent is Cells cells)
                 {
-                    for (int index = 0; index < cells.Count; ++index)
+                    for (int index = 0; index < cells.Count; index++)
                     {
                         //if (cells[index] == this)
                         //    _clm = Table.Columns[index];

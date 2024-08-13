@@ -76,7 +76,7 @@ namespace PdfSharp.Drawing
             set
             {
                 if (_immutable)
-                    throw new ArgumentException(PSSR.CannotChangeImmutableObject("XPen"));
+                    throw new ArgumentException(PsMsgs.CannotChangeImmutableObject(nameof(XPen)));
                 _dirty = _dirty || _color != value;
                 _color = value;
             }
@@ -92,7 +92,7 @@ namespace PdfSharp.Drawing
             set
             {
                 if (_immutable)
-                    throw new ArgumentException(PSSR.CannotChangeImmutableObject("XPen"));
+                    throw new ArgumentException(PsMsgs.CannotChangeImmutableObject(nameof(XPen)));
                 // ReSharper disable once CompareOfFloatsByEqualityOperator
                 _dirty = _dirty || _width != value;
                 _width = value;
@@ -109,7 +109,7 @@ namespace PdfSharp.Drawing
             set
             {
                 if (_immutable)
-                    throw new ArgumentException(PSSR.CannotChangeImmutableObject("XPen"));
+                    throw new ArgumentException(PsMsgs.CannotChangeImmutableObject(nameof(XPen)));
                 _dirty = _dirty || _lineJoin != value;
                 _lineJoin = value;
             }
@@ -125,7 +125,7 @@ namespace PdfSharp.Drawing
             set
             {
                 if (_immutable)
-                    throw new ArgumentException(PSSR.CannotChangeImmutableObject("XPen"));
+                    throw new ArgumentException(PsMsgs.CannotChangeImmutableObject(nameof(XPen)));
                 _dirty = _dirty || _lineCap != value;
                 _lineCap = value;
             }
@@ -141,7 +141,7 @@ namespace PdfSharp.Drawing
             set
             {
                 if (_immutable)
-                    throw new ArgumentException(PSSR.CannotChangeImmutableObject("XPen"));
+                    throw new ArgumentException(PsMsgs.CannotChangeImmutableObject(nameof(XPen)));
                 // ReSharper disable once CompareOfFloatsByEqualityOperator
                 _dirty = _dirty || _miterLimit != value;
                 _miterLimit = value;
@@ -158,7 +158,7 @@ namespace PdfSharp.Drawing
             set
             {
                 if (_immutable)
-                    throw new ArgumentException(PSSR.CannotChangeImmutableObject("XPen"));
+                    throw new ArgumentException(PsMsgs.CannotChangeImmutableObject(nameof(XPen)));
                 _dirty = _dirty || _dashStyle != value;
                 _dashStyle = value;
             }
@@ -174,7 +174,7 @@ namespace PdfSharp.Drawing
             set
             {
                 if (_immutable)
-                    throw new ArgumentException(PSSR.CannotChangeImmutableObject("XPen"));
+                    throw new ArgumentException(PsMsgs.CannotChangeImmutableObject(nameof(XPen)));
                 // ReSharper disable once CompareOfFloatsByEqualityOperator
                 _dirty = _dirty || _dashOffset != value;
                 _dashOffset = value;
@@ -190,13 +190,13 @@ namespace PdfSharp.Drawing
             get
             {
                 if (_dashPattern == null)
-                    _dashPattern = new double[0];
+                    _dashPattern = [];
                 return _dashPattern;
             }
             set
             {
                 if (_immutable)
-                    throw new ArgumentException(PSSR.CannotChangeImmutableObject("XPen"));
+                    throw new ArgumentException(PsMsgs.CannotChangeImmutableObject(nameof(XPen)));
 
                 int length = value.Length;
                 //if (length == 0)
@@ -225,7 +225,7 @@ namespace PdfSharp.Drawing
             set
             {
                 if (_immutable)
-                    throw new ArgumentException(PSSR.CannotChangeImmutableObject("XPen"));
+                    throw new ArgumentException(PsMsgs.CannotChangeImmutableObject(nameof(XPen)));
                 _overprint = value;
             }
         }

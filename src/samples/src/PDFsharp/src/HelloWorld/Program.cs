@@ -50,10 +50,16 @@ namespace HelloWorld
             // Create a font.
             var font = new XFont("Times New Roman", 20, XFontStyleEx.BoldItalic);
 
+#if true
+            // Draw the text.
+            gfx.DrawString("H", font, XBrushes.Black,
+                new XRect(0, 0, width, height), XStringFormats.Center);
+#else
             // Draw the text.
             gfx.DrawString("Hello, PDFsharp!", font, XBrushes.Black,
                 new XRect(0, 0, width, height), XStringFormats.Center);
-    
+#endif
+
             // Save the document...
             var fullName = PdfFileUtility.GetTempPdfFullFileName("PdfSharpSamples/HelloWorld/HelloWorld" + Capabilities.Build.BuildTag);
             document.Save(fullName);

@@ -107,5 +107,58 @@ namespace MigraDoc.Tests
             // ...and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
+
+        [Fact]
+        public void Create_a_table_with_cloned_rows()
+        {
+            // Create a MigraDoc document.
+            var document = new Document();
+
+            // Add a section to the document.
+            var section = document.AddSection();
+
+            // Add a paragraph to the section.
+            var paragraph = section.AddParagraph("Dummy");
+
+            Style style = document.Styles[StyleNames.Normal]!;
+            style.Font.Name = "Arial";
+
+            var sec = document.LastSection;
+            var p = sec.AddParagraph("Creating a table");
+            var table = sec.AddTable();
+            table.Tag = "Original";
+            table.AddColumn("2cm");
+            table.AddColumn("2cm");
+            var row = table.AddRow();
+            row[0].AddParagraph("H1");
+            row[1].AddParagraph("H2");
+            row.HeadingFormat = true;
+            row = table.AddRow();
+            row[0].AddParagraph("C1");
+            row[1].AddParagraph("C2");
+            row = table.Rows[1].Clone();
+            table.Rows.Add(row);
+            row = table.Rows[2].Clone();
+            table.Rows.Add(row);
+            row = table.Rows[1].Clone();
+            table.Rows.Add(row);
+            sec.AddParagraph("End of table test");
+
+            // Create a renderer for the MigraDoc document.
+            var pdfRenderer = new PdfDocumentRenderer()
+            {
+                // Associate the MigraDoc document with a renderer.
+                Document = document
+            };
+
+            // Layout and render document to PDF.
+            pdfRenderer.RenderDocument();
+
+            // Save the document...
+            var filename = PdfFileUtility.GetTempPdfFileName("ClonedTable");
+            pdfRenderer.PdfDocument.Save(filename);
+            // ...and start a viewer.
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
+        }
     }
 }

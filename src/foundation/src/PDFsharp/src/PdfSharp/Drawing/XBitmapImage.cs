@@ -7,7 +7,7 @@ using PdfSharp.Internal;
 #if WPF
 using PdfSharp.Internal;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media.Imaging;
 using PdfSharp.Internal;
 #endif
@@ -38,7 +38,7 @@ namespace PdfSharp.Drawing
 #if WPF
             DiagnosticsHelper.ThrowNotImplementedException("CreateBitmap");
 #endif
-#if UWP
+#if WUI
             DiagnosticsHelper.ThrowNotImplementedException("CreateBitmap");
 #endif
 #if CORE || GDI && !WPF // Prevent unreachable code error

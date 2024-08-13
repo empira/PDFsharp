@@ -325,7 +325,7 @@ namespace PdfSharp.Features.Font
 #endif
             }
             // PDFsharp never calls GetFont with a face name that was not returned by ResolveTypeface.
-            throw new ArgumentException(String.Format("Invalid face name '{0}'", faceName));
+            throw new ArgumentException($"Invalid face name '{faceName}'");
         }
     }
 

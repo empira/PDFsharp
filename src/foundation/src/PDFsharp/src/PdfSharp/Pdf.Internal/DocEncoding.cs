@@ -47,7 +47,8 @@ namespace PdfSharp.Pdf.Internal
         /// <summary>
         /// Converts WinAnsi to DocEncode characters. Based upon PDF Reference 1.6.
         /// </summary>
-        static readonly byte[] AnsiToDoc = /*new byte[256]*/ {  // keep brace to ensure that Visual Studio does not reformat 
+        static readonly byte[] AnsiToDoc = /*new byte[256]*/
+        [
             //         x0    x1    x2    x3    x4    x5    x6    x7    x8    x9    xa    xb    xc    xd    xe    xf
             /* 00 */ 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
             /* 10 */ 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
@@ -64,11 +65,12 @@ namespace PdfSharp.Pdf.Internal
             /* c0 */ 0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF,
             /* d0 */ 0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF,
             /* e0 */ 0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF,
-            /* f0 */ 0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF,
-        };
+            /* f0 */ 0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF
+        ];
 
         // TODO: use this table
-        static readonly char[] PdfDocToUnicode = {
+        static readonly char[] PdfDocToUnicode =
+        [
             '\x00',   '\x01',   '\x02',   '\x03',   '\x04',   '\x05',   '\x06',   '\x07',   '\x08',   '\x09',   '\x0A',   '\x0B',   '\x0C',   '\x0D',   '\x0E',   '\x0F',
             '\x10',   '\x11',   '\x12',   '\x13',   '\x14',   '\x15',   '\x16',   '\x17',   '\x18',   '\x19',   '\x1A',   '\x1B',   '\x1C',   '\x1D',   '\x1E',   '\x1F',
             '\x20',   '\x21',   '\x22',   '\x23',   '\x24',   '\x25',   '\x26',   '\x27',   '\x28',   '\x29',   '\x2A',   '\x2B',   '\x2C',   '\x2D',   '\x2E',   '\x2F',
@@ -84,7 +86,7 @@ namespace PdfSharp.Pdf.Internal
             '\xC0',   '\xC1',   '\xC2',   '\xC3',   '\xC4',   '\xC5',   '\xC6',   '\xC7',   '\xC8',   '\xC9',   '\xCA',   '\xCB',   '\xCC',   '\xCD',   '\xCE',   '\xCF',
             '\xD0',   '\xD1',   '\xD2',   '\xD3',   '\xD4',   '\xD5',   '\xD6',   '\xD7',   '\xD8',   '\xD9',   '\xDA',   '\xDB',   '\xDC',   '\xDD',   '\xDE',   '\xDF',
             '\xE0',   '\xE1',   '\xE2',   '\xE3',   '\xE4',   '\xE5',   '\xE6',   '\xE7',   '\xE8',   '\xE9',   '\xEA',   '\xEB',   '\xEC',   '\xED',   '\xEE',   '\xEF',
-            '\xF0',   '\xF1',   '\xF2',   '\xF3',   '\xF4',   '\xF5',   '\xF6',   '\xF7',   '\xF8',   '\xF9',   '\xFA',   '\xFB',   '\xFC',   '\xFD',   '\xFE',   '\xFF',
-        };
+            '\xF0',   '\xF1',   '\xF2',   '\xF3',   '\xF4',   '\xF5',   '\xF6',   '\xF7',   '\xF8',   '\xF9',   '\xFA',   '\xFB',   '\xFC',   '\xFD',   '\xFE',   '\xFF'
+        ];
     }
 }

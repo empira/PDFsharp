@@ -99,7 +99,6 @@ namespace PdfSharp.Pdf.Advanced
             Elements.SetInteger(Keys.XHeight, Descriptor.DesignUnitsToPdf(Descriptor.XHeight));
         }
 
-        //HACK OpenTypeDescriptor descriptor
         internal OpenTypeDescriptor Descriptor { get; }
 
         /// <summary>
@@ -173,14 +172,10 @@ namespace PdfSharp.Pdf.Advanced
             var newName = s.ToString();
             // The probability is low for a single document
             // with a handful of fonts, but it is better to check.
-#if NET6_0_OR_GREATER_
-            if (!_fontSubsetNames.TryAdd(newName, null))
-                goto TryAgain;
-#else
+
             if (_fontSubsetNames.ContainsKey(newName))
                 goto TryAgain;
             _fontSubsetNames.Add(newName, null);
-#endif
             return newName;
         }
         readonly Dictionary<string, object?> _fontSubsetNames = [];

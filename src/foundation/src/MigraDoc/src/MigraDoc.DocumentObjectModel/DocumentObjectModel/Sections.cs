@@ -29,7 +29,8 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Gets a section by its index. First section has index 0.
         /// </summary>
-        public new Section this[int index] => (base[index] as Section)!; // HACK // BUG: May return null TODO: Section? Exception?
+        //public new Section this[int index] => (base[index] as Section)!; // H/ACK // BUG: May return null TODO: Section? Exception?
+        public new Section this[int index] => (base[index] as Section) ?? throw new InvalidOperationException("DocumentObject is not a Section.");
 
         /// <summary>
         /// Creates a deep copy of this object.
@@ -53,7 +54,7 @@ namespace MigraDoc.DocumentObjectModel
         internal override void Serialize(Serializer serializer)
         {
             int count = Count;
-            for (int index = 0; index < count; ++index)
+            for (int index = 0; index < count; index++)
             {
                 var section = this[index];
                 section.Serialize(serializer);

@@ -1,53 +1,57 @@
 ﻿<Project>
-	<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
-	<ItemGroup>
-		<DescriptionFile Include="$(MSBuildProjectDirectory)\Description.txt" />
-		<ReleaseNotesFile Include="$(MSBuildProjectDirectory)\ReleaseNotes.txt" />
-	</ItemGroup>
+  <ItemGroup>
+    <DescriptionFile Include="$(MSBuildProjectDirectory)\Description.txt" />
+    <ReleaseNotesFile Include="$(MSBuildProjectDirectory)\ReleaseNotes.txt" />
+  </ItemGroup>
 
-	<PropertyGroup>
-		<!-- Yes, MSBUILD is powerful but weird. -->
-		<NuGetDescription>@(DescriptionFileContents->'%(Identity)', '%0d')</NuGetDescription>
-		<NuGetReleaseNotes>@(ReleaseNotesFileContents->'%(Identity)', '%0d')</NuGetReleaseNotes>
-		<DebugBuildMessage>***** THIS IS A DEBUG BUILD - DO NOT PUBLISH *****%0d</DebugBuildMessage>
+  <PropertyGroup>
+    <!-- Yes, MSBUILD is powerful but weird. -->
+    <NuGetDescription>@(DescriptionFileContents->'%(Identity)', '%0d')</NuGetDescription>
+    <NuGetReleaseNotes>@(ReleaseNotesFileContents->'%(Identity)', '%0d')</NuGetReleaseNotes>
+    <DebugBuildMessage>***** THIS IS A DEBUG BUILD - DO NOT PUBLISH *****%0d</DebugBuildMessage>
 
-		<!--<NuGetProjectUrl>https://docs.pdfsharp.net</NuGetProjectUrl>-->
-		<NuGetProjectUrl>https://docs.pdfsharp.net</NuGetProjectUrl>
-		<NuGetTags_PdfSharp>PDFsharp PDF creation</NuGetTags_PdfSharp>
-		<NuGetTags_MigraDoc>MigraDoc PDFsharp PDF Document Generation</NuGetTags_MigraDoc>
-	</PropertyGroup>
+    <!--<NuGetProjectUrl>https://docs.pdfsharp.net</NuGetProjectUrl>-->
+    <NuGetProjectUrl>https://docs.pdfsharp.net</NuGetProjectUrl>
+    <NuGetTags_PdfSharp>PDFsharp PDF creation</NuGetTags_PdfSharp>
+    <NuGetTags_MigraDoc>MigraDoc PDFsharp PDF Document Generation</NuGetTags_MigraDoc>
+  </PropertyGroup>
 
-	<Target Name="SetNuspecProperties" BeforeTargets="GenerateNuspec">
+  <Target Name="SetNuspecProperties" BeforeTargets="GenerateNuspec">
 
-		<ReadLinesFromFile File="@(DescriptionFile)">
-			<Output TaskParameter="Lines" ItemName="DescriptionFileContents" />
-		</ReadLinesFromFile>
+    <ReadLinesFromFile File="@(DescriptionFile)">
+      <Output TaskParameter="Lines" ItemName="DescriptionFileContents" />
+    </ReadLinesFromFile>
 
-		<ReadLinesFromFile File="@(ReleaseNotesFile)">
-			<Output TaskParameter="Lines" ItemName="ReleaseNotesFileContents" />
-		</ReadLinesFromFile>
+    <ReadLinesFromFile File="@(ReleaseNotesFile)">
+      <Output TaskParameter="Lines" ItemName="ReleaseNotesFileContents" />
+    </ReadLinesFromFile>
 
-		<PropertyGroup>
-			<NuspecProperties>$(NuspecProperties);id=$(NuGetId)</NuspecProperties>
-			<NuspecProperties>$(NuspecProperties);title=$(NuGetTitle)</NuspecProperties>
-			<NuspecProperties>$(NuspecProperties);config=$(Configuration)</NuspecProperties>
-			<NuspecProperties>$(NuspecProperties);version=$(PackageVersion)</NuspecProperties>
-			<NuspecProperties>$(NuspecProperties);description=$(NuGetDescription)</NuspecProperties>
-			<NuspecProperties>$(NuspecProperties);summary=$(NuGetSummary)</NuspecProperties>
-			<NuspecProperties>$(NuspecProperties);authors=$(Authors)</NuspecProperties>
-			<NuspecProperties>$(NuspecProperties);owners=$(Owners)</NuspecProperties>
-			<NuspecProperties>$(NuspecProperties);projectUrl=$(NuGetProjectUrl)</NuspecProperties>
-			<NuspecProperties>$(NuspecProperties);copyright=$(Copyright)</NuspecProperties>
-			<NuspecProperties>$(NuspecProperties);releaseNotes=$(NuGetReleaseNotes)</NuspecProperties>
-			<NuspecProperties>$(NuspecProperties);tags=$(NuGetTags)</NuspecProperties>
-		</PropertyGroup>
+    <PropertyGroup>
+      <NuspecProperties>$(NuspecProperties);id=$(NuGetId)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);title=$(NuGetTitle)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);config=$(Configuration)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);version=$(PackageVersion)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);description=$(NuGetDescription)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);summary=$(NuGetSummary)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);authors=$(Authors)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);owners=$(Owners)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);projectUrl=$(NuGetProjectUrl)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);copyright=$(Copyright)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);releaseNotes=$(NuGetReleaseNotes)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);tags=$(NuGetTags)</NuspecProperties>
 
-		<!--
-		<Message Text="============================================================="  Importance="high" />
-		<Message Text="YYYYY NuspecProperties = OOOOO $(NuspecProperties);description PPPPP" Importance="high" />
-		<Message Text="============================================================="  Importance="high" />
-		-->
+      <NuspecProperties>$(NuspecProperties);NetCore_PackageVersion=$(NetCore_PackageVersion)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);Logging_PackageVersion=$(Logging_PackageVersion)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);Cryptography_PackageVersion=$(Cryptography_PackageVersion)</NuspecProperties>
+  </PropertyGroup>
 
-	</Target>
+  <!--
+  <Message Text="============================================================="  Importance="high" />
+  <Message Text="YYYYY NuspecProperties = OOOOO $(NuspecProperties);description PPPPP" Importance="high" />
+  <Message Text="============================================================="  Importance="high" />
+  -->
+
+  </Target>
 </Project>

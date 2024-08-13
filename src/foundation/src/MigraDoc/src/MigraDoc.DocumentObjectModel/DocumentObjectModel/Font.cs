@@ -324,7 +324,7 @@ namespace MigraDoc.DocumentObjectModel
                     serializer.WriteSimpleAttribute("Name", Name);
 
 #if DEBUG_ // Test
-                if (!_size.IsNull && Size != 0 && Size.Point == 0)
+                if (Size != Unit.Empty && Size != 0 && Size.Point == 0)
                     _ = typeof(int);
 #endif
 

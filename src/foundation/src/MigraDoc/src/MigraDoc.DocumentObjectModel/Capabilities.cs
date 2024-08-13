@@ -116,7 +116,7 @@ namespace MigraDoc
         {
             /// <summary>
             /// Gets or sets a flag that specifies if the renderer should silently ignore charts if they are not supported.
-            /// Otherwise an exception will be thrown.
+            /// Otherwise, an exception will be thrown.
             /// </summary>
             public static FeatureNotAvailableAction ChartsCannotBeRendered { get; set; } = FeatureNotAvailableAction.DoNothing;
 

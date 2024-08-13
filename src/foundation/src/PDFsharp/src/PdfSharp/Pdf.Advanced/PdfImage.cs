@@ -8,8 +8,10 @@ using System.Drawing.Imaging;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 #endif
+using Microsoft.Extensions.Logging;
 using PdfSharp.Drawing;
 using PdfSharp.Drawing.Internal;
+using PdfSharp.Logging;
 using PdfSharp.Pdf.Filters;
 
 namespace PdfSharp.Pdf.Advanced
@@ -317,7 +319,7 @@ namespace PdfSharp.Pdf.Advanced
                     if (_image._importedImage == null)
                         _image._importedImage = i;
                 }
-                
+
                 memory = _image.Memory;
             }
             else
@@ -352,7 +354,7 @@ namespace PdfSharp.Pdf.Advanced
                 Debug.Assert(false, "Internal error? JPEG image, but file not read!");
             }
 #endif
-#if UWP
+#if WUI
             memory = new MemoryStream();
             ownMemory = true;
 #endif
@@ -389,7 +391,7 @@ namespace PdfSharp.Pdf.Advanced
                 Elements["/Length"] = new PdfInteger(streamLength);
                 Elements["/Filter"] = new PdfName("/DCTDecode");
             }
-            if (_image.Interpolate)
+            if (_image.Interpolate && !_document.IsPdfA) // @@@PDF-A-Hack
                 Elements[Keys.Interpolate] = PdfBoolean.True;
             Elements[Keys.Width] = new PdfInteger(_image.PixelWidth);
             Elements[Keys.Height] = new PdfInteger(_image.PixelHeight);
@@ -634,21 +636,29 @@ namespace PdfSharp.Pdf.Advanced
 
                 if (hasAlphaMask && pdfVersion >= 14)
                 {
-                    // The image provides an alpha mask (requires Arcrobat 5.0 or higher).
-                    byte[] alphaMaskCompressed = fd.Encode(idb.AlphaMask, _document.Options.FlateEncodeMode);
-                    var smask = new PdfDictionary(_document);
-                    smask.Elements.SetName(Keys.Type, "/XObject");
-                    smask.Elements.SetName(Keys.Subtype, "/Image");
+                    // #PDF-A
+                    if (_document.IsPdfA)
+                    {
+                        PdfSharpLogHost.Logger.LogWarning("PDF/A: Alpha mask of PdfImage suppressed.");
+                    }
+                    else
+                    {
+                        // The image provides an alpha mask (requires Arcrobat 5.0 or higher).
+                        byte[] alphaMaskCompressed = fd.Encode(idb.AlphaMask, _document.Options.FlateEncodeMode);
+                        var smask = new PdfDictionary(_document);
+                        smask.Elements.SetName(Keys.Type, "/XObject");
+                        smask.Elements.SetName(Keys.Subtype, "/Image");
 
-                    Owner.IrefTable.Add(smask);
-                    smask.Stream = new PdfStream(alphaMaskCompressed, smask);
-                    smask.Elements["/Length"] = new PdfInteger(alphaMaskCompressed.Length);
-                    smask.Elements["/Filter"] = new PdfName("/FlateDecode");
-                    smask.Elements[Keys.Width] = new PdfInteger((int)ii.Width);
-                    smask.Elements[Keys.Height] = new PdfInteger((int)ii.Height);
-                    smask.Elements[Keys.BitsPerComponent] = new PdfInteger(8);
-                    smask.Elements[Keys.ColorSpace] = new PdfName("/DeviceGray");
-                    Elements[Keys.SMask] = smask.Reference;
+                        Owner.IrefTable.Add(smask);
+                        smask.Stream = new PdfStream(alphaMaskCompressed, smask);
+                        smask.Elements["/Length"] = new PdfInteger(alphaMaskCompressed.Length);
+                        smask.Elements["/Filter"] = new PdfName("/FlateDecode");
+                        smask.Elements[Keys.Width] = new PdfInteger((int)ii.Width);
+                        smask.Elements[Keys.Height] = new PdfInteger((int)ii.Height);
+                        smask.Elements[Keys.BitsPerComponent] = new PdfInteger(8);
+                        smask.Elements[Keys.ColorSpace] = new PdfName("/DeviceGray");
+                        Elements[Keys.SMask] = smask.Reference;
+                    }
                 }
 
                 byte[] imageDataCompressed = fd.Encode(idb.Data, _document.Options.FlateEncodeMode);
@@ -750,7 +760,17 @@ namespace PdfSharp.Pdf.Advanced
                     Elements[Keys.ColorSpace] = new PdfName("/DeviceGray");
                 }
                 if (_image.Interpolate)
-                    Elements[Keys.Interpolate] = PdfBoolean.True;
+                {
+                    // #PDF-A
+                    if (_document.IsPdfA)
+                    {
+                        PdfSharpLogHost.Logger.LogWarning("PDF/A: Image interpolation suppressed.");
+                    }
+                    else
+                    {
+                        Elements[Keys.Interpolate] = PdfBoolean.True;
+                    }
+                }
             }
         }
 
@@ -764,7 +784,7 @@ namespace PdfSharp.Pdf.Advanced
             bool hasMask = idb.AlphaMaskLength > 0 || idb.BitmapMaskLength > 0;
             bool hasAlphaMask = idb.AlphaMaskLength > 0;
 
-            if (hasMask && idb.BitmapMask != null)
+            if (hasMask && idb.BitmapMask != null!)
             {
                 // Monochrome mask is either sufficient or
                 // provided for compatibility with older reader versions.
@@ -785,21 +805,29 @@ namespace PdfSharp.Pdf.Advanced
             }
             if (hasMask && hasAlphaMask && pdfVersion >= 14)
             {
-                // The image provides an alpha mask (requires Acrobat 5.0 or higher).
-                byte[] alphaMaskCompressed = fd.Encode(idb.AlphaMask, _document.Options.FlateEncodeMode);
-                var smask = new PdfDictionary(_document);
-                smask.Elements.SetName(Keys.Type, "/XObject");
-                smask.Elements.SetName(Keys.Subtype, "/Image");
+                // #PDF-A
+                if (_document.IsPdfA)
+                {
+                    PdfSharpLogHost.Logger.LogWarning("PDF/A: Alpha mask of PdfImage suppressed.");
+                }
+                else
+                {
+                    // The image provides an alpha mask (requires Acrobat 5.0 or higher).
+                    byte[] alphaMaskCompressed = fd.Encode(idb.AlphaMask, _document.Options.FlateEncodeMode);
+                    var smask = new PdfDictionary(_document);
+                    smask.Elements.SetName(Keys.Type, "/XObject");
+                    smask.Elements.SetName(Keys.Subtype, "/Image");
 
-                Owner.IrefTable.Add(smask);
-                smask.Stream = new PdfStream(alphaMaskCompressed, smask);
-                smask.Elements["/Length"] = new PdfInteger(alphaMaskCompressed.Length);
-                smask.Elements["/Filter"] = new PdfName("/FlateDecode");
-                smask.Elements[Keys.Width] = new PdfInteger((int)ii.Width);
-                smask.Elements[Keys.Height] = new PdfInteger((int)ii.Height);
-                smask.Elements[Keys.BitsPerComponent] = new PdfInteger(8);
-                smask.Elements[Keys.ColorSpace] = new PdfName("/DeviceGray");
-                Elements[Keys.SMask] = smask.Reference;
+                    Owner.IrefTable.Add(smask);
+                    smask.Stream = new PdfStream(alphaMaskCompressed, smask);
+                    smask.Elements["/Length"] = new PdfInteger(alphaMaskCompressed.Length);
+                    smask.Elements["/Filter"] = new PdfName("/FlateDecode");
+                    smask.Elements[Keys.Width] = new PdfInteger((int)ii.Width);
+                    smask.Elements[Keys.Height] = new PdfInteger((int)ii.Height);
+                    smask.Elements[Keys.BitsPerComponent] = new PdfInteger(8);
+                    smask.Elements[Keys.ColorSpace] = new PdfName("/DeviceGray");
+                    Elements[Keys.SMask] = smask.Reference;
+                }
             }
 
             byte[] imageDataCompressed = fd.Encode(idb.Data, _document.Options.FlateEncodeMode);
@@ -813,7 +841,17 @@ namespace PdfSharp.Pdf.Advanced
             // Anything needed for CMYK? Do we have sample images?
             Elements[Keys.ColorSpace] = new PdfName(components == 1 ? "/DeviceGray" : "/DeviceRGB");
             if (_image.Interpolate)
-                Elements[Keys.Interpolate] = PdfBoolean.True;
+            {  
+                // #PDF-A
+                if (_document.IsPdfA)
+                {
+                    PdfSharpLogHost.Logger.LogWarning("PDF/A: Image interpolation suppressed.");
+                }
+                else
+                {
+                    Elements[Keys.Interpolate] = PdfBoolean.True;
+                }
+            }
         }
 #endif
 
@@ -847,9 +885,9 @@ namespace PdfSharp.Pdf.Advanced
         /// <param name="hasAlpha">true (ARGB), false (RGB)</param>
         void ReadTrueColorMemoryBitmap(int components, int bits, bool hasAlpha)
         {
-//#if DEBUG_
-//          image.image.Save("$$$.bmp", ImageFormat.Bmp);
-//#endif
+            //#if DEBUG_
+            //          image.image.Save("$$$.bmp", ImageFormat.Bmp);
+            //#endif
             int pdfVersion = Owner.Version;
             var memory = new MemoryStream();
 #if GDI
@@ -866,7 +904,7 @@ namespace PdfSharp.Pdf.Advanced
             Debug.Assert(streamLength > 0, "Bitmap image encoding failed.");
             if (streamLength > 0)
             {
-#if !UWP
+#if !WUI
                 // Available with wrt, but not with wrt81.
                 // Note: imageBits.Length can be larger than streamLength. Do not use these extra bytes!
                 byte[] imageBits = memory.GetBuffer();
@@ -984,21 +1022,29 @@ namespace PdfSharp.Pdf.Advanced
                 }
                 if (hasMask && hasAlphaMask && pdfVersion >= 14 && alphaMask != null)
                 {
-                    // The image provides an alpha mask (requires Arcrobat 5.0 or higher).
-                    byte[] alphaMaskCompressed = fd.Encode(alphaMask, _document.Options.FlateEncodeMode);
-                    var smask = new PdfDictionary(_document);
-                    smask.Elements.SetName(Keys.Type, "/XObject");
-                    smask.Elements.SetName(Keys.Subtype, "/Image");
+                    // #PDF-A
+                    if (_document.IsPdfA)
+                    {
+                        PdfSharpLogHost.Logger.LogWarning("PDF/A: Alpha mask of PdfImage suppressed.");
+                    }
+                    else
+                    {
+                        // The image provides an alpha mask (requires Acrobat 5.0 or higher).
+                        byte[] alphaMaskCompressed = fd.Encode(alphaMask, _document.Options.FlateEncodeMode);
+                        var smask = new PdfDictionary(_document);
+                        smask.Elements.SetName(Keys.Type, "/XObject");
+                        smask.Elements.SetName(Keys.Subtype, "/Image");
 
-                    Owner.IrefTable.Add(smask);
-                    smask.Stream = new PdfStream(alphaMaskCompressed, smask);
-                    smask.Elements[PdfStream.Keys.Length] = new PdfInteger(alphaMaskCompressed.Length);
-                    smask.Elements[PdfStream.Keys.Filter] = new PdfName("/FlateDecode");
-                    smask.Elements[Keys.Width] = new PdfInteger(width);
-                    smask.Elements[Keys.Height] = new PdfInteger(height);
-                    smask.Elements[Keys.BitsPerComponent] = new PdfInteger(8);
-                    smask.Elements[Keys.ColorSpace] = new PdfName("/DeviceGray");
-                    Elements[Keys.SMask] = smask.Reference;
+                        Owner.IrefTable.Add(smask);
+                        smask.Stream = new PdfStream(alphaMaskCompressed, smask);
+                        smask.Elements[PdfStream.Keys.Length] = new PdfInteger(alphaMaskCompressed.Length);
+                        smask.Elements[PdfStream.Keys.Filter] = new PdfName("/FlateDecode");
+                        smask.Elements[Keys.Width] = new PdfInteger(width);
+                        smask.Elements[Keys.Height] = new PdfInteger(height);
+                        smask.Elements[Keys.BitsPerComponent] = new PdfInteger(8);
+                        smask.Elements[Keys.ColorSpace] = new PdfName("/DeviceGray");
+                        Elements[Keys.SMask] = smask.Reference;
+                    }
                 }
 
                 byte[] imageDataCompressed = fd.Encode(imageData, _document.Options.FlateEncodeMode);
@@ -1012,7 +1058,17 @@ namespace PdfSharp.Pdf.Advanced
                 // Anything needed for CMYK? Do we have sample images?
                 Elements[Keys.ColorSpace] = new PdfName("/DeviceRGB");
                 if (_image.Interpolate)
-                    Elements[Keys.Interpolate] = PdfBoolean.True;
+                {    
+                    // #PDF-A
+                    if (_document.IsPdfA)
+                    {
+                        PdfSharpLogHost.Logger.LogWarning("PDF/A: Image interpolation suppressed.");
+                    }
+                    else
+                    {
+                        Elements[Keys.Interpolate] = PdfBoolean.True;
+                    }
+                }
             }
         }
 
@@ -1059,7 +1115,7 @@ namespace PdfSharp.Pdf.Advanced
                 byte[] imageBits = new byte[streamLength];
                 memory.Seek(0, SeekOrigin.Begin);
                 memory.Read(imageBits, 0, streamLength);
-#if !UWP
+#if !WUI
                 memory.Close();
 #else
                 memory.Dispose();
@@ -1082,11 +1138,11 @@ namespace PdfSharp.Pdf.Advanced
                     throw new NotImplementedException("ReadIndexedMemoryBitmap: unsupported format");
                 }
 
-//#if WPF
-//                // These two lines should be superfluous, otherwise an exception would have been thrown above.
-//                width = ReadDWord(imageBits, 18);
-//                height = ReadDWord(imageBits, 22);
-//#endif
+                //#if WPF
+                //                // These two lines should be superfluous, otherwise an exception would have been thrown above.
+                //                width = ReadDWord(imageBits, 18);
+                //                height = ReadDWord(imageBits, 22);
+                //#endif
 
                 int fileBits = ReadWord(imageBits, 28);
                 if (fileBits != bits)
@@ -1413,7 +1469,17 @@ namespace PdfSharp.Pdf.Advanced
                     Elements[Keys.ColorSpace] = new PdfName("/DeviceGray");
                 }
                 if (_image.Interpolate)
-                    Elements[Keys.Interpolate] = PdfBoolean.True;
+                {
+                    // #PDF-A
+                    if (_document.IsPdfA)
+                    {
+                        PdfSharpLogHost.Logger.LogWarning("PDF/A: Image interpolation suppressed.");
+                    }
+                    else
+                    {
+                        Elements[Keys.Interpolate] = PdfBoolean.True;
+                    }
+                }
             }
         }
 

@@ -16,7 +16,6 @@ namespace MigraDoc.Rendering
         /// </summary>
         /// <param name="prevBottomMargin">The bottom margin of the previous element.</param>
         /// <param name="nextTopMargin">The top margin of the next element.</param>
-        /// <returns></returns>
         XUnitPt MarginMax(XUnitPt prevBottomMargin, XUnitPt nextTopMargin)
         {
             if (prevBottomMargin >= 0 && nextTopMargin >= 0)
@@ -91,7 +90,7 @@ namespace MigraDoc.Rendering
                     ready = idx == _elements.Count - 1;
                     if (ready)
                         _areaProvider.StoreRenderInfos(renderInfos);
-                    ++idx;
+                    idx++;
                     continue;
                 }
                 ///////////////////////////////////////////
@@ -152,7 +151,7 @@ namespace MigraDoc.Rendering
                         prevFormatInfo = null;
                         prevRenderInfo = null;
 
-                        ++idx;
+                        idx++;
                     }
                 }
                 else
@@ -171,7 +170,7 @@ namespace MigraDoc.Rendering
 
                         ready = idx == _elements.Count - 1;
 
-                        ++idx;
+                        idx++;
                     }
                     prevRenderInfo = FinishPage(renderer.RenderInfo, pagebreakBefore, ref renderInfos);
                     if (prevRenderInfo != null)
@@ -283,7 +282,7 @@ namespace MigraDoc.Rendering
         {
             XUnitPt elementDistance = previousMarginBottom;
             Area area = remainingArea;
-            for (int index = idx + 1; index < _elements.Count; ++index)
+            for (int index = idx + 1; index < _elements.Count; index++)
             {
                 // Never combine more than MaxCombineElements elements
                 if (index - idx > MaxCombineElements)

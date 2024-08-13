@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 using SysPoint = System.Windows.Point;
 using SysSize = System.Windows.Size;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media;
 using SysPoint = Windows.Foundation.Point;
 using SysSize = Windows.Foundation.Size;
@@ -48,7 +48,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Initializes a new instance of the XPoint class with the specified point.
         /// </summary>
@@ -183,7 +183,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Converts this XPoint to a System.Windows.Point.
         /// </summary>
@@ -352,7 +352,7 @@ namespace PdfSharp.Drawing
             return new XVector(point._x, point._y);
         }
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Performs an implicit conversion from XPoint to Point.
         /// </summary>

@@ -345,24 +345,21 @@ namespace MigraDoc.DocumentObjectModel
                 if (number.StartsWith("0x", StringComparison.Ordinal))
                 {
                     numberStyle = NumberStyles.HexNumber;
-#if NET6_0_OR_GREATER || true
                     number = color[2..];
-#else
-                    number = color.Substring(2);
-#endif
                 }
                 else if (number.StartsWith("#", StringComparison.Ordinal))
                 {
                     numberStyle = NumberStyles.HexNumber;
                     switch (color.Length)
                     {
-#if NET6_0_OR_GREATER || true
                         case 9: // Format "#aarrggbb".
                             number = color[1..];
                             break;
+
                         case 7: // Format "#rrggbb".
                             number = "ff" + color[1..];
                             break;
+
                         case 4:  // Format "#rgb".
                             var r = color[1..2];
                             var g = color[2..3];
@@ -371,24 +368,9 @@ namespace MigraDoc.DocumentObjectModel
                                      g + g +
                                      b + b;
                             break;
-#else
-                        case 9: // Format "#aarrggbb".
-                            number = color.Substring(1);
-                            break;
-                        case 7: // Format "#rrggbb".
-                            number = "ff" + color.Substring(1);
-                            break;
-                        case 4:  // Format "#rgb".
-                            var r = color.Substring(1, 1);
-                            var g = color.Substring(2, 1);
-                            var b = color.Substring(3, 1);
-                            number = "ff" + r + r +
-                                     g + g +
-                                     b + b;
-                            break;
-#endif
+
                         default:
-                            throw new ArgumentException(DomSR.InvalidColorString(color), nameof(color));
+                            throw new ArgumentException(MdDomMsgs.InvalidColorString(color).Message);
                     }
                 }
                 clr = UInt32.Parse(number, numberStyle);
@@ -396,7 +378,7 @@ namespace MigraDoc.DocumentObjectModel
             }
             catch (FormatException ex)
             {
-                throw new ArgumentException(DomSR.InvalidColorString(color), ex);
+                throw new ArgumentException(MdDomMsgs.InvalidColorString(color).Message, ex);
             }
         }
 

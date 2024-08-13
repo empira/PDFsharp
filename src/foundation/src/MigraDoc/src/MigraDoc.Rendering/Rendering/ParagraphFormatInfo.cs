@@ -65,11 +65,11 @@ namespace MigraDoc.Rendering
         internal int LineCount
             => _lineInfos.Count;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="mergeInfo"></param>
-        /// <returns></returns>
+        // Fake docs is not allowed.
+        /////// <summary>
+        /////// 
+        /////// </summary>
+        /////// <param name="mergeInfo"></param>
         internal void Append(FormatInfo mergeInfo)
         {
             ParagraphFormatInfo formatInfo = (ParagraphFormatInfo)mergeInfo;

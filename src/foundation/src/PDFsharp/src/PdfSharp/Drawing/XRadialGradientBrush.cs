@@ -18,7 +18,7 @@ using SysRect = System.Windows.Rect;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfRadialGradientBrush = System.Windows.Media.RadialGradientBrush;
 #endif
-#if UWP
+#if WUI
 using Windows.UI;
 using Windows.UI.Xaml.Media;
 using Microsoft.Graphics.Canvas;
@@ -275,7 +275,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if UWP
+#if WUI
         internal override ICanvasBrush RealizeCanvasBrush()
         {
             ICanvasBrush brush;

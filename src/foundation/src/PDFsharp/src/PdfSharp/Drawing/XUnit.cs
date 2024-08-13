@@ -2,6 +2,8 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.ComponentModel;
+using Microsoft.Extensions.Logging;
+using PdfSharp.Logging;
 
 namespace PdfSharp.Drawing
 {
@@ -275,8 +277,12 @@ namespace PdfSharp.Drawing
             XUnit unit = default;
             value = value.Trim();
 
-            // HACK for Germans...
-            value = value.Replace(',', '.');
+            // #DELETE 2024-12-31 - Replace this special treatment for German numbers with an exception.
+            if (value.Contains(','))
+            {
+                PdfSharpLogHost.Logger.LogError("A number string contains an illegal ','. It is replaced by '.'. Will throw exception in the future.");
+                value = value.Replace(',', '.');
+            }
 
             int count = value.Length;
             int valLen = 0;
@@ -335,7 +341,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Converts a double to an XUnit object with type set to point.
         /// </summary>
-        [Obsolete("In PDFsharp 6.1 implicit conversion from double is marked obsolete, because it led to misunderstandings and unexpected behavior. "+
+        [Obsolete("In PDFsharp 6.1 implicit conversion from double is marked obsolete, because it led to misunderstandings and unexpected behavior. " +
                   "Provide the unit by XUnit.FromPoint() or use the new class XUnitPt instead.")]
         public static implicit operator XUnit(double value) => new(value/*, XGraphicsUnit.Point*/);
 
@@ -346,7 +352,7 @@ namespace PdfSharp.Drawing
         public static implicit operator double(XUnit value) => value.PointValue;
 
         /// <summary>
-        /// Memberwise comparison checking the exact value und unit.
+        /// Memberwise comparison checking the exact value and unit.
         /// To compare by value tolerating rounding errors, use IsSameValue() or code like Math.Abs(a.Pt - b.Pt) &lt; 1e-5.
         /// </summary>
         // ReSharper disable CompareOfFloatsByEqualityOperator
@@ -354,7 +360,7 @@ namespace PdfSharp.Drawing
         // ReSharper restore CompareOfFloatsByEqualityOperator
 
         /// <summary>
-        /// Memberwise comparison checking exact value und unit.
+        /// Memberwise comparison checking exact value and unit.
         /// To compare by value tolerating rounding errors, use IsSameValue() or code like Math.Abs(a.Pt - b.Pt) &lt; 1e-5.
         /// </summary>
         public static bool operator !=(XUnit l, XUnit r) => !(l == r);

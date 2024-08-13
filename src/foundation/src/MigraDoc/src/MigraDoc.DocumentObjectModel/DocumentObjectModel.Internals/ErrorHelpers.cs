@@ -35,17 +35,17 @@ namespace MigraDoc.DocumentObjectModel.Internals
         //    return FormatMessage(DomMsgID.InvalidInfoFieldName, name);
         //}
 
-        // StyleExpected = The value must be of type MigraDoc.DocumentObjectModel.Style.
-        public static ArgumentException ArgumentException_StyleExpected(Type type) =>
-            new($"The value is of type '{type.FullName}' but must be of type 'MigraDoc.DocumentObjectModel.Style'.");
+        /// <summary>
+        /// The specified object must be of type Style.
+        /// </summary>
+        public static ArgumentException ArgumentException_StyleExpected(Type wrongType)
+            => new(MdDomMsgs.StyleExpected(wrongType).Message);
 
-        // BaseStyleRequired = Base style name must be defined.
-        public static ArgumentException ArgumentException_UndefinedBaseStyle(string baseStyle) =>
-            new($"Base style name '{baseStyle}' is undefined.");
-
-        //{
-        //    return FormatMessage(DomMsgID.UndefinedBaseStyle, baseStyle);
-        //}
+        /// <summary>
+        /// The base style of style that is not a root style must be defined.
+        /// </summary>
+        public static ArgumentException ArgumentException_UndefinedBaseStyle(string style)
+            => new(MdDomMsgs.UndefinedBaseStyle(style).Message);
 
         //public static string InvalidValueName(string name)
         //{
@@ -216,17 +216,17 @@ namespace MigraDoc.DocumentObjectModel.Internals
         ////    FileNotFound,
         ////    NotSupported,
 
-        //NewlineInString,
+        /// <summary>
+        /// A new-line occurs in a string literal.
+        /// </summary>
         public static DdlParserException DdlParserException_NewlineInString()
-            => new(DdlErrorLevel.Error,
-                "Newline in string not allowed.",
-                DomMsgID.NewlineInString);
+            => new(MdDomMsgs.NewlineInString);
 
-        //EscapeSequenceNotAllowed
-        public static DdlParserException DdlParserException_EscapeSequenceNotAllowed(string s)
-            => new(DdlErrorLevel.Error,
-                $"Invalid escape sequence '{s}'.",
-                DomMsgID.EscapeSequenceNotAllowed);
+        /// <summary>
+        /// An illegal escape sequence occured.
+        /// </summary>
+        public static DdlParserException DdlParserException_EscapeSequenceNotAllowed(string token)
+            => new(MdDomMsgs.EscapeSequenceNotAllowed(token));
 
         ////    SymbolsNotAllowedInsideText,
         //NullAssignmentNotSupported,

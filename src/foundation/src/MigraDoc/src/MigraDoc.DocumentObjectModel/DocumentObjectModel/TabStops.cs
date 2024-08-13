@@ -47,9 +47,7 @@ namespace MigraDoc.DocumentObjectModel
         /// Gets a TabStop by its index.
         /// </summary>
         public new TabStop this[int index]
-#nullable disable
                 => (base[index] as TabStop)!; // HACK // BUG: May return null TODO: TabStop? Exception?
-#nullable restore
 
         /// <summary>
         /// Gets a TabStop by its position. Returns null if no matching tab stop can be found.

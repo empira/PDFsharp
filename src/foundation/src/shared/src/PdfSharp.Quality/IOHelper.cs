@@ -25,9 +25,9 @@ namespace PdfSharp.Quality
             if (stream == null)
             {
                 if (show)
-                    filename = await SaveAndShowDocumentAsync(document, filenameTag);
+                    filename = await SaveAndShowDocumentAsync(document, filenameTag).ConfigureAwait(false);
                 else
-                    filename = await SaveDocumentAsync(document, filenameTag);
+                    filename = await SaveDocumentAsync(document, filenameTag).ConfigureAwait(false);
             }
             else
             {
@@ -43,7 +43,7 @@ namespace PdfSharp.Quality
         protected async Task<string> SaveAndShowDocumentAsync(PdfDocument document, string filenameTag)
         {
             // Save the PDF document...
-            var filename = await SaveDocumentAsync(document, filenameTag);
+            var filename = await SaveDocumentAsync(document, filenameTag).ConfigureAwait(false);
 
             // ... and start a viewer.
             Process.St7art(filename);
@@ -52,11 +52,11 @@ namespace PdfSharp.Quality
         }
 #endif
 
-        //#if NET/FX_CORE || UWP || DNC10
+        //#if NET/FX_CORE || WUI || DNC10
         //        static async Task<string> SaveAndShowDocumentAsync(PdfDocument document, string filenameTag)
         //        {
         //            // Save the PDF document...
-        //            string filename = await SaveDocumentAsync(document, filenameTag);
+        //            string filename = await SaveDocumentAsync(document, filenameTag).ConfigureAwait(false);
 
         //            // ... and start a viewer.
         //            //Process.St7art(filename);
@@ -64,13 +64,13 @@ namespace PdfSharp.Quality
         //        }
         //#endif
 
-        //#if true && (CORE || GDI || WPF || UWP)
-        //#if true && (NET/FX_CORE || UWP)
+        //#if true && (CORE || GDI || WPF || WUI)
+        //#if true && (NET/FX_CORE || WUI)
         //        static async Task<string> SaveDocumentAsync(PdfDocument document, string filenameTag)
         //        {
         //            var filename = String.Format("{0:N}_{1}_tempfile.pdf", Guid.NewGuid(), filenameTag);
         //            document.Save(filename);
-        //            await Task.Factory.StartNew(() => { });
+        //            await Task.Factory.StartNew(() => { }).ConfigureAwait(false);
         //            return filename;
         //        }
         //#endif

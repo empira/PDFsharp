@@ -45,7 +45,7 @@ namespace MigraDoc.RtfRendering
             RenderTopBottomPadding();
 
             //Cell borders etc. are written before the contents.
-            for (int idx = 0; idx < _row.Table!.Columns.Count; ++idx)
+            for (int idx = 0; idx < _row.Table!.Columns.Count; idx++)
             {
                 Cell cell = _row.Cells[idx];
                 CellFormatRenderer cellFrmtRenderer =

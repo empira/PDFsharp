@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net6.0;net472</TargetFrameworks>
+    <TargetFrameworks>net6.0;net462</TargetFrameworks>
     <AssemblyName>HelloWorld,PDFsharp</AssemblyName>
   </PropertyGroup>
 

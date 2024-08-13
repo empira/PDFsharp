@@ -3,14 +3,13 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using PdfSharp.Events;
 using PdfSharp.Pdf;
 using PdfSharp.Drawing;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Visitors;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.DocumentObjectModel.Tables;
-using MigraDoc.Rendering.Resources;
-using PdfSharp.Events;
 
 namespace MigraDoc.Rendering
 {
@@ -158,9 +157,10 @@ namespace MigraDoc.Rendering
             if (documentObject == null)
                 throw new ArgumentNullException(nameof(documentObject));
 
-            if (documentObject is not Shape && documentObject is not Table &&
+            if (documentObject is not Shape &&
+                documentObject is not Table &&
                 documentObject is not Paragraph)
-                throw new ArgumentException(Messages2.ObjectNotRenderable, nameof(documentObject));
+                throw new ArgumentException(MdPdfMsgs.ObjectNotRenderable(documentObject.GetType().Name).Message);
 
             var renderer = Renderer.Create(graphics, this, documentObject, null);
             renderer!.Format(new Rectangle(xPosition, yPosition, width, double.MaxValue), null);

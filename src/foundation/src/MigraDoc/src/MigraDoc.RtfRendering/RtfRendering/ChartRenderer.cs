@@ -10,8 +10,11 @@ using System.Drawing.Imaging;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Shapes.Charts;
 using MigraDoc.Logging;
-using MigraDoc.RtfRendering.Resources;
+#if GDI
+using PdfSharp.Drawing;
 using PdfSharp.Events;
+using MigraDoc.Rendering;
+#endif
 #if WPF
 using PdfSharp.Drawing;
 using MigraDoc.Rendering;
@@ -45,7 +48,7 @@ namespace MigraDoc.RtfRendering
 
             if (DocumentRelations.GetParent(_chart) is DocumentElements elms && !renderInParagraph && !(DocumentRelations.GetParent(elms) is Section || DocumentRelations.GetParent(elms) is HeaderFooter))
             {
-                MigraDocLogHost.RtfRenderingLogger.LogWarning(Messages2.ChartFreelyPlacedInWrongContext);
+                MigraDocLogHost.RtfRenderingLogger.LogWarning(MdRtfMsgs.ChartFreelyPlacedInWrongContext.Message);
                 //Debug.WriteLine(Messages2.ChartFreelyPlacedInWrongContext, "warning");
                 return;
             }
@@ -150,7 +153,7 @@ namespace MigraDoc.RtfRendering
 
         bool StoreTempImage(string fileName)
         {
-#if !WPF
+#if !GDI
             // ReviewSTLA THHO4STLA
             // EXPERIMENTAL
             switch (Capabilities.Compatibility.ChartsCannotBeRendered)
@@ -185,13 +188,17 @@ namespace MigraDoc.RtfRendering
                 const float resolution = 96;
                 int horzPixels = (int)(GetShapeWidth().Inch * resolution);
                 int vertPixels = (int)(GetShapeHeight().Inch * resolution);
-                Bitmap bmp = new Bitmap(horzPixels, vertPixels);
-#if true
+#if false
                 XGraphics gfx =
                     XGraphics.CreateMeasureContext(new XSize(horzPixels, vertPixels), XGraphicsUnit.Point, XPageDirection.Downwards, new RenderEvents());
 #else
 #if GDI
-                XGraphics gfx = XGraphics.FromGraphics(Graphics.FromImage(bmp), new XSize(horzPixels, vertPixels));
+                Bitmap bmp = new Bitmap(horzPixels, vertPixels);
+                XGraphics gfx = XGraphics.FromGraphics(Graphics.FromImage(bmp), new XSize(horzPixels, vertPixels), new RenderEvents());
+#else
+                // TODOWPF
+                // TODOCORE
+                return false;
 #endif
 #if WPF
                 // TODOWPF
@@ -204,8 +211,10 @@ namespace MigraDoc.RtfRendering
 
                 DocumentRenderer renderer = new MigraDoc.Rendering.DocumentRenderer(_chart.Document!);
                 renderer.RenderObject(gfx, 0, 0, GetShapeWidth().Point, _chart);
+#if GDI
                 bmp.SetResolution(resolution, resolution);
                 bmp.Save(fileName, System.Drawing.Imaging.ImageFormat.Png);
+#endif
             }
             catch (Exception)
             {
@@ -213,7 +222,7 @@ namespace MigraDoc.RtfRendering
             }
             return true;
 #endif
-        }
+            }
         //-/*private void CalculateImageDimensions()
         //{
         //  try
@@ -226,85 +235,85 @@ namespace MigraDoc.RtfRendering
         //    float origHorzRes = bip.HorizontalResolution;
         //    float origVertRes = bip.VerticalResolution;
 
-        //    this.originalHeight = bip.Height * 72 / origVertRes;
-        //    this.originalWidth = bip.Width * 72 / origHorzRes;
+            //    this.originalHeight = bip.Height * 72 / origVertRes;
+            //    this.originalWidth = bip.Width * 72 / origHorzRes;
 
-        //      horzResolution = bip.HorizontalResolution;
-        //      vertResolution = bip.VerticalResolution;
-        //    }
-        //    else
-        //    {
-        //      horzResolution= (float)GetValueAsIntended("Resolution");
-        //      vertResolution= horzResolution;
-        //    }
+            //      horzResolution = bip.HorizontalResolution;
+            //      vertResolution = bip.VerticalResolution;
+            //    }
+            //    else
+            //    {
+            //      horzResolution= (float)GetValueAsIntended("Resolution");
+            //      vertResolution= horzResolution;
+            //    }
 
-        //    Unit origHeight = bip.Size.Height * 72 / vertResolution;
-        //    Unit origWidth = bip.Size.Width * 72 / horzResolution;
+            //    Unit origHeight = bip.Size.Height * 72 / vertResolution;
+            //    Unit origWidth = bip.Size.Width * 72 / horzResolution;
 
-        //    this.imageHeight = origHeight;
-        //    this.imageWidth = origWidth;
+            //    this.imageHeight = origHeight;
+            //    this.imageWidth = origWidth;
 
-        //    bool scaleWidthIsNull = this.image.IsNull("ScaleWidth");
-        //    bool scaleHeightIsNull = this.image.IsNull("ScaleHeight");
-        //    float sclHeight = scaleHeightIsNull ? 1 : (float)GetValueAsIntended("ScaleHeight");
-        //    this.scaleHeight= sclHeight;
-        //    float sclWidth = scaleWidthIsNull ? 1 : (float)GetValueAsIntended("ScaleWidth");
-        //    this.scaleWidth = sclWidth;
+            //    bool scaleWidthIsNull = this.image.IsNull("ScaleWidth");
+            //    bool scaleHeightIsNull = this.image.IsNull("ScaleHeight");
+            //    float sclHeight = scaleHeightIsNull ? 1 : (float)GetValueAsIntended("ScaleHeight");
+            //    this.scaleHeight= sclHeight;
+            //    float sclWidth = scaleWidthIsNull ? 1 : (float)GetValueAsIntended("ScaleWidth");
+            //    this.scaleWidth = sclWidth;
 
-        //    bool doLockAspectRatio = this.image.IsNull("LockAspectRatio") || this.image.LockAspectRatio;
+            //    bool doLockAspectRatio = this.image.IsNull("LockAspectRatio") || this.image.LockAspectRatio;
 
-        //    if (doLockAspectRatio && (scaleHeightIsNull || scaleWidthIsNull))
-        //    {
-        //      if (!this.image.IsNull("Width") && this.image.IsNull("Height"))
-        //      {
-        //        imageWidth = this.image.Width;
-        //        imageHeight = origHeight * imageWidth / origWidth;
-        //      }
-        //      else if (!this.image.IsNull("Height") && this.image.IsNull("Width"))
-        //      {
-        //        imageHeight = this.image.Height;
-        //        imageWidth = origWidth * imageHeight / origHeight;
-        //      }
-        //      else if (!this.image.IsNull("Height") && !this.image.IsNull("Width"))
-        //      {
-        //        imageWidth = this.image.Width;
-        //        imageHeight = this.image.Height;
-        //      }
-        //      if (scaleWidthIsNull && !scaleHeightIsNull)
-        //        scaleWidth = scaleHeight;
-        //      else if (scaleHeightIsNull && ! scaleWidthIsNull)
-        //        scaleHeight =  scaleWidth;
-        //    }
-        //    else
-        //    {
-        //      if (!this.image.IsNull("Width"))
-        //        imageWidth = this.image.Width;
-        //      if (!this.image.IsNull("Height"))
-        //        imageHeight = this.image.Height;
-        //    }
+            //    if (doLockAspectRatio && (scaleHeightIsNull || scaleWidthIsNull))
+            //    {
+            //      if (!this.image.IsNull("Width") && this.image.IsNull("Height"))
+            //      {
+            //        imageWidth = this.image.Width;
+            //        imageHeight = origHeight * imageWidth / origWidth;
+            //      }
+            //      else if (!this.image.IsNull("Height") && this.image.IsNull("Width"))
+            //      {
+            //        imageHeight = this.image.Height;
+            //        imageWidth = origWidth * imageHeight / origHeight;
+            //      }
+            //      else if (!this.image.IsNull("Height") && !this.image.IsNull("Width"))
+            //      {
+            //        imageWidth = this.image.Width;
+            //        imageHeight = this.image.Height;
+            //      }
+            //      if (scaleWidthIsNull && !scaleHeightIsNull)
+            //        scaleWidth = scaleHeight;
+            //      else if (scaleHeightIsNull && ! scaleWidthIsNull)
+            //        scaleHeight =  scaleWidth;
+            //    }
+            //    else
+            //    {
+            //      if (!this.image.IsNull("Width"))
+            //        imageWidth = this.image.Width;
+            //      if (!this.image.IsNull("Height"))
+            //        imageHeight = this.image.Height;
+            //    }
 
-        //    return;
-        //  }
-        //  catch(FileNotFoundException)
-        //  {
-        //    Debug.WriteLine(Messages.ImageNotFound(this.image.Name), "warning");
-        //  }
-        //  catch(Exception exc)
-        //  {
-        //    Debug.WriteLine(Messages.ImageNotReadable(this.image.Name, exc.Message), "warning");
-        //  }
+            //    return;
+            //  }
+            //  catch(FileNotFoundException)
+            //  {
+            //    Debug.WriteLine(Messages.ImageNotFound(this.image.Name), "warning");
+            //  }
+            //  catch(Exception exc)
+            //  {
+            //    Debug.WriteLine(Messages.ImageNotReadable(this.image.Name, exc.Message), "warning");
+            //  }
 
-        //  //Setting defaults in case an error occurred.
-        //  this.imageFile = null;
-        //  this.imageHeight = (Unit)GetValueOrDefault("Height", Unit.FromInch(1));
-        //  this.imageWidth = (Unit)GetValueOrDefault("Width", Unit.FromInch(1));
-        //  this.scaleHeight = (double)GetValueOrDefault("ScaleHeight", 1.0);
-        //  this.scaleWidth = (double)GetValueOrDefault("ScaleWidth", 1.0);
-        //}*/
+            //  //Setting defaults in case an error occurred.
+            //  this.imageFile = null;
+            //  this.imageHeight = (Unit)GetValueOrDefault("Height", Unit.FromInch(1));
+            //  this.imageWidth = (Unit)GetValueOrDefault("Width", Unit.FromInch(1));
+            //  this.scaleHeight = (double)GetValueOrDefault("ScaleHeight", 1.0);
+            //  this.scaleWidth = (double)GetValueOrDefault("ScaleWidth", 1.0);
+            //}*/
 
-        /// <summary>
-        /// Renders the image file as byte series.
-        /// </summary>
+            /// <summary>
+            /// Renders the image file as byte series.
+            /// </summary>
         void RenderByteSeries(string fileName)
         {
             FileStream? imageFile = null;

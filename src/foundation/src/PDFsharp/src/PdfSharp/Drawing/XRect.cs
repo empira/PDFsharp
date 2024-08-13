@@ -11,7 +11,7 @@ using SysPoint = System.Windows.Point;
 using SysSize = System.Windows.Size;
 using SysRect = System.Windows.Rect;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media;
 using SysPoint = Windows.Foundation.Point;
 using SysSize = Windows.Foundation.Size;
@@ -34,7 +34,7 @@ namespace PdfSharp.Drawing
         public XRect(double x, double y, double width, double height)
         {
             if (width < 0 || height < 0)
-                throw new ArgumentException("WidthAndHeightCannotBeNegative"); //SR.Get(SRID.Size_WidthAndHeightCannotBeNegative, new object[0]));
+                throw new ArgumentException("WidthAndHeightCannotBeNegative"); // TODO SR.Get(SRID.Size_WidthAndHeightCannotBeNegative, new object[0]));
             _x = x;
             _y = y;
             _width = width;
@@ -116,7 +116,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Initializes a new instance of the XRect class.
         /// </summary>
@@ -341,9 +341,9 @@ namespace PdfSharp.Drawing
             set
             {
                 if (IsEmpty)
-                    throw new InvalidOperationException("CannotModifyEmptyRect"); //SR.Get(SRID.Rect_CannotModifyEmptyRect, new object[0]));
+                    throw new InvalidOperationException("CannotModifyEmptyRect"); // TODO SR.Get(SRID.Rect_CannotModifyEmptyRect, new object[0]));
                 if (value < 0)
-                    throw new ArgumentException("WidthCannotBeNegative"); //SR.Get(SRID.Size_WidthCannotBeNegative, new object[0]));
+                    throw new ArgumentException("WidthCannotBeNegative"); // TODO SR.Get(SRID.Size_WidthCannotBeNegative, new object[0]));
 
                 _width = value;
             }
@@ -725,7 +725,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Performs an implicit conversion from System.Windows.Rect to XRect.
         /// </summary>

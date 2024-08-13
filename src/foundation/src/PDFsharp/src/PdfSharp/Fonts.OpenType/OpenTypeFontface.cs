@@ -112,7 +112,7 @@ namespace PdfSharp.Fonts.OpenType
         public void SetFontEmbedding(PdfFontEmbedding fontEmbedding)
         {
             Debug.Assert(fontEmbedding is PdfFontEmbedding.TryComputeSubset or PdfFontEmbedding.EmbedCompleteFontFile);
-            
+
             if (_fontEmbedding == (PdfFontEmbedding)(-1))
             {
                 _fontEmbedding = fontEmbedding;
@@ -149,9 +149,11 @@ namespace PdfSharp.Fonts.OpenType
         XFontSource? _fontSource;
 
 #pragma warning disable CS0414 // Field is assigned but its value is never used
-        /*internal*/ FontTechnology? _fontTechnology;
+        /*internal*/
+        FontTechnology? _fontTechnology;
 #pragma warning restore CS0414 // Field is assigned but its value is never used
-        /*internal*/ OffsetTable _offsetTable;
+        /*internal*/
+        OffsetTable _offsetTable;
 
         /// <summary>
         /// The dictionary of all font tables.
@@ -162,6 +164,8 @@ namespace PdfSharp.Fonts.OpenType
         // ReSharper disable InconsistentNaming
         // ReSharper disable IdentifierTypo
         internal CMapTable cmap = default!; // NRT TODO Change programming model so that it fits NRTs.
+        internal ColorTable? colr;
+        internal ColorPalletTable? cpal;
         internal ControlValueTable cvt = default!; // NRT
         internal FontProgram fpgm = default!; // NRT
         internal MaximumProfileTable maxp = default!; // NRT
@@ -292,7 +296,7 @@ namespace PdfSharp.Fonts.OpenType
             {
 #if DEBUG_
                 if (Name == "Cambria")
-                    Debug-Break.Break();
+                    _ = typeof(int);
 #endif
                 // Check if data is a TrueType collection font.
                 uint startTag = ReadULong();
@@ -310,7 +314,7 @@ namespace PdfSharp.Fonts.OpenType
                 _offsetTable.RangeShift = ReadUShort();
 
                 // Move to table dictionary at position 12
-                Debug.Assert(_pos == 12);
+                Debug.Assert(Position == 12);
                 //tableDictionary = (offsetTable.TableCount);
 
                 if (_offsetTable.Version == OTTO)
@@ -334,6 +338,12 @@ namespace PdfSharp.Fonts.OpenType
                 // Read required tables.
                 if (Seek(CMapTable.Tag) != -1)
                     cmap = new CMapTable(this);
+
+                if (Seek(ColorTable.Tag) != -1)
+                    colr = new ColorTable(this);
+
+                if (Seek(ColorPalletTable.Tag) != -1)
+                    cpal = new ColorPalletTable(this);
 
                 if (Seek(ControlValueTable.Tag) != -1)
                     cvt = new ControlValueTable(this);
@@ -391,15 +401,15 @@ namespace PdfSharp.Fonts.OpenType
             if (_fontEmbedding == PdfFontEmbedding.EmbedCompleteFontFile || loca == null!)
                 return this;
 
-            // Create new font image
+            // Create new font image.
             var fontData = new OpenTypeFontFace(this);
 
-            // Create new loca and glyf table
+            // Create new loca and glyf table.
             var locaNew = new IndexToLocationTable();
             locaNew.ShortIndex = loca.ShortIndex;
             var glyfNew = new GlyphDataTable();
 
-            // Add all required tables
+            // Add all required tables.
             //fontData.AddTable(os2);
             if (!cidFont)
                 fontData.AddTable(cmap);
@@ -522,47 +532,33 @@ namespace PdfSharp.Fonts.OpenType
             FontSource = XFontSource.CreateCompiledFont(stream.ToArray());
         }
         // 2^entrySelector[n] <= n
-        static readonly int[] _entrySelectors = { 0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 };
+        static readonly int[] _entrySelectors = [0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4];
 
-        public int Position
-        {
-            get => _pos;
-            set => _pos = value;
-        }
-        int _pos;
+        public int Position { get; set; }
 
         public int Seek(string tag)
         {
             if (TableDictionary.TryGetValue(tag, out var entry))
             {
-                _pos = entry.Offset;
-                return _pos;
+                Position = entry.Offset;
+                return Position;
             }
             return -1;
         }
 
-        public int SeekOffset(int offset)
-        {
-            return (_pos += offset);
-        }
+        public int SeekOffset(int offset) => (Position += offset);
 
         /// <summary>
         /// Reads a System.Byte.
         /// </summary>
-        public byte ReadByte() => FontSource.Bytes[_pos++];
+        public byte ReadByte() => FontSource.Bytes[Position++];
 
         /// <summary>
         /// Reads a System.Int16.
         /// </summary>
         public short ReadShort()
         {
-#if true
-            return (short)((FontSource.Bytes[_pos++] << 8) | (FontSource.Bytes[_pos++]));
-#else
-            int pos = _pos;
-            _pos += 2;
-            return (short)((FontSource.Bytes[pos] << 8) | (FontSource.Bytes[pos + 1]));
-#endif
+            return (short)((FontSource.Bytes[Position++] << 8) | (FontSource.Bytes[Position++]));
         }
 
         /// <summary>
@@ -570,13 +566,7 @@ namespace PdfSharp.Fonts.OpenType
         /// </summary>
         public ushort ReadUShort()
         {
-#if true
-            return (ushort)((FontSource.Bytes[_pos++] << 8) | (FontSource.Bytes[_pos++]));
-#else
-            int pos = _pos;
-            _pos += 2;
-            return (ushort)((FontSource.Bytes[pos] << 8) | (FontSource.Bytes[pos + 1]));
-#endif
+            return (ushort)((FontSource.Bytes[Position++] << 8) | (FontSource.Bytes[Position++]));
         }
 
         /// <summary>
@@ -584,13 +574,7 @@ namespace PdfSharp.Fonts.OpenType
         /// </summary>
         public int ReadLong()
         {
-#if true
-            return (FontSource.Bytes[_pos++] << 24) | (FontSource.Bytes[_pos++] << 16) | (FontSource.Bytes[_pos++] << 8) | FontSource.Bytes[_pos++];
-#else
-            int pos = _pos;
-            _pos += 4;
-            return (FontSource.Bytes[pos] << 24) | (FontSource.Bytes[pos + 1] << 16) | (FontSource.Bytes[pos + 2] << 8) | FontSource.Bytes[pos + 3];
-#endif
+            return (FontSource.Bytes[Position++] << 24) | (FontSource.Bytes[Position++] << 16) | (FontSource.Bytes[Position++] << 8) | FontSource.Bytes[Position++];
         }
 
         /// <summary>
@@ -598,13 +582,7 @@ namespace PdfSharp.Fonts.OpenType
         /// </summary>
         public uint ReadULong()
         {
-#if true
-            return (uint)((FontSource.Bytes[_pos++] << 24) | (FontSource.Bytes[_pos++] << 16) | (FontSource.Bytes[_pos++] << 8) | FontSource.Bytes[_pos++]);
-#else
-            int pos = _pos;
-            _pos += 4;
-            return (uint)((FontSource.Bytes[pos] << 24) | (FontSource.Bytes[pos + 1] << 16) | (FontSource.Bytes[pos + 2] << 8) | FontSource.Bytes[pos + 3]);
-#endif
+            return (uint)((FontSource.Bytes[Position++] << 24) | (FontSource.Bytes[Position++] << 16) | (FontSource.Bytes[Position++] << 8) | FontSource.Bytes[Position++]);
         }
 
         /// <summary>
@@ -612,13 +590,7 @@ namespace PdfSharp.Fonts.OpenType
         /// </summary>
         public Fixed ReadFixed()
         {
-#if true
-            return (FontSource.Bytes[_pos++] << 24) | (FontSource.Bytes[_pos++] << 16) | (FontSource.Bytes[_pos++] << 8) | FontSource.Bytes[_pos++];
-#else
-            int pos = _pos;
-            _pos += 4;
-            return (FontSource.Bytes[pos] << 24) | (FontSource.Bytes[pos + 1] << 16) | (FontSource.Bytes[pos + 2] << 8) | FontSource.Bytes[pos + 3];
-#endif
+            return (FontSource.Bytes[Position++] << 24) | (FontSource.Bytes[Position++] << 16) | (FontSource.Bytes[Position++] << 8) | FontSource.Bytes[Position++];
         }
 
         /// <summary>
@@ -626,13 +598,7 @@ namespace PdfSharp.Fonts.OpenType
         /// </summary>
         public short ReadFWord()
         {
-#if true
-            return (short)((FontSource.Bytes[_pos++] << 8) | FontSource.Bytes[_pos++]);
-#else
-            int pos = _pos;
-            _pos += 2;
-            return (short)((FontSource.Bytes[pos] << 8) | FontSource.Bytes[pos + 1]);
-#endif
+            return (short)((FontSource.Bytes[Position++] << 8) | FontSource.Bytes[Position++]);
         }
 
         /// <summary>
@@ -641,13 +607,7 @@ namespace PdfSharp.Fonts.OpenType
         // ReSharper disable once InconsistentNaming
         public ushort ReadUFWord()
         {
-#if true
-            return (ushort)((FontSource.Bytes[_pos++] << 8) | FontSource.Bytes[_pos++]);
-#else
-            int pos = _pos;
-            _pos += 2;
-            return (ushort)((FontSource.Bytes[pos] << 8) | FontSource.Bytes[pos + 1]);
-#endif
+            return (ushort)((FontSource.Bytes[Position++] << 8) | FontSource.Bytes[Position++]);
         }
 
         /// <summary>
@@ -655,8 +615,8 @@ namespace PdfSharp.Fonts.OpenType
         /// </summary>
         public long ReadLongDate()
         {
-            int pos = _pos;
-            _pos += 8;
+            int pos = Position;
+            Position += 8;
             byte[] bytes = FontSource.Bytes;
             return (((long)bytes[pos]) << 56) | (((long)bytes[pos + 1]) << 48) | (((long)bytes[pos + 2]) << 40) | (((long)bytes[pos + 3]) << 32) |
                    (((long)bytes[pos + 4]) << 24) | (((long)bytes[pos + 5]) << 16) | (((long)bytes[pos + 6]) << 8) | bytes[pos + 7];
@@ -669,7 +629,7 @@ namespace PdfSharp.Fonts.OpenType
         {
             char[] chars = new char[size];
             for (int idx = 0; idx < size; idx++)
-                chars[idx] = (char)FontSource.Bytes[_pos++];
+                chars[idx] = (char)FontSource.Bytes[Position++];
             return new string(chars);
         }
 
@@ -680,34 +640,28 @@ namespace PdfSharp.Fonts.OpenType
         {
             byte[] bytes = new byte[size];
             for (int idx = 0; idx < size; idx++)
-                bytes[idx] = FontSource.Bytes[_pos++];
+                bytes[idx] = FontSource.Bytes[Position++];
             return bytes;
         }
 
         /// <summary>
         /// Reads the specified buffer.
         /// </summary>
-        public void Read(byte[] buffer)
-        {
-            Read(buffer, 0, buffer.Length);
-        }
+        public void Read(byte[] buffer) => Read(buffer, 0, buffer.Length);
 
         /// <summary>
         /// Reads the specified buffer.
         /// </summary>
         public void Read(byte[] buffer, int offset, int length)
         {
-            Buffer.BlockCopy(FontSource.Bytes, _pos, buffer, offset, length);
-            _pos += length;
+            Buffer.BlockCopy(FontSource.Bytes, Position, buffer, offset, length);
+            Position += length;
         }
 
         /// <summary>
         /// Reads a System.Char[4] as System.String.
         /// </summary>
-        public string ReadTag()
-        {
-            return ReadString(4);
-        }
+        public string ReadTag() => ReadString(4);
 
         /// <summary>
         /// Gets the DebuggerDisplayAttribute text.

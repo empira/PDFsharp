@@ -92,7 +92,7 @@ namespace MigraDoc.RtfRendering
         {
             int rightClmIdx = _coveringCell.Column!.Index + _coveringCell.MergeRight;
             double width = RowsRenderer.CalculateLeftIndent(_cell.Table!.Rows).Point;
-            for (int idx = 0; idx <= rightClmIdx; ++idx)
+            for (int idx = 0; idx <= rightClmIdx; idx++)
             {
                 var obj = _cell.Table.Columns[idx].Values.Width;
                 if (obj != null)

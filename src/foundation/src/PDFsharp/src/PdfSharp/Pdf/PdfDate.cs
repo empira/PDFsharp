@@ -30,6 +30,11 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfDate(DateTime value)
         {
+            // #PDF-A
+            // We cannot check here whether the document must be PDF/A conform or not.
+            // So we always chop milliseconds.
+            // Remove milliseconds to ensure that date values in Metadata and Info are equal.
+            value = new(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second);
             Value = value;
         }
 

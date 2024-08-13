@@ -261,7 +261,7 @@ namespace MigraDoc.Rendering.Windows
             Document = document;
             RenderEvents = renderEvents;
 
-            Renderer = new DocumentRenderer(Document);
+            Renderer = new(Document);
             Renderer.PrepareDocument(RenderEvents);
             Page = 1;
             //this.preview.Invalidate();

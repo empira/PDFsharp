@@ -135,7 +135,7 @@ namespace PdfSharp.Pdf
         {
             // Get keys and sort.
             PdfName[] keys = Elements.KeyNames;
-            List<PdfName> list = new List<PdfName>(keys);
+            List<PdfName> list = [..keys];
             list.Sort(PdfName.Comparer);
             list.CopyTo(keys, 0);
 
@@ -883,25 +883,24 @@ namespace PdfSharp.Pdf
             PdfArray CreateArray(Type type, PdfArray? oldArray)
             {
 #if true
-                //ConstructorInfo ctorInfo;
                 PdfArray? array;
                 if (oldArray == null)
                 {
                     // Use constructor with signature 'Ctor(PdfDocument owner)'.
                     var ctorInfo = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-                          null, new[] { typeof(PdfDocument) }, null);
+                          null, [typeof(PdfDocument)], null);
                     Debug.Assert(ctorInfo != null, "No appropriate constructor found for type: " + type.Name);
                     //array = ctorInfo.Invoke(new object[] { _ownerDictionary.Owner }) as PdfArray;
-                    array = ctorInfo.Invoke(new object[] { _ownerDictionary.Owner }) as PdfArray;
+                    array = ctorInfo.Invoke([_ownerDictionary.Owner]) as PdfArray;
                 }
                 else
                 {
                     // Use constructor with signature 'Ctor(PdfDictionary dict)'.
                     var ctorInfo = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-                                null, new[] { typeof(PdfArray) }, null);
-                    Debug.Assert(ctorInfo != null, "No appropriate constructor found for type: " + type.Name);
+                                null, types: [typeof(PdfArray)], null);
+                    Debug.Assert(ctorInfo != null, $"No appropriate constructor found for type: {type.Name}.");
                     //array = ctorInfo.Invoke(new object[] { oldArray }) as PdfArray;
-                    array = ctorInfo.Invoke(new object[] { oldArray }) as PdfArray;
+                    array = ctorInfo.Invoke([oldArray]) as PdfArray;
                 }
                 return array ?? NRT.ThrowOnNull<PdfArray>();
 #else
@@ -952,17 +951,17 @@ namespace PdfSharp.Pdf
                 {
                     // Use constructor with signature 'Ctor(PdfDocument owner)'.
                     ctorInfo = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-                        null, new[] { typeof(PdfDocument) }, null);
+                        null, [typeof(PdfDocument)], null);
                     Debug.Assert(ctorInfo != null, "No appropriate constructor found for type: " + type.Name);
-                    dict = ctorInfo.Invoke(new object[] { _ownerDictionary.Owner }) as PdfDictionary;
+                    dict = ctorInfo.Invoke([_ownerDictionary.Owner]) as PdfDictionary;
                 }
                 else
                 {
                     // Use constructor with signature 'Ctor(PdfDictionary dict)'.
                     ctorInfo = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-                      null, new[] { typeof(PdfDictionary) }, null);
+                      null, [typeof(PdfDictionary)], null);
                     Debug.Assert(ctorInfo != null, "No appropriate constructor found for type: " + type.Name);
-                    dict = ctorInfo.Invoke(new object[] { oldDictionary }) as PdfDictionary;
+                    dict = ctorInfo.Invoke([oldDictionary]) as PdfDictionary;
                 }
                 return dict ?? NRT.ThrowOnNull<PdfDictionary>();
 #else
@@ -1006,8 +1005,8 @@ namespace PdfSharp.Pdf
             {
 #if true
                 var ctorInfo = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-                    null, new Type[] { typeof(PdfDocument) }, null);
-                var obj = ctorInfo!.Invoke(new object[] { _ownerDictionary.Owner }) as PdfObject;
+                    null, [typeof(PdfDocument)], null);
+                var obj = ctorInfo!.Invoke([_ownerDictionary.Owner]) as PdfObject;
                 if (oldValue != null)
                 {
                     obj!.Reference = oldValue.Reference;
@@ -1056,7 +1055,7 @@ namespace PdfSharp.Pdf
                 Debug.Assert(value is PdfObject { Reference: null } or not PdfObject,
                 "You try to set an indirect object directly into a dictionary.");
 
-                // HACK?
+                // Hammer the value in without further checks.
                 _elements[key] = value;
             }
 

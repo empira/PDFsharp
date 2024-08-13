@@ -44,11 +44,7 @@ namespace PdfSharp.Pdf
             // Preserve "ï»¿" if text is UTF8 encoded.
             var i = stream.IndexOf(begin, StringComparison.Ordinal);
             var pos = i + begin.Length;
-#if NET6_0_OR_GREATER || true
             stream = stream[..pos] + "xxx" + stream[(pos + 3)..];
-#else
-            stream = stream.Substring(0, pos) + "xxx" + stream.Substring(pos + 3);
-#endif
 
             byte[] bytes = Encoding.UTF8.GetBytes(stream);
             bytes[pos++] = (byte)'ï';
@@ -73,6 +69,18 @@ namespace PdfSharp.Pdf
             var subject = _document.Info.Subject;
             var keywords = _document.Info.Keywords;
 
+            // #PDF-A Tag PDF as PDF/A-1A conform.
+            string? pdfA = null;
+            if (_document.IsPdfA)
+            {
+                // #PDF-A
+                pdfA = $"""
+                              <rdf:Description rdf:about="" xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/">
+                                <pdfaid:part>1</pdfaid:part>
+                                <pdfaid:conformance>A</pdfaid:conformance>
+                              </rdf:Description>
+                        """;
+            }
 #if true
             // Created based on a PDF created with Microsoft Word.
             var str = $"""
@@ -96,6 +104,7 @@ namespace PdfSharp.Pdf
                         <xmpMM:DocumentID>uuid:{documentId}</xmpMM:DocumentID>
                         <xmpMM:InstanceID>uuid:{instanceId}</xmpMM:InstanceID>
                       </rdf:Description>
+                {pdfA}
                     </rdf:RDF>
                   </x:xmpmeta>
                 <?xpacket end="w"?>

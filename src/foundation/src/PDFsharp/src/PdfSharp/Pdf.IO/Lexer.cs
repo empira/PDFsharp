@@ -227,7 +227,7 @@ namespace PdfSharp.Pdf.IO
 
             var name = Token;
             // Check for UTF-8 encoding.
-            for (int idx = 0; idx < name.Length; ++idx)
+            for (int idx = 0; idx < name.Length; idx++)
             {
                 // If the two top most significant bits are set this identifies a 2, 3, or 4
                 // byte UTF-8 encoding sequence.
@@ -236,7 +236,7 @@ namespace PdfSharp.Pdf.IO
                     // Special characters in Name objects use UTF-8 encoding.
                     var length = name.Length;
                     var bytes = new byte[length];
-                    for (int idx2 = 0; idx2 < length; ++idx2)
+                    for (int idx2 = 0; idx2 < length; idx2++)
                         bytes[idx2] = (byte)name[idx2];
 
                     var decodedName = Encoding.UTF8.GetString(bytes);
@@ -337,7 +337,7 @@ namespace PdfSharp.Pdf.IO
             // Can the scanned number be the first part of an object reference?
             if (testForObjectReference && period is false
                 && totalDigits <= maxDigitsForObjectNumber
-                && _currChar == Chars.SP)
+                && IsWhiteSpace(_currChar))
             {
 #if DEBUG
                 LexerHelper.TryCheckReferenceCount++;
@@ -392,7 +392,7 @@ namespace PdfSharp.Pdf.IO
             // Returns -1 if not an object reference.
             int TryReadReference()
             {
-                Debug.Assert(_currChar == Chars.SP);
+                Debug.Assert(IsWhiteSpace(_currChar));
 
                 // A Reference has the form "nnn ggg R". The original implementation of the parser used a
                 // reduce/shift algorithm in the first place. But this case is the only one we need to
@@ -404,12 +404,12 @@ namespace PdfSharp.Pdf.IO
                 SizeType position = Position;
                 string token = _token.ToString();
 
-                // Space expected.
-                if (_currChar != Chars.SP)
+                // White-space expected.
+                if (!IsWhiteSpace(_currChar))
                     goto NotAReference;
 
-                // Skip spaces.
-                while (_currChar == Chars.SP)
+                // Skip white-spaces.
+                while (IsWhiteSpace(_currChar))
                     ScanNextChar(true);
 
                 // First digit of generation expected.
@@ -428,12 +428,12 @@ namespace PdfSharp.Pdf.IO
                     ScanNextChar(true);
                 }
 
-                // Space expected.
-                if (_currChar != Chars.SP)
+                // White-space expected.
+                if (!IsWhiteSpace(_currChar))
                     goto NotAReference;
 
-                // Skip spaces.
-                while (_currChar == Chars.SP)
+                // Skip white-spaces.
+                while (IsWhiteSpace(_currChar))
                     ScanNextChar(true);
 
                 // "R" expected.

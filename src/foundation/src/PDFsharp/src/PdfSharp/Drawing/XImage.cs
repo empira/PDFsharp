@@ -14,7 +14,7 @@ using PdfSharp.Internal;
 using System.Text;
 using System.Windows.Media.Imaging;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media.Imaging;
 #endif
 using PdfSharp.Drawing.Internal;
@@ -133,9 +133,9 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if UWP
+#if WUI
         /// <summary>
-        /// Initializes a new instance of the <see cref="XImage"/> class from a UWP image.
+        /// Initializes a new instance of the <see cref="XImage"/> class from a WUI image.
         /// </summary>
         XImage(BitmapSource image)
         {
@@ -147,11 +147,11 @@ namespace PdfSharp.Drawing
         // Useful stuff here: http://stackoverflow.com/questions/350027/setting-wpf-image-source-in-code
         XImage(string path)
         {
-#if !UWP
+#if !WUI
             path = Path.GetFullPath(path);
             if (!File.Exists(path))
-                throw new FileNotFoundException(PSSR.FileNotFound(path));
-            //throw new FileNotFoundException(PSSR.FileNotFound(path), path);
+                throw new FileNotFoundException(PsMsgs.FileNotFound(path));
+            //throw new FileNotFoundException(PsMgs.FileNotFound(path), path);
 #endif
             _path = path;
 
@@ -252,7 +252,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if UWP
+#if WUI
         /// <summary>
         /// Conversion from BitmapSource to XImage.
         /// </summary>
@@ -283,10 +283,38 @@ namespace PdfSharp.Drawing
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
+            if (!stream.CanSeek)
+            {
+#if GDI
+                throw new InvalidOperationException("The stream is not seekable. If your stream is not a PDF file use FromBitmapImageStreamThatCannotSeek instead.");
+#endif
+#if WPF
+                throw new InvalidOperationException("Images can be loaded from seekable streams only.");
+#endif
+            }
+
             if (PdfReader.TestPdfFile(stream) > 0)
                 return new XPdfForm(stream);
             return new XImage(stream);
         }
+
+#if GDI
+        /// <summary>
+        /// Creates an image from the specified bitmap image stream.<br/>
+        /// Use this function if your stream does not support seek.
+        /// </summary>
+        /// <param name="stream">The stream containing a BMP, PNG, GIF, JPEG, TIFF, but not PDF file.</param>
+        public static XImage FromBitmapImageStreamThatCannotSeek(Stream stream)
+        {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+
+            if (stream.CanSeek)
+                throw new InvalidOperationException("Use this function only for streams that do not support Seek.");
+
+            return new XImage(stream);
+        }
+#endif
 #endif
 
 #if CORE
@@ -300,10 +328,7 @@ namespace PdfSharp.Drawing
                 return new XPdfForm(path);
 
             var ii = ImageImporter.GetImageImporter();
-            var i = ii.ImportImage(path);
-
-            if (i == null)
-                throw new InvalidOperationException("Unsupported image format.");
+            var i = ii.ImportImage(path) ?? throw new InvalidOperationException("Unsupported image format.");
 
             var image = new XImage(i);
             image._path = path;
@@ -319,14 +344,35 @@ namespace PdfSharp.Drawing
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
+            if (!stream.CanSeek)
+                throw new InvalidOperationException("The stream is not seekable. If your stream is not a PDF file use FromBitmapImageStreamThatCannotSeek instead.");
+
+            // Test for PDF requires a seekable stream.
             if (PdfReader.TestPdfFile(stream) > 0)
                 return new XPdfForm(stream);
 
             var ii = ImageImporter.GetImageImporter();
-            var i = ii.ImportImage(stream);
+            var i = ii.ImportImage(stream) ?? throw new InvalidOperationException("Unsupported image format.");
 
-            if (i == null)
-                throw new InvalidOperationException("Unsupported image format.");
+            XImage image = new XImage(i);
+            image._stream = stream;
+            return image;
+        }
+
+        /// <summary>
+        /// Creates an image from the specified stream.<br/>
+        /// </summary>
+        /// <param name="stream">The stream containing a BMP, PNG, JPEG, but not PDF file.</param>
+        public static XImage FromBitmapImageStreamThatCannotSeek(Stream stream)
+        {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+
+            if (stream.CanSeek)
+                throw new InvalidOperationException("Use this function only for streams that do not support Seek.");
+
+            var ii = ImageImporter.GetImageImporter();
+            var i = ii.ImportImage(stream) ?? throw new InvalidOperationException("Unsupported image format.");
 
             XImage image = new XImage(i);
             image._stream = stream;
@@ -349,10 +395,7 @@ namespace PdfSharp.Drawing
             // TODO: Check PDF file.
 
             var ii = ImageImporter.GetImageImporter();
-            var i = ii.ImportImage(path);
-
-            if (i == null)
-                throw new InvalidOperationException("Unsupported image format.");
+            var i = ii.ImportImage(path) ?? throw new InvalidOperationException("Unsupported image format."); ;
 
             var image = new XImage(i);
             image._path = path;
@@ -376,10 +419,7 @@ namespace PdfSharp.Drawing
                 throw new ArgumentNullException(nameof(stream));
 
             var ii = ImageImporter.GetImageImporter();
-            var i = ii.ImportImage(stream);
-
-            if (i == null)
-                throw new InvalidOperationException("Unsupported image format.");
+            var i = ii.ImportImage(stream) ?? throw new InvalidOperationException("Unsupported image format.");
 
             XImage image = new XImage(i);
             image._stream = stream;
@@ -416,7 +456,7 @@ namespace PdfSharp.Drawing
 
             if (PdfReader.TestPdfFile(path) > 0)
                 return true;
-#if !UWP
+#if !WUI
             return File.Exists(path);
 #else
             return false;
@@ -813,7 +853,7 @@ namespace PdfSharp.Drawing
 #if WPF && !GDI
                 return _wpfImage.PixelWidth;
 #endif
-#if UWP
+#if WUI
                 return 100;
 #endif
             }
@@ -855,7 +895,7 @@ namespace PdfSharp.Drawing
 #if WPF && !GDI
                 return _wpfImage.PixelHeight;
 #endif
-#if UWP
+#if WUI
                 return _wrtImage.PixelHeight;
 #endif
             }
@@ -918,7 +958,7 @@ namespace PdfSharp.Drawing
                 Debug.Assert(Math.Abs(_wpfImage.PixelWidth * 72 / _wpfImage.DpiX - _wpfImage.Width * (72.0 / 96.0)) < 0.001);
                 return _wpfImage.Width * (72.0 / 96.0);
 #endif
-#if UWP
+#if WUI
                 //var wb = new WriteableBitmap();
                 //GetImagePropertiesAsync
                 return 100;
@@ -968,7 +1008,7 @@ namespace PdfSharp.Drawing
                 Debug.Assert(Math.Abs(_wpfImage.PixelHeight * 72 / _wpfImage.DpiY - _wpfImage.Height * (72.0 / 96.0)) < 0.001);
                 return _wpfImage.Height * (72.0 / 96.0);
 #endif
-#if UWP
+#if WUI
                 return _wrtImage.PixelHeight; //_gdi Image.Width * 72 / _gdiImage.HorizontalResolution;
 #endif
             }
@@ -1008,7 +1048,7 @@ namespace PdfSharp.Drawing
 #if WPF && !GDI
                 return _wpfImage.PixelWidth;
 #endif
-#if UWP
+#if WUI
                 return _wrtImage.PixelWidth;
 #endif
             }
@@ -1048,7 +1088,7 @@ namespace PdfSharp.Drawing
 #if WPF && !GDI
                 return _wpfImage.PixelHeight;
 #endif
-#if UWP
+#if WUI
                 return _wrtImage.PixelHeight;
 #endif
             }
@@ -1101,7 +1141,7 @@ namespace PdfSharp.Drawing
 #if WPF && !GDI
                 return _wpfImage.DpiX; //.PixelWidth * 96.0 / _wpfImage.Width;
 #endif
-#if UWP
+#if WUI
                 return 96;
 #endif
             }
@@ -1146,7 +1186,7 @@ namespace PdfSharp.Drawing
 #if WPF && !GDI
                 return _wpfImage.DpiY; //.PixelHeight * 96.0 / _wpfImage.Height;
 #endif
-#if UWP
+#if WUI
                 return 96;
 #endif
             }
@@ -1369,7 +1409,7 @@ namespace PdfSharp.Drawing
 #if WPF
         internal BitmapSource _wpfImage = null!;
 #endif
-#if UWP
+#if WUI
         internal BitmapSource _wrtImage = null!;
 #endif
 
