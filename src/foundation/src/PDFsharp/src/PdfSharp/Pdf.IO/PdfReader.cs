@@ -300,7 +300,14 @@ namespace PdfSharp.Pdf.IO
                 var parser = new Parser(_document, options ?? new PdfReaderOptions(), _logger);
 
                 // 1. Read all trailers or cross-reference streams, but no objects.
-                _document.Trailer = parser.ReadTrailer();
+                try
+                {
+                    _document.Trailer = parser.ReadTrailer();
+                }
+                catch
+                {
+                    _document.Trailer = PdfTrailer.Rebuild(_document, stream, parser);
+                }
                 if (_document.Trailer == null!)
                     ParserDiagnostics.ThrowParserException(
                         "Invalid PDF file: no trailer found."); // TODO L10N using PsMsgs

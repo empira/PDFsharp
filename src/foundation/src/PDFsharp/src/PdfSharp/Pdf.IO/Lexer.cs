@@ -147,9 +147,9 @@ namespace PdfSharp.Pdf.IO
                     return Symbol = Symbol.Eof;
 
                 default:
-                    Debug.Assert(!Char.IsLetter(ch), "PDFsharp did something wrong. See code below.");
-                    ParserDiagnostics.HandleUnexpectedCharacter(ch, DumpNeighborhoodOfPosition());
-                    return Symbol = Symbol.None;
+                    // just skip over unexpected character
+                    ScanNextChar(true);
+                    goto TryAgain;
             }
         }
 
@@ -855,20 +855,22 @@ namespace PdfSharp.Pdf.IO
             if (start == 144848)
                 _ = sizeof(int);
 #endif
-            var rawString = RandomReadRawString(start, searchLength);
-
-            // When we come here, we have either an invalid or no \Length entry.
-            // Best we can do is to consider all byte before 'endstream' are part of the stream content.
-            // In case the stream is zipped, this is no problem. In case the stream is encrypted
-            // it would be a serious problem. But we wait if this really happens.
-            int idxEndStream = rawString.LastIndexOf("endstream", StringComparison.Ordinal);
-            if (idxEndStream == -1)
+            var firstStart = start;
+            while (start < _pdfLength)
             {
-                SuppressExceptions.HandleError(suppressObjectOrderExceptions, () => throw TH.ObjectNotAvailableException_CannotRetrieveStreamLength());
-                return -1;
-            }
+                var rawString = RandomReadRawString(start, Math.Min(searchLength, (int)(_pdfLength - start)));
 
-            return idxEndStream;
+                // When we come here, we have either an invalid or no \Length entry.
+                // Best we can do is to consider all byte before 'endstream' are part of the stream content.
+                // In case the stream is zipped, this is no problem. In case the stream is encrypted
+                // it would be a serious problem. But we wait if this really happens.
+                int idxEndStream = rawString.LastIndexOf("endstream", StringComparison.Ordinal);
+                if (idxEndStream >= 0)
+                    return (int)(start - firstStart + idxEndStream);
+                start += Math.Max(1, searchLength - "endstream".Length - 1);
+            }
+            SuppressExceptions.HandleError(suppressObjectOrderExceptions, () => throw TH.ObjectNotAvailableException_CannotRetrieveStreamLength());
+            return -1;
         }
 
         /// <summary>

@@ -57,7 +57,7 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         /// <param name="objectID">The ID of the object to move.</param>
         /// <param name="suppressObjectOrderExceptions">Suppresses exceptions that may be caused by not yet available objects.</param>
-        public SizeType MoveToObject(PdfObjectID objectID, SuppressExceptions? suppressObjectOrderExceptions)
+        public SizeType MoveToObject(PdfObjectID objectID, SuppressExceptions? suppressObjectOrderExceptions = null)
         {
             SizeType? position = _document.IrefTable[objectID]?.Position;
             if (!position.HasValue)
@@ -829,7 +829,7 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Reads the next symbol that must be the specified one.
         /// </summary>
-        Symbol ReadSymbol(Symbol symbol)
+        internal Symbol ReadSymbol(Symbol symbol)
         {
             Symbol current = ScanNextToken(symbol == Symbol.ObjRef);
             if (symbol != current)
@@ -903,7 +903,7 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Reads the PdfObject of the reference, no matter if it’s saved at document level or inside an ObjectStream.
         /// </summary>
-        internal PdfObject ReadIndirectObject(PdfReference pdfReference, SuppressExceptions? suppressObjectOrderExceptions, bool withoutDecrypting = false)
+        internal PdfObject ReadIndirectObject(PdfReference pdfReference, SuppressExceptions? suppressObjectOrderExceptions = null, bool withoutDecrypting = false)
         {
             try
             {
@@ -1406,7 +1406,7 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Reads cross-reference stream(s).
         /// </summary>
-        PdfTrailer ReadXRefStream(PdfCrossReferenceTable xrefTable)
+        internal PdfTrailer ReadXRefStream(PdfCrossReferenceTable xrefTable)
         {
             // Read cross-reference stream.
             //Debug.Assert(_lexer.Symbol == Symbol.Integer);

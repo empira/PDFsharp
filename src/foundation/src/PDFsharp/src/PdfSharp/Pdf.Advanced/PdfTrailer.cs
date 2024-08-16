@@ -4,6 +4,10 @@
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Security;
 using PdfSharp.Pdf.Internal;
+using System.Text.RegularExpressions;
+using System.Text;
+using PdfSharp.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace PdfSharp.Pdf.Advanced
 {
@@ -214,6 +218,142 @@ namespace PdfSharp.Pdf.Advanced
             Debug.Assert(_document.IrefTable.IsUnderConstruction == false);
             _document.IrefTable.IsUnderConstruction = false;
         }
+
+        /// <summary>
+        /// Attempts to rebuild the trailer and iref-table if original ones seem to be corrupt
+        /// </summary>
+        /// <exception cref="PdfReaderException"></exception>
+        internal static PdfTrailer Rebuild(PdfDocument document, Stream stream, Parser parser)
+        {
+            PdfSharpLogHost.PdfReadingLogger.LogInformation("Attempt to rebuild trailer...");
+#if NET6_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(document, nameof(document));
+#else
+            if (document == null)
+                throw new ArgumentNullException(nameof(document));
+#endif
+            if (document._lexer == null)
+                throw new InvalidOperationException("Document must have a lexer set");
+
+            // TODO: for performance reasons, we would normally use static properties for the Regex
+            // (and Source-Generators for newer .Net Versions !)
+            // but since this should be a one-time operation, we declare them inline for clarity)
+            
+            // start on an object, e.g. "1 0 obj"
+            var rxObjectStart = new Regex("\\b(?<num>\\d+)\\s+(?<gen>\\d+)\\s+obj\\b");
+            // start of a trailer, e.g. "trailer <<"
+            var rxTrailerStart = new Regex("\\btrailer\\s*<<");
+            var irefTable = new PdfCrossReferenceTable(document);
+            var trailerStart = 0L;
+            try
+            {
+                // scan the whole file and collect object-ids
+                stream.Position = 0;
+                var buffer = new byte[4096];
+                var nextStreamPos = stream.Position + 1;    // start of the next chunk
+                while (stream.Position < stream.Length)
+                {
+                    var bufStart = stream.Position;
+                    var readLength = stream.Read(buffer, 0, buffer.Length);
+                    var readString = Encoding.ASCII.GetString(buffer, 0, readLength);
+                    // search for objects
+                    var numObjectsFound = 0;
+                    var objectMatches = rxObjectStart.Matches(readString);
+                    foreach (Match match in objectMatches)
+                    {
+                        if (match.Success)
+                        {
+                            var objNumber = int.Parse(match.Groups["num"].Value);
+                            var generationNumber = int.Parse(match.Groups["gen"].Value);
+                            var objId = new PdfObjectID(objNumber, generationNumber);
+                            var existingObj = irefTable[objId];
+                            if (existingObj != null)
+                                // always use the object found later in the file
+                                // this handles newer objects written by incremental updates
+                                existingObj.Position = bufStart + match.Index;
+                            else
+                                irefTable.Add(new PdfReference(objId, (int)bufStart + match.Index));
+                            nextStreamPos = bufStart + match.Index + match.Length;
+                            numObjectsFound++;
+                        }
+                    }
+                    // search for the trailer
+                    var trailerMatches = rxTrailerStart.Matches(readString);
+                    foreach (Match match in trailerMatches)
+                    {
+                        if (match.Success)
+                        {
+                            // if trailer is found multiple times, the last one wins (conforms to spec)
+                            trailerStart = bufStart + match.Index;
+                            nextStreamPos = Math.Max(nextStreamPos, trailerStart + match.Length);
+                        }
+                    }
+                    // read with overlap to avoid splitting an object-declaration
+                    if (readLength == buffer.Length)
+                        stream.Position = Math.Max(0, stream.Position - 12);
+                    if (stream.Position < stream.Length)
+                    {
+                        if (trailerMatches.Count > 0 || numObjectsFound > 0)
+                            stream.Position = nextStreamPos;
+                        else
+                            // read with overlap to avoid splitting an object-declaration
+                            stream.Position = Math.Max(0, stream.Position - 12);
+                    }
+                }
+                document.IrefTable = irefTable;
+                irefTable.IsUnderConstruction = true;
+
+                var allRefs = irefTable.AllReferences;
+                var trailer = new PdfTrailer(document);
+
+                if (trailerStart > 0L)
+                {
+                    // read the entries of the trailer dictionary
+                    stream.Position = trailerStart;
+                    document._lexer.Position = trailerStart;
+                    parser.ReadSymbol(Symbol.Trailer);
+                    parser.ReadSymbol(Symbol.BeginDictionary);
+                    parser.ReadDictionary(trailer, false);
+                    // TODO: what about /Prev entry ? these may also be corrupt (need a file to verify)
+                    // in theory, this can be ignored, because we already have read ALL objects
+                }
+                if (!trailer.Elements.ContainsKey(Keys.Root))
+                {
+                    // cases:
+                    // 1. no trailer found (maybe cut off at end of file)
+                    // 2. trailer is corrupt (found one with just a single /Size entry, /Catalog was missing)
+                    // read all found objects searching for the catalog (/Root entry)
+                    foreach (var objRef in allRefs)
+                    {
+                        parser.MoveToObject(objRef.ObjectID);
+                        var obj = parser.ReadIndirectObject(objRef);
+                        if (obj is PdfDictionary dict)
+                        {
+                            var type = dict.Elements.GetName(PdfCatalog.Keys.Type);
+                            // ensure we use a valid catalog (we may find multiple)
+                            if (type == "/Catalog" && dict.Elements.ContainsKey(PdfCatalog.Keys.Pages))
+                            {
+                                trailer.Elements[Keys.Root] = dict.Reference;
+                            }
+                        }
+                    }
+                }
+                // still no catalog ? then throw
+                if (!trailer.Elements.ContainsKey(Keys.Root))
+                    throw new PdfReaderException(
+                        "Unable to rebuild trailer and iref-table, catalog dictionary not found. The pdf is corrupt");
+
+                var largestObjectNumber = allRefs.Max(x => x.ObjectID.ObjectNumber);
+                trailer.Elements.SetInteger(Keys.Size, largestObjectNumber + 1);
+                PdfSharpLogHost.PdfReadingLogger.LogInformation("Trailer was rebuild with {count} found objects", irefTable.AllObjectIDs.Length);
+                return trailer;
+            }
+            catch (Exception ex)
+            {
+                throw new PdfReaderException("Unable to rebuild trailer and iref-table, pdf is corrupt", ex);
+            }
+        }
+
 
         /// <summary>
         /// Predefined keys of this dictionary.
