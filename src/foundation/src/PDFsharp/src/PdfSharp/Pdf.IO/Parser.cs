@@ -57,7 +57,7 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         /// <param name="objectID">The ID of the object to move.</param>
         /// <param name="suppressObjectOrderExceptions">Suppresses exceptions that may be caused by not yet available objects.</param>
-        public SizeType MoveToObject(PdfObjectID objectID, SuppressExceptions? suppressObjectOrderExceptions)
+        public SizeType MoveToObject(PdfObjectID objectID, SuppressExceptions? suppressObjectOrderExceptions = null)
         {
             SizeType? position = _document.IrefTable[objectID]?.Position;
             if (!position.HasValue)
@@ -369,9 +369,20 @@ namespace PdfSharp.Pdf.IO
             // Step 3: We try to read the stream content.
             // Maybe we have to re-read it in case 'endstream' was not at the
             // right place after reading with the length value coming from /Length.
-            var bytes = _lexer.ScanStream(startPosition, streamLength);
-            var stream = new PdfDictionary.PdfStream(bytes, dict);
-            dict.Stream = stream;
+            byte[] bytes;
+            try
+            {
+                // this may throw if startPosition + streamLength > length of stream
+                bytes = _lexer.ScanStream(startPosition, streamLength);
+                var stream = new PdfDictionary.PdfStream(bytes, dict);
+                dict.Stream = stream;
+            }
+            catch
+            {
+                // reset stream position
+                _lexer.Position = startPosition;
+                // ignore exception, we'll try again after determining real stream-length
+            }
 #if DEBUG_  // Check it with Notepad++ directly in PDF file.
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (bytes is not null && bytes.Length > 0)
@@ -829,7 +840,7 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Reads the next symbol that must be the specified one.
         /// </summary>
-        Symbol ReadSymbol(Symbol symbol)
+        internal Symbol ReadSymbol(Symbol symbol)
         {
             Symbol current = ScanNextToken(symbol == Symbol.ObjRef);
             if (symbol != current)
@@ -903,7 +914,7 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Reads the PdfObject of the reference, no matter if it’s saved at document level or inside an ObjectStream.
         /// </summary>
-        internal PdfObject ReadIndirectObject(PdfReference pdfReference, SuppressExceptions? suppressObjectOrderExceptions, bool withoutDecrypting = false)
+        internal PdfObject ReadIndirectObject(PdfReference pdfReference, SuppressExceptions? suppressObjectOrderExceptions = null, bool withoutDecrypting = false)
         {
             try
             {
@@ -1406,7 +1417,7 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Reads cross-reference stream(s).
         /// </summary>
-        PdfTrailer ReadXRefStream(PdfCrossReferenceTable xrefTable)
+        internal PdfTrailer ReadXRefStream(PdfCrossReferenceTable xrefTable)
         {
             // Read cross-reference stream.
             //Debug.Assert(_lexer.Symbol == Symbol.Integer);

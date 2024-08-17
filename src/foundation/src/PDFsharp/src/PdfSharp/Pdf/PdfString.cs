@@ -277,9 +277,11 @@ namespace PdfSharp.Pdf
                 return true;
             }
 
-#if true // UTF-16LE is not defined as valid text string encoding in PDF reference.
+#if false // UTF-16LE is not defined as valid text string encoding in PDF reference.
             if (value is ['\xFF', '\xFE', ..])
+            {
                 throw new NotImplementedException("Found UTF-16LE string. Please send us the PDF file and we will fix it (issues (at) pdfsharp.net).");
+            }
 #else
             // Adobe Reader also supports UTF-16LE.
             if (value is ['\xFF', '\xFE', ..])

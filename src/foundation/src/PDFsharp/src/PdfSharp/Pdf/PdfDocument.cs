@@ -899,7 +899,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Gets the standard security handler, if existing and encryption is active.
         /// </summary>
-        internal PdfStandardSecurityHandler? EffectiveSecurityHandler => Trailer.EffectiveSecurityHandler;
+        internal PdfStandardSecurityHandler? EffectiveSecurityHandler => Trailer?.EffectiveSecurityHandler;
 
         internal PdfTrailer Trailer { get; set; } = default!;
 
