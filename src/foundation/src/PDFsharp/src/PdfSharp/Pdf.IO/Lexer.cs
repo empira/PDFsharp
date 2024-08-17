@@ -866,7 +866,28 @@ namespace PdfSharp.Pdf.IO
                 // it would be a serious problem. But we wait if this really happens.
                 int idxEndStream = rawString.LastIndexOf("endstream", StringComparison.Ordinal);
                 if (idxEndStream >= 0)
+                {
+                    // The spec says (7.3.8, Stream Objects):
+                    // "There should be an end-of-line marker after the data and before endstream;
+                    // this marker shall not be included in the stream length"
+
+                    // check bytes before the keyword for possible CRLF or LF or CR
+                    // (CR alone SHALL NOT be used but check it anyway)
+                    // sanity check, should always pass since we SHOULD have read the "stream" keyword before we came here
+                    if (start + idxEndStream >= 2)
+                    {
+                        _pdfStream.Position = start + idxEndStream - 2;
+                        var b1 = _pdfStream.ReadByte();
+                        var b2 = _pdfStream.ReadByte();
+                        if (b2 == '\n' || b2 == '\r')   // possible CRLF or single LF or single CR
+                        {
+                            idxEndStream--;
+                            if (b1 == '\r' && b2 != '\r')   // handle CRLF but not CRCR
+                                idxEndStream--;
+                        }
+                    }
                     return (int)(start - firstStart + idxEndStream);
+                }
                 start += Math.Max(1, searchLength - "endstream".Length - 1);
             }
             SuppressExceptions.HandleError(suppressObjectOrderExceptions, () => throw TH.ObjectNotAvailableException_CannotRetrieveStreamLength());
