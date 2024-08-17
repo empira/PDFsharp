@@ -369,9 +369,20 @@ namespace PdfSharp.Pdf.IO
             // Step 3: We try to read the stream content.
             // Maybe we have to re-read it in case 'endstream' was not at the
             // right place after reading with the length value coming from /Length.
-            var bytes = _lexer.ScanStream(startPosition, streamLength);
-            var stream = new PdfDictionary.PdfStream(bytes, dict);
-            dict.Stream = stream;
+            byte[] bytes;
+            try
+            {
+                // this may throw if startPosition + streamLength > length of stream
+                bytes = _lexer.ScanStream(startPosition, streamLength);
+                var stream = new PdfDictionary.PdfStream(bytes, dict);
+                dict.Stream = stream;
+            }
+            catch
+            {
+                // reset stream position
+                _lexer.Position = startPosition;
+                // ignore exception, we'll try again after determining real stream-length
+            }
 #if DEBUG_  // Check it with Notepad++ directly in PDF file.
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (bytes is not null && bytes.Length > 0)
