@@ -321,7 +321,7 @@ namespace PdfSharp.Pdf.Advanced
                 {
                     // cases:
                     // 1. no trailer found (maybe cut off at end of file)
-                    // 2. trailer is corrupt (found one with just a single /Size entry, /Catalog was missing)
+                    // 2. trailer is corrupt (found one with just a single /Size entry, /Root was missing)
                     // read all found objects searching for the catalog (/Root entry)
                     foreach (var objRef in allRefs)
                     {
