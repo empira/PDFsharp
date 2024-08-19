@@ -53,7 +53,7 @@ namespace PdfSharp.Pdf.Security.Encryption
             if (versionValue is not 5)
                 throw TH.InvalidOperationException_InvalidVersionValueForEncryptionVersion5();
 
-            if (revisionValue is not 6)
+            if (revisionValue is not (5 or 6))
                 throw TH.InvalidOperationException_InvalidRevisionValueForEncryptionVersion5();
 
             if (lengthValue is not (null or 256))
@@ -348,7 +348,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// Computes the hash for a user password.
         /// Corresponding to "7.6.4.3.4 Algorithm 2.B: Computing a hash (revision 6 and later)"
         /// </summary>
-        static byte[] ComputeUserHash(byte[] password, byte[] salt)
+        byte[] ComputeUserHash(byte[] password, byte[] salt)
         {
             return ComputeHashInternal(password, salt, false, null);
         }
@@ -357,7 +357,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// Computes the hash for an owner password.
         /// Corresponding to "7.6.4.3.4 Algorithm 2.B: Computing a hash (revision 6 and later)"
         /// </summary>
-        static byte[] ComputeOwnerHash(byte[] password, byte[] salt, byte[]? userValue)
+        byte[] ComputeOwnerHash(byte[] password, byte[] salt, byte[]? userValue)
         {
             return ComputeHashInternal(password, salt, true, userValue);
         }
@@ -366,7 +366,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// Computes the hash.
         /// Corresponding to "7.6.4.3.4 Algorithm 2.B: Computing a hash (revision 6 and later)"
         /// </summary>
-        static byte[] ComputeHashInternal(byte[] password, byte[] salt, bool computeOwnerHash, byte[]? userValue)
+        byte[] ComputeHashInternal(byte[] password, byte[] salt, bool computeOwnerHash, byte[]? userValue)
         {
             // Take the SHA-256 hash of input and name it k.
             var input = password.Concat(salt);
@@ -379,49 +379,51 @@ namespace PdfSharp.Pdf.Security.Encryption
             var k = sha.ComputeHash(input.ToArray());
 #endif
 
-            var lastByteOfE = new byte();
-
-            using var aes = CreateAesForHashCryptography();
-
-            // Run steps (a)-(d) at least 64 times
-            // and afterward as long as the last byte of e is greater than round number - 32. e) is f) this check only.
-            for (var i = 0; i < 64 || lastByteOfE > i - 32; i++)
+            if (RevisionValue > 5)
             {
-                // a): Create k1 containing 64 repetitions of input and k
-                var sequenceEnumerable = password.Concat(k);
-                // For computing the owner hash also concat the user value).
-                if (computeOwnerHash)
-                    sequenceEnumerable = sequenceEnumerable.Concat(userValue!);
-                var sequence = sequenceEnumerable.ToArray();
+                var lastByteOfE = new byte();
 
-                IEnumerable<byte> k1Enumerable = [];
-                for (var j = 0; j < 64; j++)
-                    k1Enumerable = k1Enumerable.Concat(sequence);
-                var k1 = k1Enumerable.ToArray();
+                using var aes = CreateAesForHashCryptography();
 
-                // b): Create e: Encrypt k1 using AES-128 (CBC, no padding), with the first 16 bytes of k as the key and the second 16 bytes of k as the initialization vector.
-                var aesKey = k[..16];
-                var aesIV = k[16..32];
-                using var encryptor = aes.CreateEncryptor(aesKey, aesIV);
-                var e = encryptor.TransformFinalBlock(k1, 0, k1.Length);
+                // Run steps (a)-(d) at least 64 times
+                // and afterward as long as the last byte of e is greater than round number - 32. e) is f) this check only.
+                for (var i = 0; i < 64 || lastByteOfE > i - 32; i++)
+                {
+                    // a): Create k1 containing 64 repetitions of input and k
+                    var sequenceEnumerable = password.Concat(k);
+                    // For computing the owner hash also concat the user value).
+                    if (computeOwnerHash)
+                        sequenceEnumerable = sequenceEnumerable.Concat(userValue!);
+                    var sequence = sequenceEnumerable.ToArray();
 
-                // c) + d): Take the first 16 bytes of e as an unsigned big-endian integer.
-                var e16 = e[..16];
+                    IEnumerable<byte> k1Enumerable = [];
+                    for (var j = 0; j < 64; j++)
+                        k1Enumerable = k1Enumerable.Concat(sequence);
+                    var k1 = k1Enumerable.ToArray();
+
+                    // b): Create e: Encrypt k1 using AES-128 (CBC, no padding), with the first 16 bytes of k as the key and the second 16 bytes of k as the initialization vector.
+                    var aesKey = k[..16];
+                    var aesIV = k[16..32];
+                    using var encryptor = aes.CreateEncryptor(aesKey, aesIV);
+                    var e = encryptor.TransformFinalBlock(k1, 0, k1.Length);
+
+                    // c) + d): Take the first 16 bytes of e as an unsigned big-endian integer.
+                    var e16 = e[..16];
 #if NET6_0_OR_GREATER
-                var e16BigEndianUnsigned = new BigInteger(e16, true, true);
+                    var e16BigEndianUnsigned = new BigInteger(e16, true, true);
 #else
                 var e16BigEndianUnsigned = DotNetHelper.CreateBigInteger(e16, true, true);
 #endif
-                // Calculate the remainder of the result by modulo 3
-                // and according to that result choose the SHA algorithm to calculate the new k from e.
-                BigInteger.DivRem(e16BigEndianUnsigned, 3, out var remainder);
+                    // Calculate the remainder of the result by modulo 3
+                    // and according to that result choose the SHA algorithm to calculate the new k from e.
+                    BigInteger.DivRem(e16BigEndianUnsigned, 3, out var remainder);
 #if NET6_0_OR_GREATER
-                if (remainder == 0)
-                    k = SHA256.HashData(e);
-                else if (remainder == 1)
-                    k = SHA384.HashData(e);
-                else if (remainder == 2)
-                    k = SHA512.HashData(e);
+                    if (remainder == 0)
+                        k = SHA256.HashData(e);
+                    else if (remainder == 1)
+                        k = SHA384.HashData(e);
+                    else if (remainder == 2)
+                        k = SHA512.HashData(e);
 #else
                 if (remainder == 0)
                     k = sha.ComputeHash(e);
@@ -431,7 +433,8 @@ namespace PdfSharp.Pdf.Security.Encryption
                     k = SHA512.Create().ComputeHash(e);
 #endif
 
-                lastByteOfE = e.Last();
+                    lastByteOfE = e.Last();
+                }
             }
 
             // The first 32 bytes of the final K are the output of the algorithm.
@@ -624,7 +627,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// Validates the user password.
         /// Corresponding to "7.6.4.4.10 Algorithm 11: Authenticating the user password (Security handlers of revision 6)"
         /// </summary>
-        static bool ValidateUserPassword(byte[] utf8InputPassword, byte[] userValue)
+        bool ValidateUserPassword(byte[] utf8InputPassword, byte[] userValue)
         {
             // a) Test inputPassword against the userValue by computing the hash with an input string consisting of the UTF-8 password
             // concatenated with the user validation salt.
@@ -641,7 +644,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// Validates the owner password.
         /// Corresponding to "7.6.4.4.11 Algorithm 12: Authenticating the owner password (Security handlers of revision 6)"
         /// </summary>
-        static bool ValidateOwnerPassword(byte[] utf8InputPassword, byte[] userValue, byte[] ownerValue)
+        bool ValidateOwnerPassword(byte[] utf8InputPassword, byte[] userValue, byte[] ownerValue)
         {
             // a) Test inputPassword against the ownerValue by computing the hash with an input string consisting of the UTF-8 password
             // concatenated with the owner validation salt and userValue.

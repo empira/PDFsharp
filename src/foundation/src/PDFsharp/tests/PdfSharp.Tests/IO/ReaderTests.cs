@@ -3,6 +3,9 @@
 
 using System.Diagnostics;
 using System.Globalization;
+#if !NET6_0_OR_GREATER
+using System.Net.Http;
+#endif
 #if WPF
 using System.IO;
 #endif
@@ -297,6 +300,22 @@ namespace PdfSharp.Tests.IO
                     gfx.DrawString(label ?? "", font, XBrushes.Firebrick, 20, 20);
                 }
             }
+        }
+
+        [Theory]
+        [InlineData("https://github.com/py-pdf/pypdf/blob/0c81f3cfad26ddffbfc60d0ae855118e515fad8c/resources/encryption/r5-empty-password.pdf?raw=true", PdfDocumentOpenMode.Import, null)]
+        [InlineData("https://github.com/py-pdf/pypdf/blob/0c81f3cfad26ddffbfc60d0ae855118e515fad8c/resources/encryption/r5-user-password.pdf?raw=true", PdfDocumentOpenMode.Import, "asdfzxcv")]
+        [InlineData("https://github.com/py-pdf/pypdf/blob/0c81f3cfad26ddffbfc60d0ae855118e515fad8c/resources/encryption/r5-owner-password.pdf?raw=true", PdfDocumentOpenMode.Modify, "asdfzxcv")]
+        [InlineData("https://github.com/py-pdf/pypdf/blob/0c81f3cfad26ddffbfc60d0ae855118e515fad8c/resources/encryption/r5-owner-password.pdf?raw=true", PdfDocumentOpenMode.Import, "asdfzxcv")]
+        public async Task Read_file_with_version_5_revision_5_encryption(string url, PdfDocumentOpenMode mode, string? password)
+        {
+            var client = new HttpClient();
+            var content = await client.GetByteArrayAsync(url);
+            using var ms = new MemoryStream(content);
+
+            var act = () => PdfReader.Open(ms, password, mode);
+
+            act.Should().NotThrow();
         }
     }
 }

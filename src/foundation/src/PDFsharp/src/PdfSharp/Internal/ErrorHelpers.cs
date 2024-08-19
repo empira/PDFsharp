@@ -72,7 +72,7 @@ namespace PdfSharp.Internal
             new("The encryption version value must be 5 for encryption version 5.");
 
         public static InvalidOperationException InvalidOperationException_InvalidRevisionValueForEncryptionVersion5() =>
-            new("The encryption revision value must be 6 for encryption version 5.");
+            new("The encryption revision value must be 5 (deprecated) or 6 for encryption version 5.");
 
         public static InvalidOperationException InvalidOperationException_InvalidLengthValueForEncryptionVersion5() =>
             new("The Length value must be omitted or 256 for encryption version 5.");
