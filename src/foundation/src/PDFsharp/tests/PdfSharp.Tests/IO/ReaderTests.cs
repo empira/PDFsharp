@@ -298,5 +298,15 @@ namespace PdfSharp.Tests.IO
                 }
             }
         }
+   
+        [Fact]
+        public void Encrypt_can_be_an_inline_dictionary()
+        {
+            const string path = @"C:\Users\ArnaudTAMAILLON\Downloads\dictionary_encrypt.pdf";
+            var act = () => PdfReader.Open(path, PdfDocumentOpenMode.Import);
+            act.Should().NotThrow();
+            act = () => PdfReader.Open(path, "asdfzxcv", PdfDocumentOpenMode.Modify);
+            act.Should().NotThrow();
+        }
     }
 }
