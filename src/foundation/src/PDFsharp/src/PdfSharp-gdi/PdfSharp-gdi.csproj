@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="root\CompilerServices.cs" />
+    <Compile Include="..\..\..\shared\src\PdfSharp.System\System\CodeAnalysis.cs" Link="root\CodeAnalysis.cs" />
     <Compile Include="..\PdfSharp\!internal\Configuration.cs" Link="!internal\Configuration.cs" />
     <Compile Include="..\PdfSharp\!internal\Directives.cs" Link="!internal\Directives.cs" />
     <Compile Include="..\PdfSharp\!internal\TargetContext.cs" Link="!internal\TargetContext.cs" />

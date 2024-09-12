@@ -7,6 +7,7 @@
 
 namespace System.Runtime.CompilerServices
 {
+#if !NET6_0_OR_GREATER
     /// <summary>
     /// Extension method GetSubArray required for the built-in range operator (e.g.'[1..9]').
     /// Fun fact: This class must be compiled into each assembly. If it is only visible through
@@ -45,4 +46,5 @@ namespace System.Runtime.CompilerServices
             }
         }
     }
+#endif
 }
