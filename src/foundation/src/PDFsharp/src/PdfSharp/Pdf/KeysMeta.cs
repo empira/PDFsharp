@@ -1,6 +1,7 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using PdfSharp.Pdf.Advanced;
 
@@ -38,6 +39,7 @@ namespace PdfSharp.Pdf
 
         public string FixedValue { get; }
 
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
         public Type ObjectType { get; set; }
 
         public bool CanBeIndirect => (KeyType & KeyType.MustNotBeIndirect) == 0;
@@ -45,6 +47,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Returns the type of the object to be created as value for the described key.
         /// </summary>
+        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
         public Type GetValueType()
         {
             var type = ObjectType;
@@ -134,7 +137,7 @@ namespace PdfSharp.Pdf
     /// </summary>
     class DictionaryMeta
     {
-        public DictionaryMeta(Type type)
+        public DictionaryMeta([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] Type type)
         {
             var fields = type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
             foreach (var field in fields)
@@ -159,7 +162,7 @@ namespace PdfSharp.Pdf
         /// <param name="type">The type.</param>
         /// <param name="defaultContentKeyType">Default type of the content key.</param>
         /// <param name="defaultContentType">Default type of the content.</param>
-        public DictionaryMeta(Type type, KeyType defaultContentKeyType, Type defaultContentType) : this(type)
+        public DictionaryMeta([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] Type type, KeyType defaultContentKeyType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type defaultContentType) : this(type)
         {
             _defaultContentKeyDescriptor = new KeyDescriptor(new KeyInfoAttribute(defaultContentKeyType, defaultContentType));
         }

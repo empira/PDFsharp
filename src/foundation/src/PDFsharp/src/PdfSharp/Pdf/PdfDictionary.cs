@@ -863,6 +863,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Returns the type of the object to be created as value of the specified key.
             /// </summary>
+            [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
             Type? GetValueType(string key)  // TODO: move to PdfObject
             {
                 Type? type = null;
@@ -880,7 +881,7 @@ namespace PdfSharp.Pdf
                 return type;
             }
 
-            PdfArray CreateArray(Type type, PdfArray? oldArray)
+            PdfArray CreateArray([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type type, PdfArray? oldArray)
             {
 #if true
                 PdfArray? array;
@@ -942,7 +943,7 @@ namespace PdfSharp.Pdf
 #endif
             }
 
-            PdfDictionary CreateDictionary(Type type, PdfDictionary? oldDictionary)
+            PdfDictionary CreateDictionary([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type type, PdfDictionary? oldDictionary)
             {
 #if true
                 ConstructorInfo? ctorInfo;
@@ -1001,7 +1002,7 @@ namespace PdfSharp.Pdf
 #endif
             }
 
-            PdfItem CreateValue(Type type, PdfDictionary? oldValue)
+            PdfItem CreateValue([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type type, PdfDictionary? oldValue)
             {
 #if true
                 var ctorInfo = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,

@@ -1,6 +1,7 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using PdfSharp.Pdf.IO;
 
@@ -160,7 +161,7 @@ namespace PdfSharp.Pdf.Advanced
         /// Creates the indirect object of the specified type, adds it to the document,
         /// and returns the object.
         /// </summary>
-        public T CreateIndirectObject<T>() where T : PdfObject
+        public T CreateIndirectObject<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>() where T : PdfObject
         {
 #if true
             T obj = Activator.CreateInstance<T>();
