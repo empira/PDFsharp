@@ -7,7 +7,7 @@ namespace MigraDoc.DocumentObjectModel
     /// Represents a special character in paragraph text.
     /// </summary>
     // TODO: Change this class and store symbolName and char in different fields.
-    public class Character : DocumentObject
+    public class Character : TextBasedDocumentObject
     {
         // ===== \space =====
         /// <summary>
@@ -87,7 +87,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Initializes a new instance of the Character class.
         /// </summary>
-        public Character()
+        public Character(TextRenderOption textRenderOption = TextRenderOption.Default) : base(textRenderOption)
         {
             BaseValues = new CharacterValues(this);
         }
@@ -95,7 +95,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Initializes a new instance of the Character class with the specified parent.
         /// </summary>
-        internal Character(DocumentObject parent) : base(parent)
+        internal Character(DocumentObject parent, TextRenderOption textRenderOption = TextRenderOption.Default) : base(parent, textRenderOption)
         {
             BaseValues = new CharacterValues(this); 
         }
@@ -103,7 +103,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Initializes a new instance of the Character class with the specified SymbolName.
         /// </summary>
-        Character(SymbolName name) : this()
+        Character(SymbolName name, TextRenderOption textRenderOption = TextRenderOption.Default) : this(textRenderOption)
         {
             Values.SymbolName = name;
         }

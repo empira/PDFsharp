@@ -11,7 +11,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
         /// <summary>
         /// Initializes a new instance of the NumPagesField class.
         /// </summary>
-        public NumPagesField()
+        public NumPagesField(TextRenderOption textRenderOption = TextRenderOption.Default) : base(textRenderOption)
         {
             BaseValues = new NumPagesFieldValues(this);
         }
@@ -19,7 +19,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
         /// <summary>
         /// Initializes a new instance of the NumPagesField class with the specified parent.
         /// </summary>
-        internal NumPagesField(DocumentObject parent) : base(parent)
+        internal NumPagesField(DocumentObject parent, TextRenderOption textRenderOption = TextRenderOption.Default) : base(parent, textRenderOption)
         {
             BaseValues = new NumPagesFieldValues(this);
         }

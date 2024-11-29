@@ -65,9 +65,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new paragraph with the specified text to the header or footer.
         /// </summary>
-        public Paragraph AddParagraph(string paragraphText)
+        public Paragraph AddParagraph(string paragraphText, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddParagraph(paragraphText);
+            return Elements.AddParagraph(paragraphText, textRenderOption);
         }
 
         /// <summary>

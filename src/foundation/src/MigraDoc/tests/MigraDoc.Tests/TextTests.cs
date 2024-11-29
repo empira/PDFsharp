@@ -440,5 +440,114 @@ namespace MigraDoc.Tests
             //// ...and start a viewer.
             //Process.Sta/rt(new ProcessStartInfo(filename) { UseShellExecute = true });
         }
+
+        [Theory()]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, false)]
+        public void RenderTextAsPathTest(bool isRenderAsPath, bool isFlattenPath)
+        {
+            var document = new Document();
+
+            var style = document.Styles[StyleNames.Heading1];
+            style!.Font.Size = Unit.FromPoint(14);
+            style.Font.Bold = true;
+
+            var section = document.AddSection();
+
+            // Leave 10 cm for content.
+            section.PageSetup.TopMargin = Unit.FromCentimeter(5);
+            section.PageSetup.BottomMargin = Unit.FromCentimeter(8);
+
+            var textRenderOption = isRenderAsPath switch
+            {
+                true when isFlattenPath => TextRenderOption.FlattenPath,
+                true => TextRenderOption.Path,
+                _ => TextRenderOption.Default
+            };
+
+            // Add test paragraph.
+            var p = section.AddParagraph("Paragraph one", textRenderOption);
+            p.AddLineBreak(textRenderOption);
+            p.AddChar('C', textRenderOption);
+            p.AddSpace(3, textRenderOption);
+            p.AddCharacter(SymbolName.Copyright, textRenderOption);
+            p.AddTab(textRenderOption);
+            p.AddCharacter('C', textRenderOption);
+            p.AddCharacter('h', textRenderOption);
+            p.AddLineBreak(textRenderOption);
+            var ft = p.AddFormattedText(textRenderOption);
+            ft.AddText("Formatted Text");
+            p.AddTab(textRenderOption);
+            p.AddTab(textRenderOption);
+            p.AddTab(textRenderOption);
+            ft = p.AddFormattedText(TextFormat.Bold, textRenderOption);
+            ft.AddText("Formatted Bold Text");
+            p.AddLineBreak(textRenderOption);
+            var font = new Font("Times New Roman", 20);
+            ft = p.AddFormattedText(font, textRenderOption);
+            ft.AddText("Formatted Text with Font");
+            p.AddLineBreak(textRenderOption);
+            p.AddFormattedText("Formatted Text one", textRenderOption);
+            p.AddLineBreak(textRenderOption);
+            p.AddFormattedText("Formatted Text two", TextFormat.Underline, textRenderOption);
+            p.AddLineBreak(textRenderOption);
+            p.AddFormattedText("Formatted Text three", font, textRenderOption);
+            p.AddLineBreak(textRenderOption);
+            p.AddFormattedText("Formatted Text four", StyleNames.Heading4, textRenderOption);
+            p.AddLineBreak(textRenderOption);
+            p.AddText("Section: ", textRenderOption);
+            p.AddSectionField(textRenderOption).Format = "alphabetic";
+            p.AddLineBreak(textRenderOption);
+            p.AddText("Footnote: ", textRenderOption);
+            p.AddFootnote(textRenderOption);
+            p.AddLineBreak(textRenderOption);
+            p.AddText("Page: ", textRenderOption);
+            p.AddPageField(textRenderOption).Format = "ROMAN";
+            p.AddLineBreak(textRenderOption);
+            p.AddText("NumPages: ", textRenderOption);
+            p.AddNumPagesField(textRenderOption);
+            p.AddLineBreak(textRenderOption);
+            p.AddText("Date: ", textRenderOption);
+            p.AddDateField(textRenderOption);
+            p.AddLineBreak(textRenderOption);
+            p.Format.LineSpacingRule = LineSpacingRule.Exactly;
+            p.Format.LineSpacing = Unit.FromCentimeter(1);
+            p.Format.Shading.Color = Colors.LightBlue;
+            p = section.AddParagraph("Paragraph two", StyleNames.Heading3, textRenderOption);
+            p.AddLineBreak(textRenderOption);
+            p.AddChar('C', 2, textRenderOption);
+            p.AddLineBreak(textRenderOption);
+            p.AddCharacter(SymbolName.Copyright, 2, textRenderOption);
+            p.AddLineBreak(textRenderOption);
+            p.AddText("SectionPages: ", textRenderOption);
+            p.AddSectionPagesField(textRenderOption).Format = "alphabetic";
+            p.AddLineBreak(textRenderOption);
+            p.AddText("Bookmark: ", textRenderOption);
+            p.AddBookmark("page");
+            p.AddLineBreak(textRenderOption);
+            p.AddText("PageRef: ", textRenderOption);
+            p.AddPageRefField("page", textRenderOption).Format = "ROMAN";
+            p.AddLineBreak(textRenderOption);
+            p.AddText("Footnote: ", textRenderOption);
+            p.AddFootnote("Foot", textRenderOption);
+            p.AddLineBreak(textRenderOption);
+            p.AddText("Date: ", textRenderOption);
+            p.AddDateField("yyyy-MM-dd", textRenderOption);
+            p.AddLineBreak(textRenderOption);
+            p.Format.LineSpacingRule = LineSpacingRule.Exactly;
+            p.Format.LineSpacing = Unit.FromCentimeter(1);
+            p.Format.Shading.Color = Colors.LightGray;
+
+            // Render document and add it to sumDoc.
+            var pdfRenderer = new PdfDocumentRenderer { Document = document };
+            pdfRenderer.RenderDocument();
+
+            // Save the document...
+            var filename = PdfFileUtility.GetTempPdfFileName("RenderTextAsPathTest");
+            pdfRenderer.PdfDocument.Save(filename);
+            // ...and start a viewer.
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
+        }
     }
 }

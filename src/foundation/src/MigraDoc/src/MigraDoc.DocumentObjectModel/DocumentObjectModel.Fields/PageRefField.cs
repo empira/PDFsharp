@@ -11,7 +11,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
         /// <summary>
         /// Initializes a new instance of the PageRefField class.
         /// </summary>    
-        public PageRefField()
+        public PageRefField(TextRenderOption textRenderOption = TextRenderOption.Default) : base(textRenderOption)
         {
             BaseValues = new PageRefFieldValues(this);
         }
@@ -19,7 +19,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
         /// <summary>
         /// Initializes a new instance of the PageRefField class with the necessary bookmark name.
         /// </summary>
-        public PageRefField(string name) : this()
+        public PageRefField(string name, TextRenderOption textRenderOption = TextRenderOption.Default) : this(textRenderOption)
         {
             Name = name;
         }
@@ -27,7 +27,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
         /// <summary>
         /// Initializes a new instance of the PageRefField class with the specified parent.
         /// </summary>
-        internal PageRefField(DocumentObject parent) : base(parent)
+        internal PageRefField(DocumentObject parent, TextRenderOption textRenderOption = TextRenderOption.Default) : base(parent, textRenderOption)
         { }
 
         /// <summary>

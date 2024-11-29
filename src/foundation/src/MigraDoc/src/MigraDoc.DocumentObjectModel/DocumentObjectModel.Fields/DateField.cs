@@ -6,12 +6,12 @@ namespace MigraDoc.DocumentObjectModel.Fields
     /// <summary>
     /// DateField is used to reference the date and time the printing starts.
     /// </summary>
-    public class DateField : DocumentObject
+    public class DateField : TextBasedDocumentObject
     {
         /// <summary>
         /// Initializes a new instance of the DateField class.
         /// </summary>
-        public DateField()
+        public DateField(TextRenderOption textRenderOption = TextRenderOption.Default) : base(textRenderOption)
         {
             BaseValues = new DateFieldValues(this);
         }
@@ -19,7 +19,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
         /// <summary>
         /// Initializes a new instance of the DateField class with the specified parent.
         /// </summary>
-        internal DateField(DocumentObject parent) : base(parent)
+        internal DateField(DocumentObject parent, TextRenderOption textRenderOption = TextRenderOption.Default) : base(parent, textRenderOption)
         {
             BaseValues = new DateFieldValues(this);
         }

@@ -135,105 +135,105 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds one or more Symbol objects.
         /// </summary>
-        public Character AddCharacter(SymbolName symbolType, int count)
+        public Character AddCharacter(SymbolName symbolType, int count, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddCharacter(symbolType, count);
+            return Elements.AddCharacter(symbolType, count, textRenderOption);
         }
 
         /// <summary>
         /// Adds a Symbol object.
         /// </summary>
-        public Character AddCharacter(SymbolName symbolType)
+        public Character AddCharacter(SymbolName symbolType, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddCharacter(symbolType);
+            return Elements.AddCharacter(symbolType, textRenderOption);
         }
 
         /// <summary>
         /// Adds one or more Symbol objects defined by a character.
         /// </summary>
-        public Character AddCharacter(char ch, int count)
+        public Character AddCharacter(char ch, int count, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddCharacter(ch, count);
+            return Elements.AddCharacter(ch, count, textRenderOption);
         }
 
         /// <summary>
         /// Adds a Symbol object defined by a character.
         /// </summary>
-        public Character AddCharacter(char ch)
+        public Character AddCharacter(char ch, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddCharacter(ch);
+            return Elements.AddCharacter(ch, textRenderOption);
         }
 
         /// <summary>
         /// Adds a space character as many as count.
         /// </summary>
-        public Character AddSpace(int count)
+        public Character AddSpace(int count, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddSpace(count);
+            return Elements.AddSpace(count, textRenderOption);
         }
 
         /// <summary>
         /// Adds a horizontal tab.
         /// </summary>
-        public void AddTab()
+        public void AddTab(TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            Elements.AddTab();
+            Elements.AddTab(textRenderOption);
         }
 
         /// <summary>
         /// Adds a new FormattedText.
         /// </summary>
-        public FormattedText AddFormattedText()
+        public FormattedText AddFormattedText(TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddFormattedText();
+            return Elements.AddFormattedText(textRenderOption);
         }
 
         /// <summary>
         /// Adds a new FormattedText object with the given format.
         /// </summary>
-        public FormattedText AddFormattedText(TextFormat textFormat)
+        public FormattedText AddFormattedText(TextFormat textFormat, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddFormattedText(textFormat);
+            return Elements.AddFormattedText(textFormat, textRenderOption);
         }
 
         /// <summary>
         /// Adds a new FormattedText with the given Font.
         /// </summary>
-        public FormattedText AddFormattedText(Font font)
+        public FormattedText AddFormattedText(Font font, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddFormattedText(font);
+            return Elements.AddFormattedText(font, textRenderOption);
         }
 
         /// <summary>
         /// Adds a new FormattedText with the given text.
         /// </summary>
-        public FormattedText AddFormattedText(string text)
+        public FormattedText AddFormattedText(string text, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddFormattedText(text);
+            return Elements.AddFormattedText(text, textRenderOption);
         }
 
         /// <summary>
         /// Adds a new FormattedText object with the given text and format.
         /// </summary>
-        public FormattedText AddFormattedText(string text, TextFormat textFormat)
+        public FormattedText AddFormattedText(string text, TextFormat textFormat, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddFormattedText(text, textFormat);
+            return Elements.AddFormattedText(text, textFormat, textRenderOption);
         }
 
         /// <summary>
         /// Adds a new FormattedText object with the given text and font.
         /// </summary>
-        public FormattedText AddFormattedText(string text, Font font)
+        public FormattedText AddFormattedText(string text, Font font, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddFormattedText(text, font);
+            return Elements.AddFormattedText(text, font, textRenderOption);
         }
 
         /// <summary>
         /// Adds a new FormattedText object with the given text and style.
         /// </summary>
-        public FormattedText AddFormattedText(string text, string style)
+        public FormattedText AddFormattedText(string text, string style, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddFormattedText(text, style);
+            return Elements.AddFormattedText(text, style, textRenderOption);
         }
 
         /// <summary>
@@ -249,81 +249,81 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new PageField.
         /// </summary>
-        public PageField AddPageField()
+        public PageField AddPageField(TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddPageField();
+            return Elements.AddPageField(textRenderOption);
         }
 
         /// <summary>
         /// Adds a new PageRefField.
         /// </summary>
-        public PageRefField AddPageRefField(string name)
+        public PageRefField AddPageRefField(string name, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddPageRefField(name);
+            return Elements.AddPageRefField(name, textRenderOption);
         }
 
         /// <summary>
         /// Adds a new NumPagesField.
         /// </summary>
-        public NumPagesField AddNumPagesField()
+        public NumPagesField AddNumPagesField(TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddNumPagesField();
+            return Elements.AddNumPagesField(textRenderOption);
         }
 
         /// <summary>
         /// Adds a new SectionField.
         /// </summary>
-        public SectionField AddSectionField()
+        public SectionField AddSectionField(TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddSectionField();
+            return Elements.AddSectionField(textRenderOption);
         }
 
         /// <summary>
         /// Adds a new SectionPagesField.
         /// </summary>
-        public SectionPagesField AddSectionPagesField()
+        public SectionPagesField AddSectionPagesField(TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddSectionPagesField();
+            return Elements.AddSectionPagesField(textRenderOption);
         }
 
         /// <summary>
         /// Adds a new DateField.
         /// </summary>
-        public DateField AddDateField()
+        public DateField AddDateField(TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddDateField();
+            return Elements.AddDateField(textRenderOption);
         }
 
         /// <summary>
         /// Adds a new DateField.
         /// </summary>
-        public DateField AddDateField(string format)
+        public DateField AddDateField(string format, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddDateField(format);
+            return Elements.AddDateField(format, textRenderOption);
         }
 
         /// <summary>
         /// Adds a new InfoField.
         /// </summary>
-        public InfoField AddInfoField(InfoFieldType iType)
+        public InfoField AddInfoField(InfoFieldType iType, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddInfoField(iType);
+            return Elements.AddInfoField(iType, textRenderOption);
         }
 
         /// <summary>
         /// Adds a new Footnote with the specified text.
         /// </summary>
-        public Footnote AddFootnote(string text)
+        public Footnote AddFootnote(string text, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddFootnote(text);
+            return Elements.AddFootnote(text, textRenderOption);
         }
 
         /// <summary>
         /// Adds a new Footnote.
         /// </summary>
-        public Footnote AddFootnote()
+        public Footnote AddFootnote(TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddFootnote();
+            return Elements.AddFootnote(textRenderOption);
         }
 
         /// <summary>
@@ -659,7 +659,7 @@ namespace MigraDoc.DocumentObjectModel
             /// </summary>
             public string? Name
             {
-                get => Owner.Name;
+                get => Owner.Name; 
                 set => Owner.Name = value ?? ""; // BUG??? "null" becomes "".
             }
 
