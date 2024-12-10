@@ -130,11 +130,11 @@ namespace PdfSharp.Fonts
         {
 #if CORE && DEBUG
             // Should be true in one of the following cases.
-            // a) CORE build and no custom font resolver is set.
-            // b) CORE build and custom font resolver is set and CFR calls PFR as fallback.
+            // a) Core build and no custom font resolver is set.
+            // b) Core build and custom font resolver is set and CFR calls PFR as fallback.
             bool platformInfo = fontResolverInfo is PlatformFontResolverInfo;
             if (platformInfo)
-                Debug.Assert(fontResolver is CoreBuildFontResolver);
+                Debug.Assert(fontResolver is WindowsPlatformFontResolver);
 #endif
             try
             {
@@ -201,7 +201,7 @@ namespace PdfSharp.Fonts
                                 $"The custom font resolver '{fontResolver.GetType().FullName}' resolved for typeface '{familyName}" +
                                 $"{(fontResolvingOptions.IsItalic ? " italic" : "")}{(fontResolvingOptions.IsBold ? " bold" : "")}' " +
                                 $"the face name '{fontResolverInfo.FaceName}', but returned no bytes for this name. " +
-                                "This is most likely a bug in your font resolver.";
+                                "This is most likely a bug in your custom font resolver.";
                             PdfSharpLogHost.Logger.LogCritical(message);
                             throw new InvalidOperationException(message);
                         }
@@ -440,6 +440,11 @@ namespace PdfSharp.Fonts
             Globals.Global.Fonts.FontResolverInfosByName.Clear();
             Globals.Global.Fonts.FontSourcesByName.Clear();
             Globals.Global.Fonts.FontSourcesByKey.Clear();
+
+#if CORE
+            // Also requires a reset.
+            PlatformFontResolver.Reset();
+#endif
         }
 
         internal static string GetFontCachesState()

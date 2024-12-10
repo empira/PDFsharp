@@ -30,7 +30,7 @@ namespace PdfSharp.Pdf.AcroForms
         public string Text
         {
             get => Elements.GetString(PdfAcroField.Keys.V);
-            set { Elements.SetString(PdfAcroField.Keys.V, value); RenderAppearance(); } //HACK in PdfTextField
+            set { Elements.SetString(PdfAcroField.Keys.V, value); RenderAppearance(); } //HACK_OLD in PdfTextField
         }
 
         /// <summary>
@@ -139,7 +139,6 @@ namespace PdfSharp.Pdf.AcroForms
             // Set XRef to normal state
             ap.Elements["/N"] = xobj.Reference;
 
-            //// HACK
             //string m =
             //"<?xpacket begin=\" \" id=\"W5M0MpCehiHzreSzNTczkc9d\"?>" + '\n' +
             //"<x:xmpmeta xmlns:x=\"adobe:ns:meta/\" x:xmptk=\"Adobe XMP Core 4.0-c321 44.398116, Tue Aug 04 2009 14:24:39\"> " + '\n' +

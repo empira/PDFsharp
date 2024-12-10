@@ -26,7 +26,6 @@
     <ProjectReference Include="..\..\..\src\MigraDoc\src\MigraDoc.RtfRendering-gdi\MigraDoc.RtfRendering-gdi.csproj" />
     <ProjectReference Include="..\..\..\src\PDFsharp\src\PdfSharp-gdi\PdfSharp-gdi.csproj" />
     <ProjectReference Include="..\..\..\src\PDFsharp\src\PdfSharp.Charting-gdi\PdfSharp.Charting-gdi.csproj" />
-    <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.Crytography\PdfSharp.Cryptography.csproj" />
     <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.Quality-gdi\PdfSharp.Quality-gdi.csproj" />
     <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.Snippets-gdi\PdfSharp.Snippets-gdi.csproj" />
     <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.System\PdfSharp.System.csproj" />

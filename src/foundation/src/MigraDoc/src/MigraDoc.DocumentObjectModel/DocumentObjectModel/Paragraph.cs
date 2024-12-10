@@ -392,7 +392,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Format ??= new ParagraphFormat(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Format = value;
             }
         }
@@ -405,7 +405,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Elements ??= new ParagraphElements(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Elements = value;
             }
         }
@@ -531,13 +531,13 @@ namespace MigraDoc.DocumentObjectModel
             if (Values.Elements is not null)
             {
                 for (int idx = startIdx; idx <= endIdx; idx++)
-                    paragraphElements.Add((DocumentObject)Values.Elements[idx]!.Clone()); // BUG??? "!" added.
+                    paragraphElements.Add((DocumentObject?)(Values.Elements[idx]?.Clone()));
             }
             return paragraphElements;
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

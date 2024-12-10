@@ -190,7 +190,7 @@ namespace PdfSharp.Drawing
             //// Create a dummy unique path.
             //_path = "*" + Guid.NewGuid().ToString("B");
 
-            // TODO: Create a fingerprint of the bytes in the stream to identify identical images.
+            // TODO_OLD: Create a fingerprint of the bytes in the stream to identify identical images.
 #if GDI
             // Create a GDI+ image.
             try
@@ -392,7 +392,7 @@ namespace PdfSharp.Drawing
             if (!platformIndependent)
                 return FromFile(path);
 
-            // TODO: Check PDF file.
+            // TODO_OLD: Check PDF file.
 
             var ii = ImageImporter.GetImageImporter();
             var i = ii.ImportImage(path) ?? throw new InvalidOperationException("Unsupported image format."); ;
@@ -413,7 +413,7 @@ namespace PdfSharp.Drawing
             if (!platformIndependent)
                 return FromStream(stream);
 
-            // TODO: Check PDF file.
+            // TODO_OLD: Check PDF file.
 
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
@@ -674,7 +674,7 @@ namespace PdfSharp.Drawing
         /// <param name="filename">The filename.</param>
         internal static bool TestJpeg(string filename)
         {
-            // $THHO_NET6 Use ImageImporterJpeg to reduce code redundancy and detect CMYK format.
+            // Improvement: Use ImageImporterJpeg to reduce code redundancy and detect CMYK format.
             byte[]? imageBits = null;
             return ReadJpegFile(filename, 16, ref imageBits);
         }
@@ -712,13 +712,13 @@ namespace PdfSharp.Drawing
 
                 bool? test = ReadJpegFile(fs, maxRead, ref imageBits);
                 // Treat test result as definite.
-                if (test == false || test == true)
+                if (test is false or true)
                 {
                     fs.Close();
                     return test.Value;
                 }
                 // Test result is maybe.
-                // Hack: store the file in PDF if extension matches ...
+                // HACK_OLD: store the file in PDF if extension matches ...
                 string str = filename.ToLower();
                 if (str.EndsWith(".jpg", StringComparison.Ordinal) || str.EndsWith(".jpeg", StringComparison.Ordinal))
                     return true;
@@ -758,7 +758,7 @@ namespace PdfSharp.Drawing
             {
                 return true;
             }
-            // TODO: Exif: find JFIF header
+            // TODO_OLD: Exif: find JFIF header
             if (imageBits[0] == 0xff &&
                 imageBits[1] == 0xd8 &&
                 imageBits[2] == 0xff &&
@@ -769,7 +769,7 @@ namespace PdfSharp.Drawing
                 imageBits[9] == 0x46 &&
                 imageBits[10] == 0x0*/)
             {
-                // Hack: store the file in PDF if extension matches ...
+                // HACK_OLD: store the file in PDF if extension matches ...
                 return null;
             }
             return false;
@@ -1110,11 +1110,11 @@ namespace PdfSharp.Drawing
                 if (_importedImage != null)
                 {
                     if (_importedImage.Information.HorizontalDPI > 0)
-                        return (double)_importedImage.Information.HorizontalDPI;
+                        return _importedImage.Information.HorizontalDPI;
                     if (_importedImage.Information.HorizontalDPM > 0)
-                        return (double)(_importedImage.Information.HorizontalDPM / FactorDPM);
+                        return _importedImage.Information.HorizontalDPM / FactorDPM;
                     if (_importedImage.Information.DefaultDPI > 0)
-                        return (double)_importedImage.Information.DefaultDPI;
+                        return _importedImage.Information.DefaultDPI;
                     return 96;
                 }
 #endif

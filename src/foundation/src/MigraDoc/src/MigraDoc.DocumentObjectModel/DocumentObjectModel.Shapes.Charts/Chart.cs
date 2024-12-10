@@ -146,7 +146,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.Format ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Format = value;
             }
         }
@@ -159,7 +159,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.XAxis ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.XAxis = value;
             }
         }
@@ -172,7 +172,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.YAxis ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.YAxis = value;
             }
         }
@@ -185,7 +185,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.ZAxis ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.ZAxis = value;
             }
         }
@@ -198,7 +198,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.SeriesCollection ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.SeriesCollection = value;
             }
         }
@@ -211,7 +211,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.XValues ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.XValues = value;
             }
         }
@@ -224,7 +224,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.HeaderArea ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.HeaderArea = value;
             }
         }
@@ -237,7 +237,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.BottomArea ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.BottomArea = value;
             }
         }
@@ -250,7 +250,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.TopArea ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.TopArea = value;
             }
         }
@@ -263,7 +263,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.FooterArea ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.FooterArea = value;
             }
         }
@@ -276,7 +276,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.LeftArea ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.LeftArea = value;
             }
         }
@@ -289,7 +289,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.RightArea ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.RightArea = value;
             }
         }
@@ -302,7 +302,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.PlotArea ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.PlotArea = value;
             }
         }
@@ -333,7 +333,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.DataLabel ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.DataLabel = value;
             }
         }
@@ -461,7 +461,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

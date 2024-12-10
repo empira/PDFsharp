@@ -318,7 +318,7 @@ namespace MigraDoc.Rendering
 
         void RenderPlotArea(PlotArea area, Rectangle rect)
         {
-            var chartFrame = ((ChartFormatInfo)_renderInfo.FormatInfo).ChartFrame ?? NRT.ThrowOnNull<ChartFrame>("BUG");
+            var chartFrame = ((ChartFormatInfo)_renderInfo.FormatInfo).ChartFrame ?? NRT.ThrowOnNull<ChartFrame>("BUG_OLD");
 
             XUnitPt top = rect.Y;
             top += area.TopPadding.Point;

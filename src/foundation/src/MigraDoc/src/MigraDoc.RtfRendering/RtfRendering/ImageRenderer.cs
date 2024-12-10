@@ -25,7 +25,7 @@ namespace MigraDoc.RtfRendering
 
             _filePath = _image.GetFilePath(_docRenderer.WorkingDirectory);
             _isInline = DocumentRelations.HasParentOfType(_image, typeof(Paragraph)) ||
-                       RenderInParagraph();
+                        RenderInParagraph();
 
             CalculateImageDimensions();
         }
@@ -147,7 +147,7 @@ namespace MigraDoc.RtfRendering
                     _rtfWriter.WriteControl("pngblip");
                     break;
 
-                //// TODO BMP files. It is not that simple. Must extract the bytes we need.
+                //// TODO_OLD BMP files. It is not that simple. Must extract the bytes we need.
                 //case ".bmp":
                 //    _rtfWriter.WriteControl("dibitmap0");
                 //    break;
@@ -388,7 +388,7 @@ namespace MigraDoc.RtfRendering
         Unit _originalHeight;
         Unit _originalWidth;
 
-        //this is the user defined scaling, not the stuff to render as scalex, scaley
+        // This is the user-defined scaling, not the stuff to render as scalex, scaley.
         double _scaleHeight;
         double _scaleWidth;
     }

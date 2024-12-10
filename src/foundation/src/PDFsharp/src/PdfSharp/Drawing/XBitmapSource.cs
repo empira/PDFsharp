@@ -19,7 +19,7 @@ namespace PdfSharp.Drawing
     /// </summary>
     public abstract class XBitmapSource : XImage
     {
-        // TODO: Move code from XImage to this class.
+        // TODO_OLD: Move code from XImage to this class.
 
         /// <summary>
         /// Gets the width of the image in pixels.

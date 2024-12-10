@@ -659,7 +659,7 @@ namespace PdfSharp.Pdf.Security
 #if true
             throw TH.NotImplementedException_EncryptEmbeddedFileStreamsOnlyCurrentlyShutOff();
 #else
-            // TODO: Find and fix error in order to produce files readable by common PDF readers. When done enable SecurityTests.Test_OnlyEmbeddedFileStreamEncrypted().
+            // TODO_OLD: Find and fix error in order to produce files readable by common PDF readers. When done enable SecurityTests.Test_OnlyEmbeddedFileStreamEncrypted().
 
             if (!VersionSupportsCryptFilter())
                 throw TH.InvalidOperationException_InvalidVersionForEncryptEmbeddedFilesOnly();

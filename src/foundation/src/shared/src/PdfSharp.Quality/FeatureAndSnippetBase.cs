@@ -208,7 +208,7 @@ namespace PdfSharp.Quality
 
             // All drawing is done in presentation units (1/96 inch).
             var gfx = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Append, graphicsUnit, pageDirection);
-            // Draw a bounding box. BUG if graphics unit is not Presentation.
+            // Draw a bounding box. BUG_OLD if graphics unit is not Presentation.
 
             if (graphicsUnit != XGraphicsUnit.Point)
             {
@@ -643,7 +643,7 @@ namespace PdfSharp.Quality
         }
         byte[] _comparisonBytes = [];
 
-#if old  // #KEEP for reference
+#if old  // KEEP for reference
 //        protected DrawingVisual PrepareDrawingVisual(out DrawingContext dc)
 //        {
 //            return PrepareDrawingVisual(out dc, true);
@@ -983,7 +983,7 @@ namespace PdfSharp.Quality
 //        }
 #endif
 
-#if even_older  // #KEEP for reference
+#if even_older  // KEEP for reference
     ///// <summary>
     ///// Prepares new PDF page for drawing.
     ///// </summary>

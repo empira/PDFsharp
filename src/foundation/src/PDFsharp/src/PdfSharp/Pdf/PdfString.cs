@@ -2,13 +2,15 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
+using Microsoft.Extensions.Logging;
 using PdfSharp.Internal;
+using PdfSharp.Logging;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Internal;
 
 namespace PdfSharp.Pdf
 {
-    // TODO: Make code more readable with PDF 1.7 strings: text string, ASCII string, byte string etc.
+    // TODO_OLD: Make code more readable with PDF 1.7 strings: text string, ASCII string, byte string etc.
     // See [xx]()
 
     /// <summary>
@@ -251,21 +253,16 @@ namespace PdfSharp.Pdf
             // ChatGPT 4 however explains the next line correctly.
             if (value is ['\xFE', '\xFF', ..])
             {
-#if DEBUG && true
-                // Q: Does this code compile on every target framework?
-                // A: No, System.Index is missing. But we can add the source code in PdfSharp.System to make it work.
-                _ = value is ['\xFE', '\xFF', ..];
-#endif
                 // Combine two ANSI characters to get one Unicode character.
                 var temp = new StringBuilder(value);
                 var length = temp.Length;
                 if ((length & 1) == 1)
                 {
-                    // #PRD Issue a warning
-                    // TODO What does the PDF Reference say about this case? Assume (char)0 or treat the file as corrupted?
-                    temp.Append(0);  // BUG: definitely wrong. Last character is multiplied with 256.
+                    // What does the PDF Reference say about this case? Assume (char)0 or treat the file as corrupted?
+                    // We add a (char)0.
+                    PdfSharpLogHost.Logger.LogWarning("A PDF UTF-16 string contains an odd number of bytes. We add a dummy byte of 0.");
+                    temp.Append(0);  // BUG_OLD: definitely wrong. Last character is multiplied with 256.
                     ++length;
-                    DebugBreak.Break();
                 }
 
                 var unicodeValue = new StringBuilder();
@@ -277,11 +274,8 @@ namespace PdfSharp.Pdf
                 return true;
             }
 
-#if true // UTF-16LE is not defined as valid text string encoding in PDF reference.
-            if (value is ['\xFF', '\xFE', ..])
-                throw new NotImplementedException("Found UTF-16LE string. Please send us the PDF file and we will fix it (issues (at) pdfsharp.net).");
-#else
-            // Adobe Reader also supports UTF-16LE.
+            // UTF-16LE Unicode strings start with U+FFE ("ÿþ").
+            // Adobe Reader also supports UTF-16LE with BOM, so we do.
             if (value is ['\xFF', '\xFE', ..])
             {
                 // Combine two ANSI characters to get one Unicode character.
@@ -289,10 +283,11 @@ namespace PdfSharp.Pdf
                 var length = temp.Length;
                 if ((length & 1) == 1)
                 {
-                    // TODO What does the PDF Reference say about this case? Assume (char)0 or treat the file as corrupted?
+                    // What does the PDF Reference say about this case? Assume (char)0 or treat the file as corrupted?
+                    // We add a (char)0.
+                    PdfSharpLogHost.Logger.LogWarning("A PDF UTF-16 string contains an odd number of bytes. We add a dummy byte of 0.");
                     temp.Append(0);  // See BE case. But this is correct here.
                     ++length;
-                    DebugBreak.Break();
                 }
 
                 var unicodeValue = new StringBuilder();
@@ -303,7 +298,6 @@ namespace PdfSharp.Pdf
                 value = unicodeValue.ToString();
                 return true;
             }
-#endif
 
             // UTF-8 Unicode strings start with U+EFBBBF ("ï»¿").
             if (value is ['\xEF', '\xBB', '\xBF', ..])
@@ -315,7 +309,6 @@ namespace PdfSharp.Pdf
 
                 return true;
             }
-
             return false;
         }
 

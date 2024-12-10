@@ -152,29 +152,32 @@ namespace PdfSharp.Drawing
                 //var fontResolverInfo = FontFactory.ResolveTypeface(familyName, fontResolvingOptions, typefaceKey, false) ??
                 //                       FontFactory.ResolveTypeface(familyName, fontResolvingOptions, typefaceKey, true);
                 FontResolverInfo? fontResolverInfo = null;
-                const string message = "A font resolver throws an exception, but it must return null if the font cannot be resolved.";
                 try  // Custom font resolvers may throw an exception.
                 {
                     // Try custom font resolver.
                     fontResolverInfo = FontFactory.ResolveTypeface(familyName, fontResolvingOptions, typefaceKey, false);
                 }
-                catch // (Exception ex)
+                catch (Exception ex)
                 {
-                    PdfSharpLogHost.Logger.LogError(message);
+                    LogErrorBecauseFontResolverThrowsException(familyName, ex);
                 }
 
                 if (fontResolverInfo == null)
                 {
-                    try  // Custom font resolvers may throw an exception.
+                    try  // Custom fallback font resolvers may throw an exception.
                     {
                         // Try fallback font resolver.
                         fontResolverInfo = FontFactory.ResolveTypeface(familyName, fontResolvingOptions, typefaceKey, true);
                     }
-                    catch // (Exception ex)
+                    catch (Exception ex)
                     {
-                        PdfSharpLogHost.Logger.LogError(message);
+                        LogErrorBecauseFontResolverThrowsException(familyName, ex);
                     }
                 }
+
+                void LogErrorBecauseFontResolverThrowsException(string name, Exception ex)
+                    => PdfSharpLogHost.Logger.LogError("A font resolver cannot resolve font family '{}' and throws an exception, " +
+                                                       "but it must return null if the font cannot be resolved. Exception text: " + ex.Message, name);
 
                 if (fontResolverInfo == null)
                 {
@@ -182,7 +185,6 @@ namespace PdfSharp.Drawing
 #if CORE
                     if (GlobalFontSettings.FontResolver is null)
                     {
-                        // Only Arial, Times, ...
                         throw new InvalidOperationException(
                             $"No appropriate font found for family name '{familyName}'. " +
                                    "Implement IFontResolver and assign to 'GlobalFontSettings.FontResolver' to use fonts. " +

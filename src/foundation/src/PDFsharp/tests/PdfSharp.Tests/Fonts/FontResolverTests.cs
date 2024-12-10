@@ -2,11 +2,15 @@
 // See the LICENSE file in the solution root for more information.
 
 using FluentAssertions;
+using PdfSharp.Diagnostics;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
-using PdfSharp.Fonts.Internal;
 using PdfSharp.Snippets.Font;
+#if CORE
+using PdfSharp.Quality;
+#endif
 using Xunit;
+using FontHelper = PdfSharp.Fonts.Internal.FontHelper;
 
 namespace PdfSharp.Tests.Fonts
 {
@@ -20,6 +24,7 @@ namespace PdfSharp.Tests.Fonts
         const string VerdanaName = "Verdana";
         const string LucidaName = "Lucida Console";
         const string SymbolName = "Symbol";
+        const string WingdingsName = "Wingdings";
 
         // A font that never exists.
         const string DummyFontName = "A-dummy-font";
@@ -44,13 +49,18 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void No_FontResolver_set()
         {
+            PdfSharpCore.ResetAll();
+
             // No FFR.
             DummyShouldFail();
 
             // No CFR.
             XFilesShouldFail();
 #if CORE
-            // Not in PFR.
+            // We set the UnitTestFontResolver to get support for some fonts.
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+
+            // Not in UTFR.
             SegoeUIShouldFail();
 
             var arial = new XFont(ArialName, 10, XFontStyleEx.Regular);
@@ -69,10 +79,11 @@ namespace PdfSharp.Tests.Fonts
             var lucida = new XFont(LucidaName, 10, XFontStyleEx.Regular);
             lucida.GlyphTypeface.FaceName.Should().Be("Lucida Console");
 
+            // Test Symbol font because it is a symbol font.
             var symbol = new XFont(SymbolName, 10, XFontStyleEx.Regular);
-            var symbolB = new XFont(SymbolName, 10, XFontStyleEx.Bold);
-            var symbolI = new XFont(SymbolName, 10, XFontStyleEx.Italic);
-            var symbolBI = new XFont(SymbolName, 10, XFontStyleEx.BoldItalic);
+            var symbolB = new XFont(SymbolName, 10, XFontStyleEx.Bold, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.BoldSimulation);
+            var symbolI = new XFont(SymbolName, 10, XFontStyleEx.Italic, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.ItalicSimulation);
+            var symbolBI = new XFont(SymbolName, 10, XFontStyleEx.BoldItalic, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.BoldItalicSimulation);
             symbol.GlyphTypeface.FaceName.Should().Be("Symbol");
             symbolB.GlyphTypeface.FaceName.Should().Be("Symbol");
             symbolI.GlyphTypeface.FaceName.Should().Be("Symbol");
@@ -81,6 +92,20 @@ namespace PdfSharp.Tests.Fonts
             symbolB.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.BoldSimulation);
             symbolI.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.ItalicSimulation);
             symbolBI.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.BoldItalicSimulation);
+
+            // Test Wingdings font because it is a symbol font.
+            var winDings = new XFont(WingdingsName, 10, XFontStyleEx.Regular);
+            var winDingsB = new XFont(WingdingsName, 10, XFontStyleEx.Bold, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.BoldSimulation);
+            var winDingsI = new XFont(WingdingsName, 10, XFontStyleEx.Italic, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.ItalicSimulation);
+            var winDingsBI = new XFont(WingdingsName, 10, XFontStyleEx.BoldItalic, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.BoldItalicSimulation);
+            winDings.GlyphTypeface.FaceName.Should().Be("Wingdings");
+            winDingsB.GlyphTypeface.FaceName.Should().Be("Wingdings");
+            winDingsI.GlyphTypeface.FaceName.Should().Be("Wingdings");
+            winDingsBI.GlyphTypeface.FaceName.Should().Be("Wingdings");
+            winDings.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.None);
+            winDingsB.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.BoldSimulation);
+            winDingsI.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.ItalicSimulation);
+            winDingsBI.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.BoldItalicSimulation);
 #endif
 #if GDI
             // Resolved by GDI.
@@ -92,6 +117,7 @@ namespace PdfSharp.Tests.Fonts
             var verdana = new XFont(VerdanaName, 10, XFontStyleEx.Regular);
             var lucida = new XFont(LucidaName, 10, XFontStyleEx.Italic);
             var symbol = new XFont(SymbolName, 10, XFontStyleEx.Regular);
+            var winDings = new XFont(WingdingsName, 10, XFontStyleEx.Regular);
 #endif
 #if WPF
             // Resolved by GDI.
@@ -103,32 +129,43 @@ namespace PdfSharp.Tests.Fonts
             var verdana = new XFont(VerdanaName, 10, XFontStyleEx.Regular);
             var lucida = new XFont(LucidaName, 10, XFontStyleEx.Regular);
             var symbol = new XFont(SymbolName, 10, XFontStyleEx.Regular);
+            var winDings = new XFont(WingdingsName, 10, XFontStyleEx.Regular);
 #endif
             var arialCount = FontHelper.CountGlyphs(arial);
             var timesCount = FontHelper.CountGlyphs(times);
             var courierCount = FontHelper.CountGlyphs(courier);
             var verdanaCount = FontHelper.CountGlyphs(verdana);
+#if !CORE
             var lucidaCount = FontHelper.CountGlyphs(lucida);
             var symbolCount = FontHelper.CountGlyphs(symbol);
+#endif
 
             arialCount.Should().BeGreaterThan(3300);
             timesCount.Should().BeGreaterThan(3300);
             courierCount.Should().BeGreaterThan(3100);
             verdanaCount.Should().BeGreaterThan(800);
+#if !CORE
             lucidaCount.Should().BeGreaterThan(600);
             symbolCount.Should().BeGreaterThan(180);
+#endif
         }
 
         [Fact]
         public void No_FontResolver_set_and_multiple_creations()
         {
+            PdfSharpCore.ResetAll();
+#if CORE
+            // We set the UnitTestFontResolver to get support for some fonts.
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+
             // No FFR.
             DummyShouldFail();
 
             // No CFR.
             XFilesShouldFail();
 #if CORE
-            // Not in PFR.
+            // Not in UTFR.
             SegoeUIShouldFail();
 #else
             // Resolved by PDF for GDI and WPF.
@@ -165,6 +202,12 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void No_FontResolver_set_and_multiple_creations2()
         {
+            PdfSharpCore.ResetAll();
+#if CORE
+            // We set the UnitTestFontResolver to get support for some fonts.
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+
             var arial0 = new XFont(ArialName, 10, XFontStyleEx.Regular);
             var arial1 = new XFont(ArialName, 10, XFontStyleEx.Italic);
             var arial = new XFont(ArialName, 10, XFontStyleEx.Bold);
@@ -200,9 +243,9 @@ namespace PdfSharp.Tests.Fonts
             lucida1.GlyphTypeface.FaceName.Should().Be("Lucida Console");
             lucida.GlyphTypeface.FaceName.Should().Be("Lucida Console");
 
-            var symbol0 = new XFont(SymbolName, 10, XFontStyleEx.Italic);
-            var symbol1 = new XFont(SymbolName, 10, XFontStyleEx.Bold);
-            var symbol = new XFont(SymbolName, 10, XFontStyleEx.BoldItalic);
+            var symbol0 = new XFont(SymbolName, 10, XFontStyleEx.Italic, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.ItalicSimulation);
+            var symbol1 = new XFont(SymbolName, 10, XFontStyleEx.Bold, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.BoldSimulation);
+            var symbol = new XFont(SymbolName, 10, XFontStyleEx.BoldItalic, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.BoldItalicSimulation);
             symbol0.GlyphTypeface.FaceName.Should().Be("Symbol");
             symbol0.IsSymbolFont.Should().BeTrue();
             symbol0.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.ItalicSimulation);
@@ -229,6 +272,12 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void Test_FailsafeFontResolver_as_fallback_font_resolver()
         {
+            PdfSharpCore.ResetAll();
+#if CORE
+            // We set the UnitTestFontResolver to get support for some fonts.
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+
             GlobalFontSettings.FallbackFontResolver = new FailsafeFontResolver();
 
             // Resolved in FFR.
@@ -266,6 +315,7 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void TestXFilesFontResolver1_used_as_main_font_resolver()
         {
+            PdfSharpCore.ResetAll();
             GlobalFontSettings.FontResolver = new TestXFilesFontResolver1();
 
             // No FFR.
@@ -295,6 +345,7 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void TestXFilesFontResolver1_used_as_main_font_resolver_with_fallback()
         {
+            PdfSharpCore.ResetAll();
             GlobalFontSettings.FontResolver = new TestXFilesFontResolver1();
             GlobalFontSettings.FallbackFontResolver = new FailsafeFontResolver();
 
@@ -322,6 +373,12 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void TestXFilesFontResolver2_used_as_main_font_resolver()
         {
+            PdfSharpCore.ResetAll();
+#if CORE
+            // We set the UnitTestFontResolver to get support for some fonts.
+            GlobalFontSettings.FallbackFontResolver = new UnitTestFontResolver();
+#endif
+
             GlobalFontSettings.FontResolver = new TestXFilesFontResolver2();
 
             // No FFR.
@@ -371,6 +428,7 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void TestXFilesFontResolver2_used_as_main_font_resolver_with_fallback()
         {
+            PdfSharpCore.ResetAll();
             GlobalFontSettings.FontResolver = new TestXFilesFontResolver2();
             GlobalFontSettings.FallbackFontResolver = new FailsafeFontResolver();
 
@@ -386,10 +444,13 @@ namespace PdfSharp.Tests.Fonts
             // PFR called and resolved by GDI / WPF PFR.
             SegoeUIShouldSucceed();
 #endif
+
+#if !CORE
             // Arial fails not because custom font resolver calls
             // platform font resolver.
             var arial = new XFont(ArialName, 10, XFontStyleEx.Regular);
             arial.GlyphTypeface.FaceName.Should().Be("Arial");
+#endif
 
             // X-Files resolved by font resolver.
             var xfiles = new XFont(XFilesName, 10, XFontStyleEx.Regular);
@@ -413,6 +474,7 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void TestXFilesFontResolver2_used_as_fallback()
         {
+            PdfSharpCore.ResetAll();
             GlobalFontSettings.FontResolver = new TestXFilesFontResolver1();
             GlobalFontSettings.FallbackFontResolver = new TestXFilesFontResolver2();
 
@@ -432,6 +494,7 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void TestXFilesFontResolver3_used_as_main_font_resolver()
         {
+            PdfSharpCore.ResetAll();
             GlobalFontSettings.FontResolver = new TestXFilesFontResolver3();
             //GlobalFontSettings.FallbackFontResolver = new TestXFilesFontResolver2();
 
@@ -448,6 +511,7 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void TestXFilesFontResolver3_used_as_main_font_resolver_with_fallback()
         {
+            PdfSharpCore.ResetAll();
             GlobalFontSettings.FontResolver = new TestXFilesFontResolver3();
             GlobalFontSettings.FallbackFontResolver = new FailsafeFontResolver();
 
@@ -464,6 +528,7 @@ namespace PdfSharp.Tests.Fonts
         [Fact]
         public void Test_test()
         {
+            PdfSharpCore.ResetAll();
             //GlobalFontSettings.FontResolver = new TestXFilesFontResolver1();
             //GlobalFontSettings.FallbackFontResolver = new TestXFilesFontResolver2();
 

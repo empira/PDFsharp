@@ -154,7 +154,7 @@ namespace MigraDoc.DocumentObjectModel
             set => Values.Italic = value;
         }
 
-        // TODO Implement Strikethrough for PDFsharp and MigraDoc.
+        // TODO_OLD Implement Strikethrough for PDFsharp and MigraDoc.
         // THHO4STLA Implementation for Strikethrough in the forum: http://forum.pdfsharp.net/viewtopic.php?p=4636#p4636
         /// <summary>
         /// Gets or sets the underline property.
@@ -395,7 +395,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

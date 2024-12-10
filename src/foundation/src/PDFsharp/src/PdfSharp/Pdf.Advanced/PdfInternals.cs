@@ -1,6 +1,7 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using PdfSharp.Pdf.IO;
 
@@ -10,7 +11,7 @@ namespace PdfSharp.Pdf.Advanced
     /// Provides access to the internal document data structures.
     /// This class prevents the public interfaces from pollution with too many internal functions.
     /// </summary>
-    public class PdfInternals  // TODO: PdfDocumentInternals... PdfPageInternals etc.
+    public class PdfInternals  // TODO_OLD: PdfDocumentInternals... PdfPageInternals etc.
     {
         internal PdfInternals(PdfDocument document)
         {
@@ -73,7 +74,8 @@ namespace PdfSharp.Pdf.Advanced
         /// This property is not documented by intention.
         /// </summary>
         // ReSharper disable once InconsistentNaming
-        public object? UAManager  // @PDF/UA
+        // #PDF-UA
+        public object? UAManager
             => _document._uaManager;
 
         /// <summary>
@@ -160,7 +162,7 @@ namespace PdfSharp.Pdf.Advanced
         /// Creates the indirect object of the specified type, adds it to the document,
         /// and returns the object.
         /// </summary>
-        public T CreateIndirectObject<T>() where T : PdfObject
+        public T CreateIndirectObject<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>() where T : PdfObject
         {
 #if true
             T obj = Activator.CreateInstance<T>();
@@ -219,16 +221,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public PdfObject[] GetClosure(PdfObject obj)
         {
-            return GetClosure(obj, Int32.MaxValue);
-        }
-
-        /// <summary>
-        /// Returns an array containing the specified object as first element follows by its transitive
-        /// closure limited by the specified number of iterations.
-        /// </summary>
-        public PdfObject[] GetClosure(PdfObject obj, int depth)
-        {
-            PdfReference[] references = _document.IrefTable.TransitiveClosure(obj, depth);
+            PdfReference[] references = _document.IrefTable.TransitiveClosure(obj);
             int count = references.Length + 1;
             PdfObject[] objects = new PdfObject[count];
             objects[0] = obj;

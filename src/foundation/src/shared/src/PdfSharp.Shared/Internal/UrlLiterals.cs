@@ -6,7 +6,7 @@ namespace PdfSharp.Internal
     /// <summary>
     /// URLs used in PDFsharp are maintained only here.
     /// </summary>
-    class UrlLiterals  // #CHECK_BEFORE_RELEASE
+    class UrlLiterals  // CHECK_BEFORE_RELEASE
     {
 #if DEBUG
         const string DocsPdfSharpUrl = "http://localhost:8094/";

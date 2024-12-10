@@ -122,6 +122,9 @@ namespace PdfSharp.Internal
               "The specified page number is {0}, but it must be in the range from 1 to {1}.", pageNumber, maxPage, path);
         }
 
+        public static string StreamMustBeWritable
+            => "The stream does not allow writing.";
+
         public static string MultiplePageInsert => "The page cannot be added to this document because the document already owned this page.";
 
         public static string UnexpectedTokenInPdfFile => "Unexpected token in PDF file. The PDF file may be corrupt. If it is not, please send us the file for service (issues (at) pdfsharp.net).";

@@ -17,13 +17,28 @@ using PdfSharp.Pdf.IO;
 using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
+#if CORE
+#endif
 using Xunit;
 
 namespace PdfSharp.Tests.Drawing
 {
     [Collection("PDFsharp")]
-    public class ImageTests
+    public class ImageTests : IDisposable
     {
+        public ImageTests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void PDF_with_Images()
         {
@@ -118,7 +133,6 @@ namespace PdfSharp.Tests.Drawing
         [Fact]
         public void WriteAndRead_PDF_with_FlateDecode()
         {
-            PdfSharpCore.ResetAll();
             // Create a new PDF document.
             var document = new PdfDocument();
             document.Info.Title = "Created with PDFsharp";
@@ -220,7 +234,7 @@ namespace PdfSharp.Tests.Drawing
 
             void ExportJpeg(PdfDictionary image)
             {
-                // TODO Check filter types. This works for "/Filter [/FlateDecode /DCTDecode]" only.
+                // TODO_OLD Check filter types. This works for "/Filter [/FlateDecode /DCTDecode]" only.
                 var imageFilename = Path.Combine(dir, $"image-{Guid.NewGuid():N}.jpg");
 
                 var stream = image.Stream.Value;
@@ -266,7 +280,7 @@ namespace PdfSharp.Tests.Drawing
 
 #if NET6_0_OR_GREATER
         [Fact]
-        async Task PDF_with_Image_from_http_stream()
+        public async Task PDF_with_Image_from_http_stream()
         {
             {
                 var document = new PdfDocument();
@@ -275,7 +289,9 @@ namespace PdfSharp.Tests.Drawing
 
                 using var client = new HttpClient();
                 await using var imageStream =
-                    await client.GetStreamAsync("https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png").ConfigureAwait(false);
+                    await client.GetStreamAsync("https://docs.pdfsharp.net/images/PDFsharp-80x80.png").ConfigureAwait(false);
+                //await using var imageStream =
+                //    await client.GetStreamAsync("https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png").ConfigureAwait(false);
 
 #if WPF
                 XImage xImage = null!;

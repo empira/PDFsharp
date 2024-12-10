@@ -6,18 +6,18 @@ namespace PdfSharp.Pdf.Signatures
     /// <summary>
     /// The signature dictionary added to a PDF file when it is to be signed.
     /// </summary>
-    public sealed class PdfSignature : PdfDictionary
+    public sealed class PdfSignature2 : PdfDictionary
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PdfSignature"/> class.
+        /// Initializes a new instance of the <see cref="PdfSignature2"/> class.
         /// </summary>
-        public PdfSignature()
+        public PdfSignature2()
         { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PdfSignature"/> class.
+        /// Initializes a new instance of the <see cref="PdfSignature2"/> class.
         /// </summary>
-        public PdfSignature(PdfDocument dict) : base(dict)
+        public PdfSignature2(PdfDocument dict) : base(dict)
         { }
 
         ///// <summary>

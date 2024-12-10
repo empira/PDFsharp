@@ -41,7 +41,7 @@ namespace PdfSharp.Fonts.OpenType
             try
             {
                 FontFace = font.GlyphTypeface.FontFace;
-                FontName2 = font.Name;
+                FontName3 = font.Name2;
                 Initialize();
             }
             catch
@@ -57,7 +57,7 @@ namespace PdfSharp.Fonts.OpenType
             try
             {
                 FontFace = glyphTypeface.FontFace;
-                FontName2 = glyphTypeface.FaceName;
+                FontName3 = glyphTypeface.FaceName;
                 Initialize();
             }
             catch
@@ -84,12 +84,14 @@ namespace PdfSharp.Fonts.OpenType
                         idName += "," + FontFace.name.Style;
                     //idName = idName.Replace(" ", "");
                 }
-                FontName2 = idName;
+                FontName3 = idName;
                 Initialize();
             }
             catch (Exception)
             {
+#if DEBUG
                 _ = typeof(int);
+#endif
                 throw;
             }
         }
@@ -98,7 +100,7 @@ namespace PdfSharp.Fonts.OpenType
 
         void Initialize()
         {
-            // TODO: Respect embedding restrictions.
+            // TODO_OLD: Respect embedding restrictions.
             //bool embeddingRestricted = fontData.os2.fsType == 0x0002;
 
             //fontName = image.n

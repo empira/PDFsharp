@@ -75,7 +75,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public DateTime ToDateTime(IFormatProvider? provider)
         {
-            // TODO:  Add PdfUInteger.ToDateTime implementation
+            // TODO_OLD:  Add PdfUInteger.ToDateTime implementation
             return new DateTime();
         }
 
@@ -146,7 +146,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public object ToType(Type conversionType, IFormatProvider? provider)
         {
-            // TODO: Add PdfUInteger.ToType implementation
+            // TODO_OLD: Add PdfUInteger.ToType implementation
             //return null!;
             throw new NotImplementedException(nameof(ToType));
         }

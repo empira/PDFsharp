@@ -139,7 +139,7 @@ namespace MigraDoc.DocumentObjectModel
         {
             get
             {
-                // TODO: LastTable, etc., docu
+                // TODO_OLD: LastTable, etc., docu
                 var sections = Values.Sections;
                 if (sections is { Count: > 0 })
                     return sections[^1];
@@ -186,7 +186,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Info ??= new DocumentInfo(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Info = value;
             }
         }
@@ -199,7 +199,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Styles ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Styles = value;
             }
         }
@@ -293,7 +293,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.EmbeddedFiles ??= new EmbeddedFiles();
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.EmbeddedFiles = value;
             }
         }
@@ -360,7 +360,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

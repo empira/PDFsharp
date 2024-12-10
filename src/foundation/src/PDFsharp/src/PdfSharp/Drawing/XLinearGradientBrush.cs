@@ -113,7 +113,7 @@ namespace PdfSharp.Drawing
             _linearGradientMode = linearGradientMode;
         }
 
-        // TODO: 
+        // TODO_OLD: 
         //public XLinearGradientBrush(Rectangle rect, XColor color1, XColor color2, double angle);
         //public XLinearGradientBrush(RectangleF rect, XColor color1, XColor color2, double angle);
         //public XLinearGradientBrush(Rectangle rect, XColor color1, XColor color2, double angle, bool isAngleScaleable);
@@ -234,7 +234,7 @@ namespace PdfSharp.Drawing
             //  dirty = false;
             //}
 
-            // TODO: use dirty to optimize code
+            // TODO_OLD: use dirty to optimize code
             GdiLinearGradientBrush brush;
             try
             {

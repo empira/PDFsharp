@@ -5,11 +5,11 @@ namespace PdfSharp.Pdf.Advanced
 {
 #if true_  // Not yet used.
     /// <summary>
-    /// TODO
+    /// TODO_OLD
     /// </summary>
     public static class PdfPageInternals
     {
-        // TODO
+        // TODO_OLD
     }
 #endif
 }

@@ -8,18 +8,31 @@ using PdfSharp.Pdf;
 using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
+#if CORE
+#endif
 using Xunit;
 
 namespace PdfSharp.Tests
 {
     [Collection("PDFsharp")]
-    public class BasicTests
+    public class BasicTests : IDisposable
     {
+        public BasicTests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void Create_Hello_World_BasicTests()
         {
-            PdfSharpCore.ResetAll();
-
             // Create a new PDF document.
             var document = new PdfDocument();
             document.Info.Title = "Created with PDFsharp";

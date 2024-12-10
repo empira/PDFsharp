@@ -78,7 +78,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public PdfContent CreateSingleContent()
         {
-            byte[] bytes = Array.Empty<byte>();
+            byte[] bytes = [];
             byte[] bytes1;
             byte[] bytes2;
             foreach (PdfItem iref in Elements)

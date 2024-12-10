@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>library</OutputType>
+    <TargetFrameworks>net6.0-windows;net8.0-windows;net462</TargetFrameworks>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <RootNamespace>PdfSharp</RootNamespace>
+    <UseWindowsForms>true</UseWindowsForms>
+    <DefineConstants>GDI</DefineConstants>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="root\CompilerServices.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\BarCode.cs" Link="Drawing.BarCodes\BarCode.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\BarCodeRenderInfo.cs" Link="Drawing.BarCodes\BarCodeRenderInfo.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\BcgSR.cs" Link="Drawing.BarCodes\BcgSR.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\Code2of5Interleaved.cs" Link="Drawing.BarCodes\Code2of5Interleaved.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\Code3of9Standard.cs" Link="Drawing.BarCodes\Code3of9Standard.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\CodeBase.cs" Link="Drawing.BarCodes\CodeBase.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\CodeDataMatrix.cs" Link="Drawing.BarCodes\CodeDataMatrix.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\CodeOmr.cs" Link="Drawing.BarCodes\CodeOmr.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\DataMatrixImage.cs" Link="Drawing.BarCodes\DataMatrixImage.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\enums\AnchorType.cs" Link="Drawing.BarCodes\enums\AnchorType.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\enums\CodeDirection.cs" Link="Drawing.BarCodes\enums\CodeDirection.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\enums\CodeType.cs" Link="Drawing.BarCodes\enums\CodeType.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\enums\DataMatrixEncoding.cs" Link="Drawing.BarCodes\enums\DataMatrixEncoding.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\enums\MarkDistance.cs" Link="Drawing.BarCodes\enums\MarkDistance.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\enums\TextLocation.cs" Link="Drawing.BarCodes\enums\TextLocation.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\MatrixCode.cs" Link="Drawing.BarCodes\MatrixCode.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\OmrData.cs" Link="Drawing.BarCodes\OmrData.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\ThickThinBarcodeRenderer.cs" Link="Drawing.BarCodes\ThickThinBarcodeRenderer.cs" />
+    <Compile Include="..\PdfSharp.BarCodes\Extensions.cs" Link="Extensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+  </ItemGroup>
+
+  <ItemGroup>
+     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Shared\PdfSharp.Shared.csproj" />
+     <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
+     <ProjectReference Include="..\PdfSharp-gdi\PdfSharp-gdi.csproj" />
+  </ItemGroup>
+
+</Project>

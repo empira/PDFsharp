@@ -445,7 +445,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Font ??= new Font(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Font = value;
             }
         }
@@ -565,7 +565,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Elements ??= new ParagraphElements(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Elements = value;
             }
         }
@@ -620,7 +620,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 
@@ -660,7 +660,7 @@ namespace MigraDoc.DocumentObjectModel
             public string? Name
             {
                 get => Owner.Name;
-                set => Owner.Name = value ?? ""; // BUG??? "null" becomes "".
+                set => Owner.Name = value ?? ""; // BUG_OLD??? "null" becomes "".
             }
 
             /// <summary>

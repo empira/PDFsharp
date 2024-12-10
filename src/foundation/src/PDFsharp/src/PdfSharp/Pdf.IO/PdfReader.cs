@@ -272,17 +272,30 @@ namespace PdfSharp.Pdf.IO
         {
             try
             {
-#if !USE_LONG_SIZE
-                if (/*sizeof(SizeType) == 4 &&*/ stream.Length > Int32.MaxValue)
-                    throw new PdfReaderException(
-                        $"PDF document with size {stream.Length} cannot be opened with a 32-bit size type. " +
-                        "Recompile PDFsharp with USE_LONG_SIZE set in Directory.Build.targets");
-#endif
+                if (!stream.CanRead)
+                    throw new PdfReaderException("PdfReader needs a stream that supports reading.");
+                if (!stream.CanSeek)
+                    throw new PdfReaderException("PdfReader needs a stream that supports seeking.");
+
                 var lexer = new Lexer(stream, _logger);
                 _document = new PdfDocument(lexer);
                 _document._state |= DocumentState.Imported;
                 _document._openMode = openMode;
-                _document.FileSize = stream.Length;
+
+                try
+                {
+#if !USE_LONG_SIZE
+                    if (/*sizeof(SizeType) == 4 &&*/ stream.Length > Int32.MaxValue)
+                        throw new PdfReaderException(
+                            Invariant($"PDF document with size {stream.Length} cannot be opened with a 32-bit size type. ") +
+                            "Recompile PDFsharp with USE_LONG_SIZE set in Directory.Build.targets");
+#endif
+                    _document.FileSize = stream.Length;
+                }
+                catch (Exception ex)
+                {
+                    throw new PdfReaderException("PdfReader needs a stream that supports the Length property.", ex);
+                }
 
                 // Get file version.
                 byte[] header = new byte[1024];
@@ -303,7 +316,7 @@ namespace PdfSharp.Pdf.IO
                 _document.Trailer = parser.ReadTrailer();
                 if (_document.Trailer == null!)
                     ParserDiagnostics.ThrowParserException(
-                        "Invalid PDF file: no trailer found."); // TODO L10N using PsMsgs
+                        "Invalid PDF file: no trailer found."); // TODO_OLD L10N using PsMsgs
                 // References available by now: All references to file-level objects.
                 // Reference.Values available by now: All trailers and cross-reference streams (which are not encrypted by definition). 
 
@@ -389,7 +402,7 @@ namespace PdfSharp.Pdf.IO
 
                 RereadUnicodeStrings();
 
-#if DEBUG_ // TODO: Delete or rewrite.
+#if DEBUG_ // TODO_OLD: Delete or rewrite.
                 // Some tests...
                 PdfReference[] reachables = document.xrefTable.TransitiveClosure(document.trailer);
                 _ = typeof(int);
@@ -416,7 +429,7 @@ namespace PdfSharp.Pdf.IO
                     if (removed != 0)
                     {
                         //Debug.WriteLine("Number of deleted unreachable objects: " + removed);
-                        PdfSharpLogHost.PdfReadingLogger.LogInformation("Number of deleted unreachable objects: " + removed);
+                        PdfSharpLogHost.PdfReadingLogger.LogInformation("Number of deleted unreachable objects: {Removed}", removed);
                     }
 
                     // Force flattening of page tree.
@@ -586,7 +599,7 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         void RereadUnicodeStrings()
         {
-            foreach (var pdfReference in _document.IrefTable.ObjectTable.Values)
+            foreach (var pdfReference in _document.IrefTable.Values)
             {
                 var pdfObject = pdfReference.Value;
                 RereadUnicodeStrings(pdfObject);

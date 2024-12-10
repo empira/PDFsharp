@@ -23,7 +23,6 @@
     <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp.Charting\PdfSharp.Charting.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Quality\PdfSharp.Quality.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets\PdfSharp.Snippets.csproj" />
-    <ProjectReference Include="..\..\src\PdfSharp.Crytography\PdfSharp.Cryptography.csproj" />
   </ItemGroup>
 
 </Project>

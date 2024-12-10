@@ -46,10 +46,10 @@
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Shared\PdfSharp.Shared.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets\PdfSharp.Snippets.csproj" />
     <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper\PdfSharp.TestHelper.csproj" />
-    <ProjectReference Include="..\..\..\shared\src\PdfSharp.Crytography\PdfSharp.Cryptography.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Testing\PdfSharp.Testing.csproj" />
     <ProjectReference Include="..\..\src\PdfSharp.Charting\PdfSharp.Charting.csproj" />
+    <ProjectReference Include="..\..\src\PdfSharp.Cryptography\PdfSharp.Cryptography.csproj" />
     <ProjectReference Include="..\..\src\PdfSharp\PdfSharp.csproj" />
   </ItemGroup>
 

@@ -27,7 +27,7 @@ namespace PdfSharp.Pdf.Advanced
         internal PdfFormXObject(PdfDocument thisDocument, XForm form)
             : base(thisDocument)
         {
-            // BUG: form is not used - not implemented.
+            // BUG_OLD: form is not used - not implemented.
             Elements.SetName(Keys.Type, "/XObject");
             Elements.SetName(Keys.Subtype, "/Form");
 
@@ -50,7 +50,7 @@ namespace PdfSharp.Pdf.Advanced
             if (form.IsTemplate)
             {
                 Debug.Assert(importedObjectTable == null);
-                // TODO more initialization here???
+                // TODO_OLD more initialization here???
                 return;
             }
 
@@ -171,7 +171,7 @@ namespace PdfSharp.Pdf.Advanced
             }
             else
             {
-                // TODO: Have to adjust bounding box? (I think not, but I’m not sure -> wait for problem)
+                // TODO_OLD: Have to adjust bounding box? (I think not, but I’m not sure -> wait for problem)
                 Elements["/BBox"] = rect;
 
                 // Rotate the image such that it is upright.
@@ -184,15 +184,15 @@ namespace PdfSharp.Pdf.Advanced
                 double offset = (height - width) / 2;
                 if (rotate == 90)
                 {
-                    // TODO It seems we can simplify this as the sign of offset changes too.
+                    // TODO_OLD It seems we can simplify this as the sign of offset changes too.
                     if (height > width)
                         matrix.TranslatePrepend(offset, offset); // Tested.
                     else
-                        matrix.TranslatePrepend(offset, offset); // TODO Test case.
+                        matrix.TranslatePrepend(offset, offset); // TODO_OLD Test case.
                 }
                 else if (rotate == 270)
                 {
-                    // TODO It seems we can simplify this as the sign of offset changes too.
+                    // TODO_OLD It seems we can simplify this as the sign of offset changes too.
                     if (height > width)
                         matrix.TranslatePrepend(-offset, -offset); // Tested.
                     else
@@ -278,7 +278,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         void FixUpObject_old(PdfImportedObjectTable iot, PdfObject value)
         {
-            // TODO: merge with PdfXObject.FixUpObject
+            // TODO_OLD: merge with PdfXObject.FixUpObject
             PdfDictionary dict;
             PdfArray array;
             if ((dict = value as PdfDictionary) != null)
@@ -363,14 +363,6 @@ namespace PdfSharp.Pdf.Advanced
             }
         }
 #endif
-
-        //    /// <summary>
-        //    /// Returns ???
-        //    /// </summary>
-        //    public override string ToString()
-        //    {
-        //      return "Form";
-        //    }
 
         /// <summary>
         /// Predefined keys of this dictionary.

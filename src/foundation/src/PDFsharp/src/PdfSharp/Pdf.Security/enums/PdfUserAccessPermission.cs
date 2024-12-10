@@ -9,6 +9,9 @@ namespace PdfSharp.Pdf.Security
     [Flags]
     enum PdfUserAccessPermission : uint
     {
+        // PDF 2.0: 7.6.4.2 Standard encryption dictionary
+        // See table 22.
+
         /// <summary>
         /// Permits everything. This is the default value.
         /// </summary>

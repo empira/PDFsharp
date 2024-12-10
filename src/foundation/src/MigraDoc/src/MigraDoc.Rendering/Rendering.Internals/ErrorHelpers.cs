@@ -6,7 +6,7 @@ namespace MigraDoc.Rendering.Internals
     /// <summary>
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    static class TH // RENAME TODO 
+    static class TH // RENAME TODO_OLD 
     {
         #region Renderer Messages
 

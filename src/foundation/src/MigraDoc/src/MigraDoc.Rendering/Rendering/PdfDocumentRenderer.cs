@@ -97,13 +97,19 @@ namespace MigraDoc.Rendering
 
             _documentRenderer ??= new(_document)
             {
-                WorkingDirectory = _workingDirectory! // BUG  ?? NRT.ThrowOnNull<string>()
+                WorkingDirectory = _workingDirectory! // BUG_OLD  ?? NRT.ThrowOnNull<string>()
             };
 
-            if (prepareCompletely && _documentRenderer.FormattedDocument == null!)
-                _documentRenderer.PrepareDocument(PdfDocument.RenderEvents);
-        }
+            if (prepareCompletely)
+            {
+                // Create all fixed predefined fonts initially for early failing if not available.
+                // Bullet fonts are not created for early failing as their style and therefore the fontface depends on the format of the lists in the document.
+                _documentRenderer.FontsAndChars.CreateAllFixedFonts();
 
+                if (_documentRenderer.FormattedDocument == null!)
+                    _documentRenderer.PrepareDocument(PdfDocument.RenderEvents);
+            }
+        }
         /// <summary>
         /// Renders the document into a PdfDocument containing all pages of the document.
         /// </summary>
@@ -203,28 +209,6 @@ namespace MigraDoc.Rendering
                 pdfPage.Height = pageInfo.Height;
                 pdfPage.Orientation = pageInfo.Orientation;
 
-#if true_
-                // Starting with 6.2.0, PDFsharp sometimes swaps width and height when setting the orientation.
-                // This code ensures that MigraDoc gets the Width and Height it asks for.
-                if (pageInfo.Orientation == PageOrientation.Portrait)
-                {
-                    // Make sure page sizes are correct, but ignore pdfPage orientation here.
-                    // Assign Width and Height again if they do not match.
-                    if (pdfPage.Width.Point != pageInfo.Width)
-                        pdfPage.Width = pageInfo.Width;
-                    if (pdfPage.Height.Point != pageInfo.Height)
-                        pdfPage.Height = pageInfo.Height;
-                }
-                else
-                {
-                    // Assign Width to Height and vice versa if they do not match.
-                    if (pdfPage.Width.Point != pageInfo.Height)
-                        pdfPage.Width = pageInfo.Height;
-                    if (pdfPage.Height.Point != pageInfo.Width)
-                        pdfPage.Height = pageInfo.Width;
-                }
-#endif
-
                 using var gfx = XGraphics.FromPdfPage(pdfPage);
                 DocumentRenderer.RenderPage(gfx, pageNr);
             }
@@ -263,7 +247,7 @@ namespace MigraDoc.Rendering
         PdfDocument? _pdfDocument;
 
         /// <summary>
-        /// Returns true, if the PdfDocument of this renderer is not yet set.
+        /// Returns true, if the PdfDocument of this renderer is set.
         /// </summary>
         public bool HasPdfDocument()
         {

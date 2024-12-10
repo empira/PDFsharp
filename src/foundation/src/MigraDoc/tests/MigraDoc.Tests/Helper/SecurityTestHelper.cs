@@ -58,10 +58,33 @@ namespace MigraDoc.Tests.Helper
             pdfRenderer.Save(filename);
         }
 
+        public static string GetStandardTestDocument()
+        {
+            const string filename = "temp.pdf";
+            WriteStandardTestDocument(filename);
+            return filename;
+        }
+
         public static void WriteSecuredStandardTestDocument(string filename, TestOptions options)
         {
             var pdfRenderer = RenderSecuredStandardTestDocument(options);
             pdfRenderer.Save(filename);
+        }
+
+        public static string GetSecuredStandardTestDocument(TestOptions options)
+        {
+            string filename;
+            if (options.Encryption == TestEncryptions.V5R5ReadOnly)
+            {
+                GetAssetsTestFile(options, out filename);
+            }
+            else
+            {
+                // Render secured test document.
+                filename = "temp.pdf";
+                WriteSecuredStandardTestDocument(filename, options);
+            }
+            return filename;
         }
     }
 }

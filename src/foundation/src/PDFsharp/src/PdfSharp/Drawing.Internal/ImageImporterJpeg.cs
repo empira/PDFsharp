@@ -10,7 +10,7 @@ namespace PdfSharp.Drawing.Internal
     // ReSharper disable once InconsistentNaming
     class ImageImporterJpeg : ImageImporterRoot, IImageImporter
     {
-        // TODO Find information about JPEG2000.
+        // TODO_OLD Find information about JPEG2000.
 
         // Notes: JFIF is big-endian.
 
@@ -18,7 +18,6 @@ namespace PdfSharp.Drawing.Internal
         {
             try
             {
-
                 stream.CurrentOffset = 0;
                 // Test 2 magic bytes.
                 if (TestFileHeader(stream))
@@ -52,6 +51,8 @@ namespace PdfSharp.Drawing.Internal
             // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception)
             {
+                // Eat exceptions to have this image importer skipped.
+                // We try to find an image importer that can handle the image.
             }
             return null;
         }
@@ -80,7 +81,7 @@ namespace PdfSharp.Drawing.Internal
             // The App0 header should be the first header in every JFIF file.
             if (stream.GetWord(0, true) == 0xffe0)
             {
-                // TODO Skip EXIF header if it precedes the JFIF header.
+                // TODO_OLD Skip EXIF header if it precedes the JFIF header.
 
                 // Now check for text "JFIF".
                 if (stream.GetDWord(4, true) == 0x4a464946)
@@ -134,7 +135,7 @@ namespace PdfSharp.Drawing.Internal
                         (ft == 0x4d4d || ft == 0x4949))
                     {
                         // More information here? More tests?
-                        // TODO Find JFIF header in the EXIF header.
+                        // TODO_OLD Find JFIF header in the EXIF header.
                         // EXIF headers are similar to TIFF.
                         return true;
                     }
@@ -225,10 +226,21 @@ namespace PdfSharp.Drawing.Internal
                     return false;
 
                 // Eventually do more tests here.
-                // Magic: we assume that all JPEG files with 4 components are RGBW (inverted CMYK) and not CMYK.
+                // Info: we assume that all JPEG files with 4 components are RGBW (inverted CMYK) and not CMYK.
                 // We add a test to tell CMYK from RGBW when we encounter a test file in CMYK format.
-                ii.Information.ImageFormat = components == 3 ? ImageInformation.ImageFormats.JPEG :
-                    (components == 1 ? ImageInformation.ImageFormats.JPEGGRAY : ImageInformation.ImageFormats.JPEGRGBW);
+                var format = components == 3
+                    ? ImageInformation.ImageFormats.JPEG
+                    : (components == 1
+                        ? ImageInformation.ImageFormats.JPEGGRAY
+                        : ImageInformation.ImageFormats.JPEGRGBW);
+                if (ii.Information.ImageFormat == ImageInformation.ImageFormats.Undefined)
+                    ii.Information.ImageFormat = format;
+#if DEBUG
+                else
+                {
+                    Debug.Assert(format == ii.Information.ImageFormat);
+                }
+#endif
 
                 return true;
             }
@@ -247,7 +259,29 @@ namespace PdfSharp.Drawing.Internal
                 // Samples per line.
                 int sizeX = stream.GetWord(7, true);
 
-                // $THHO TODO: Check if we always get useful information here.
+                int components = stream.GetByte(9);
+                if (components is 1 or 3 or 4)
+                {
+                    // Info: we assume that all JPEG files with 4 components are RGBW (inverted CMYK) and not CMYK.
+                    // We add a test to tell CMYK from RGBW when we encounter a test file in CMYK format.
+                    var format = components == 3
+                        ? ImageInformation.ImageFormats.JPEG
+                        : (components == 1
+                            ? ImageInformation.ImageFormats.JPEGGRAY
+                            : ImageInformation.ImageFormats.JPEGRGBW);
+
+                    // We have more faith in the information from the SOF header than the SOS header.
+#if DEBUG
+                    // Assert information in Debug mode.
+                    if (ii.Information.ImageFormat != ImageInformation.ImageFormats.Undefined)
+                    {
+                        Debug.Assert(format == ii.Information.ImageFormat);
+                    }
+#endif
+                    // Always use information from SOF header. Just overwrite previously set format, maybe from SOS header.
+                    ii.Information.ImageFormat = format;
+                }
+
                 ii.Information.Width = (uint)sizeX;
                 ii.Information.Height = (uint)sizeY;
 

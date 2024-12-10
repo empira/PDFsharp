@@ -230,13 +230,6 @@ namespace PdfSharp.Drawing
         }
         ulong _key;
 
-        //public void IncrementKey()  // #DELETE
-        //{
-        //    // H/ACK: Depends on implementation of CalcChecksum.
-        //    // Increment check sum and keep length untouched.
-        //    _key += 1ul << 32;
-        //}
-
         /// <summary>
         /// Gets the name of the font’s name table.
         /// </summary>

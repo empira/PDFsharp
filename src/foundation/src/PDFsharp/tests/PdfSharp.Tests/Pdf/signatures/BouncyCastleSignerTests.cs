@@ -6,21 +6,38 @@ using System.Globalization;
 using System.IO;
 #endif
 using System.Security.Cryptography.X509Certificates;
+using PdfSharp.Diagnostics;
 using PdfSharp.Drawing;
 using PdfSharp.Drawing.Layout;
+using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Annotations;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Signatures;
 using PdfSharp.Quality;
 using PdfSharp.Snippets.Pdf;
+#if CORE
+#endif
 using Xunit;
 
 namespace PdfSharp.Tests.Pdf
 {
     [Collection("PDFsharp")]
-    public class BouncyCastleSignerTests
+    public class BouncyCastleSignerTests : IDisposable
     {
+        public BouncyCastleSignerTests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         /// <summary>
         /// The minimum assets version required.
         /// </summary>
@@ -67,6 +84,7 @@ namespace PdfSharp.Tests.Pdf
         public void Sign_existing_file_Bouncy()
         {
             IOUtility.EnsureAssetsVersion(RequiredAssets);
+
             var pdfFolder = IOUtility.GetAssetsPath("archives/samples-1.5/PDFs");
             var pdfFile = Path.Combine(pdfFolder ?? throw new InvalidOperationException("Call Download-Assets.ps1 before running the tests."), "SomeLayout.pdf");
 

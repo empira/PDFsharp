@@ -186,7 +186,7 @@ namespace MigraDoc.DocumentObjectModel
                 },
                 Font =
                 {
-                    Name = "Arial", // Not "Verdana" anymore.
+                    Name = "Arial",
                     Size = 10,
                     Bold = false,
                     Italic = false,
@@ -493,7 +493,7 @@ namespace MigraDoc.DocumentObjectModel
 
             var visitedStyles = new Dictionary<Style, object>();
             foreach (var style in this)
-                VisitStyle(visitedStyles, (Style)style!, visitor, visitChildren); // BUG style may be null and not of appropriate type
+                VisitStyle(visitedStyles, (Style)style!, visitor, visitChildren); // BUG_OLD style may be null and not of appropriate type
         }
 
         /// <summary>
@@ -518,7 +518,7 @@ namespace MigraDoc.DocumentObjectModel
         public static Styles BuiltInStyles { get; } = [];
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

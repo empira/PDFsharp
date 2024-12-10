@@ -100,7 +100,7 @@ namespace PdfSharp.Pdf
 
         object IConvertible.ToType(Type conversionType, IFormatProvider? provider)
         {
-            // TODO: Add PdfInteger.ToType implementation
+            // TODO_OLD: Add PdfInteger.ToType implementation
             return null!;
         }
 

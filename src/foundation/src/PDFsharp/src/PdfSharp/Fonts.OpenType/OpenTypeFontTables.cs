@@ -857,7 +857,7 @@ namespace PdfSharp.Fonts.OpenType
             try
             {
                 Debug.Assert(_fontData != null);
-#if DEBUG || true  // TODO
+#if DEBUG || true  // TODO_OLD
                 if (_fontData.Position != DirectoryEntry.Offset)
                     throw new InvalidOperationException("_fontData!.Position != DirectoryEntry.Offset");
 

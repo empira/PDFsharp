@@ -99,12 +99,6 @@ namespace MigraDoc.RtfRendering
             if (document.UseCmykColor)
                 throw new InvalidOperationException("Cannot create RTF document with CMYK colors.");
 
-            // #DELETE
-            //#if NET6_0_OR_GREATER
-            //            var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
-            //#else
-            //            var ansiE ncoding = Encoding.GetEncoding(1252);
-            //#endif
             var ansiEncoding = PdfEncoders.WinAnsiEncoding;
             StreamWriter? streamWriter = null;
             try
@@ -185,8 +179,10 @@ namespace MigraDoc.RtfRendering
         void Prepare()
         {
             _fontList.Clear();
-            //Fonts
-            _fontList.Add("Courier New");
+
+            // Add predefined fonts.
+            foreach (var fontName in GetPredefinedFontNames())
+                _fontList.Add(fontName);
 
             _colorList.Clear();
             _colorList.Add(Colors.Black);//!!necessary for borders!!
@@ -194,6 +190,22 @@ namespace MigraDoc.RtfRendering
             ListInfoRenderer.Clear();
             ListInfoOverrideRenderer.Clear();
             CollectTables(Document);
+        }
+
+        /// <summary>
+        /// Gets a distinct set of all predefined font names relevant for RTF creation.
+        /// ErrorFontName is not returned as it isn’t used for RTF files.
+        /// </summary>
+        static IEnumerable<string> GetPredefinedFontNames()
+        {
+            var fontNames = new[]
+            { 
+                PredefinedFontsAndChars.RtfDocumentInfoFontName, 
+                PredefinedFontsAndChars.Bullets.Level1FontName, 
+                PredefinedFontsAndChars.Bullets.Level2FontName, 
+                PredefinedFontsAndChars.Bullets.Level3FontName
+            };
+            return fontNames.Distinct();
         }
 
         /// <summary>
@@ -477,7 +489,7 @@ namespace MigraDoc.RtfRendering
                 return;
 
             _rtfWriter.StartContent();
-            _rtfWriter.WriteControl("f", 0); // Font with ID 0 is Courier New. See Prepare().
+            _rtfWriter.WriteControl("f", GetFontIndex(PredefinedFontsAndChars.RtfDocumentInfoFontName));
             _rtfWriter.WriteControl("info");
             DocumentInfo info = Document.Info;
             if (!info.Values.Title.IsValueNullOrEmpty())
@@ -510,7 +522,7 @@ namespace MigraDoc.RtfRendering
             }
             _rtfWriter.EndContent();
         }
-
+        
         /// <summary>
         /// Gets the MigraDoc document that is currently rendered.
         /// </summary>

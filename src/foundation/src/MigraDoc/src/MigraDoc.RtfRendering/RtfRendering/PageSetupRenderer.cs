@@ -32,7 +32,7 @@ namespace MigraDoc.RtfRendering
             obj = GetValueAsIntended("Orientation");
             if (obj != null && (Orientation)obj == Orientation.Landscape)
                 _rtfWriter.WriteControl("lndscpsxn");
-            RenderPageSize(obj == null ? Orientation.Portrait : (Orientation)obj);
+            RenderPageSize();
             RenderPageDistances();
             RenderSectionStart();
         }
@@ -68,20 +68,12 @@ namespace MigraDoc.RtfRendering
             }
         }
         /// <summary>
-        /// Renders the page size, taking into account Orientation, PageFormat and PageWidth / PageHeight.
+        /// Renders the page size.
         /// </summary>
-        void RenderPageSize(Orientation orient)
+        void RenderPageSize()
         {
-            if (orient == Orientation.Landscape)
-            {
-                RenderUnit("pghsxn", _pageSetup.PageWidth);
-                RenderUnit("pgwsxn", _pageSetup.PageHeight);
-            }
-            else
-            {
-                RenderUnit("pghsxn", _pageSetup.PageHeight);
-                RenderUnit("pgwsxn", _pageSetup.PageWidth);
-            }
+            RenderUnit("pghsxn", _pageSetup.PageHeight);
+            RenderUnit("pgwsxn", _pageSetup.PageWidth);
         }
 
         readonly PageSetup _pageSetup;

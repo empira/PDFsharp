@@ -52,3 +52,4 @@ InternalAgentState.json
 *.log
 *tempfile.*
 launchsettings.json
+testEnvironments.json

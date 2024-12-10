@@ -37,6 +37,7 @@
     <Compile Include="..\PdfSharp.Tests\Fonts\FontEmbeddingTests.cs" Link="Fonts\FontEmbeddingTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Fonts\FontHelperTests.cs" Link="Fonts\FontHelperTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Fonts\FontResolverTests.cs" Link="Fonts\FontResolverTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Fonts\UseWindowsFontsTests.cs" Link="Fonts\UseWindowsFontsTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Drawing\text\GlyphHelperTests.cs" Link="Drawing\text\GlyphHelperTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Drawing\text\MeasurementTests.cs" Link="Drawing\text\MeasurementTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Drawing\text\TextTests.cs" Link="Drawing\text\TextTests.cs" />
@@ -67,11 +68,11 @@
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Shared\PdfSharp.Shared.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
     <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper-wpf\PdfSharp.TestHelper-wpf.csproj" />
-    <ProjectReference Include="..\..\..\shared\src\PdfSharp.Crytography\PdfSharp.Cryptography.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets-wpf\PdfSharp.Snippets-wpf.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Testing-wpf\PdfSharp.Testing-wpf.csproj" />
     <ProjectReference Include="..\..\src\PdfSharp.Charting-wpf\PdfSharp.Charting-wpf.csproj" />
     <ProjectReference Include="..\..\src\PdfSharp-wpf\PdfSharp-wpf.csproj" />
+    <ProjectReference Include="..\..\src\PdfSharp.Cryptography\PdfSharp.Cryptography.csproj" />
   </ItemGroup>
 
   <ItemGroup>

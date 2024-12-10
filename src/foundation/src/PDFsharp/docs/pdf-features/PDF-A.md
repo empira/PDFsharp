@@ -5,5 +5,6 @@ The goal is to make it PDF/A-3 conform, same as Microsoft Word do.
 
 Modification in PDFsharp done for PDF/A conformance are tagged with `#PDF-A`.
 
-## Current issues 
+## Current issues
+
 

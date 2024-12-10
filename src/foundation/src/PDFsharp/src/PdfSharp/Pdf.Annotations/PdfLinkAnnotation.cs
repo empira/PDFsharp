@@ -160,7 +160,7 @@ namespace PdfSharp.Pdf.Annotations
             var link = new PdfLinkAnnotation
             {
                 _linkType = LinkType.File,
-                // TODO: Adjust bleed box here (if possible)
+                // TODO_OLD: Adjust bleed box here (if possible)
                 Rectangle = rect,
                 _url = fileName
             };

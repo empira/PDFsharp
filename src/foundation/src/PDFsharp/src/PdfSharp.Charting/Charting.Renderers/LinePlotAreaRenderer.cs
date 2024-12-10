@@ -34,7 +34,7 @@ namespace PdfSharp.Charting.Renderers
                 //gfx.SetClip(plotAreaRect, XCombineMode.Intersect);
                 gfx.IntersectClip(plotAreaRect);
 
-                //TODO Treat null values correctly.
+                //TODO_OLD Treat null values correctly.
                 //     Points can be missing. Treat null values accordingly (NotPlotted, Interpolate etc.)
 
                 // Draw lines and markers for each data series.
@@ -48,7 +48,7 @@ namespace PdfSharp.Charting.Renderers
                     for (int idx = 0; idx < count; idx++)
                     {
                         double v = sri.Series.Elements[idx].Value;
-                        if (Double.IsNaN(v) /*&& cri.Chart.DisplayBlanksAs == BlankType.Zero*/) // TODO DisplayBlanksAs
+                        if (Double.IsNaN(v) /*&& cri.Chart.DisplayBlanksAs == BlankType.Zero*/) // TODO_OLD DisplayBlanksAs
                             v = 0;
                         points[idx] = new XPoint(idx + xMajorTick / 2, v);
                     }

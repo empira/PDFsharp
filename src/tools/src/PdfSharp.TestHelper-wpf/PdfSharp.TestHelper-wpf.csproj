@@ -20,9 +20,9 @@
   
   <ItemGroup>
     <Compile Include="..\PdfSharp.TestHelper\Analysis\ContentStream\ContentStreamEnumerator.cs" Link="Analysis\ContentStream\ContentStreamEnumerator.cs" />
-    <Compile Include="..\PdfSharp.TestHelper\Analysis\ContentStream\GetLine.cs" Link="Analysis\ContentStream\GetLine.cs" />
-    <Compile Include="..\PdfSharp.TestHelper\Analysis\ContentStream\GetObjectBase.cs" Link="Analysis\ContentStream\GetObjectBase.cs" />
-    <Compile Include="..\PdfSharp.TestHelper\Analysis\ContentStream\GetText.cs" Link="Analysis\ContentStream\GetText.cs" />
+    <Compile Include="..\PdfSharp.TestHelper\Analysis\ContentStream\LineGetter.cs" Link="Analysis\ContentStream\LineGetter.cs" />
+    <Compile Include="..\PdfSharp.TestHelper\Analysis\ContentStream\ObjectGetterBase.cs" Link="Analysis\ContentStream\ObjectGetterBase.cs" />
+    <Compile Include="..\PdfSharp.TestHelper\Analysis\ContentStream\TextGetter.cs" Link="Analysis\ContentStream\TextGetter.cs" />
     <Compile Include="..\PdfSharp.TestHelper\MemoryLogger.cs" Link="MemoryLogger.cs" />
     <Compile Include="..\PdfSharp.TestHelper\PdfFileHelper.cs" Link="PdfFileHelper.cs" />
     <Compile Include="..\PdfSharp.TestHelper\SecurityTestHelper.cs" Link="SecurityTestHelper.cs" />

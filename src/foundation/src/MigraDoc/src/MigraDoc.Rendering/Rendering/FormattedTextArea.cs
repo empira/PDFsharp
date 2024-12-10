@@ -98,7 +98,7 @@ namespace MigraDoc.Rendering
             if (_renderInfos != null)
                 return _renderInfos.ToArray();
 
-            return Array.Empty<RenderInfo>();
+            return [];
         }
 
         internal XUnitPt ContentHeight => RenderInfo.GetTotalHeight(GetRenderInfos());

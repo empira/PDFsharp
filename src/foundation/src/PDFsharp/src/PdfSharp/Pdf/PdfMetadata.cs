@@ -59,8 +59,11 @@ namespace PdfSharp.Pdf
             var instanceId = Guid.NewGuid().ToString();
             var documentId = Guid.NewGuid().ToString();
 
-            var creationDate = _document.Info.CreationDate.ToString("o");
-            var modificationDate = _document.Info.CreationDate.ToString("o");
+            static DateTime SpecifyLocalDateTimeKindIfUnspecified(DateTime value)
+                => value.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(value, DateTimeKind.Local) : value;
+
+            var creationDate = SpecifyLocalDateTimeKindIfUnspecified(_document.Info.CreationDate).ToString("yyyy-MM-ddTHH:mm:ssK");
+            var modificationDate = creationDate;
 
             var author = _document.Info.Author;
             var creator = _document.Info.Creator;
@@ -163,8 +166,11 @@ namespace PdfSharp.Pdf
             var documentId = Guid.NewGuid().ToString();
             var instanceId = Guid.NewGuid().ToString();
 
-            var creationDate = _document.Info.CreationDate.ToString("o");
-            var modificationDate = _document.Info.CreationDate.ToString("o");
+            static DateTime SpecifyLocalDateTimeKindIfUnspecified(DateTime value)
+                => value.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(value, DateTimeKind.Local) : value;
+
+            var creationDate = SpecifyLocalDateTimeKindIfUnspecified(_document.Info.CreationDate).ToString("yyyy-MM-ddTHH:mm:ssK");
+            var modificationDate = creationDate;
 
             var author = _document.Info.Author;
             var creator = _document.Info.Creator;

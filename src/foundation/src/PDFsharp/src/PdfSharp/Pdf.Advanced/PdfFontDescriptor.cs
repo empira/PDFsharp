@@ -115,7 +115,6 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public bool IsSymbolFont { get; private set; }
 
-        // HACK FlagsFromDescriptor(OpenTypeDescriptor descriptor)
         PdfFontDescriptorFlags FlagsFromDescriptor(OpenTypeDescriptor descriptor)
         {
             PdfFontDescriptorFlags flags = 0;

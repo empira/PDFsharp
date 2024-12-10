@@ -12,6 +12,7 @@ using MigraDoc.RtfRendering;
 using MigraDoc.Tests.Helper;
 using Xunit;
 using FluentAssertions;
+using PdfSharp.Diagnostics;
 #if CORE
 using PdfSharp.Fonts;
 using PdfSharp.Snippets.Font;
@@ -26,8 +27,21 @@ using PdfSharp.TestHelper;
 namespace MigraDoc.Tests
 {
     [Collection("PDFsharp")]
-    public class RtfRendererTests
+    public class RtfRendererTests : IDisposable
     {
+        public RtfRendererTests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void Create_Hello_World_RtfRendererTests()
         {
@@ -713,7 +727,7 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
 
             var imagePath = IOUtility.GetAssetsPath(@"PDFsharp\images\samples\" + assetName)!;
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (!PdfSharp.Capabilities.OperatingSystem.IsWindows)
                 imagePath = imagePath.Replace('\\', '/');
 
             var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);

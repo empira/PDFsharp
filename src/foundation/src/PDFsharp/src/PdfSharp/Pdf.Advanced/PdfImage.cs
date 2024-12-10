@@ -32,7 +32,7 @@ namespace PdfSharp.Pdf.Advanced
 
             _image = image;
 
-            ////// TODO: identify images used multiple times. If the image already exists use the same XRef.
+            ////// TODO_OLD: identify images used multiple times. If the image already exists use the same XRef.
             ////_defaultName = PdfImageTable.NextImageName;
 
             switch (_image.Format.Guid.ToString("B").ToUpper())
@@ -273,7 +273,7 @@ namespace PdfSharp.Pdf.Advanced
                     }
                     else
                     {
-                        // TODO Anything we can do here?
+                        // TODO_OLD Anything we can do here?
                         //#if CORE _WITH _GDI
                         //                        // No stream, no filename, get image data.
                         //                        // Save the image to a memory stream.
@@ -340,7 +340,7 @@ namespace PdfSharp.Pdf.Advanced
                 }
                 else
                 {
-                    // TODO Anything we can do here?
+                    // TODO_OLD Anything we can do here?
                     //#if CORE _WITH _GDI
                     //                        // No stream, no filename, get image data.
                     //                        // Save the image to a memory stream.
@@ -391,7 +391,8 @@ namespace PdfSharp.Pdf.Advanced
                 Elements["/Length"] = new PdfInteger(streamLength);
                 Elements["/Filter"] = new PdfName("/DCTDecode");
             }
-            if (_image.Interpolate && !_document.IsPdfA) // @@@PDF-A-Hack
+            // #PDF-A
+            if (_image.Interpolate && !_document.IsPdfA)
                 Elements[Keys.Interpolate] = PdfBoolean.True;
             Elements[Keys.Width] = new PdfInteger(_image.PixelWidth);
             Elements[Keys.Height] = new PdfInteger(_image.PixelHeight);
@@ -403,7 +404,7 @@ namespace PdfSharp.Pdf.Advanced
                 if (_image._importedImage.Information.ImageFormat == ImageInformation.ImageFormats.JPEGCMYK ||
                     _image._importedImage.Information.ImageFormat == ImageInformation.ImageFormats.JPEGRGBW)
                 {
-                    // TODO: Test with CMYK JPEG files (so far I only found ImageFlags.ColorSpaceYcck JPEG files ...)
+                    // TODO_OLD: Test with CMYK JPEG files (so far I only found ImageFlags.ColorSpaceYcck JPEG files ...)
                     Elements[Keys.ColorSpace] = new PdfName("/DeviceCMYK");
                     if (_image._importedImage.Information.ImageFormat == ImageInformation.ImageFormats.JPEGRGBW)
                         Elements["/Decode"] = new PdfLiteral("[1 0 1 0 1 0 1 0]"); // Invert colors because YCCK is inverted CMYK.
@@ -423,7 +424,7 @@ namespace PdfSharp.Pdf.Advanced
             {
                 if ((_image._gdiImage.Flags & ((int)ImageFlags.ColorSpaceCmyk | (int)ImageFlags.ColorSpaceYcck)) != 0)
                 {
-                    // TODO: Test with CMYK JPEG files (so far I only found ImageFlags.ColorSpaceYcck JPEG files ...)
+                    // TODO_OLD: Test with CMYK JPEG files (so far I only found ImageFlags.ColorSpaceYcck JPEG files ...)
                     Elements[Keys.ColorSpace] = new PdfName("/DeviceCMYK");
                     if ((_image._gdiImage.Flags & (int)ImageFlags.ColorSpaceYcck) != 0)
                         Elements["/Decode"] = new PdfLiteral("[1 0 1 0 1 0 1 0]"); // Invert colors because YCCK is inverted CMYK.
@@ -446,7 +447,7 @@ namespace PdfSharp.Pdf.Advanced
                 bool isGrey = pixelFormat == "Gray8";
                 if (isCmyk)
                 {
-                    // TODO: Test with CMYK JPEG files (so far I only found ImageFlags.ColorSpaceYcck JPEG files ...)
+                    // TODO_OLD: Test with CMYK JPEG files (so far I only found ImageFlags.ColorSpaceYcck JPEG files ...)
                     Elements[Keys.ColorSpace] = new PdfName("/DeviceCMYK");
                     Elements["/Decode"] = new PdfLiteral("[1 0 1 0 1 0 1 0]"); // Invert colors because YCCK is inverted CMYK.
                 }
@@ -598,7 +599,7 @@ namespace PdfSharp.Pdf.Advanced
 
             int pdfVersion = Owner.Version;
             int firstMaskColor = -1, lastMaskColor = -1;
-            // TODO MaskColor transparency.
+            // TODO_OLD MaskColor transparency.
             bool segmentedColorMask = idb.SegmentedColorMask;
             bool hasAlphaMask = idb.AlphaMaskLength > 0;
 
@@ -776,7 +777,7 @@ namespace PdfSharp.Pdf.Advanced
 
         void CreateTrueColorMemoryBitmap(int components, int bits, bool hasAlpha, PdfDocumentOptions options)
         {
-            // TODO Use hasAlpha? Or is ot superfluous?
+            // TODO_OLD Use hasAlpha? Or is ot superfluous?
             int pdfVersion = Owner.Version;
             var fd = new FlateDecode();
             var idb = (ImageDataBitmap?)_image._importedImage?.ImageData(options) ?? NRT.ThrowOnNull<ImageDataBitmap>();
@@ -1299,12 +1300,12 @@ namespace PdfSharp.Pdf.Advanced
                                     int n = imageBits[bytesFileOffset + bytesOffsetRead];
                                     if (bits == 8)
                                     {
-                                        // TODO???: segmentedColorMask == true => bad mask NYI
+                                        // TODO_OLD???: segmentedColorMask == true => bad mask NYI
                                         mask.AddPel((n >= firstMaskColor) && (n <= lastMaskColor));
                                     }
                                     else if (bits == 4)
                                     {
-                                        // TODO???: segmentedColorMask == true => bad mask NYI
+                                        // TODO_OLD???: segmentedColorMask == true => bad mask NYI
                                         int n1 = (n & 0xf0) / 16;
                                         int n2 = (n & 0x0f);
                                         mask.AddPel((n1 >= firstMaskColor) && (n1 <= lastMaskColor));
@@ -1312,7 +1313,7 @@ namespace PdfSharp.Pdf.Advanced
                                     }
                                     else if (bits == 1)
                                     {
-                                        // TODO???: segmentedColorMask == true => bad mask NYI
+                                        // TODO_OLD???: segmentedColorMask == true => bad mask NYI
                                         for (int bit = 1; bit <= 8; ++bit)
                                         {
                                             int n1 = (n & 0x80) / 128;

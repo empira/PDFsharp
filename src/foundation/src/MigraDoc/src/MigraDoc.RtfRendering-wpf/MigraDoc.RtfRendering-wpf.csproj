@@ -24,6 +24,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\MigraDoc.RtfRendering\Properties\GlobalDeclarations.cs" Link="Properties\GlobalDeclarations.cs" />
     <Compile Include="..\MigraDoc.RtfRendering\RtfRendering\enums\RtfUnit.cs" Link="RtfRendering\enums\RtfUnit.cs" />
     <Compile Include="..\MigraDoc.RtfRendering\RtfRendering\BookmarkFieldRenderer.cs" Link="RtfRendering\BookmarkFieldRenderer.cs" />
     <Compile Include="..\MigraDoc.RtfRendering\RtfRendering\BorderRenderer.cs" Link="RtfRendering\BorderRenderer.cs" />

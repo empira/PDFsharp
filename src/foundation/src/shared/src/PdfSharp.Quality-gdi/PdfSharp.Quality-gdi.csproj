@@ -25,7 +25,8 @@
   <ItemGroup>
     <Compile Include="..\PdfSharp.Quality\AssetsHelper.cs" Link="AssetsHelper.cs" />
     <Compile Include="..\PdfSharp.Quality\FeatureAndSnippetBase.cs" Link="FeatureAndSnippetBase.cs" />
-    <Compile Include="..\PdfSharp.Quality\DefaultFontResolver.cs" Link="DefaultFontResolver.cs" />
+    <Compile Include="..\PdfSharp.Quality\fontresolver\DefaultFontResolver.cs" Link="fontresolver\DefaultFontResolver.cs" />
+    <Compile Include="..\PdfSharp.Quality\fontresolver\UnitTestFontResolver.cs" Link="fontresolver\UnitTestFontResolver.cs" />
     <Compile Include="..\PdfSharp.Quality\Feature.cs" Link="Feature.cs" />
     <Compile Include="..\PdfSharp.Quality\FontHelper.cs" Link="FontHelper.cs" />
     <Compile Include="..\PdfSharp.Quality\FontUtility.cs" Link="FontUtility.cs" />

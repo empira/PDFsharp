@@ -7,6 +7,7 @@
 
 namespace System.Runtime.CompilerServices
 {
+#if !NET6_0_OR_GREATER
     /// <summary>
     /// Extension method GetSubArray required for the built-in range operator (e.g.'[1..9]').
     /// Fun fact: This class must be compiled into each assembly. If it is only visible through
@@ -29,7 +30,7 @@ namespace System.Runtime.CompilerServices
             {
                 // We know the type of the array to be exactly T[].
                 if (length == 0)
-                    //return Array.Empty<T>();
+                    //return [];
                     return [];
 
                 var dest = new T[length];
@@ -45,4 +46,5 @@ namespace System.Runtime.CompilerServices
             }
         }
     }
+#endif
 }

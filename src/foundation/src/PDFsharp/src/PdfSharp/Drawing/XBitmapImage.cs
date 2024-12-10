@@ -19,7 +19,7 @@ namespace PdfSharp.Drawing
     /// </summary>
     public sealed class XBitmapImage : XBitmapSource
     {
-        // TODO: Move code from XImage to this class.
+        // TODO_OLD: Move code from XImage to this class.
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XBitmapImage"/> class.

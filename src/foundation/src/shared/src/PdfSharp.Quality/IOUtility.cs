@@ -4,6 +4,9 @@
 #if WPF
 using System.IO;
 #endif
+#if WPF || GDI
+using System.Net.Http;
+#endif
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using PdfSharp.Internal;
@@ -373,6 +376,37 @@ namespace PdfSharp.Quality
             }
 
             throw new IOException(@"The assets folder does not exist. " + AssetsInfo);
+        }
+
+        /// <summary>
+        /// Gets the full path of a web file cached in the assets folder.
+        /// Downloads the file from URL if not found in assets.
+        /// </summary>
+        /// <param name="assetsFilename">The relative path to the file in the assets folder.</param>
+        /// <param name="url">The URL to the web file to cache.</param>
+        /// <returns>The absolute path of the cached file.</returns>
+        public static string GetCachedWebFile(string assetsFilename, string url)
+        {
+            var assetsPath = GetAssetsPath();
+            var fullAssetsFilename = assetsPath != null ? Path.Combine(assetsPath, assetsFilename) : assetsFilename;
+
+            if (!File.Exists(fullAssetsFilename))
+            {
+                var folder = Path.GetDirectoryName(fullAssetsFilename);
+                if (!Directory.Exists(folder))
+                    Directory.CreateDirectory(folder!);
+
+                var client = new HttpClient();
+                var task = client.GetStreamAsync(url);
+                task.Wait(1000);
+                var inputStream = task.Result;
+
+                using var fs = new FileStream(fullAssetsFilename, FileMode.Create);
+                inputStream.CopyTo(fs);
+                fs.Flush();
+            }
+
+            return fullAssetsFilename;
         }
 
         #endregion

@@ -34,7 +34,7 @@ namespace PdfSharp.Drawing
         public XRect(double x, double y, double width, double height)
         {
             if (width < 0 || height < 0)
-                throw new ArgumentException("WidthAndHeightCannotBeNegative"); // TODO SR.Get(SRID.Size_WidthAndHeightCannotBeNegative, new object[0]));
+                throw new ArgumentException("WidthAndHeightCannotBeNegative"); // TODO_OLD SR.Get(SRID.Size_WidthAndHeightCannotBeNegative, new object[0]));
             _x = x;
             _y = y;
             _width = width;
@@ -341,9 +341,9 @@ namespace PdfSharp.Drawing
             set
             {
                 if (IsEmpty)
-                    throw new InvalidOperationException("CannotModifyEmptyRect"); // TODO SR.Get(SRID.Rect_CannotModifyEmptyRect, new object[0]));
+                    throw new InvalidOperationException("CannotModifyEmptyRect"); // TODO_OLD SR.Get(SRID.Rect_CannotModifyEmptyRect, new object[0]));
                 if (value < 0)
-                    throw new ArgumentException("WidthCannotBeNegative"); // TODO SR.Get(SRID.Size_WidthCannotBeNegative, new object[0]));
+                    throw new ArgumentException("WidthCannotBeNegative"); // TODO_OLD SR.Get(SRID.Size_WidthCannotBeNegative, new object[0]));
 
                 _width = value;
             }

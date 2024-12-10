@@ -118,7 +118,7 @@ namespace PdfSharp.Charting.Renderers
             if (cri.ColumnSeriesRendererInfos != null)
             {
                 cri.SeriesRendererInfos = cri.ColumnSeriesRendererInfos;
-                //TODO Check for Clustered- or StackedPlotAreaRenderer
+                //TODO_OLD Check for Clustered- or StackedPlotAreaRenderer
                 renderer = new ColumnClusteredPlotAreaRenderer(_rendererParms);
                 renderer.Format();
             }
@@ -168,7 +168,7 @@ namespace PdfSharp.Charting.Renderers
             if (cri.ColumnSeriesRendererInfos != null)
             {
                 cri.SeriesRendererInfos = cri.ColumnSeriesRendererInfos;
-                //TODO Check for Clustered- or StackedPlotAreaRenderer
+                //TODO_OLD Check for Clustered- or StackedPlotAreaRenderer
                 renderer = new ColumnClusteredPlotAreaRenderer(_rendererParms);
                 renderer.Draw();
             }

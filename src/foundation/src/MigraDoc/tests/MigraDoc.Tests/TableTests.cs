@@ -3,17 +3,33 @@
 
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.Rendering;
+using PdfSharp.Diagnostics;
 using PdfSharp.Fonts;
 using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
+#if CORE
+#endif
 using Xunit;
 
 namespace MigraDoc.Tests
 {
     [Collection("PDFsharp")]
-    public class TableTests
+    public class TableTests : IDisposable
     {
+        public TableTests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void Create_Table_Cell_with_Top_Border()
         {
