@@ -6,12 +6,12 @@ namespace MigraDoc.DocumentObjectModel.Fields
     /// <summary>
     /// InfoField is used to reference one of the DocumentInfo fields in the document.
     /// </summary>
-    public class InfoField : DocumentObject
+    public class InfoField : TextBasedDocumentObject
     {
         /// <summary>
         /// Initializes a new instance of the InfoField class.
         /// </summary>
-        public InfoField()
+        public InfoField(TextRenderOption textRenderOption = TextRenderOption.Default) : base(textRenderOption)
         {
             BaseValues = new InfoFieldValues(this);
         }
@@ -19,7 +19,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
         /// <summary>
         /// Initializes a new instance of the InfoField class with the specified parent.
         /// </summary>
-        internal InfoField(DocumentObject parent) : base(parent)
+        internal InfoField(DocumentObject parent, TextRenderOption textRenderOption = TextRenderOption.Default) : base(parent, textRenderOption)
         {
             BaseValues = new InfoFieldValues(this);
         }
