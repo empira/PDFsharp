@@ -53,7 +53,7 @@ using PdfSharp.Pdf.Internal;
 // ReSharper disable RedundantNameQualifier
 // ReSharper disable UseNameofExpression
 
-namespace PdfSharp.Drawing  // #??? Clean up
+namespace PdfSharp.Drawing
 {
     /// <summary>
     /// Holds information about the current state of the XGraphics object.
@@ -72,9 +72,8 @@ namespace PdfSharp.Drawing  // #??? Clean up
     public sealed class XGraphics : IDisposable
     {
 #if CORE
-        // TODO: Implement better concept of a measure context.
+        // TODO_OLD: Implement better concept of a measure context.
 #endif
-
 #if GDI
         /// <summary>
         /// Initializes a new instance of the XGraphics class.
@@ -94,7 +93,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 try
                 {
                     Lock.EnterGdiPlus();
-                    gfx = Graphics.FromHwnd(IntPtr.Zero);  // BUG: Use measure image
+                    gfx = Graphics.FromHwnd(IntPtr.Zero);  // BUG_OLD: Use measure image
                 }
                 finally { Lock.ExitGdiPlus(); }
             }
@@ -441,7 +440,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 if (form.Owner == null!)
                 {
                     var stream = new MemoryStream();
-                    // BUG: This Windows 1.0 technique issued an exception under Microsoft Azure.  // #???
+                    // This Windows 1.0 technique issued an exception under Microsoft Azure.
                     using (var refGfx = Graphics.FromHwnd(IntPtr.Zero))
                     {
                         IntPtr hdc = refGfx.GetHdc();
@@ -660,8 +659,9 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public static XGraphics FromPdfPage(PdfPage page)
         {
             var gfx = new XGraphics(page, XGraphicsPdfPageOptions.Append, XGraphicsUnit.Point, XPageDirection.Downwards);
+            // #PDF-UA
             if (page.Owner._uaManager != null)
-                page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });  // @PDF/UA
+                page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });
 
             PdfSharpLogHost.Logger.XGraphicsCreated("PDF page");
 
@@ -674,8 +674,9 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public static XGraphics FromPdfPage(PdfPage page, XGraphicsUnit unit)
         {
             var gfx = new XGraphics(page, XGraphicsPdfPageOptions.Append, unit, XPageDirection.Downwards);
+            // #PDF-UA
             if (page.Owner._uaManager != null)
-                page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });  // @PDF/UA
+                page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });
 
             PdfSharpLogHost.Logger.XGraphicsCreated("PDF page");
 
@@ -688,8 +689,9 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public static XGraphics FromPdfPage(PdfPage page, XPageDirection pageDirection)
         {
             var gfx = new XGraphics(page, XGraphicsPdfPageOptions.Append, XGraphicsUnit.Point, pageDirection);
+            // #PDF-UA
             if (page.Owner._uaManager != null)
-                page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });  // @PDF/UA
+                page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });
 
             PdfSharpLogHost.Logger.XGraphicsCreated("PDF page");
 
@@ -702,8 +704,9 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public static XGraphics FromPdfPage(PdfPage page, XGraphicsPdfPageOptions options)
         {
             var gfx = new XGraphics(page, options, XGraphicsUnit.Point, XPageDirection.Downwards);
+            // #PDF-UA
             if (page.Owner._uaManager != null)
-                page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });  // @PDF/UA
+                page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });
 
             PdfSharpLogHost.Logger.XGraphicsCreated("PDF page");
 
@@ -716,8 +719,9 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public static XGraphics FromPdfPage(PdfPage page, XGraphicsPdfPageOptions options, XPageDirection pageDirection)
         {
             var gfx = new XGraphics(page, options, XGraphicsUnit.Point, pageDirection);
+            // #PDF-UA
             if (page.Owner._uaManager != null)
-                page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });  // @PDF/UA
+                page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });
 
             PdfSharpLogHost.Logger.XGraphicsCreated("PDF page");
 
@@ -729,9 +733,10 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// </summary>
         public static XGraphics FromPdfPage(PdfPage page, XGraphicsPdfPageOptions options, XGraphicsUnit unit)
         {
-            using XGraphics gfx = new XGraphics(page, options, unit, XPageDirection.Downwards);
+            XGraphics gfx = new XGraphics(page, options, unit, XPageDirection.Downwards);
+            // #PDF-UA
             if (page.Owner._uaManager != null)
-                page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });  // @PDF/UA
+                page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });
 
             PdfSharpLogHost.Logger.XGraphicsCreated("PDF page");
 
@@ -744,8 +749,9 @@ namespace PdfSharp.Drawing  // #??? Clean up
         public static XGraphics FromPdfPage(PdfPage page, XGraphicsPdfPageOptions options, XGraphicsUnit unit, XPageDirection pageDirection)
         {
             var gfx = new XGraphics(page, options, unit, pageDirection);
+            // #PDF-UA
             if (page.Owner._uaManager != null)
-                page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });  // @PDF/UA
+                page.Owner.Events.OnPageGraphicsCreated(page.Owner, new PageGraphicsEventArgs(page.Owner) { Page = page, Graphics = gfx, ActionType = PageGraphicsActionType.GraphicsCreated });
 
             PdfSharpLogHost.Logger.XGraphicsCreated("PDF page");
 
@@ -3625,7 +3631,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                                 break;
 
                             case XLineAlignment.Center:
-                                // TODO use CapHeight. PDFlib also uses 3/4 of ascent
+                                // TODO_OLD use CapHeight. PDFlib also uses 3/4 of ascent
 #if DEBUG
                                 var test = y;
 #endif
@@ -3661,7 +3667,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                                 break;
 
                             case XLineAlignment.Center:
-                                // TODO use CapHeight. PDFlib also uses 3/4 of ascent
+                                // TODO_OLD use CapHeight. PDFlib also uses 3/4 of ascent
                                 //y += -(cyAscent * 3 / 4) / 2 + rect.Height / 2;
                                 break;
 
@@ -3749,7 +3755,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             else
             {
                 // We always need a target for RenderEvent.
-                // TODO: Check whether this can happen.
+                // TODO_OLD: Check whether this can happen.
                 PdfSharpLogHost.FontManagementLogger.LogCritical(
                     "MeasureString could not invoke OnRenderTextEvent because we have no owning PDF document in the current context and no renderEvent parameter.");
                 throw new InvalidOperationException("No owning document or valid renderEvent.");
@@ -4103,7 +4109,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             _renderer?.DrawImage(image, x, y, width, height);
         }
 
-        // TODO: calculate destination size
+        // TODO_OLD: calculate destination size
         //public void DrawImage(XImage image, double x, double y, GdiRectF srcRect, XGraphicsUnit srcUnit)
         //public void DrawImage(XImage image, double x, double y, XRect srcRect, XGraphicsUnit srcUnit)
 
@@ -4274,6 +4280,8 @@ namespace PdfSharp.Drawing  // #??? Clean up
             }
         }
 
+#if false
+// #barcode => extension method
         // ----- DrawBarCode --------------------------------------------------------------------------
 
         /// <summary>
@@ -4317,6 +4325,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         {
             matrixcode.Render(this, brush, position);
         }
+#endif
 
         #endregion
 
@@ -4396,7 +4405,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
                     Lock.EnterGdiPlus();
                     _gsStack.Restore(state.InternalState);
                     if (_gfx != null!)
-                        _gfx.Restore(state.GdiState!);  // BUG NRT
+                        _gfx.Restore(state.GdiState!);  // BUG_OLD NRT
                     _transform = state.InternalState.Transform;
                 }
                 finally { Lock.ExitGdiPlus(); }
@@ -4470,7 +4479,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         /// </summary>
         public XGraphicsContainer BeginContainer(XRect dstRect, XRect srcRect, XGraphicsUnit unit)
         {
-            // TODO: unit
+            // TODO_OLD: unit
             if (unit != XGraphicsUnit.Point)
                 throw new ArgumentException("The current implementation supports XGraphicsUnit.Point only.", nameof(unit));
 
@@ -4486,9 +4495,10 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 try
                 {
                     Lock.EnterGdiPlus();
-                    if (_gfx is null)
-                        throw new InvalidOperationException(nameof(_gfx));
-                    xContainer = new XGraphicsContainer(_gfx.Save());
+                    GraphicsState? graphicsState = null;
+                    if (_gfx != null!)
+                        graphicsState = _gfx.Save();
+                    xContainer = new XGraphicsContainer(graphicsState);
                 }
                 finally { Lock.ExitGdiPlus(); }
             }
@@ -4497,6 +4507,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             if (TargetContext == XGraphicTargetContext.WPF)
                 xContainer = new XGraphicsContainer();
 #endif
+
             if (xContainer is null)
                 throw new InvalidOperationException(nameof(xContainer));
 
@@ -4532,12 +4543,15 @@ namespace PdfSharp.Drawing  // #??? Clean up
             // Nothing to do.
 #endif
 #if GDI
-            if (TargetContext == XGraphicTargetContext.GDI /*&& _gfx != null*/) // NRT
+            // _gfx can be null if drawing applies to PDF page only.
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (TargetContext == XGraphicTargetContext.GDI && _gfx != null) // NRT
             {
                 try
                 {
                     Lock.EnterGdiPlus();
-                    _gfx.Restore(container.GdiState);
+                    // GdiState cannot be null if _gfx is not null.
+                    _gfx.Restore(container.GdiState!);
                 }
                 finally { Lock.ExitGdiPlus(); }
             }
@@ -4843,7 +4857,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             _transform = matrix;
             matrix = DefaultViewMatrix;
             matrix.Multiply(_transform, XMatrixOrder.Prepend);
-#if CORE_ // No concept of target context in CORE build.
+#if CORE_ // No concept of target context in Core build.
             if (TargetContext == XGraphicTargetContext.CORE)
             {
                 _ = typeof(int);
@@ -5039,7 +5053,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         internal static GdiPointF[] MakePointFArray(GdiPoint[]? points, int offset, int count)
         {
             if (points == null)
-                return Array.Empty<GdiPointF>();
+                return [];
 
             //int length = points.Length;
             var result = new GdiPointF[count];
@@ -5059,7 +5073,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         internal static GdiPointF[] MakePointFArray(XPoint[]? points)
         {
             if (points == null)
-                return Array.Empty<GdiPointF>();
+                return [];
 
             int count = points.Length;
             var result = new GdiPointF[count];
@@ -5079,7 +5093,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         internal static XPoint[] MakeXPointArray(GdiPoint[]? points, int offset, int count)
         {
             if (points == null)
-                return Array.Empty<XPoint>();
+                return [];
 
             //int length = points.Length;
             var result = new XPoint[count];
@@ -5099,7 +5113,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         internal static XPoint[] MakeXPointArray(SysPoint[] points, int offset, int count)
         {
             if (points == null)
-                return Array.Empty<XPoint>();
+                return [];
 
             //int length = points.Length;
             var result = new XPoint[count];
@@ -5119,7 +5133,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         internal static XPoint[] MakeXPointArray(GdiPointF[]? points, int offset, int count)
         {
             if (points == null)
-                return Array.Empty<XPoint>();
+                return [];
 
             //int length = points.Length;
             var result = new XPoint[count];
@@ -5139,7 +5153,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         internal static GdiRectF[] MakeRectangleFArray(XRect[]? rects, int offset, int count)
         {
             if (rects == null)
-                return Array.Empty<GdiRectF>();
+                return [];
 
             //int length = rects.Length;
             GdiRectF[] result = new GdiRectF[count];
@@ -5159,10 +5173,10 @@ namespace PdfSharp.Drawing  // #??? Clean up
         internal static SysPoint[] MakePointArray(XPoint[]? points)
         {
             if (points == null)
-                return Array.Empty<SysPoint>();
+                return [];
 
             int count = points.Length;
-            SysPoint[] result = new SysPoint[count];
+            var result = new SysPoint[count];
             for (int idx = 0; idx < count; idx++)
             {
                 result[idx].X = points[idx].X;
@@ -5257,7 +5271,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
         // ReSharper disable once InconsistentNaming
         internal IXGraphicsRenderer? _renderer;
 
-        // @PDF/UA
+        // #PDF-UA
         internal void AppendToContentStream(string str)
         {
             if (_renderer is XGraphicsPdfRenderer renderer)

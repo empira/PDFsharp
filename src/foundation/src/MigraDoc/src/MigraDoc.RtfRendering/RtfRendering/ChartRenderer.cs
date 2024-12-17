@@ -167,7 +167,7 @@ namespace MigraDoc.RtfRendering
                     //break;
 
                 case Capabilities.FeatureNotAvailableAction.LogWarning:
-                    // TODO Logging. TODO Unified handling for PDFsharp and MigraDoc.
+                    // TODO_OLD Logging. TODO_OLD Unified handling for PDFsharp and MigraDoc.
                     break;
 
                 case Capabilities.FeatureNotAvailableAction.LogError:
@@ -177,7 +177,7 @@ namespace MigraDoc.RtfRendering
                     throw new ArgumentOutOfRangeException();
             }
 
-            //// NET6 return false TODO
+            //// NET6 return false TODO_OLD
             //if (Capabilities.Compatibility.ChartsCannotBeRendered)
             //    throw new InvalidOperationException("This version of MigraDoc cannot render charts to RTF. Use the WPF build under Windows to create RTF files with charts.");
 

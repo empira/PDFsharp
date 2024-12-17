@@ -28,7 +28,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
         // Differences in RTF vs Word (decimal tab)
         // Performance optimization
 
-        // TODO Use logging instead of Con/sole.WriteLine.
-        // TODO remove all Con/sole.WriteLine calls.
+        // TODO_OLD Use logging instead of Con/sole.WriteLine.
+        // TODO_OLD remove all Con/sole.WriteLine calls.
     }
 }

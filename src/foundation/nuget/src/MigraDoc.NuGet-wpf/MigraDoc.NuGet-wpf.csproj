@@ -26,7 +26,6 @@
     <ProjectReference Include="..\..\..\src\MigraDoc\src\MigraDoc.RtfRendering-wpf\MigraDoc.RtfRendering-wpf.csproj" />
     <ProjectReference Include="..\..\..\src\PDFsharp\src\PdfSharp-wpf\PdfSharp-wpf.csproj" />
     <ProjectReference Include="..\..\..\src\PDFsharp\src\PdfSharp.Charting-wpf\PdfSharp.Charting-wpf.csproj" />
-    <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.Crytography\PdfSharp.Cryptography.csproj" />
     <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.Quality-wpf\PdfSharp.Quality-wpf.csproj" />
     <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.Snippets-wpf\PdfSharp.Snippets-wpf.csproj" />
     <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.System\PdfSharp.System.csproj" />

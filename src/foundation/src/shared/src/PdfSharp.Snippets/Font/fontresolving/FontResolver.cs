@@ -23,7 +23,7 @@ namespace PdfSharp.Snippets.Font
 
         public override void RenderSnippet(XGraphics gfx)
         {
-            //// TODO: implement this.
+            //// TODO_OLD: implement this.
             ////XFont.PdfFontDefaultOptions = XPdfFontOptions.UnicodeDefault;
 
             //// Create a new PDF document.

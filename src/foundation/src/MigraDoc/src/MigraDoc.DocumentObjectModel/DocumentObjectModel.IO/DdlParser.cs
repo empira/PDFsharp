@@ -1920,7 +1920,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                         ParagraphFormat paragraphFormat = (ParagraphFormat)doc;
                         TabStops tabStops = paragraphFormat.TabStops;
 
-                        if (true) // HACK in ParseAttributeStatement       // BUG THHO4STLA Already existed in 2019.
+                        if (true) // HACK_OLD in ParseAttributeStatement       // BUG_OLD THHO4STLA Already existed in 2019.
                         {
                             bool fAddItem = Symbol == Symbol.PlusAssign;
                             var tabStop = new TabStop();
@@ -2009,7 +2009,7 @@ namespace MigraDoc.DocumentObjectModel.IO
 
             try
             {
-                // BUG ReviewSTLA
+                // BUG_OLD ReviewSTLA
                 if (valType == typeof(string))
                     ParseStringAssignment(dom, vd);
                 else if (valType == typeof(int))

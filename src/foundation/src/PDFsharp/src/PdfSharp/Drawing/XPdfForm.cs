@@ -66,7 +66,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public new static XPdfForm FromFile(string path)
         {
-            // TODO: Same file should return same object (that’s why the function is static).
+            // TODO_OLD: Same file should return same object (that’s why the function is static).
             return new XPdfForm(path);
         }
 
@@ -122,7 +122,7 @@ namespace PdfSharp.Drawing
         /// refer to this document. A reuse of this object doesn’t fail, because the underlying PDF document
         /// is re-imported if necessary.
         /// </summary>
-        // TODO: NYI: Dispose
+        // TODO_OLD: NYI: Dispose
         protected override void Dispose(bool disposing)
         {
             if (!_disposed)
@@ -326,7 +326,7 @@ namespace PdfSharp.Drawing
             get
             {
                 if (IsTemplate)
-                    throw new InvalidOperationException("This XPdfForm is a template and not an imported PDF page; therefore it has no external document.");
+                    throw new InvalidOperationException("This XPdfForm is a template and not an imported PDF page. Therefore it has no external document.");
 
                 return _externalDocument ??= PdfDocument.Tls.GetDocument(_path);
             }
@@ -355,11 +355,7 @@ namespace PdfSharp.Drawing
                     if (length > 0 && path[length] == '#')
                     {
                         // Must have at least one dot left of number sign to distinguish from e.g. '#123'.
-#if NET6_0_OR_GREATER
-                        if (path.IndexOf('.', StringComparison.Ordinal) != -1)
-#else
-                        if (path.IndexOf(".", StringComparison.Ordinal) != -1)
-#endif
+                        if (path.IndexOf('.') != -1)
                         {
                             pageNumber = Int32.Parse(path.Substring(length + 1));
                             path = path.Substring(0, length);

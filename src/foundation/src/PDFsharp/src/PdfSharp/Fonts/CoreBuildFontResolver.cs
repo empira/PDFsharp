@@ -1,23 +1,6 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-//#if GDI
-////using System.Drawing;
-////using System.Drawing.Drawing2D;
-//using GdiFontFamily = System.Drawing.FontFamily;
-//using GdiFont = System.Drawing.Font;
-//using GdiFontStyle = System.Drawing.FontStyle;
-//#endif
-//#if WPF
-//using WpfFontFamily = System.Windows.Media.FontFamily;
-//using WpfTypeface = System.Windows.Media.Typeface;
-//using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
-//using WpfStyleSimulations = System.Windows.Media.StyleSimulations;
-//#endif
-//using PdfSharp.Drawing;
-//using PdfSharp.Fonts.Internal;
-//using PdfSharp.Internal;
-//using System.Linq;
 using System.Runtime.InteropServices;
 
 // Re-Sharper disable RedundantNameQualifier
@@ -25,12 +8,12 @@ using System.Runtime.InteropServices;
 namespace PdfSharp.Fonts
 {
     /// <summary>
-    /// Used in CORE build only if no custom FontResolver and no FallbackFontResolver set.
+    /// Used in Core build only if no custom FontResolver and no FallbackFontResolver set.
     /// </summary>
     /// <remarks>
     /// Mac OS? Other Linux???
     /// </remarks>
-    class CoreBuildFontResolver : IFontResolver
+    class CoreBuildFontResolver_REMOVE : IFontResolver
     {
         class TypefaceInfo
         {
@@ -70,6 +53,8 @@ namespace PdfSharp.Fonts
 
         static readonly List<TypefaceInfo> TypefaceInfos =
         [
+            // ReSharper disable StringLiteralTypo
+
             new("Arial", TypefaceInfo.FontSimulation.None, "arial", "Arial", "FreeSans"),
             new("Arial Black", TypefaceInfo.FontSimulation.None, "ariblk", "Arial-Black"),
             new("Arial Bold", TypefaceInfo.FontSimulation.None, "arialbd", "Arial-Bold", "FreeSansBold"),
@@ -104,7 +89,7 @@ namespace PdfSharp.Fonts
             //new("Wingdings", "wingding"), // No Linux substitute
 
             // Linux Substitute Fonts
-            // TODO Nimbus and Liberation are only readily available as OTF.
+            // TODO_OLD Nimbus and Liberation are only readily available as OTF.
 
             // Ubuntu packages: fonts-dejavu fonts-dejavu-core fonts-dejavu-extra
             new("DejaVu Sans", TypefaceInfo.FontSimulation.None, "DejaVuSans"),
@@ -147,7 +132,7 @@ namespace PdfSharp.Fonts
             // ReSharper restore StringLiteralTypo
         ];
 
-        static CoreBuildFontResolver()
+        static CoreBuildFontResolver_REMOVE()
         {
             var fcp = Environment.GetEnvironmentVariable("FONTCONFIG_PATH");
             if (fcp is not null && !LinuxFontLocations.Contains(fcp))
@@ -197,8 +182,7 @@ namespace PdfSharp.Fonts
 #if NET462
                 _isWindows = true;
 #else
-                // May be too simple.
-                _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+                _isWindows = Capabilities.OperatingSystem.IsWindows;
 #endif
             }
 
@@ -207,8 +191,7 @@ namespace PdfSharp.Fonts
 #if NET462
                 _isLinux = false;
 #else
-                // May be too simple.
-                _isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+                _isLinux = Capabilities.OperatingSystem.IsLinux;
 #endif
             }
 
@@ -248,7 +231,7 @@ namespace PdfSharp.Fonts
 
         byte[]? GetLinuxFontFace(string faceName)
         {
-            // TODO Query fontconfig.
+            // TODO_OLD Query fontconfig.
             // Fontconfig is the de facto standard for indexing and managing fonts on linux.
             // Example command that should return a full file path to FreeSansBoldOblique.ttf:
             //     fc-match -f '%{file}\n' 'FreeSans:Bold:Oblique:fontformat=TrueType' : file
@@ -276,7 +259,7 @@ namespace PdfSharp.Fonts
             "/usr/share/fonts",
             "/usr/share/X11/fonts",
             "/usr/X11R6/lib/X11/fonts",
-            // TODO Avoid calling Environment.GetFolderPath twice.
+            // TODO_OLD Avoid calling Environment.GetFolderPath twice.
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".fonts"),
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/fonts")
         ];
@@ -316,7 +299,7 @@ namespace PdfSharp.Fonts
         string[] FaceNameToFilenameCandidates(string faceName)
         {
             const string fileExtension = ".ttf";
-            // TODO OTF Fonts are popular on Linux too.
+            // TODO_OLD OTF Fonts are popular on Linux too.
 
             var candidates = new List<string>
             {

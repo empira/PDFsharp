@@ -115,8 +115,9 @@ namespace PdfSharp.Drawing.Pdf
         /// </summary>
         public void DrawLines(XPen pen, XPoint[] points)
         {
+            // #PDF-UA
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             if (pen == null)
                 throw new ArgumentNullException(nameof(pen));
@@ -147,8 +148,9 @@ namespace PdfSharp.Drawing.Pdf
 
         public void DrawBeziers(XPen pen, XPoint[] points)
         {
+            // #PDF-UA
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             if (pen == null)
                 throw new ArgumentNullException(nameof(pen));
@@ -179,8 +181,9 @@ namespace PdfSharp.Drawing.Pdf
 
         public void DrawCurve(XPen pen, XPoint[] points, double tension)
         {
+            // #PDF-UA
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             if (pen == null)
                 throw new ArgumentNullException(nameof(pen));
@@ -219,8 +222,9 @@ namespace PdfSharp.Drawing.Pdf
 
         public void DrawArc(XPen pen, double x, double y, double width, double height, double startAngle, double sweepAngle)
         {
+            // #PDF-UA
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             if (pen == null)
                 throw new ArgumentNullException(nameof(pen));
@@ -235,8 +239,9 @@ namespace PdfSharp.Drawing.Pdf
 
         public void DrawRectangle(XPen? pen, XBrush? brush, double x, double y, double width, double height)
         {
+            // #PDF-UA
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             if (pen == null && brush == null)
             {    // ReSharper disable once NotResolvedInText
@@ -273,8 +278,9 @@ namespace PdfSharp.Drawing.Pdf
 
         public void DrawRoundedRectangle(XPen? pen, XBrush? brush, double x, double y, double width, double height, double ellipseWidth, double ellipseHeight)
         {
+            // #PDF-UA
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             XGraphicsPath path = new XGraphicsPath();
             path.AddRoundedRectangle(x, y, width, height, ellipseWidth, ellipseHeight);
@@ -285,8 +291,9 @@ namespace PdfSharp.Drawing.Pdf
 
         public void DrawEllipse(XPen? pen, XBrush? brush, double x, double y, double width, double height)
         {
+            // #PDF-UA
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             Realize(pen, brush);
 
@@ -319,8 +326,9 @@ namespace PdfSharp.Drawing.Pdf
 
         public void DrawPolygon(XPen? pen, XBrush? brush, XPoint[] points, XFillMode fillmode)
         {
+            // #PDF-UA
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             Realize(pen, brush);
 
@@ -341,8 +349,9 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawPie(XPen? pen, XBrush? brush, double x, double y, double width, double height,
           double startAngle, double sweepAngle)
         {
+            // #PDF-UA
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             Realize(pen, brush);
 
@@ -356,8 +365,9 @@ namespace PdfSharp.Drawing.Pdf
 
         public void DrawClosedCurve(XPen? pen, XBrush? brush, XPoint[] points, double tension, XFillMode fillmode)
         {
+            // #PDF-UA
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             int count = points.Length;
             if (count == 0)
@@ -392,8 +402,9 @@ namespace PdfSharp.Drawing.Pdf
 
         public void DrawPath(XPen? pen, XBrush? brush, XGraphicsPath path)
         {
+            // #PDF-UA
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             if (pen == null && brush == null)
                 throw new ArgumentNullException(nameof(pen));
@@ -432,8 +443,9 @@ namespace PdfSharp.Drawing.Pdf
 
         public void DrawString(string s, XFont font, XBrush brush, XRect rect, XStringFormat format)
         {
+            // #PDF-UA
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.DrawString });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.DrawString });
 
             font.CheckVersion();
 
@@ -533,7 +545,7 @@ namespace PdfSharp.Drawing.Pdf
                         break;
 
                     case XLineAlignment.Center:
-                        // TODO: Use CapHeight. PDFlib also uses 3/4 of ascent
+                        // TODO_OLD: Use CapHeight. PDFlib also uses 3/4 of ascent
                         y += (cyAscent * 3 / 4) / 2 + rect.Height / 2;
                         break;
 
@@ -555,7 +567,7 @@ namespace PdfSharp.Drawing.Pdf
                         break;
 
                     case XLineAlignment.Center:
-                        // TODO: Use CapHeight. PDFlib also uses 3/4 of ascent
+                        // TODO_OLD: Use CapHeight. PDFlib also uses 3/4 of ascent
                         y += -(cyAscent * 3 / 4) / 2 + rect.Height / 2;
                         break;
 
@@ -829,7 +841,6 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawString(string s, XGlyphTypeface typeface, XBrush brush, XRect rect, XStringFormat format)
         {
             // Placeholder
-            // TODO: Underline, strike-trough, more...
             throw new NotImplementedException("DrawString with typeface.");
         }
 
@@ -868,8 +879,9 @@ namespace PdfSharp.Drawing.Pdf
 
         public void DrawImage(XImage image, double x, double y, double width, double height)
         {
+            // #PDF-UA
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             const string format = Config.SignificantDecimalPlaces4;
 
@@ -921,7 +933,7 @@ namespace PdfSharp.Drawing.Pdf
                     }
                     else
                     {
-                        // TODO Translation for MediaBox.
+                        // TODO_OLD Translation for MediaBox.
                         AppendFormatImage("q" + resetColor + "{2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q\n",
                             x, y, cx, cy, name);
                     }
@@ -929,11 +941,12 @@ namespace PdfSharp.Drawing.Pdf
             }
         }
 
-        // TODO: incomplete - srcRect not used
+        // TODO_OLD: incomplete - srcRect not used
         public void DrawImage(XImage image, XRect destRect, XRect srcRect, XGraphicsUnit srcUnit)
         {
+            // #PDF-UA
             if (Owner._uaManager != null)
-                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });  // @PDF/UA
+                Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             const string format = Config.SignificantDecimalPlaces4;
 
@@ -988,7 +1001,7 @@ namespace PdfSharp.Drawing.Pdf
                     }
                     else
                     {
-                        // TODO Translation for MediaBox.
+                        // TODO_OLD Translation for MediaBox.
                         AppendFormatImage("q" + resetColor + "{2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q\n",
                             x, y, cx, cy, name);
                     }
@@ -1023,7 +1036,7 @@ namespace PdfSharp.Drawing.Pdf
 
         public void BeginContainer(XGraphicsContainer container, XRect dstrect, XRect srcrect, XGraphicsUnit unit)
         {
-            // TODO implement begin container
+            // TODO_OLD implement begin container
             // Before saving, the current transformation matrix must be completely realized.
             BeginGraphicMode();
             RealizeTransform();
@@ -1080,7 +1093,7 @@ namespace PdfSharp.Drawing.Pdf
             // Ensure that the graphics state stack level is at least 2, because otherwise an error
             // occurs when someone set the clip region before something was drawn.
             if (_gfxState.Level < GraphicsStackLevelWorldSpace)
-                RealizeTransform();  // TODO: refactor this function
+                RealizeTransform();  // TODO_OLD: refactor this function
 
             if (combineMode == XCombineMode.Replace)
             {
@@ -1131,7 +1144,7 @@ namespace PdfSharp.Drawing.Pdf
             // Save internal state
             _gfxState.InternalState = state;
             // Restore CTM
-            // TODO: check rest of clip
+            // TODO_OLD: check rest of clip
             //GfxState.Transform = ctm;
         }
 
@@ -1911,11 +1924,12 @@ namespace PdfSharp.Drawing.Pdf
         /// Initializes the default view transformation, i.e. the transformation from the user page
         /// space to the PDF page space.
         /// </summary>
-        internal void BeginPage() // @PDF/UA
+        // #PDF-UA
+        internal void BeginPage()
         {
             if (_gfxState.Level == GraphicsStackLevelInitial)
             {
-                // TODO: Is PageOrigin and PageScale (== Viewport) useful? Or just public DefaultViewMatrix (like Presentation Manager has had)
+                // TODO_OLD: Is PageOrigin and PageScale (== Viewport) useful? Or just public DefaultViewMatrix (like Presentation Manager has had)
                 // May be a BeginContainer(windows, viewport) is useful for users that are not familiar with matrix transformations.
 
                 // Flip page horizontally and mirror text.
@@ -2087,7 +2101,8 @@ namespace PdfSharp.Drawing.Pdf
             _gfxState.ItalicSimulationOn = false;
         }
 
-        internal bool IsInTextMode()  // @PDF/UA
+        // #PDF-UA
+        internal bool IsInTextMode()
             => _streamMode == StreamMode.Text;
 
         StreamMode _streamMode;

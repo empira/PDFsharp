@@ -103,7 +103,7 @@ namespace MigraDoc.RtfRendering
                         format = dtfInfo.SortableDateTimePattern;
                         break;
 
-                    //TODO: Output universal time for u and U.
+                    //TODO_OLD: Output universal time for u and U.
                     case "u":
                         format = dtfInfo.UniversalSortableDateTimePattern;
                         break;

@@ -1313,7 +1313,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public void AddPolygon(SysPoint[] points)
         {
-            // TODO: fill mode unclear here
+            // TODO_OLD: fill mode unclear here
 #if true
             PathGeometry.AddGeometry(GeometryHelper.CreatePolygonGeometry(points, XFillMode.Alternate, true));
             CloseFigure(); // StartFigure() isn’t needed because AddGeometry() implicitly starts a new figure, but CloseFigure() is needed for the next adding not to continue this figure.
@@ -1379,7 +1379,7 @@ namespace PdfSharp.Drawing
             figure.Segments.Add(segment);
             _pathGeometry.Figures.Add(figure);
 #endif
-            // TODO: NOT NEEDED
+            // TODO_OLD: NOT NEEDED
             //CloseFigure(); // StartFigure() isn’t needed because AddGeometry() implicitly starts a new figure, but CloseFigure() is needed for the next adding not to continue this figure.
 #endif
         }
@@ -1425,7 +1425,7 @@ namespace PdfSharp.Drawing
         public void AddPie(double x, double y, double width, double height, double startAngle, double sweepAngle)
         {
 #if CORE
-            const string message = "AddPie: This operation is not yet implemented in CORE build.";
+            const string message = "AddPie: This operation is not yet implemented in Core build.";
             DiagnosticsHelper.HandleNotImplemented(message, Capabilities.Action.PathOperations);
 #endif
 #if GDI
@@ -1526,7 +1526,7 @@ namespace PdfSharp.Drawing
                 throw new ArgumentException("Not enough points.", nameof(points));
 
 #if CORE
-            const string message = "AddClosedCurve: This operation is not yet implemented in CORE build.";
+            const string message = "AddClosedCurve: This operation is not yet implemented in Core build.";
             DiagnosticsHelper.HandleNotImplemented(message, Capabilities.Action.PathOperations);
 #endif
 #if GDI
@@ -1567,7 +1567,7 @@ namespace PdfSharp.Drawing
         public void AddPath(XGraphicsPath path, bool connect)
         {
 #if CORE
-            const string message = "AddPath: This operation is not yet implemented in CORE build.";
+            const string message = "AddPath: This operation is not yet implemented in Core build.";
             DiagnosticsHelper.HandleNotImplemented(message, Capabilities.Action.PathOperations);
 #endif
 #if GDI
@@ -1689,7 +1689,7 @@ namespace PdfSharp.Drawing
                         break;
 
                     case XLineAlignment.Center:
-                        // TODO use CapHeight. PDFlib also uses 3/4 of ascent
+                        // TODO_OLD use CapHeight. PDFlib also uses 3/4 of ascent
                         y += -lineSpace / 2; //-formattedText.Baseline + (cyAscent * 2 / 4);
                         break;
 
@@ -1890,7 +1890,7 @@ namespace PdfSharp.Drawing
                     //y += -formattedText.Baseline + (cyAscent * 2 / 4) + layoutRect.Height / 2;
 
                     // GDI seems to make it this simple:
-                    // TODO: Check WPF’s vertical alignment and make all implementations fit. $MaOs
+                    // TODO_OLD: Check WPF’s vertical alignment and make all implementations fit. $MaOs
                     y += layoutRect.Height / 2 - lineSpace / 2;
                     break;
 
@@ -1913,7 +1913,7 @@ namespace PdfSharp.Drawing
             //      break;
 
             //    case XLineAlignment.Center:
-            //      // TODO use CapHeight. PDFlib also uses 3/4 of ascent
+            //      // TODO_OLD use CapHeight. PDFlib also uses 3/4 of ascent
             //      //y += -(cyAscent * 3 / 4) / 2 + rect.Height / 2;
             //      break;
 
@@ -1929,12 +1929,12 @@ namespace PdfSharp.Drawing
 
             //if (bold && !descriptor.IsBoldFace)
             //{
-            //  // TODO: emulate bold by thicker outline
+            //  // TODO_OLD: emulate bold by thicker outline
             //}
 
             //if (italic && !descriptor.IsItalicFace)
             //{
-            //  // TODO: emulate italic by shearing transformation
+            //  // TODO_OLD: emulate italic by shearing transformation
             //}
 
             if (underline)
@@ -2106,7 +2106,7 @@ namespace PdfSharp.Drawing
 #endif
 #if WPF || WUI
             PathGeometry = PathGeometry.GetFlattenedPathGeometry();
-            // TODO: matrix handling not yet tested
+            // TODO_OLD: matrix handling not yet tested
             if (!matrix.IsIdentity)
                 PathGeometry.Transform = new MatrixTransform(matrix.ToWpfMatrix());
 #endif
@@ -2195,7 +2195,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         internal CoreGraphicsPath CorePath;
 
-        const string AddStringMessage = "AddString: Converting a string into a graphical path is not available in CORE build.";
+        const string AddStringMessage = "AddString: Converting a string into a graphical path is not available in Core build.";
 #endif
 
 #if GDI

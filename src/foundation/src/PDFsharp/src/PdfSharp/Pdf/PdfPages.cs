@@ -135,7 +135,7 @@ namespace PdfSharp.Pdf
                 // Update page count.
                 Elements.SetInteger(Keys.Count, PagesArray.Elements.Count);
 
-                // @PDF/UA: Pages must not be moved.
+                // #PDF-UA: Pages must not be moved.
                 if (_document._uaManager != null)
                     _document.Events.OnPageAdded(_document, new PageEventArgs(_document) { Page = page, PageIndex = index, EventType = PageEventType.Moved });
 
@@ -155,7 +155,7 @@ namespace PdfSharp.Pdf
                 PagesArray.Elements.Insert(index, page.ReferenceNotNull);
                 Elements.SetInteger(Keys.Count, PagesArray.Elements.Count);
 
-                // @PDF/UA: Page was created.
+                // #PDF-UA: Page was created.
                 if (_document._uaManager != null)
                     _document.Events.OnPageAdded(_document, new PageEventArgs(_document) { Page = page, PageIndex = index, EventType = PageEventType.Created });
             }
@@ -174,7 +174,7 @@ namespace PdfSharp.Pdf
                 Elements.SetInteger(Keys.Count, PagesArray.Elements.Count);
                 PdfAnnotations.FixImportedAnnotation(page);
 
-                // @PDF/UA: Page was imported.
+                // #PDF-UA: Page was imported.
                 if (_document._uaManager != null)
                     _document.Events.OnPageAdded(_document, new PageEventArgs(_document) { Page = page, PageIndex = index, EventType = PageEventType.Imported });
             }
@@ -196,7 +196,7 @@ namespace PdfSharp.Pdf
         /// <param name="pageCount">The number of pages to be inserted.</param>
         public void InsertRange(int index, PdfDocument document, int startIndex, int pageCount)
         {
-            // @PDF/UA
+            // #PDF-UA
             if (document == null)
                 throw new ArgumentNullException(nameof(document));
 
@@ -334,7 +334,7 @@ namespace PdfSharp.Pdf
                     if (annotations.Count > 0)
                     {
 #if DEBUG_
-                        // BUG!!! Hack to make it work: Fails if there already are annotations. // ReviewSTLA.
+                        // BUG_OLD!!! HACK_OLD to make it work: Fails if there already are annotations. // ReviewSTLA.
                         var annots2 = page.Elements.GetArray(PdfPage.Keys.Annots);
                         if (annots2 is null)
                         {
@@ -343,9 +343,7 @@ namespace PdfSharp.Pdf
 #else
                         var annots2 = page.Elements.GetArray(PdfPage.Keys.Annots);
                         if (annots2 is not null)
-                        {
                             _ = typeof(int);  // Temporary line for breakpoints.
-                        }
 
                         //Owner._irefTable.Add(annotations);
                         page.Elements.Add(PdfPage.Keys.Annots, annotations);
@@ -354,7 +352,7 @@ namespace PdfSharp.Pdf
                 }
             }
 
-            // @PDF/UA: Pages were imported.
+            // #PDF-UA: Pages were imported.
             if (_document._uaManager != null)
                 _document.Events.OnPageAdded(_document, new PageEventArgs(_document) { EventType = PageEventType.Imported });
         }
@@ -394,7 +392,7 @@ namespace PdfSharp.Pdf
             PagesArray.Elements.Remove(page.ReferenceNotNull);
             Elements.SetInteger(Keys.Count, PagesArray.Elements.Count);
 
-            // @PDF/UA: Page was removed.
+            // #PDF-UA: Page was removed.
             if (_document._uaManager != null)
                 _document.Events.OnPageRemoved(_document, new PageEventArgs(_document) { Page = page, PageIndex = -1, EventType = PageEventType.Removed });
         }
@@ -408,7 +406,7 @@ namespace PdfSharp.Pdf
             PagesArray.Elements.RemoveAt(index);
             Elements.SetInteger(Keys.Count, PagesArray.Elements.Count);
 
-            // @PDF/UA
+            // #PDF-UA
             if (_document._uaManager != null && page != null)
                 _document.Events.OnPageRemoved(_document, new PageEventArgs(_document) { Page = page, PageIndex = index });
         }
@@ -420,7 +418,7 @@ namespace PdfSharp.Pdf
         /// <param name="newIndex">The page index after this operation.</param>
         public void MovePage(int oldIndex, int newIndex)
         {
-            // @PDF/UA Not implemented.
+            // #PDF-UA: Not implemented.
             if (_document._uaManager != null)
                 throw new InvalidOperationException("Cannot move a page in a PDF/UA document.");
 
@@ -466,6 +464,8 @@ namespace PdfSharp.Pdf
             // Deep copy annotations.
             CloneElement(page, importPage, PdfPage.Keys.Annots, true);
 #endif
+            page.Initialize(true);
+
             // ReSharper restore AccessToStaticMemberViaDerivedType
             return page;
         }
@@ -473,7 +473,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Helper function for ImportExternalPage.
         /// </summary>
-        void CloneElement(PdfPage page, PdfPage importPage, string key, bool deepcopy)
+        void CloneElement(PdfPage page, PdfPage importPage, string key, bool deepCopy)
         {
             Debug.Assert(page != null);
             Debug.Assert(page.Owner == _document);
@@ -484,7 +484,7 @@ namespace PdfSharp.Pdf
             if (item != null)
             {
                 PdfImportedObjectTable? importedObjectTable = null;
-                if (!deepcopy)
+                if (!deepCopy)
                     importedObjectTable = Owner.FormTable.GetImportedObjectTable(importPage);
 
                 // The item can be indirect. If so, replace it by its value.
@@ -492,7 +492,7 @@ namespace PdfSharp.Pdf
                     item = reference.Value;
                 if (item is PdfObject root)
                 {
-                    if (deepcopy)
+                    if (deepCopy)
                     {
                         Debug.Assert(root.Owner != null, "See 'else' case for details");
                         root = DeepCopyClosure(_document, root);
@@ -534,7 +534,6 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfArray PagesArray
             => _pagesArray ??= (PdfArray?)Elements.GetValue(Keys.Kids, VCF.Create) ?? NRT.ThrowOnNull<PdfArray>();
-
         PdfArray? _pagesArray;
 
         /// <summary>
@@ -582,7 +581,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         static PdfDictionary[] GetKids(PdfReference iref, PdfPage.InheritedValues values, PdfDictionary? parentNotUsed)
         {
-            // TODO: inherit inheritable keys...
+            // TODO_OLD: inherit inheritable keys...
             var kid = (PdfDictionary)iref.Value;
 
 #if true
@@ -597,7 +596,7 @@ namespace PdfSharp.Pdf
             if (String.IsNullOrEmpty(type) && !kid.Elements.ContainsKey("/Kids"))
             {
                 // Type is required. If type is missing, assume it is "/Page" and hope it will work.
-                // TODO Implement a "Strict" mode in PDFsharp and don’t do this in "Strict" mode.
+                // TODO_OLD Implement a "Strict" mode in PDFsharp and don’t do this in "Strict" mode.
                 PdfPage.InheritValues(kid, values);
                 return [kid];
             }
@@ -639,7 +638,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         internal override void PrepareForSave()
         {
-            // TODO: Close all open content streams
+            // TODO_OLD: Close all open content streams
 
             // We do not create the page tree.
             // Arrays have a limit of 8192 entries, but I successfully tested documents

@@ -107,9 +107,9 @@
   </ItemGroup>
 
   <ItemGroup>
-      <ProjectReference Include="..\..\..\shared\src\PdfSharp.Shared\PdfSharp.Shared.csproj" />
-      <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
-      <ProjectReference Include="..\PdfSharp-gdi\PdfSharp-gdi.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.Shared\PdfSharp.Shared.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
+    <ProjectReference Include="..\PdfSharp-gdi\PdfSharp-gdi.csproj" />
   </ItemGroup>
 
 </Project>

@@ -11,7 +11,7 @@ namespace MigraDoc.DocumentObjectModel
     public class TabStops : DocumentObjectCollection, IEnumerable<TabStop>
     {
         /// <summary>
-        /// Specifies the minimal spacing between two TabStop positions.
+        /// Specifies the minimal spacing between two TabStop positions in points.
         /// </summary>
         public static readonly double TabStopPrecision = 1.5;
 
@@ -47,7 +47,7 @@ namespace MigraDoc.DocumentObjectModel
         /// Gets a TabStop by its index.
         /// </summary>
         public new TabStop this[int index]
-                => (base[index] as TabStop)!; // HACK // BUG: May return null TODO: TabStop? Exception?
+            => base[index] as TabStop ?? throw new InvalidOperationException("Object is not a 'TabStop'.");
 
         /// <summary>
         /// Gets a TabStop by its position. Returns null if no matching tab stop can be found.
@@ -83,9 +83,10 @@ namespace MigraDoc.DocumentObjectModel
             if (tabStop == null)
                 throw new ArgumentNullException(nameof(tabStop));
 
-            if (TabStopExists(tabStop.Position))
+            var tabAt = GetTabStopAt(tabStop.Position);
+            if (tabAt != null)
             {
-                int index = IndexOf(GetTabStopAt(tabStop.Position));
+                int index = IndexOf(tabAt);
                 RemoveObjectAt(index);
                 InsertObject(index, tabStop);
             }
@@ -94,7 +95,8 @@ namespace MigraDoc.DocumentObjectModel
                 int count = Count;
                 for (int index = 0; index < count; index++)
                 {
-                    if (tabStop.Position.Point < this[index].Position.Point)
+                    var tab = this[index];
+                    if (tabStop.Position.Point < tab.Position.Point)
                     {
                         InsertObject(index, tabStop);
                         return tabStop;
@@ -111,10 +113,11 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public TabStop AddTabStop(Unit position)
         {
-            if (TabStopExists(position))
-                return GetTabStopAt(position)!;  // Because it exists.
+            var tab = GetTabStopAt(position);
+            if (tab != null)
+                return tab;
 
-            var tab = new TabStop(position);
+            tab = new TabStop(position);
             return AddTabStop(tab);
         }
 
@@ -212,7 +215,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

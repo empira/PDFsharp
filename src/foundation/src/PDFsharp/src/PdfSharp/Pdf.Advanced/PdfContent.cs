@@ -34,7 +34,7 @@ namespace PdfSharp.Pdf.Advanced
         /// Initializes a new instance of the <see cref="PdfContent"/> class.
         /// </summary>
         /// <param name="dict">The dict.</param>
-        public PdfContent(PdfDictionary dict) // HACK PdfContent
+        public PdfContent(PdfDictionary dict) // HACK_OLD PdfContent
             : base(dict)
         {
             // A PdfContent dictionary is always unfiltered.

@@ -10,7 +10,7 @@ namespace PdfSharp.Pdf.Annotations
     {
         // DMH 6/7/06
         // Make this public so we can use it in PdfAnnotations to
-        // get the Meta data from existing annotations.
+        // get the metadata from existing annotations.
         public PdfGenericAnnotation(PdfDictionary dict)
             : base(dict)
         { }

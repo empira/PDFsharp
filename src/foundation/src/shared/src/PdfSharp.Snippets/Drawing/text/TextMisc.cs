@@ -36,7 +36,7 @@ namespace PdfSharp.Snippets.Drawing
                 const string facename = "Segoe UI";
                 var options = new XPdfFontOptions(PdfFontEncoding.Unicode);
 
-                // TODO: Define if XFontStyleEx.Bold should have an effect for bold fonts. For Segoe UI Semibold and Black it currently (15-12-01) has an effect in CORE and GDI, but not in WPF. $MaOs
+                // TODO_OLD: Define if XFontStyleEx.Bold should have an effect for bold fonts. For Segoe UI Semibold and Black it currently (15-12-01) has an effect in CORE and GDI, but not in WPF. $MaOs
 
                 var fontLight = new XFont(String.Format("{0} light", facename), 20, XFontStyleEx.Regular, options);
                 var fontSemilight = new XFont(String.Format("{0} semilight", facename), 20, XFontStyleEx.Regular, options);
@@ -56,7 +56,7 @@ namespace PdfSharp.Snippets.Drawing
             // Text Styles (not resulting own Type Faces).
             BeginBox(gfx, 3, BoxOptions.Tile);
             {
-                // TODO: Include bold for FontResolver without own Type Face for.
+                // TODO_OLD: Include bold for FontResolver without own Type Face for.
 
                 const string facename = "Segoe UI";
                 var options = new XPdfFontOptions(PdfFontEncoding.Unicode);

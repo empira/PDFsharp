@@ -132,7 +132,7 @@ namespace PdfSharp.Drawing.Pdf
 
                     case XDashStyle.Custom:
                         {
-                            StringBuilder pdf = new StringBuilder("[", 256);
+                            var pdf = new StringBuilder("[", 256);
                             int len = pen._dashPattern == null ? 0 : pen.DashPattern.Length;
                             for (int idx = 0; idx < len; idx++)
                             {
@@ -149,8 +149,9 @@ namespace PdfSharp.Drawing.Pdf
                             pdf.AppendFormat(CultureInfo.InvariantCulture, "]{0:" + format + "} d\n", pen.DashOffset * pen.Width);
                             string pattern = pdf.ToString();
 
-                            // BUG: drice2@ageone.de reported a realizing problem
-                            // HACK: I remove the if clause
+                            // IMPROVE
+                            // drice2@ageone.de reported a realizing problem.
+                            // So we now always render the pattern.
                             //if (_realizedDashPattern != pattern)
                             {
                                 _realizedDashPattern = pattern;
@@ -423,11 +424,9 @@ namespace PdfSharp.Drawing.Pdf
 
         public void AddTransform(XMatrix value, XMatrixOrder matrixOrder)
         {
-            // TODO: Use matrixOrder
-#if DEBUG
             if (matrixOrder == XMatrixOrder.Append)
                 throw new NotImplementedException("XMatrixOrder.Append");
-#endif
+
             XMatrix transform = value;
             if (renderer.Gfx.PageDirection == XPageDirection.Downwards)
             {
@@ -490,7 +489,7 @@ namespace PdfSharp.Drawing.Pdf
 
         void RealizeClipPath(XGraphicsPath clipPath)
         {
-#if CORE_  // It should work in CORE build.
+#if CORE_  // It should work in Core build.
             DiagnosticsHelper.HandleNotImplemented("RealizeClipPath");
 #endif
 #if GDI

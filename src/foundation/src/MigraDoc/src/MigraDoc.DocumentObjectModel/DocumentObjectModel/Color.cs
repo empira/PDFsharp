@@ -186,7 +186,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public uint Argb
         {
-            // TODO Check performance
+            // TODO_OLD Check performance
             //get => _isCmyk is not null ? _argb : throw new InvalidOperationException();  // oder LogHost.Warning.. 
             //[Inline]
             get => _argb;

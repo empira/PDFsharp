@@ -38,7 +38,7 @@ namespace PdfSharp.BigGustave
                 throw new InvalidOperationException($"Unexpected end of stream at {stream.Position}.");
             }
 
-            return (byte) b;
+            return (byte)b;
         }
 
         public static bool TryReadHeaderBytes(Stream stream, out byte[] bytes)

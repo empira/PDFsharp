@@ -3,7 +3,6 @@
 
 using FluentAssertions;
 using PdfSharp.Drawing;
-using PdfSharp.FontResolver;
 using PdfSharp.Fonts;
 using PdfSharp.Fonts.Internal;
 using PdfSharp.Pdf;

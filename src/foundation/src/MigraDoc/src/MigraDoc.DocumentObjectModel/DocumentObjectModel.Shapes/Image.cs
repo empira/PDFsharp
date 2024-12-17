@@ -101,13 +101,13 @@ namespace MigraDoc.DocumentObjectModel.Shapes
             get => Values.PictureFormat ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.PictureFormat = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets a user defined resolution for the image in dots per inch.
+        /// Gets or sets a user-defined resolution for the image in dots per inch.
         /// </summary>
         public double Resolution
         {
@@ -183,7 +183,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

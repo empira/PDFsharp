@@ -181,7 +181,7 @@ namespace MigraDoc.Rendering
             return iterator.SeekLastLeaf();
         }
 
-        ParagraphIterator SeekLastLeaf()  // TODO NOTE ReSharper has a bug here (use original code). Introducing pattern variable breaks the code. Should report that to JetBrains.
+        ParagraphIterator SeekLastLeaf()  // TODO_OLD NOTE ReSharper has a bug here (use original code). Introducing pattern variable breaks the code. Should report that to JetBrains.
         {
 #if true
             var obj = Current;
@@ -224,7 +224,7 @@ namespace MigraDoc.Rendering
         /// Gets the leftmost leaf within the hierarchy.
         /// </summary>
         /// <returns>The searched leaf.</returns>
-        ParagraphIterator SeekFirstLeaf() // TODO NOTE ReSharper has a bug here (see above).
+        ParagraphIterator SeekFirstLeaf() // TODO_OLD NOTE ReSharper has a bug here (see above).
         {
 #if true
             var obj = Current;

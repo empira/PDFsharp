@@ -31,7 +31,7 @@ namespace PdfSharp.Drawing
         public XSize(double width, double height)
         {
             if (width < 0 || height < 0)
-                throw new ArgumentException("WidthAndHeightCannotBeNegative"); // TODO SR.Get(SRID.Size_WidthAndHeightCannotBeNegative, new object[0]));
+                throw new ArgumentException("WidthAndHeightCannotBeNegative"); // TODO_OLD SR.Get(SRID.Size_WidthAndHeightCannotBeNegative, new object[0]));
 
             _width = width;
             _height = height;
@@ -257,9 +257,9 @@ namespace PdfSharp.Drawing
             set
             {
                 if (IsEmpty)
-                    throw new InvalidOperationException("CannotModifyEmptySize"); // TODO SR.Get(SRID.Size_CannotModifyEmptySize, new object[0]));
+                    throw new InvalidOperationException("CannotModifyEmptySize"); // TODO_OLD SR.Get(SRID.Size_CannotModifyEmptySize, new object[0]));
                 if (value < 0)
-                    throw new ArgumentException("WidthCannotBeNegative"); // TODO SR.Get(SRID.Size_WidthCannotBeNegative, new object[0]));
+                    throw new ArgumentException("WidthCannotBeNegative"); // TODO_OLD SR.Get(SRID.Size_WidthCannotBeNegative, new object[0]));
                 _width = value;
             }
         }
@@ -274,9 +274,9 @@ namespace PdfSharp.Drawing
             set
             {
                 if (IsEmpty)
-                    throw new InvalidOperationException("CannotModifyEmptySize"); // TODO SR.Get(SRID.Size_CannotModifyEmptySize, new object[0]));
+                    throw new InvalidOperationException("CannotModifyEmptySize"); // TODO_OLD SR.Get(SRID.Size_CannotModifyEmptySize, new object[0]));
                 if (value < 0)
-                    throw new ArgumentException("HeightCannotBeNegative"); // TODO SR.Get(SRID.Size_HeightCannotBeNegative, new object[0]));
+                    throw new ArgumentException("HeightCannotBeNegative"); // TODO_OLD SR.Get(SRID.Size_HeightCannotBeNegative, new object[0]));
                 _height = value;
             }
         }

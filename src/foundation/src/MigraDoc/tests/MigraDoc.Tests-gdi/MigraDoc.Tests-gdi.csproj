@@ -29,6 +29,7 @@
     <Compile Include="..\MigraDoc.Tests\ChartTests.cs" Link="ChartTests.cs" />
     <Compile Include="..\MigraDoc.Tests\CultureAndRegionTests.cs" Link="CultureAndRegionTests.cs" />
     <Compile Include="..\MigraDoc.Tests\Extensions\XunitHelper.cs" Link="Extensions\XunitHelper.cs" />
+    <Compile Include="..\MigraDoc.Tests\Fonts\PredefinedFontsTests.cs" Link="Fonts\PredefinedFontsTests.cs" />
     <Compile Include="..\MigraDoc.Tests\Helper\TestHelper.cs" Link="Helper\TestHelper.cs" />
     <Compile Include="..\MigraDoc.Tests\Helper\SecurityTestHelper.cs" Link="Helper\SecurityTestHelper.cs" />
     <Compile Include="..\MigraDoc.Tests\ImageFormats.cs" Link="ImageFormats.cs" />

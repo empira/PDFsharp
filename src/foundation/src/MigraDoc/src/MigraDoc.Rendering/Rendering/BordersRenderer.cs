@@ -36,7 +36,7 @@ namespace MigraDoc.Rendering
 #if noCMYK
             return XColor.FromArgb((int)clr.Argb);
 #else
-            //      bool cmyk = false; // BUG CMYK
+            //      bool cmyk = false; // BUG_OLD CMYK
             //      if (_borders.Document != null)
             //        cmyk = _borders.Document.UseCmykColor;
             //#if DEBUG_

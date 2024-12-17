@@ -1,9 +1,8 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using PdfSharp.Pdf.Internal;
 using System.Security.Cryptography;
-using PdfSharp.Internal;
+using PdfSharp.Pdf.Internal;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
 
@@ -223,7 +222,6 @@ namespace PdfSharp.Pdf.Security.Encryption
             var userPad = PadPassword(userPassword);
             var ownerPad = PadPassword(ownerPassword);
 
-            _md5.Initialize();
             var ownerValue = ComputeOwnerValue(userPad, ownerPad);
             var userValue = ComputeUserValue(documentId, userPassword, ownerValue, permissionsValue);
 
@@ -375,18 +373,8 @@ namespace PdfSharp.Pdf.Security.Encryption
                 // Create the hash 50 times (only for 128 bit).
                 for (var idx = 0; idx < 50; idx++)
                 {
-#if !NET6_0_OR_GREATER
-                    // Complicated code to avoid the "Hash not valid for use in specified state" exception.
-                    using (var md5 = MD5.Create())
-                    {
-                        md5.Initialize();
-                        // Only use hash with a length of keyLength.
-                        hash = md5.ComputeHash(hash, 0, keyLength);
-                    }
-#else
                     // Only use hash with a length of keyLength.
                     hash = _md5.ComputeHash(hash, 0, keyLength);
-#endif
                 }
             }
             else
@@ -695,8 +683,10 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// <summary>
         /// Gets the RC4 encryption key for the current indirect PdfObject.
         /// </summary>
+        // ReSharper disable InconsistentNaming
         byte[]? GetObjectEncryptionKeyRC4() => _objectEncryptionKeyRC4 ??= ComputeObjectEncryptionKey(false);
         byte[]? _objectEncryptionKeyRC4;
+        // ReSharper restore InconsistentNaming
 
         /// <summary>
         /// The AES encryption key for the current indirect PdfObject.
@@ -712,7 +702,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// <summary>
         /// The message digest algorithm MD5.
         /// </summary>
-        readonly MD5 _md5 = MD5.Create();
+        readonly MD5Managed _md5 = MD5Managed.Create();
 
         /// <summary>
         /// The RC4 encryption algorithm.

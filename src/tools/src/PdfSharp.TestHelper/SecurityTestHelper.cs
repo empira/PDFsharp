@@ -4,6 +4,7 @@
 using System.Collections;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Security;
+using PdfSharp.Quality;
 #if WPF
 using System.IO;
 #endif
@@ -34,7 +35,21 @@ namespace PdfSharp.TestHelper
             V4UsingAES,
             V4UsingAESWithoutMetadata,
             V5,
-            V5WithoutMetadata
+            V5WithoutMetadata,
+            V5R5ReadOnly
+        }
+
+        public enum TestEncryptions
+        {
+            None = PdfDefaultEncryption.None,
+            Default = PdfDefaultEncryption.Default,
+            V1 = PdfDefaultEncryption.V1,
+            V2With40Bits = PdfDefaultEncryption.V2With40Bits,
+            V2With128Bits = PdfDefaultEncryption.V2With128Bits,
+            V4UsingRC4 = PdfDefaultEncryption.V4UsingRC4,
+            V4UsingAES = PdfDefaultEncryption.V4UsingAES,
+            V5 = PdfDefaultEncryption.V5,
+            V5R5ReadOnly // Encryption version 5 revision is proprietary and deprecate, but reading those documents is supported.
         }
 
         static readonly TestOptionsEnum[] SkippedTestOptions =
@@ -50,31 +65,44 @@ namespace PdfSharp.TestHelper
         /// </summary>
         public class TestData
         {
-            public class AllVersionsAndDefault : TestDataBase
+            /// <summary>
+            /// Returns all TestOptionsEnum values, except None. Also, ReadOnly values are excluded.
+            /// </summary>
+            public class AllWriteVersionsAndDefault : TestDataBase
             {
-                public AllVersionsAndDefault() : this(false)
+                public AllWriteVersionsAndDefault() : this(false)
                 { }
 
-                protected AllVersionsAndDefault(bool getSkipped) : base(x => x is not TestOptionsEnum.None, getSkipped)
+                protected AllWriteVersionsAndDefault(bool getSkipped) : base(true, false, true, getSkipped)
                 { }
             }
-            public class AllVersionsAndDefaultSkipped : AllVersionsAndDefault
+            /// <summary>
+            /// Returns all skipped TestOptionsEnum values, except None. Also, ReadOnly values are excluded.
+            /// </summary>
+            public class AllWriteVersionsAndDefaultSkipped : AllWriteVersionsAndDefault
             {
-                public AllVersionsAndDefaultSkipped() : base(true)
+                public AllWriteVersionsAndDefaultSkipped() : base(true)
                 { }
             }
 
-            public class AllVersions : TestDataBase
+
+            /// <summary>
+            /// Returns all TestOptionsEnum values, except None and Default. Also, ReadOnly values are excluded.
+            /// </summary>
+            public class AllWriteVersions : TestDataBase
             {
-                public AllVersions() : this(false)
+                public AllWriteVersions() : this(false)
                 { }
 
-                protected AllVersions(bool getSkipped) : base(x => x is not TestOptionsEnum.None and not TestOptionsEnum.Default, getSkipped)
+                protected AllWriteVersions(bool getSkipped) : base(true, true, true, getSkipped)
                 { }
             }
-            public class AllVersionsSkipped : AllVersions
+            /// <summary>
+            /// Returns all skipped TestOptionsEnum values, except None and Default. Also, ReadOnly values are excluded.
+            /// </summary>
+            public class AllWriteVersionsSkipped : AllWriteVersions
             {
-                public AllVersionsSkipped() : base(true)
+                public AllWriteVersionsSkipped() : base(true)
                 { }
             }
 
@@ -146,6 +174,17 @@ namespace PdfSharp.TestHelper
 #endif
                 }
 
+                protected TestDataBase(bool excludeNone, bool excludeDefault, bool excludeReadonly, bool getSkipped = false) 
+                    : this(x =>
+                    {
+                        if (excludeNone && x == TestOptionsEnum.None ||
+                            excludeDefault && x == TestOptionsEnum.Default ||
+                            excludeReadonly && x == TestOptionsEnum.V5R5ReadOnly)
+                            return false;
+                        return true;
+                    }, getSkipped)
+                {}
+
                 public IEnumerator<object[]> GetEnumerator() => _data.GetEnumerator();
                 IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
             }
@@ -157,7 +196,7 @@ namespace PdfSharp.TestHelper
         /// </summary>
         public class TestOptions
         {
-            public PdfDefaultEncryption Encryption { get; init; }
+            public TestEncryptions Encryption { get; init; }
 
             /// <summary>
             /// Encrypt the Metadata dictionary (default = true). Valid for Version 4 and 5.
@@ -183,17 +222,18 @@ namespace PdfSharp.TestHelper
             {
                 return @enum switch
                 {
-                    TestOptionsEnum.None => new() { Encryption = PdfDefaultEncryption.None },
-                    TestOptionsEnum.Default => new() { Encryption = PdfDefaultEncryption.Default },
-                    TestOptionsEnum.V1 => new() { Encryption = PdfDefaultEncryption.V1 },
-                    TestOptionsEnum.V2With40Bits => new() { Encryption = PdfDefaultEncryption.V2With40Bits },
-                    TestOptionsEnum.V2With128Bits => new() { Encryption = PdfDefaultEncryption.V2With128Bits },
-                    TestOptionsEnum.V4UsingRC4 => new() { Encryption = PdfDefaultEncryption.V4UsingRC4 },
-                    TestOptionsEnum.V4UsingRC4WithoutMetadata => new() { Encryption = PdfDefaultEncryption.V4UsingRC4, EncryptMetadata = false },
-                    TestOptionsEnum.V4UsingAES => new() { Encryption = PdfDefaultEncryption.V4UsingAES },
-                    TestOptionsEnum.V4UsingAESWithoutMetadata => new() { Encryption = PdfDefaultEncryption.V4UsingAES, EncryptMetadata = false },
-                    TestOptionsEnum.V5 => new() { Encryption = PdfDefaultEncryption.V5 },
-                    TestOptionsEnum.V5WithoutMetadata => new() { Encryption = PdfDefaultEncryption.V5, EncryptMetadata = false },
+                    TestOptionsEnum.None => new() { Encryption = TestEncryptions.None },
+                    TestOptionsEnum.Default => new() { Encryption = TestEncryptions.Default },
+                    TestOptionsEnum.V1 => new() { Encryption = TestEncryptions.V1 },
+                    TestOptionsEnum.V2With40Bits => new() { Encryption = TestEncryptions.V2With40Bits },
+                    TestOptionsEnum.V2With128Bits => new() { Encryption = TestEncryptions.V2With128Bits },
+                    TestOptionsEnum.V4UsingRC4 => new() { Encryption = TestEncryptions.V4UsingRC4 },
+                    TestOptionsEnum.V4UsingRC4WithoutMetadata => new() { Encryption = TestEncryptions.V4UsingRC4, EncryptMetadata = false },
+                    TestOptionsEnum.V4UsingAES => new() { Encryption = TestEncryptions.V4UsingAES },
+                    TestOptionsEnum.V4UsingAESWithoutMetadata => new() { Encryption = TestEncryptions.V4UsingAES, EncryptMetadata = false },
+                    TestOptionsEnum.V5 => new() { Encryption = TestEncryptions.V5 },
+                    TestOptionsEnum.V5WithoutMetadata => new() { Encryption = TestEncryptions.V5, EncryptMetadata = false },
+                    TestOptionsEnum.V5R5ReadOnly => new TestOptions() { Encryption = TestEncryptions.V5R5ReadOnly },
                     _ => throw new ArgumentOutOfRangeException(nameof(@enum), @enum, null)
                 };
             }
@@ -201,7 +241,10 @@ namespace PdfSharp.TestHelper
 
         public static void SecureDocument(PdfDocument pdfDoc, TestOptions options)
         {
-            if (options.Encryption != PdfDefaultEncryption.None)
+            if (options.Encryption == TestEncryptions.V5R5ReadOnly)
+                throw new InvalidOperationException("A document cannot be secured with a ReadOnly encryption.");
+
+            if (options.Encryption != TestEncryptions.None)
             {
                 if (options.UserPassword is not null)
                     pdfDoc.SecuritySettings.UserPassword = options.UserPassword;
@@ -211,15 +254,15 @@ namespace PdfSharp.TestHelper
                 var securityHandler = pdfDoc.SecurityHandler;
 
                 // Encryptions to initialize manually with additional options.
-                if (options.Encryption == PdfDefaultEncryption.V4UsingRC4)
+                if (options.Encryption == TestEncryptions.V4UsingRC4)
                     securityHandler.SetEncryptionToV4UsingRC4(options.EncryptMetadata);
-                else if (options.Encryption == PdfDefaultEncryption.V4UsingAES)
+                else if (options.Encryption == TestEncryptions.V4UsingAES)
                     securityHandler.SetEncryptionToV4UsingAES(options.EncryptMetadata);
-                else if (options.Encryption == PdfDefaultEncryption.V5)
+                else if (options.Encryption == TestEncryptions.V5)
                     securityHandler.SetEncryptionToV5(options.EncryptMetadata);
                 // Encryptions to initialize through enum. Default encryption is already set, so we avoid to set it again.
-                else if (options.Encryption != PdfDefaultEncryption.Default)
-                    securityHandler.SetEncryption(options.Encryption);
+                else if (options.Encryption != TestEncryptions.Default)
+                    securityHandler.SetEncryption((PdfDefaultEncryption)options.Encryption);
             }
         }
 
@@ -253,7 +296,7 @@ namespace PdfSharp.TestHelper
             var prefixSuffix = "S_";
 
             // Prefix for non-encrypted file.
-            if (options is null || options.Encryption is PdfDefaultEncryption.None)
+            if (options is null || options.Encryption is TestEncryptions.None)
                 prefixSuffix += "_No";
             // Prefix for encrypted file.
             else
@@ -265,7 +308,7 @@ namespace PdfSharp.TestHelper
                     .Replace("With", "_")
                     .Replace("Bits", "B");
 #else
-                prefixSuffix += $"{Enum.GetName(typeof(PdfDefaultEncryption), options.Encryption)}"
+                prefixSuffix += $"{Enum.GetName(typeof(TestEncryptions), options.Encryption)}"
                     .Replace("Default", "Def")
                     .Replace("Using", "_")
                     .Replace("With", "_")
@@ -277,6 +320,43 @@ namespace PdfSharp.TestHelper
             }
 
             return prefixSuffix;
+        }
+
+        public static void GetAssetsTestFile(TestOptions options, out string filename)
+        {
+            filename = "";
+            if (options.Encryption == TestEncryptions.V5R5ReadOnly)
+            {
+                IOUtility.EnsureAssetsVersion(1021);
+
+                var hasUserPassword = !String.IsNullOrEmpty(options.UserPassword);
+                var hasOwnerPassword = !String.IsNullOrEmpty(options.OwnerPassword);
+
+                if (hasUserPassword && hasOwnerPassword)
+                {
+                    filename = IOUtility.GetAssetsPath("pdfsharp/encryption/S_V5R5 w UO.pdf")!;
+                    return;
+                }
+                if (hasUserPassword)
+                {
+                    filename = IOUtility.GetAssetsPath("pdfsharp/encryption/S_V5R5 w U.pdf")!;
+                    return;
+                }
+                if (hasOwnerPassword)
+                {
+                    filename = IOUtility.GetAssetsPath("pdfsharp/encryption/S_V5R5 w O.pdf")!;
+                    return;
+                }
+
+                // How to cache a file from the web in assets.
+                //filename = IOUtility.GetCachedWebFile("pdfsharp/encryption/r5-owner-password.pdf",
+                //    "https://github.com/py-pdf/pypdf/blob/0c81f3cfad26ddffbfc60d0ae855118e515fad8c/resources/encryption/r5-owner-password.pdf?raw=true");
+                //options.SetPasswords("", "asdfzxcv");
+
+                throw new InvalidOperationException("There are test files to cache for version 5 revision 5 for user and owner password only.");
+            }
+
+            throw new InvalidOperationException("There are no test files to cache for this encryption configuration.");
         }
     }
 }

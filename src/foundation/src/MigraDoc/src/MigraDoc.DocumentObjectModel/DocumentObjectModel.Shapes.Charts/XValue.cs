@@ -28,7 +28,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         /// <summary>
         /// The actual value of the XValue.
         /// </summary>
-        protected internal string? Value // TODO Previous implementation did not have a property?
+        protected internal string? Value // TODO_OLD Previous implementation did not have a property?
         {
             get => Values.Value;
             set => Values.Value = value;
@@ -49,7 +49,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

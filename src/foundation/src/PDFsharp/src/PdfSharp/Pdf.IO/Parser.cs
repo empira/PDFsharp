@@ -43,9 +43,9 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Constructs a parser for an ObjectStream.
         /// </summary>
-        public Parser(PdfDocument? document, Stream objectStream, Parser documentParser)
+        public Parser(PdfDocument document, Stream objectStream, Parser documentParser)
         {
-            _document = document!; // NRT HACK
+            _document = document!; // NRT HACK_OLD
             _options = documentParser._options;
             _lexer = new Lexer(objectStream, documentParser._logger);
             _documentParser = documentParser;
@@ -323,7 +323,7 @@ namespace PdfSharp.Pdf.IO
 #endif
                 // Only dictionaries can have a stream.
                 if (pdfObject is not PdfDictionary dict)
-                    throw new InvalidOperationException(); // #INVALID_PDF TODO
+                    throw new InvalidOperationException(); // #INVALID_PDF TODO_OLD
                 Debug.Assert(checkForStream, "Unexpected stream...");
 
                 ReadDictionaryStream(dict, suppressObjectOrderExceptions);
@@ -349,7 +349,7 @@ namespace PdfSharp.Pdf.IO
         /// <param name="suppressObjectOrderExceptions">Suppresses exceptions that may be caused by not yet available objects.</param>
         void ReadDictionaryStream(PdfDictionary dict, SuppressExceptions? suppressObjectOrderExceptions)
         {
-#if DEBUG_
+#if TESTCODE
             if (dict.ObjectID.ObjectNumber == 30)
                 _ = typeof(int);
 #endif
@@ -363,13 +363,13 @@ namespace PdfSharp.Pdf.IO
             if (SuppressExceptions.HasError(suppressObjectOrderExceptions))
                 return;
 //#warning THHO4STLA What to do if startPosition + streamLength is larger than length of stream? => Better not show "Please send us your PDF file" but another error message.
-// TODO THHO4STLA What to do if startPosition + streamLength is larger than length of stream? => Better not show "Please send us your PDF file" but another error message.
+// TODO_OLD THHO4STLA What to do if startPosition + streamLength is larger than length of stream? => Better not show "Please send us your PDF file" but another error message.
             int retryCount = 0;
         RetryReadStream:
             // Step 3: We try to read the stream content.
             // Maybe we have to re-read it in case 'endstream' was not at the
             // right place after reading with the length value coming from /Length.
-            var bytes = _lexer.ScanStream(startPosition, streamLength);
+            var bytes = _lexer.ScanStream(startPosition, streamLength, out var readBytes);
             var stream = new PdfDictionary.PdfStream(bytes, dict);
             dict.Stream = stream;
 #if DEBUG_  // Check it with Notepad++ directly in PDF file.
@@ -389,6 +389,8 @@ namespace PdfSharp.Pdf.IO
 #endif
             // Step 4: We try to read the 'endstream' keyword.
             // Maybe we have to re-read the content.
+            if (streamLength > readBytes)
+                streamLength = readBytes;
             if (!TryReadEndStream(dict, startPosition, ref streamLength, suppressObjectOrderExceptions))
             {
                 if (SuppressExceptions.HasError(suppressObjectOrderExceptions))
@@ -549,7 +551,18 @@ namespace PdfSharp.Pdf.IO
             // Try find 'endstream' manually.
             var oldLength = streamLength;
             //_lexer.DetermineStreamLength(dict.Reference!.Position, streamLength - length, ref streamLength);
-            streamLength = _lexer.DetermineStreamLength(streamStart, streamLength + 20, suppressObjectOrderExceptions);
+
+            // Try to read 20 extra bytes in case reported stream length is too small.
+            int scanWindow = streamLength + 20;
+            // Make sure we do not try to read beyond EOF.
+            if (streamStart + scanWindow > _lexer.PdfLength)
+            {
+                // We're close to the EOF, so casting to int is OK here.
+                scanWindow = (int)(_lexer.PdfLength - streamStart);
+                Debug.Assert(scanWindow >= oldLength);
+            }
+
+            streamLength = _lexer.DetermineStreamLength(streamStart, scanWindow, suppressObjectOrderExceptions);
             if (SuppressExceptions.HasError(suppressObjectOrderExceptions))
                 return false;
 #if DEBUG
@@ -619,7 +632,7 @@ namespace PdfSharp.Pdf.IO
             {
                 var val = items[idx];
                 if (val is not PdfName)
-                    ParserDiagnostics.ThrowParserException("Name expected."); // TODO L10N using PsMsgs
+                    ParserDiagnostics.ThrowParserException("Name expected."); // TODO_OLD L10N using PsMsgs
 
                 string key = val.ToString() ?? NRT.ThrowOnNull<string>();
                 val = items[idx + 1];
@@ -762,7 +775,7 @@ namespace PdfSharp.Pdf.IO
                         return items;
                 }
             }
-            ParserDiagnostics.ThrowParserException("Unexpected end of file."); // TODO L10N using PsMsgs
+            ParserDiagnostics.ThrowParserException("Unexpected end of file."); // TODO_OLD L10N using PsMsgs
             return items;  // Dummy code.
         }
 
@@ -956,6 +969,33 @@ namespace PdfSharp.Pdf.IO
 
         PdfObject ReadIndirectObjectFromObjectStreamInternal(PdfObjectID objectID, SuppressExceptions? suppressObjectOrderExceptions)
         {
+#if true
+            // New code: Get the ObjectStream’s parser and the offset for the ObjectID from _objectStreamObjectSources and load the object.
+
+            // Try to get the entry with the parser and the offset for the ObjectID.
+            if (!_objectStreamObjectSources.TryGetValue(objectID, out var objectStreamObjectSource))
+            {
+                SuppressExceptions.HandleError(suppressObjectOrderExceptions, () => throw TH.PdfReaderException_ObjectCouldNotBeFoundInObjectStreams());
+                return null!;
+            }
+
+            var objectStreamParser = objectStreamObjectSource.Parser;
+            var offset = objectStreamObjectSource.Offset;
+
+            // Set position in parser for the object stream and read object.
+            objectStreamParser._lexer.Position = offset;
+            var pdfObject = objectStreamParser.ReadObjectInternal(null, objectID, false, true, suppressObjectOrderExceptions);
+            if (SuppressExceptions.HasError(suppressObjectOrderExceptions))
+                return null!;
+            return pdfObject;
+#else
+            // Old code: Scan each ObjectStream for the offset of the ObjectID and load it, if found.
+            // Get the ObjectStream and its Parser from _objectStreamsWithParsers.
+            // Scanning each ObjectStream for each objectID lead to performance issues.
+            // The retry code lead to huge performance problems because of extensive Contains() checks.
+            // It could be omitted in the new code as the code after the foreach loop was not executed in any test.
+            // It seems to be obsolete and written before PdfReader executed ReadAllObjectStreamsAndTheirReferences() before ReadAllIndirectObjects().
+
             var doNextRound = true;
             var checkedObjectStreams = new List<PdfObjectStream>();
 
@@ -1001,8 +1041,9 @@ namespace PdfSharp.Pdf.IO
             PdfSharpLogHost.PdfReadingLogger.LogError($"Reading indirect object with ID {objectID} from ObjectStream finally failed.");
 
             throw TH.PdfReaderException_ObjectCouldNotBeFoundInObjectStreams();
+#endif
         }
-
+        
         /// <summary>
         /// Reads the PdfObjects of all known references, no matter if they are saved at document level or inside an ObjectStream.
         /// </summary>
@@ -1045,7 +1086,7 @@ namespace PdfSharp.Pdf.IO
             // Collect xref streams.
             var xrefStreams = pdfReferences.Select(x => x.Value).OfType<PdfCrossReferenceStream>().ToList();
             // Sort them so the last xref stream is read first.
-            // TODO: Is this always sufficient? (haven’t found any issues so far testing with ~1300 PDFs...)
+            // TODO_OLD: Is this always sufficient? (haven’t found any issues so far testing with ~1300 PDFs...)
             xrefStreams.Sort((a, b) => (int)((b.Reference?.Position ?? 0) - (a.Reference?.Position ?? 0)));
 
             // By checking the CrossReferenceStream entries, we can get all ObjectStream IDs without loading all file level objects now.
@@ -1071,6 +1112,85 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         internal void ReadAllObjectStreamsAndTheirReferences()
         {
+#if true
+            // New code: Add an entry for each ObjectID saved in an ObjectStream to _objectStreamObjectSources.
+            // Each entry holds the ObjectStream’s parser and the offset, to be able to directly load the object later.
+
+            var pdfReferences = _document.IrefTable.AllReferences;
+
+            var nextObjectStreamIDsToLoad = LoadObjectStreamIDs(pdfReferences);
+            int nextObjectStreamIDsCount;
+
+            int thisObjectStreamIDsCount;
+
+            // If any ObjectStream can’t be loaded immediately because its stream length is saved in another ObjectStream, retry it in the next round.
+            // Repeat while there are nextObjectStreamIDsToLoad and while their count has changed
+            // (if it is unchanged, no more ObjectStream could be loaded, so we suppose cyclic references).
+            do
+            {
+                // Get the next ObjectStreams to load.
+                var thisObjectStreamIDsToLoad = nextObjectStreamIDsToLoad;
+                thisObjectStreamIDsCount = thisObjectStreamIDsToLoad.Count;
+
+                // Reset nextObjectStreamIDsToLoad to restart gathering.
+                nextObjectStreamIDsToLoad = [];
+
+                foreach (var objectStreamID in thisObjectStreamIDsToLoad)
+                {
+                    var objectStreamReference = _document.IrefTable[objectStreamID];
+
+                    // Suppress exceptions that may be caused by not yet available objects.
+                    var suppressObjectOrderExceptions = new SuppressExceptions();
+
+                    // Read the PdfObjectStream object.
+                    var objectStream = ReadObjectStream(objectStreamReference!, suppressObjectOrderExceptions);
+                    if (SuppressExceptions.HasError(suppressObjectOrderExceptions))
+                    {
+                        // Exceptional case: Reset objectStreamReference. Value back to null, because it could not be read
+                        // properly and that may cause further errors.
+                        objectStreamReference?.ResetObject();
+
+                        // ObjectStream could not be loaded. Maybe its stream length is saved in an ObjectStream not yet loaded. Try it again in the next round.
+                        nextObjectStreamIDsToLoad.Add(objectStreamID);
+
+                        PdfSharpLogHost.PdfReadingLogger.LogWarning($"Loading ObjectStream with ID {objectStreamID} will be retried.");
+
+                        // Read next ObjectStream.
+                        continue;
+                    }
+
+                    // Create the parser for the object stream.
+                    var objectStreamParser = new Parser(_document, new MemoryStream(objectStream.Stream.Value), _documentParser);
+
+                    // Read and add all References to objects residing in the object stream and get all ObjectIDs and offsets .
+                    var objectIDsWithOffset = objectStream.ReadReferencesAndOffsets(_document.IrefTable);
+                    
+                    // Save all ObjectIDs with the parser of its ObjectStream and its offset.
+                    foreach (var objectIDWithOffset in objectIDsWithOffset)
+                    {
+                        var objectID = objectIDWithOffset.Key;
+                        var offset = objectIDWithOffset.Value;
+
+                        _objectStreamObjectSources.Add(objectID, (objectStreamParser, offset));
+                    }
+                }
+
+                nextObjectStreamIDsCount = nextObjectStreamIDsToLoad.Count;
+            } while (nextObjectStreamIDsCount > 0 && nextObjectStreamIDsCount != thisObjectStreamIDsCount);
+
+            // Handle ObjectStreams that could not be loaded.
+            if (nextObjectStreamIDsCount > 0)
+            {
+                PdfSharpLogHost.PdfReadingLogger.LogError($"Loading ObjectStreams with IDs {String.Join(", ", nextObjectStreamIDsToLoad)} finally failed.");
+
+                throw new ObjectNotAvailableException($"Could not load the ObjectStreams with the following ObjectNumbers: {String.Join(", ", nextObjectStreamIDsToLoad)}. " +
+                                                      $"Perhaps there is a cyclic reference between ObjectStreams, whose stream lengths are saved in an object inside the other ObjectStream.");
+            }
+#else
+            // Old code: Add an entry for each ObjectStreamID to _objectStreamsWithParsers.
+            // Each entry holds the ObjectStream and its Parser, to be able to scan the ObjectStreams later.
+            // _objectStreamsWithParsers.ContainsKey(objectStreamID) caused performance issues and could be omitted, as the loop does not save the parser for an ObjectStream a second time.
+            
             var pdfReferences = _document.IrefTable.AllReferences;
 
             var objectStreamIDsToLoad = LoadObjectStreamIDs(pdfReferences);
@@ -1079,7 +1199,8 @@ namespace PdfSharp.Pdf.IO
             var doNextRound = true;
 
             // If any ObjectStream can’t be loaded immediately because its stream length is saved in an ObjectStream, retry it later.
-            // Repeat while not all object streams are load and object streams were still added in the last round, to retry loading for objects streams that could not be loaded by now.
+            // Repeat while not all object streams are load and object streams were still added in the last round, to retry loading
+            // for objects streams that could not be loaded by now.
             while (objectStreamIDsToLoad.Count > 0 && doNextRound)
             {
                 doNextRound = false;
@@ -1096,8 +1217,9 @@ namespace PdfSharp.Pdf.IO
                         var objectStream = ReadObjectStream(objectStreamReference!, suppressObjectOrderExceptions);
                         if (SuppressExceptions.HasError(suppressObjectOrderExceptions))
                         {
-                            // Exceptional case: Reset objectStreamReference. Value back to null, because it could not be read properly and that may cause further errors.
-                            objectStreamReference?.SetObject(null!);
+                            // Exceptional case: Reset objectStreamReference. Value back to null, because it could not be read
+                            // properly and that may cause further errors.
+                            objectStreamReference?.ResetObject();
 
                             // Try it again in the next round.
                             skippedObjectStreamIDs.Add(objectStreamID);
@@ -1133,6 +1255,7 @@ namespace PdfSharp.Pdf.IO
                 throw new ObjectNotAvailableException($"Could not load the ObjectStreams with the following ObjectNumbers: {String.Join(", ", objectStreamIDsToLoad)}. " +
                                                       $"Perhaps there is a cyclic reference between ObjectStreams, whose stream lengths are saved in an object inside the other ObjectStream.");
             }
+#endif
         }
 
         PdfObjectStream ReadObjectStream(PdfReference reference, SuppressExceptions? suppressObjectOrderExceptions)
@@ -1170,7 +1293,7 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         internal int[][] ReadObjectStreamHeader(int n, int first)
         {
-            // TODO: Concept for general error  handling.
+            // TODO_OLD: Concept for general error  handling.
             // If the stream is corrupted a lot of things can go wrong here.
             // Does it make sense to do a more detailed error checking?
 
@@ -1222,7 +1345,7 @@ namespace PdfSharp.Pdf.IO
                 // If 'startxref' was still not found yet, read the file completely.
                 if (length > int.MaxValue)
                 {
-                    //TODO: Implement chunking to read long files.
+                    //TODO_OLD: Implement chunking to read long files.
                     throw new NotImplementedException(
                         "Reading >2GiB files with a 'startxref' in the middle not implemented.");
                 }
@@ -1318,7 +1441,7 @@ namespace PdfSharp.Pdf.IO
                                 {
                                     // File is corrupt, but try to recover it by using the ID we found at the location.
                                     idToUse = idChecked;
-                                    //ParserDiagnostics.ThrowParserException("Invalid entry in XRef table, ID=" + id + ", Generation=" + generation + ", Position=" + position + ", ID of referenced object=" + idChecked + ", Generation of referenced object=" + generationChecked);  // TODO L10N using PsMsgs
+                                    //ParserDiagnostics.ThrowParserException("Invalid entry in XRef table, ID=" + id + ", Generation=" + generation + ", Position=" + position + ", ID of referenced object=" + idChecked + ", Generation of referenced object=" + generationChecked);  // TODO_OLD L10N using PsMsgs
                                 }
                                 var message = Invariant(
                                     $"Object ID mismatch: Object at position {position} has ID '{id}' according to xref table and ID '{idChecked}' at its position of file.");
@@ -1350,7 +1473,7 @@ namespace PdfSharp.Pdf.IO
             {
                 // Case: Entry is a cross-reference stream.
                 // Reference: 3.4.7  Cross-Reference Streams / Page 93
-                // TODO: We have not yet tested PDF files larger than 2 GiB because we have none and cannot produce one.
+                // TODO_OLD: We have not yet tested PDF files larger than 2 GiB because we have none and cannot produce one.
 
                 // The parsed integer is the object ID of the cross-reference stream object.
                 return ReadXRefStream(xrefTable);
@@ -1378,12 +1501,12 @@ namespace PdfSharp.Pdf.IO
                 _lexer.Position = position;
                 idChecked = ReadInteger();
                 generationChecked = ReadInteger();
-                //// TODO Should we use ScanKeyword here?
+                //// TODO_OLD Should we use ScanKeyword here?
                 //ReadKSymbol(Symbol.Keyword);
                 //string token = _lexer.Token;
                 Symbol symbol = _lexer.ScanNextToken(false);
                 if (symbol != Symbol.Obj)
-                    ParserDiagnostics.ThrowParserException(Invariant($"Invalid entry in XRef table, ID={id} {generation} at position={position}")); // TODO L10N using PsMsgs
+                    ParserDiagnostics.ThrowParserException(Invariant($"Invalid entry in XRef table, ID={id} {generation} at position={position}")); // TODO_OLD L10N using PsMsgs
 
                 if (id != idChecked || generation != generationChecked)
                     return false;
@@ -1394,7 +1517,7 @@ namespace PdfSharp.Pdf.IO
             }
             catch (Exception ex)
             {
-                ParserDiagnostics.ThrowParserException("Invalid entry in XRef table, ID=" + id + ", Generation=" + generation + ", Position=" + position, ex); // TODO L10N using PsMsgs
+                ParserDiagnostics.ThrowParserException("Invalid entry in XRef table, ID=" + id + ", Generation=" + generation + ", Position=" + position, ex); // TODO_OLD L10N using PsMsgs
             }
             finally
             {
@@ -1478,19 +1601,6 @@ namespace PdfSharp.Pdf.IO
             //_ = typeof(int);
             byte[] bytes = xrefStream.Stream.UnfilteredValue;
 
-#if DEBUG_
-            for (int idx = 0; idx < bytes.Length; idx++)
-            {
-                if (idx % 4 == 0)
-                    Console.WriteLine();
-                Console.Write("{0:000} ", (int)bytes[idx]);
-            }
-            Console.WriteLine();
-#endif
-            // _ = typeof(int);
-            // Add to table.
-            // xrefTable.Add(new PdfReference(objectID, -1));
-
             int size = xrefStream.Elements.GetInteger(PdfCrossReferenceStream.Keys.Size);
             var index = xrefStream.Elements.GetValue(PdfCrossReferenceStream.Keys.Index) as PdfArray;
             int prev = xrefStream.Elements.GetInteger(PdfCrossReferenceStream.Keys.Prev);
@@ -1507,7 +1617,7 @@ namespace PdfSharp.Pdf.IO
                 // Setup with default values.
                 subsectionCount = 1;
                 subsections = new int[subsectionCount][];
-                subsections[0] = [0, size]; // HACK: What is size? Contradiction in PDF reference.
+                subsections[0] = [0, size]; // HACK_OLD: What is size? Contradiction in PDF reference.
                 subsectionEntryCount = size;
             }
             else
@@ -1531,7 +1641,7 @@ namespace PdfSharp.Pdf.IO
             if (wsum * subsectionEntryCount != bytes.Length)
                 _ = typeof(int);
 #endif
-            // BUG: This assertion fails with original PDF 2.0 documentation (ISO_32000-2_2020(en).pdf)
+            // BUG_OLD: This assertion fails with original PDF 2.0 documentation (ISO_32000-2_2020(en).pdf)
             //Debug.Assert(wsum * subsectionEntryCount == bytes.Length, "Check implementation here.");
 #if DEBUG_ && CORE
             if (PdfDiagnostics.TraceXrefStreams)
@@ -1627,7 +1737,7 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Parses a PDF date string.
         /// </summary>
-        internal static DateTime ParseDateTime(string date, DateTime errorValue)  // TODO: TryParseDateTime
+        internal static DateTime ParseDateTime(string date, DateTime errorValue)  // TODO_OLD: TryParseDateTime
         {
             DateTime datetime = errorValue;
             try
@@ -1720,7 +1830,13 @@ namespace PdfSharp.Pdf.IO
         readonly PdfDocument _document;
         readonly PdfReaderOptions _options;
         readonly Lexer _lexer;
+#if true
+        // Holds the parser and the offset for each ObjectID residing in an ObjectStream.
+        readonly Dictionary<PdfObjectID, (Parser Parser, SizeType Offset)> _objectStreamObjectSources = new();
+#else
+        // Holds the ObjectStream and the parser for each ObjectStream’s ObjectID.
         readonly Dictionary<PdfObjectID, (PdfObjectStream ObjectStream, Parser Parser)> _objectStreamsWithParsers = new();
+#endif
         readonly Parser _documentParser;
         private int _endStreamNotFoundCounter = 0;
         readonly ILogger _logger;

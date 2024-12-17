@@ -568,7 +568,7 @@ namespace PdfSharp.Pdf.IO
                 _stream.Position = _commentPosition + 150;
                 WriteRaw(Invariant($"Pages: {document.Pages.Count:#}"));  // No thousands separator here.
                 _stream.Position = _commentPosition + 200;
-                WriteRaw(Invariant($"Objects: {document.IrefTable.ObjectTable.Count:#,###}"));
+                WriteRaw(Invariant($"Objects: {document.IrefTable.Count:#,###}"));
             }
         }
 

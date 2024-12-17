@@ -23,15 +23,6 @@ namespace PdfSharp.Snippets.Pdf
         /// </summary>
         public string CertificateName => Certificate.GetNameInfo(X509NameType.SimpleName, false);
 
-        //        public Int32 GetKeySize()
-        //        {
-        //#if NET6_0_OR_GREATER
-        //            return Certificate.PublicKey.GetRSAPublicKey()!.KeySize;
-        //#else
-        //            return 17; // Hack!
-        //#endif
-        //        }
-
         public async Task<int> GetSignatureSizeAsync()
         {
             if (_signatureSize == 0)
@@ -39,6 +30,9 @@ namespace PdfSharp.Snippets.Pdf
                 // The signature size varies depending on the length of the digest and the size of the certificate.
                 // We simply calculate it once by signing an empty stream.
                 _signatureSize = (await GetSignatureAsync(new MemoryStream([0])).ConfigureAwait(false)).Length;
+
+                // With DSA, signature size varies without timestamp. A variation of 2 bytes was observed. Make it 4 to allow more variation.
+                _signatureSize += 4;
             }
             return _signatureSize;
         }

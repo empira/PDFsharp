@@ -9,6 +9,9 @@
     <DefineConstants>WPF</DefineConstants>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
+    <!-- Trimming probably does not work for the WPF build. Therefore, it is disabled for now. -->
+    <!--<IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>-->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -24,29 +27,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\..\shared\src\PdfSharp.System\System\CodeAnalysis.cs" Link="root\CodeAnalysis.cs" />
     <Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="root\CompilerServices.cs" />
     <Compile Include="..\PdfSharp\!internal\Configuration.cs" Link="!internal\Configuration.cs" />
     <Compile Include="..\PdfSharp\!internal\Directives.cs" Link="!internal\Directives.cs" />
     <Compile Include="..\PdfSharp\!internal\TargetContext.cs" Link="!internal\TargetContext.cs" />
     <Compile Include="..\PdfSharp\Diagnostics\PdfSharpCore.cs" Link="Diagnostics\PdfSharpCore.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\BarCode.cs" Link="Drawing.BarCodes\BarCode.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\BarCodeRenderInfo.cs" Link="Drawing.BarCodes\BarCodeRenderInfo.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\BcgSR.cs" Link="Drawing.BarCodes\BcgSR.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\Code2of5Interleaved.cs" Link="Drawing.BarCodes\Code2of5Interleaved.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\Code3of9Standard.cs" Link="Drawing.BarCodes\Code3of9Standard.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\CodeBase.cs" Link="Drawing.BarCodes\CodeBase.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\CodeDataMatrix.cs" Link="Drawing.BarCodes\CodeDataMatrix.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\CodeOmr.cs" Link="Drawing.BarCodes\CodeOmr.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\DataMatrixImage.cs" Link="Drawing.BarCodes\DataMatrixImage.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\enums\AnchorType.cs" Link="Drawing.BarCodes\enums\AnchorType.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\enums\CodeDirection.cs" Link="Drawing.BarCodes\enums\CodeDirection.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\enums\CodeType.cs" Link="Drawing.BarCodes\enums\CodeType.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\enums\DataMatrixEncoding.cs" Link="Drawing.BarCodes\enums\DataMatrixEncoding.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\enums\MarkDistance.cs" Link="Drawing.BarCodes\enums\MarkDistance.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\enums\TextLocation.cs" Link="Drawing.BarCodes\enums\TextLocation.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\MatrixCode.cs" Link="Drawing.BarCodes\MatrixCode.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\OmrData.cs" Link="Drawing.BarCodes\OmrData.cs" />
-    <Compile Include="..\PdfSharp\Drawing.BarCodes\ThickThinBarcodeRenderer.cs" Link="Drawing.BarCodes\ThickThinBarcodeRenderer.cs" />
     <Compile Include="..\PdfSharp\Drawing.Internal\IImageImporter.cs" Link="Drawing.Internal\IImageImporter.cs" />
     <Compile Include="..\PdfSharp\Drawing.Internal\ImageImporter.cs" Link="Drawing.Internal\ImageImporter.cs" />
     <Compile Include="..\PdfSharp\Drawing.Internal\ImageImporterBmp.cs" Link="Drawing.Internal\ImageImporterBmp.cs" />
@@ -234,6 +220,7 @@
     <Compile Include="..\PdfSharp\Pdf.Advanced\PdfImageTable.cs" Link="Pdf.Advanced\PdfImageTable.cs" />
     <Compile Include="..\PdfSharp\Pdf.Advanced\PdfImportedObjectTable.cs" Link="Pdf.Advanced\PdfImportedObjectTable.cs" />
     <Compile Include="..\PdfSharp\Pdf.Advanced\PdfInternals.cs" Link="Pdf.Advanced\PdfInternals.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Advanced\PdfNamedDestinations.cs" Link="Pdf.Advanced\PdfNamedDestinations.cs" />
     <Compile Include="..\PdfSharp\Pdf.Advanced\PdfNamedDestinationParameters.cs" Link="Pdf.Advanced\PdfNamedDestinationParameters.cs" />
     <Compile Include="..\PdfSharp\Pdf.Advanced\PdfNameDictionary.cs" Link="Pdf.Advanced\PdfNameDictionary.cs" />
     <Compile Include="..\PdfSharp\Pdf.Advanced\PdfObjectInternals.cs" Link="Pdf.Advanced\PdfObjectInternals.cs" />
@@ -313,6 +300,7 @@
     <Compile Include="..\PdfSharp\Pdf.Security\enums\PdfUserAccessPermission.cs" Link="Pdf.Security\enums\PdfUserAccessPermission.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\CryptFilterBase.cs" Link="Pdf.Security\CryptFilterBase.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\IdentityCryptFilter.cs" Link="Pdf.Security\IdentityCryptFilter.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Security\MD5Managed.cs" Link="Pdf.Security\MD5Managed.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\PdfCryptFilter.cs" Link="Pdf.Security\PdfCryptFilter.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\PdfCryptFilters.cs" Link="Pdf.Security\PdfCryptFilters.cs" />
     <Compile Include="..\PdfSharp\Pdf.Security\PdfSecurityHandler.cs" Link="Pdf.Security\PdfSecurityHandler.cs" />

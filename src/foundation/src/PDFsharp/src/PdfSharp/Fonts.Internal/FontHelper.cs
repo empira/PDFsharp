@@ -80,7 +80,7 @@ namespace PdfSharp.Fonts.Internal
                 for (int idx = 0; idx < length; idx++)
                 {
                     char ch = text[idx];
-                    // H/ACK: Unclear what to do here.
+                    // H/A/C/K: Unclear what to do here.
                     if (ch < 32)
                         continue;
 
@@ -134,7 +134,7 @@ namespace PdfSharp.Fonts.Internal
                     size.Width += length * font.Size * Const.BoldEmphasis;
                 }
             }
-            // BUG: Is it correct to return an empty size if we have no descriptor?
+            // BUG_OLD: Is it correct to return an empty size if we have no descriptor?
             Debug.Assert(descriptor != null, "No OpenTypeDescriptor.");
 
             return size;
@@ -182,11 +182,11 @@ namespace PdfSharp.Fonts.Internal
 
 #if CORE
         /// <summary>
-        /// Creates a typeface.
+        /// Creates a typeface from XFontStyleEx.
         /// </summary>
         public static XTypeface CreateTypeface(XFontFamily family, XFontStyleEx style)
         {
-            // BUG: does not work with fonts that have others than the four default styles.
+            // Does not work with fonts that have others than the four default styles.
             XFontStyle fontStyle = XFontStyle.FromGdiFontStyle((XFontStyleEx)style);
             XFontWeight fontWeight = XFontWeight.FromGdiFontStyle((XFontStyleEx)style);
             var typeface = new XTypeface(family, fontStyle, fontWeight, XFontStretches.Normal);
@@ -200,16 +200,6 @@ namespace PdfSharp.Fonts.Internal
             // ReSharper disable once JoinDeclarationAndInitializer
             GdiFont? font;
 
-            // Use font resolver in CORE build. XPrivateFontCollection exists only in GDI and WPF build.
-#if GDI_  // No XPrivateFontCollection anymore.
-            // Try private font collection first.
-            font = XPrivateFontCollection.TryCreateFont(familyName, emSize, style, out fontSource);
-            if (font != null)
-            {
-                // Get font source is different for this font because Win32 does not know it.
-                return font;
-            }
-#endif
             // Create ordinary Win32 font.
             font = new GdiFont(familyName, (float)emSize, style, GraphicsUnit.World);
 
@@ -240,11 +230,11 @@ namespace PdfSharp.Fonts.Internal
         public static readonly XmlLanguage XmlLanguageEnUs = XmlLanguage.GetLanguage("en-US");
 
         /// <summary>
-        /// Creates a typeface.
+        /// Creates a typeface from XFontStyleEx.
         /// </summary>
         public static WpfTypeface CreateTypeface(WpfFontFamily family, XFontStyleEx style)
         {
-            // BUG: does not work with fonts that have others than the four default styles
+            // Does not work with fonts that have others than the four default styles.
             WpfFontStyle fontStyle = FontStyleFromStyle(style);
             WpfFontWeight fontWeight = FontWeightFromStyle(style);
             WpfTypeface typeface = new WpfTypeface(family, fontStyle, fontWeight, FontStretches.Normal);
@@ -262,7 +252,7 @@ namespace PdfSharp.Fonts.Internal
             //typefaces.GetType();
             //typeface = s_typefaces[0];
 
-            // BUG: does not work with fonts that have others than the four default styles
+            // Does not work with fonts that have others than the four default styles
             FormattedText formattedText = new FormattedText(text, new CultureInfo("en-us"), FlowDirection.LeftToRight, typeface, emSize, brush, 1);
             // .NET 4.0 feature new NumberSubstitution(), TextFormattingMode.Display);
             //formattedText.SetFontWeight(FontWeights.Bold);

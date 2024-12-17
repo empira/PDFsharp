@@ -39,7 +39,7 @@ namespace PdfSharp.Pdf
             // set the value of the reference to this.
             if (obj._iref != null)
                 obj._iref.Value = this;
-#if DEBUG_  // BUG
+#if DEBUG_  // BUG_OLD
             else
             {
                 // If this occurs it is an internal error
@@ -104,7 +104,7 @@ namespace PdfSharp.Pdf
         {
             var objectID = new PdfObjectID(objectNumber, generationNumber);
 
-            // TODO: check imported
+            // TODO_OLD: check imported
             _iref ??= _document.IrefTable[objectID];
             if (_iref == null)
             {
@@ -169,10 +169,8 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Saves the stream position. 2nd Edition.
         /// </summary>
-        internal override void WriteObject(PdfWriter writer)
-        {
-            Debug.Assert(false, "Must not come here, WriteObject must be overridden in derived class.");
-        }
+        internal override void WriteObject(PdfWriter writer) 
+            => Debug.Assert(false, "Must not come here, WriteObject must be overridden in derived class.");
 
         /// <summary>
         /// Gets the object identifier. Returns PdfObjectID.Empty for direct objects,
@@ -401,7 +399,7 @@ namespace PdfSharp.Pdf
 
                         //Debug.Assert(iref.Document == iot.Document);
                         // No: Replace with iref of cloned object.
-                        var newXRef = iot[iref.ObjectID];  // TODO: Explain this line of code in all details.
+                        var newXRef = iot[iref.ObjectID];  // TODO_OLD: Explain this line of code in all details.
                         Debug.Assert(newXRef != null);
                         Debug.Assert(newXRef.Document == owner);
                         dict.Elements[name] = newXRef;
@@ -548,7 +546,7 @@ namespace PdfSharp.Pdf
         /// Gets the indirect reference of this object. Throws if it is null.
         /// </summary>
         /// <exception cref="System.InvalidOperationException">The indirect reference must be not null here.</exception>
-        public PdfReference ReferenceNotNull // TODO: Name in need of improvement.
+        public PdfReference ReferenceNotNull // TODO_OLD: Name in need of improvement.
             => _iref ?? throw new InvalidOperationException("The indirect reference must be not null here.");
     }
 }

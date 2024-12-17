@@ -6,7 +6,6 @@ using System.IO;
 #endif
 using FluentAssertions;
 using PdfSharp.Drawing;
-using PdfSharp.FontResolver;
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 using PdfSharp.Quality;

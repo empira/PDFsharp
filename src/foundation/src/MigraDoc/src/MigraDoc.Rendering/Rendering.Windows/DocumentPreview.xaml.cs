@@ -234,16 +234,9 @@ namespace MigraDoc.Rendering.Windows
             }
 
             var pageInfo = Renderer.FormattedDocument.GetPageInfo(page);
-            if (pageInfo.Orientation == PdfSharp.PageOrientation.Portrait)
-            {
-                width = pageInfo.Width;
-                height = pageInfo.Height;
-            }
-            else
-            {
-                width = pageInfo.Height;
-                height = pageInfo.Width;
-            }
+            width = pageInfo.Width;
+            height = pageInfo.Height;
+
             return new Size(width.Presentation, height.Presentation);
         }
 

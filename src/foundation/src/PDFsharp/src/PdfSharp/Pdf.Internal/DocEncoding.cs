@@ -47,7 +47,7 @@ namespace PdfSharp.Pdf.Internal
         /// <summary>
         /// Converts WinAnsi to DocEncode characters. Based upon PDF Reference 1.6.
         /// </summary>
-        static readonly byte[] AnsiToDoc = /*new byte[256]*/
+        static readonly byte[] AnsiToDoc = // new byte[256]
         [
             //         x0    x1    x2    x3    x4    x5    x6    x7    x8    x9    xa    xb    xc    xd    xe    xf
             /* 00 */ 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
@@ -68,8 +68,8 @@ namespace PdfSharp.Pdf.Internal
             /* f0 */ 0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF
         ];
 
-        // TODO: use this table
-        static readonly char[] PdfDocToUnicode =
+        // ReSharper disable once InconsistentNaming
+        static readonly char[] PdfDocToUnicode_not_used =
         [
             '\x00',   '\x01',   '\x02',   '\x03',   '\x04',   '\x05',   '\x06',   '\x07',   '\x08',   '\x09',   '\x0A',   '\x0B',   '\x0C',   '\x0D',   '\x0E',   '\x0F',
             '\x10',   '\x11',   '\x12',   '\x13',   '\x14',   '\x15',   '\x16',   '\x17',   '\x18',   '\x19',   '\x1A',   '\x1B',   '\x1C',   '\x1D',   '\x1E',   '\x1F',

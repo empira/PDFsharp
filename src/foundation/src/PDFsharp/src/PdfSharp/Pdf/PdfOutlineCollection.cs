@@ -59,7 +59,7 @@ namespace PdfSharp.Pdf
             if (outline.DestinationPage != null && !ReferenceEquals(Owner, outline.DestinationPage.Owner))
                 throw new ArgumentException("Destination page must belong to this document.");
 
-            //// TODO check the parent problems...
+            //// TODO_OLD check the parent problems...
             ////outline.Document = Owner;
             ////outline.Parent = _parent;
             ////Owner._irefTable.Add(outline);
@@ -248,7 +248,7 @@ namespace PdfSharp.Pdf
             if (outline.DestinationPage != null && !ReferenceEquals(Owner, outline.DestinationPage.Owner))
                 throw new ArgumentException("Destination page must belong to this document.");
 
-            // TODO check the parent problems...
+            // TODO_OLD check the parent problems...
             outline.Document = Owner;
             outline.Parent = _parent;
 
@@ -281,7 +281,7 @@ namespace PdfSharp.Pdf
             if (outline.Reference == null)
                 throw new ArgumentNullException(nameof(outline));
 
-            // TODO check the parent problems...
+            // TODO_OLD check the parent problems...
             //outline.Document = Owner;
             outline.Parent = null!;
 

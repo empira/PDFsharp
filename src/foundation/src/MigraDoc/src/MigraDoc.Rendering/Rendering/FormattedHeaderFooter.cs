@@ -52,7 +52,7 @@ namespace MigraDoc.Rendering
                 return _renderInfos.ToArray();
 
             //return new RenderInfo[0];
-            return Array.Empty<RenderInfo>();
+            return [];
         }
 
         internal Rectangle ContentRect { get; set; } = null!;

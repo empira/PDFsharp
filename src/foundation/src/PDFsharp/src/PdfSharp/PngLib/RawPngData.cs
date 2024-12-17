@@ -36,7 +36,7 @@ namespace PdfSharp.BigGustave
             this.data = data ?? throw new ArgumentNullException(nameof(data));
             this.bytesPerPixel = bytesPerPixel;
             this.palette = palette;
-            
+
             width = imageHeader.Width;
             colorType = imageHeader.ColorType;
             rowOffset = imageHeader.InterlaceMethod == InterlaceMethod.Adam7 ? 0 : 1;
@@ -49,7 +49,7 @@ namespace PdfSharp.BigGustave
             {
                 var pixelsPerByte = (8 / bitDepth);
 
-                var bytesInRow = (1 + (width / pixelsPerByte));
+                var bytesInRow = (1 + ((width + pixelsPerByte - 1) / pixelsPerByte));
 
                 var byteIndexInRow = x / pixelsPerByte;
                 var paletteIndex = (1 + (y * bytesInRow)) + byteIndexInRow;
@@ -77,7 +77,7 @@ namespace PdfSharp.BigGustave
             {
                 var pixelsPerByte = (8 / bitDepth);
 
-                var bytesInRow = (1 + (width / pixelsPerByte));
+                var bytesInRow = (1 + ((width + pixelsPerByte - 1) / pixelsPerByte));
 
                 var byteIndexInRow = x / pixelsPerByte;
                 var paletteIndex = (1 + (y * bytesInRow)) + byteIndexInRow;
@@ -111,12 +111,12 @@ namespace PdfSharp.BigGustave
                     switch (colorType)
                     {
                         case ColorType.None:
-                        {
-                            byte second = data[pixelStartIndex + 1];
-                            var value = ToSingleByte(first, second);
-                            return new Pixel(value, value, value, 255, true);
+                            {
+                                byte second = data[pixelStartIndex + 1];
+                                var value = ToSingleByte(first, second);
+                                return new Pixel(value, value, value, 255, true);
 
-                        }
+                            }
                         default:
                             return new Pixel(first, first, first, data[pixelStartIndex + 1], true);
                     }
@@ -128,14 +128,14 @@ namespace PdfSharp.BigGustave
                     switch (colorType)
                     {
                         case ColorType.None | ColorType.AlphaChannelUsed:
-                        {
-                            var second = data[pixelStartIndex + 1];
-                            var firstAlpha = data[pixelStartIndex + 2];
-                            var secondAlpha = data[pixelStartIndex + 3];
-                            var gray = ToSingleByte(first, second);
-                            var alpha = ToSingleByte(firstAlpha, secondAlpha);
-                            return new Pixel(gray, gray, gray, alpha, true);
-                        }
+                            {
+                                var second = data[pixelStartIndex + 1];
+                                var firstAlpha = data[pixelStartIndex + 2];
+                                var secondAlpha = data[pixelStartIndex + 3];
+                                var gray = ToSingleByte(first, second);
+                                var alpha = ToSingleByte(firstAlpha, secondAlpha);
+                                return new Pixel(gray, gray, gray, alpha, true);
+                            }
                         default:
                             return new Pixel(first, data[pixelStartIndex + 1], data[pixelStartIndex + 2], data[pixelStartIndex + 3], false);
                     }

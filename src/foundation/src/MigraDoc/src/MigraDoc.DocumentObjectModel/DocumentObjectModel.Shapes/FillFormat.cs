@@ -63,7 +63,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 
@@ -89,7 +89,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
             public Color? Color
             {
                 get => _color;
-                set => _color = DocumentObjectModel.Color.MakeNullIfEmpty(value);  // Contradicts Unit! BUG investigate what is better
+                set => _color = DocumentObjectModel.Color.MakeNullIfEmpty(value);  // Contradicts Unit! BUG_OLD investigate what is better
             }
             Color? _color;
 

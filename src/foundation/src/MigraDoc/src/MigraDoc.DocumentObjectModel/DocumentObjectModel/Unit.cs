@@ -48,7 +48,7 @@ namespace MigraDoc.DocumentObjectModel
         void INullableValue.SetValue(object? value)
         {
             if (value == null)
-                throw new ArgumentNullException(nameof(value));  // BUG? float = 0; uint=null
+                throw new ArgumentNullException(nameof(value));  // BUG_OLD? float = 0; uint=null
 
             if (value is Unit unit)
                 this = unit;
@@ -437,7 +437,7 @@ namespace MigraDoc.DocumentObjectModel
         public static implicit operator Unit(string? value)
         {
             if (value is null)
-                //NRT.ThrowOnNull("string parameter was null"); // BUG Throwing on null.
+                //NRT.ThrowOnNull("string parameter was null"); // BUG_OLD Throwing on null.
                 return Zero;
 
             var unit = Zero;
@@ -553,7 +553,7 @@ namespace MigraDoc.DocumentObjectModel
         public static bool operator ==(Unit l, Unit r)
         {
             // ReSharper disable CompareOfFloatsByEqualityOperator
-            // BUG _type may be null
+            // BUG_OLD _type may be null
             return l._type == r._type && l._value == r._value;
             // ReSharper restore CompareOfFloatsByEqualityOperator
         }

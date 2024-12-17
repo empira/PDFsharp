@@ -38,7 +38,7 @@ namespace PdfSharp.Pdf.AcroForms
         /// </summary>
         void RenderCustomAppearance()
         {
-            PdfRectangle rect = Elements.GetRectangle(PdfAnnotation.Keys.Rect);
+            var rect = Elements.GetRectangle(PdfAnnotation.Keys.Rect);
 
             var visible = rect.X1 + rect.X2 + rect.Y1 + rect.Y2 != 0;
 
@@ -46,10 +46,10 @@ namespace PdfSharp.Pdf.AcroForms
                 return;
 
             if (CustomAppearanceHandler == null)
-                throw new Exception("AppearanceHandler is null");
+                throw new Exception("AppearanceHandler is not set.");
 
-            XForm form = new XForm(_document, rect.Size);
-            XGraphics gfx = XGraphics.FromForm(form);
+            var form = new XForm(_document, rect.Size);
+            var gfx = XGraphics.FromForm(form);
 
             CustomAppearanceHandler.DrawAppearance(gfx, rect.ToXRect());
 

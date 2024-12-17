@@ -589,7 +589,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                         break;
 
                     case Chars.LF:
-                        ScanNextChar(); // read beyond EOL
+                        ScanNextChar(); // Read beyond EOL
                         if (rootLevel)
                         {
                             // At nesting level 0 (root level) a new line ends the paragraph content.
@@ -606,7 +606,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                                 return false;
                             }
 
-                            //TODO NiSc NYI
+                            //TODO_OLD NiSc NYI
                             //Check.NotImplemented("empty line at non-root level");
                         }
                         break;

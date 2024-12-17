@@ -250,7 +250,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Adds a point and a size.
         /// </summary>
-        public static XPoint operator +(XPoint point, XSize size) // TODO: make obsolete
+        public static XPoint operator +(XPoint point, XSize size) // TODO_OLD: make obsolete
         {
             return new XPoint(point._x + size.Width, point._y + size.Height);
         }

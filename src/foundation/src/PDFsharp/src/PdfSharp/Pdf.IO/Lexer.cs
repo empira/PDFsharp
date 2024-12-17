@@ -178,7 +178,7 @@ namespace PdfSharp.Pdf.IO
                 if (ch is Chars.LF or Chars.EOF)
                     break;
             }
-            // TODO: not correct | StLa/24-01-23: Why?
+            // TODO_OLD: not correct | StLa/24-01-23: Why?
             if (_token.ToString().StartsWith("%%EOF", StringComparison.Ordinal))
                 return Symbol.Eof;
             return Symbol = Symbol.Comment;
@@ -287,7 +287,7 @@ namespace PdfSharp.Pdf.IO
 #if DEBUG_
             var pos = Position;
             var neighborhood = GetNeighborhoodOfCurrentPosition(Position);
-            Console.WriteLine(neighborhood);
+            Console.W/riteLine(neighborhood);
 #endif
             ClearToken();
             if (ch is '+' or '-')
@@ -505,7 +505,7 @@ namespace PdfSharp.Pdf.IO
             Debug.Assert(_currChar == Chars.ParenLeft);
             ClearToken();
             int parenLevel = 0;
-        RetryAfterSkipIllegalCharacter:
+            //RetryAfterSkipIllegalCharacter:
             char ch = ScanNextChar(true); // Inside of a string \r, \n and \r\n without preceding \\ shall be treated as \n.
 
             // Deal with escape characters.
@@ -615,11 +615,11 @@ namespace PdfSharp.Pdf.IO
                                         // PDF 32000: "If the character following the REVERSE SOLIDUS is not one of those shown in Table 3, the REVERSE SOLIDUS shall be ignored."
                                         // fyi: REVERSE SOLIDUS is a backslash
                                         // What does that mean: "abc\qxyz" is "abcxyz" oder "abcqxyz"?
+                                        // Adobe Reader ignores '\', but keeps 'q'. We do the same.
                                         // #PRD Notify about unknown escape character.
                                         // Debug.As-sert(false, "Not implemented; unknown escape character.");
                                         // ParserDiagnostics.HandleUnexpectedCharacter(ch);
-                                        //_ = typeof(int);
-                                        goto RetryAfterSkipIllegalCharacter;
+                                        PdfSharpLogHost.PdfReadingLogger.LogWarning($"Illegal escape sequence '\\{ch}' found. Reverse solidus (backslash) is ignored.");
                                     }
                                     break;
                             }
@@ -772,15 +772,8 @@ namespace PdfSharp.Pdf.IO
                 ScanNextChar(true);
             }
 
-            string message;
             if (skip > 0 || true)
-            {
-                if (_logger.IsEnabled(LogLevel.Warning))
-                {
-                    message = Invariant($"Skipped {skip} illegal blanks behind keyword 'stream' at position {currentPosition} in object {id}.");
-                    _logger.LogWarning(message);
-                }
-            }
+                _logger.SkippedIllegalBlanksAfterStreamKeyword(skip, currentPosition, id);
 
             // Single LF.
             if (_currChar == Chars.LF)
@@ -799,20 +792,12 @@ namespace PdfSharp.Pdf.IO
             // Single CR is illegal according to spec.
             if (_currChar == Chars.CR)
             {
-                if (_logger.IsEnabled(LogLevel.Warning))
-                {
-                    message = Invariant($"Keyword 'stream' followed by single CR is illegal at position {currentPosition} in object {id}.");
-                    _logger.LogWarning(message);
-                }
+                _logger.StreamKeywordFollowedBySingleCR(currentPosition, id);
                 Position += 1;
                 return Position;
             }
 
-            if (_logger.IsEnabled(LogLevel.Warning))
-            {
-                message = Invariant($"Keyword 'stream' followed by illegal bytes at position {currentPosition} in object {id}.");
-                _logger.LogWarning(message);
-            }
+            _logger.StreamKeywordFollowedByIllegalBytes(currentPosition, id);
 
             // Best we can do here is to define content starts immediately behind 'stream' or behind the last blank, respectively.
             return Position;
@@ -821,23 +806,89 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Reads the raw content of a stream.
         /// A stream longer than 2 GiB is not intended by design.
+        /// May return fewer bytes than requested if EOF is reached while reading.
         /// </summary>
-        public byte[] ScanStream(SizeType position, int length)
+        public byte[] ScanStream(SizeType position, int length, out int bytesRead)
         {
             Debug.Assert(Position == position);
             // Set physical stream position because this is not the logical position.
             _pdfStream.Position = position;
 
-            byte[] bytes = new byte[length];
-            int read = _pdfStream.Read(bytes, 0, length);
-            if (read != length)
+            if (!ReadWholeStreamSequence(_pdfStream, length, out var bytes, out bytesRead))
             {
-                throw new InvalidOperationException("Stream cannot be read. Please send us the PDF file so that we can fix this (issues (at) pdfsharp.net).");
+                // EOF reached, so return what was read.
+                _logger.EndOfStreamReached(length,position,bytesRead);
+
+                Position = position + bytesRead;
+                return bytes;
             }
 
             // Note: Position += length cannot be used here.
             Position = position + length;
             return bytes;
+        }
+
+        /// <summary>
+        /// Reads the whole given sequence of bytes of the current stream and advances the position within the stream by the number of bytes read.
+        /// Stream.Read is executed multiple times, if necessary.
+        /// </summary>
+        /// <param name="stream">The stream to read from.</param>
+        /// <param name="length">The length of the sequence to be read.</param>
+        /// <param name="content">The array holding the stream data read.</param>
+        /// <param name="bytesRead">The number of bytes actually read.</param>
+        /// <exception cref="EndOfStreamException">
+        /// Thrown when the sequence could not be read completely although the end of the stream has not been reached.
+        /// </exception>
+        static bool ReadWholeStreamSequence(Stream stream, int length, out byte[] content, out int bytesRead)
+        {
+            content = new Byte[length];
+
+            var bytesAhead = length;
+            bytesRead = 0;
+            int currentBytesRead;
+            var round = 1;
+
+            // Stream.Read may not read all requested bytes, if the end of the stream is reached, the internal buffer of the stream is too small, or for other reasons.
+            // We explicitly don’t want to handle all kinds of possible stream errors. We expect the user to use streams that are fully available and seekable and to
+            // use a MemoryStream to cache the original stream if necessary.
+            // However, without this workaround the file would be regarded as corrupt instead of the stream not being compatible.
+            do
+            {   
+                // Log error only for retries.
+                ConditionalLogOnRetry(bytesRead, "Stream.Read did not return the whole requested sequence. As a workaround, reading the missing bytes is tried again.");
+
+                currentBytesRead = stream.Read(content, bytesRead, bytesAhead);
+                bytesRead += currentBytesRead;
+                bytesAhead -= currentBytesRead;
+
+                // Return true, if the whole sequence could be read.
+                if (bytesRead == length)
+                {
+                    // Log error only if retries were done.
+                    ConditionalLogOnRetry(bytesRead, "The workaround was able to load the whole sequence.");
+                    return true;
+                }
+
+                // Return false, if the end of the stream was reached.
+                if (stream.Position >= stream.Length)
+                {
+                    // Log error only if retries were done.
+                    ConditionalLogOnRetry(bytesRead, "The workaround could not load the whole sequence. The end of the stream was reached before the end of the sequence.");
+                    return false;
+                }
+
+                round++;
+            } while (bytesAhead > 0 && currentBytesRead > 0);
+
+
+            // The sequence could not be read completely although the end of the stream has not been reached: Throw exception.
+            throw TH.EndOfStreamException_CouldNotReadToStreamEnd();
+
+            void ConditionalLogOnRetry(int bytesRead, string status)
+            {
+                if (round > 1)
+                    PdfSharpLogHost.Logger.StreamIssue(status, bytesRead, length);
+            }
         }
 
         /// <summary>
@@ -851,10 +902,6 @@ namespace PdfSharp.Pdf.IO
         /// <returns>The real length of the stream when 'endstream' was found.</returns>
         public int DetermineStreamLength(SizeType start, int searchLength, SuppressExceptions? suppressObjectOrderExceptions = null)
         {
-#if DEBUG_
-            if (start == 144848)
-                _ = sizeof(int);
-#endif
             var rawString = RandomReadRawString(start, searchLength);
 
             // When we come here, we have either an invalid or no \Length entry.
@@ -897,9 +944,8 @@ namespace PdfSharp.Pdf.IO
         public string ScanRawString(SizeType position, int length)
         {
             _pdfStream.Position = position;
-            var bytes = new byte[length];
-            var readBytes = _pdfStream.Read(bytes, 0, length);
-            Debug.Assert(readBytes == length);
+            var result = ReadWholeStreamSequence(_pdfStream, length, out var bytes, out _);
+            Debug.Assert(result);
             return PdfEncoders.RawEncoding.GetString(bytes, 0, bytes.Length);
         }
 

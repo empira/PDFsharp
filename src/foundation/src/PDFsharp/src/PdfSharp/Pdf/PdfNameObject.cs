@@ -59,7 +59,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public override string ToString()
         {
-            // TODO: Encode characters.
+            // TODO_OLD: Encode characters.
             return Value;
         }
 

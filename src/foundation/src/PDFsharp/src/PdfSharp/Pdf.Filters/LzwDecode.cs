@@ -79,7 +79,7 @@ namespace PdfSharp.Pdf.Filters
 
                 return outputStream.GetBuffer();
             }
-            return Array.Empty<byte>();
+            return [];
         }
 
         /// <summary>

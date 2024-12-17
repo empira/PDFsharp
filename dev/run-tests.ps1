@@ -20,6 +20,7 @@
 .PARAMETER RunAllTests
     Specifies whether to run even the slow tests, whose execution can be managed via PDFsharpTests environment variable. $False is the default.
 
+.NOTES
     Possible test results are:
     --------------------------
 
@@ -40,15 +41,15 @@
 
     If started in Windows, tests are executed in Windows and WSL:
 
-      > .\dev\run-tests.ps1
+        > .\dev\run-tests.ps1
 
     If started from Windows in WSL, tests are executed in WSL only:
 
-      > wsl -e pwsh -c .\dev\run-tests.ps1
+        > wsl -e pwsh -c .\dev\run-tests.ps1
 
     If started in Linux / WSL, tests are executed in Linux / WSL only:
 
-      > pwsh -c ./dev/run-tests.ps1
+        > pwsh -c ./dev/run-tests.ps1
 
     Changing the script:
     --------------------
@@ -203,6 +204,47 @@ function InitializeScript()
         Write-Host "Skipping slow tests of solution."
     }
     Write-Host
+
+    CheckNetRuntimes
+}
+
+# Checks the net runtimes for all available environments.
+function CheckNetRuntimes() {
+    # Check net runtime for local machine.
+    CheckNetRuntime $false
+
+    # Check net runtime for hosted WSL, if needed.
+    if ($script:RunOnHostedWsl) {
+        CheckNetRuntime $true
+    }
+}
+
+# Checks the net runtime for the local machine or WSL.
+function CheckNetRuntime($isWsl)
+{
+    if ($isWsl) {
+        $runtimes = (wsl -e dotnet --list-runtimes | Out-String) -split "`n"
+        $wslOrLocal = "WSL"
+    }
+    else {
+        $runtimes = (dotnet --list-runtimes | Out-String) -split "`n"
+        $wslOrLocal = "the local machine"
+    }
+
+    if ($script:Net6) {
+        $netMajorVersion = 6;
+    }
+    else {
+        $netMajorVersion = 8;
+    }
+
+    $hasRequiredVersion = ($runtimes | Where-Object { $_.StartsWith("Microsoft.NETCore.App $netMajorVersion.") } | Measure-Object | Select-Object -ExpandProperty Count) -gt 0
+
+    if ($hasRequiredVersion -eq $false)
+    {
+        Write-Error "The script is configured to run tests for net$netMajorVersion, but the net$netMajorVersion runtime is not installed on $wslOrLocal."
+        exit
+    }
 }
 
 # Gets the first solution in the current folder. There should be only one.

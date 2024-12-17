@@ -46,6 +46,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{18E75E2F-2
 		src\foundation\src\PDFsharp\docs\GlobalStuff.md = src\foundation\src\PDFsharp\docs\GlobalStuff.md
 		src\foundation\src\PDFsharp\docs\Notebook.md = src\foundation\src\PDFsharp\docs\Notebook.md
 		src\foundation\src\PDFsharp\docs\PortingNotes.md = src\foundation\src\PDFsharp\docs\PortingNotes.md
+		src\foundation\src\PDFsharp\docs\README.md = src\foundation\src\PDFsharp\docs\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{5BB9AA90-46A6-4C3A-BF50-BD122331517B}"
@@ -61,7 +62,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D564E33D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{9EB8E8CC-3BA3-4B0F-B853-5B2443C40015}"
 	ProjectSection(SolutionItems) = preProject
-		AboutLineSpacing.md = AboutLineSpacing.md
+		src\foundation\src\MigraDoc\docs\README.md = src\foundation\src\MigraDoc\docs\README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MigraDoc.Tests", "src\foundation\src\MigraDoc\tests\MigraDoc.Tests\MigraDoc.Tests.csproj", "{CA022FCC-7A23-4759-8789-9FC86C805557}"
@@ -73,8 +74,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MigraDoc", "MigraDoc", "{D25A7758-C8D7-473D-B032-D798FECCF08B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{62D00D8A-4171-4103-A5A4-A49212E0F7B3}"
+	ProjectSection(SolutionItems) = preProject
+		src\samples\src\PDFsharp\src\README.md = src\samples\src\PDFsharp\src\README.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1E84E8EF-D2F3-40A5-BF1B-10DE99894DC3}"
+	ProjectSection(SolutionItems) = preProject
+		src\samples\src\MigraDoc\src\README.md = src\samples\src\MigraDoc\src\README.md
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelloWorld,PDFsharp", "src\samples\src\PDFsharp\src\HelloWorld\HelloWorld,PDFsharp.csproj", "{92E59C39-1633-4763-B9A3-3E6FA2593477}"
 EndProject
@@ -194,13 +201,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PDFsharp.NuGet-wpf", "src\foundation\nuget\src\PDFsharp.NuGet-wpf\PDFsharp.NuGet-wpf.csproj", "{4EEE7867-461B-49EC-9450-3973B932A5C8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{76BA9372-65AE-479C-AEF7-D50E6B486CEF}"
-	ProjectSection(SolutionItems) = preProject
-		docs\BeforeReleases.md = docs\BeforeReleases.md
-		docs\BoilerplateText.md = docs\BoilerplateText.md
-		docs\DevNotes.md = docs\DevNotes.md
-		docs\MakeNewReleaseNotes.md = docs\MakeNewReleaseNotes.md
-		docs\xUnitRunnerSettings.md = docs\xUnitRunnerSettings.md
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A1AE894D-9061-44F0-8268-328AC41F403A}"
 EndProject
@@ -259,26 +259,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.Testing-wpf", "src
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "psf", "psf", "{D2B0EC1F-CF81-4756-B20C-9BB786A151E0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.Cryptography", "src\foundation\src\shared\src\PdfSharp.Crytography\PdfSharp.Cryptography.csproj", "{2BA35CF7-9851-4B19-A170-0B66BE87ACE5}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Signatures", "Signatures", "{8CE97B3D-BECA-436D-86EC-E053A99E3A81}"
-	ProjectSection(SolutionItems) = preProject
-		docs\Signatures\CertificateCreation.md = docs\Signatures\CertificateCreation.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{C39DF31C-2938-4EC3-B50D-52FFA8453866}"
-	ProjectSection(SolutionItems) = preProject
-		docs\changes\v6.2.0-log.md = docs\changes\v6.2.0-log.md
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CopyAsLink", "src\tools\src\CopyAsLink\CopyAsLink.csproj", "{60D307AC-D7D6-4AA4-BF9F-DDC6809CBCC7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.Shared", "src\foundation\src\shared\src\PdfSharp.Shared\PdfSharp.Shared.csproj", "{8C20115B-AA17-41A7-837D-F5CFD286DFC9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MigraDoc", "MigraDoc", "{08BB5B79-D6B5-4EEF-8D37-77FBD0F04AA6}"
-	ProjectSection(SolutionItems) = preProject
-		docs\MigraDoc\AboutLineSpacing.md = docs\MigraDoc\AboutLineSpacing.md
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.BarCodes-gdi", "src\foundation\src\PDFsharp\src\PdfSharp.BarCodes-gdi\PdfSharp.BarCodes-gdi.csproj", "{E6E3A838-95C6-462D-84E4-FAFF69DA95C0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.BarCodes-wpf", "src\foundation\src\PDFsharp\src\PdfSharp.BarCodes-wpf\PdfSharp.BarCodes-wpf.csproj", "{4CBBAD35-0D01-4BDD-8BDF-B6022497938E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.BarCodes", "src\foundation\src\PDFsharp\src\PdfSharp.BarCodes\PdfSharp.BarCodes.csproj", "{F4AB506C-AD13-4383-9AF9-48D74085ECC1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "docs-dummy", "docs\docs-dummy.csproj", "{76B94284-402D-4951-8DA4-7FFAF15E6C95}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PdfSharp.Cryptography", "src\foundation\src\PDFsharp\src\PdfSharp.Cryptography\PdfSharp.Cryptography.csproj", "{769ED050-15AF-4EB5-A89F-D7123EE5AA95}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -546,10 +539,6 @@ Global
 		{1F9EE0B3-4BA1-4CE4-9301-1735732B61B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F9EE0B3-4BA1-4CE4-9301-1735732B61B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F9EE0B3-4BA1-4CE4-9301-1735732B61B6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2BA35CF7-9851-4B19-A170-0B66BE87ACE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2BA35CF7-9851-4B19-A170-0B66BE87ACE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2BA35CF7-9851-4B19-A170-0B66BE87ACE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2BA35CF7-9851-4B19-A170-0B66BE87ACE5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{60D307AC-D7D6-4AA4-BF9F-DDC6809CBCC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{60D307AC-D7D6-4AA4-BF9F-DDC6809CBCC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60D307AC-D7D6-4AA4-BF9F-DDC6809CBCC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -558,6 +547,26 @@ Global
 		{8C20115B-AA17-41A7-837D-F5CFD286DFC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C20115B-AA17-41A7-837D-F5CFD286DFC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8C20115B-AA17-41A7-837D-F5CFD286DFC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6E3A838-95C6-462D-84E4-FAFF69DA95C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6E3A838-95C6-462D-84E4-FAFF69DA95C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6E3A838-95C6-462D-84E4-FAFF69DA95C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6E3A838-95C6-462D-84E4-FAFF69DA95C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CBBAD35-0D01-4BDD-8BDF-B6022497938E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CBBAD35-0D01-4BDD-8BDF-B6022497938E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CBBAD35-0D01-4BDD-8BDF-B6022497938E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CBBAD35-0D01-4BDD-8BDF-B6022497938E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4AB506C-AD13-4383-9AF9-48D74085ECC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4AB506C-AD13-4383-9AF9-48D74085ECC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4AB506C-AD13-4383-9AF9-48D74085ECC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4AB506C-AD13-4383-9AF9-48D74085ECC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76B94284-402D-4951-8DA4-7FFAF15E6C95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76B94284-402D-4951-8DA4-7FFAF15E6C95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76B94284-402D-4951-8DA4-7FFAF15E6C95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76B94284-402D-4951-8DA4-7FFAF15E6C95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{769ED050-15AF-4EB5-A89F-D7123EE5AA95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{769ED050-15AF-4EB5-A89F-D7123EE5AA95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{769ED050-15AF-4EB5-A89F-D7123EE5AA95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{769ED050-15AF-4EB5-A89F-D7123EE5AA95}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -658,12 +667,13 @@ Global
 		{C7CCB288-8372-41AD-9F65-6224CE0D6358} = {DE458BB2-5942-4588-A74A-AE9CA86F284C}
 		{1F9EE0B3-4BA1-4CE4-9301-1735732B61B6} = {DE458BB2-5942-4588-A74A-AE9CA86F284C}
 		{D2B0EC1F-CF81-4756-B20C-9BB786A151E0} = {18E75E2F-2A27-408C-BC02-9B68D7F0817F}
-		{2BA35CF7-9851-4B19-A170-0B66BE87ACE5} = {DE458BB2-5942-4588-A74A-AE9CA86F284C}
-		{8CE97B3D-BECA-436D-86EC-E053A99E3A81} = {76BA9372-65AE-479C-AEF7-D50E6B486CEF}
-		{C39DF31C-2938-4EC3-B50D-52FFA8453866} = {76BA9372-65AE-479C-AEF7-D50E6B486CEF}
 		{60D307AC-D7D6-4AA4-BF9F-DDC6809CBCC7} = {CC13B431-6963-480F-8C21-1F78A220A399}
 		{8C20115B-AA17-41A7-837D-F5CFD286DFC9} = {DE458BB2-5942-4588-A74A-AE9CA86F284C}
-		{08BB5B79-D6B5-4EEF-8D37-77FBD0F04AA6} = {76BA9372-65AE-479C-AEF7-D50E6B486CEF}
+		{E6E3A838-95C6-462D-84E4-FAFF69DA95C0} = {7C753636-7947-46E0-95E0-135EAA7BFEB3}
+		{4CBBAD35-0D01-4BDD-8BDF-B6022497938E} = {7C753636-7947-46E0-95E0-135EAA7BFEB3}
+		{F4AB506C-AD13-4383-9AF9-48D74085ECC1} = {7C753636-7947-46E0-95E0-135EAA7BFEB3}
+		{76B94284-402D-4951-8DA4-7FFAF15E6C95} = {76BA9372-65AE-479C-AEF7-D50E6B486CEF}
+		{769ED050-15AF-4EB5-A89F-D7123EE5AA95} = {7C753636-7947-46E0-95E0-135EAA7BFEB3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D5FF5562-3C79-434B-B951-B84542D01625}

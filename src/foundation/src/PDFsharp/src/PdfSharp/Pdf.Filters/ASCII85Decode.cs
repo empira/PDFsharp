@@ -126,7 +126,7 @@ namespace PdfSharp.Pdf.Filters
             for (idx = 0; idx < length; idx++)
             {
                 char ch = (char)data[idx];
-                if (ch >= '!' && ch <= 'u')
+                if (ch is >= '!' and <= 'u')
                     data[idxOut++] = (byte)ch;
                 else if (ch == 'z')
                 {
@@ -170,7 +170,7 @@ namespace PdfSharp.Pdf.Filters
                 }
                 else
                 {
-                    // TODO: check 
+                    // TODO_OLD: check 
                     long value =
                       (long)(data[idx++] - '!') * (85 * 85 * 85 * 85) +
                       (uint)(data[idx++] - '!') * (85 * 85 * 85) +
@@ -179,7 +179,7 @@ namespace PdfSharp.Pdf.Filters
                       (uint)(data[idx++] - '!');
 
                     if (value > UInt32.MaxValue)
-                        throw new InvalidOperationException("Value of group greater than 2 power 32 - 1.");
+                        throw new InvalidOperationException("Value of group greater than 2^(32-1).");
 
                     output[idxOut++] = (byte)(value >> 24);
                     output[idxOut++] = (byte)(value >> 16);
@@ -189,7 +189,7 @@ namespace PdfSharp.Pdf.Filters
             }
 
             // I have found no appropriate algorithm, so I write my own. In some rare cases the value must not
-            // increased by one, but I cannot found a general formula or a proof.
+            // be increased by one, but I cannot found a general formula or a proof.
             // All possible cases are tested programmatically.
             switch (remainder)
             {

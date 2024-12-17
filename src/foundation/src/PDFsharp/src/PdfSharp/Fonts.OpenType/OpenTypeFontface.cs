@@ -83,7 +83,7 @@ namespace PdfSharp.Fonts.OpenType
             if (OpenTypeFontFaceCache.TryGetFontFace(fontSource.Key, out var fontFace))
                 return fontFace;
 
-            //  Each font source already contains its OpenTypeFontFace.
+            // Each font source already contains its OpenTypeFontFace.
             Debug.Assert(fontSource.FontFace != null);
             fontFace = OpenTypeFontFaceCache.AddFontFace(fontSource.FontFace);
             Debug.Assert(ReferenceEquals(fontSource.FontFace, fontFace));
@@ -163,7 +163,7 @@ namespace PdfSharp.Fonts.OpenType
         // Keep names identical to OpenType spec.
         // ReSharper disable InconsistentNaming
         // ReSharper disable IdentifierTypo
-        internal CMapTable cmap = default!; // NRT TODO Change programming model so that it fits NRTs.
+        internal CMapTable cmap = default!; // NRT TODO_OLD Change programming model so that it fits NRTs.
         internal ColorTable? colr;
         internal ColorPalletTable? cpal;
         internal ControlValueTable cvt = default!; // NRT
@@ -179,8 +179,8 @@ namespace PdfSharp.Fonts.OpenType
         internal GlyphDataTable glyf = default!; // NRT
         internal IndexToLocationTable loca = default!; // NRT
         internal GlyphSubstitutionTable gsub = default!; // NRT
-        internal VerticalHeaderTable? vhea; // TODO
-        internal VerticalMetricsTable? vmtx; // TODO
+        internal VerticalHeaderTable? vhea; // TODO_OLD
+        internal VerticalMetricsTable? vmtx; // TODO_OLD
         // ReSharper restore IdentifierTypo
         // ReSharper restore InconsistentNaming
 
@@ -227,7 +227,7 @@ namespace PdfSharp.Fonts.OpenType
                 case TableTagNames.Fpgm:
                     fpgm = (fontTable as FontProgram)!; // ?? NRT.ThrowOnNull<FontProgram>();
 
-                    // BUG BUG BUG BUG
+                    // BUG_OLD BUG_OLD BUG_OLD BUG_OLD
                     //Debug.Assert(fpgm != null);
                     break;
 
@@ -508,8 +508,8 @@ namespace PdfSharp.Fonts.OpenType
             for (int idx = 0; idx < tableCount; idx++)
             {
                 var entry = TableDictionary[tags[idx]];
-#if DEBUG
-                if (entry.Tag == "glyf" || entry.Tag == "loca")
+#if DEBUG_
+                if (entry.Tag is "glyf" or "loca")
                     _ = typeof(int);
 #endif
                 entry.FontTable.PrepareForCompilation();

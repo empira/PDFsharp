@@ -22,7 +22,10 @@ namespace PdfSharp.Pdf.Content
         Operator,
         BeginArray,
         EndArray,
-        Dictionary,  // HACK: << ... >> is scanned as string literal.
+        // IMPROVE
+        // Content dictionary << … >> is scanned as string literal.
+        // Scan as an object tree.
+        Dictionary,
         Eof,
         Error = -1,
     }

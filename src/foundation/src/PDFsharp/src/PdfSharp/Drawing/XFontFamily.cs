@@ -201,7 +201,7 @@ namespace PdfSharp.Drawing
         {
             XFontStyleEx xStyle = style & XFontStyleEx.BoldItalic;
 #if CORE
-            throw new InvalidOperationException("In CORE build it is the responsibility of the developer to provide all required font faces.");
+            throw new InvalidOperationException("In Core build it is the responsibility of the developer to provide all required font faces.");
 #endif
 #if GDI && !WPF
             if (GdiFamily != null)

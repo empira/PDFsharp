@@ -72,7 +72,8 @@ namespace PdfSharp.BigGustave
                                     }
 
                                     // Ignore palette data unless the header.ColorType indicates that the image is paletted.
-                                    if (imageHeader.ColorType.HasFlag(ColorType.PaletteUsed)) {
+                                    if (imageHeader.ColorType.HasFlag(ColorType.PaletteUsed))
+                                    {
                                         palette = new Palette(bytes);
                                     }
 

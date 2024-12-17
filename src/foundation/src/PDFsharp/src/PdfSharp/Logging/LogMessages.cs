@@ -2,6 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 using Microsoft.Extensions.Logging;
+using PdfSharp.Pdf;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member because it is for internal use only.
 
@@ -19,7 +20,13 @@ namespace PdfSharp.Logging
         public const int GraphicsCreated = StartId + 5;
         public const int FontCreated = StartId + 6;
 
+        // Reading PDFs
         public const int PdfReaderIssue = StartId + 10;
+        public const int StreamIssue = StartId + 11;
+        public const int EndOfStreamReached = StartId + 12;
+        public const int SkippedIllegalBlanksAfterStreamKeyword = StartId + 13;
+        public const int StreamKeywordFollowedBySingleCR = StartId + 14;
+        public const int StreamKeywordFollowedByIllegalBytes = StartId + 15;
 
         internal const int Placeholder = StartId + 1234;
         const int StartId = 50000;
@@ -35,6 +42,11 @@ namespace PdfSharp.Logging
         public const string FontCreated = "Font created";
 
         public const string PdfReaderIssue = "PDF reader issue";
+        public const string StreamIssue = "Stream issue";
+        public const string EndOfStreamReached = "End of stream reached";
+        public const string SkippedIllegalBlanksAfterStreamKeyword = "Skipped illegal blanks after stream keyword";
+        public const string StreamKeywordFollowedBySingleCR = "Stream keyword followed by single CR";
+        public const string StreamKeywordFollowedByIllegalBytes = "Stream keyword followed by illegal bytes";
     }
 
     public static class PdfSharpEvent
@@ -97,11 +109,53 @@ namespace PdfSharp.Logging
         public static partial void XGraphicsCreated(this ILogger logger,
             string? source);
 
+        // Reading PDFs
+
+        [LoggerMessage(
+            Level = LogLevel.Error,
+            EventId = PdfSharpEventId.StreamIssue,
+            EventName = PdfSharpEventName.StreamIssue,
+            Message = "{Status} {BytesRead} of {Length} bytes were received. " +
+                      "We strongly recommend using streams with PdfReader whose content is fully available. " +
+                      "Copy the stream containing the file to a MemoryStream for example.")]
+        public static partial void StreamIssue(this ILogger logger,
+            string status, int bytesRead, int length);
+
+        [LoggerMessage(
+            Level = LogLevel.Warning,
+            EventId = PdfSharpEventId.EndOfStreamReached,
+            EventName = PdfSharpEventName.EndOfStreamReached,
+            Message = "End of stream reached while reading {Length} bytes at position {Position}, but got only {BytesRead} bytes.")]
+        public static partial void EndOfStreamReached(this ILogger logger,
+             int length, SizeType position, int bytesRead);
+
+        [LoggerMessage(
+            Level = LogLevel.Warning,
+            EventId = PdfSharpEventId.SkippedIllegalBlanksAfterStreamKeyword,
+            EventName = PdfSharpEventName.SkippedIllegalBlanksAfterStreamKeyword,
+            Message = "Skipped {BlankCount} illegal blanks behind keyword 'stream' at position {Position} in object {ObjectId}.")]
+        public static partial void SkippedIllegalBlanksAfterStreamKeyword(this ILogger logger,
+            int blankCount, SizeType position, PdfObjectID objectId);
+
+        [LoggerMessage(
+            Level = LogLevel.Warning,
+            EventId = PdfSharpEventId.StreamKeywordFollowedBySingleCR,
+            EventName = PdfSharpEventName.StreamKeywordFollowedBySingleCR,
+            Message = "Keyword 'stream' followed by single CR is illegal at position {Position} in object {ObjectId}.")]
+        public static partial void StreamKeywordFollowedBySingleCR(this ILogger logger,
+            SizeType position, PdfObjectID objectId);
+
+        [LoggerMessage(
+            Level = LogLevel.Warning,
+            EventId = PdfSharpEventId.StreamKeywordFollowedByIllegalBytes,
+            EventName = PdfSharpEventName.StreamKeywordFollowedByIllegalBytes,
+            Message = "Keyword 'stream' followed by illegal bytes at position {Position} in object {ObjectId}.")]
+        public static partial void StreamKeywordFollowedByIllegalBytes(this ILogger logger,
+            SizeType position, PdfObjectID objectId);
+
         //[LoggerMessage(EventId = 23, EventName = "hallo", Level = LogLevel.Warning, Message = "This is a warning: `{someText}`")]
         //public static partial void WarningMessage(this ILogger logger, string someText);
     }
-
-    // TODO remove all Console.WriteLine calls.
 
 #if true_
     class LogTestCode

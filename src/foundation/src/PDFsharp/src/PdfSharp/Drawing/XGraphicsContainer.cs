@@ -17,11 +17,11 @@ namespace PdfSharp.Drawing
     public sealed class XGraphicsContainer
     {
 #if GDI
-        internal XGraphicsContainer(GraphicsState state)
+        internal XGraphicsContainer(GraphicsState? state)
         {
             GdiState = state;
         }
-        internal GraphicsState GdiState;
+        internal GraphicsState? GdiState;
 #endif
 #if WPF
         internal XGraphicsContainer()

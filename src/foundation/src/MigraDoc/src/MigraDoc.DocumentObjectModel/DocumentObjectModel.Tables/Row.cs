@@ -157,7 +157,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
             get => Values.Format ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Format = value;
             }
         }
@@ -224,7 +224,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
             get => Values.Borders ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Borders = value;
             }
         }
@@ -237,7 +237,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
             get => Values.Shading ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Shading = value;
             }
         }
@@ -260,7 +260,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
             get => Values.Cells ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Cells = value;
             }
         }
@@ -343,7 +343,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

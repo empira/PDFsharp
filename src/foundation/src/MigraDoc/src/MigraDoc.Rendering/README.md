@@ -1,3 +1,3 @@
 ﻿# MigraDoc.Rendering
 
-PDF Rendering CORE build.
+PDF Rendering Core build.

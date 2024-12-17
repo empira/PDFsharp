@@ -8,7 +8,7 @@ namespace PdfSharp
     /// <summary>
     /// Version information for all PDFsharp related assemblies.
     /// </summary>
-    // TODO: These literals are not in sync with the NuGet metadata. Should be fixed.
+    // TODO_OLD: These literals are not in sync with the NuGet metadata. Should be fixed.
     public static class PdfSharpProductVersionInformation
     {
         // Cannot use const string anymore because GitVersionInformation used static string.
@@ -51,7 +51,7 @@ namespace PdfSharp
 
         /// <summary>
         /// The PDF producer (created by) information string.
-        /// TODO: Called Creator in MigraDoc???
+        /// TODO_OLD: Called Creator in MigraDoc???
         /// </summary>
         public static readonly string Producer = $"{Title} {GitVersionInformation.NuGetVersion} ({Url})";
 

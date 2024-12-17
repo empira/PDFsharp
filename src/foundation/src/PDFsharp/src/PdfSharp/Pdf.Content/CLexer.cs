@@ -110,7 +110,7 @@ namespace PdfSharp.Pdf.Content
         /// </summary>
         public CSymbol ScanInlineImage()
         {
-            // TODO: Implement inline images.
+            // TODO_OLD: Implement inline images.
             // Skip this:
             // BI
             // … Key-value pairs …
@@ -122,7 +122,7 @@ namespace PdfSharp.Pdf.Content
             do
             {
                 ScanNextToken();
-                // HACK: Is image ASCII85 decoded?
+                // HACK_OLD: Is image ASCII85 decoded?
                 if (!ascii85 && Symbol == CSymbol.Name && Token is "/ASCII85Decode" or "/A85")
                     ascii85 = true;
             } while (Symbol != CSymbol.Operator || Token != "ID");
@@ -226,7 +226,7 @@ namespace PdfSharp.Pdf.Content
         /// </summary>
         protected CSymbol ScanDictionary()
         {
-            // TODO Do an actual recursive parse instead of this simple scan.
+            // TODO_OLD Do an actual recursive parse instead of this simple scan.
 
             ClearToken();
             _token.Append(_currChar);      // '<'
@@ -396,7 +396,6 @@ namespace PdfSharp.Pdf.Content
             return Symbol = CSymbol.Operator;
         }
 
-        // TODO        
         /// <summary>
         /// Scans a literal string.
         /// </summary>
@@ -443,7 +442,7 @@ namespace PdfSharp.Pdf.Content
 
                         case '\\':
                             {
-                                // TODO: not sure that this is correct...
+                                // TODO_OLD: not sure that this is correct...
                                 ch = ScanNextChar();
                                 switch (ch)
                                 {

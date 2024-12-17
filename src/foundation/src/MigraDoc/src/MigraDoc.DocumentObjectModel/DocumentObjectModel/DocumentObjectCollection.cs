@@ -1,7 +1,6 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System;
 using System.Collections;
 using MigraDoc.DocumentObjectModel.Tables;
 using MigraDoc.DocumentObjectModel.Visitors;
@@ -50,7 +49,6 @@ namespace MigraDoc.DocumentObjectModel
                 var doc = this[index];
                 if (doc != null)
                 {
-                    //doc = doc.Clone() as DocumentObject;
                     doc = (DocumentObject)doc.Clone();
                     doc.Parent = coll;
                 }
@@ -84,17 +82,16 @@ namespace MigraDoc.DocumentObjectModel
         public void Clear()
         {
             // Call ResetCachedValues for all affected objects.
-            int count = ((IList<DocumentObject?>)this).Count;
-            for (int idx = 0; idx < count; idx++)
+            for (int idx = 0; idx < Count; idx++)
             {
-                var obj = (DocumentObject)((IList<DocumentObject?>)this)[idx]!;
-                obj.ResetCachedValues();
+                var obj = this[idx];
+                obj?.ResetCachedValues();
                 if (obj is Row row)
                     UpdateRowCachedValues(row);
             }
 
             // Now clear the list.
-            ((IList<DocumentObject?>)this).Clear();
+            _elements.Clear();
         }
 
         /// <summary>
@@ -102,7 +99,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public virtual void InsertObject(int index, DocumentObject val)
         {
-            SetParent(val);
+            SetParentOf(val);
             ((IList<DocumentObject?>)this).Insert(index, val);
             // Call ResetCachedValues for all objects moved by the Insert operation.
             int count = ((IList<DocumentObject?>)this).Count;
@@ -118,11 +115,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Determines the index of a specific item in the collection.
         /// </summary>
-        public int IndexOf(DocumentObject? val)
-        {
-            //return ((IList)this).IndexOf(val);
-            return _elements.IndexOf(val);
-        }
+        public int IndexOf(DocumentObject? val) => _elements.IndexOf(val);
 
         /// <summary>
         /// Gets or sets the element at the specified index.
@@ -132,7 +125,7 @@ namespace MigraDoc.DocumentObjectModel
             get => _elements[index];
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 _elements[index] = value;
             }
         }
@@ -171,7 +164,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public virtual void Add(DocumentObject? value)
         {
-            SetParent(value);
+            SetParentOf(value);
             _elements.Add(value);
 
             if (value is Row row)
@@ -373,7 +366,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Resets this instance, i.e. IsNull() will return true afterwards.
+        /// Resets this instance, i.e. IsNull() will return true afterward.
         /// </summary>
         public override void SetNull()
         {

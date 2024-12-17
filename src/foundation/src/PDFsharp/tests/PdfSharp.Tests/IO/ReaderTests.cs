@@ -11,14 +11,31 @@ using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Quality;
+#if CORE
+#endif
 using Xunit;
 using FluentAssertions;
+using PdfSharp.Diagnostics;
+using PdfSharp.Fonts;
 
 namespace PdfSharp.Tests.IO
 {
     [Collection("PDFsharp")]
-    public class ReaderTests
+    public class ReaderTests : IDisposable
     {
+        public ReaderTests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void Read_empty_file()
         {
@@ -296,6 +313,128 @@ namespace PdfSharp.Tests.IO
                     var font = new XFont("Verdana", 10, XFontStyleEx.Regular);
                     gfx.DrawString(label ?? "", font, XBrushes.Firebrick, 20, 20);
                 }
+            }
+        }
+
+        [Fact]
+        public void Read_and_modify_PDF_file_CustomPageSize_PageOrientation_test()
+        {
+            // This test creates all 8 possible variations of 14 cm by 16 cm pages.
+            // Step 1 draws a red frame around the page.
+            // Step 2 draws a narrower, yellow frame around the page.
+            // Step 3 draws a narrow, green frame around the page.
+            // All frames should be visible after step 3 and should be around the edges of the pages.
+            var document = new PdfDocument();
+
+            // There are 4 possible values for rotation and 2 options for orientation.
+            // We create 8 pages to cover all cases.
+            for (int i = 0; i < 8; ++i)
+            {
+                var page = document.AddPage();
+                page.Width = XUnit.FromCentimeter(14);
+                page.Height = XUnit.FromCentimeter(16);
+                page.Rotate = i % 4 * 90;
+                page.Orientation = (i / 4) switch
+                {
+                    0 => PageOrientation.Portrait,
+                    1 => PageOrientation.Landscape,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+                DrawPageFrame(page, XColors.Red, 20,
+                    $"Page {i + 1} - Rotate {page.Rotate} - Orientation {page.Orientation}");
+
+                var box = new XRect(0, 0, page.Width.Point, page.Height.Point);
+                box.Inflate(0, -20);
+                DrawFooter(page, XBrushes.Red, box, "After creation " + i);
+            }
+
+            // Save the document...
+            string filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationCustomTestStep1");
+            document.Save(filename);
+
+            // Read the document from step 1.
+            document = PdfReader.Open(filename, PdfDocumentOpenMode.Modify);
+            for (int i = 0; i < 8; ++i)
+            {
+                var page = document.Pages[i];
+                var width = page.MediaBox.Width;
+                var height = page.MediaBox.Height;
+
+                width.Should().BeApproximately(page.Width.Point, 2);
+                height.Should().BeApproximately(page.Height.Point, 2);
+
+                DrawPageFrame(page, XColors.Yellow, 10);
+
+                var box = new XRect(0, 0, page.Width.Point, page.Height.Point);
+                box.Inflate(0, -30);
+                DrawFooter(page, XBrushes.Yellow, box, "After import " + i);
+            }
+
+            // Save the document...
+            filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationCustomTestStep2");
+            document.Save(filename);
+
+            // Read the document from step 2.
+            document = PdfReader.Open(filename, PdfDocumentOpenMode.Modify);
+            for (int i = 0; i < 8; ++i)
+            {
+                var page = document.Pages[i];
+                DrawPageFrame(page, XColors.Green, 5);
+
+                var box = new XRect(0, 0, page.Width.Point, page.Height.Point);
+                box.Inflate(0, -40);
+                DrawFooter(page, XBrushes.Green, box, "After second import " + i);
+            }
+
+            // Save the document...
+            filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationCustomTestStep3");
+            document.Save(filename);
+
+            // Read the document from step 3.
+            document = PdfReader.Open(filename, PdfDocumentOpenMode.Import);
+            var doc2 = new PdfDocument();
+            for (int i = 0; i < 8; ++i)
+            {
+                var page0 = document.Pages[i];
+                var page = doc2.AddPage(page0);
+
+                var width = page.MediaBox.Width;
+                var height = page.MediaBox.Height;
+
+                width.Should().BeApproximately(page.Width.Point, 2);
+                height.Should().BeApproximately(page.Height.Point, 2);
+
+                DrawPageFrame(page, XColors.LimeGreen, 2);
+
+                var box = new XRect(0, 0, page.Width.Point, page.Height.Point);
+                box.Inflate(0, -50);
+                DrawFooter(page, XBrushes.LimeGreen, box, "After page import " + i);
+            }
+
+            // Save the document...
+            filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationCustomTestStep4");
+            doc2.Save(filename);
+            static void DrawPageFrame(PdfPage page, XColor color, Int32 width, string? label = null)
+            {
+                // Draw a frame around the page. Add an optional label.
+                using var gfx = XGraphics.FromPdfPage(page);
+                var pen = new XPen(XColors.OrangeRed, 10) { LineCap = XLineCap.Round };
+                gfx.DrawLine(pen, 0, 0, 200, 200);
+                gfx.DrawRectangle(new XPen(color, width), new XRect(0, 0, page.Width.Point, page.Height.Point));
+                if (!String.IsNullOrWhiteSpace(label))
+                {
+                    var font = new XFont("Verdana", 10, XFontStyleEx.Regular);
+                    gfx.DrawString(label ?? "", font, XBrushes.Firebrick, 20, 20);
+                }
+            }
+
+            static void DrawFooter(PdfPage page, XBrush color, XRect box, string footer)
+            {
+                // Draw a frame around the page. Add an optional label.
+                using var gfx = XGraphics.FromPdfPage(page);
+                var font = new XFont("Verdana", 10, XFontStyleEx.Regular);
+                var format = XStringFormats.BottomCenter;
+                gfx.DrawString(footer, font, color, box, format);
             }
         }
     }

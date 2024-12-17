@@ -1,7 +1,9 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Diagnostics;
 using PdfSharp.Drawing;
+using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 using PdfSharp.Quality;
 using PdfSharp.UniversalAccessibility;
@@ -10,8 +12,21 @@ using Xunit;
 namespace PdfSharp.Tests.PDF
 {
     [Collection("PDFsharp")]
-    public class PdfATests
+    public class PdfATests : IDisposable
     {
+        public PdfATests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void Simple_PDF_A_document()
         {

@@ -576,7 +576,7 @@ namespace MigraDoc.Rendering
             if (_lastHeaderColumn >= 0)
                 _lastHeaderRow = CalcLastConnectedColumn(_lastHeaderColumn);
 
-            // Ignore heading format if all the table is heading:
+            // Ignore heading format if all the table is heading.
             if (_lastHeaderRow == _table.Rows.Count - 1)
                 _lastHeaderRow = -1;
         }
@@ -594,7 +594,7 @@ namespace MigraDoc.Rendering
             if (_lastHeaderRow >= 0)
                 _lastHeaderRow = CalcLastConnectedRowDirect(_lastHeaderRow);
 
-            // Ignore heading format if all the table is heading:
+            // Ignore heading format if all the table is heading.
             if (_lastHeaderRow == _table.Rows.Count - 1)
                 _lastHeaderRow = -1;
         }

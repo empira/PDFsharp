@@ -1,10 +1,9 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Collections.Generic;
+#if WPF
 using System.IO;
-using System.Text;
+#endif
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 
@@ -27,11 +26,9 @@ namespace PdfSharp.Quality
                 PdfObject[] objects = pdfDocument.Internals.GetAllObjects();
                 for (int idx = 0; idx < objects.Length; idx++)
                 {
-                    if (objects[idx] is PdfDictionary dict && dict.Stream != null)
-                    // ??? ReSharper creates the next line - 
-                    //if (objects[idx] is PdfDictionary { Stream: { } } dict)
+                    if (objects[idx] is PdfDictionary { Stream: not null } dict)
                     {
-                        dict.Stream.TryUnfilter();
+                        dict.Stream.TryUncompress();
                     }
                 }
                 var name = Path.GetFileName(path);
@@ -44,7 +41,9 @@ namespace PdfSharp.Quality
             }
             catch (Exception)
             {
+#if DEBUG
                 _ = typeof(int);
+#endif
             }
         }
     }

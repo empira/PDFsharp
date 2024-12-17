@@ -7,6 +7,10 @@ using PdfSharp.Pdf.Annotations;
 
 namespace PdfSharp.Pdf.Signatures
 {
+    /// <summary>
+    /// This is only a sample of an appearance handler that draws the visual representation of the signature in the PDF.
+    /// You should write your own implementation of IAnnotationAppearanceHandler and ensure that the used font is available.
+    /// </summary>
     class DefaultSignatureAppearanceHandler : IAnnotationAppearanceHandler
     {
         public string? Location { get; set; }
@@ -19,6 +23,7 @@ namespace PdfSharp.Pdf.Signatures
         {
             var defaultText = $"Signed by: {Signer}\nLocation: {Location}\nReason: {Reason}\nDate: {DateTime.Now}";
 
+            // You should write your own implementation of IAnnotationAppearanceHandler and ensure that the used font is available.
             var font = new XFont("Verdana", 7, XFontStyleEx.Regular);
 
             var txtFormat = new XTextFormatter(gfx);

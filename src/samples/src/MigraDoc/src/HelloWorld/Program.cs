@@ -17,6 +17,10 @@ using MigraDoc.Rendering;
 
 namespace HelloWorld
 {
+    /// <summary>
+    /// This sample is just a copy and used as a smoke test for MigraDoc development.
+    /// For the original sample check the PDFsharp.Samples repository.
+    /// </summary>
     class Program
     {
         static void Main()

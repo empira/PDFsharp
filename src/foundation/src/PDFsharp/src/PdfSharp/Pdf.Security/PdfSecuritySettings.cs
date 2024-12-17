@@ -72,7 +72,6 @@ namespace PdfSharp.Pdf.Security
         }
 
         #region Permissions
-        //TODO: Use documentation from our English Acrobat 6.0 version.
 
         /// <summary>
         /// Permits printing the document. Should be used in conjunction with PermitFullQualityPrint.

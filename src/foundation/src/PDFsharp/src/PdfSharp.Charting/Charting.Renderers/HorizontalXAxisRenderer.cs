@@ -113,7 +113,7 @@ namespace PdfSharp.Charting.Renderers
             XPoint startPos = new XPoint(xari.X + tickLabelStep / 2, xari.Y + xari.TickLabelsHeight);
             if (xari.MajorTickMark != TickMarkType.None)
                 startPos.Y += xari.MajorTickMarkWidth;
-            foreach (var xs in (xari.XValues ?? throw new InvalidOperationException()).Cast<XSeries>()) // BUG???
+            foreach (var xs in (xari.XValues ?? throw new InvalidOperationException()).Cast<XSeries>()) // BUG_OLD???
             {
                 for (int idx = 0; idx < countTickLabels && idx < xs.Count; idx++)
                 {

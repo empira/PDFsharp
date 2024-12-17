@@ -207,7 +207,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Appends a translation of the specified offsets to this matrix.
         /// </summary>
-        public void TranslateAppend(double offsetX, double offsetY) // TODO: will become default
+        public void TranslateAppend(double offsetX, double offsetY) // TODO_OLD: will become default
         {
             switch (_type)
             {
@@ -271,7 +271,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Appends the specified scale vector to this matrix.
         /// </summary>
-        public void ScaleAppend(double scaleX, double scaleY) // TODO: will become default
+        public void ScaleAppend(double scaleX, double scaleY) // TODO_OLD: will become default
         {
             this *= CreateScaling(scaleX, scaleY);
         }
@@ -370,7 +370,7 @@ namespace PdfSharp.Drawing
         /// Appends the specified scale about the specified point of this matrix.
         /// </summary>
         public void ScaleAtAppend(double scaleX, double scaleY, double centerX,
-            double centerY) // TODO: will become default
+            double centerY) // TODO_OLD: will become default
         {
             this *= CreateScaling(scaleX, scaleY, centerX, centerY);
         }
@@ -398,7 +398,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Appends a rotation of the specified angle to this matrix.
         /// </summary>
-        public void RotateAppend(double angle) // TODO: will become default Rotate
+        public void RotateAppend(double angle) // TODO_OLD: will become default Rotate
         {
             angle %= 360.0;
             this *= CreateRotationRadians(angle * Const.Deg2Rad);
@@ -470,7 +470,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Appends a rotation of the specified angle at the specified point to this matrix.
         /// </summary>
-        public void RotateAtAppend(double angle, double centerX, double centerY) // TODO: will become default
+        public void RotateAtAppend(double angle, double centerX, double centerY) // TODO_OLD: will become default
         {
             angle %= 360.0;
             this *= CreateRotationRadians(angle * Const.Deg2Rad, centerX, centerY);
@@ -550,7 +550,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Appends a skew of the specified degrees in the x and y dimensions to this matrix.
         /// </summary>
-        public void ShearAppend(double shearX, double shearY) // TODO: will become default
+        public void ShearAppend(double shearX, double shearY) // TODO_OLD: will become default
         {
             Shear(shearX, shearY, XMatrixOrder.Append);
         }

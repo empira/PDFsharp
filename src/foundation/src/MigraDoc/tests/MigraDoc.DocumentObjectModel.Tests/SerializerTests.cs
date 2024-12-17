@@ -7,13 +7,29 @@ using MigraDoc.DocumentObjectModel.Tests.Helper;
 using Xunit;
 using FluentAssertions;
 using PdfSharp.Fonts;
+using PdfSharp.Quality;
+#if CORE
+#endif
 using PdfSharp.Snippets.Font;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
     [Collection("PDFsharp")]
-    public class SerializerTests
+    public class SerializerTests : IDisposable
     {
+        public SerializerTests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void Test_WriteToString()
         {
@@ -192,9 +208,11 @@ namespace MigraDoc.DocumentObjectModel.Tests
         public void Test_WriteAndReadMdddl_String_and_DocumentObject()
         {
             PdfSharpCore.ResetAll();
+
             try
             {
                 GlobalFontSettings.FontResolver = new SegoeWpFontResolver();
+                GlobalFontSettings.FallbackFontResolver = new UnitTestFontResolver();
                 const string desiredValue = "segoe wp bold";
                 const string changedValue = "segoe wp light";
                 const string defaultValue = "";
@@ -245,7 +263,11 @@ namespace MigraDoc.DocumentObjectModel.Tests
             }
             finally
             {
+                // Restore the state set by the c’tor.
                 PdfSharpCore.ResetAll();
+#if CORE
+                GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
             }
         }
 
@@ -256,6 +278,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             try
             {
                 GlobalFontSettings.FontResolver = new SegoeWpFontResolver();
+                GlobalFontSettings.FallbackFontResolver = new UnitTestFontResolver();
                 const string defaultValue = "";
                 const string baseValue = "segoe wp bold";
                 const string changedValue = "segoe wp light";
@@ -315,7 +338,11 @@ namespace MigraDoc.DocumentObjectModel.Tests
             }
             finally
             {
+                // Restore the state set by the c’tor.
                 PdfSharpCore.ResetAll();
+#if CORE
+                GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
             }
         }
 
@@ -326,6 +353,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             try
             {
                 GlobalFontSettings.FontResolver = new SegoeWpFontResolver();
+                GlobalFontSettings.FallbackFontResolver = new UnitTestFontResolver();
                 const string defaultValue = "";
                 const string baseValue = "segoe wp bold";
                 const string desiredValue = "segoe wp black";
@@ -388,7 +416,11 @@ namespace MigraDoc.DocumentObjectModel.Tests
             }
             finally
             {
+                // Restore the state set by the c’tor.
                 PdfSharpCore.ResetAll();
+#if CORE
+                GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
             }
         }
 
@@ -941,6 +973,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             try
             {
                 GlobalFontSettings.FontResolver = new SegoeWpFontResolver();
+                GlobalFontSettings.FallbackFontResolver = new UnitTestFontResolver();
 
                 var desiredAlignment = ParagraphAlignment.Right;
                 var desiredBorderRightWidth = Unit.Parse("1pt");
@@ -1128,7 +1161,11 @@ namespace MigraDoc.DocumentObjectModel.Tests
             }
             finally
             {
+                // Restore the state set by the c’tor.
                 PdfSharpCore.ResetAll();
+#if CORE
+                GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
             }
         }
 
@@ -1415,7 +1452,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var evenPageHeaderTextRead = evenPageHeaderParagraphRead!.Elements.First as Text;
             evenPageHeaderTextRead.Should().NotBeNull();
             evenPageHeaderTextRead!.Content.Should().Be("EvenPageHeaderText");
-            
+
             if (paragraphCount == 0)
             {
                 sectionRead.Elements.Should().HaveCount(0);

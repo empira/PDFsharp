@@ -8,7 +8,7 @@ namespace PdfSharp.Internal
 {
     /// <summary>
     /// Static locking functions to make PDFsharp thread save.
-    /// POSSIBLE BUG: Having more than one lock can lead to a deadlock.
+    /// POSSIBLE BUG_OLD: Having more than one lock can lead to a deadlock.
     /// </summary>
     static class Lock
     {

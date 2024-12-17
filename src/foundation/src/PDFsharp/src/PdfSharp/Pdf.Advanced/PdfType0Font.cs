@@ -86,7 +86,7 @@ namespace PdfSharp.Pdf.Advanced
             BaseFont = otDescriptor.FontName;
 
             // CID fonts are always embedded
-            if (!BaseFont.Contains("+"))  // H/ACK in PdfType0Font
+            if (!BaseFont.Contains("+"))  // H/A/C/K in PdfType0Font
                 BaseFont = FontDescriptor.CreateEmbeddedFontSubsetName(BaseFont);
 
             FontDescriptor.FontName = BaseFont;
@@ -127,7 +127,7 @@ namespace PdfSharp.Pdf.Advanced
                 for (int idx = 0; idx < count; idx++)
                     glyphWidths[idx] = descriptor.GlyphIndexToPdfWidth(glyphIndices[idx]);
 
-                //TODO: optimize order of indices
+                //TODO_OLD: optimize order of indices
 
                 for (int idx = 0; idx < count; idx++)
                     w.AppendFormat("{0}[{1}]", glyphIndices[idx], glyphWidths[idx]);

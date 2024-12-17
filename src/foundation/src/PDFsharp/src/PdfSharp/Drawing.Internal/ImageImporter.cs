@@ -10,7 +10,7 @@ namespace PdfSharp.Drawing.Internal
     /// </summary>
     class ImageImporter
     {
-        // TODO Make a singleton!
+        // TODO_OLD Make a singleton!
         /// <summary>
         /// Gets the image importer.
         /// </summary>
@@ -24,7 +24,7 @@ namespace PdfSharp.Drawing.Internal
             _importers.Add(new ImageImporterJpeg());
             _importers.Add(new ImageImporterBmp());
             _importers.Add(new ImageImporterPng());
-            // TODO: Special importer for PDF? Or dealt with at a higher level?
+            // TODO_OLD: Special importer for PDF? Or dealt with at a higher level?
         }
 
         /// <summary>
@@ -37,9 +37,16 @@ namespace PdfSharp.Drawing.Internal
             {
                 length = stream.Length;
             }
-            // ReSharper disable once EmptyGeneralCatchClause
-            catch (Exception)
-            { }
+            catch (NotSupportedException)
+            {
+                // We eat this exception.
+                // We can handle streams that do not return their length.
+            }
+            catch (Exception ex)
+            {
+                // Unexpected exception.
+                throw new InvalidOperationException("Cannot determine the length of the stream. Use a stream that supports the Length property. Consider copying the image to a MemoryStream.", ex);
+            }
 
             if (length < -1 || length > Int32.MaxValue)
                 throw new InvalidOperationException($"Image files with a size of {length} bytes are not supported. Use image files smaller than 2 GiB.");

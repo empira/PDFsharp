@@ -36,7 +36,7 @@ namespace PdfSharp.Pdf.Signatures
                     "Signature page index cannot be negative.");
             }
 
-            // TODO in document: Set document version depending on digest type from options.
+            // TODO_OLD in document: Set document version depending on digest type from options.
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace PdfSharp.Pdf.Signatures
             catalog.AcroForm.Fields.Elements.Add(signatureField);
         }
 
-        PdfSignatureField GetSignatureField(PdfDictionary signatureDic)  // PdfSignatureDictionary
+        PdfSignatureField GetSignatureField(PdfSignature2 signatureDic)
         {
             var signatureField = new PdfSignatureField(Document);
 
@@ -186,7 +186,7 @@ namespace PdfSharp.Pdf.Signatures
 
             // Annotation keys.
             signatureField.Elements.Add(PdfAcroField.Keys.FT, new PdfName("/Sig"));
-            signatureField.Elements.Add(PdfAcroField.Keys.T, new PdfString("Signature1")); // TODO If already exists, will it cause error? implement a name chooser if yes.
+            signatureField.Elements.Add(PdfAcroField.Keys.T, new PdfString("Signature1")); // TODO_OLD If already exists, will it cause error? implement a name chooser if yes.
             signatureField.Elements.Add(PdfAcroField.Keys.Ff, new PdfInteger(132));
             signatureField.Elements.Add(PdfAcroField.Keys.DR, new PdfDictionary());
             signatureField.Elements.Add(PdfSignatureField.Keys.Type, new PdfName("/Annot"));
@@ -201,17 +201,17 @@ namespace PdfSharp.Pdf.Signatures
                 Reason = Options.Reason,
                 Signer = Signer.CertificateName
             };
-            // TODO Call RenderCustomAppearance(); here.
-            signatureField.PrepareForSave(); // TODO PdfSignatureField.PrepareForSave() is not triggered automatically so let's call it manually from here, but it would be better to be called automatically.
+            // TODO_OLD Call RenderCustomAppearance(); here.
+            signatureField.PrepareForSave(); // TODO_OLD PdfSignatureField.PrepareForSave() is not triggered automatically so let's call it manually from here, but it would be better to be called automatically.
 
             Document.Internals.AddObject(signatureField);
 
             return signatureField;
         }
 
-        PdfDictionary GetSignatureDictionary(PdfSignaturePlaceholderItem contents, PdfArray byteRange)
+        PdfSignature2 GetSignatureDictionary(PdfSignaturePlaceholderItem contents, PdfArray byteRange)
         {
-            PdfSignature signatureDic = new(Document);
+            PdfSignature2 signatureDic = new(Document);
 
             signatureDic.Elements.Add(PdfSignatureField.Keys.Type, new PdfName("/Sig"));
             signatureDic.Elements.Add(PdfSignatureField.Keys.Filter, new PdfName("/Adobe.PPKLite"));
@@ -230,7 +230,8 @@ namespace PdfSharp.Pdf.Signatures
             propertyItems.Elements.Add("/Name",
                 String.IsNullOrWhiteSpace(Options.AppName) ?
                 new PdfName("/PDFsharp http://www.pdfsharp.net") :
-                new PdfName($"/{Options.AppName}"));
+                //new PdfName($"/{Options.AppName}")); // #DELETE
+                PdfName.FromString(Options.AppName));
 
             Document.Internals.AddObject(signatureDic);
 

@@ -9,6 +9,7 @@ using PdfSharp.Quality;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Rendering;
+using PdfSharp.Diagnostics;
 using Xunit;
 #if CORE
 using PdfSharp.Fonts;
@@ -23,8 +24,21 @@ using SecurityTestHelperMD = MigraDoc.Tests.Helper.SecurityTestHelper;
 namespace MigraDoc.Tests
 {
     [Collection("PDFsharp")]
-    public class ImageFormats
+    public class ImageFormats : IDisposable
     {
+        public ImageFormats()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
 #if WPF
         public void Test_Image_Formats_Wpf()
@@ -267,7 +281,7 @@ namespace MigraDoc.Tests
             {
                 var path = root + image.Path;
 
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                if (!PdfSharp.Capabilities.OperatingSystem.IsWindows)
                     path = path.Replace('\\', '/');
 
                 var file = Path.GetFileName(image.Path);

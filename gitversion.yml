@@ -1,11 +1,13 @@
-# 24-08-07
+# Last update: 24-11-27
 assembly-versioning-scheme: MajorMinorPatch
 # PDFSHARP_BUILD_VERSION are the days since 2005-01-01. #CHECK_BEFORE_RELEASE
-assembly-file-versioning-format: '{Major}.{Minor}.{Patch}.{env:PDFSHARP_BUILD_VERSION ?? 7164}'
+# Command Window: ? (DateTime.Now - new DateTime(2005, 1, 1)).Days;
+# C# Interactive: Console.WriteLine((DateTime.Now - new DateTime(2005, 1, 1)).Days);
+assembly-file-versioning-format: '{Major}.{Minor}.{Patch}.{env:PDFSHARP_BUILD_VERSION ?? 7283}'
 mode: Mainline
 assembly-informational-format: '{NuGetVersion}'
 branches:
-  develop: # Current development
+  develop: # Current development branch
     # branch:  develop             -- is always 'develop'
     # version: {6.0.0}-develop.123 -- taken from git tag plus 'develop' plus commit count
     regex: ^develop$
@@ -19,7 +21,7 @@ branches:
     # branch:  release/6.0.0-preview-3 -- must be same as git tag without leading 'v'.
     # version: {6-0-0-preview-3}       -- taken from git tag only
     regex: ^(release[/-]|master)
-    # Must not have mode set to be mainline? WTF?
+    # Must not have mode set to be mainline?
     increment: None
     tag: ''
     prevent-increment-of-merged-branch-version: true

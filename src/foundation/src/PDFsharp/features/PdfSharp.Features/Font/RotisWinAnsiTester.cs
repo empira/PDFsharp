@@ -173,7 +173,7 @@ namespace PdfSharp.Features.Font
             // of familyName, isBold, and isItalic.
 
             // In this sample we use 6 fonts from the Segoe font family which come with the
-            // Windows Phone SDK. These fonts are pretty and well designed and their
+            // Windows Phone SDK. These fonts are pretty and well-designed and their
             // font files are much smaller than their Windows counterparts.
 
             // What this implementation do:
@@ -182,7 +182,7 @@ namespace PdfSharp.Features.Font
             // * if isItalic is true italic simulation is turned on because there is no italic font
             //
             // Currently there are two minor design flaws/bugs in PDFsharp that will be fixed later:
-            // If the same font is used with and without italic simulation two subsets of it 
+            // If the same font is used with and without italic simulation, two subsets of it 
             // are embedded in the PDF file (instead of one subset with the glyphs of both usages).
             // If an XFont is italic and the resolved font is not an italic font, italic simulation is
             // always used (i.e. you cannot turn italic simulation off in ResolveTypeface).
@@ -200,7 +200,7 @@ namespace PdfSharp.Features.Font
 
                 string? faceName = null;
 
-                // In this sample family names are case sensitive. You can relax this in your own implementation
+                // In this sample family names are case-sensitive. You can relax this in your own implementation
                 // and make them case-insensitive.
                 switch (lowerFamilyName)
                 {
@@ -388,16 +388,14 @@ namespace PdfSharp.Features.Font
         {
             var assembly = typeof(RotisFontDataHelper).Assembly;
 
-            using (var stream = assembly.GetManifestResourceStream(name))
-            {
-                if (stream == null)
-                    throw new ArgumentException("No resource with name " + name);
+            using var stream = assembly.GetManifestResourceStream(name);
+            if (stream == null)
+                throw new ArgumentException("No resource with name " + name);
 
-                var count = (int)stream.Length;
-                var data = new byte[count];
-                stream.Read(data, 0, count);
-                return data;
-            }
+            var count = (int)stream.Length;
+            var data = new byte[count];
+            stream.Read(data, 0, count);
+            return data;
         }
     }
 }

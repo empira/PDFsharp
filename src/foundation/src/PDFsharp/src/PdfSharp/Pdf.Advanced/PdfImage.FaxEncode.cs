@@ -508,7 +508,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Encodes a bitonal bitmap using 2D group 4 CCITT fax encoding.
         /// </summary>
-        /// <param name="imageData">Space reserved for the fax encoded bitmap. An exception will be thrown if this buffer is too small.</param>
+        /// <param name="imageData">Space reserved for the fax encoded bitmap.</param>
         /// <param name="imageBits">The bitmap to be encoded.</param>
         /// <param name="bytesFileOffset">Offset of image data in bitmap file.</param>
         /// <param name="width">The width of the image.</param>
@@ -529,6 +529,8 @@ namespace PdfSharp.Pdf.Advanced
             }
             catch (Exception)
             {
+                // An exception will be thrown if the buffer is too small.
+                // Fax encoding is tried to save space. Fax encoding makes no sense if buffer is too small.
                 return 0;
             }
         }
@@ -623,7 +625,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <returns>The MSB aligned bits from the buffer.</returns>
         internal byte PeekByte(out uint bits)
         {
-            // TODO: try to make this faster!
+            // TODO_OLD: try to make this faster!
             if (_bitsInBuffer == 8)
             {
                 bits = 8;
@@ -697,7 +699,7 @@ namespace PdfSharp.Pdf.Advanced
         internal void WriteBits(uint value, uint bits)
         {
 #if true
-            // TODO: Try to make this faster!
+            // TODO_OLD: Try to make this faster!
 
             // If we have to write more bits than fit into the buffer, we fill
             // the buffer and call the same routine recursively for the rest.

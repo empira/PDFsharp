@@ -13,7 +13,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         /// </summary>
         LeftPosition(Unit value)
         {
-            ShapePosition = ShapePosition.Undefined;  // BUG
+            ShapePosition = ShapePosition.Undefined;  // BUG_OLD
             Position = value;
         }
 

@@ -126,9 +126,7 @@ namespace MigraDoc.Rendering
                     break;
             }
 
-            // Create stub font.
-            XFont font = new XFont("Courier New", 8);
-            _gfx.DrawString(failureString, font, XBrushes.Red, destRect, XStringFormats.Center);
+            _gfx.DrawString(failureString, _documentRenderer.FontsAndChars.ErrorFont, XBrushes.Red, destRect, XStringFormats.Center);
         }
 
         void CalculateImageDimensions()

@@ -153,7 +153,7 @@ namespace PdfSharp.Pdf.Advanced
         internal override void WriteObject(PdfWriter writer)
         {
             // Delete /XRefStm entry, if any.
-            // HACK: 
+            // HACK_OLD: 
             _elements?.Remove(Keys.XRefStm);
 
             // Don’t encrypt myself.

@@ -22,7 +22,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
         // ReSharper disable once IdentifierTypo
         public static EventId MDDOM = new(AppLogEventIds.MDDOM, "NDDOM");
 
-        // TODO Not yet used.
+        // TODO_OLD Not yet used.
 
         public static EventId FontCreated = new(AppLogEventIds.MDDOM + 0, "Font created");
         public static EventId FontFound = new(AppLogEventIds.MDDOM + 1, "Font found");

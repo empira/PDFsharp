@@ -19,8 +19,6 @@ namespace PdfSharp.Pdf.Advanced
             : base(document)
         {
             Elements.SetName(Keys.Type, "/Catalog");
-
-            //_version = "1.4";  // HACK in PdfCatalog
         }
 
         internal PdfCatalog(PdfDictionary dictionary)
@@ -143,15 +141,45 @@ namespace PdfSharp.Pdf.Advanced
             {
                 if (_names == null)
                 {
-                    _names = new PdfNameDictionary(Owner);
-                    Owner.Internals.AddObject(_names);
-                    Elements.SetReference(Keys.Names, _names.Reference);
-
+                    var dict = Elements.GetDictionary(Keys.Names);
+                    if (dict != null)
+                        _names = new PdfNameDictionary(dict);
+                    else
+                    {
+                        _names = new PdfNameDictionary(Owner);
+                        Owner.Internals.AddObject(_names);
+                        Elements.SetReference(Keys.Names, _names.Reference);
+                    }
                 }
                 return _names;
             }
         }
         PdfNameDictionary? _names;
+
+        /// <summary>
+        /// Gets the named destinations defined in the Catalog
+        /// </summary>
+        public PdfNamedDestinations Destinations
+        {
+            get
+            {
+                if (_dests == null)
+                {
+                    var dict = Elements.GetDictionary(Keys.Dests);
+                    if (dict != null)
+                        _dests = new PdfNamedDestinations(dict);
+                    else
+                    {
+                        _dests = new PdfNamedDestinations();
+                        _dests = new PdfNamedDestinations();
+                        Owner.Internals.AddObject(_dests);
+                        Elements.SetReference(Keys.Dests, _dests.Reference);
+                    }
+                }
+                return _dests;
+            }
+        }
+        PdfNamedDestinations? _dests;
 
         /// <summary>
         /// Gets the AcroForm dictionary of this document.

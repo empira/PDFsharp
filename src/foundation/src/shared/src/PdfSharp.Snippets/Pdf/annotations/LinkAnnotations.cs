@@ -59,7 +59,7 @@ namespace PdfSharp.Snippets.Pdf
 
         public void RenderSnippet(PdfPage page, XGraphics gfx)
         {
-            // DocumentLink and FileLink don’t work here. Maybe they never worked. TODO: Repair AddHyperlink for DocumentLink and FileLink. $MaOs 
+            // DocumentLink and FileLink don’t work here. Maybe they never worked. TODO_OLD: Repair AddHyperlink for DocumentLink and FileLink. $MaOs 
 
             var font = new XFont("Segoe UI", 20, XFontStyleEx.Regular);
 

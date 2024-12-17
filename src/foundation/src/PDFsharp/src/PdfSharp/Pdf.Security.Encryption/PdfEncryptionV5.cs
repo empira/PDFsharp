@@ -53,7 +53,7 @@ namespace PdfSharp.Pdf.Security.Encryption
             if (versionValue is not 5)
                 throw TH.InvalidOperationException_InvalidVersionValueForEncryptionVersion5();
 
-            if (revisionValue is not 6)
+            if (revisionValue is not (5 or 6))
                 throw TH.InvalidOperationException_InvalidRevisionValueForEncryptionVersion5();
 
             if (lengthValue is not (null or 256))
@@ -255,9 +255,9 @@ namespace PdfSharp.Pdf.Security.Encryption
             {
                 saslPrep = SASLprep.PrepareQuery(password);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw TH.ArgumentException_WrappingSASLprepException(e);
+                throw TH.ArgumentException_WrappingSASLprepException(ex);
             }
 
             var utf8Bytes = Encoding.UTF8.GetBytes(saslPrep);
@@ -348,7 +348,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// Computes the hash for a user password.
         /// Corresponding to "7.6.4.3.4 Algorithm 2.B: Computing a hash (revision 6 and later)"
         /// </summary>
-        static byte[] ComputeUserHash(byte[] password, byte[] salt)
+        byte[] ComputeUserHash(byte[] password, byte[] salt)
         {
             return ComputeHashInternal(password, salt, false, null);
         }
@@ -357,7 +357,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// Computes the hash for an owner password.
         /// Corresponding to "7.6.4.3.4 Algorithm 2.B: Computing a hash (revision 6 and later)"
         /// </summary>
-        static byte[] ComputeOwnerHash(byte[] password, byte[] salt, byte[]? userValue)
+        byte[] ComputeOwnerHash(byte[] password, byte[] salt, byte[]? userValue)
         {
             return ComputeHashInternal(password, salt, true, userValue);
         }
@@ -366,8 +366,13 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// Computes the hash.
         /// Corresponding to "7.6.4.3.4 Algorithm 2.B: Computing a hash (revision 6 and later)"
         /// </summary>
-        static byte[] ComputeHashInternal(byte[] password, byte[] salt, bool computeOwnerHash, byte[]? userValue)
+        byte[] ComputeHashInternal(byte[] password, byte[] salt, bool computeOwnerHash, byte[]? userValue)
         {
+            // For deprecated proprietary revision 5, there is no documentation in PDF reference.
+            // However, to allow reading of files using revision 5, we applied code from a GitHub pull request.
+            if (RevisionValue == 5)
+                return ComputeHashRevision5Internal(password, salt, computeOwnerHash, userValue);
+
             // Take the SHA-256 hash of input and name it k.
             var input = password.Concat(salt);
             if (computeOwnerHash)
@@ -410,7 +415,7 @@ namespace PdfSharp.Pdf.Security.Encryption
 #if NET6_0_OR_GREATER
                 var e16BigEndianUnsigned = new BigInteger(e16, true, true);
 #else
-                var e16BigEndianUnsigned = DotNetHelper.CreateBigInteger(e16, true, true);
+            var e16BigEndianUnsigned = DotNetHelper.CreateBigInteger(e16, true, true);
 #endif
                 // Calculate the remainder of the result by modulo 3
                 // and according to that result choose the SHA algorithm to calculate the new k from e.
@@ -433,6 +438,28 @@ namespace PdfSharp.Pdf.Security.Encryption
 
                 lastByteOfE = e.Last();
             }
+
+            // The first 32 bytes of the final K are the output of the algorithm.
+            var result = k[..32];
+            return result;
+        }
+
+        /// <summary>
+        /// Computes the hash.
+        /// Corresponding to GitHub pull request #153: https://github.com/empira/PDFsharp/pull/153/files.
+        /// </summary>
+        static byte[] ComputeHashRevision5Internal(byte[] password, byte[] salt, bool computeOwnerHash, byte[]? userValue)
+        {
+            // Take the SHA-256 hash of input and name it k.
+            var input = password.Concat(salt);
+            if (computeOwnerHash)
+                input = input.Concat(userValue!); // Shall not be null, if computeOwnerHash is true.
+#if NET6_0_OR_GREATER
+            var k = SHA256.HashData(input.ToArray());
+#else
+            var sha = SHA256.Create();
+            var k = sha.ComputeHash(input.ToArray());
+#endif
 
             // The first 32 bytes of the final K are the output of the algorithm.
             var result = k[..32];
@@ -624,7 +651,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// Validates the user password.
         /// Corresponding to "7.6.4.4.10 Algorithm 11: Authenticating the user password (Security handlers of revision 6)"
         /// </summary>
-        static bool ValidateUserPassword(byte[] utf8InputPassword, byte[] userValue)
+        bool ValidateUserPassword(byte[] utf8InputPassword, byte[] userValue)
         {
             // a) Test inputPassword against the userValue by computing the hash with an input string consisting of the UTF-8 password
             // concatenated with the user validation salt.
@@ -641,7 +668,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// Validates the owner password.
         /// Corresponding to "7.6.4.4.11 Algorithm 12: Authenticating the owner password (Security handlers of revision 6)"
         /// </summary>
-        static bool ValidateOwnerPassword(byte[] utf8InputPassword, byte[] userValue, byte[] ownerValue)
+        bool ValidateOwnerPassword(byte[] utf8InputPassword, byte[] userValue, byte[] ownerValue)
         {
             // a) Test inputPassword against the ownerValue by computing the hash with an input string consisting of the UTF-8 password
             // concatenated with the owner validation salt and userValue.

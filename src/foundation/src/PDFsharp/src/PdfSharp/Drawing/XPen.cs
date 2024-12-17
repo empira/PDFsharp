@@ -14,7 +14,7 @@ using WpfBrush = System.Windows.Media.Brush;
 
 namespace PdfSharp.Drawing
 {
-    // TODO Free GDI objects (pens, brushes, ...) automatically without IDisposable.
+    // TODO_OLD Free GDI objects (pens, brushes, ...) automatically without IDisposable.
     /// <summary>
     /// Defines an object used to draw lines and curves.
     /// </summary>
@@ -252,7 +252,7 @@ namespace PdfSharp.Drawing
                     },
                     _ => throw new NotImplementedException("Pen type not supported by PDFsharp.")
                 };
-                // Bug fixed by drice2@ageone.de
+                // Custom dash style, fix by drice2@ageone.de.
                 if (pen.DashStyle == System.Drawing.Drawing2D.DashStyle.Custom)
                 {
                     int length = pen.DashPattern.Length;

@@ -179,7 +179,7 @@ namespace PdfSharp.Drawing
         //public void SetSigmaBellShape(double focus, double scale);
 
 #if GDI
-        //TODO: Change from LinearGradient to RadialGradient
+        //TODO_OLD: Change from LinearGradient to RadialGradient
         internal override System.Drawing.Brush RealizeGdiBrush()
         {
             //if (dirty)
@@ -194,7 +194,7 @@ namespace PdfSharp.Drawing
             //}
 
 #if not_implemented
-            // TODO: use dirty to optimize code
+            // TODO_OLD: use dirty to optimize code
             GdiLinearGradientBrush brush;
             try
             {

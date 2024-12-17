@@ -31,7 +31,7 @@ namespace PdfSharp.Snippets.Drawing
 
             BeginBox(gfx, 2, BoxOptions.Tile);
             {
-                // TODO 2014-12-01 PDFsharp does not yet support transparency for grayscale images.
+                // TODO_OLD 2014-12-01 PDFsharp does not yet support transparency for grayscale images.
                 var img = ImageHelper.GetGifImage(ImageHelper.GifImages.GrayscaleTransparency);
                 gfx.DrawImage(img, 68, 18, 114, 114);
             }

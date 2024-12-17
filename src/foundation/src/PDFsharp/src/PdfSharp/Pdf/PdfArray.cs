@@ -3,7 +3,6 @@
 
 using System.Collections;
 using System.Text;
-using PdfSharp.Internal;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
 
@@ -173,7 +172,7 @@ namespace PdfSharp.Pdf
                     throw new ArgumentOutOfRangeException(nameof(index), index, SyMsgs.IndexOutOfRange3);
 
                 object obj = this[index];
-                //object? obj = GetObject(index); // TODO Do this for all conversions! 2023-06-21
+                //object? obj = GetObject(index); // TODO_OLD Do this for all conversions! 2023-06-21
                 return obj switch
                 {
                     null => false,
@@ -195,7 +194,7 @@ namespace PdfSharp.Pdf
                     throw new ArgumentOutOfRangeException(nameof(index), index, SyMsgs.IndexOutOfRange3);
 
                 object obj = this[index];
-                //object? obj = GetObject(index); // TODO Do this for all conversions! 2023-06-21
+                //object? obj = GetObject(index); // TODO_OLD Do this for all conversions! 2023-06-21
                 return obj switch
                 {
                     null => 0,
@@ -217,7 +216,7 @@ namespace PdfSharp.Pdf
                     throw new ArgumentOutOfRangeException(nameof(index), index, SyMsgs.IndexOutOfRange3);
 
                 object obj = this[index];
-                //object? obj = GetObject(index); // TODO Do this for all conversions! 2023-06-21
+                //object? obj = GetObject(index); // TODO_OLD Do this for all conversions! 2023-06-21
                 if (obj is PdfReference reference)
                 {
                     //Debug.Assert(false, "Check why this is not PdfRealObject or PdfIntegerObject.");
@@ -256,7 +255,7 @@ namespace PdfSharp.Pdf
                     throw new ArgumentOutOfRangeException(nameof(index), index, SyMsgs.IndexOutOfRange3);
 
                 object obj = this[index];
-                //object? obj = GetObject(index); // TODO Do this for all conversions! 2023-06-21
+                //object? obj = GetObject(index); // TODO_OLD Do this for all conversions! 2023-06-21
                 return obj switch
                 {
                     null => null,
@@ -282,7 +281,7 @@ namespace PdfSharp.Pdf
                     throw new ArgumentOutOfRangeException(nameof(index), index, SyMsgs.IndexOutOfRange3);
 
                 object obj = this[index];
-                //object? obj = GetObject(index); // TODO Do this for all conversions! 2023-06-21
+                //object? obj = GetObject(index); // TODO_OLD Do this for all conversions! 2023-06-21
                 return obj switch
                 {
                     null => "",
@@ -437,7 +436,7 @@ namespace PdfSharp.Pdf
             /// </summary>
             public void Add(PdfItem value)
             {
-                // TODO: ??? 
+                // TODO_OLD: ??? 
                 //Debug.Assert((value is PdfObject && ((PdfObject)value).Reference == null) | !(value is PdfObject),
                 //  "You try to set an indirect object directly into an array.");
 

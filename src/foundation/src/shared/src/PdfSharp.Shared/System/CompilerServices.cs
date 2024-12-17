@@ -58,7 +58,7 @@ static class StringExtensions
 // This is just experimental. If we use it in PDFsharp, the code will move to the PDFsharp assembly
 // and the classes become internal. Otherwise, customers may run into problems of ambiguity of these classes.
 // true is set in Directory.Build.targets.
-// StL/24-03-04: We will use Index and Range in PDFsharp until we ger problem reports.
+// StL/24-03-04: We will use Index and Range in PDFsharp until we get problem reports.
 
 namespace System
 {

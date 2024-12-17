@@ -6,21 +6,38 @@ using System.Globalization;
 using System.IO;
 #endif
 using System.Security.Cryptography.X509Certificates;
+using PdfSharp.Diagnostics;
 using PdfSharp.Drawing;
 using PdfSharp.Drawing.Layout;
+using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Annotations;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Signatures;
 using PdfSharp.Quality;
+#if CORE
+#endif
 using Xunit;
 using SecurityTestHelper = PdfSharp.TestHelper.SecurityTestHelper;
 
 namespace PdfSharp.Tests.Pdf
 {
     [Collection("PDFsharp")]
-    public class DefaultSignerTests
+    public class DefaultSignerTests : IDisposable
     {
+        public DefaultSignerTests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         /// <summary>
         /// The minimum assets version required.
         /// </summary>
@@ -236,6 +253,7 @@ namespace PdfSharp.Tests.Pdf
         public void Sign_existing_file_Default()
         {
             IOUtility.EnsureAssetsVersion(RequiredAssets);
+
             var pdfFolder = IOUtility.GetAssetsPath("archives/samples-1.5/PDFs");
             var pdfFile = Path.Combine(pdfFolder ?? throw new InvalidOperationException("Call Download-Assets.ps1 before running the tests."), "SomeLayout.pdf");
 
@@ -316,8 +334,8 @@ namespace PdfSharp.Tests.Pdf
         }
 
         [Theory(Skip = "errors on writing and maybe reading encrypted files with signature")]
-        [ClassData(typeof(SecurityTestHelper.TestData.AllVersions))]
-        [ClassData(typeof(SecurityTestHelper.TestData.AllVersionsSkipped), Skip = SecurityTestHelper.SkippedTestOptionsMessage)]
+        [ClassData(typeof(SecurityTestHelper.TestData.AllWriteVersions))]
+        [ClassData(typeof(SecurityTestHelper.TestData.AllWriteVersionsSkipped), Skip = SecurityTestHelper.SkippedTestOptionsMessage)]
         public void Sign_and_encrypt_file_Default(SecurityTestHelper.TestOptionsEnum optionsEnum)
         {
             var testOptions = SecurityTestHelper.TestOptions.ByEnum(optionsEnum);

@@ -17,13 +17,24 @@ namespace PdfSharp.Pdf.Advanced
 
         internal PdfNameDictionary(PdfDictionary dictionary)
             : base(dictionary)
-        { }
+        {
+            var dests = Elements.GetDictionary(Keys.Dests);
+            if (dests != null)
+            {
+                _dests = new PdfNameTreeNode(dests);
+            }
+        }
+
+        /// <summary>
+        /// Gets the named destinations
+        /// </summary>
+        public PdfNameTreeNode? NameTree => _dests;
 
         internal void AddNamedDestination(string destinationName, int destinationPage, PdfNamedDestinationParameters parameters)
         {
             if (_dests == null)
             {
-                _dests = new PdfNameTreeNode(true);
+                _dests = new PdfNameTreeNode();
                 Owner.Internals.AddObject(_dests);
                 Elements.SetReference(Keys.Dests, _dests.Reference);
             }
@@ -55,7 +66,7 @@ namespace PdfSharp.Pdf.Advanced
         {
             if (_embeddedFiles == null)
             {
-                _embeddedFiles = new PdfNameTreeNode(true);
+                _embeddedFiles = new PdfNameTreeNode();
                 Owner.Internals.AddObject(_embeddedFiles);
                 Elements.SetReference(Keys.EmbeddedFiles, _embeddedFiles.Reference);
             }
