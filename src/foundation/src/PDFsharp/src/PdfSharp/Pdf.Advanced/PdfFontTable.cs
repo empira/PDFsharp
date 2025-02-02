@@ -2,6 +2,11 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
+using PdfSharp.Fonts;
+using PdfSharp.Fonts.OpenType;
+using PdfSharp.Fonts.StandardFonts;
+using PdfSharp.Internal;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PdfSharp.Pdf.Advanced
 {
@@ -30,7 +35,8 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public PdfFontTable(PdfDocument document)
             : base(document)
-        { }
+        {
+        }
 
         /// <summary>
         /// Gets a PdfFont from an XFont. If no PdfFont already exists, a new one is created.
@@ -46,11 +52,31 @@ namespace PdfSharp.Pdf.Advanced
                 else if (fontType == FontType.TrueTypeWinAnsi)
                     pdfFont = new PdfTrueTypeFont(Owner, glyphTypeface);
                 else
-                    throw new InvalidOperationException($"Invalid font type '{fontType.ToString()}'.");
+                    throw new InvalidOperationException($"Invalid font type '{fontType}'.");
                 Debug.Assert(pdfFont.Owner == Owner);
                 _fonts[selector] = pdfFont;
             }
             return pdfFont;
+        }
+
+        /// <summary>
+        /// Caches a font from an existing document.<br></br>
+        /// Used to prevent adding new fonts when filling existing AcroForms.
+        /// </summary>
+        /// <param name="fontDict"></param>
+        /// <param name="glyphTypeface"></param>
+        /// <param name="fontType"></param>
+        internal void CacheExistingFont(PdfDictionary fontDict, XGlyphTypeface glyphTypeface, FontType fontType)
+        {
+            var selector = ComputePdfFontKey(glyphTypeface, fontType);
+            if (!_fonts.ContainsKey(selector))
+            {
+                var otDescriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptorFor(glyphTypeface);
+                var descriptor = Owner.PdfFontDescriptorCache.GetOrCreatePdfDescriptorFor(otDescriptor, glyphTypeface.GetBaseName());
+
+                var font = new PdfFont(fontDict, descriptor, PdfFontEncoding.Automatic);
+                _fonts[selector] = font;
+            }
         }
 
 #if true

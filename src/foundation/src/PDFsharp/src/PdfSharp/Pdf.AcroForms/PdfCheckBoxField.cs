@@ -1,8 +1,8 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Drawing;
 using PdfSharp.Pdf.Annotations;
-using PdfSharp.Pdf.Advanced;
 
 namespace PdfSharp.Pdf.AcroForms
 {
@@ -24,156 +24,29 @@ namespace PdfSharp.Pdf.AcroForms
             : base(dict)
         { }
 
-#if true_
+
         /// <summary>
-        /// Indicates whether the field is checked.
+        /// Gets or sets the value of this field. This should be either <b>Off</b> or 
+        /// the result of <see cref="PdfButtonField.GetNonOffValue()"/> (typically <b>Yes</b>)
         /// </summary>
-        public bool Checked  //R080317 // TODO_OLD
+        public new string Value
         {
-            get
-            {
-                if (!HasKids)
-                {
-                    string value = Elements.GetString(Keys.V);
-                    //return !String.IsNullOrEmpty(value) && value != UncheckedValue;
-                    return !String.IsNullOrEmpty(value) && value == CheckedName;
-                }
-
-                if (Fields.Elements.Items.Length == 2)
-                {
-                    string value = ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements.GetString(Keys.V);
-                    //bool bReturn = value.Length != 0 && value != UncheckedValue; //R081114 (3Std.!!) auch auf Nein prüfen; //TODO_OLD woher kommt der Wert?
-                    bool bReturn = value.Length != 0 && value == CheckedName;
-                    return bReturn;
-                }
-
-                // NYI: Return false in any other case. 
-                return false;
-            }
-
+            get { return (base.Value?.ToString() ?? "Off").TrimStart('/'); }
             set
             {
-                if (!HasKids)
+                if (ReadOnly)
+                    throw new InvalidOperationException("The field is read only.");
+                if (value != null && value.Equals(GetNonOffValueInternal().TrimStart('/'), StringComparison.OrdinalIgnoreCase))
                 {
-                    //string name = value ? GetNonOffValue() : "/Off";
-                    string name = value ? CheckedName : UncheckedName;
-                    Elements.SetName(Keys.V, name);
-                    Elements.SetName(PdfAnnotation.Keys.AS, name);
+                    Elements.SetName(PdfAcroField.Keys.V, value);
                 }
+                else if (value != "Off" && value != GetNonOffValueInternal())
+                    throw new ArgumentException($"'{value}' is not a valid value for field '{FullyQualifiedName}'. Valid values are either '/Off' or '{GetNonOffValueInternal()}'");
                 else
-                {
-                    // Here we have to handle fields that exist twice with the same name.
-                    // Checked must be set for both fields, using /Off for one field and skipping /Off for the other,
-                    // to have only one field with a check mark.
-                    // Finding this took me two working days.
-                    if (Fields.Elements.Items.Length == 2)
-                    {
-                        if (value)
-                        {
-                            //Element 0 behandeln -> auf checked setzen
-                            string name1 = "";
-                            PdfDictionary o = ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements["/AP"] as PdfDictionary;
-                            if (o != null)
-                            {
-                                PdfDictionary n = o.Elements["/N"] as PdfDictionary;
-                                if (n != null)
-                                {
-                                    foreach (string name in n.Elements.Keys)
-                                    {
-                                        //if (name != UncheckedValue)
-                                        if (name == CheckedName)
-                                        {
-                                            name1 = name;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if (name1.Length != 0)
-                            {
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements.SetName(Keys.V, name1);
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements.SetName(PdfAnnotation.Keys.AS, name1);
-                            }
-
-                            //Element 1 behandeln -> auf unchecked setzen
-                            o = ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[1])).Value)).Elements["/AP"] as PdfDictionary;
-                            if (o != null)
-                            {
-                                PdfDictionary n = o.Elements["/N"] as PdfDictionary;
-                                if (n != null)
-                                {
-                                    foreach (string name in n.Elements.Keys)
-                                    {
-                                        if (name == UncheckedName)
-                                        {
-                                            name1 = name;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if (!String.IsNullOrEmpty(name1))
-                            {
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[1])).Value)).Elements.SetName(Keys.V, name1);
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[1])).Value)).Elements.SetName(PdfAnnotation.Keys.AS, name1);
-                            }
-                        }
-                        else
-                        {
-                            //Element 0 behandeln -> auf unchecked setzen
-                            string name1 = "";
-                            PdfDictionary o = ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[1])).Value)).Elements["/AP"] as PdfDictionary;
-                            if (o != null)
-                            {
-                                PdfDictionary n = o.Elements["/N"] as PdfDictionary;
-                                if (n != null)
-                                {
-                                    foreach (string name in n.Elements.Keys)
-                                    {
-                                        //if (name != UncheckedValue)
-                                        if (name == CheckedName)
-                                        {
-                                            name1 = name;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if (name1.Length != 0)
-                            {
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[1])).Value)).Elements.SetName(Keys.V, name1);
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[1])).Value)).Elements.SetName(PdfAnnotation.Keys.AS, name1);
-                            }
-
-                            //Element 1 behandeln -> auf checked setzen
-                            o = ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements["/AP"] as PdfDictionary;
-                            if (o != null)
-                            {
-                                PdfDictionary n = o.Elements["/N"] as PdfDictionary;
-                                if (n != null)
-                                {
-                                    foreach (string name in n.Elements.Keys)
-                                    {
-                                        if (name == UncheckedName)
-                                        {
-                                            name1 = name;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if (name1.Length != 0)
-                            {
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements.SetName(Keys.V, name1);
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements.SetName(PdfAnnotation.Keys.AS, name1);
-                            }
-                        }
-                    }
-                }
+                    Elements.SetName(PdfAcroField.Keys.V, "/Off");
             }
         }
 
-#else
         /// <summary>
         /// Indicates whether the field is checked.
         /// </summary>
@@ -181,139 +54,90 @@ namespace PdfSharp.Pdf.AcroForms
         {
             get
             {
-                if (!HasKids) //R080317
+                var value = Elements.GetString(PdfAcroField.Keys.V);
+                var widget = Annotations.Elements.Count > 0 ? Annotations.Elements[0] : null;
+                if (widget != null)
                 {
-                    string value = Elements.GetString(PdfAcroField.Keys.V);
-                    return value.Length != 0 && value != "/Off";
-                }
-                else //R080317
-                {
-                    if (Fields.Elements.Items.Length == 2)
+                    if (string.IsNullOrEmpty(value))
+                        value = widget.Elements.GetString(PdfAnnotation.Keys.AS);
+                    var appearances = widget.Elements.GetDictionary(PdfAnnotation.Keys.AP);
+                    if (appearances != null)
                     {
-                        string value = ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements.GetString(PdfAcroField.Keys.V);
-                        bool bReturn = value.Length != 0 && value != "/Off" && value != "/Nein"; //R081114 (3Std.!!) auch auf Nein prüfen; //TODO_OLD woher kommt der Wert?
-                        return bReturn;
+                        var normalState = appearances.Elements.GetDictionary("/N");
+                        if (normalState != null)
+                            return value.Length != 0 && value != "/Off" && normalState.Elements.ContainsKey(value);
                     }
-                    else
-                        return false;
                 }
+                return value.Length != 0 && value != "/Off";
             }
             set
             {
-                if (!HasKids)
+                if (ReadOnly)
+                    throw new InvalidOperationException("The field is read only.");
+                var name = value ? GetNonOffValueInternal() : "/Off";
+                Elements.SetName(PdfAcroField.Keys.V, name);
+            }
+        }
+
+        /// <summary>
+        /// Renders the appearance of this field
+        /// </summary>
+        protected override void RenderAppearance()
+        {
+            for (var i = 0; i < Annotations.Elements.Count; i++)
+            {
+                var widget = Annotations.Elements[i];
+                var rect = widget.Rectangle;
+                var width = Math.Abs(rect.Width);
+                var height = Math.Abs(rect.Height);
+                // ensure a minimum size of 1x1, otherwise an exception is thrown
+                if (width < 1.0 || height < 1.0)
+                    continue;
+
+                // existing/imported field ?
+                if (widget.Elements.ContainsKey(PdfAnnotation.Keys.AP))
                 {
-                    string name = value ? GetNonOffValue() : "/Off";
-                    Elements.SetName(PdfAcroField.Keys.V, name);
-                    Elements.SetName(PdfAnnotation.Keys.AS, name);
+                    widget.Elements.SetName(PdfAnnotation.Keys.AS, Checked ? GetNonOffValueInternal() : "/Off");
                 }
-                else
+                else    // newly created field
                 {
-                    // Here we have to handle fields that exist twice with the same name.
-                    // Checked must be set for both fields, using /Off for one field and skipping /Off for the other,
-                    // to have only one field with a check mark.
-                    // Finding this took me two working days.
-                    if (Fields.Elements.Items.Length == 2)
+                    var xRect = new XRect(0, 0, width, height);
+                    // checked state
+                    var formChecked = new XForm(_document, xRect);
+                    using (var gfx = XGraphics.FromForm(formChecked))
                     {
-                        if (value)
-                        {
-                            //Element 0 behandeln -> auf checked setzen
-                            string name1 = "";
-                            if (((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements["/AP"] is PdfDictionary obj1)
-                            {
-                                if (obj1.Elements["/N"] is PdfDictionary n)
-                                {
-                                    foreach (string name in n.Elements.Keys)
-                                    {
-                                        if (name != "/Off")
-                                        {
-                                            name1 = name;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if (name1.Length != 0)
-                            {
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements.SetName(PdfAcroField.Keys.V, name1);
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements.SetName(PdfAnnotation.Keys.AS, name1);
-                            }
-
-                            //Element 1 behandeln -> auf unchecked setzen
-                            var obj2 = ((PdfDictionary?)((PdfReference?)Fields.Elements.Items[1])?.Value)?.Elements["/AP"] as PdfDictionary;
-                            if (obj2 != null)
-                            {
-                                var n = obj2.Elements["/N"] as PdfDictionary;
-                                if (n != null)
-                                {
-                                    foreach (string name in n.Elements.Keys)
-                                    {
-                                        if (name == "/Off")
-                                        {
-                                            name1 = name;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if (name1.Length != 0)
-                            {
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[1])).Value)).Elements.SetName(PdfAcroField.Keys.V, name1);
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[1])).Value)).Elements.SetName(PdfAnnotation.Keys.AS, name1);
-                            }
-
-                        }
-                        else
-                        {
-                            //Element 0 behandeln -> auf unchecked setzen
-                            string name1 = "";
-                            PdfDictionary? o = ((PdfDictionary)((PdfReference)(Fields.Elements.Items[1])).Value).Elements["/AP"] as PdfDictionary;
-                            if (o != null)
-                            {
-                                if (o.Elements["/N"] is PdfDictionary n)
-                                {
-                                    foreach (string name in n.Elements.Keys)
-                                    {
-                                        if (name != "/Off")
-                                        {
-                                            name1 = name;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if (name1.Length != 0)
-                            {
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[1])).Value)).Elements.SetName(PdfAcroField.Keys.V, name1);
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[1])).Value)).Elements.SetName(PdfAnnotation.Keys.AS, name1);
-                            }
-
-                            //Element 1 behandeln -> auf checked setzen
-                            o = ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements["/AP"] as PdfDictionary;
-                            if (o != null)
-                            {
-                                if (o.Elements["/N"] is PdfDictionary n)
-                                {
-                                    foreach (string name in n.Elements.Keys)
-                                    {
-                                        if (name == "/Off")
-                                        {
-                                            name1 = name;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if (name1.Length != 0)
-                            {
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements.SetName(PdfAcroField.Keys.V, name1);
-                                ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements.SetName(PdfAnnotation.Keys.AS, name1);
-                            }
-                        }
+                        gfx.IntersectClip(xRect);
+                        Owner.AcroForm?.FieldRenderer.CheckBoxFieldRenderer.RenderCheckedState(this, widget, gfx, xRect);
                     }
+                    formChecked.DrawingFinished();
+                    SetXFormFont(formChecked);
+                    // unchecked state
+                    var formUnchecked = new XForm(_document, rect.ToXRect());
+                    using (var gfx = XGraphics.FromForm(formUnchecked))
+                    {
+                        gfx.IntersectClip(xRect);
+                        Owner.AcroForm?.FieldRenderer.CheckBoxFieldRenderer.RenderUncheckedState(this, widget, gfx, xRect);
+                    }
+                    formUnchecked.DrawingFinished();
+                    SetXFormFont(formUnchecked);
+
+                    var ap = new PdfDictionary(_document);
+                    var nDict = new PdfDictionary(_document);
+                    ap.Elements.SetValue("/N", nDict);
+                    // the names /Off and /Yes should be used according to the spec (1.7, 12.7.4.2.3)
+                    nDict.Elements["/Yes"] = formChecked.PdfForm.Reference;
+                    nDict.Elements["/Off"] = formUnchecked.PdfForm.Reference;
+                    widget.Elements[PdfAnnotation.Keys.AP] = ap;
+                    widget.Elements.SetName(PdfAnnotation.Keys.AS, Checked ? "/Yes" : "/Off");   // set appearance state
                 }
             }
         }
-#endif
+
+        internal override void PrepareForSave()
+        {
+            base.PrepareForSave();
+            RenderAppearance();
+        }
 
         /// <summary>
         /// Gets or sets the name of the dictionary that represents the Checked state.
@@ -346,8 +170,15 @@ namespace PdfSharp.Pdf.AcroForms
         public new class Keys : PdfButtonField.Keys
         {
             /// <summary>
-            /// (Optional; inheritable; PDF 1.4) A text string to be used in place of the V entry for the
-            /// value of the field.
+            /// (Optional; inheritable; PDF 1.4) An array containing one entry for each 
+            /// widget annotation in the Kids array of the radio button or check box field.
+            /// Each entry shall be a text string representing the on state of the
+            /// corresponding widget annotation.<br></br>
+            /// When this entry is present, the names used to represent the on state in the
+            /// AP dictionary of each annotation may use numerical position (starting with 0)
+            /// of the annotation in the Kids array, encoded as a name object (for example: /0, /1).<br></br>
+            /// This allows distinguishing between the annotations even if two or more of them
+            /// have the same value in the Opt array.
             /// </summary>
             [KeyInfo(KeyType.TextString | KeyType.Optional)]
             public const string Opt = "/Opt";

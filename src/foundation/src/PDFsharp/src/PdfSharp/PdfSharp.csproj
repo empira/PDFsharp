@@ -67,4 +67,19 @@
     <EmbeddedResource Include="Resources\sRGB2014.icc" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Fonts\StandardFonts\FontResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>FontResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Fonts\StandardFonts\FontResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>FontResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

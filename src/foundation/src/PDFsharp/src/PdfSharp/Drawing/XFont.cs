@@ -34,6 +34,21 @@ namespace PdfSharp.Drawing
     public sealed class XFont
     {
         /// <summary>
+        /// Creates a new XFont based on an existing XFont with the specified emSize and options.
+        /// </summary>
+        /// <param name="existingFont"></param>
+        /// <param name="emSize"></param>
+        /// <param name="pdfOptions"></param>
+        /// <returns></returns>
+        public static XFont FromExisting(XFont existingFont, double emSize, XPdfFontOptions? pdfOptions = null)
+        {
+            return new XFont(existingFont.GlyphTypeface, emSize, pdfOptions ?? existingFont.PdfOptions)
+            {
+                _familyName = existingFont.FamilyName
+            };
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="XFont"/> class.
         /// </summary>
         /// <param name="familyName">Name of the font family.</param>
@@ -765,5 +780,20 @@ namespace PdfSharp.Drawing
         {
             get => Invariant($"font=('{Name2}' {Size:0.##}{(Bold ? " bold" : "")}{(Italic ? " italic" : "")} {GlyphTypeface.StyleSimulations})");
         }
+
+        /// <summary>
+        /// Gets the list of characters supported by this font.<br></br>
+        /// </summary>
+        /// <returns>The list of characters supported by this font</returns>
+        /// <remarks>
+        /// Applications may use <see cref="char.ConvertFromUtf32(int)"/> to convert these values to a valid string.
+        /// </remarks>
+        public HashSet<int> GetSupportedCharacters()
+        {
+            characterSet ??= OpenTypeDescriptor.FontFace.cmap.GetSupportedCharacters();
+            return characterSet;
+        }
+
+        HashSet<int> characterSet = null!;
     }
 }
