@@ -484,6 +484,9 @@ namespace PdfSharp.Pdf
             }
             info.Elements.SetString(PdfDocumentInformation.Keys.Producer, producer);
 
+            // Prepare AcroForm. Must occur BEFORE preparing the Fonts !
+            Catalog.AcroForm?.PrepareForSave();
+
             // Prepare used fonts.
             _fontTable?.PrepareForSave();
 
@@ -711,7 +714,52 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Get the AcroForm dictionary.
         /// </summary>
-        public PdfAcroForm AcroForm => Catalog.AcroForm;
+        public PdfAcroForm? AcroForm => Catalog.AcroForm;
+
+        /// <summary>
+        /// Imports the fields from the specified <see cref="PdfAcroForm"/> into the current document.<br></br>
+        /// If the current document does not contain an AcroForm, a new one is created automatically.<br></br>
+        /// This method should be called <b>after</b> importing pages into the current document.
+        /// </summary>
+        /// <param name="remoteForm">The <see cref="AcroForm"/> to import</param>
+        /// <param name="fieldFilter">A method that allows filtering the fields to import.<br></br>
+        /// It receives the field to import from the remote AcroForm as a parameter.<br></br>
+        /// When the method returns true, the field is imported, otherwise the field (and all childs of that field) is skipped</param>
+        /// <param name="fieldHandler">A method that allows modifying a field after it was imported.<br></br>
+        /// It receives the original (remote) field and the imported (local) field as parameters.</param>
+        /// <remarks>
+        /// While importing, the new fields may be renamed, if a field with the same name is already present.<br></br>
+        /// The new field receives a number-suffix in this case, starting at 2.<br></br>
+        /// i.e. if the new field has the name <b>myField</b> and there is already a field <b>myField</b> present,
+        /// the new field is renamed to <b>myField2</b>.<br></br>
+        /// If more fields with the same name are imported, the number-suffix will increase automatically.<br></br>
+        /// This is useful when merging multiple versions of the same document. (e.g.with different field-values)
+        /// </remarks>
+        public void ImportAcroForm(PdfAcroForm remoteForm,
+            Func<PdfAcroField, bool>? fieldFilter = null,
+            Action<PdfAcroField, PdfAcroField>? fieldHandler = null)
+        {
+            var importer = new PdfAcroFormImporter(this);
+            importer.ImportAcroForm(remoteForm, fieldFilter, fieldHandler);
+        }
+
+        /// <summary>
+        /// Gets the existing <see cref="PdfAcroForm"/> or creates a new one, if there is no <see cref="PdfAcroForm"/> in the current document
+        /// </summary>
+        /// <returns>The <see cref="PdfAcroForm"/> associated with this document</returns>
+        public PdfAcroForm GetOrCreateAcroForm()
+        {
+            var form = AcroForm;
+            if (form == null)
+            {
+                form = new PdfAcroForm(this);
+                IrefTable.Add(new PdfReference(form));
+                if (form.Reference != null)
+                    form.Reference.Document = this;
+                Catalog.AcroForm = form;
+            }
+            return form;
+        }
 
         /// <summary>
         /// Gets or sets the default language of the document.
@@ -884,14 +932,12 @@ namespace PdfSharp.Pdf
             => Internals.Catalog.Names.AddEmbeddedFile(name, stream);
 
         /// <summary>
-        /// Flattens a document (make the fields non-editable).
+        /// Flattens the AcroField's widget annotations of this document.<br></br>
+        /// Other annotations are unaffected.
         /// </summary>
-        public void Flatten()
+        public void FlattenAcroForm()
         {
-            for (int idx = 0; idx < AcroForm.Fields.Count; idx++)
-            {
-                AcroForm.Fields[idx].ReadOnly = true;
-            }
+            AcroForm?.Flatten();
         }
 
         /// <summary>

@@ -145,7 +145,10 @@
     <Compile Include="..\PdfSharp\Fonts.OpenType\OpenTypeFontTables.cs" Link="Fonts.OpenType\OpenTypeFontTables.cs" />
     <Compile Include="..\PdfSharp\Fonts.OpenType\OpenTypeFontWriter.cs" Link="Fonts.OpenType\OpenTypeFontWriter.cs" />
     <Compile Include="..\PdfSharp\Fonts.OpenType\TableDirectoryEntry.cs" Link="Fonts.OpenType\TableDirectoryEntry.cs" />
-    <Compile Include="..\PdfSharp\Fonts\AdobeGlyphList20.cs" Link="Fonts\AdobeGlyphList20.cs" />
+	<Compile Include="..\PdfSharp\Fonts\StandardFonts\StandardFontData.cs" Link="Fonts\StandardFonts\StandardFontData.cs" />
+	<Compile Include="..\PdfSharp\Fonts\StandardFonts\StandardFontNames.cs" Link="Fonts\StandardFonts\StandardFontNames.cs" />
+	<Compile Include="..\PdfSharp\Fonts\StandardFonts\StandardFontResolver.cs" Link="Fonts\StandardFonts\StandardFontResolver.cs" />
+	<Compile Include="..\PdfSharp\Fonts\AdobeGlyphList20.cs" Link="Fonts\AdobeGlyphList20.cs" />
     <Compile Include="..\PdfSharp\Fonts\AdobeGlyphListForNewFonts.cs" Link="Fonts\AdobeGlyphListForNewFonts.cs" />
     <Compile Include="..\PdfSharp\Fonts\CMapInfo.cs" Link="Fonts\CMapInfo.cs" />
     <Compile Include="..\PdfSharp\Fonts\CodePointGlyphIndexPair.cs" Link="Fonts\CodePointGlyphIndexPair.cs" />
@@ -171,6 +174,7 @@
     <Compile Include="..\PdfSharp\Internal\ErrorHelpers.cs" Link="Internal\ErrorHelpers.cs" />
     <Compile Include="..\PdfSharp\Internal\Globals.cs" Link="Internal\Globals.cs" />
     <Compile Include="..\PdfSharp\Internal\Lock.cs" Link="Internal\Lock.cs" />
+	<Compile Include="..\PdfSharp\Internal\StringExtensions.cs" Link="Internal\StringExtensions.cs" />
     <Compile Include="..\PdfSharp\Internal\NativeMethods.cs" Link="Internal\NativeMethods.cs" />
     <Compile Include="..\PdfSharp\Internal\PsMsgs.cs" Link="Internal\PsMsgs.cs" />
     <Compile Include="..\PdfSharp\Internal\PsMsg.cs" Link="Internal\PsMsg.cs" />
@@ -178,9 +182,19 @@
     <Compile Include="..\PdfSharp\Internal\TokenizerHelper.cs" Link="Internal\TokenizerHelper.cs" />
     <Compile Include="..\PdfSharp\Logging\LogMessages.cs" Link="Logging\LogMessages.cs" />
     <Compile Include="..\PdfSharp\Logging\PdfSharpLogHost.cs" Link="PdfSharpLogHost.cs" />
-    <Compile Include="..\PdfSharp\Pdf.AcroForms\enums\PdfAcroFieldFlags.cs" Link="Pdf.AcroForms\enums\PdfAcroFieldFlags.cs" />
-    <Compile Include="..\PdfSharp\Pdf.AcroForms\PdfAcroField.cs" Link="Pdf.AcroForms\PdfAcroField.cs" />
-    <Compile Include="..\PdfSharp\Pdf.AcroForms\PdfAcroForm.cs" Link="Pdf.AcroForms\PdfAcroForm.cs" />
+	<Compile Include="..\PdfSharp\Pdf.AcroForms\enums\PdfAcroFieldFlags.cs" Link="Pdf.AcroForms\enums\PdfAcroFieldFlags.cs" />
+	<Compile Include="..\PdfSharp\Pdf.AcroForms\enums\PdfAcroFieldTextAlignment.cs" Link="Pdf.AcroForms\enums\PdfAcroFieldTextAlignment.cs" />
+	<Compile Include="..\PdfSharp\Pdf.AcroForms\Rendering\PdfAcroFieldRenderer.cs" Link="Pdf.AcroForms\Rendering\PdfAcroFieldRenderer.cs" />
+	<Compile Include="..\PdfSharp\Pdf.AcroForms\Rendering\PdfCheckBoxFieldRenderer.cs" Link="Pdf.AcroForms\Rendering\PdfCheckBoxFieldRenderer.cs" />
+	<Compile Include="..\PdfSharp\Pdf.AcroForms\Rendering\PdfComboBoxFieldRenderer.cs" Link="Pdf.AcroForms\Rendering\PdfComboBoxFieldRenderer.cs" />
+	<Compile Include="..\PdfSharp\Pdf.AcroForms\Rendering\PdfListBoxFieldRenderer.cs" Link="Pdf.AcroForms\Rendering\PdfListBoxFieldRenderer.cs" />
+	<Compile Include="..\PdfSharp\Pdf.AcroForms\Rendering\PdfPushButtonFieldRenderer.cs" Link="Pdf.AcroForms\Rendering\PdfPushButtonFieldRenderer.cs" />
+	<Compile Include="..\PdfSharp\Pdf.AcroForms\Rendering\PdfRadioButtonFieldRenderer.cs" Link="Pdf.AcroForms\Rendering\PdfRadioButtonFieldRenderer.cs" />
+	<Compile Include="..\PdfSharp\Pdf.AcroForms\Rendering\PdfSignatureFieldRenderer.cs" Link="Pdf.AcroForms\Rendering\PdfSignatureFieldRenderer.cs" />
+	<Compile Include="..\PdfSharp\Pdf.AcroForms\Rendering\PdfTextFieldRenderer.cs" Link="Pdf.AcroForms\Rendering\PdfTextFieldRenderer.cs" />	  
+	<Compile Include="..\PdfSharp\Pdf.AcroForms\PdfAcroField.cs" Link="Pdf.AcroForms\PdfAcroField.cs" />
+	<Compile Include="..\PdfSharp\Pdf.AcroForms\PdfAcroForm.cs" Link="Pdf.AcroForms\PdfAcroForm.cs" />
+	<Compile Include="..\PdfSharp\Pdf.AcroForms\PdfAcroFormImporter.cs" Link="Pdf.AcroForms\PdfAcroFormImporter.cs" />
     <Compile Include="..\PdfSharp\Pdf.AcroForms\PdfButtonField.cs" Link="Pdf.AcroForms\PdfButtonField.cs" />
     <Compile Include="..\PdfSharp\Pdf.AcroForms\PdfCheckBoxField.cs" Link="Pdf.AcroForms\PdfCheckBoxField.cs" />
     <Compile Include="..\PdfSharp\Pdf.AcroForms\PdfChoiceField.cs" Link="Pdf.AcroForms\PdfChoiceField.cs" />
@@ -243,11 +257,15 @@
     <Compile Include="..\PdfSharp\Pdf.Advanced\PdfType0Font.cs" Link="Pdf.Advanced\PdfType0Font.cs" />
     <Compile Include="..\PdfSharp\Pdf.Advanced\PdfType1Font.cs" Link="Pdf.Advanced\PdfType1Font.cs" />
     <Compile Include="..\PdfSharp\Pdf.Advanced\PdfXObject.cs" Link="Pdf.Advanced\PdfXObject.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Annotations\enums\PdfAnnotationBorderStyle.cs" Link="Pdf.Annotations\enums\PdfAnnotationBorderStyle.cs" />
     <Compile Include="..\PdfSharp\Pdf.Annotations\enums\PdfAnnotationFlags.cs" Link="Pdf.Annotations\enums\PdfAnnotationFlags.cs" />
-    <Compile Include="..\PdfSharp\Pdf.Annotations\enums\PdfRubberStampAnnotationIcon.cs" Link="Pdf.Annotations\enums\PdfRubberStampAnnotationIcon.cs" />
+	<Compile Include="..\PdfSharp\Pdf.Annotations\enums\PdfAnnotationHighlightingMode.cs" Link="Pdf.Annotations\enums\PdfAnnotationHighlightingMode.cs" />
+	<Compile Include="..\PdfSharp\Pdf.Annotations\enums\PdfButtonCaptionPosition.cs" Link="Pdf.Annotations\enums\PdfButtonCaptionPosition.cs" />
+	<Compile Include="..\PdfSharp\Pdf.Annotations\enums\PdfRubberStampAnnotationIcon.cs" Link="Pdf.Annotations\enums\PdfRubberStampAnnotationIcon.cs" />
     <Compile Include="..\PdfSharp\Pdf.Annotations\enums\PdfTextAnnotationIcon.cs" Link="Pdf.Annotations\enums\PdfTextAnnotationIcon.cs" />
     <Compile Include="..\PdfSharp\Pdf.Annotations\IAnnotationAppearanceHandler.cs" Link="Pdf.Annotations\IAnnotationAppearanceHandler.cs" />
     <Compile Include="..\PdfSharp\Pdf.Annotations\PdfAnnotation.cs" Link="Pdf.Annotations\PdfAnnotation.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Annotations\PdfAnnotationBorder.cs" Link="Pdf.Annotations\PdfAnnotationBorder.cs" />
     <Compile Include="..\PdfSharp\Pdf.Annotations\PdfAnnotations.cs" Link="Pdf.Annotations\PdfAnnotations.cs" />
     <Compile Include="..\PdfSharp\Pdf.Annotations\PdfGenericAnnotation.cs" Link="Pdf.Annotations\PdfGenericAnnotation.cs" />
     <Compile Include="..\PdfSharp\Pdf.Annotations\PdfLinkAnnotation.cs" Link="Pdf.Annotations\PdfLinkAnnotation.cs" />
@@ -420,5 +438,20 @@
   <ItemGroup>
     <EmbeddedResource Include="..\PdfSharp\Resources\sRGB2014.icc" Link="Resources\sRGB2014.icc" />
   </ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="..\PdfSharp\Fonts\StandardFonts\FontResources.Designer.cs" Link="Fonts\StandardFonts\FontResources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>FontResources.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="..\PdfSharp\Fonts\StandardFonts\FontResources.resx" Link="Fonts\StandardFonts\FontResources.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>FontResources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
 
 </Project>

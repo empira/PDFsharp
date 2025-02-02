@@ -12,7 +12,8 @@ namespace PdfSharp.Pdf.Signatures
     public class DigitalSignatureOptions()
     {
         /// <summary>
-        /// Gets or sets the appearance handler that draws the visual representation of the signature in the PDF.
+        /// Gets or sets the appearance handler that draws the visual representation of the signature in the PDF.<br></br>
+        /// This overrides the <see cref="AcroForms.Rendering.PdfAcroFieldRenderer.SignatureFieldRenderer"/> in <see cref="AcroForms.PdfAcroForm.FieldRenderer"/>
         /// </summary>
         public IAnnotationAppearanceHandler? AppearanceHandler { get; init; }
 

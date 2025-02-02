@@ -18,6 +18,15 @@ namespace PdfSharp.Pdf.Advanced
             : base(document)
         { }
 
+        internal PdfFont(PdfDictionary dict, PdfFontDescriptor fontDescriptor, PdfFontEncoding encoding)
+            :base(dict)
+        {
+            FontDescriptor = fontDescriptor;
+            FontEncoding = encoding;
+            _cmapInfo = new CMapInfo(fontDescriptor.Descriptor);
+            _toUnicodeMap = new PdfToUnicodeMap(Owner);
+        }
+
         internal PdfFontDescriptor FontDescriptor
         {
             get

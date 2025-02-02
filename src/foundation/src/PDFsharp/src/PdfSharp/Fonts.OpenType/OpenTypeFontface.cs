@@ -78,7 +78,7 @@ namespace PdfSharp.Fonts.OpenType
             _fullFaceName = name.FullFontName;
         }
 
-        public static OpenTypeFontFace CetOrCreateFrom(XFontSource fontSource)
+        public static OpenTypeFontFace GetOrCreateFrom(XFontSource fontSource)
         {
             if (OpenTypeFontFaceCache.TryGetFontFace(fontSource.Key, out var fontFace))
                 return fontFace;
@@ -398,7 +398,7 @@ namespace PdfSharp.Fonts.OpenType
         {
             // Do not create a subset?
             // No loca table means font has postscript outline.
-            if (_fontEmbedding == PdfFontEmbedding.EmbedCompleteFontFile || loca == null!)
+            if (glyphs.Count == 0 || _fontEmbedding == PdfFontEmbedding.EmbedCompleteFontFile || loca == null!)
                 return this;
 
             // Create new font image.
