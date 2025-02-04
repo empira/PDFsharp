@@ -13,7 +13,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfCustomValue()
         {
-            CreateStream(new byte[] { });
+            CreateStream([]);
         }
 
         /// <summary>
@@ -27,13 +27,13 @@ namespace PdfSharp.Pdf
         internal PdfCustomValue(PdfDocument document)
             : base(document)
         {
-            CreateStream(new byte[] { });
+            CreateStream([]);
         }
 
         internal PdfCustomValue(PdfDictionary dict)
             : base(dict)
         {
-            // TODO: uncompress stream
+            // TODO_OLD: uncompress stream
         }
 
         /// <summary>

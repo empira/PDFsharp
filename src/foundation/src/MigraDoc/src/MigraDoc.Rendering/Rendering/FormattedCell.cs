@@ -19,7 +19,7 @@ namespace MigraDoc.Rendering
             _fieldInfos = fieldInfos;
             _yOffset = yOffset;
             _xOffset = xOffset;
-            _bordersRenderer = new BordersRenderer(cellBorders, null!);  // BUG null
+            _bordersRenderer = new BordersRenderer(cellBorders, null!);  // BUG_OLD null
             _documentRenderer = documentRenderer;
         }
 

@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Logging;
 using PdfSharp.Drawing;
 using PdfSharp.Logging;
+using System.Runtime.InteropServices;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member because it is UNDER CONSTRUCTION.
 
@@ -49,6 +50,7 @@ namespace PdfSharp
     {
         static Capabilities()
         {
+            _ = PdfSharp.Internal.FooBarEnum3.xxx;
 #if DEBUG_
             var x = Capabilities.IsAvailable.GlyphsToPathFrom(new XFontFamily("test"));
 
@@ -68,8 +70,8 @@ namespace PdfSharp
             PdfSharpLogHost.Logger.LogInformation("All PDFsharp capability settings are about to be reset.");
 
             Action.GlyphsToPath = FeatureNotAvailableBehavior.SilentlyIgnore;
-            
-            // ... TODO
+
+            // ... TODO_OLD
         }
 
         /// <summary>
@@ -91,11 +93,11 @@ namespace PdfSharp
             //#elif MAUI
             //                => "MAUI";
 #else
-                => "<unkown>";  // Cannot happen.
+                => "<unknown>";  // Cannot happen.
 #endif
 
             /// <summary>
-            /// Gets a value indicating whether this instance is PDFsharp CORE build.
+            /// Gets a value indicating whether this instance is PDFsharp Core build.
             /// </summary>
             public static bool IsCoreBuild
 #if CORE
@@ -125,7 +127,7 @@ namespace PdfSharp
 #endif
 
             /// <summary>
-            /// Gets a 3-character abbreviation preceded with a dash of the current
+            /// Gets an up to 4-character abbreviation preceded with a dash of the current
             /// build flavor system.
             /// Valid return values are '-core', '-gdi', '-wpf', or '-xxx'
             /// if the platform is not known.
@@ -140,18 +142,40 @@ namespace PdfSharp
 #else
                 => "-xxx";
 #endif
-
+            /// <summary>
+            /// Gets the .NET version number PDFsharp was built with.
+            /// </summary>
             public static string Framework
-#if NET6_0_OR_GREATER
+#if NET11_0_OR_GREATER
+                => "11.0";
+#elif NET10_0_OR_GREATER
+                => "10.0";
+#elif NET9_0_OR_GREATER
+                => "9.0";
+#elif NET8_0_OR_GREATER
+                => "8.0";
+#elif NET7_0_OR_GREATER
+                => "7.0";
+#elif NET6_0_OR_GREATER
                 => "6.0";
-#else
+#elif NET481
+                => "4.8";
+#elif NET472
                 => "4.7";
+#elif NET462
+                => "4.6";
+#elif NETSTANDARD2_1
+                => "2.1";
+#elif NETSTANDARD2_0
+                => "2.0";
+#else
+                => "0.0";
 #endif
         }
 
         /// <summary>
         /// Access to information about the currently running operating system.
-        /// The functionality supersede functions that are partially not available
+        /// The functionality supersedes functions that are partially not available
         /// in .NET Framework / Standard.
         /// </summary>
         public static class OperatingSystem
@@ -159,17 +183,46 @@ namespace PdfSharp
             /// <summary>
             /// Indicates whether the current application is running on Windows.
             /// </summary>
-            public static bool IsWindows => Environment.OSVersion.Platform == PlatformID.Win32NT;
+            public static bool IsWindows =>
+                _isWindows ??= RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            private static bool? _isWindows;
 
             /// <summary>
             /// Indicates whether the current application is running on Linux.
             /// </summary>
-            public static bool IsLinux => Environment.OSVersion.Platform == PlatformID.Unix;
+            public static bool IsLinux =>
+                _isLinux ??= RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+            private static bool? _isLinux;
+
+            /// <summary>
+            /// Indicates whether the current application is running on OSX.
+            /// </summary>
+            public static bool IsOSX =>
+                _isOSX ??= RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+            private static bool? _isOSX;
+
+#if NET6_0_OR_GREATER
+            /// <summary>
+            /// Indicates whether the current application is running on FreeBSD.
+            /// </summary>
+            public static bool IsFreeBSD =>
+                _isFreeBSD ??= RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD);
+            private static bool? _isFreeBSD;
+#endif
 
             /// <summary>
             /// Indicates whether the current application is running on WSL2.
             /// If IsWsl2 is true, IsLinux also is true.
             /// </summary>
+#if true
+            public static bool IsWsl2 =>
+                _isWsl2 ??= IsLinux &&
+                Environment.GetEnvironmentVariable("WSL_DISTRO_NAME") != null;
+            private static bool? _isWsl2;
+            // New implementation checking Environment.GetEnvironmentVariable("WSL_DISTRO_NAME").
+            // Checking WSL_DISTRO_NAME seems to be the best way to check whether we are under WSL2.
+#else
+            // KEEP Old implementation using Directory.Exists("/mnt/c/Windows").
             public static bool IsWsl2
             {
                 get
@@ -177,31 +230,37 @@ namespace PdfSharp
                     if (IsLinux)
                     {
                         // The source code of WPF contains hard-coded "C:\Windows".
-                        // So this directory is caved in stone forever.
+                        // So this directory is carved in stone forever.
                         return Directory.Exists("/mnt/c/Windows");
                     }
                     return false;
                 }
             }
+#endif
 
             /// <summary>
             /// Gets a 3-character abbreviation of the current operating system.
-            /// Valid return values are 'WIN', 'WSL', 'LNX', 'OSX',
-            /// or 'xxx' if the platform is not known.
+            /// Valid return values are 'WIN', 'WSL', 'LNX', 'OSX', 'BSD',
+            /// or 'XXX' if the platform is not known.
             /// </summary>
             // ReSharper disable once InconsistentNaming
             public static string OSAbbreviation
             {
                 get
                 {
-                    return Environment.OSVersion.Platform switch
-                    {
-                        PlatformID.Win32NT => "WIN",
-                        PlatformID.Unix => IsWsl2 ? "WSL" : "LNX",
-                        PlatformID.MacOSX => "OSX",
-                        // IOS, MOS???
-                        _ => "XXX"
-                    };
+                    if (IsWindows)
+                        return "WIN";
+                    if (IsWsl2) // IsLinux is also true for IsWsl2.
+                        return "WSL";
+                    if (IsLinux)
+                        return "LNX";
+                    if (IsOSX)
+                        return "OSX";
+#if NET6_0_OR_GREATER
+                    if (IsFreeBSD)
+                        return "BSD";
+#endif
+                    return "XXX";
                 }
             }
 
@@ -219,12 +278,12 @@ namespace PdfSharp
         {
             // Converting the outline of the glyphs of a string into a graphical path is possible,
             // not very difficult to implement, but work that must be done for something presumably
-            // nobody really needs. Therefore, it is not available in a CORE build and if the font
+            // nobody really needs. Therefore, it is not available in a Core build and if the font
             // comes from a font resolver.
 
             /// <summary>
             /// Gets a value indicating whether XPath.AddString is available in this build of PDFsharp.
-            /// It is always false in CORE build. It is true for GDI and WPF builds if the font did not come from a FontResolver.
+            /// It is always false in Core build. It is true for GDI and WPF builds if the font did not come from a FontResolver.
             /// </summary>
             /// <param name="family">The font family.</param>
             public static bool GlyphsToPathFrom(XFontFamily family)

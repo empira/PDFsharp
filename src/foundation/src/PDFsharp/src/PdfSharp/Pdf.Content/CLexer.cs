@@ -110,7 +110,7 @@ namespace PdfSharp.Pdf.Content
         /// </summary>
         public CSymbol ScanInlineImage()
         {
-            // TODO: Implement inline images.
+            // TODO_OLD: Implement inline images.
             // Skip this:
             // BI
             // … Key-value pairs …
@@ -122,7 +122,7 @@ namespace PdfSharp.Pdf.Content
             do
             {
                 ScanNextToken();
-                // HACK: Is image ASCII85 decoded?
+                // HACK_OLD: Is image ASCII85 decoded?
                 if (!ascii85 && Symbol == CSymbol.Name && Token is "/ASCII85Decode" or "/A85")
                     ascii85 = true;
             } while (Symbol != CSymbol.Operator || Token != "ID");
@@ -173,7 +173,7 @@ namespace PdfSharp.Pdf.Content
                 if (ch == '#')
                 {
                     ScanNextChar();
-#if true
+
                     var newChar = (_currChar switch
                     {
                         >= '0' and <= '9' => _currChar - '0',
@@ -195,21 +195,12 @@ namespace PdfSharp.Pdf.Content
                         PdfSharpLogHost.Logger.LogError("Illegal character {char} in hex string.", ch);
                         return '\0';
                     }
-#else
-                    char[] hex = new char[2];
-                    hex[0] = _currChar;
-                    hex[1] = _nextChar;
-                    ScanNextChar();
-                    // TODO Check syntax
-                    ch = (char)(ushort)Int32.Parse(new string(hex), NumberStyles.AllowHexSpecifier);
-                    _currChar = ch;
-#endif
                 }
             }
 
             var name = Token;
             // Check token for UTF-8 encoding.
-            for (int idx = 0; idx < name.Length; ++idx)
+            for (int idx = 0; idx < name.Length; idx++)
             {
                 // If the two top most significant bits are set this identifies a 2, 3, or 4
                 // byte UTF-8 encoding sequence.
@@ -218,7 +209,7 @@ namespace PdfSharp.Pdf.Content
                     // Special characters in Name objects use UTF-8 encoding.
                     var length = name.Length;
                     var bytes = new byte[length];
-                    for (int idx2 = 0; idx2 < length; ++idx2)
+                    for (int idx2 = 0; idx2 < length; idx2++)
                         bytes[idx2] = (byte)name[idx2];
 
                     var decodedName = Encoding.UTF8.GetString(bytes);
@@ -235,7 +226,7 @@ namespace PdfSharp.Pdf.Content
         /// </summary>
         protected CSymbol ScanDictionary()
         {
-            // TODO Do an actual recursive parse instead of this simple scan.
+            // TODO_OLD Do an actual recursive parse instead of this simple scan.
 
             ClearToken();
             _token.Append(_currChar);      // '<'
@@ -405,7 +396,6 @@ namespace PdfSharp.Pdf.Content
             return Symbol = CSymbol.Operator;
         }
 
-        // TODO        
         /// <summary>
         /// Scans a literal string.
         /// </summary>
@@ -452,7 +442,7 @@ namespace PdfSharp.Pdf.Content
 
                         case '\\':
                             {
-                                // TODO: not sure that this is correct...
+                                // TODO_OLD: not sure that this is correct...
                                 ch = ScanNextChar();
                                 switch (ch)
                                 {
@@ -532,7 +522,7 @@ namespace PdfSharp.Pdf.Content
             else if (ch == '\xFF' && _nextChar == '\xFE')  // Little endian?
             {
                 // Is this possible?
-                Debug.Assert(false, "Found UTF-16 LE string. Please send us the PDF file and we will fix it (issues (at) pdfsharp.net).");
+                Debug.Assert(false, "Found UTF-16LE string. Please send us the PDF file and we will fix it (issues (at) pdfsharp.net).");
                 return Symbol = CSymbol.None;
             }
             else

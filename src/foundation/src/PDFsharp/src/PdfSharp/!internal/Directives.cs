@@ -27,9 +27,9 @@
 #elif CORE
 // PDFsharp independent of any particular .NET library.
 
-#elif UWP
+#elif WUI
 // PDFsharp based on 'Windows Universal Platform'.
-#error UWP is not supported anymore
+#error WUI is not supported anymore
 #else
 #error Either 'CORE', 'GDI', or 'WPF' must be defined.
 #endif

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netstandard2.0;net472</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0;net462;netstandard2.0</TargetFrameworks>
     <RootNamespace>MigraDoc</RootNamespace>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
@@ -15,11 +15,11 @@
     <DefineConstants>;</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net462|AnyCPU'">
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net462|AnyCPU'">
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
 
@@ -31,25 +31,12 @@
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
 
-    <ItemGroup>
-        <Compile Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-    <None Remove="DocumentObjectModel.Resources\Messages.de.restext" />
-    <None Remove="DocumentObjectModel.Resources\Messages.restext" />
-  </ItemGroup>
-
-  <!--<ItemGroup>
-    <Compile Include="..\..\..\PDFsharp\src\PdfSharp\Internal\LogMessages.cs" Link="DocumentObjectModel.Internals\LogMessages.cs" />
-  </ItemGroup>-->
-
   <ItemGroup>
-    <EmbeddedResource Include="DocumentObjectModel.Resources\Messages.de.restext" />
-    <EmbeddedResource Include="DocumentObjectModel.Resources\Messages.restext" />
+      <Compile Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.Shared\PdfSharp.Shared.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
   </ItemGroup>
 

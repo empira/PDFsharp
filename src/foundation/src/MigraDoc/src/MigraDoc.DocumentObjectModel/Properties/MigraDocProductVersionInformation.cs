@@ -1,12 +1,14 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
+#pragma warning disable 0436
+
 namespace MigraDoc
 {
     /// <summary>
     /// Version information for all MigraDoc related assemblies.
     /// </summary>
-    // TODO: These literals are not completely in sync with the NuGet meta data. Should be reviewed and fixed.
+    // TODO_OLD: These literals are not completely in sync with the NuGet metadata. Should be reviewed and fixed.
     public static class MigraDocProductVersionInformation
     {
         // Cannot use const string anymore because GitVersionInformation used static string.

@@ -4,8 +4,8 @@
 using System.Diagnostics;
 using FluentAssertions;
 using PdfSharp.Drawing;
-using PdfSharp.FontResolver;
 using PdfSharp.Fonts;
+using PdfSharp.Quality;
 using Xunit;
 
 namespace PdfSharp.Tests.Fonts

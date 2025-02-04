@@ -1,4 +1,4 @@
-# Fonts
+ï»¿# Fonts
 
 **This document is under construction**
 
@@ -112,7 +112,7 @@ The class **XGlyphTypeface** specifies a physical font face that corresponds to 
 While a **XFont** or a **XTypeface** specifiy what you want to get from the font resolver, a **XGlypeTypeface** identifies
 what you actually get. For instance, when you specify you want to get an italic typeface of a particular font family, you may
 actually get a font face of a non-italic physical font, but the **XGlyphTypeface** specifies that the italic style is simulated
-by skewing characters from the font face by 20°.
+by skewing characters from the font face by 20ï¿½.
 The concept was taken from WPF.
 
 
@@ -123,7 +123,7 @@ PDFsharp only supports TrueType font files. TrueType font collections and OpenTy
 
 ### XStyleSimulations
 The class **XStyleSimulation** describes the simulation style of a font.
-Bold, Italic, or both can be simulated for a font that doesn’t have these faces physically.
+Bold, Italic, or both can be simulated for a font that doesnï¿½t have these faces physically.
 The concept was taken from WPF.
 PDFsharp only simules the italic face by sloping the font 20 degrees to the right.
 

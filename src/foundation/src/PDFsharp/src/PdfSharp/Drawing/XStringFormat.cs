@@ -47,7 +47,7 @@ namespace PdfSharp.Drawing
         public XStringFormat()
         { }
 
-        //TODO public StringFormat(StringFormat format);
+        //TODO_OLD public StringFormat(StringFormat format);
         //public StringFormat(StringFormatFlags options);
         //public StringFormat(StringFormatFlags options, int language);
         //public object Clone();

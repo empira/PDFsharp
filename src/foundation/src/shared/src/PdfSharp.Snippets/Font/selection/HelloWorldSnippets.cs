@@ -31,7 +31,7 @@ using System.Drawing;
 using System.Windows;
 using System.Windows.Media;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media;
 #endif
 using PdfSharp.Drawing;

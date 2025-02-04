@@ -272,17 +272,30 @@ namespace PdfSharp.Pdf.IO
         {
             try
             {
-#if !USE_LONG_SIZE
-                if (/*sizeof(SizeType) == 4 &&*/ stream.Length > Int32.MaxValue)
-                    throw new PdfReaderException(
-                        $"PDF document with size {stream.Length} cannot be opened with a 32-bit size type. " +
-                        "Recompile PDFsharp with USE_LONG_SIZE set in Directory.Build.targets");
-#endif
+                if (!stream.CanRead)
+                    throw new PdfReaderException("PdfReader needs a stream that supports reading.");
+                if (!stream.CanSeek)
+                    throw new PdfReaderException("PdfReader needs a stream that supports seeking.");
+
                 var lexer = new Lexer(stream, _logger);
                 _document = new PdfDocument(lexer);
                 _document._state |= DocumentState.Imported;
                 _document._openMode = openMode;
-                _document._fileSize = stream.Length;
+
+                try
+                {
+#if !USE_LONG_SIZE
+                    if (/*sizeof(SizeType) == 4 &&*/ stream.Length > Int32.MaxValue)
+                        throw new PdfReaderException(
+                            Invariant($"PDF document with size {stream.Length} cannot be opened with a 32-bit size type. ") +
+                            "Recompile PDFsharp with USE_LONG_SIZE set in Directory.Build.targets");
+#endif
+                    _document.FileSize = stream.Length;
+                }
+                catch (Exception ex)
+                {
+                    throw new PdfReaderException("PdfReader needs a stream that supports the Length property.", ex);
+                }
 
                 // Get file version.
                 byte[] header = new byte[1024];
@@ -290,7 +303,7 @@ namespace PdfSharp.Pdf.IO
                 var _ = stream.Read(header, 0, 1024);
                 _document._version = GetPdfFileVersion(header);
                 if (_document._version == 0)
-                    throw new InvalidOperationException(PSSR.InvalidPdf);
+                    throw new InvalidOperationException(PsMsgs.InvalidPdf);
 
                 // Set IsUnderConstruction for IrefTable to true. This allows Parser.ParseObject() to insert placeholder references for objects not yet known.
                 // This is necessary for documents with objects saved in objects streams, which are read and decoded after reading the file level PdfObjects.
@@ -303,7 +316,7 @@ namespace PdfSharp.Pdf.IO
                 _document.Trailer = parser.ReadTrailer();
                 if (_document.Trailer == null!)
                     ParserDiagnostics.ThrowParserException(
-                        "Invalid PDF file: no trailer found."); // TODO L10N using PSSR.
+                        "Invalid PDF file: no trailer found."); // TODO_OLD L10N using PsMsgs
                 // References available by now: All references to file-level objects.
                 // Reference.Values available by now: All trailers and cross-reference streams (which are not encrypted by definition). 
 
@@ -340,9 +353,9 @@ namespace PdfSharp.Pdf.IO
                         else
                         {
                             if (password == null)
-                                throw new PdfReaderException(PSSR.PasswordRequired);
+                                throw new PdfReaderException(PsMsgs.PasswordRequired);
                             else
-                                throw new PdfReaderException(PSSR.InvalidPassword);
+                                throw new PdfReaderException(PsMsgs.InvalidPassword);
                         }
                     }
                     else if (validity == PasswordValidity.UserPassword && openMode == PdfDocumentOpenMode.Modify)
@@ -357,7 +370,7 @@ namespace PdfSharp.Pdf.IO
                             goto TryAgain;
                         }
                         else
-                            throw new PdfReaderException(PSSR.OwnerPasswordRequired);
+                            throw new PdfReaderException(PsMsgs.OwnerPasswordRequired);
                     }
                     // ReSharper restore RedundantIfElseBlock
                 }
@@ -389,7 +402,7 @@ namespace PdfSharp.Pdf.IO
 
                 RereadUnicodeStrings();
 
-#if DEBUG_ // TODO: Delete or rewrite.
+#if DEBUG_ // TODO_OLD: Delete or rewrite.
                 // Some tests...
                 PdfReference[] reachables = document.xrefTable.TransitiveClosure(document.trailer);
                 _ = typeof(int);
@@ -416,7 +429,7 @@ namespace PdfSharp.Pdf.IO
                     if (removed != 0)
                     {
                         //Debug.WriteLine("Number of deleted unreachable objects: " + removed);
-                        PdfSharpLogHost.PdfReadingLogger.LogInformation("Number of deleted unreachable objects: " + removed);
+                        PdfSharpLogHost.PdfReadingLogger.LogInformation("Number of deleted unreachable objects: {Removed}", removed);
                     }
 
                     // Force flattening of page tree.
@@ -498,7 +511,7 @@ namespace PdfSharp.Pdf.IO
 
         void FinishChildReferences(PdfDictionary dictionary, HashSet<PdfObject> finishedObjects)
         {
-            // Dictionary elements are modified inside loop. Avoid "Collection was modified; enumeration operation may not execute" error occuring in net 4.7.2.
+            // Dictionary elements are modified inside loop. Avoid "Collection was modified; enumeration operation may not execute" error occuring in net 4.6.2.
             // There is no way to access KeyValuePairs via index natively to use a for loop with.
             // Instead, enumerate Keys and get value via Elements[key], which shall be O(1).
             foreach (var key in dictionary.Elements.Keys)
@@ -586,7 +599,7 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         void RereadUnicodeStrings()
         {
-            foreach (var pdfReference in _document.IrefTable.ObjectTable.Values)
+            foreach (var pdfReference in _document.IrefTable.Values)
             {
                 var pdfObject = pdfReference.Value;
                 RereadUnicodeStrings(pdfObject);

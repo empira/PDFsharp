@@ -8,7 +8,7 @@ using System.Drawing;
 #if WPF
 using WpfColor = System.Windows.Media.Color;
 #endif
-#if UWP
+#if WUI
 using UwpColor = Windows.UI.Color;
 #endif
 
@@ -112,7 +112,7 @@ namespace PdfSharp.Drawing
         { }
 #endif
 
-#if UWP
+#if WUI
         XColor(UwpColor color)
             : this(color.A, color.R, color.G, color.B)
         { }
@@ -189,7 +189,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if UWP
+#if WUI
         /// <summary>
         /// Creates an XColor structure from the specified Windows.UI.Color.
         /// </summary>
@@ -230,7 +230,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if UWP
+#if WUI
         /// <summary>
         /// Creates an XColor structure from the specified alpha value and color.
         /// </summary>
@@ -313,7 +313,7 @@ namespace PdfSharp.Drawing
             set
             {
                 if (!Enum.IsDefined(typeof(XColorSpace), value))
-                    throw new InvalidEnumArgumentException("value", (int)value, typeof(XColorSpace));
+                    throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(XColorSpace));
                 _cs = value;
             }
         }
@@ -351,7 +351,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if UWP
+#if WUI
         ///<summary>
         /// Creates a Windows.UI.Color object from this color.
         /// </summary>
@@ -756,7 +756,7 @@ namespace PdfSharp.Drawing
         static void CheckByte(int val, string name)
         {
             if (val is < 0 or > 0xFF)
-                throw new ArgumentException(PSSR.InvalidValue(val, name, 0, 255));
+                throw new ArgumentException(PsMsgs.InvalidValue(val, name, 0, 255));
         }
 
         XColorSpace _cs;

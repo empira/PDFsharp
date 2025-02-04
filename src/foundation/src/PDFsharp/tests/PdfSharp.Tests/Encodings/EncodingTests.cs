@@ -135,7 +135,7 @@ namespace PdfSharp.Tests.Encodings
 
             int[] abc = new int[128];
             for (int i = 0, ach = 128; i <= 127; i++, ach++)
-                abc[i] = pdfSharpImplementation.GetChars(new byte[] { (byte)ach }, 0, 1)[0];
+                abc[i] = pdfSharpImplementation.GetChars([(byte)ach], 0, 1)[0];
 
             // Check Unicode chars.
             for (int i = 0; i <= 65535; i++)
@@ -172,6 +172,7 @@ namespace PdfSharp.Tests.Encodings
             }
         }
 
+        // Used test PDFsharp AnsiEncoding against Microsoft code page 1252.
         Encoding? GetDotNetAnsiEncoding()
         {
 #if NET6_0_OR_GREATER

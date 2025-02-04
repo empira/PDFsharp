@@ -27,8 +27,7 @@ namespace PdfSharp.Fonts
     /// <summary>
     /// Default platform specific font resolving.
     /// </summary>
-    public static class 
-        PlatformFontResolver
+    public static class PlatformFontResolver
     {
         /// <summary>
         /// Resolves the typeface by generating a font resolver info.
@@ -63,13 +62,13 @@ namespace PdfSharp.Fonts
             // and look now for the italic typeface, but no such font exists. In this case we get the regular font source
             // and cache it again with the italic typeface key. Furthermore, in glyph typeface style simulation for italic is set.
 #if CORE
-            var resolverInfo = TryCoreBuildFontResolver(familyName, fontResolvingOptions, typefaceKey);
+            var resolverInfo = TryWindowsPlatformFontResolver(familyName, fontResolvingOptions, typefaceKey);
             return resolverInfo;
 #endif
 #if GDI
             var fontSource = CreateFontSource(familyName, fontResolvingOptions, out var gdiFont, typefaceKey);
 
-            if (fontSource == null || gdiFont == null )
+            if (fontSource == null || gdiFont == null)
                 return null;
 #endif
 #if WPF
@@ -79,24 +78,24 @@ namespace PdfSharp.Fonts
             if (fontSource == null || wpfFontFamily == null || wpfTypeface == null || wpfGlyphTypeface == null)
                 return null;
 #endif
-#if UWP
+#if WUI
             //GlyphTypeface wpfGlyphTypeface;
             XFontSource fontSource = null;//CreateFontSource(familyName, isBold, isItalic, out wpfGlyphTypeface, typefaceKey);
 #endif
-#if GDI || WPF || UWP
+#if GDI || WPF || WUI
             // If no such font exists return null. PDFsharp will fail.
             // Re/Sharper disable once ConditionIsAlwaysTrueOrFalse because code is under construction.
             if (fontSource == null)
                 return null;
 
             //#if (CORE || GDI) && !WPF
-            //            // TODO: Support style simulation for GDI+ platform fonts.
+            //            // TODO_OLD: Support style simulation for GDI+ platform fonts.
             //            fontResolverInfo = new PlatformFontResolverInfo(typefaceKey, false, false, gdiFont);
             //#endif
             if (fontResolvingOptions.OverrideStyleSimulations)
             {
 #if GDI
-                // TODO: Support style simulation for GDI+ platform fonts.
+                // TODO_OLD: Support style simulation for GDI+ platform fonts.
                 fontResolverInfo = new PlatformFontResolverInfo(typefaceKey, fontResolvingOptions.MustSimulateBold, fontResolvingOptions.MustSimulateItalic, gdiFont);
 #endif
 #if WPF
@@ -163,7 +162,7 @@ namespace PdfSharp.Fonts
         /// <summary>
         /// Creates an XGlyphTypeface.
         /// </summary>
-        internal static FontResolverInfo? TryCoreBuildFontResolver(string familyName, FontResolvingOptions fontResolvingOptions, string typefaceKey) // #RENAME
+        internal static FontResolverInfo? TryWindowsPlatformFontResolver(string familyName, FontResolvingOptions fontResolvingOptions, string typefaceKey)
         {
             if (String.IsNullOrEmpty(typefaceKey))
                 typefaceKey = XGlyphTypeface.ComputeGtfKey(familyName, fontResolvingOptions);
@@ -175,10 +174,33 @@ namespace PdfSharp.Fonts
             // Was this typeface requested before?
             if (fontResolverInfosByName.TryGetValue(typefaceKey, out var fontResolverInfo))
             {
-                return null!; //todo
+                return null;
             }
 
-            var resolverInfo = CoreBuildFontResolver.ResolveTypeface(familyName, fontResolvingOptions.IsBold, fontResolvingOptions.IsItalic);
+            if (_tryWindowsPlatformFontResolver is null)
+            {
+                if (Capabilities.OperatingSystem.IsWindows)
+                {
+                    _tryWindowsPlatformFontResolver = GlobalFontSettings.UseWindowsFontsUnderWindows;
+                }
+                else if (Capabilities.OperatingSystem.IsLinux)
+                {
+                    if (Capabilities.OperatingSystem.IsWsl2)
+                        _tryWindowsPlatformFontResolver = GlobalFontSettings.UseWindowsFontsUnderWsl2;
+                    else
+                        _tryWindowsPlatformFontResolver = false;
+                }
+                else
+                    _tryWindowsPlatformFontResolver = false;
+            }
+
+            if (_tryWindowsPlatformFontResolver is false)
+            {
+                // No font face found.
+                return null;
+            }
+
+            var resolverInfo = WindowsPlatformFontResolver.ResolveTypeface(familyName, fontResolvingOptions.IsBold, fontResolvingOptions.IsItalic);
             if (resolverInfo == null)
             {
                 // No font face found.
@@ -188,11 +210,17 @@ namespace PdfSharp.Fonts
             var type = resolverInfo.GetType();
             Debug.Assert(resolverInfo is PlatformFontResolverInfo);
 
-            FontFactory.RegisterResolverResult(CoreBuildFontResolver, familyName, fontResolvingOptions, resolverInfo, typefaceKey);
+            FontFactory.RegisterResolverResult(WindowsPlatformFontResolver, familyName, fontResolvingOptions, resolverInfo, typefaceKey);
 
             return resolverInfo;
         }
-        static readonly IFontResolver CoreBuildFontResolver = new CoreBuildFontResolver();
+        static readonly IFontResolver WindowsPlatformFontResolver = new WindowsPlatformFontResolver();
+        static bool? _tryWindowsPlatformFontResolver;
+
+        internal static void Reset()
+        {
+            _tryWindowsPlatformFontResolver = null;
+        }
 #endif
 
 #if GDI
@@ -310,7 +338,7 @@ namespace PdfSharp.Fonts
                 }
 
                 //if (!WpfTypeface.TryGetGlyphTypeface(out glyphTypeface))
-                //    throw new InvalidOperationException(PSSR.CannotGetGlyphTypeface(familyName));
+                //    throw new InvalidOperationException(PsMgs.CannotGetGlyphTypeface(familyName));
             }
 #endif
             wpfFontFamily ??= new WpfFontFamily(familyName);
@@ -327,10 +355,10 @@ namespace PdfSharp.Fonts
         }
 #endif
 
-#if UWP
+#if WUI
         internal static XFontSource CreateFontSource(string familyName, bool isBold, bool isItalic, string typefaceKey)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(nameof(CreateFontSource));
         }
 #endif
     }

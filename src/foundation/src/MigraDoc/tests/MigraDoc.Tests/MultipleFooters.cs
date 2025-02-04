@@ -3,6 +3,7 @@
 
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.Rendering;
+using PdfSharp.Diagnostics;
 using PdfSharp.Fonts;
 using PdfSharp.Quality;
 using PdfSharp.TestHelper;
@@ -14,8 +15,21 @@ using PdfSharp.Snippets.Font;
 namespace MigraDoc.Tests
 {
     [Collection("PDFsharp")]
-    public class MultipleFooters
+    public class MultipleFooters : IDisposable
     {
+        public MultipleFooters()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void Create_Multiple_Footers()
         {

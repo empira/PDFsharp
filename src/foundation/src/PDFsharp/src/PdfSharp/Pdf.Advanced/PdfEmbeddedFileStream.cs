@@ -19,7 +19,6 @@ namespace PdfSharp.Pdf.Advanced
             {
                 stream.Read(_data, 0, (int)stream.Length);
             }
-
             Initialize();
         }
 

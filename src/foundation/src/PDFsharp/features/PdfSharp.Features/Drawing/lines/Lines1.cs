@@ -63,7 +63,7 @@ namespace PdfSharp.Features.Drawing
                 {
                     // Custom pattern
                     //pen.DashStyle = XDashStyle.Custom;
-                    DashPattern = new[] { 3, 1, 2.5, 1.5 },
+                    DashPattern = [3, 1, 2.5, 1.5],
                     Width = 7,
                     DashOffset = 1
                 };

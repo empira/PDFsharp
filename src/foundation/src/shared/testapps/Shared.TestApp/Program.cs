@@ -29,17 +29,16 @@ namespace Shared.TestApp
             });
 
             ILogger logger = loggerFactory.CreateLogger<Program>();
-            logger.LogInformation("Example log message 1");
+            //logger.LogInformation("Example log message 1");
 
-            LogHost.Logger.LogInformation("Example log message 2");
+            //LogHost.Logger.LogInformation("Example log message 2");
 
             LogHost.Factory = loggerFactory;
 
-            LogHost.Logger.LogError("Something went wrong.");
-
-            LogHost.Logger.TestMessage(LogLevel.Critical, "blah");
-            LogHost.Logger.TestMessage("di-blub");
-            LogHost.Logger.TestMessage("------------------------------------------------------------------------------");
+            //LogHost.Logger.LogError("Something went wrong.");
+            //LogHost.Logger.TestMessage(LogLevel.Critical, "blah");
+            //LogHost.Logger.TestMessage("di-blub");
+            //LogHost.Logger.TestMessage("------------------------------------------------------------------------------");
 
 
 

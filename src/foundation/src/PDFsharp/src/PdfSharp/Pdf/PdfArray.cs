@@ -132,7 +132,7 @@ namespace PdfSharp.Pdf
             object ICloneable.Clone()
             {
                 var elements = (ArrayElements)MemberwiseClone();
-                elements._elements = new List<PdfItem>(elements._elements);
+                elements._elements = [..elements._elements];
                 elements._ownerArray = null;
                 return elements;
             }
@@ -169,10 +169,10 @@ namespace PdfSharp.Pdf
             public bool GetBoolean(int index)
             {
                 if (index < 0 || index >= Count)
-                    throw new ArgumentOutOfRangeException(nameof(index), index, PSSR.IndexOutOfRange);
+                    throw new ArgumentOutOfRangeException(nameof(index), index, SyMsgs.IndexOutOfRange3);
 
                 object obj = this[index];
-                //object? obj = GetObject(index); // TODO Do this for all conversions! 2023-06-21
+                //object? obj = GetObject(index); // TODO_OLD Do this for all conversions! 2023-06-21
                 return obj switch
                 {
                     null => false,
@@ -191,10 +191,10 @@ namespace PdfSharp.Pdf
             public int GetInteger(int index)
             {
                 if (index < 0 || index >= Count)
-                    throw new ArgumentOutOfRangeException(nameof(index), index, PSSR.IndexOutOfRange);
+                    throw new ArgumentOutOfRangeException(nameof(index), index, SyMsgs.IndexOutOfRange3);
 
                 object obj = this[index];
-                //object? obj = GetObject(index); // TODO Do this for all conversions! 2023-06-21
+                //object? obj = GetObject(index); // TODO_OLD Do this for all conversions! 2023-06-21
                 return obj switch
                 {
                     null => 0,
@@ -213,10 +213,10 @@ namespace PdfSharp.Pdf
             public double GetReal(int index)
             {
                 if (index < 0 || index >= Count)
-                    throw new ArgumentOutOfRangeException(nameof(index), index, PSSR.IndexOutOfRange);
+                    throw new ArgumentOutOfRangeException(nameof(index), index, SyMsgs.IndexOutOfRange3);
 
                 object obj = this[index];
-                //object? obj = GetObject(index); // TODO Do this for all conversions! 2023-06-21
+                //object? obj = GetObject(index); // TODO_OLD Do this for all conversions! 2023-06-21
                 if (obj is PdfReference reference)
                 {
                     //Debug.Assert(false, "Check why this is not PdfRealObject or PdfIntegerObject.");
@@ -252,10 +252,10 @@ namespace PdfSharp.Pdf
             public double? GetNullableReal(int index)
             {
                 if (index < 0 || index >= Count)
-                    throw new ArgumentOutOfRangeException(nameof(index), index, PSSR.IndexOutOfRange);
+                    throw new ArgumentOutOfRangeException(nameof(index), index, SyMsgs.IndexOutOfRange3);
 
                 object obj = this[index];
-                //object? obj = GetObject(index); // TODO Do this for all conversions! 2023-06-21
+                //object? obj = GetObject(index); // TODO_OLD Do this for all conversions! 2023-06-21
                 return obj switch
                 {
                     null => null,
@@ -278,10 +278,10 @@ namespace PdfSharp.Pdf
             public string GetString(int index)
             {
                 if (index < 0 || index >= Count)
-                    throw new ArgumentOutOfRangeException(nameof(index), index, PSSR.IndexOutOfRange);
+                    throw new ArgumentOutOfRangeException(nameof(index), index, SyMsgs.IndexOutOfRange3);
 
                 object obj = this[index];
-                //object? obj = GetObject(index); // TODO Do this for all conversions! 2023-06-21
+                //object? obj = GetObject(index); // TODO_OLD Do this for all conversions! 2023-06-21
                 return obj switch
                 {
                     null => "",
@@ -300,7 +300,7 @@ namespace PdfSharp.Pdf
             public string GetName(int index)
             {
                 if (index < 0 || index >= Count)
-                    throw new ArgumentOutOfRangeException(nameof(index), index, PSSR.IndexOutOfRange);
+                    throw new ArgumentOutOfRangeException(nameof(index), index, SyMsgs.IndexOutOfRange3);
 
                 var obj = this[index];
                 if (obj == null!)
@@ -324,7 +324,7 @@ namespace PdfSharp.Pdf
             public PdfObject? GetObject(int index)
             {
                 if (index < 0 || index >= Count)
-                    throw new ArgumentOutOfRangeException(nameof(index), index, PSSR.IndexOutOfRange);
+                    throw new ArgumentOutOfRangeException(nameof(index), index, SyMsgs.IndexOutOfRange3);
 
                 var item = this[index];
                 if (item is PdfReference reference)
@@ -436,7 +436,7 @@ namespace PdfSharp.Pdf
             /// </summary>
             public void Add(PdfItem value)
             {
-                // TODO: ??? 
+                // TODO_OLD: ??? 
                 //Debug.Assert((value is PdfObject && ((PdfObject)value).Reference == null) | !(value is PdfObject),
                 //  "You try to set an indirect object directly into an array.");
 

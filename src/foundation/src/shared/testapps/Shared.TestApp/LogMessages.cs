@@ -23,7 +23,6 @@ namespace Shared.TestApp
         public static partial void WarningMessage(this ILogger logger, string someText);
     }
     
-    
     public static partial class TestAppLogMessages
     {
         [LoggerMessage(
@@ -42,6 +41,5 @@ namespace Shared.TestApp
         public static partial void TestMessage(
             this ILogger logger,
             string someText);
-
     }
 }

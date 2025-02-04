@@ -1,63 +1,68 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFrameworks>net6.0-windows;net472</TargetFrameworks>
-        <EnableWindowsTargeting>true</EnableWindowsTargeting>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net6.0-windows;net8.0-windows;net462</TargetFrameworks>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <DefineConstants>$(DefineConstants);TRACE;GDI</DefineConstants>
-    </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);TRACE;GDI</DefineConstants>
+  </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <DefineConstants>$(DefineConstants);TRACE;GDI</DefineConstants>
-    </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants);TRACE;GDI</DefineConstants>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <Compile Remove="TestResults\**" />
-      <EmbeddedResource Remove="TestResults\**" />
-      <None Remove="TestResults\**" />
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="TestResults\**" />
+    <EmbeddedResource Remove="TestResults\**" />
+    <None Remove="TestResults\**" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <Compile Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <Compile Include="..\MigraDoc.Tests\ChartTests.cs" Link="ChartTests.cs" />
-        <Compile Include="..\MigraDoc.Tests\CultureAndRegionTests.cs" Link="CultureAndRegionTests.cs" />
-        <Compile Include="..\MigraDoc.Tests\Extensions\XunitHelper.cs" Link="Extensions\XunitHelper.cs" />
-        <Compile Include="..\MigraDoc.Tests\Helper\TestHelper.cs" Link="Helper\TestHelper.cs" />
-        <Compile Include="..\MigraDoc.Tests\ImageFormats.cs" Link="ImageFormats.cs" />
-        <Compile Include="..\MigraDoc.Tests\MultipleFooters.cs" Link="MultipleFooters.cs" />
-        <Compile Include="..\MigraDoc.Tests\RtfRendererTests.cs" Link="RtfRendererTests.cs" />
-        <Compile Include="..\MigraDoc.Tests\SecurityTestHelper.cs" Link="SecurityTestHelper.cs" />
-        <Compile Include="..\MigraDoc.Tests\SecurityTests.cs" Link="SecurityTests.cs" />
-        <Compile Include="..\MigraDoc.Tests\SpaceBeforeTests.cs" Link="SpaceBeforeTests.cs" />
-        <Compile Include="..\MigraDoc.Tests\TableTests.cs" Link="TableTests.cs" />
-        <Compile Include="..\MigraDoc.Tests\TextTests.cs" Link="TextTests.cs" />
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\MigraDoc.Tests\ChartTests.cs" Link="ChartTests.cs" />
+    <Compile Include="..\MigraDoc.Tests\CultureAndRegionTests.cs" Link="CultureAndRegionTests.cs" />
+    <Compile Include="..\MigraDoc.Tests\Extensions\XunitHelper.cs" Link="Extensions\XunitHelper.cs" />
+    <Compile Include="..\MigraDoc.Tests\Fonts\PredefinedFontsTests.cs" Link="Fonts\PredefinedFontsTests.cs" />
+    <Compile Include="..\MigraDoc.Tests\Helper\TestHelper.cs" Link="Helper\TestHelper.cs" />
+    <Compile Include="..\MigraDoc.Tests\Helper\SecurityTestHelper.cs" Link="Helper\SecurityTestHelper.cs" />
+    <Compile Include="..\MigraDoc.Tests\ImageFormats.cs" Link="ImageFormats.cs" />
+    <Compile Include="..\MigraDoc.Tests\MultipleFooters.cs" Link="MultipleFooters.cs" />
+    <Compile Include="..\MigraDoc.Tests\RtfRendererTests.cs" Link="RtfRendererTests.cs" />
+    <Compile Include="..\MigraDoc.Tests\SecurityTests.cs" Link="SecurityTests.cs" />
+    <Compile Include="..\MigraDoc.Tests\SpaceBeforeTests.cs" Link="SpaceBeforeTests.cs" />
+    <Compile Include="..\MigraDoc.Tests\TableTests.cs" Link="TableTests.cs" />
+    <Compile Include="..\MigraDoc.Tests\TextTests.cs" Link="TextTests.cs" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper-gdi\PdfSharp.TestHelper-gdi.csproj" />
-        <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-gdi\PdfSharp-gdi.csproj" />
-        <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp.Charting-gdi\PdfSharp.Charting-gdi.csproj" />
-        <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets-gdi\PdfSharp.Snippets-gdi.csproj" />
-        <ProjectReference Include="..\..\..\shared\src\PdfSharp.Testing-gdi\PdfSharp.Testing-gdi.csproj" />
-        <ProjectReference Include="..\..\src\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
-        <ProjectReference Include="..\..\src\MigraDoc.Rendering-gdi\MigraDoc.Rendering-gdi.csproj" />
-        <ProjectReference Include="..\..\src\MigraDoc.RtfRendering-gdi\MigraDoc.RtfRendering-gdi.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.Shared\PdfSharp.Shared.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
+    <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper-gdi\PdfSharp.TestHelper-gdi.csproj" />
+    <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-gdi\PdfSharp-gdi.csproj" />
+    <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp.Charting-gdi\PdfSharp.Charting-gdi.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets-gdi\PdfSharp.Snippets-gdi.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.Testing-gdi\PdfSharp.Testing-gdi.csproj" />
+    <ProjectReference Include="..\..\src\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
+    <ProjectReference Include="..\..\src\MigraDoc.Rendering-gdi\MigraDoc.Rendering-gdi.csproj" />
+    <ProjectReference Include="..\..\src\MigraDoc.RtfRendering-gdi\MigraDoc.RtfRendering-gdi.csproj" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Helper\" />
-      <Folder Include="Extensions\" />
-      <Folder Include="Helper\" />
-    </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Helper\" />
+    <Folder Include="Extensions\" />
+    <Folder Include="Helper\" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Xunit.SkippableFact" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Console" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Xunit.SkippableFact" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
+  </ItemGroup>
 
 </Project>

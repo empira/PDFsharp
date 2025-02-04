@@ -5,12 +5,11 @@ using System.Diagnostics;
 using System.Text;
 using MigraDoc.DocumentObjectModel;
 using PdfSharp.Pdf;
+using PdfSharp.Pdf.Advanced;
 using PdfSharp.Drawing;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.Rendering.Extensions;
-using MigraDoc.Rendering.Resources;
-using PdfSharp.Pdf.Advanced;
 
 namespace MigraDoc.Rendering
 {
@@ -113,7 +112,7 @@ namespace MigraDoc.Rendering
             RenderBorders();
 
             ParagraphFormatInfo parFormatInfo = (ParagraphFormatInfo)_renderInfo.FormatInfo;
-            for (int idx = 0; idx < parFormatInfo.LineCount; ++idx)
+            for (int idx = 0; idx < parFormatInfo.LineCount; idx++)
             {
                 LineInfo lineInfo = parFormatInfo.GetLineInfo(idx);
                 _isLastLine = (idx == parFormatInfo.LineCount - 1);
@@ -147,7 +146,7 @@ namespace MigraDoc.Rendering
                     {
                         if (_phase == Phase.Formatting)
                             return "XX";
-                        return Messages2.BookmarkNotDefined(pageRefField.Name);
+                        return MdPdfMsgs.BookmarkNotDefined(pageRefField.Name).Message;
                     }
                 }
                 else if (field is SectionField)
@@ -184,7 +183,7 @@ namespace MigraDoc.Rendering
                     if (dt == DateTime.MinValue)
                         dt = DateTime.Now;
 
-                    return dt.ToString(GetEffectiveFormat(dateField));
+                    return FormatDateTimeForField(dt, dateField);
                 }
 
                 if (field is InfoField infoField)
@@ -195,16 +194,16 @@ namespace MigraDoc.Rendering
             return "";
         }
 
-        static string GetEffectiveFormat(DateField dateField)
+        static String FormatDateTimeForField(DateTime dateTime, DateField dateField)
         {
-            var format = dateField.Format;
-            if (!String.IsNullOrEmpty(format))
-                return format;
-
             var culture = dateField.Document!.EffectiveCulture;
             var dtfInfo = culture.DateTimeFormat;
 
-            return dtfInfo.ShortDatePattern + " " + dtfInfo.LongTimePattern;
+            var format = dateField.Format;
+            if (String.IsNullOrEmpty(format))
+                format = dtfInfo.ShortDatePattern + " " + dtfInfo.LongTimePattern;
+
+            return dateTime.ToString(format, dtfInfo);
         }
 
         string GetOutlineTitle()
@@ -337,7 +336,7 @@ namespace MigraDoc.Rendering
             return false;
         }
 
-        // TODO Make combined predicates for better performance (e.g. IsTabOrLineBreak).
+        // TODO_OLD Make combined predicates for better performance (e.g. IsTabOrLineBreak).
         static bool IsTab(DocumentObject docObj)
         {
             if (docObj is Character { SymbolName: SymbolName.Tab })
@@ -362,7 +361,8 @@ namespace MigraDoc.Rendering
         XUnitPt ProbeAfterLeftAlignedTab(XUnitPt tabStopPosition, out bool notFitting)
         {
             //--- Save ---------------------------------
-            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth);
+            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth, 
+                out var lineEndsWithLineBreak);
             //------------------------------------------
 
             XUnitPt xPositionAfterTab = xPosition;
@@ -373,7 +373,7 @@ namespace MigraDoc.Rendering
                 xPositionAfterTab = _formattingArea.X + tabStopPosition;
 
             //--- Restore ---------------------------------
-            RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth);
+            RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth, lineEndsWithLineBreak);
             //------------------------------------------
             return xPositionAfterTab;
         }
@@ -387,7 +387,8 @@ namespace MigraDoc.Rendering
         XUnitPt ProbeAfterRightAlignedTab(XUnitPt tabStopPosition, out bool notFitting)
         {
             //--- Save ---------------------------------
-            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth);
+            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth, 
+                out var lineEndsWithLineBreak);
             //------------------------------------------
 
             XUnitPt xPositionAfterTab = xPosition;
@@ -397,7 +398,7 @@ namespace MigraDoc.Rendering
                 xPositionAfterTab = _formattingArea.X + tabStopPosition - _currentLineWidth;
 
             //--- Restore ------------------------------
-            RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth);
+            RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth, lineEndsWithLineBreak);
             //------------------------------------------
             return xPositionAfterTab;
         }
@@ -430,7 +431,8 @@ namespace MigraDoc.Rendering
         XUnitPt ProbeAfterCenterAlignedTab(XUnitPt tabStopPosition, out bool notFitting)
         {
             //--- Save ---------------------------------
-            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth);
+            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth, 
+                out var lineEndsWithLineBreak);
             //------------------------------------------
 
             XUnitPt xPositionAfterTab = xPosition;
@@ -457,7 +459,7 @@ namespace MigraDoc.Rendering
             }
 
             //--- Restore ------------------------------
-            RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth);
+            RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth, lineEndsWithLineBreak);
             //------------------------------------------
             return xPositionAfterTab;
         }
@@ -473,7 +475,8 @@ namespace MigraDoc.Rendering
             notFitting = false;
 
             //--- Save ---------------------------------
-            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth);
+            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth, 
+                out var lineEndsWithLineBreak);
             //------------------------------------------
 
             try
@@ -548,11 +551,7 @@ namespace MigraDoc.Rendering
                     }
 
                     if (decimalPosIndex >= 0)
-#if NET6_0_OR_GREATER || true
                         word = word[..decimalPosIndex];
-#else
-                        word = word.Substring(0, decimalPosIndex);
-#endif
 
                     XUnitPt wordLength = MeasureString(word);
                     notFitting = _currentXPosition + wordLength >= _formattingArea.X + _formattingArea.Width + Tolerance;
@@ -565,14 +564,15 @@ namespace MigraDoc.Rendering
             finally
             {
                 //--- Restore ------------------------------
-                RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth);
+                RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth, lineEndsWithLineBreak);
                 //------------------------------------------
             }
 
             return ProbeAfterRightAlignedTab(tabStopPosition, out notFitting);
         }
 
-        void SaveBeforeProbing(out ParagraphIterator? paragraphIter, out int blankCount, out XUnitPt wordsWidth, out XUnitPt xPosition, out XUnitPt lineWidth, out XUnitPt blankWidth)
+        void SaveBeforeProbing(out ParagraphIterator? paragraphIter, out int blankCount, out XUnitPt wordsWidth, out XUnitPt xPosition, out XUnitPt lineWidth, out XUnitPt blankWidth, 
+            out bool lineEndsWithLineBreak)
         {
             paragraphIter = _currentLeaf;
             blankCount = _currentBlankCount;
@@ -580,9 +580,11 @@ namespace MigraDoc.Rendering
             lineWidth = _currentLineWidth;
             wordsWidth = _currentWordsWidth;
             blankWidth = _savedBlankWidth;
+            lineEndsWithLineBreak = _currentLineEndsWithLineBreak;
         }
 
-        void RestoreAfterProbing(ParagraphIterator? paragraphIter, int blankCount, XUnitPt wordsWidth, XUnitPt xPosition, XUnitPt lineWidth, XUnitPt blankWidth)
+        void RestoreAfterProbing(ParagraphIterator? paragraphIter, int blankCount, XUnitPt wordsWidth, XUnitPt xPosition, XUnitPt lineWidth, XUnitPt blankWidth, 
+            bool lineEndsWithLineBreak)
         {
             _currentLeaf = paragraphIter;
             _currentBlankCount = blankCount;
@@ -590,6 +592,7 @@ namespace MigraDoc.Rendering
             _currentLineWidth = lineWidth;
             _currentWordsWidth = wordsWidth;
             _savedBlankWidth = blankWidth;
+            _currentLineEndsWithLineBreak = lineEndsWithLineBreak;
         }
 
         /// <summary>
@@ -603,7 +606,7 @@ namespace MigraDoc.Rendering
             _currentBlankCount = 0;
             //Extra for auto tab after list symbol.
 
-            //TODO: KLPO4KLPO: Check if this conditional statement is still required.
+            //TODO_OLD: KLPO4KLPO: Check if this conditional statement is still required.
             if (_currentLeaf != null && IsTab(_currentLeaf.Current))
                 _currentLeaf = _currentLeaf.GetNextLeaf();
 
@@ -680,6 +683,50 @@ namespace MigraDoc.Rendering
         {
             get
             {
+#if true
+                // New code with StartXPosition independent of _currentYPosition.
+
+                XUnitPt xPos = 0;
+
+                if (_phase == Phase.Formatting)
+                {
+                    xPos = _formattingArea.X;
+                    xPos += LeftIndent;
+                }
+                else //if (phase == Phase.Rendering)
+                {
+                    Area contentArea = _renderInfo.LayoutInfo.ContentArea;
+                    //next lines for non-fitting lines that produce an empty fitting rect:
+                    XUnitPt rectX = contentArea.X;
+                    XUnitPt rectWidth = contentArea.Width;
+
+                    switch (_paragraph.Format.Alignment)
+                    {
+                        case ParagraphAlignment.Left:
+                        case ParagraphAlignment.Justify:
+                            xPos = rectX;
+                            xPos += LeftIndent;
+                            break;
+
+                        case ParagraphAlignment.Right:
+                            xPos = rectX + rectWidth - RightIndent;
+                            xPos -= _currentLineWidth;
+                            break;
+
+                        case ParagraphAlignment.Center:
+                            xPos = rectX + (rectWidth + LeftIndent - RightIndent - _currentLineWidth) / 2.0;
+                            break;
+                    }
+                }
+                return xPos;
+#else
+                // Old code with StartXPosition dependent on _currentYPosition.
+
+                // Why should StartXPosition be dependent on GetFittingRect() and _currentYPosition? 
+                // GetFittingRect() always returns the X and Width from the area it was called for.
+                // Or it returns null. In that case the original area’s X and width was used in rendering phase
+                // and an exception occurred in formatting phase. What was the purpose?
+
                 XUnitPt xPos = 0;
 
                 if (_phase == Phase.Formatting)
@@ -719,6 +766,7 @@ namespace MigraDoc.Rendering
                     }
                 }
                 return xPos;
+#endif
             }
         }
 
@@ -734,6 +782,7 @@ namespace MigraDoc.Rendering
             _endLeaf = lineInfo.EndIter;
             _currentBlankCount = lineInfo.BlankCount;
             _currentLineWidth = lineInfo.LineWidth;
+            _currentLineEndsWithLineBreak = lineInfo.LineEndsWithLineBreak;
             _currentWordsWidth = lineInfo.WordsWidth;
             _currentXPosition = StartXPosition;
             _tabOffsets = lineInfo.TabOffsets;
@@ -771,7 +820,8 @@ namespace MigraDoc.Rendering
         void ReMeasureLine(ref LineInfo lineInfo)
         {
             //--- Save ---------------------------------
-            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth);
+            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth, 
+                out var lineEndsWithLineBreak);
             bool origLastTabPassed = _lastTabPassed;
             //------------------------------------------
             _currentLeaf = lineInfo.StartIter;
@@ -781,6 +831,7 @@ namespace MigraDoc.Rendering
             _tabOffsets = [];
             _currentLineWidth = 0;
             _currentWordsWidth = 0;
+            _currentLineEndsWithLineBreak = false;
 
             var fittingRect = _formattingArea.GetFittingRect(_currentYPosition, _currentVerticalInfo.Height);
             if (fittingRect != null)
@@ -805,10 +856,11 @@ namespace MigraDoc.Rendering
                 lineInfo.WordsWidth = _currentWordsWidth;
                 lineInfo.BlankCount = _currentBlankCount;
                 lineInfo.TabOffsets = _tabOffsets;
+                lineInfo.LineEndsWithLineBreak = _currentLineEndsWithLineBreak;
                 lineInfo.ReMeasureLine = false;
                 _lastTabPassed = origLastTabPassed;
             }
-            RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth);
+            RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth, lineEndsWithLineBreak);
         }
 
         XUnitPt CurrentWordDistance
@@ -901,7 +953,7 @@ namespace MigraDoc.Rendering
                     break;
 
                 case Footnote:
-                    // TODO Not yet implemented.
+                    // TODO_OLD Not yet implemented.
                     break;
 
                 default:
@@ -928,7 +980,8 @@ namespace MigraDoc.Rendering
         {
             if (_fieldInfos is null)
                 NRT.ThrowOnNull();
-            RenderWord(_fieldInfos.Date.ToString(GetEffectiveFormat(dateField)));
+            var value = FormatDateTimeForField(_fieldInfos.Date, dateField);
+            RenderWord(value);
         }
 
         void RenderInfoField(InfoField infoField)
@@ -1039,7 +1092,7 @@ namespace MigraDoc.Rendering
         {
             string sym = GetSymbol(character);
             string completeWord = sym;
-            for (int idx = 1; idx < character.Count; ++idx)
+            for (int idx = 1; idx < character.Count; idx++)
                 completeWord += sym;
 
             RenderWord(completeWord);
@@ -1355,6 +1408,7 @@ namespace MigraDoc.Rendering
             if (rect != null)
                 _currentXPosition = rect.X;
             _currentLineWidth = 0;
+            _currentLineEndsWithLineBreak = false;
         }
 
         /// <summary>
@@ -1422,18 +1476,18 @@ namespace MigraDoc.Rendering
                     switch (listInfo.ListType)
                     {
                         case ListType.BulletList1:
-                            symbol = "●";
-                            font = new XFont("Courier New", size, style);
+                            symbol = _documentRenderer.FontsAndChars.Bullets.Level1Character.ToString();
+                            font = _documentRenderer.FontsAndChars.Bullets.GetLevel1Font(size, style);
                             break;
 
                         case ListType.BulletList2:
-                            symbol = "○";
-                            font = new XFont("Courier New", size, style);
+                            symbol = _documentRenderer.FontsAndChars.Bullets.Level2Character.ToString();
+                            font = _documentRenderer.FontsAndChars.Bullets.GetLevel2Font(size, style);
                             break;
 
                         case ListType.BulletList3:
-                            symbol = "▪";
-                            font = new XFont("Courier New", size, style);
+                            symbol = _documentRenderer.FontsAndChars.Bullets.Level3Character.ToString();
+                            font = _documentRenderer.FontsAndChars.Bullets.GetLevel3Font(size, style);
                             break;
 
                         case ListType.NumberList1:
@@ -1527,11 +1581,9 @@ namespace MigraDoc.Rendering
                     case FormatResult.NewLine:
                         lastResult = result;
                         StoreLineInformation();
-                        if (!StartNewLine())
-                        {
-                            result = FormatResult.NewArea;
-                            formatInfo._isEnding = false;
-                        }
+                        // StartNewLine() no longer gives the signal to start a new page. We don’t know the line height yet and therefore can’t decide,
+                        // if it will fit on the page. Page fitting is only checked by FormatElement() now, when the height of the new line is known.
+                        StartNewLine();
                         break;
                 }
                 if (result == FormatResult.NewArea)
@@ -1627,7 +1679,6 @@ namespace MigraDoc.Rendering
         /// Processes the elements when formatting.
         /// </summary>
         /// <param name="docObj"></param>
-        /// <returns></returns>
         FormatResult FormatElement(DocumentObject docObj)
         {
             // Check for available space in the area must be made for each element and explicitly for the last paragraph’s element, because in formatting phase,
@@ -1854,7 +1905,7 @@ namespace MigraDoc.Rendering
         FormatResult FormatDateField(DateField dateField, Rectangle fittingRect)
         {
             _reMeasureLine = true;
-            string estimatedFieldValue = DateTime.Now.ToString(GetEffectiveFormat(dateField));
+            var estimatedFieldValue = FormatDateTimeForField(DateTime.Now, dateField);
             return FormatWord(estimatedFieldValue, fittingRect);
         }
 
@@ -2141,6 +2192,7 @@ namespace MigraDoc.Rendering
                 _currentLeaf = _currentLeaf?.GetNextLeaf();
 
             _savedWordWidth = 0;
+            _currentLineEndsWithLineBreak = true;
             return FormatResult.NewLine;
         }
 
@@ -2169,18 +2221,19 @@ namespace MigraDoc.Rendering
                 return FormatResult.Continue;
 
             //--- Save ---------------------------------
-            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth);
+            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth, 
+                out var lineEndsWithLineBreak);
             //------------------------------------------
             _currentLeaf = nextIter;
             var result = FormatElement(nextIter.Current);
 
             //--- Restore ------------------------------
-            RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth);
+            RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth, lineEndsWithLineBreak);
             //------------------------------------------
             if (result == FormatResult.Continue)
                 return FormatResult.Continue;
 
-            RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth);
+            RestoreAfterProbing(iter, blankCount, wordsWidth, xPosition, lineWidth, blankWidth, lineEndsWithLineBreak);
             var fittingRect = _formattingArea.GetFittingRect(_currentYPosition, _currentVerticalInfo.Height);
             if (fittingRect is null)
                 NRT.ThrowOnNull();
@@ -2251,27 +2304,28 @@ namespace MigraDoc.Rendering
         /// Starts a new line by resetting measuring values.
         /// Do not call before the first line is formatted!
         /// </summary>
-        /// <returns>True if the new line may fit the formatting area.</returns>
-        bool StartNewLine()
+        void StartNewLine()
         {
             _tabOffsets = [];
             _lastTab = null;
             _lastTabPosition = 0;
             _currentYPosition += _currentVerticalInfo.Height;
 
-            var rect = _formattingArea.GetFittingRect(_currentYPosition, _currentVerticalInfo.Height + BottomBorderOffset);
-            if (rect == null)
-                return false;
+            // Height of the new line may be not equal to the height of the current line, so taking it for determining if it will fit on the page
+            // could lead to a wrongly added page break. Page fitting must only be checked in FormatElement(), where the height of the new line is known.
+            //var rect = _formattingArea.GetFittingRect(_currentYPosition, _currentVerticalInfo.Height + BottomBorderOffset);
+            //if (rect == null)
+            //    return false;
 
             _isFirstLine = false;
-            _currentXPosition = StartXPosition; // Depends on "currentVerticalInfo".
+            _currentXPosition = StartXPosition;
             _currentVerticalInfo = new VerticalLineInfo();
             _currentVerticalInfo = CalcCurrentVerticalInfo();
             _startLeaf = _currentLeaf;
             _currentBlankCount = 0;
             _currentWordsWidth = 0;
             _currentLineWidth = 0;
-            return true;
+            _currentLineEndsWithLineBreak = false;
         }
 
         /// <summary>
@@ -2296,9 +2350,24 @@ namespace MigraDoc.Rendering
                 Vertical = _currentVerticalInfo
             };
 
+#if true
+            // For lines containing only one not fitting element, HandleNonFittingLine must be called,
+            // to add the element to the line and prepare for the next one.
+            // The current element must have caused the line break (StoreLineInformation is called on a line break)
+            // so if _currentLineWidth is zero by now (the length of the current element is not yet added),
+            // there seems to be only this one not fitting element.
+            // But also a manual line break may have caused StoreLineInformation. For this case, do not call 
+            // HandleNonFittingLine. Blanks before _currentLeaf don’t have any influence.
+            if (_currentLineWidth == XUnitPt.Zero && !_currentLineEndsWithLineBreak)
+                HandleNonFittingLine();
+#else
+            // This old code does not call HandleNonFittingLine for one not fitting element, if the line starts with a blank.
+            // The blank is ignored on formatting, but causes _currentLeaf not to be _startLeaf, so HandleNonFittingLine is not executed.
+            
             if (_startLeaf != null && _startLeaf == _currentLeaf)
                 HandleNonFittingLine();
-
+#endif
+            
             lineInfo.LastTab = _lastTab;
             _renderInfo.LayoutInfo.ContentArea = contentArea ?? NRT.ThrowOnNull<Area>();
 
@@ -2316,6 +2385,7 @@ namespace MigraDoc.Rendering
             lineInfo.LineWidth = _currentLineWidth;
             lineInfo.TabOffsets = _tabOffsets;
             lineInfo.ReMeasureLine = _reMeasureLine;
+            lineInfo.LineEndsWithLineBreak = _currentLineEndsWithLineBreak;
 
             _savedWordWidth = 0;
             _reMeasureLine = false;
@@ -2626,7 +2696,7 @@ namespace MigraDoc.Rendering
             if (_currentUnderlinePen is null)
                 NRT.ThrowOnNull();
 
-            if (pen != null && pen.Color != _currentUnderlinePen!.Color)  // BUG in ReSharper:
+            if (pen != null && pen.Color != _currentUnderlinePen!.Color)  // BUG_OLD in ReSharper:
                 return true;
 
             if (pen is null)
@@ -2695,6 +2765,7 @@ namespace MigraDoc.Rendering
         XUnitPt _currentWordsWidth;
         int _currentBlankCount;
         XUnitPt _currentLineWidth;
+        bool _currentLineEndsWithLineBreak;
         bool _isFirstLine;
         bool _isLastLine;
         VerticalLineInfo _currentVerticalInfo;

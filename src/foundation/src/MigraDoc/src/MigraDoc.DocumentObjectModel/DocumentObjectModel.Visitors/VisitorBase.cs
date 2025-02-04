@@ -271,9 +271,9 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 
             for (int i = 0; i < tabStops.Count; i++)
             {
-                TabStop tabStop = tabStops[i];
+                var tabStop = tabStops[i];
                 if (!tabStop.AddTab)
-                    tabStops.RemoveObjectAt(i);
+                    tabStops.RemoveObjectAt(i--);
             }
 
             // The TabStopCollection is complete now.
@@ -286,45 +286,91 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         /// </summary>
         protected static void FlattenPageSetup(PageSetup pageSetup, PageSetup refPageSetup)
         {
-            if (pageSetup.Values.PageWidth.IsValueNullOrEmpty() && pageSetup.Values.PageHeight is null)
+            var definesOrientation = pageSetup.Values.Orientation is not null;
+
+            // Inherit orientation now, as the value is needed below.
+            if (pageSetup.Values.Orientation is null)
+                pageSetup.Values.Orientation = refPageSetup.Values.Orientation;
+
+            Debug.Assert(pageSetup.Values.Orientation is not null);
+
+            var realizeOrientation = false; // The default is updating the Orientation value due to PageWidth and PageHeight instead of realizing the Orientation.
+
+            // PageWidth and PageHeight are not set.
+            if (pageSetup.Values.PageWidth.IsValueNullOrEmpty() && pageSetup.Values.PageHeight.IsValueNullOrEmpty())
             {
+                // If all values are null, inherit them from refPageSetup.
                 if (pageSetup.Values.PageFormat is null)
                 {
                     pageSetup.Values.PageWidth = refPageSetup.Values.PageWidth;
                     pageSetup.Values.PageHeight = refPageSetup.Values.PageHeight;
                     pageSetup.Values.PageFormat = refPageSetup.Values.PageFormat;
+
+                    // Realize Orientation, if no PageWidth, PageHeight and PageFormat, but Orientation was set for this PageSetup.
+                    if (definesOrientation)
+                        realizeOrientation = true;
                 }
+                // If only PageFormat is set, calculate PageWidth and PageHeight from PageFormat.
                 else
                 {
+                    // Realize Orientation, if only PageFormat was set for this PageSetup.
+                    realizeOrientation = true;
+
                     // Cannot use properties as out parameters, so use local vars.
                     PageSetup.GetPageSize(pageSetup.PageFormat, out Unit width, out Unit height);
                     pageSetup.Values.PageWidth = width;
                     pageSetup.Values.PageHeight = height;
                 }
             }
+            // At least PageWidth or PageHeight is set.
             else
             {
                 if (pageSetup.Values.PageWidth.IsValueNullOrEmpty())
                 {
+                    // If only PageHeight is set, inherit PageFormat and PageWidth.
                     if (pageSetup.Values.PageFormat is null)
-                        pageSetup.Values.PageHeight = refPageSetup.Values.PageHeight;
+                    {
+                        pageSetup.Values.PageWidth = refPageSetup.Values.PageWidth;
+                        pageSetup.Values.PageFormat = refPageSetup.Values.PageFormat;
+                    }
+                    // If only PageHeight and PageFormat are set, calculate PageWidth from PageFormat.
                     else
                     {
-                        PageSetup.GetPageSize(pageSetup.PageFormat, out _, out Unit height);
-                        pageSetup.Values.PageHeight = height;
+                        PageSetup.GetPageSize(pageSetup.PageFormat, out Unit width, out Unit height);
+                        // Take PageWidth according to page format orientation, even if Orientation may be updated later due to the final PageWidth and PageHeight.
+                        pageSetup.Values.PageWidth = pageSetup.Orientation == Orientation.Landscape ? height : width;
                     }
                 }
                 else if (pageSetup.Values.PageHeight.IsValueNullOrEmpty())
                 {
+                    // If only PageWidth is set, inherit PageFormat and PageHeight.
                     if (pageSetup.Values.PageFormat is null)
-                        pageSetup.Values.PageWidth = refPageSetup.Values.PageWidth;
+                    {
+                        pageSetup.Values.PageHeight = refPageSetup.Values.PageHeight;
+                        pageSetup.Values.PageFormat = refPageSetup.Values.PageFormat;
+                    }
+                    // If only PageWidth and PageFormat are set, calculate PageHeight from PageFormat.
                     else
                     {
-                        PageSetup.GetPageSize(pageSetup.PageFormat, out Unit width, out _);
-                        pageSetup.Values.PageWidth = width;
+                        PageSetup.GetPageSize(pageSetup.PageFormat, out Unit width, out Unit height);
+                        // Take PageHeight according to page format orientation, even if Orientation may be updated later due to the final PageWidth and PageHeight.
+                        pageSetup.Values.PageHeight = pageSetup.Orientation == Orientation.Landscape ? width : height;
                     }
                 }
             }
+
+            Debug.Assert(!pageSetup.Values.PageWidth.IsValueNullOrEmpty() || !pageSetup.Values.PageHeight.IsValueNullOrEmpty());
+            
+            // If the page size is newly initialized from PageFormat and/or Orientation only, swap PageWidth and PageHeight due to Orientation, if necessary.
+            if (realizeOrientation)
+                RealizeOrientation(pageSetup);
+            // If the page size is inherited or set by PageWidth and PageHeight, update Orientation due to PageWidth and PageHeight.
+            // For inherited PageFormat values, PageWidth and PageHeight were already swapped for the source PageSetup, if necessary.
+            else
+                UpdateOrientation(pageSetup);
+
+            Debug.Assert((pageSetup.Values.Orientation == Orientation.Portrait && pageSetup.Values.PageWidth <= pageSetup.Values.PageHeight) ||
+                         (pageSetup.Values.Orientation == Orientation.Landscape && pageSetup.Values.PageWidth > pageSetup.Values.PageHeight));
 
             //      if (pageSetup.pageWidth.IsNull)
             //        pageSetup.pageWidth = refPageSetup.pageWidth;
@@ -334,8 +380,6 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             //        pageSetup.pageFormat = refPageSetup.pageFormat;
             if (pageSetup.Values.SectionStart is null)
                 pageSetup.Values.SectionStart = refPageSetup.Values.SectionStart;
-            if (pageSetup.Values.Orientation is null)
-                pageSetup.Values.Orientation = refPageSetup.Values.Orientation;
             if (pageSetup.Values.TopMargin.IsValueNullOrEmpty())
                 pageSetup.Values.TopMargin = refPageSetup.Values.TopMargin;
             if (pageSetup.Values.BottomMargin.IsValueNullOrEmpty())
@@ -356,6 +400,36 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 pageSetup.Values.MirrorMargins = refPageSetup.Values.MirrorMargins;
             if (pageSetup.Values.HorizontalPageBreak is null)
                 pageSetup.Values.HorizontalPageBreak = refPageSetup.Values.HorizontalPageBreak;
+        }
+
+        /// <summary>
+        /// Realizes the Orientation for PageSetup.
+        /// This shall be done for PageSetups initialized with PageFormat and or Orientation only. 
+        /// For quadratic pages, Orientation is set to Portrait, as it is Portrait by definition. 
+        /// Otherwise, PageWidth and PageHeight are swapped, if necessary.
+        /// </summary>
+        static void RealizeOrientation(PageSetup pageSetup)
+        {
+            var effectiveOrientation = pageSetup.Orientation;
+
+            // Set quadratic page to Portrait.
+            if (pageSetup.Values.PageWidth == pageSetup.Values.PageHeight)
+                pageSetup.Values.Orientation = Orientation.Portrait;
+            // Otherwise swap PageWidth and PageHeight, if not fitting to effectiveOrientation.
+            else if ((pageSetup.Values.PageWidth > pageSetup.Values.PageHeight && effectiveOrientation == Orientation.Portrait) ||
+                     (pageSetup.Values.PageWidth < pageSetup.Values.PageHeight && effectiveOrientation == Orientation.Landscape))
+                (pageSetup.Values.PageWidth, pageSetup.Values.PageHeight) = (pageSetup.Values.PageHeight, pageSetup.Values.PageWidth);
+        }
+
+        /// <summary>
+        /// Updates the orientation according to a PageSetup’s PageWidth and PageHeight.
+        /// </summary>
+        static void UpdateOrientation(PageSetup pageSetup)
+        {
+            // Quadratic page is considered to be Portrait.
+            pageSetup.Values.Orientation = pageSetup.Values.PageWidth <= pageSetup.Values.PageHeight
+                ? Orientation.Portrait
+                : Orientation.Landscape;
         }
 
         /// <summary>
@@ -502,13 +576,13 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 
             ParagraphFormat? format;
 
-            var style = document.Styles[footnote.Values.Style!]; // BUG??? "!" added.
+            var style = document.Styles[footnote.Values.Style!]; // BUG_OLD??? "!" added.
             if (style != null)
                 format = ParagraphFormatFromStyle(style);
             else
             {
                 footnote.Style = StyleNames.Footnote;
-                format = document.Styles[StyleNames.Footnote]!.Values.ParagraphFormat!; // BUG: Check null
+                format = document.Styles[StyleNames.Footnote]!.Values.ParagraphFormat!; // BUG_OLD: Check null
             }
 
             if (footnote.Values.Format is null)
@@ -560,12 +634,12 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             }
             else if (currentElementHolder is TextArea area)
             {
-                paragraph.Style = area.Style; // BUG ???
+                paragraph.Style = area.Style; // BUG_OLD ???
                 format = area.Values.Format ?? NRT.ThrowOnNull<ParagraphFormat>();
             }
             else
             {
-                if (!String.IsNullOrEmpty(paragraph.Values.Style))  //StL:BUG see old code
+                if (!String.IsNullOrEmpty(paragraph.Values.Style))  //StL:BUG_OLD see old code
                     paragraph.Style = StyleNames.InvalidStyleName;
                 else
                     paragraph.Style = StyleNames.Normal;
@@ -574,12 +648,13 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 
             if (paragraph.Values.Format == null)
             {
-                paragraph.Format = format.Clone(); //StL:BUG see old code
+                paragraph.Format = format.Clone(); //StL:BUG_OLD see old code
                 paragraph.Format.Parent = paragraph;
             }
             else
                 FlattenParagraphFormat(paragraph.Format, format);
         }
+
         // Section
 
         internal override void VisitHeaderFooter(HeaderFooter headerFooter)

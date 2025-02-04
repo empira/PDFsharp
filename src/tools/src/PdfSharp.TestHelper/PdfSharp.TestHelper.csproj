@@ -24,6 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\foundation\src\shared\src\PdfSharp.Shared\PdfSharp.Shared.csproj" />
+    <ProjectReference Include="..\..\..\foundation\src\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
     <ProjectReference Include="..\..\..\foundation\src\PDFsharp\src\PdfSharp\PdfSharp.csproj" />
     <ProjectReference Include="..\..\..\foundation\src\shared\src\PdfSharp.Quality\PdfSharp.Quality.csproj" />
   </ItemGroup>

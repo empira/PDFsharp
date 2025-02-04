@@ -175,7 +175,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
             get => Values.Elements ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Elements = value;
             }
         }
@@ -221,7 +221,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

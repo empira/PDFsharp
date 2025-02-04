@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0-windows;net472</TargetFrameworks>
+    <TargetFrameworks>net6.0-windows;net462</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <RootNamespace>PDFsharp.Features</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
@@ -38,6 +38,8 @@
     <Compile Include="..\PdfSharp.Features\IO\Info.cs" Link="IO\Info.cs" />
     <Compile Include="..\PdfSharp.Features\IO\LargePdfFiles.cs" Link="IO\LargePdfFiles.cs" />
     <Compile Include="..\PdfSharp.Features\IO\ObjectStreams.cs" Link="IO\ObjectStreams.cs" />
+    <Compile Include="..\PdfSharp.Features\Pdf\annotations\LinkAnnotations.cs" Link="Pdf\annotations\LinkAnnotations.cs" />
+    <Compile Include="..\PdfSharp.Features\Pdf\pdfa\PDF-A.cs" Link="Pdf\pdfa\PDF-A.cs" />
     <Compile Include="..\PdfSharp.Features\PdfSharpFeatures.cs" Link="PdfSharpFeatures.cs" />
   </ItemGroup>
 

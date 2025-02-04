@@ -52,7 +52,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.LineFormat ??= new LineFormat(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.LineFormat = value;
             }
         }
@@ -62,9 +62,9 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         /// </summary>
         internal override void Serialize(Serializer serializer)
         {
-            var axisObject = Parent as Axis;
+            var axisObject = Parent as Axis ?? throw new InvalidOperationException("Parent is not of type Axis.");
 
-            var pos = serializer.BeginContent(axisObject!.CheckGridlines(this)); // HACK // BUG: What if Parent is not Axis?
+            var pos = serializer.BeginContent(axisObject.CheckGridlines(this));
 
             Values.LineFormat?.Serialize(serializer);
 
@@ -72,7 +72,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

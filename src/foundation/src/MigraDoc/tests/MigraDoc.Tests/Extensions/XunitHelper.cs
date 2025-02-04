@@ -24,7 +24,7 @@ namespace Xunit
 
         /// <summary>
         /// Gets a value indicating whether slow unit tests should be skipped.
-        /// This method is used for tests that run slow under .NET Framework 4.7.2, but much faster under .NET 6.
+        /// This method is used for tests that run slow under .NET Framework 4.6.2, but much faster under .NET 6.
         /// </summary>
         /// <returns>True if slow tests should be skipped.</returns>
         public static bool SkipSlowTestsUnderDotNetFramework()

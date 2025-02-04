@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 using SysPoint = System.Windows.Point;
 using SysSize = System.Windows.Size;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media;
 using SysPoint = Windows.Foundation.Point;
 using SysSize = Windows.Foundation.Size;
@@ -31,7 +31,7 @@ namespace PdfSharp.Drawing
         public XSize(double width, double height)
         {
             if (width < 0 || height < 0)
-                throw new ArgumentException("WidthAndHeightCannotBeNegative"); //SR.Get(SRID.Size_WidthAndHeightCannotBeNegative, new object[0]));
+                throw new ArgumentException("WidthAndHeightCannotBeNegative"); // TODO_OLD SR.Get(SRID.Size_WidthAndHeightCannotBeNegative, new object[0]));
 
             _width = width;
             _height = height;
@@ -146,7 +146,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Converts this XSize to a System.Windows.Size.
         /// </summary>
@@ -175,7 +175,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Creates an XSize from a System.Drawing.Size.
         /// </summary>
@@ -257,9 +257,9 @@ namespace PdfSharp.Drawing
             set
             {
                 if (IsEmpty)
-                    throw new InvalidOperationException("CannotModifyEmptySize"); //SR.Get(SRID.Size_CannotModifyEmptySize, new object[0]));
+                    throw new InvalidOperationException("CannotModifyEmptySize"); // TODO_OLD SR.Get(SRID.Size_CannotModifyEmptySize, new object[0]));
                 if (value < 0)
-                    throw new ArgumentException("WidthCannotBeNegative"); //SR.Get(SRID.Size_WidthCannotBeNegative, new object[0]));
+                    throw new ArgumentException("WidthCannotBeNegative"); // TODO_OLD SR.Get(SRID.Size_WidthCannotBeNegative, new object[0]));
                 _width = value;
             }
         }
@@ -274,9 +274,9 @@ namespace PdfSharp.Drawing
             set
             {
                 if (IsEmpty)
-                    throw new InvalidOperationException("CannotModifyEmptySize"); // SR.Get(SRID.Size_CannotModifyEmptySize, new object[0]));
+                    throw new InvalidOperationException("CannotModifyEmptySize"); // TODO_OLD SR.Get(SRID.Size_CannotModifyEmptySize, new object[0]));
                 if (value < 0)
-                    throw new ArgumentException("HeightCannotBeNegative"); //SR.Get(SRID.Size_HeightCannotBeNegative, new object[0]));
+                    throw new ArgumentException("HeightCannotBeNegative"); // TODO_OLD SR.Get(SRID.Size_HeightCannotBeNegative, new object[0]));
                 _height = value;
             }
         }
@@ -298,7 +298,7 @@ namespace PdfSharp.Drawing
             return new XPoint(size._width, size._height);
         }
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Performs an explicit conversion from Size to XSize.
         /// </summary>

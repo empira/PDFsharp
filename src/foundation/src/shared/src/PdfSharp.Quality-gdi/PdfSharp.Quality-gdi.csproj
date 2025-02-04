@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0-windows;net472</TargetFrameworks>
+    <TargetFrameworks>net6.0-windows;net8.0-windows;net462</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <RootNamespace>PdfSharp.Quality</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
@@ -14,18 +14,19 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net462|AnyCPU'">
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net462|AnyCPU'">
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   
   <ItemGroup>
     <Compile Include="..\PdfSharp.Quality\AssetsHelper.cs" Link="AssetsHelper.cs" />
     <Compile Include="..\PdfSharp.Quality\FeatureAndSnippetBase.cs" Link="FeatureAndSnippetBase.cs" />
-    <Compile Include="..\PdfSharp.Quality\DefaultFontResolver.cs" Link="DefaultFontResolver.cs" />
+    <Compile Include="..\PdfSharp.Quality\fontresolver\DefaultFontResolver.cs" Link="fontresolver\DefaultFontResolver.cs" />
+    <Compile Include="..\PdfSharp.Quality\fontresolver\UnitTestFontResolver.cs" Link="fontresolver\UnitTestFontResolver.cs" />
     <Compile Include="..\PdfSharp.Quality\Feature.cs" Link="Feature.cs" />
     <Compile Include="..\PdfSharp.Quality\FontHelper.cs" Link="FontHelper.cs" />
     <Compile Include="..\PdfSharp.Quality\FontUtility.cs" Link="FontUtility.cs" />
@@ -42,6 +43,8 @@
   </ItemGroup>
   
   <ItemGroup>
+    <ProjectReference Include="..\PdfSharp.Shared\PdfSharp.Shared.csproj" />
+    <ProjectReference Include="..\PdfSharp.System\PdfSharp.System.csproj" />
     <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-gdi\PdfSharp-gdi.csproj" />
     <ProjectReference Include="..\PdfSharp.WPFonts\PdfSharp.WPFonts.csproj" />
   </ItemGroup>

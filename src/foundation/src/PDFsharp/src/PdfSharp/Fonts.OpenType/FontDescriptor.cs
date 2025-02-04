@@ -34,27 +34,7 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// 
         /// </summary>
-        public string FontName2 { get; init; } = default!; // #NFM check format of this name. It is the name of the XFont or the name of XGlyphTypeface.
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //public string FullName
-        //{
-        //    get { return _fullName; }
-        //    private set { _fullName = value; }
-        //}
-        //string _fullName;
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //public string FamilyName
-        //{
-        //    get { return _familyName; }
-        //    private set { _familyName = value; }
-        //}
-        //string _familyName;
+        public string FontName3 { get; init; } = default!; // #NFM check format of this name. It is the name of the XFont or the name of XGlyphTypeface.
 
         /// <summary>
         /// 
@@ -63,7 +43,7 @@ namespace PdfSharp.Fonts.OpenType
         {
             get;
             private set;
-            // BUG: never set
+            // BUG_OLD: never set
         } = default!;
 
         /// <summary>
@@ -107,7 +87,7 @@ namespace PdfSharp.Fonts.OpenType
         public bool IsFixedPitch
         {
             get;
-            init; // BUG: never set
+            init; // BUG_OLD: never set
         }
 
         /// <summary>
@@ -137,17 +117,8 @@ namespace PdfSharp.Fonts.OpenType
         {
             get;
             private set;
-            // BUG: never set
+            // BUG_OLD: never set
         } = default!;
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //public string Notice
-        //{
-        //  get { return Notice; }
-        //}
-        //protected string notice;
 
         /// <summary>
         /// 
@@ -156,7 +127,7 @@ namespace PdfSharp.Fonts.OpenType
         {
             get;
             private set;
-            // BUG: never set
+            // BUG_OLD: never set
         } = default!;
 
         /// <summary>
@@ -196,7 +167,7 @@ namespace PdfSharp.Fonts.OpenType
         {
             get;
             private set;
-            // BUG: never set
+            // BUG_OLD: never set
         }
 
         /// <summary>

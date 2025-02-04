@@ -81,7 +81,7 @@ namespace MigraDoc.Rendering
         {
             double size = font.Size * GetSubSuperScaling(font);
 
-            return new XFont(font.Name, size, font.Style, font.PdfOptions);
+            return new XFont(font.Name2, size, font.Style, font.PdfOptions);
         }
 
         internal static XBrush FontColorToXBrush(Font font)

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0-windows;net472</TargetFrameworks>
+    <TargetFrameworks>net6.0-windows;net8.0-windows;net462</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <UseWPF>true</UseWPF>
     <DefineConstants>WPF</DefineConstants>    
@@ -37,11 +37,13 @@
     <Compile Include="..\PdfSharp.Tests\Fonts\FontEmbeddingTests.cs" Link="Fonts\FontEmbeddingTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Fonts\FontHelperTests.cs" Link="Fonts\FontHelperTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Fonts\FontResolverTests.cs" Link="Fonts\FontResolverTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Fonts\UseWindowsFontsTests.cs" Link="Fonts\UseWindowsFontsTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Drawing\text\GlyphHelperTests.cs" Link="Drawing\text\GlyphHelperTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Drawing\text\MeasurementTests.cs" Link="Drawing\text\MeasurementTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Drawing\text\TextTests.cs" Link="Drawing\text\TextTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Drawing\text\UnicodeHelperTests.cs" Link="Drawing\text\UnicodeHelperTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Drawing\xforms\XFormTests.cs" Link="Drawing\xforms\XFormTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Helper\XunitHelper.cs" Link="Helper\XunitHelper.cs" />
     <Compile Include="..\PdfSharp.Tests\IO\CLexerTests.cs" Link="IO\CLexerTests.cs" />
     <Compile Include="..\PdfSharp.Tests\IO\LexerTests.cs" Link="IO\LexerTests.cs" />
     <Compile Include="..\PdfSharp.Tests\IO\ReaderTests.cs" Link="IO\ReaderTests.cs" />
@@ -52,15 +54,29 @@
     <Compile Include="..\PdfSharp.Tests\Pdf\objectmodel\ArrayTests.cs" Link="PDF\objectmodel\ArrayTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Pdf\objectmodel\DictionaryTests.cs" Link="PDF\objectmodel\DictionaryTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Pdf\objectmodel\NameTests.cs" Link="PDF\objectmodel\NameTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Pdf\signatures\BouncyCastleSignerTests.cs" Link="PDF\signatures\BouncyCastleSignerTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Pdf\signatures\DefaultSignerTests.cs" Link="PDF\signatures\DefaultSignerTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Structs\XUnitTests.cs" Link="Structs\XUnitTests.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="BouncyCastle.Cryptography" />
+    <PackageReference Include="Xunit.SkippableFact" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.Shared\PdfSharp.Shared.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
     <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper-wpf\PdfSharp.TestHelper-wpf.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets-wpf\PdfSharp.Snippets-wpf.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Testing-wpf\PdfSharp.Testing-wpf.csproj" />
     <ProjectReference Include="..\..\src\PdfSharp.Charting-wpf\PdfSharp.Charting-wpf.csproj" />
     <ProjectReference Include="..\..\src\PdfSharp-wpf\PdfSharp-wpf.csproj" />
+    <ProjectReference Include="..\..\src\PdfSharp.Cryptography\PdfSharp.Cryptography.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Helper\" />
   </ItemGroup>
 
 </Project>

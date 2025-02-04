@@ -412,7 +412,7 @@ namespace PdfSharp.BigGustave
                 stream.WriteChunkLength(length);
                 stream.WriteChunkHeader(Encoding.ASCII.GetBytes("iTXt"));
                 stream.Write(keyword, 0, keyword.Length);
-                
+
                 stream.WriteByte(0); // Null separator
                 stream.WriteByte(0); // Compression flag (0 for uncompressed)
                 stream.WriteByte(0); // Compression method (0, ignored since flag is zero)

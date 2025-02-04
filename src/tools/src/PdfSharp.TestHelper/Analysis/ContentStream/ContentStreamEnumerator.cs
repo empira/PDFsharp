@@ -146,7 +146,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         /// <param name="countMatchesOnly">Counts only elements check returns true for.</param>
         public bool MovePrevious(Func<string, bool> check, int steps, bool countMatchesOnly)
         {
-            return Move(check, steps, countMatchesOnly, false);
+            return Move(check, steps, countMatchesOnly, true);
         }
 
         /// <summary>
@@ -268,14 +268,14 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         /// <summary>
         /// Provides functions to load text objects for further inspection.
         /// </summary>
-        public GetText Text => _text ??= new GetText(this);
-        GetText? _text;
+        public TextGetter Text => _text ??= new TextGetter(this);
+        TextGetter? _text;
 
         /// <summary>
         /// Provides functions to load line objects for further inspection.
         /// </summary>
-        public GetLine Line => _line ??= new GetLine(this);
-        GetLine? _line;
+        public LineGetter Line => _line ??= new LineGetter(this);
+        LineGetter? _line;
 
         public void Dispose()
         { }

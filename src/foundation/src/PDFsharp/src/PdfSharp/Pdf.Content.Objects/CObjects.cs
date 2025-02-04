@@ -3,8 +3,9 @@
 
 using System.Collections;
 using System.Text;
+using PdfSharp.Internal;
 
-namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
+namespace PdfSharp.Pdf.Content.Objects  // TODO_OLD: split into single files
 {
     /// <summary>
     /// Base class for all PDF content stream objects.
@@ -375,18 +376,18 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
         HexString,
 
         /// <summary>
-        /// The string... TODO.
+        /// The string... TODO_OLD.
         /// </summary>
         UnicodeString,
 
         /// <summary>
-        /// The string... TODO.
+        /// The string... TODO_OLD.
         /// </summary>
         UnicodeHexString,
 
         /// <summary>
-        /// HACK: The string is the content of a dictionary.
-        /// Currently, there is no parser for dictionaries in Content Streams.
+        /// The string is the content of a dictionary.
+        /// Currently, there is no parser for dictionaries in content streams.
         /// </summary>
         Dictionary,
     }
@@ -557,7 +558,7 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO: split into single files
                 if (String.IsNullOrEmpty(value))
                     throw new ArgumentNullException(nameof(value));
                 if (value[0] != '/')
-                    throw new ArgumentException(PSSR.NameMustStartWithSlash);
+                    throw new ArgumentException(PsMsgs.NameMustStartWithSlash);
                 _name = value;
             }
         }

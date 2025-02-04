@@ -1,6 +1,9 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using Microsoft.Extensions.Logging;
+using PdfSharp.Logging;
+
 namespace PdfSharp.Pdf.Filters
 {
     /// <summary>
@@ -10,7 +13,7 @@ namespace PdfSharp.Pdf.Filters
     /// </summary>
     public class DctDecode : NoOpFiler
     {
-        // Reference: 3.3.7  DCTDecode Filter / Page 84
+        // Reference:     3.3.7  DCTDecode Filter / Page 84
         // Reference 2.0: 7.4.8  DCTDecode filter / Page 48
 
         // Implemented as a hack to read the ISO_32000-2_2020(en).pdf file.
@@ -21,7 +24,7 @@ namespace PdfSharp.Pdf.Filters
         // ReSharper disable once RedundantOverriddenMember
         public override byte[] Encode(byte[] data)
         {
-            // TODO. Check where it is used.
+            PdfSharpLogHost.Logger.LogInformation("DctDecode.Encode is not implemented and returns a copy of the input data.");
             return base.Encode(data);
         }
 
@@ -31,7 +34,7 @@ namespace PdfSharp.Pdf.Filters
         // ReSharper disable once RedundantOverriddenMember
         public override byte[] Decode(byte[] data, FilterParms? parms)
         {
-            // TODO. Check where it is used.
+            PdfSharpLogHost.Logger.LogInformation("DctDecode.Decode is not implemented and returns a copy of the input data.");
             return base.Decode(data, parms);
         }
     }

@@ -177,10 +177,6 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Returns the parameters string for the named destination.
         /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            return _parameters;
-        }
+        public override string ToString() => _parameters;
     }
 }

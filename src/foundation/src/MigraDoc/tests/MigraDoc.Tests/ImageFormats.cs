@@ -9,6 +9,7 @@ using PdfSharp.Quality;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Rendering;
+using PdfSharp.Diagnostics;
 using Xunit;
 #if CORE
 using PdfSharp.Fonts;
@@ -17,12 +18,27 @@ using PdfSharp.Snippets.Font;
 #if WPF
 using System.IO;
 #endif
+using SecurityTestHelper = PdfSharp.TestHelper.SecurityTestHelper;
+using SecurityTestHelperMD = MigraDoc.Tests.Helper.SecurityTestHelper;
 
 namespace MigraDoc.Tests
 {
     [Collection("PDFsharp")]
-    public class ImageFormats
+    public class ImageFormats : IDisposable
     {
+        public ImageFormats()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
 #if WPF
         public void Test_Image_Formats_Wpf()
@@ -34,8 +50,6 @@ namespace MigraDoc.Tests
         {
             // Create a MigraDoc document.
             var document = CreateDocument(true);
-
-            // ----- Unicode encoding in MigraDoc is demonstrated here. -----
 
             // Create a renderer for the MigraDoc document.
             var pdfRenderer = new PdfDocumentRenderer()
@@ -189,7 +203,7 @@ namespace MigraDoc.Tests
         public void Test_Image_Formats_Encrypted(SecurityTestHelper.TestOptionsEnum optionsEnum)
 #endif
         {
-            // Attempt to avoid "image file locked" under .NET 4.7.2.
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
             GC.Collect();
             GC.WaitForFullGCComplete();
 
@@ -202,7 +216,7 @@ namespace MigraDoc.Tests
 
                 var document = CreateDocument(true);
 
-                var pdfRenderer = SecurityTestHelper.RenderSecuredDocument(document, options);
+                var pdfRenderer = SecurityTestHelperMD.RenderSecuredDocument(document, options);
                 pdfRenderer.Save(filename);
                 // ReSharper disable once RedundantAssignment
                 pdfRenderer = null;
@@ -222,7 +236,7 @@ namespace MigraDoc.Tests
                 PdfFileUtility.ShowDocumentIfDebugging(filenameRead);
             }
 
-            // Attempt to avoid "image file locked" under .NET 4.7.2.
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
             GC.Collect();
             GC.WaitForFullGCComplete();
         }
@@ -267,7 +281,7 @@ namespace MigraDoc.Tests
             {
                 var path = root + image.Path;
 
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                if (!PdfSharp.Capabilities.OperatingSystem.IsWindows)
                     path = path.Replace('\\', '/');
 
                 var file = Path.GetFileName(image.Path);
@@ -294,7 +308,8 @@ namespace MigraDoc.Tests
             public Unit? Width { get; set; }
         }
 
-        readonly TestImage[] _testImages = {
+        readonly TestImage[] _testImages =
+        [
             // JPEG
             new() { Path = @"jpeg\windows7problem.jpg", Comment = "JPEG image", Width = "12cm" },
             new() { Path = @"jpeg\TruecolorNoAlpha.jpg", Comment = "JPEG image" },
@@ -346,6 +361,6 @@ namespace MigraDoc.Tests
             new() { Path = @"misc\Rose (RGB 8).tif", Comment = "TIFF, not supported by Core build" },
             new() { Path = @"misc\Test.gif", Comment = "GIF, not supported by Core build" },
             new() { Path = @"misc\Test.png", Comment = "PNG image" }
-        };
+        ];
     }
 }

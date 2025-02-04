@@ -1,12 +1,9 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-// With this define each iref object gets a unique number (uid) to make them distinguishable in the debugger
+// With this define each iref object gets a unique number (uid) to make them distinguishable in the debugger.
 #define UNIQUE_IREF_
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using PdfSharp.Logging;
 using PdfSharp.Pdf.IO;
@@ -27,7 +24,7 @@ namespace PdfSharp.Pdf.Advanced
         //   no PdfReference, because they are embedded in a parent objects.
         //
         // * PdfReference objects are used to reference PdfObject instances. A value in a PDF dictionary
-        //   or array that is a PdfReference represents an indirect reference. A value in a PDF dictionary or
+        //   or array that is a PdfReference represents an indirect reference. A value in a PDF dictionary
         //   or array that is a PdfObject represents a direct (or embedded) object.
         //
         // * When a PDF file is imported, the PdfXRefTable is filled with PdfReference objects keeping the
@@ -92,11 +89,6 @@ namespace PdfSharp.Pdf.Advanced
             get => _objectID;
             set
             {
-                // Makes no sense anymore.
-                //// Ignore redundant invocations.
-                //if (_objectID == value)
-                //    return;
-
                 _objectID = value;
 #if true_
                 if (Document != null)
@@ -129,19 +121,11 @@ namespace PdfSharp.Pdf.Advanced
         public SizeType Position
         {
             get => _position;
-#if true
             set
             {
-#if DEBUG_
-                if (value < 0)
-                    _ = typeof(int);
-#endif
                 Debug.Assert(value >= 0);
                 _position = value;
             }
-#else
-                set => _position = value;
-#endif
         }
         SizeType _position;
 
@@ -163,12 +147,9 @@ namespace PdfSharp.Pdf.Advanced
         PdfObject _value = default!;
 
         /// <summary>
-        /// Hack for dead objects.
+        /// Resets value to null. Used when reading object stream.
         /// </summary>
-        internal void SetObject(PdfObject value)
-        {
-            _value = value;
-        }
+        internal void ResetObject() => _value = null!;
 
         /// <summary>
         /// Gets or sets the document this object belongs to.
@@ -206,7 +187,7 @@ namespace PdfSharp.Pdf.Advanced
 
         /// <summary>
         /// Dereferences the specified item. If the item is a PdfReference, the item is set
-        /// to the referenced value. Otherwise no action is taken.
+        /// to the referenced value. Otherwise, no action is taken.
         /// </summary>
         public static void Dereference(ref PdfItem item)
         {
@@ -223,8 +204,6 @@ namespace PdfSharp.Pdf.Advanced
         {
             public int Compare(PdfReference? l, PdfReference? r)
             {
-                //var l = x;
-                //var r = y;
                 if (l != null)
                 {
                     if (r != null)

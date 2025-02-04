@@ -1,14 +1,11 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Internals;
 using MigraDoc.DocumentObjectModel.Visitors;
-using PdfSharp.Diagnostics;
+using PdfSharp.Pdf.Internal;
 using Color = MigraDoc.DocumentObjectModel.Color;
 using Font = MigraDoc.DocumentObjectModel.Font;
 
@@ -38,38 +35,40 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         public void Render(Document doc, string file, string workingDirectory)
         {
-#if NET6_0_OR_GREATER
-            var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
-#else
-            Encoding? ansiEncoding;
-            try
-            {
-                // Try to get ANSI encoding.
-                ansiEncoding = Encoding.GetEncoding(1252);
-            }
-            catch (NotSupportedException)
-            {
-#if NET6_0_OR_GREATER
-                // Register provider if ANSI encoding is not available.
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-#endif
-                ansiEncoding = Encoding.GetEncoding(1252);
-            }
-#endif
+            // #DELETE
+            //#if NET6_0_OR_GREATER
+            //            var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
+            //#else
+            //            Encoding? ansiEncoding;
+            //            try
+            //            {
+            //                // Try to get ANSI encoding.
+            //                ansiEncoding = Encoding.GetEncoding(1252);
+            //            }
+            //            catch (NotSupportedException)
+            //            {
+            //#if NET6_0_OR_GREATER
+            //                // Register provider if ANSI encoding is not available.
+            //                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            //#endif
+            //                ansiEncoding = Encoding.GetEncoding(1252);
+            //            }
+            //#endif
+            var ansiEncoding = PdfEncoders.WinAnsiEncoding;
 
             StreamWriter? streamWriter = null;
             try
             {
-                _document = doc;
+                Document = doc;
                 _docObject = doc;
-                _workingDirectory = workingDirectory;
+                WorkingDirectory = workingDirectory;
                 string path = file;
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
                 if (workingDirectory != null)
                     path = Path.Combine(workingDirectory, file);
 
-                streamWriter = new StreamWriter(path, false, ansiEncoding);
-                _rtfWriter = new RtfWriter(streamWriter);
+                streamWriter = new(path, false, ansiEncoding);
+                _rtfWriter = new(streamWriter);
                 WriteDocument();
             }
             finally
@@ -96,22 +95,18 @@ namespace MigraDoc.RtfRendering
         public void Render(Document document, Stream stream, bool closeStream, string workingDirectory)
         {
             if (document == null)
-                throw new ArgumentNullException("document");
+                throw new ArgumentNullException(nameof(document));
             if (document.UseCmykColor)
                 throw new InvalidOperationException("Cannot create RTF document with CMYK colors.");
 
-#if NET6_0_OR_GREATER
-            var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
-#else
-            var ansiEncoding = Encoding.GetEncoding(1252);
-#endif
+            var ansiEncoding = PdfEncoders.WinAnsiEncoding;
             StreamWriter? streamWriter = null;
             try
             {
                 streamWriter = new(stream, ansiEncoding);
-                _document = document;
+                Document = document;
                 _docObject = document;
-                _workingDirectory = workingDirectory;
+                WorkingDirectory = workingDirectory;
                 _rtfWriter = new(streamWriter);
                 WriteDocument();
             }
@@ -138,13 +133,13 @@ namespace MigraDoc.RtfRendering
         public string RenderToString(Document document, string workingDirectory)
         {
             if (document == null)
-                throw new ArgumentNullException("document");
+                throw new ArgumentNullException(nameof(document));
             if (document.UseCmykColor)
                 throw new InvalidOperationException("Cannot create RTF document with CMYK colors.");
 
-            _document = document;
+            Document = document;
             _docObject = document;
-            _workingDirectory = workingDirectory;
+            WorkingDirectory = workingDirectory;
             StringWriter? writer = null;
             try
             {
@@ -169,8 +164,8 @@ namespace MigraDoc.RtfRendering
             if (Document.EmbeddedFiles.Count > 0)
                 throw new InvalidOperationException("Embedded files are not supported in RTF documents.");
 
-            RtfFlattenVisitor flattener = new RtfFlattenVisitor();
-            flattener.Visit(_document);
+            var flattener = new RtfFlattenVisitor();
+            flattener.Visit(Document);
             Prepare();
             _rtfWriter.StartContent();
             RenderHeader();
@@ -184,15 +179,33 @@ namespace MigraDoc.RtfRendering
         void Prepare()
         {
             _fontList.Clear();
-            //Fonts
-            _fontList.Add("Courier New");
+
+            // Add predefined fonts.
+            foreach (var fontName in GetPredefinedFontNames())
+                _fontList.Add(fontName);
 
             _colorList.Clear();
             _colorList.Add(Colors.Black);//!!necessary for borders!!
             _listList.Clear();
             ListInfoRenderer.Clear();
             ListInfoOverrideRenderer.Clear();
-            CollectTables(_document);
+            CollectTables(Document);
+        }
+
+        /// <summary>
+        /// Gets a distinct set of all predefined font names relevant for RTF creation.
+        /// ErrorFontName is not returned as it isn’t used for RTF files.
+        /// </summary>
+        static IEnumerable<string> GetPredefinedFontNames()
+        {
+            var fontNames = new[]
+            { 
+                PredefinedFontsAndChars.RtfDocumentInfoFontName, 
+                PredefinedFontsAndChars.Bullets.Level1FontName, 
+                PredefinedFontsAndChars.Bullets.Level2FontName, 
+                PredefinedFontsAndChars.Bullets.Level3FontName
+            };
+            return fontNames.Distinct();
         }
 
         /// <summary>
@@ -215,7 +228,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Fills the font, color and (later!) list hashtables so they can be rendered and used by other renderers.
+        /// Fills the font, color and (later!) list hashtables, so they can be rendered and used by other renderers.
         /// </summary>
         void CollectTables(DocumentObject dom)
         {
@@ -277,10 +290,10 @@ namespace MigraDoc.RtfRendering
 
             _rtfWriter.StartContent();
             _rtfWriter.WriteControl("fonttbl");
-            for (int idx = 0; idx < _fontList.Count; ++idx)
+            for (int idx = 0; idx < _fontList.Count; idx++)
             {
                 _rtfWriter.StartContent();
-                string name = (string)_fontList[idx];
+                string name = _fontList[idx];
                 _rtfWriter.WriteControl("f", idx);
 #if true
                 //System.Drawing.Font font = new System.Drawing.Font(name, 12); //any size
@@ -311,9 +324,8 @@ namespace MigraDoc.RtfRendering
             //this would indicate index 0 as auto color:
             //this.rtfWriter.WriteSeparator();
             //left away cause there is no auto color in MigraDoc.
-            foreach (var obj in _colorList)
+            foreach (var color in _colorList)
             {
-                Color color = (Color)obj;
                 _rtfWriter.WriteControl("red", (int)color.R);
                 _rtfWriter.WriteControl("green", (int)color.G);
                 _rtfWriter.WriteControl("blue", (int)color.B);
@@ -331,7 +343,7 @@ namespace MigraDoc.RtfRendering
                 return (int)_fontList.IndexOf(fontName);
 
             //development purpose exception
-            throw new ArgumentException(@"Font does not exist in this document’s font table.", "fontName");
+            throw new ArgumentException(@"Font does not exist in this document’s font table.", nameof(fontName));
         }
 
         /// <summary>
@@ -340,10 +352,10 @@ namespace MigraDoc.RtfRendering
         internal int GetColorIndex(Color color)
         {
             Color clr = color.GetMixedTransparencyColor();
-            int idx = (int)_colorList.IndexOf(clr);
+            int idx = _colorList.IndexOf(clr);
             // Development purpose exception.
             if (idx < 0)
-                throw new ArgumentException(@"Color does not exist in this document’s color table.", "color");
+                throw new ArgumentException(@"Color does not exist in this document’s color table.", nameof(color));
             return idx;
         }
 
@@ -352,7 +364,7 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         internal int GetStyleIndex(string styleName)
         {
-            return _document.Styles.GetIndex(styleName);
+            return Document.Styles.GetIndex(styleName);
         }
 
         /// <summary>
@@ -362,7 +374,7 @@ namespace MigraDoc.RtfRendering
         {
             _rtfWriter.StartContent();
             _rtfWriter.WriteControl("stylesheet");
-            foreach (var style in _document.Styles)
+            foreach (var style in Document.Styles)
             {
                 Debug.Assert(style != null, nameof(style) + " != null");
                 RendererFactory.CreateRenderer(style, this).Render();
@@ -380,9 +392,8 @@ namespace MigraDoc.RtfRendering
 
             _rtfWriter.StartContent();
             _rtfWriter.WriteControlWithStar("listtable");
-            foreach (var obj in _listList)
+            foreach (var lst in _listList)
             {
-                ListInfo lst = (ListInfo)obj;
                 ListInfoRenderer lir = new ListInfoRenderer(lst, this);
                 lir.Render();
             }
@@ -390,9 +401,8 @@ namespace MigraDoc.RtfRendering
 
             _rtfWriter.StartContent();
             _rtfWriter.WriteControlWithStar("listoverridetable");
-            foreach (var obj in _listList)
+            foreach (var lst in _listList)
             {
-                ListInfo lst = (ListInfo)obj;
                 ListInfoOverrideRenderer lir =
                     new ListInfoOverrideRenderer(lst, this);
                 lir.Render();
@@ -408,7 +418,7 @@ namespace MigraDoc.RtfRendering
             RenderInfo();
             RenderDocumentFormat();
             RenderGlobalPorperties();
-            foreach (var sect in _document.Sections)
+            foreach (var sect in Document.Sections)
             {
                 Debug.Assert(sect != null, nameof(sect) + " != null");
                 RendererFactory.CreateRenderer(sect, this).Render();
@@ -439,7 +449,7 @@ namespace MigraDoc.RtfRendering
             // Word cannot realize the mirror margins property for single sections,
             // although rtf control words exist for this purpose.
             // Thus, the mirror margins property is set globally if it’s true for the first section.
-            var sec = _document.Sections.First as Section;
+            var sec = Document.Sections.First as Section;
             if (sec != null)
             {
                 if (sec.PageSetup.Values.MirrorMargins is not null && sec.PageSetup.MirrorMargins)
@@ -475,13 +485,13 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         void RenderInfo()
         {
-            if (_document.Values.Info.IsValueNullOrEmpty())
+            if (Document.Values.Info.IsValueNullOrEmpty())
                 return;
 
             _rtfWriter.StartContent();
-            _rtfWriter.WriteControl("f", 0); // Font with ID 0 is Courier New. See Prepare().
+            _rtfWriter.WriteControl("f", GetFontIndex(PredefinedFontsAndChars.RtfDocumentInfoFontName));
             _rtfWriter.WriteControl("info");
-            DocumentInfo info = _document.Info;
+            DocumentInfo info = Document.Info;
             if (!info.Values.Title.IsValueNullOrEmpty())
             {
                 _rtfWriter.StartContent();
@@ -512,33 +522,22 @@ namespace MigraDoc.RtfRendering
             }
             _rtfWriter.EndContent();
         }
-
+        
         /// <summary>
         /// Gets the MigraDoc document that is currently rendered.
         /// </summary>
-        internal Document Document
-        {
-            get { return _document; }
-        }
-
-        Document _document = null!;
+        internal Document Document { get; private set; } = null!;
 
         /// <summary>
         /// Gets the RtfWriter the document is rendered with.
         /// </summary>
         internal RtfWriter RtfWriter
-        {
-            get { return _rtfWriter; }
-        }
+            => _rtfWriter;
 
-        internal string WorkingDirectory
-        {
-            get { return _workingDirectory; }
-        }
-        string _workingDirectory = null!;
+        internal string WorkingDirectory { get; private set; } = null!;
 
-        readonly List<Color> _colorList = new List<Color>();
-        readonly List<string> _fontList = new List<string>();
-        readonly List<ListInfo> _listList = new List<ListInfo>();
+        readonly List<Color> _colorList = new();
+        readonly List<string> _fontList = new();
+        readonly List<ListInfo> _listList = new();
     }
 }

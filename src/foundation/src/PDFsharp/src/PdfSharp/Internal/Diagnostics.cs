@@ -70,7 +70,7 @@ namespace PdfSharp.Internal
         {
             // Hex formatting does not work with type Char. It must be cast to integer.
             string message =
-                Invariant($"Unexpected character '0x{ch:x4}' in PDF stream. The file may be corrupted. ") +
+                Invariant($"Unexpected character '0x{(uint)ch:x4}' in PDF stream. The file may be corrupted. ") +
                     "If you think this is a bug in PDFsharp, please send us your PDF file (issues (at) pdfsharp.net).\n" + dump;
             ThrowParserException(message);
         }

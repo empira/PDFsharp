@@ -18,7 +18,7 @@ using SysRect = System.Windows.Rect;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfRadialGradientBrush = System.Windows.Media.RadialGradientBrush;
 #endif
-#if UWP
+#if WUI
 using Windows.UI;
 using Windows.UI.Xaml.Media;
 using Microsoft.Graphics.Canvas;
@@ -179,7 +179,7 @@ namespace PdfSharp.Drawing
         //public void SetSigmaBellShape(double focus, double scale);
 
 #if GDI
-        //TODO: Change from LinearGradient to RadialGradient
+        //TODO_OLD: Change from LinearGradient to RadialGradient
         internal override System.Drawing.Brush RealizeGdiBrush()
         {
             //if (dirty)
@@ -194,7 +194,7 @@ namespace PdfSharp.Drawing
             //}
 
 #if not_implemented
-            // TODO: use dirty to optimize code
+            // TODO_OLD: use dirty to optimize code
             GdiLinearGradientBrush brush;
             try
             {
@@ -275,7 +275,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if UWP
+#if WUI
         internal override ICanvasBrush RealizeCanvasBrush()
         {
             ICanvasBrush brush;

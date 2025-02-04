@@ -29,7 +29,7 @@ namespace PdfSharp.Drawing
         // * XFontSource represents a single font (file) in memory.
         // * An XFontSource holds a reference to its OpenTypeFontFace.
         // * To prevent large heap fragmentation this class must exist only once.
-        // * TODO: ttcf
+        // * ttcf postponed to PDFsharp.Fonts.
 
         // Signature of a true type collection font.
         const uint ttcf = 0x66637474;
@@ -73,8 +73,8 @@ namespace PdfSharp.Drawing
 #if CORE
         internal static XFontSource GetOrCreateFromGlyphTypeface(string typefaceKey, XGlyphTypeface? glyphTypeface)
         {
-            // #CORE HACK
-            throw new NotImplementedException();
+            // #CORE NYI
+            throw new NotImplementedException(nameof(GetOrCreateFromGlyphTypeface));
 
             //byte[] bytes = null; //FontDataHelper.SegoeWP;
             //XFontSource fontSource = GetOrCreateFrom(typefaceKey, bytes);
@@ -229,13 +229,6 @@ namespace PdfSharp.Drawing
             }
         }
         ulong _key;
-
-        //public void IncrementKey()
-        //{
-        //    // HACK: Depends on implementation of CalcChecksum.
-        //    // Increment check sum and keep length untouched.
-        //    _key += 1ul << 32;
-        //}
 
         /// <summary>
         /// Gets the name of the font’s name table.

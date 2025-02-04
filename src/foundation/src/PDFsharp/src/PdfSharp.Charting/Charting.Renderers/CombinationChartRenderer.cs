@@ -118,7 +118,7 @@ namespace PdfSharp.Charting.Renderers
             if (cri.ColumnSeriesRendererInfos != null)
             {
                 cri.SeriesRendererInfos = cri.ColumnSeriesRendererInfos;
-                //TODO Check for Clustered- or StackedPlotAreaRenderer
+                //TODO_OLD Check for Clustered- or StackedPlotAreaRenderer
                 renderer = new ColumnClusteredPlotAreaRenderer(_rendererParms);
                 renderer.Format();
             }
@@ -168,7 +168,7 @@ namespace PdfSharp.Charting.Renderers
             if (cri.ColumnSeriesRendererInfos != null)
             {
                 cri.SeriesRendererInfos = cri.ColumnSeriesRendererInfos;
-                //TODO Check for Clustered- or StackedPlotAreaRenderer
+                //TODO_OLD Check for Clustered- or StackedPlotAreaRenderer
                 renderer = new ColumnClusteredPlotAreaRenderer(_rendererParms);
                 renderer.Draw();
             }
@@ -209,7 +209,7 @@ namespace PdfSharp.Charting.Renderers
             var cri = (CombinationRendererInfo)_rendererParms.RendererInfo;
             var seriesColl = cri.Chart.SeriesCollection;
             cri.SeriesRendererInfos = new SeriesRendererInfo[seriesColl.Count];
-            for (int idx = 0; idx < seriesColl.Count; ++idx)
+            for (int idx = 0; idx < seriesColl.Count; idx++)
             {
                 SeriesRendererInfo sri = new SeriesRendererInfo();
                 sri.Series = seriesColl[idx];

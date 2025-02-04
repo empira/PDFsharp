@@ -3,14 +3,13 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using PdfSharp.Events;
 using PdfSharp.Pdf;
 using PdfSharp.Drawing;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Visitors;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.DocumentObjectModel.Tables;
-using MigraDoc.Rendering.Resources;
-using PdfSharp.Events;
 
 namespace MigraDoc.Rendering
 {
@@ -158,9 +157,10 @@ namespace MigraDoc.Rendering
             if (documentObject == null)
                 throw new ArgumentNullException(nameof(documentObject));
 
-            if (documentObject is not Shape && documentObject is not Table &&
+            if (documentObject is not Shape &&
+                documentObject is not Table &&
                 documentObject is not Paragraph)
-                throw new ArgumentException(Messages2.ObjectNotRenderable, nameof(documentObject));
+                throw new ArgumentException(MdPdfMsgs.ObjectNotRenderable(documentObject.GetType().Name).Message);
 
             var renderer = Renderer.Create(graphics, this, documentObject, null);
             renderer!.Format(new Rectangle(xPosition, yPosition, width, double.MaxValue), null);
@@ -185,7 +185,7 @@ namespace MigraDoc.Rendering
                 return;
 
             /* var headerArea = */
-            FormattedDocument.GetHeaderArea(page);  // BUG Does it return something?
+            FormattedDocument.GetHeaderArea(page);  // BUG_OLD Does it return something?
             RenderInfo[] renderInfos = formattedHeader.GetRenderInfos();
             var fieldInfos = FormattedDocument.GetFieldInfos(page);
             foreach (RenderInfo renderInfo in renderInfos)
@@ -300,6 +300,62 @@ namespace MigraDoc.Rendering
         /// Gets or sets the print date, i.e. the rendering date.
         /// </summary>
         public DateTime PrintDate { get; set; } = DateTime.MinValue;
+
+        internal PredefinedFontsAndChars FontsAndChars => _fontsAndChars ??= new ();
+        PredefinedFontsAndChars? _fontsAndChars;
+
+        internal class PredefinedFontsAndChars
+        {
+            /// <summary>
+            /// Creates and caches the XFont used for error messages as they are of a fixed size and style.
+            /// </summary>
+            internal XFont ErrorFont => _errorFont ??= 
+                CreateFont(MigraDoc.PredefinedFontsAndChars.ErrorFontName, 8, XFontStyleEx.Regular, "predefined error font");
+            XFont? _errorFont;
+
+            internal PredefinedBullets Bullets => _bullets ??= new();
+            PredefinedBullets? _bullets;
+
+            static XFont CreateFont(string familyName, double emSize, XFontStyleEx style, string propertyDescription)
+            {
+                try
+                {
+                    return new(familyName, emSize, style);
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException(
+                        $"The font '{familyName}' cannot be resolved for {propertyDescription}. Use another font name or fix your font resolver.", ex);
+                }
+            }
+
+            /// <summary>
+            /// Creates all fixed predefined fonts for early failing.
+            /// Bullet fonts are not created for early failing as their style and therefore the fontface depends on the format of the lists in the document.
+            /// </summary>
+            internal void CreateAllFixedFonts()
+            {
+                _ = ErrorFont;
+            }
+            
+            internal class PredefinedBullets
+            {
+                internal XFont GetLevel1Font(double emSize, XFontStyleEx style) => 
+                    CreateFont(MigraDoc.PredefinedFontsAndChars.Bullets.Level1FontName, emSize, style, "predefined bullet level 1 font");
+
+                internal char Level1Character => MigraDoc.PredefinedFontsAndChars.Bullets.Level1Character;
+
+                internal XFont GetLevel2Font(double emSize, XFontStyleEx style) => 
+                    CreateFont(MigraDoc.PredefinedFontsAndChars.Bullets.Level2FontName, emSize, style, "predefined bullet level 2 font");
+
+                internal char Level2Character => MigraDoc.PredefinedFontsAndChars.Bullets.Level2Character;
+                
+                internal XFont GetLevel3Font(double emSize, XFontStyleEx style) => 
+                    CreateFont(MigraDoc.PredefinedFontsAndChars.Bullets.Level3FontName, emSize, style, "predefined bullet level 3 font");
+
+                internal char Level3Character => MigraDoc.PredefinedFontsAndChars.Bullets.Level3Character;
+            }
+        }
 
         /// <summary>
         /// Arguments for the PrepareDocumentProgressEvent which is called while a document is being prepared (you can use this to display a progress bar).

@@ -7,6 +7,7 @@ using System.Drawing;
 #if WPF
 using System.Windows.Media;
 #endif
+using PdfSharp.Internal;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
@@ -116,7 +117,7 @@ namespace PdfSharp.Pdf
 
             var array = item as PdfArray;
             if (array == null)
-                throw new InvalidOperationException(PSSR.UnexpectedTokenInPdfFile);
+                throw new InvalidOperationException(PsMsgs.UnexpectedTokenInPdfFile);
 
             _x1 = array.Elements.GetReal(0);
             _y1 = array.Elements.GetReal(1);

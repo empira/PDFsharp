@@ -5,7 +5,6 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using PdfSharp.Drawing;
 using MigraDoc.DocumentObjectModel.Shapes;
-using MigraDoc.Rendering.Resources;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.Logging;
 
@@ -38,7 +37,7 @@ namespace MigraDoc.Rendering
                 !XImage.ExistsFile(_imageFilePath))
             {
                 _failure = ImageFailure.FileNotFound;
-                MigraDocLogHost.PdfRenderingLogger.LogWarning(Messages2.ImageNotFound(_image.Name));
+                MigraDocLogHost.PdfRenderingLogger.LogWarning(MdPdfMsgs.ImageNotFound(_image.Name).Message);
                 //Debug.WriteLine(Messages2.ImageNotFound(_image.Name), "warning");
             }
             ImageFormatInfo formatInfo = (ImageFormatInfo)_renderInfo.FormatInfo;
@@ -110,26 +109,24 @@ namespace MigraDoc.Rendering
             switch (formatInfo.Failure)
             {
                 case ImageFailure.EmptySize:
-                    failureString = Messages2.DisplayEmptyImageSize;
+                    failureString = MdPdfMsgs.DisplayEmptyImageSize.Message;
                     break;
 
                 case ImageFailure.FileNotFound:
-                    failureString = Messages2.DisplayImageFileNotFound;
+                    failureString = MdPdfMsgs.DisplayImageFileNotFound("???").Message;
                     break;
 
                 case ImageFailure.InvalidType:
-                    failureString = Messages2.DisplayInvalidImageType;
+                    failureString = MdPdfMsgs.DisplayInvalidImageType.Message;
                     break;
 
                 case ImageFailure.NotRead:
                 default:
-                    failureString = Messages2.DisplayImageNotRead;
+                    failureString = MdPdfMsgs.DisplayImageNotRead.Message;
                     break;
             }
 
-            // Create stub font.
-            XFont font = new XFont("Courier New", 8);
-            _gfx.DrawString(failureString, font, XBrushes.Red, destRect, XStringFormats.Center);
+            _gfx.DrawString(failureString, _documentRenderer.FontsAndChars.ErrorFont, XBrushes.Red, destRect, XStringFormats.Center);
         }
 
         void CalculateImageDimensions()
@@ -147,7 +144,7 @@ namespace MigraDoc.Rendering
                 catch (InvalidOperationException ex)
                 {
                     //Debug.WriteLine(Messages2.InvalidImageType(ex.Message));
-                    MigraDocLogHost.DocumentModelLogger.LogError(Messages2.InvalidImageType(ex.Message));
+                    MigraDocLogHost.DocumentModelLogger.LogError(MdPdfMsgs.InvalidImageType(ex.Message).Message);
                     formatInfo.Failure = ImageFailure.InvalidType;
                 }
 
@@ -281,7 +278,7 @@ namespace MigraDoc.Rendering
                             formatInfo.Width = XUnitPt.FromCentimeter(2.5);
                             formatInfo.Height = XUnitPt.FromCentimeter(2.5);
                             //Debug.WriteLine(Messages2.EmptyImageSize);
-                            MigraDocLogHost.PdfRenderingLogger.LogError(Messages2.EmptyImageSize);
+                            MigraDocLogHost.PdfRenderingLogger.LogError(MdPdfMsgs.EmptyImageSize.Message);
                             _failure = ImageFailure.EmptySize;
                         }
                         else
@@ -293,7 +290,7 @@ namespace MigraDoc.Rendering
                     catch (Exception ex)
                     {
                         //Debug.WriteLine(Messages2.ImageNotReadable(_image.Name, ex.Message));
-                        MigraDocLogHost.PdfRenderingLogger.LogError(Messages2.ImageNotReadable(_image.Name, ex.Message));
+                        MigraDocLogHost.PdfRenderingLogger.LogError(MdPdfMsgs.ImageNotReadable(_image.Name, ex.Message).Message);
                         formatInfo.Failure = ImageFailure.NotRead;
                     }
                     finally

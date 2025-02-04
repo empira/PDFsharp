@@ -2,9 +2,6 @@
 // See the LICENSE file in the solution root for more information.
 
 using MigraDoc.GrammarByExample;
-using PdfSharp.Diagnostics;
-using PdfSharp.Fonts;
-using PdfSharp.Snippets.Font;
 
 using Xunit;
 
@@ -37,24 +34,7 @@ namespace GdiGrammarByExample
 #endif
         {
             Skip.If(SkippableTests.SkipSlowTests());
-            if (!PdfSharp.Capabilities.Build.IsCoreBuild)
-            {
-                RunTest();
-            }
-            else
-            {
-                // This test requires Wingdings font, so we set FailsafeFontResolver as fallback.
-                PdfSharpCore.ResetAll();
-                try
-                {
-                    GlobalFontSettings.FallbackFontResolver = new FailsafeFontResolver();
-                    RunTest();
-                }
-                finally
-                {
-                    PdfSharpCore.ResetAll();
-                }
-            }
+            RunTest();
         }
         // ReSharper restore InconsistentNaming
 

@@ -148,9 +148,9 @@ namespace PdfSharp.Charting.Renderers
             labelSize.Height = lineSpace * xHeight / cellSpace;
 
             int countTickLabels = (int)((yMax - yMin) / yMajorTick) + 1;
-            for (int i = 0; i < countTickLabels; ++i)
+            for (int idx = 0; idx < countTickLabels; idx++)
             {
-                double y = yMin + yMajorTick * i;
+                double y = yMin + yMajorTick * idx;
                 string str = y.ToString(yari.TickLabelsFormat);
 
                 labelSize.Width = gfx.MeasureString(str, yari.TickLabelsFont).Width;

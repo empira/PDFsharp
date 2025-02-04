@@ -1,6 +1,7 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Internal;
 using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Pdf
@@ -16,7 +17,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfName()
         {
-            _value = "/";  // Empty name.
+            Value = "/";  // Empty name.
         }
 
         /// <summary>
@@ -28,9 +29,9 @@ namespace PdfSharp.Pdf
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
             if (value.Length == 0 || value[0] != '/')
-                throw new ArgumentException(PSSR.NameMustStartWithSlash);
+                throw new ArgumentException(PsMsgs.NameMustStartWithSlash);
 
-            _value = value;
+            Value = value;
         }
 
         /// <summary>
@@ -39,37 +40,34 @@ namespace PdfSharp.Pdf
         public override bool Equals(object? obj)
         {
             if (obj is PdfName pdfName)
-                return _value.Equals(pdfName._value);
-            return _value.Equals(obj);
+                return Value.Equals(pdfName.Value);
+            return Value.Equals(obj);
         }
 
         /// <summary>
         /// Returns the hash code for this instance.
         /// </summary>
-        public override int GetHashCode() 
-            => _value.GetHashCode();
+        public override int GetHashCode() => Value.GetHashCode();
 
         /// <summary>
         /// Gets the name as a string.
         /// </summary>
-        public string Value => _value;
-
-        readonly string _value;
+        public string Value { get; }
 
         /// <summary>
         /// Returns the name. The string always begins with a slash.
         /// </summary>
-        public override string ToString() => _value;
+        public override string ToString() => Value;
 
         /// <summary>
         /// Determines whether the specified name and string are equal.
         /// </summary>
-        public static bool operator ==(PdfName? name, string? str)  // BUG TODO check all operator ==
+        public static bool operator ==(PdfName? name, string? str)  // BUG_OLD TODO_OLD check all operator ==
         {
             if (name is null)
                 return str is null;
 
-            return name._value == str;
+            return name.Value == str;
         }
 
         /// <summary>
@@ -79,14 +77,14 @@ namespace PdfSharp.Pdf
             => !(name == str);
 
         /// <summary>
-        /// Represents the empty name.
+        /// Gets an empty name.
         /// </summary>
-        public static readonly PdfName Empty = new PdfName("/");
+        public static PdfName Empty => new("/");
 
         /// <summary>
         /// Adds the slash to a string, that is needed at the beginning of a PDFName string.
         /// </summary>
-        public static string AddSlash(string value) // TODO PDFsharp6: Naming. StL: WithSlash?
+        public static string AddSlash(string value) // TODO_OLD PDFsharp6: Naming. StL: WithSlash?
         {
             if (value.Length == 0)
                 return "/";
@@ -97,12 +95,26 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Removes the slash from a string, that is needed at the beginning of a PDFName string.
         /// </summary>
-        public static string RemoveSlash(string value) // TODO PDFsharp6: Naming. StL: WithoutSlash?
+        public static string RemoveSlash(string value) // TODO_OLD PDFsharp6: Naming. StL: WithoutSlash?
         {
             if (value.Length == 0 || value[0] != '/')
                 return value;
 
-            return value.Substring(1);
+            return value[1..];
+        }
+
+        /// <summary>
+        /// Gets a PdfName form a string. The string must not start with a slash.
+        /// </summary>
+        public static PdfName FromString(string value)
+        {
+            if (String.IsNullOrEmpty(value))
+                return Empty;
+
+            if (value[0] == '/')
+                throw new ArgumentException($"String '{value}' must not start with a slash.");
+
+            return new('/' + value);
         }
 
         /// <summary>
@@ -110,8 +122,8 @@ namespace PdfSharp.Pdf
         /// </summary>
         internal override void WriteObject(PdfWriter writer)
         {
-            // TODO: what if Unicode character are part of the name?
-            // TODO: 7.3.5 Name objects: "In such situations, the sequence of bytes making up the name
+            // TODO_OLD: what if Unicode character are part of the name?
+            // TODO_OLD: 7.3.5 Name objects: "In such situations, the sequence of bytes making up the name
             //     object should be interpreted according to UTF-8, a variable-length byte-encoded
             //     representation of Unicode in which the printable ASCII characters have the same
             //     representations as in ASCII. This enables a name object to represent text virtually
@@ -139,7 +151,7 @@ namespace PdfSharp.Pdf
                 if (l != null)
                 {
                     if (r != null)
-                        return String.Compare(l._value, r._value, StringComparison.Ordinal);
+                        return String.Compare(l.Value, r.Value, StringComparison.Ordinal);
                     return -1;
                 }
                 if (r != null)

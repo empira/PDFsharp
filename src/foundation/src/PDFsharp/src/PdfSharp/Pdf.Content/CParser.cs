@@ -213,7 +213,7 @@ namespace PdfSharp.Pdf.Content
         {
             CSymbol current = _lexer.ScanNextToken();
             if (symbol != current)
-                ContentReaderDiagnostics.ThrowContentReaderException(PSSR.UnexpectedToken(_lexer.Token));
+                ContentReaderDiagnostics.ThrowContentReaderException(PsMsgs.UnexpectedToken(_lexer.Token));
             return current;
         }
 

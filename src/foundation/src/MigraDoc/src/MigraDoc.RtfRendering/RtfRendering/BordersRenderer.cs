@@ -45,7 +45,6 @@ namespace MigraDoc.RtfRendering
             }
             if (!isCellBorders)
                 Translate("DistanceFromTop", "brsp");
-            //REVIEW: Andere Renderer verfahren glaube ich genauso, da ja sonst doppelt gemoppelt
 
             if (LeaveAwayLeft)
                 _rtfWriter.WriteControl(GetBorderControl(BorderType.Top));

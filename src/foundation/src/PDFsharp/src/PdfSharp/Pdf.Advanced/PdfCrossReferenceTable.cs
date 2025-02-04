@@ -1,7 +1,6 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
 using System.Collections;
 using Microsoft.Extensions.Logging;
 using PdfSharp.Logging;
@@ -13,24 +12,18 @@ namespace PdfSharp.Pdf.Advanced
     /// Represents the cross-reference table of a PDF document. 
     /// It contains all indirect objects of a document.
     /// </summary>
-    sealed class PdfCrossReferenceTable  // Must not be derived from PdfObject.
+    sealed class PdfCrossReferenceTable(PdfDocument document) // Must not be derived from PdfObject.
     {
-        public PdfCrossReferenceTable(PdfDocument document)
-        {
-            _document = document;
-        }
-        readonly PdfDocument _document;
-
-        /// <summary>
-        /// Represents the relation between PdfObjectID and PdfReference for a PdfDocument.
-        /// </summary>
-        public Dictionary<PdfObjectID, PdfReference> ObjectTable = [];
-
         /// <summary>
         /// Gets or sets a value indicating whether this table is under construction.
         /// It is true while reading a PDF file.
         /// </summary>
         internal bool IsUnderConstruction { get; set; }
+
+        /// <summary>
+        /// Gets the number of objects in the table.
+        /// </summary>
+        public int Count => _objectTable.Count;
 
         /// <summary>
         /// Adds a cross-reference entry to the table. Used when parsing the trailer.
@@ -41,23 +34,24 @@ namespace PdfSharp.Pdf.Advanced
                 iref.ObjectID = new(GetNewObjectNumber());
 
             // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd because it would not build with .NET Framework.
-            if (ObjectTable.ContainsKey(iref.ObjectID))
+            if (_objectTable.ContainsKey(iref.ObjectID))
             {
-#if true_
-                // Really happens with existing (bad) PDF files.
-                // See file 'Detaljer.ARGO.KOD.rev.B.pdf' from https://github.com/ststeiger/PdfSharpCore/issues/362
-                throw new InvalidOperationException("Object already in table.");
-#else
+                var oldIref = _objectTable.First(x => x.Key == iref.ObjectID).Value;
+
                 // We remove the existing one and use the latter reference.
-                // HACK: This is just a quick fix that may not be the best solution in all cases.
+                // Choosing the latter reference may not be the best solution in all cases.
                 // On GitHub user packdat provides a PR that orders objects. This code is not yet integrated,
-                // because releasing 6.1.0 had a higher priority. We will fix this in 6.2.0.
-                // However, this quick fix is better than throwing an exception in all cases.
-                PdfSharpLogHost.PdfReadingLogger.LogError("Object '{ObjectID}' already exists in xref table. The latter one is used.", iref.ObjectID);
-                ObjectTable.Remove(iref.ObjectID);
-#endif
+                // because releasing 6.1.0 had a higher priority. We will fix this in a later release.
+                // However, using the last added object and logging an error is better than throwing an exception in all cases.
+                PdfSharpLogHost.PdfReadingLogger.LogError("Object '{ObjectID}' already exists in xref table’s objects, referring to position {Position}. The latter one referring to position {Position} is used. " +
+                                                          "This should not occur. If somebody came here, please send us your PDF file so that we can fix it (issues (at) pdfsharp.net.", oldIref.ObjectID, oldIref.Position, iref.Position);
+
+                _objectTable.Remove(iref.ObjectID);
             }
-            ObjectTable.Add(iref.ObjectID, iref);
+            _objectTable.Add(iref.ObjectID, iref);
+
+            // Always adjust MaxObjectNumber when a new object is added.
+            MaxObjectNumber = Math.Max(MaxObjectNumber, iref.ObjectNumber);
         }
 
         /// <summary>
@@ -66,17 +60,20 @@ namespace PdfSharp.Pdf.Advanced
         public void Add(PdfObject value)
         {
             if (value.Owner == null!)
-                value.Document = _document;
+                value.Document = document;
             else
-                Debug.Assert(value.Owner == _document);
+                Debug.Assert(value.Owner == document);
 
             if (value.ObjectID.IsEmpty)
                 value.SetObjectID(GetNewObjectNumber(), 0);
 
-            if (ObjectTable.ContainsKey(value.ObjectID))
+            if (_objectTable.ContainsKey(value.ObjectID))
                 throw new InvalidOperationException("Object already in table.");
 
-            ObjectTable.Add(value.ObjectID, value.ReferenceNotNull);
+            _objectTable.Add(value.ObjectID, value.ReferenceNotNull);
+
+            // Always adjust MaxObjectNumber when a new object is added.
+            MaxObjectNumber = Math.Max(MaxObjectNumber, value.ObjectNumber);
         }
 
         /// <summary>
@@ -85,7 +82,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public bool TryAdd(PdfObject value)
         {
-            if (value.ObjectID.IsEmpty || !ObjectTable.ContainsKey(value.ObjectID))
+            if (value.ObjectID.IsEmpty || !_objectTable.ContainsKey(value.ObjectID))
             {
                 Add(value);
                 return true;
@@ -95,7 +92,7 @@ namespace PdfSharp.Pdf.Advanced
 
         public void Remove(PdfReference iref)
         {
-            ObjectTable.Remove(iref.ObjectID);
+            _objectTable.Remove(iref.ObjectID);
         }
 
         /// <summary>
@@ -106,7 +103,7 @@ namespace PdfSharp.Pdf.Advanced
         {
             get
             {
-                ObjectTable.TryGetValue(objectID, out var iref);
+                _objectTable.TryGetValue(objectID, out var iref);
                 return iref;
             }
         }
@@ -114,24 +111,12 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Indicates whether the specified object identifier is in the table.
         /// </summary>
-        public bool Contains(PdfObjectID objectID)
-        {
-            return ObjectTable.ContainsKey(objectID);
-        }
+        public bool Contains(PdfObjectID objectID) => _objectTable.ContainsKey(objectID);
 
-        //public PdfObject GetObject(PdfObjectID objectID)
-        //{
-        //  return this[objectID].Value;
-        //}
-
-        //    /// <summary>
-        //    /// Gets the entry for the specified object, or null if the object is not in
-        //    /// this XRef table.
-        //    /// </summary>
-        //    internal PdfReference GetEntry(PdfObjectID objectID)
-        //    {
-        //      return this[objectID];
-        //    }
+        /// <summary>
+        /// Gets a collection of all values in the table.
+        /// </summary>
+        public Dictionary<PdfObjectID, PdfReference>.ValueCollection Values => _objectTable.Values;
 
         /// <summary>
         /// Returns the next free object number.
@@ -177,7 +162,7 @@ namespace PdfSharp.Pdf.Advanced
         {
             get
             {
-                ICollection collection = ObjectTable.Keys;
+                ICollection collection = _objectTable.Keys;
                 var objectIDs = new PdfObjectID[collection.Count];
                 collection.CopyTo(objectIDs, 0);
                 return objectIDs;
@@ -191,7 +176,7 @@ namespace PdfSharp.Pdf.Advanced
         {
             get
             {
-                var collection = ObjectTable.Values;
+                var collection = _objectTable.Values;
                 var list = new List<PdfReference>(collection);
                 list.Sort(PdfReference.Comparer);
                 var iRefs = new PdfReference[collection.Count];
@@ -209,16 +194,14 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal int Compact()
         {
-            // TODO: remove PdfBooleanObject, PdfIntegerObject etc.
-            int removed = ObjectTable.Count;
-            //CheckConsistence();
-            // TODO: Is this really so easy?
-            PdfReference[] irefs = TransitiveClosure(_document.Trailer);
+            // IMPROVE: remove PdfBooleanObject, PdfIntegerObject etc.
+            int removed = _objectTable.Count;
+            PdfReference[] irefs = TransitiveClosure(document.Trailer);
 
 #if DEBUG
             // Have any two objects the same ID?
             Dictionary<int, int> ids = [];
-            foreach (PdfObjectID objID in ObjectTable.Keys)
+            foreach (PdfObjectID objID in _objectTable.Keys)
             {
                 ids.Add(objID.ObjectNumber, 0);
             }
@@ -226,25 +209,25 @@ namespace PdfSharp.Pdf.Advanced
             // Have any two irefs the same value?
             //Dictionary<int, int> ids = new Dictionary<int, int>();
             ids.Clear();
-            foreach (PdfReference iref in ObjectTable.Values)
+            foreach (PdfReference iref in _objectTable.Values)
             {
                 ids.Add(iref.ObjectNumber, 0);
             }
 
-            //
+            // Are all references different?
             Dictionary<PdfReference, int> refs = new Dictionary<PdfReference, int>();
             foreach (PdfReference iref in irefs)
             {
                 refs.Add(iref, 0);
             }
 
-            foreach (PdfReference value in ObjectTable.Values)
+            foreach (PdfReference value in _objectTable.Values)
             {
                 if (!refs.ContainsKey(value))
                     _ = typeof(int);
             }
 
-            foreach (PdfReference iref in ObjectTable.Values)
+            foreach (PdfReference iref in _objectTable.Values)
             {
                 if (iref.Value == null!)
                     _ = typeof(int);
@@ -253,9 +236,9 @@ namespace PdfSharp.Pdf.Advanced
 
             foreach (PdfReference iref in irefs)
             {
-                if (!ObjectTable.ContainsKey(iref.ObjectID))
+                if (!_objectTable.ContainsKey(iref.ObjectID))
                     _ = typeof(int);
-                Debug.Assert(ObjectTable.ContainsKey(iref.ObjectID));
+                Debug.Assert(_objectTable.ContainsKey(iref.ObjectID));
 
                 if (iref.Value == null!)
                     _ = typeof(int);
@@ -264,20 +247,21 @@ namespace PdfSharp.Pdf.Advanced
 #endif
 
             MaxObjectNumber = 0;
-            ObjectTable.Clear();
+            _objectTable.Clear();
             foreach (PdfReference iref in irefs)
             {
-                // This if is needed for corrupt PDF files from the wild.
-                // Without the if, an exception will be thrown if the file contains duplicate IDs ("An item with the same key has already been added to the dictionary.").
-                // With the if, the first object with the ID will be used and later objects with the same ID will be ignored.
-                if (!ObjectTable.ContainsKey(iref.ObjectID))
+                // This if-statement is needed for corrupt PDF files from the wild.
+                // Without the if-statement, an exception will be thrown if the file contains duplicate IDs ("An item with the same key has already been added to the dictionary.").
+                // With the if-statement, the first object with the ID will be used and later objects with the same ID will be ignored.
+                // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd because it would not build with .NET Framework.
+                if (!_objectTable.ContainsKey(iref.ObjectID))
                 {
-                    ObjectTable.Add(iref.ObjectID, iref);
+                    _objectTable.Add(iref.ObjectID, iref);
                     MaxObjectNumber = Math.Max(MaxObjectNumber, iref.ObjectNumber);
                 }
             }
             //CheckConsistence();
-            removed -= ObjectTable.Count;
+            removed -= _objectTable.Count;
             return removed;
         }
 
@@ -288,19 +272,15 @@ namespace PdfSharp.Pdf.Advanced
         {
             //CheckConsistence();
             PdfReference[] irefs = AllReferences;
-            ObjectTable.Clear();
+            _objectTable.Clear();
             // Give all objects a new number.
             int count = irefs.Length;
             for (int idx = 0; idx < count; idx++)
             {
                 PdfReference iref = irefs[idx];
-#if DEBUG_
-                if (iref.ObjectNumber == 1108)
-                    _ = typeof(int);
-#endif
                 iref.ObjectID = new PdfObjectID(idx + 1);
                 // Rehash with new number.
-                ObjectTable.Add(iref.ObjectID, iref);
+                _objectTable.Add(iref.ObjectID, iref);
             }
             MaxObjectNumber = count;
             //CheckConsistence();
@@ -318,7 +298,7 @@ namespace PdfSharp.Pdf.Advanced
 #endif
             var closestPosition = SizeType.MaxValue;
             PdfReference? closest = null;
-            foreach (var iref in ObjectTable.Values)
+            foreach (var iref in _objectTable.Values)
             {
                 var pos = iref.Position;
                 if (pos < position)
@@ -340,7 +320,7 @@ namespace PdfSharp.Pdf.Advanced
         public void CheckConsistence()
         {
             Dictionary<PdfReference, object?> ht1 = new();
-            foreach (var iref in ObjectTable.Values)
+            foreach (var iref in _objectTable.Values)
             {
                 Debug.Assert(!ht1.ContainsKey(iref), "Duplicate iref.");
                 Debug.Assert(iref.Value != null);
@@ -348,23 +328,22 @@ namespace PdfSharp.Pdf.Advanced
             }
 
             Dictionary<PdfObjectID, object?> ht2 = new();
-            foreach (var iref in ObjectTable.Values)
+            foreach (var iref in _objectTable.Values)
             {
                 Debug.Assert(!ht2.ContainsKey(iref.ObjectID), "Duplicate iref.");
                 ht2.Add(iref.ObjectID, null);
             }
 
-            ICollection collection = ObjectTable.Values;
+            ICollection collection = _objectTable.Values;
             int count = collection.Count;
             PdfReference[] irefs = new PdfReference[count];
             collection.CopyTo(irefs, 0);
-#if true
 #if DEBUG
             for (int i = 0; i < count; i++)
                 for (int j = 0; j < count; j++)
                     if (i != j)
                     {
-                        Debug.Assert(ReferenceEquals(irefs[i].Document, _document));
+                        Debug.Assert(ReferenceEquals(irefs[i].Document, document));
                         Debug.Assert(irefs[i] != irefs[j]);
                         Debug.Assert(!ReferenceEquals(irefs[i], irefs[j]));
                         Debug.Assert(!ReferenceEquals(irefs[i].Value, irefs[j].Value));
@@ -373,40 +352,26 @@ namespace PdfSharp.Pdf.Advanced
                         Debug.Assert(ReferenceEquals(irefs[i].Document, irefs[j].Document));
                     }
 #endif
-#endif
         }
-
-        ///// <summary>
-        ///// The garbage collector for PDF objects.
-        ///// </summary>
-        //public sealed class GC
-        //{
-        //  PdfXRefTable xrefTable;
-        //
-        //  internal GC(PdfXRefTable xrefTable)
-        //  {
-        //    _xrefTable = xrefTable;
-        //  }
-        //
-        //  public void Collect()
-        //  { }
-        //
-        //  public PdfReference[] ReachableObjects()
-        //  {
-        //    Hash_table objects = new Hash_table();
-        //    TransitiveClosure(objects, _xrefTable.document.trailer);
-        //  }
 
         /// <summary>
         /// Calculates the transitive closure of the specified PdfObject with the specified depth, i.e. all indirect objects
         /// recursively reachable from the specified object in up to maximally depth steps.
         /// </summary>
-        public PdfReference[] TransitiveClosure(PdfObject pdfObject, int depth = Int16.MaxValue)
+        public PdfReference[] TransitiveClosure(PdfObject pdfObject /*, int depth = Int16.MaxValue*/)
         {
             CheckConsistence();
             Dictionary<PdfItem, object?> objects = new();
-            _overflow = new();
+            //_overflow = new();
+#if DEBUG
+            _nestingLevel = _maxNestingLevel = 0;
+#endif
             TransitiveClosureImplementation(objects, pdfObject);
+#if DEBUG
+            // TODO Check 
+            PdfSharpLogHost.Logger.LogInformation("Transitive closure max nesting level is {NestingLevel}.", _maxNestingLevel);
+#endif
+#if false
         TryAgain:
             if (_overflow.Count > 0)
             {
@@ -420,7 +385,7 @@ namespace PdfSharp.Pdf.Advanced
                 }
                 goto TryAgain;
             }
-
+#endif
             CheckConsistence();
 
             ICollection collection = objects.Keys;
@@ -446,20 +411,32 @@ namespace PdfSharp.Pdf.Advanced
             return irefs;
         }
 
-        static int _nestingLevel;
-        Dictionary<PdfItem, object?> _overflow = new();
+        //// TODO: Delete next two lines?
+        //int _nestingLevel;
+        //Dictionary<PdfItem, object?> _overflow_ = new();
+#if DEBUG
+        int _nestingLevel;
+        int _maxNestingLevel;
+#endif
 
-        void TransitiveClosureImplementation(Dictionary<PdfItem, object?> objects, PdfObject pdfObject/*, ref int depth*/)
+        // TODO: Write new non-recursive function and counter check with this implementation.
+        void TransitiveClosureImplementation(Dictionary<PdfItem, object?> objects, PdfObject pdfObject)
         {
             try
             {
+#if DEBUG
                 _nestingLevel++;
+                _maxNestingLevel = Math.Max(_maxNestingLevel, _nestingLevel);
+#endif
+#if false
                 if (_nestingLevel >= 1000)
                 {
+                    // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd because it would not build with .NET Framework.
                     if (!_overflow.ContainsKey(pdfObject))
                         _overflow.Add(pdfObject, null);
                     return;
                 }
+#endif
 #if DEBUG_
                 //enterCount++;
                 if (enterCount == 5400)
@@ -472,7 +449,7 @@ namespace PdfSharp.Pdf.Advanced
                 //if (pdfObject.ObjectNumber == 5)
                 //  _ = typeof(int);
 #endif
-                IEnumerable? enumerable = null; //(IEnumerator)pdfObject;
+                IEnumerable? enumerable = null;
                 PdfDictionary? dict;
                 PdfArray? array;
                 if ((dict = pdfObject as PdfDictionary) != null)
@@ -482,7 +459,7 @@ namespace PdfSharp.Pdf.Advanced
                 else
                     Debug.Assert(false, "Should not come here.");
 
-                if (enumerable != null)
+                if (enumerable != null!)
                 {
                     foreach (PdfItem item in enumerable)
                     {
@@ -504,17 +481,17 @@ namespace PdfSharp.Pdf.Advanced
                             //    iref = dead;
                             //}
 
-                            if (!ReferenceEquals(iref.Document, _document))
+                            if (!ReferenceEquals(iref.Document, document))
                             {
                                 //Debug.WriteLine($"Bad iref: {iref.ObjectID.ToString()}");
                                 PdfSharpLogHost.PdfReadingLogger.LogError($"Bad iref: {iref.ObjectID.ToString()}");
                             }
-                            Debug.Assert(ReferenceEquals(iref.Document, _document) || iref.Document == null, "External object detected!");
+                            Debug.Assert(ReferenceEquals(iref.Document, document) || iref.Document == null, "External object detected!");
 #if DEBUG_
                             if (iref.ObjectID.ObjectNumber == 23)
                                 _ = typeof(int);
 #endif
-                            if (!objects.ContainsKey(iref))
+                            if (objects.ContainsKey(iref) is false)
                             {
                                 PdfObject value = iref.Value;
 
@@ -522,22 +499,26 @@ namespace PdfSharp.Pdf.Advanced
                                 if (iref.Document != null)
                                 {
                                     // ... from trailer hack
-                                    if (value == null)
+                                    if (value == null!) // Can it be null?
                                     {
-                                        iref = ObjectTable[iref.ObjectID];
+                                        iref = _objectTable[iref.ObjectID];
                                         Debug.Assert(iref.Value != null);
                                         value = iref.Value;
                                     }
-                                    Debug.Assert(ReferenceEquals(iref.Document, _document));
+                                    Debug.Assert(ReferenceEquals(iref.Document, document));
                                     objects.Add(iref, null);
                                     //Debug.WriteLine(String.Format("objects.Add('{0}', null);", iref.ObjectID.ToString()));
-                                    if (value is PdfArray || value is PdfDictionary)
-                                        TransitiveClosureImplementation(objects, value /*, ref depth*/);
+                                    if (value is PdfArray or PdfDictionary)
+                                        TransitiveClosureImplementation(objects, value);
                                 }
-                                //else
-                                //{
-                                //  objects2.Add(this[iref.ObjectID], null);
-                                //}
+#if DEBUG
+                                else
+                                {
+                                    _ = typeof(int);
+                                    // objects2.Add(this[iref.ObjectID], null);
+                                }
+#endif
+
                             }
                         }
                         else
@@ -549,15 +530,22 @@ namespace PdfSharp.Pdf.Advanced
                             //if (pdfObject28 != null)
                             //  Debug.Assert(Object.ReferenceEquals(pdfObject28.Document, _document));
                             if (item is PdfObject pdfObj and (PdfDictionary or PdfArray))
-                                TransitiveClosureImplementation(objects, pdfObj /*, ref depth*/);
+                                TransitiveClosureImplementation(objects, pdfObj);
                         }
                     }
                 }
             }
             finally
             {
+#if DEBUG
                 _nestingLevel--;
+#endif
             }
+        }
+
+        void TransitiveClosureImplementationNew(Dictionary<PdfItem, object?> objects, PdfObject pdfObject)
+        {
+            // ...
         }
 
         /// <summary>
@@ -569,7 +557,7 @@ namespace PdfSharp.Pdf.Advanced
             {
                 if (_deadObject == null)
                 {
-                    _deadObject = new PdfDictionary(_document);
+                    _deadObject = new PdfDictionary(document);
                     Add(_deadObject);
                     _deadObject.Elements.Add("/DeadObjectCount", new PdfInteger());
                 }
@@ -577,6 +565,11 @@ namespace PdfSharp.Pdf.Advanced
             }
         }
         PdfDictionary? _deadObject;
+
+        /// <summary>
+        /// Represents the relation between PdfObjectID and PdfReference for a PdfDocument.
+        /// </summary>
+        readonly Dictionary<PdfObjectID, PdfReference> _objectTable = [];
     }
 
     ///// <summary>

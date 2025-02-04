@@ -1,4 +1,4 @@
-﻿# PDFsharp Charting (WPF)
+﻿# PDFsharp Charting WPF
 
 This is the PdfSharp.Charting WPF build project.
 It defines no build constants.

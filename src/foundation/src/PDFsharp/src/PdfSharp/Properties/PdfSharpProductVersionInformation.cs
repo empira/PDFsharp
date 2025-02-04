@@ -1,12 +1,14 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+#pragma warning disable 0436
+
 namespace PdfSharp
 {
     /// <summary>
     /// Version information for all PDFsharp related assemblies.
     /// </summary>
-    // TODO: These literals are not in sync with the NuGet metadata. Should be fixed.
+    // TODO_OLD: These literals are not in sync with the NuGet metadata. Should be fixed.
     public static class PdfSharpProductVersionInformation
     {
         // Cannot use const string anymore because GitVersionInformation used static string.
@@ -49,7 +51,7 @@ namespace PdfSharp
 
         /// <summary>
         /// The PDF producer (created by) information string.
-        /// TODO: Called Creator in MigraDoc???
+        /// TODO_OLD: Called Creator in MigraDoc???
         /// </summary>
         public static readonly string Producer = $"{Title} {GitVersionInformation.NuGetVersion} ({Url})";
 
@@ -221,8 +223,8 @@ namespace PdfSharp
         // Hybrid - for testing only
         public const string Technology = "-h";
 #error Should not come here anymore. May be revived in the future.
-#elif UWP
-        // UWP - Universal Windows Platform
+#elif WUI
+        // WUI - Universal Windows Platform
         public const string Technology = "-uwp";
 #endif
     }

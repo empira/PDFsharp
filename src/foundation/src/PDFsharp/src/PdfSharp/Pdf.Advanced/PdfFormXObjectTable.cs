@@ -150,7 +150,7 @@ namespace PdfSharp.Pdf.Advanced
             /// </summary>
             public Selector(XForm form)
             {
-                // HACK: just use full path to identify
+                // HACK_OLD: just use full path to identify
                 Path = form._path.ToLowerInvariant();
             }
 

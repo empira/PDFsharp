@@ -7,7 +7,7 @@ using PdfSharp.Internal;
 #if WPF
 using PdfSharp.Internal;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media.Imaging;
 using PdfSharp.Internal;
 #endif
@@ -19,7 +19,7 @@ namespace PdfSharp.Drawing
     /// </summary>
     public sealed class XBitmapImage : XBitmapSource
     {
-        // TODO: Move code from XImage to this class.
+        // TODO_OLD: Move code from XImage to this class.
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XBitmapImage"/> class.
@@ -38,7 +38,7 @@ namespace PdfSharp.Drawing
 #if WPF
             DiagnosticsHelper.ThrowNotImplementedException("CreateBitmap");
 #endif
-#if UWP
+#if WUI
             DiagnosticsHelper.ThrowNotImplementedException("CreateBitmap");
 #endif
 #if CORE || GDI && !WPF // Prevent unreachable code error

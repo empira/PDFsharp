@@ -150,7 +150,7 @@ namespace MigraDoc.RtfRendering
             _enumTranslationTable.Add(BreakType.BreakOddPage, "odd");
             _enumTranslationTable.Add(BreakType.BreakNextPage, "page");
 
-            //TODO:  ListType under construction.
+            //TODO_OLD:  ListType under construction.
             _enumTranslationTable.Add(ListType.BulletList1, 23);
             _enumTranslationTable.Add(ListType.BulletList2, 23);
             _enumTranslationTable.Add(ListType.BulletList3, 23);
@@ -210,7 +210,6 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         /// <param name="unit"></param>
         /// <param name="rtfUnit"></param>
-        /// <returns></returns>
         internal static int ToRtfUnit(Unit unit, RtfUnit rtfUnit)
         {
             switch (rtfUnit)
@@ -314,7 +313,7 @@ namespace MigraDoc.RtfRendering
         /// <summary>
         /// Typed version of GetValueAsIntended.
         /// </summary>
-        protected virtual T? GetValueAsIntended2<T>(string valueName)  // TODO Use this?
+        protected virtual T? GetValueAsIntended2<T>(string valueName)  // TODO_OLD Use this?
         {
             return (T?)_docObject.GetValue(valueName, GV.GetNull);
         }

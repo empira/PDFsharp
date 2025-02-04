@@ -35,7 +35,7 @@ namespace PdfSharp.Drawing
 
         internal StreamReaderHelper(Stream stream, int streamLength)
         {
-            // TODO: Use the Stream as it is or ensure it is a MemoryStream?
+            // TODO_OLD: Use the Stream as it is or ensure it is a MemoryStream?
 #if CORE || GDI || WPF
             OriginalStream = stream;
             // Only copy when necessary.
@@ -60,7 +60,7 @@ namespace PdfSharp.Drawing
             }
 #else
             // For Win_RT there is no GetBuffer() => alternative implementation for Win_RT.
-            // TODO: Are there advantages of GetBuffer()? It should reduce LOH fragmentation.
+            // TODO_OLD: Are there advantages of GetBuffer()? It should reduce LOH fragmentation.
             this.stream = stream;
             this.stream.Position = 0;
             if (this.stream.Length > Int32.MaxValue)
@@ -219,6 +219,10 @@ namespace PdfSharp.Drawing
         internal enum ImageFormats
         {
             // ReSharper disable InconsistentNaming
+            /// <summary>
+            /// Value not set.
+            /// </summary>
+            Undefined = -1,
 
             /// <summary>
             /// Standard JPEG format (RGB).
@@ -250,7 +254,7 @@ namespace PdfSharp.Drawing
             // ReSharper restore InconsistentNaming
         }
 
-        internal ImageFormats ImageFormat;
+        internal ImageFormats ImageFormat = ImageFormats.Undefined;
 
         /// <summary>
         /// The width of the image in pixel.

@@ -1,7 +1,6 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System;
 using System.Collections;
 using MigraDoc.DocumentObjectModel.Tables;
 using MigraDoc.DocumentObjectModel.Visitors;
@@ -45,12 +44,11 @@ namespace MigraDoc.DocumentObjectModel
 
             int count = Count;
             coll._elements = new List<DocumentObject?>(count);
-            for (int index = 0; index < count; ++index)
+            for (int index = 0; index < count; index++)
             {
                 var doc = this[index];
                 if (doc != null)
                 {
-                    //doc = doc.Clone() as DocumentObject;
                     doc = (DocumentObject)doc.Clone();
                     doc.Parent = coll;
                 }
@@ -84,17 +82,16 @@ namespace MigraDoc.DocumentObjectModel
         public void Clear()
         {
             // Call ResetCachedValues for all affected objects.
-            int count = ((IList<DocumentObject?>)this).Count;
-            for (int idx = 0; idx < count; ++idx)
+            for (int idx = 0; idx < Count; idx++)
             {
-                var obj = (DocumentObject)((IList<DocumentObject?>)this)[idx]!;
-                obj.ResetCachedValues();
+                var obj = this[idx];
+                obj?.ResetCachedValues();
                 if (obj is Row row)
                     UpdateRowCachedValues(row);
             }
 
             // Now clear the list.
-            ((IList<DocumentObject?>)this).Clear();
+            _elements.Clear();
         }
 
         /// <summary>
@@ -102,11 +99,11 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public virtual void InsertObject(int index, DocumentObject val)
         {
-            SetParent(val);
+            SetParentOf(val);
             ((IList<DocumentObject?>)this).Insert(index, val);
             // Call ResetCachedValues for all objects moved by the Insert operation.
             int count = ((IList<DocumentObject?>)this).Count;
-            for (int idx = index + 1; idx < count; ++idx)
+            for (int idx = index + 1; idx < count; idx++)
             {
                 var obj = ((IList<DocumentObject?>)this)[idx]!;
                 if (obj is Row row)
@@ -118,11 +115,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Determines the index of a specific item in the collection.
         /// </summary>
-        public int IndexOf(DocumentObject? val)
-        {
-            //return ((IList)this).IndexOf(val);
-            return _elements.IndexOf(val);
-        }
+        public int IndexOf(DocumentObject? val) => _elements.IndexOf(val);
 
         /// <summary>
         /// Gets or sets the element at the specified index.
@@ -132,7 +125,7 @@ namespace MigraDoc.DocumentObjectModel
             get => _elements[index];
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 _elements[index] = value;
             }
         }
@@ -157,7 +150,7 @@ namespace MigraDoc.DocumentObjectModel
             ((IList<DocumentObject?>)this).RemoveAt(index);
             // Call ResetCachedValues for all objects moved by the RemoveAt operation.
             int count = ((IList<DocumentObject?>)this).Count;
-            for (int idx = index; idx < count; ++idx)
+            for (int idx = index; idx < count; idx++)
             {
                 var obj = (DocumentObject)((IList<DocumentObject?>)this)[idx]!;
                 if (obj is Row row)
@@ -171,7 +164,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public virtual void Add(DocumentObject? value)
         {
-            SetParent(value);
+            SetParentOf(value);
             _elements.Add(value);
 
             if (value is Row row)
@@ -195,12 +188,12 @@ namespace MigraDoc.DocumentObjectModel
                 else
                 {
                     // Called from Clear, InsertObject, or RemoveObjectAt: use a loop.
-                    for (int i = 0; i < rws.Count; ++i)
+                    for (int idx = 0; idx < rws.Count; idx++)
                     {
-                        if (row == rws[i])
+                        if (row == rws[idx])
                         {
-                            row.Values.Index = i;
-                            row.ResetIndex(i);
+                            row.Values.Index = idx;
+                            row.ResetIndex(idx);
                         }
                     }
                 }
@@ -373,7 +366,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Resets this instance, i.e. IsNull() will return true afterwards.
+        /// Resets this instance, i.e. IsNull() will return true afterward.
         /// </summary>
         public override void SetNull()
         {

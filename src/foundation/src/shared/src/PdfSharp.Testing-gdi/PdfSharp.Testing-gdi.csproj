@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0-windows;net472</TargetFrameworks>
+    <TargetFrameworks>net6.0-windows;net8.0-windows;net462</TargetFrameworks>
     <RootNamespace>PdfSharp.Testing_gdi</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -10,14 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\PdfSharp.Testing\FontResolver\UnitTestFontResolver.cs" Link="FontResolver\UnitTestFontResolver.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="FontResolver\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\PdfSharp.Shared\PdfSharp.Shared.csproj" />
+    <ProjectReference Include="..\PdfSharp.System\PdfSharp.System.csproj" />
     <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-gdi\PdfSharp-gdi.csproj" />
     <ProjectReference Include="..\PdfSharp.Quality-gdi\PdfSharp.Quality-gdi.csproj" />
   </ItemGroup>

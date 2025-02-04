@@ -19,7 +19,7 @@ namespace PdfSharp.Drawing
     /// </summary>
     static class ImageHelper
     {
-#if WPF && GDI  // #KEEP for reference
+#if WPF && GDI  // KEEP for reference
         /// <summary>
         /// Creates a WPF bitmap source from an GDI image.
         /// </summary>

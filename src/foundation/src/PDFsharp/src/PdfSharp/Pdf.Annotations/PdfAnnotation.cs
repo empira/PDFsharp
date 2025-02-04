@@ -1,7 +1,6 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf.Advanced;
 
@@ -151,7 +150,7 @@ namespace PdfSharp.Pdf.Annotations
                 {
                     if (array.Elements.Count == 3)
                     {
-                        // TODO: an array.GetColor() function may be useful here
+                        // TODO_OLD: an array.GetColor() function may be useful here
                         return XColor.FromArgb(
                             (int)(array.Elements.GetReal(0) * 255),
                             (int)(array.Elements.GetReal(1) * 255),
@@ -305,11 +304,11 @@ namespace PdfSharp.Pdf.Annotations
             [KeyInfo("1.1", KeyType.Array | KeyType.Optional)]
             public const string C = "/C";
 
-            // @PDF/UA
             /// <summary>
             /// (Required if the annotation is a structural content item; PDF 1.3)
             /// The integer key of the annotation’s entry in the structural parent tree.
             /// </summary>
+            // #PDF-UA
             [KeyInfo("1.3", KeyType.Integer | KeyType.Optional)]
             public const string StructParent = "/StructParent";
 

@@ -57,7 +57,7 @@ namespace PdfSharp.Pdf.Security
         /// </summary>
         public IEnumerable<(string Name, PdfCryptFilter CryptFilter)> GetCryptFilters()
         {
-            // Convert() modifies Elements. Avoid "Collection was modified; enumeration operation may not execute" error occuring in net 4.7.2.
+            // Convert() modifies Elements. Avoid "Collection was modified; enumeration operation may not execute" error occuring in net 4.6.2.
             // There is no way to access KeyValuePairs via index natively to use a for loop with.
             // Instead, enumerate Keys and get value via Elements[key], which shall be O(1).
             foreach (var key in Elements.Keys)
@@ -97,9 +97,9 @@ namespace PdfSharp.Pdf.Security
             var type = typeof(PdfCryptFilter);
 
             var ctorInfo = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-                null, new[] { typeof(PdfDictionary) }, null);
+                null, [typeof(PdfDictionary)], null);
             Debug.Assert(ctorInfo != null, "No appropriate constructor found for type: " + type.Name);
-            var cryptFilter = (PdfCryptFilter)ctorInfo.Invoke(new object[] { pdfItem });
+            var cryptFilter = (PdfCryptFilter)ctorInfo.Invoke([pdfItem]);
 
             if (keyToUpdate is not null)
                 Elements[keyToUpdate] = cryptFilter;

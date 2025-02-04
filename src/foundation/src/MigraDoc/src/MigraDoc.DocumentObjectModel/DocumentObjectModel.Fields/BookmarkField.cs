@@ -55,7 +55,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
         internal override void Serialize(Serializer serializer)
         {
             if (String.IsNullOrEmpty(Values.Name))
-                throw new InvalidOperationException(DomSR.MissingObligatoryProperty("Name", "BookmarkField"));
+                throw new InvalidOperationException(MdDomMsgs.MissingObligatoryProperty(nameof(Name), nameof(BookmarkField)).Message);
 
             serializer.Write("\\field(Bookmark)[Name = \"" + Name.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"]");
         }
@@ -69,7 +69,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

@@ -45,14 +45,15 @@ namespace PdfSharp.BigGustave
                     }
                 case InterlaceMethod.Adam7:
                     {
-                        var byteHack = bytesPerPixel == 1 ? 1 : 0; // TODO: Further investigation required.
-                        var pixelsPerRow = header.Width * bytesPerPixel + byteHack; // Add an extra byte per line.
+                        var byteHack = bytesPerPixel == 1 ? 1 : 0; // TODO_OLD: Further investigation required.
+                        var pixelsPerRow = header.Width * bytesPerPixel + byteHack; // Add an extra byte per line. // Is the name correct?
                         var newBytes = new byte[header.Height * pixelsPerRow];
                         var i = 0;
-                        var previousStartRowByteAbsolute = -1;
                         // 7 passes
                         for (var pass = 0; pass < 7; pass++)
                         {
+                            var previousStartRowByteAbsolute = -2 * pixelsPerRow; // Was: - 1;
+
                             var numberOfScanlines = Adam7.GetNumberOfScanlinesInPass(header, pass);
                             var numberOfPixelsPerScanline = Adam7.GetPixelsPerScanlineInPass(header, pass);
 
@@ -69,6 +70,7 @@ namespace PdfSharp.BigGustave
                                 for (var j = 0; j < numberOfPixelsPerScanline; j++)
                                 {
                                     var pixelIndex = Adam7.GetPixelIndexForScanlineInPass(header, pass, scanlineIndex, j);
+
                                     for (var k = 0; k < bytesPerPixel; k++)
                                     {
                                         var byteLineNumber = (j * bytesPerPixel) + k;
@@ -90,7 +92,7 @@ namespace PdfSharp.BigGustave
                     throw new ArgumentOutOfRangeException($"Invalid interlace method: {header.InterlaceMethod}.");
             }
         }
-        
+
         static byte SamplesPerPixel(ImageHeader header)
         {
             switch (header.ColorType)
@@ -164,7 +166,7 @@ namespace PdfSharp.BigGustave
                 data[byteAbsolute] += data[above];
                 return;
             }
-            
+
             if (type == FilterType.Sub)
             {
                 var leftIndex = rowByteIndex - bytesPerPixel;

@@ -17,11 +17,15 @@ using MigraDoc.Rendering;
 
 namespace HelloWorld
 {
+    /// <summary>
+    /// This sample is just a copy and used as a smoke test for MigraDoc development.
+    /// For the original sample check the PDFsharp.Samples repository.
+    /// </summary>
     class Program
     {
         static void Main()
         {
-            if (PdfSharp.Capabilities.Build.IsCoreBuild)
+            if (Capabilities.Build.IsCoreBuild)
                 GlobalFontSettings.FontResolver = new FailsafeFontResolver();
 
             // Create a MigraDoc document.

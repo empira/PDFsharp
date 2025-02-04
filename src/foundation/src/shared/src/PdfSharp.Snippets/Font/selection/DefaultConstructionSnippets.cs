@@ -32,7 +32,7 @@ using GdiFont = System.Drawing.Font;
 using System.Windows;
 using System.Windows.Media;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media;
 #endif
 using PdfSharp.Drawing;
@@ -70,7 +70,7 @@ namespace PdfSharp.Snippets.Font
         {
             XPoint pos;
 
-#if true || CORE || GDI || WPF || UWP
+#if true || CORE || GDI || WPF || WUI
             var fntRegular = new XFont(FamilyName, EmSize, XFontStyleEx.Regular, _fontOptions);
             var fntBold = new XFont(FamilyName, EmSize, XFontStyleEx.Bold, _fontOptions);
             var fntItalic = new XFont(FamilyName, EmSize, XFontStyleEx.Italic, _fontOptions);
@@ -272,9 +272,9 @@ namespace PdfSharp.Snippets.Font
 
         public override void RenderSnippet(XGraphics gfx)
         {
-#if CORE || GDI || UWP
+#if CORE || GDI || WUI
 #if TIMES_NEW_ROMAN
-#if !UWP
+#if !WUI
             var times = new FontFamily("Times New Roman");
 #else
             var times = "Times New Roman";
@@ -290,7 +290,7 @@ namespace PdfSharp.Snippets.Font
             var timesBoldItalic2 = new XFont(times, 42, XFontStyleEx.BoldItalic);
 #endif
 #if SEGOE_UI
-#if !UWP && false
+#if !WUI && false
             var segoe = new FontFamily("Segoe UI");
 #else
             var segoe = "Segoe UI";

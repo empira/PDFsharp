@@ -161,27 +161,27 @@ namespace PdfSharp.Pdf.Advanced
 
         PdfResourceMap? _xObjects;
 
-        // TODO: make own class
+        // TODO_OLD: make own class
         internal PdfResourceMap ExtGStates => _extGStates ??= (PdfResourceMap?)Elements.GetValue(Keys.ExtGState, VCF.Create) ?? NRT.ThrowOnNull<PdfResourceMap>();
 
         PdfResourceMap? _extGStates;
 
-        // TODO: make own class
+        // TODO_OLD: make own class
         internal PdfResourceMap ColorSpaces => _colorSpaces ??= (PdfResourceMap?)Elements.GetValue(Keys.ColorSpace, VCF.Create) ?? NRT.ThrowOnNull<PdfResourceMap>();
 
         PdfResourceMap? _colorSpaces;
 
-        // TODO: make own class
+        // TODO_OLD: make own class
         internal PdfResourceMap Patterns => _patterns ??= (PdfResourceMap?)Elements.GetValue(Keys.Pattern, VCF.Create) ?? NRT.ThrowOnNull<PdfResourceMap>();
 
         PdfResourceMap? _patterns;
 
-        // TODO: make own class
+        // TODO_OLD: make own class
         internal PdfResourceMap Shadings => _shadings ??= (PdfResourceMap?)Elements.GetValue(Keys.Shading, VCF.Create) ?? NRT.ThrowOnNull<PdfResourceMap>();
 
         PdfResourceMap? _shadings;
 
-        // TODO: make own class
+        // TODO_OLD: make own class
         internal PdfResourceMap Properties => _properties ??= (PdfResourceMap?)Elements.GetValue(Keys.Properties, VCF.Create) ?? NRT.ThrowOnNull<PdfResourceMap>();
 
         PdfResourceMap? _properties;
@@ -283,8 +283,8 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal bool ExistsResourceName(string name)
         {
-            // TODO: more precise: is this page imported and is PageOptions != Replace
-            // BUG: 
+            // TODO_OLD: more precise: is this page imported and is PageOptions != Replace
+            // BUG_OLD: 
             //if (!Owner.IsImported)
             //  return false;
 

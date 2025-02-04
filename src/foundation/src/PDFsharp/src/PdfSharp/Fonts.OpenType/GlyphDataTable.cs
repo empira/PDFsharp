@@ -44,7 +44,7 @@ namespace PdfSharp.Fonts.OpenType
         {
             try
             {
-                // not yet needed...
+                // Not yet needed...
             }
             // ReSharper disable once RedundantCatchClause
             catch (Exception)

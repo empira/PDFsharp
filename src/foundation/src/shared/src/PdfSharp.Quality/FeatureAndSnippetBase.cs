@@ -2,7 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.IO;
-//#if NET/FX_CORE || UWP || DNC10
+//#if NET/FX_CORE || WUI || DNC10
 //using System.Threading.Tasks;
 //using Windows.Foundation;
 //using Windows.Storage;
@@ -208,7 +208,7 @@ namespace PdfSharp.Quality
 
             // All drawing is done in presentation units (1/96 inch).
             var gfx = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Append, graphicsUnit, pageDirection);
-            // Draw a bounding box. BUG if graphics unit is not Presentation.
+            // Draw a bounding box. BUG_OLD if graphics unit is not Presentation.
 
             if (graphicsUnit != XGraphicsUnit.Point)
             {
@@ -337,7 +337,6 @@ namespace PdfSharp.Quality
         /// <param name="sourceBytes">The source bytes.</param>
         /// <param name="filepath">The filepath.</param>
         /// <param name="startViewer">if set to <c>true</c> [start viewer].</param>
-        /// <returns></returns>
         /// <exception cref="System.ArgumentNullException">sourceBytes</exception>
         public string SaveAndShowFile(byte[]? sourceBytes, string filepath = "", bool startViewer = false)
         {
@@ -540,7 +539,7 @@ namespace PdfSharp.Quality
 #if GDI
                 _gfx = null!;
 #endif
-                _pdfBytes = Array.Empty<byte>();
+                _pdfBytes = [];
             }
         }
         PdfDocument? _document;
@@ -644,7 +643,7 @@ namespace PdfSharp.Quality
         }
         byte[] _comparisonBytes = [];
 
-#if old  // #KEEP for reference
+#if old  // KEEP for reference
 //        protected DrawingVisual PrepareDrawingVisual(out DrawingContext dc)
 //        {
 //            return PrepareDrawingVisual(out dc, true);
@@ -984,7 +983,7 @@ namespace PdfSharp.Quality
 //        }
 #endif
 
-#if even_older  // #KEEP for reference
+#if even_older  // KEEP for reference
     ///// <summary>
     ///// Prepares new PDF page for drawing.
     ///// </summary>
