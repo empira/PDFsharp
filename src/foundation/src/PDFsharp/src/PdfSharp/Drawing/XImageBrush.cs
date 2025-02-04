@@ -28,7 +28,7 @@ namespace PdfSharp.Drawing
 
             path = Path.GetFullPath(path);
             if (!File.Exists(path))
-                throw new FileNotFoundException(PSSR.FileNotFound(path));
+                throw new FileNotFoundException(PsMsgs.FileNotFound(path));
 
             return new XImageBrush(path);
         }

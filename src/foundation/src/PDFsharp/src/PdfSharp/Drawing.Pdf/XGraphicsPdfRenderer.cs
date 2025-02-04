@@ -255,7 +255,8 @@ namespace PdfSharp.Drawing.Pdf
                 xGraphicsPath.AddRectangle(x, y, width, height);
                 DrawImageBrush(xImageBrush, xGraphicsPath);
 
-                if (pen != null) {
+                if (pen != null) 
+                {
                     AppendRectangle();
                     _content.Append("S\n");
                 }
@@ -313,14 +314,15 @@ namespace PdfSharp.Drawing.Pdf
 
                 DrawImageBrush(xImageBrush, xGraphicsPath);
 
-                if (pen != null) {
+                if (pen != null) 
+                {
                     AppendEllipse();
                     _content.Append("h ");
                     _content.Append("S\n");
                 }
-
                 return;
             }
+
             AppendEllipse();
             AppendStrokeFill(pen, brush, XFillMode.Winding, true);
 
@@ -375,6 +377,7 @@ namespace PdfSharp.Drawing.Pdf
                 }
                 return;
             }
+
             AppendPolygon();
             AppendStrokeFill(pen, brush, fillmode, true);
 
@@ -402,7 +405,8 @@ namespace PdfSharp.Drawing.Pdf
 
             Realize(pen, brush);
 
-            if (brush is XImageBrush imageBrush) {
+            if (brush is XImageBrush imageBrush) 
+            {
                 XGraphicsPath graphicsPath = new XGraphicsPath();
                 graphicsPath.AddPie(x, y, width, height, startAngle, sweepAngle);
 
@@ -415,6 +419,7 @@ namespace PdfSharp.Drawing.Pdf
                 }
                 return;
             }
+
             AppendPie();
             AppendStrokeFill(pen, brush, XFillMode.Alternate, true);
 
@@ -530,7 +535,7 @@ namespace PdfSharp.Drawing.Pdf
             AppendPath(path._pathGeometry);
             AppendStrokeFill(pen, brush, path.FillMode, false);
 #endif
-        }
+            }   
         }
  
         // ----- DrawString ---------------------------------------------------------------------------

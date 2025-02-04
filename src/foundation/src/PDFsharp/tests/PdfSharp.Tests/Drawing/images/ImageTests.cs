@@ -20,7 +20,6 @@ using PdfSharp.TestHelper;
 #if CORE
 #endif
 using Xunit;
-using PdfSharp.FontResolver;
 
 namespace PdfSharp.Tests.Drawing
 {
