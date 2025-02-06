@@ -162,7 +162,8 @@ namespace PdfSharp.Pdf.Advanced
         /// Creates the indirect object of the specified type, adds it to the document,
         /// and returns the object.
         /// </summary>
-        public T CreateIndirectObject<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>() where T : PdfObject
+        public T CreateIndirectObject<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>()
+            where T : PdfObject
         {
 #if true
             T obj = Activator.CreateInstance<T>();

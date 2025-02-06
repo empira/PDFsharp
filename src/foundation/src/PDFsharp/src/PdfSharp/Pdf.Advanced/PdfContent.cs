@@ -67,8 +67,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         void Decode()
         {
-            //if (Stream != null && Stream.Value != null)
-            if (Stream is { Value: { } })  // StL: Is this really more readable???
+            if (Stream is { Value: not null })
             {
                 var item = Elements["/Filter"];
                 if (item != null)
@@ -92,7 +91,7 @@ namespace PdfSharp.Pdf.Advanced
         {
             // If a content stream is touched by PDFsharp it is typically because graphical operations are
             // prepended or appended. Some nasty PDF tools do not preserve the graphical state correctly.
-            // Therefore we try to relieve the problem by surrounding the content stream with push/restore 
+            // Therefore, we try to relieve the problem by surrounding the content stream with push/restore 
             // graphic state operation.
             if (Stream != null!)
             {
@@ -128,7 +127,6 @@ namespace PdfSharp.Pdf.Advanced
 
             if (Stream != null!)
             {
-                //if (Owner.Options.CompressContentStreams)
                 if (Owner.Options.CompressContentStreams && Elements.GetName("/Filter").Length == 0)
                 {
                     Stream.Value = Filtering.FlateDecode.Encode(Stream.Value, _document.Options.FlateEncodeMode);
@@ -141,7 +139,8 @@ namespace PdfSharp.Pdf.Advanced
             base.WriteObject(writer);
         }
 
-        internal XGraphicsPdfRenderer? _pdfRenderer;
+        internal void SetRenderer(XGraphicsPdfRenderer? renderer) => _pdfRenderer = renderer;
+        XGraphicsPdfRenderer? _pdfRenderer;
 
         /// <summary>
         /// Predefined keys of this dictionary.

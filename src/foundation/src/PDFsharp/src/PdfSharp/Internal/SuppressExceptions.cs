@@ -37,7 +37,6 @@ namespace PdfSharp.Internal
     }
 
     // Experimental - not yet in use.
-
 #if true_
 
     interface IErrorResult// TODO_OLD: Find final name

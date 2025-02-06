@@ -35,22 +35,6 @@ namespace PdfSharp.Pdf.Internal
         {
             // We consistently use our own WinAnsiEncoding implementation in PDFsharp.
             get => _winAnsiEncoding ??= new AnsiEncoding();
-            // #DELETE
-            //            {
-            //                if (_winAnsiEncoding == null)
-            //                {
-            //                    //// Use own implementation because there is no ANSI encoding in .NET 6.
-            //                    //_winAnsiEncoding = new AnsiEncoding();
-            //#if NET6_0_OR_GREATER___ //
-            //                    // There is ANSI encoding available with .NET 6. Use it.
-            //                    _winAnsiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
-            //#else
-            //                    // StL 24-02-24: We are consistent on all platforms.
-            //                    _winAnsiEncoding = new AnsiEncoding();
-            //#endif
-            //                }
-            //                return _winAnsiEncoding;
-            //            }
         }
         static Encoding? _winAnsiEncoding;
 

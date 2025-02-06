@@ -148,7 +148,7 @@ namespace PdfSharp.Pdf.Advanced
                     {
                         _names = new PdfNameDictionary(Owner);
                         Owner.Internals.AddObject(_names);
-                        Elements.SetReference(Keys.Names, _names.Reference);
+                        Elements.SetReference(Keys.Names, _names.Reference ?? throw TH.InvalidOperationException_ReferenceMustNotBeNull());
                     }
                 }
                 return _names;
@@ -173,7 +173,7 @@ namespace PdfSharp.Pdf.Advanced
                         _dests = new PdfNamedDestinations();
                         _dests = new PdfNamedDestinations();
                         Owner.Internals.AddObject(_dests);
-                        Elements.SetReference(Keys.Dests, _dests.Reference);
+                        Elements.SetReference(Keys.Dests, _dests.Reference ?? throw TH.InvalidOperationException_ReferenceMustNotBeNull());
                     }
                 }
                 return _dests;

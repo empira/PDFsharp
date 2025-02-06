@@ -35,25 +35,6 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         public void Render(Document doc, string file, string workingDirectory)
         {
-            // #DELETE
-            //#if NET6_0_OR_GREATER
-            //            var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
-            //#else
-            //            Encoding? ansiEncoding;
-            //            try
-            //            {
-            //                // Try to get ANSI encoding.
-            //                ansiEncoding = Encoding.GetEncoding(1252);
-            //            }
-            //            catch (NotSupportedException)
-            //            {
-            //#if NET6_0_OR_GREATER
-            //                // Register provider if ANSI encoding is not available.
-            //                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            //#endif
-            //                ansiEncoding = Encoding.GetEncoding(1252);
-            //            }
-            //#endif
             var ansiEncoding = PdfEncoders.WinAnsiEncoding;
 
             StreamWriter? streamWriter = null;

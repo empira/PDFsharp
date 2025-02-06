@@ -306,7 +306,7 @@ namespace MigraDoc.DocumentObjectModel
             //   because the two operations are not always equivalent.
             //   
             //   While comparing a string to "" may seem like it’s checking for an empty string, it’s actually checking
-            //   for a specific value of an empty string.This can be a problem if the empty string is represented by
+            //   for a specific value of an empty string. This can be a problem if the empty string is represented by
             //   something other than "" in the code, such as null or whitespace.
             //   
             //   On the other hand, comparing the length of a string to 0 is always checking for an empty string,
@@ -314,7 +314,7 @@ namespace MigraDoc.DocumentObjectModel
             //   a string to "", because it requires calculating the length of the string before doing the comparison.
             //   
             //   Therefore, the decision of whether to use a string comparison with "" or a length comparison to 0 should
-            //   depend on the specific use case and the expected behavior of the code.In general, if you want to check if
+            //   depend on the specific use case and the expected behavior of the code. In general, if you want to check if
             //   a string is empty regardless of how it’s represented, a length comparison to 0 is a safer choice.
             //   But if you specifically want to check for an empty string represented by "", then a string comparison with ""
             //   may be more appropriate.
@@ -328,16 +328,20 @@ namespace MigraDoc.DocumentObjectModel
             try
             {
                 uint clr;
-                // Must use Enum.Parse because Enum.IsDefined is case-sensitive
-                try
+                // Do not parse strings that do not start with a letter, thus cannot be enum values.
+                if (!String.IsNullOrEmpty(color) && Char.IsLetter(color[0]))
                 {
-                    var obj = Enum.Parse(typeof(ColorName), color, true);
-                    clr = (uint)obj;
-                    return new(clr);
-                }
-                catch
-                {
-                    // Ignore exception because it’s not a ColorName.
+                    // Must use Enum.Parse because Enum.IsDefined is case-sensitive.
+                    try
+                    {
+                        var obj = Enum.Parse(typeof(ColorName), color, true);
+                        clr = (uint)obj;
+                        return new(clr);
+                    }
+                    catch
+                    {
+                        // Ignore exception because it’s not a ColorName.
+                    }
                 }
 
                 var numberStyle = NumberStyles.Integer;

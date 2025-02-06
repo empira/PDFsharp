@@ -19,7 +19,7 @@ namespace PdfSharp.Drawing.Internal
                     // Note: TestBitmapFileHeader updates stream.CurrentOffset on success.
 
                     ImagePrivateDataBitmap ipd = new ImagePrivateDataBitmap(stream.Data, stream.Length);
-                    ImportedImage ii = new ImportedImageBitmap(this, ipd);
+                    ImportedImage ii = new ImportedImageBitmap(ipd);
                     ii.Information.DefaultDPI = 96; // Assume 96 DPI if information not provided in the file.
 
                     if (TestBitmapInfoHeader(stream, ii, offsetImageData))
@@ -174,8 +174,8 @@ namespace PdfSharp.Drawing.Internal
         /// <summary>
         /// Initializes a new instance of the <see cref="ImportedImageBitmap"/> class.
         /// </summary>
-        public ImportedImageBitmap(IImageImporter importer, ImagePrivateDataBitmap data)
-            : base(importer, data)
+        public ImportedImageBitmap(ImagePrivateDataBitmap data)
+            : base(data)
         { }
 
         internal override ImageData PrepareImageData(PdfDocumentOptions options)

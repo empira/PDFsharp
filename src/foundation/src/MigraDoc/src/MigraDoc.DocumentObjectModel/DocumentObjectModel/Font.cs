@@ -224,21 +224,6 @@ namespace MigraDoc.DocumentObjectModel
         //    .Kerning = 0
         //    .Animation = wdAnimationNone
 
-        ///// <summary>
-        ///// Gets a value indicating whether the specified font exists.
-        ///// </summary>
-        //[Obsolete("This function is removed from DocumentObjectModel and always returns false.")]
-        //public static bool Exists(string fontName)
-        //{
-        //    //System.Drawing.FontFamily[] families = System.Drawing.FontFamily.Families;
-        //    //foreach (System.Drawing.FontFamily family in families)
-        //    //{
-        //    //  if (String.Compare(family.Name, fontName, true) == 0)
-        //    //    return true;
-        //    //}
-        //    return false;
-        //}
-
         /// <summary>
         /// Get a bitmask of all non-null properties.
         /// </summary>

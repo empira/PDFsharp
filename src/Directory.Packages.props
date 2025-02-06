@@ -15,23 +15,25 @@
 
     <!-- Digital signature packages used by PdfSharp.Cryptography and for testing -->
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="$(Cryptography_PackageVersion)" />
-    <PackageVersion Include="BouncyCastle.Cryptography" Version="2.4.0" />
+    <PackageVersion Include="BouncyCastle.Cryptography" Version="2.5.0" />
 
     <!-- Unit test packages used for testing only-->
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
-    <PackageVersion Include="xunit.core" Version="2.9.2" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageVersion Include="xunit.core" Version="2.9.3" />
     <PackageVersion Include="xunit.assert" Version="2.4.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageVersion Include="Xunit.Priority" Version="1.1.6" />
-    <PackageVersion Include="Xunit.SkippableFact" Version="1.4.13" />
+    <PackageVersion Include="Xunit.SkippableFact" Version="1.5.23" />
     <PackageVersion Include="XunitXml.TestLogger" Version="4.1.0" />
     <PackageVersion Include="FluentAssertions" Version="6.12.2" />
 
     <!-- GitVersion used for Semantic Versioning -->
     <PackageVersion Include="GitVersion.MsBuild" Version="5.12.0" />
-    <!-- GitVersion 6.0.5 has breaking changes. We fix it later -->
-    <!--<PackageVersion Include="GitVersion.MsBuild" Version="6.0.5" />-->
+    <!-- GitVersion 6 does not work in VS because of .NET Framework -->
+    <!--<PackageVersion Include="GitVersion.MsBuild" Version="6.1.0" />-->
 
+    <!-- Other packages -->
+    <PackageVersion Include="System.Resources.Extensions" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

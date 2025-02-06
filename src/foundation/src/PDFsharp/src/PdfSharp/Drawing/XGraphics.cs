@@ -185,7 +185,7 @@ namespace PdfSharp.Drawing
         /// <param name="pageUnit">The page unit.</param>
         /// <param name="pageDirection">The page direction.</param>
         /// <param name="renderEvents">The render events.</param>
-        XGraphics(Canvas canvas, XSize size, XGraphicsUnit pageUnit, XPageDirection pageDirection, RenderEvents renderEvents)
+        XGraphics(Canvas canvas, XSize size, XGraphicsUnit pageUnit, XPageDirection pageDirection, RenderEvents? renderEvents = null)
         {
             //throw new ArgumentNullException("canvas");
             if (canvas == null!)
@@ -412,7 +412,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Initializes a new instance of the XGraphics class used for drawing on a form.
         /// </summary>
-        XGraphics(XForm form, RenderEvents renderEvents)
+        XGraphics(XForm form, RenderEvents? renderEvents = null)
         {
             if (form == null!)
                 throw new ArgumentNullException(nameof(form));
@@ -571,7 +571,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Creates a new instance of the XGraphics class from a System.Drawing.Graphics object.
         /// </summary>
-        public static XGraphics FromGraphics(Graphics graphics, XSize size, RenderEvents renderEvents)
+        public static XGraphics FromGraphics(Graphics graphics, XSize size, RenderEvents? renderEvents = null)
         {
             // Creating a new instance is by design.
             var gfx = new XGraphics(graphics, size, XGraphicsUnit.Point, XPageDirection.Downwards, renderEvents);
@@ -584,7 +584,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Creates a new instance of the XGraphics class from a System.Drawing.Graphics object.
         /// </summary>
-        public static XGraphics FromGraphics(Graphics graphics, XSize size, XGraphicsUnit unit, RenderEvents renderEvents)
+        public static XGraphics FromGraphics(Graphics graphics, XSize size, XGraphicsUnit unit, RenderEvents? renderEvents = null)
         {
             // Creating a new instance is by design.
             var gfx = new XGraphics(graphics, size, unit, XPageDirection.Downwards, renderEvents);
@@ -618,7 +618,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Creates a new instance of the XGraphics class from a System.Windows.Media.DrawingContext object.
         /// </summary>
-        public static XGraphics FromDrawingContext(DrawingContext drawingContext, XSize size, XGraphicsUnit unit, RenderEvents renderEvents)
+        public static XGraphics FromDrawingContext(DrawingContext drawingContext, XSize size, XGraphicsUnit unit, RenderEvents? renderEvents = null)
         {
             var gfx = new XGraphics(drawingContext, size, unit, XPageDirection.Downwards, renderEvents);
 
@@ -632,7 +632,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Creates a new instance of the XGraphics class from a System.Windows.Media.DrawingContext object.
         /// </summary>
-        public static XGraphics FromCanvas(Canvas canvas, XSize size, XGraphicsUnit unit, RenderEvents renderEvents)
+        public static XGraphics FromCanvas(Canvas canvas, XSize size, XGraphicsUnit unit, RenderEvents? renderEvents = null)
         {
             var gfx = new XGraphics(canvas, size, unit, XPageDirection.Downwards, renderEvents);
 
@@ -791,13 +791,13 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Creates a new instance of the XGraphics class from a PdfSharp.Drawing.XForm object.
         /// </summary>
-        public static XGraphics? FromImage(XImage image, RenderEvents renderEvents)
+        public static XGraphics? FromImage(XImage image, RenderEvents? renderEvents = null)
             => FromImage(image, XGraphicsUnit.Point, renderEvents);
 
         /// <summary>
         /// Creates a new instance of the XGraphics class from a PdfSharp.Drawing.XImage object.
         /// </summary>
-        public static XGraphics? FromImage(XImage image, XGraphicsUnit unit, RenderEvents renderEvents)
+        public static XGraphics? FromImage(XImage image, XGraphicsUnit unit, RenderEvents? renderEvents = null)
         {
             if (image == null)
                 throw new ArgumentNullException(nameof(image));

@@ -16,12 +16,12 @@ namespace PdfSharp.Pdf.Advanced
     [DebuggerDisplay("iref({ObjectNumber}, {GenerationNumber})")]
     public sealed class PdfReference : PdfItem
     {
-        // About PdfReference 
-        // 
+        // About PdfReference
+        //
         // * A PdfReference holds either the ObjectID or the PdfObject or both.
-        // 
+        //
         // * Each PdfObject has a PdfReference if and only if it is an indirect object. Direct objects have
-        //   no PdfReference, because they are embedded in a parent objects.
+        //   no PdfReference, because they are embedded in a parent object.
         //
         // * PdfReference objects are used to reference PdfObject instances. A value in a PDF dictionary
         //   or array that is a PdfReference represents an indirect reference. A value in a PDF dictionary
@@ -37,13 +37,25 @@ namespace PdfSharp.Pdf.Advanced
 
         /// <summary>
         /// Initializes a new PdfReference instance for the specified indirect object.
+        /// An indirect PDF object has one and only one reference.
+        /// You cannot create an instance of PdfReference.
         /// </summary>
-        public PdfReference(PdfObject pdfObject)
+        PdfReference(PdfObject pdfObject, PdfObjectID objectID, SizeType position)
         {
             if (pdfObject.Reference != null)
                 throw new InvalidOperationException("Must not create iref for an object that already has one.");
             _value = pdfObject;
             pdfObject.Reference = this;
+            _objectID = objectID;
+
+            if (position != 0)
+                _position = position;
+            //else
+            //{
+            //    // Can be 0 or -1.
+            //    //_ = typeof(int);
+            //    //PdfSharpLogHost.DocumentProcessingLogger.LogError("Position is 0.");
+            //}
 #if UNIQUE_IREF && DEBUG
             _uid = ++s_counter;
 #endif
@@ -52,7 +64,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Initializes a new PdfReference instance from the specified object identifier and file position.
         /// </summary>
-        public PdfReference(PdfObjectID objectID, SizeType position)
+        PdfReference(PdfObjectID objectID, SizeType position)
         {
             _objectID = objectID;
             _position = position;
@@ -60,6 +72,25 @@ namespace PdfSharp.Pdf.Advanced
             _uid = ++s_counter;
 #endif
         }
+
+        /// <summary>
+        /// Creates a PdfReference from a PdfObject.
+        /// </summary>
+        /// <param name="pdfObject"></param>
+        /// <param name="objectID"></param>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        internal static PdfReference CreateFromObject(PdfObject pdfObject, PdfObjectID objectID, SizeType position)
+            => new(pdfObject, objectID, position);
+
+        /// <summary>
+        /// Creates a PdfReference from a PdfObjectID.
+        /// </summary>
+        /// <param name="objectID"></param>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        internal static PdfReference CreateForObjectID(PdfObjectID objectID, SizeType position)
+            => new(objectID, position);
 
         /// <summary>
         /// Writes the object in PDF iref table format.
@@ -121,7 +152,7 @@ namespace PdfSharp.Pdf.Advanced
         public SizeType Position
         {
             get => _position;
-            set
+            internal set
             {
                 Debug.Assert(value >= 0);
                 _position = value;
@@ -135,7 +166,7 @@ namespace PdfSharp.Pdf.Advanced
         public PdfObject Value
         {
             get => _value;
-            set
+            internal set
             {
                 Debug.Assert(value != null, "The value of a PdfReference must never be null.");
                 Debug.Assert(value.Reference == null || ReferenceEquals(value.Reference, this), "The reference of the value must be null or this.");
@@ -144,7 +175,7 @@ namespace PdfSharp.Pdf.Advanced
                 value.Reference = this;
             }
         }
-        PdfObject _value = default!;
+        PdfObject _value = null!;
 
         /// <summary>
         /// Resets value to null. Used when reading object stream.

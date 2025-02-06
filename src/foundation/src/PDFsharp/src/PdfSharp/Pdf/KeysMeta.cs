@@ -162,7 +162,10 @@ namespace PdfSharp.Pdf
         /// <param name="type">The type.</param>
         /// <param name="defaultContentKeyType">Default type of the content key.</param>
         /// <param name="defaultContentType">Default type of the content.</param>
-        public DictionaryMeta([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] Type type, KeyType defaultContentKeyType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type defaultContentType) : this(type)
+        public DictionaryMeta([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] Type type,
+            KeyType defaultContentKeyType,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            Type defaultContentType) : this(type)
         {
             _defaultContentKeyDescriptor = new KeyDescriptor(new KeyInfoAttribute(defaultContentKeyType, defaultContentType));
         }

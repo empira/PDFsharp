@@ -1,7 +1,7 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-#pragma warning disable 0436
+using PdfSharp.Internal;
 
 namespace MigraDoc
 {
@@ -27,38 +27,38 @@ namespace MigraDoc
         /// <summary>
         /// The major version number of the product.
         /// </summary>
-        public static readonly string VersionMajor = GitVersionInformation.Major;
+        public static readonly string VersionMajor = PdfSharpGitVersionInformation.Major;
 
         /// <summary>
         /// The minor version number of the product.
         /// </summary>
-        public static readonly string VersionMinor = GitVersionInformation.Minor;
+        public static readonly string VersionMinor = PdfSharpGitVersionInformation.Minor;
 
         /// <summary>
         /// The patch number of the product.
         /// </summary>
-        public static readonly string VersionPatch = GitVersionInformation.Patch;
+        public static readonly string VersionPatch = PdfSharpGitVersionInformation.Patch;
 
         /// <summary>
         /// The Version pre-release string for NuGet.
         /// </summary>
-        public static readonly string VersionPreRelease = GitVersionInformation.NuGetPreReleaseTagV2;
+        public static readonly string VersionPreRelease = PdfSharpGitVersionInformation.PreReleaseLabel;
 
         /// <summary>
         /// The PDF creator application information string.
         /// The PDF producer (created by) is PDFsharp anyway.
         /// </summary>
-        public static readonly string Creator = $"{Title} {GitVersionInformation.NuGetVersion} ({Url})";
+        public static readonly string Creator = $"{Title} {PdfSharpGitVersionInformation.InformationalVersion} ({Url})";
 
         /// <summary>
         /// The full version number.
         /// </summary>
-        public static readonly string Version = GitVersionInformation.MajorMinorPatch;
+        public static readonly string Version = PdfSharpGitVersionInformation.MajorMinorPatch;
 
         /// <summary>
         /// The full semantic version number created by GitVersion.
         /// </summary>
-        public static readonly string SemanticVersion = GitVersionInformation.SemVer;
+        public static readonly string SemanticVersion = PdfSharpGitVersionInformation.SemVer;
 
         /// <summary>
         /// The home page of this product.
@@ -83,7 +83,7 @@ namespace MigraDoc
         /// <summary>
         /// The copyright information.
         /// </summary>
-        public const string Copyright = "Copyright © 2001-2024 empira Software GmbH."; // Also used as NuGet Copyright.
+        public const string Copyright = "Copyright © 2001-2025 empira Software GmbH."; // Also used as NuGet Copyright.
 
         /// <summary>
         /// The trademark of the product.
@@ -103,7 +103,7 @@ namespace MigraDoc
                                                                                                       // ReSharper restore RedundantNameQualifier
 #endif
 
-#if Not_used_anymore
+#if Not_used_anymore // #DELETE 25-12-31
 
         /// <summary>
         /// E.g. "2005-01-01", for use in NuGet Script
@@ -137,7 +137,7 @@ namespace MigraDoc
         /// <summary>
         /// Nuspec Doc: A long description of the package. This shows up in the right pane of the Add Package Dialog as well as in the Package Manager Console when listing packages using the Get-Package command. 
         /// </summary>
-        public const string NuGetDescription = "MigraDoc Foundation - the Open Source .NET library that easily creates documents based on an object model with paragraphs, tables, styles, etc. and renders them into PDF or RTF.";
+        public const string NuGetDescription = "MigraDoc - the Open Source .NET library that easily creates documents based on an object model with paragraphs, tables, styles, etc. and renders them into PDF or RTF.";
 
         /// <summary>
         /// Nuspec Doc: A description of the changes made in each release of the package. This field only shows up when the _Updates_ tab is selected and the package is an update to a previously installed package.

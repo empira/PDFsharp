@@ -232,7 +232,7 @@ namespace MigraDoc.DocumentObjectModel
             if (Values.BaseStyle == "")
                 throw new ArgumentException("User-defined Style defined without a BaseStyle");
 
-            //REVIEW KlPo4StLa Special treatment for DefaultParagraphFont faulty (DefaultParagraphFont not returned via styles["name"]).
+            // REVIEW KlPo4StLa Special treatment for DefaultParagraphFont faulty (DefaultParagraphFont not returned via styles["name"]).
             if (Values.BaseStyle == DefaultParagraphFontName)
                 return styles[0];
 

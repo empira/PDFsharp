@@ -1,0 +1,50 @@
+# Last update: 25-01-30
+assembly-versioning-scheme: MajorMinorPatch
+# PDFSHARP_BUILD_VERSION are the days since 2005-01-01. #CHECK_BEFORE_RELEASE
+# Command Window: ? (DateTime.Now - new DateTime(2005, 1, 1)).Days;
+# C# Interactive: Console.WriteLine((DateTime.Now - new DateTime(2005, 1, 1)).Days);
+assembly-file-versioning-format: '{Major}.{Minor}.{Patch}.{env:PDFSHARP_BUILD_VERSION ?? 7334}'
+strategies: [Mainline]
+assembly-informational-format: '{InformationalVersion}'
+branches:
+  develop: # Current development branch
+    # branch:  develop             -- is always 'develop'
+    # version: {6.0.0}-develop.123 -- taken from git tag plus 'develop' plus commit count
+    regex: ^develop$
+    mode: ContinuousDeployment
+    increment: None
+    label: develop
+    # Investigate this currently undocumented breaking change when switching to v6.x.
+    # The statement may not be needed.
+    # Not in v6.x: prevent-increment-of-merged-branch-version: false
+    # Not working: prevent-increment.of-merged-branch: false
+    # Not working: prevent-increment.when-branch-merged: false
+    track-merge-target: true
+    source-branches: ['feature', 'release']
+  release: # Release and preview versions.
+    # branch:  release/6.0.0-preview-3 -- must be same as git tag without leading 'v'.
+    # version: {6-0-0-preview-3}       -- taken from git tag only
+    regex: ^(release[/-]|master)
+    # Must not have mode set to be mainline?
+    increment: None
+    label: ''
+    # Not in v6.x: prevent-increment-of-merged-branch-version: true
+    track-merge-target: true
+    is-release-branch: true
+    is-main-branch: true
+    source-branches: ['develop', 'release', 'feature']
+  feature: # Features and bug fixes.
+    # branch:  feature/my-new-feature           -- arbitrary name, e.g. a new preview
+    # version: {6.0.0}-dev-{my-new-feature}.123 -- taken from git tag plus 'dev-' plus branch name plus commit count
+    regex: ^(user|feature|fix)[/-]
+    mode: ContinuousDeployment
+    increment: None
+    label: 'dev-{BranchName}'
+    # Not in v6.x: prevent-increment-of-merged-branch-version: true
+    track-merge-target: true
+    source-branches: ['develop', 'release', 'feature']
+  pull-request:
+    regex: ^(pull|pull\-requests|pr)[/-]
+    label: PullRequest
+    mode: ContinuousDeployment
+merge-message-formats: {}

@@ -1,6 +1,13 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+// Turn on all test code at one place and ensure, that it does not come accidentally to the release build.
+#if true && TEST_CODE
+#define TEST_CODE  // The #define is redundant, but clarifies what it means.
+#else
+#undef TEST_CODE
+#endif
+
 using System.Collections;
 using Microsoft.Extensions.Logging;
 using PdfSharp.Logging;
@@ -12,8 +19,19 @@ namespace PdfSharp.Pdf.Advanced
     /// Represents the cross-reference table of a PDF document. 
     /// It contains all indirect objects of a document.
     /// </summary>
+    /// <remarks>
+    /// New implementation:<br/>
+    /// * No deep nesting recursion anymore.<br/>
+    /// * Uses a Stack&lt;PdfObject&gt;.<br/>
+    /// <br/>
+    /// We use Dictionary&lt;PdfReference, object?&gt; instead of Set&lt;PdfReference&gt; because a dictionary
+    /// with an unused value is faster than a set.
+    /// </remarks>
     sealed class PdfCrossReferenceTable(PdfDocument document) // Must not be derived from PdfObject.
     {
+#if TEST_CODE
+        readonly Stopwatch _stopwatch = new();
+#endif
         /// <summary>
         /// Gets or sets a value indicating whether this table is under construction.
         /// It is true while reading a PDF file.
@@ -21,17 +39,21 @@ namespace PdfSharp.Pdf.Advanced
         internal bool IsUnderConstruction { get; set; }
 
         /// <summary>
-        /// Gets the number of objects in the table.
+        /// Gets the current number of references in the table.
         /// </summary>
         public int Count => _objectTable.Count;
 
         /// <summary>
-        /// Adds a cross-reference entry to the table. Used when parsing the trailer.
+        /// Adds a cross-reference entry to the table. Used when parsing a trailer.
         /// </summary>
         public void Add(PdfReference iref)
         {
             if (iref.ObjectID.IsEmpty)
+            {
+                // When happens this?
                 iref.ObjectID = new(GetNewObjectNumber());
+                PdfSharpLogHost.DocumentProcessingLogger.LogWarning("iRef with empty object ID found.");
+            }
 
             // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd because it would not build with .NET Framework.
             if (_objectTable.ContainsKey(iref.ObjectID))
@@ -59,16 +81,32 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public void Add(PdfObject value)
         {
+            // ReSharper disable once NullableWarningSuppressionIsUsed
             if (value.Owner == null!)
+            {
+                PdfSharpLogHost.PdfReadingLogger.LogWarning("Object without owner gets owned by the document it was added to.");
                 value.Document = document;
+            }
             else
+            {
                 Debug.Assert(value.Owner == document);
+                if (value.Owner != document)
+                {
+                    PdfSharpLogHost.PdfReadingLogger.LogError("Object not owned by the document it was added to.");
+                }
+            }
 
             if (value.ObjectID.IsEmpty)
+            {
+                // Create new object number.
                 value.SetObjectID(GetNewObjectNumber(), 0);
+            }
 
             if (_objectTable.ContainsKey(value.ObjectID))
+            {
+                // This must not happen.
                 throw new InvalidOperationException("Object already in table.");
+            }
 
             _objectTable.Add(value.ObjectID, value.ReferenceNotNull);
 
@@ -90,9 +128,14 @@ namespace PdfSharp.Pdf.Advanced
             return false;
         }
 
-        public void Remove(PdfReference iref)
+        /// <summary>
+        /// Removes a PdfObject from the table.
+        /// </summary>
+        /// <param name="iref"></param>
+        public bool Remove(PdfReference iref)
         {
-            _objectTable.Remove(iref.ObjectID);
+            // Remove the reference by its ID.
+            return _objectTable.Remove(iref.ObjectID);
         }
 
         /// <summary>
@@ -198,7 +241,7 @@ namespace PdfSharp.Pdf.Advanced
             int removed = _objectTable.Count;
             PdfReference[] irefs = TransitiveClosure(document.Trailer);
 
-#if DEBUG
+#if DEBUG_ // Turn on again
             // Have any two objects the same ID?
             Dictionary<int, int> ids = [];
             foreach (PdfObjectID objID in _objectTable.Keys)
@@ -248,7 +291,7 @@ namespace PdfSharp.Pdf.Advanced
 
             MaxObjectNumber = 0;
             _objectTable.Clear();
-            foreach (PdfReference iref in irefs)
+            foreach (var iref in irefs)
             {
                 // This if-statement is needed for corrupt PDF files from the wild.
                 // Without the if-statement, an exception will be thrown if the file contains duplicate IDs ("An item with the same key has already been added to the dictionary.").
@@ -277,7 +320,7 @@ namespace PdfSharp.Pdf.Advanced
             int count = irefs.Length;
             for (int idx = 0; idx < count; idx++)
             {
-                PdfReference iref = irefs[idx];
+                var iref = irefs[idx];
                 iref.ObjectID = new PdfObjectID(idx + 1);
                 // Rehash with new number.
                 _objectTable.Add(iref.ObjectID, iref);
@@ -292,7 +335,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal SizeType GetPositionOfObjectBehind(PdfObject obj, SizeType position)
         {
-#if DEBUG
+#if DEBUG_
             if (obj.Reference == null)
                 _ = typeof(int);
 #endif
@@ -356,198 +399,308 @@ namespace PdfSharp.Pdf.Advanced
 
         /// <summary>
         /// Calculates the transitive closure of the specified PdfObject with the specified depth, i.e. all indirect objects
-        /// recursively reachable from the specified object in up to maximally depth steps.
+        /// recursively reachable from the specified object.
         /// </summary>
-        public PdfReference[] TransitiveClosure(PdfObject pdfObject /*, int depth = Int16.MaxValue*/)
+        public PdfReference[] TransitiveClosure(PdfObject pdfObject)
         {
+            var logger = PdfSharpLogHost.DocumentProcessingLogger;
+
             CheckConsistence();
-            Dictionary<PdfItem, object?> objects = new();
-            //_overflow = new();
-#if DEBUG
-            _nestingLevel = _maxNestingLevel = 0;
+#if TEST_CODE
+            // ReSharper disable once InconsistentNaming because it is test-code.
+            Dictionary<PdfReference, object?> references_old = new();
+            _stopwatch.Reset();
+            _stopwatch.Start();
+            TransitiveClosureImplementation_old(references_old, pdfObject);
+            _stopwatch.Stop();
+            logger.LogInformation(nameof(TransitiveClosureImplementation_old) + " runs {MS}ms.", _stopwatch.ElapsedMilliseconds);
+            logger.LogInformation($"TC: {references_old.Count}");
+            logger.LogInformation("--------------------");
 #endif
-            TransitiveClosureImplementation(objects, pdfObject);
-#if DEBUG
-            // TODO Check 
-            PdfSharpLogHost.Logger.LogInformation("Transitive closure max nesting level is {NestingLevel}.", _maxNestingLevel);
+
+#if TEST_CODE
+            _stopwatch.Reset();
+            _stopwatch.Start();
 #endif
-#if false
-        TryAgain:
-            if (_overflow.Count > 0)
+            Dictionary<PdfReference, object?> references = new();
+            TransitiveClosureImplementation(references, pdfObject);
+#if TEST_CODE
+            _stopwatch.Stop();
+            logger.LogInformation(nameof(TransitiveClosureImplementation) + " runs {MS}ms.", _stopwatch.ElapsedMilliseconds);
+            logger.LogInformation($"TC: {references.Count}");
+            logger.LogInformation("--------------------");
+
+            Debug.Assert(references.Count == references_old.Count);
+#endif
+
+#if TEST_CODE
+            _stopwatch.Reset();
+            _stopwatch.Start();
+            foreach (var val in references_old)
             {
-                var array = new PdfObject[_overflow.Count];
-                _overflow.Keys.CopyTo(array, 0);
-                _overflow = new();
-                for (int idx = 0; idx < array.Length; idx++)
-                {
-                    PdfObject obj = array[idx];
-                    TransitiveClosureImplementation(objects, obj);
-                }
-                goto TryAgain;
+                var valNew = references.ContainsKey((PdfReference)val.Key);
+                if (valNew == false)
+                    _ = typeof(int);
+                Debug.Assert(valNew);
             }
+            _stopwatch.Stop();
+            logger.LogInformation("references_old check runs {MS}ms.", _stopwatch.ElapsedMilliseconds);
+
 #endif
             CheckConsistence();
 
-            ICollection collection = objects.Keys;
+            ICollection collection = references.Keys;
             int count = collection.Count;
             PdfReference[] irefs = new PdfReference[count];
             collection.CopyTo(irefs, 0);
 
-#if true_
-            for (int i = 0; i < count; i++)
-                for (int j = 0; j < count; j++)
-                    if (i != j)
-                    {
-                        Debug.Assert(ReferenceEquals(irefs[i].Document, _document));
-                        Debug.Assert(irefs[i] != irefs[j]);
-                        Debug.Assert(!ReferenceEquals(irefs[i], irefs[j]));
-                        Debug.Assert(!ReferenceEquals(irefs[i].Value, irefs[j].Value));
-                        Debug.Assert(!Equals(irefs[i].ObjectID, irefs[j].Value.ObjectID));
-                        Debug.Assert(irefs[i].ObjectNumber != irefs[j].Value.ObjectNumber);
-                        Debug.Assert(ReferenceEquals(irefs[i].Document, irefs[j].Document));
-                        _ = typeof(int);
-                    }
-#endif
             return irefs;
         }
 
-        //// TODO: Delete next two lines?
-        //int _nestingLevel;
-        //Dictionary<PdfItem, object?> _overflow_ = new();
-#if DEBUG
-        int _nestingLevel;
-        int _maxNestingLevel;
-#endif
-
-        // TODO: Write new non-recursive function and counter check with this implementation.
-        void TransitiveClosureImplementation(Dictionary<PdfItem, object?> objects, PdfObject pdfObject)
+#if TEST_CODE
+        /// <summary>
+        /// This is the old implementation of the transitive closure. It is a recursive implementation.
+        /// We keep it some time to use it for counter-checking the new non-recursive implementation.
+        /// </summary>
+        /// <param name="references"></param>
+        /// <param name="pdfObject"></param>
+        void TransitiveClosureImplementation_old(Dictionary<PdfReference, object?> references, PdfObject pdfObject)
         {
-            try
+            IEnumerable? enumerable = null;
+            PdfDictionary? dict;
+            PdfArray? array;
+            if ((dict = pdfObject as PdfDictionary) != null)
+                enumerable = dict.Elements.Values;
+            else if ((array = pdfObject as PdfArray) != null)
+                enumerable = array.Elements;
+            else
+                Debug.Assert(false, "Should not come here.");
+
+            if (enumerable != null!)
             {
-#if DEBUG
-                _nestingLevel++;
-                _maxNestingLevel = Math.Max(_maxNestingLevel, _nestingLevel);
-#endif
-#if false
-                if (_nestingLevel >= 1000)
+                foreach (PdfItem item in enumerable)
                 {
-                    // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd because it would not build with .NET Framework.
-                    if (!_overflow.ContainsKey(pdfObject))
-                        _overflow.Add(pdfObject, null);
-                    return;
+                    if (item is PdfReference iref)
+                    {
+                        // Is this an indirect reference to an object that does not exist?
+                        //if (iref.Document == null)
+                        //{
+                        //    Deb/ug.WriteLine("Dead object detected: " + iref.ObjectID.ToString());
+                        //    PdfReference dead = DeadObject;
+                        //    iref.ObjectID = dead.ObjectID;
+                        //    iref.Document = _document;
+                        //    iref.SetObject(dead.Value);
+                        //    PdfDictionary dict = (PdfDictionary)dead.Value;
+
+                        //    dict.Elements["/DeadObjectCount"] =
+                        //      new PdfInteger(dict.Elements.GetInteger("/DeadObjectCount") + 1);
+
+                        //    iref = dead;
+                        //}
+
+                        if (!ReferenceEquals(iref.Document, document))
+                        {
+                            //Debug.WriteLine($"Bad iref: {iref.ObjectID.ToString()}");
+                            PdfSharpLogHost.PdfReadingLogger.LogError($"Bad iref: {iref.ObjectID.ToString()}");
+                        }
+                        Debug.Assert(ReferenceEquals(iref.Document, document) || iref.Document == null, "External object detected!");
+
+                        if (references.ContainsKey(iref) is false)
+                        {
+                            PdfObject value = iref.Value;
+
+                            // Ignore unreachable objects.
+                            if (iref.Document != null)
+                            {
+                                // ... from trailer hack
+                                if (value == null!) // Can it be null?
+                                {
+                                    iref = _objectTable[iref.ObjectID];
+                                    Debug.Assert(iref.Value != null);
+                                    value = iref.Value;
+                                }
+                                Debug.Assert(ReferenceEquals(iref.Document, document));
+                                references.Add(iref, null);
+                                //Debug.WriteLine(String.Format("objects.Add('{0}', null);", iref.ObjectID.ToString()));
+                                if (value is PdfArray or PdfDictionary)
+                                    TransitiveClosureImplementation_old(references, value);
+                            }
+#if DEBUG
+                            else
+                            {
+                                _ = typeof(int);
+                            }
+#endif
+                        }
+                    }
+                    else
+                    {
+                        if (item is PdfObject pdfObj and (PdfDictionary or PdfArray))
+                            TransitiveClosureImplementation_old(references, pdfObj);
+                    }
                 }
+            }
+        }
 #endif
-#if DEBUG_
-                //enterCount++;
-                if (enterCount == 5400)
-                    _ = typeof(int);
-                //if (!Object.ReferenceEquals(pdfObject.Owner, _document))
-                //  _ = typeof(int);
-                //////Debug.Assert(Object.ReferenceEquals(pdfObject27.Document, _document));
-                //      if (item is PdfObject && ((PdfObject)item).ObjectID.ObjectNumber == 5)
-                //        Deb/ug.WriteLine("items: " + ((PdfObject)item).ObjectID.ToString());
-                //if (pdfObject.ObjectNumber == 5)
-                //  _ = typeof(int);
+        /// <summary>
+        /// The new non-recursive implementation.
+        /// </summary>
+        /// <param name="references"></param>
+        /// <param name="pdfObject"></param>
+        void TransitiveClosureImplementation(Dictionary<PdfReference, object?> references, PdfObject pdfObject)
+        {
+            var logger = PdfSharpLogHost.DocumentProcessingLogger;
+#if TEST_CODE
+            //Dictionary<PdfObject, object?> doubleCheckReferences = [];
+            //Dictionary<PdfObject, object?> pivots = [];
+            int loopCounter = 0;
+            int maxStackLength = 0;
+            int alreadyInTable = 0;
+            int elementsAdded = 0;
 #endif
-                IEnumerable? enumerable = null;
+            // Initialize the stack.
+            Stack<PdfObject> stack = [];
+            FindReferencedItems(pdfObject);
+
+            // Loop until no more new references are found.
+            while (stack.Count > 0)
+            {
+                var pivot = stack.Pop();
+#if TEST_CODE
+                maxStackLength = Math.Max(maxStackLength, stack.Count);
+                loopCounter++;
+
+                //// ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd because TryAdd does not exist in .NET Framework.
+                //if (!pivots.ContainsKey(pivot))
+                //{
+                //    pivots.Add(pivot, null);
+                //}
+                //else
+                //{
+                //    _ = pivot.Equals(null);
+                //    _ = typeof(int);
+                //}
+#endif
+                FindReferencedItems(pivot);
+            }
+#if TEST_CODE
+            logger.LogInformation(
+                "LoopCounter: {LoopCounter}, MaxStackLength: {MaxStackLength}, AlreadyInTable: {AlreadyInTable}, ElementsAdded: {ElementsAdded}",
+                loopCounter, maxStackLength, alreadyInTable, elementsAdded);
+
+            //Dictionary<int, object?> test = [];
+            //foreach (var pivotsValue in pivots.Keys)
+            //{
+            //    if (pivotsValue.ObjectID.ObjectNumber == 0)
+            //        continue;
+
+            //    test.Add(pivotsValue.ObjectID.ObjectNumber, null);
+            //}
+            //int ids = test.Count;
+#endif
+            return;
+
+            // Add all dictionaries and arrays referenced by the specified object
+            // that are not already in references to the stack.
+            void FindReferencedItems(PdfObject pdfObj)
+            {
+                Debug.Assert(pdfObj is PdfDictionary or PdfArray, "Call with dictionary or array only.");
+
+                IEnumerable? items = null;
                 PdfDictionary? dict;
                 PdfArray? array;
-                if ((dict = pdfObject as PdfDictionary) != null)
-                    enumerable = dict.Elements.Values;
-                else if ((array = pdfObject as PdfArray) != null)
-                    enumerable = array.Elements;
+                if ((dict = pdfObj as PdfDictionary) is not null)
+                    items = dict.Elements.Values;
+                else if ((array = pdfObj as PdfArray) is not null)
+                    items = array.Elements;
                 else
                     Debug.Assert(false, "Should not come here.");
 
-                if (enumerable != null!)
+                foreach (PdfItem item in items)
                 {
-                    foreach (PdfItem item in enumerable)
+                    if (item is PdfReference iref)
                     {
-                        if (item is PdfReference iref)
+                        // Case: The item is an indirect object.
+
+                        // Check if the reference belongs to the current document.
+                        if (!ReferenceEquals(iref.Document, document))
                         {
-                            // Is this an indirect reference to an object that does not exist?
-                            //if (iref.Document == null)
-                            //{
-                            //    Deb/ug.WriteLine("Dead object detected: " + iref.ObjectID.ToString());
-                            //    PdfReference dead = DeadObject;
-                            //    iref.ObjectID = dead.ObjectID;
-                            //    iref.Document = _document;
-                            //    iref.SetObject(dead.Value);
-                            //    PdfDictionary dict = (PdfDictionary)dead.Value;
+                            logger.LogError($"Bad iref: {iref.ObjectID.ToString()}");
+                        }
 
-                            //    dict.Elements["/DeadObjectCount"] =
-                            //      new PdfInteger(dict.Elements.GetInteger("/DeadObjectCount") + 1);
+                        Debug.Assert(ReferenceEquals(iref.Document, document) || iref.Document == null,
+                            "External object detected!");
 
-                            //    iref = dead;
-                            //}
+                        // Is the reference not yet in the collection of referenced objects?
+                        if (references.ContainsKey(iref))
+                        {
+#if TEST_CODE
+                            alreadyInTable++;
+#endif
+                            continue;
+                        }
 
-                            if (!ReferenceEquals(iref.Document, document))
+                        var newObject = iref.Value;
+
+                        // Ignore unreachable objects.
+                        if (iref.Document != null)
+                        {
+                            // ... from trailer hack
+                            if (newObject == null!) // Can it be null?
                             {
-                                //Debug.WriteLine($"Bad iref: {iref.ObjectID.ToString()}");
-                                PdfSharpLogHost.PdfReadingLogger.LogError($"Bad iref: {iref.ObjectID.ToString()}");
+                                logger.LogInformation("Value of a PdfReference is null.");
+                                iref = _objectTable[iref.ObjectID];
+                                Debug.Assert(iref.Value != null);
+                                newObject = iref.Value;
                             }
-                            Debug.Assert(ReferenceEquals(iref.Document, document) || iref.Document == null, "External object detected!");
-#if DEBUG_
-                            if (iref.ObjectID.ObjectNumber == 23)
+
+                            Debug.Assert(ReferenceEquals(iref.Document, document));
+                            if (newObject.ObjectID.ObjectNumber != 0)
+                                references.Add(iref, null);
+#if TEST_CODE__
+                            // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd because auf .NET Framework / Standard
+                            if (!doubleCheckReferences.ContainsKey(value))
+                                doubleCheckReferences.Add(value, null);
+                            else
                                 _ = typeof(int);
 #endif
-                            if (objects.ContainsKey(iref) is false)
+
+                            if (newObject is PdfDictionary or PdfArray)
                             {
-                                PdfObject value = iref.Value;
-
-                                // Ignore unreachable objects.
-                                if (iref.Document != null)
-                                {
-                                    // ... from trailer hack
-                                    if (value == null!) // Can it be null?
-                                    {
-                                        iref = _objectTable[iref.ObjectID];
-                                        Debug.Assert(iref.Value != null);
-                                        value = iref.Value;
-                                    }
-                                    Debug.Assert(ReferenceEquals(iref.Document, document));
-                                    objects.Add(iref, null);
-                                    //Debug.WriteLine(String.Format("objects.Add('{0}', null);", iref.ObjectID.ToString()));
-                                    if (value is PdfArray or PdfDictionary)
-                                        TransitiveClosureImplementation(objects, value);
-                                }
-#if DEBUG
-                                else
-                                {
-                                    _ = typeof(int);
-                                    // objects2.Add(this[iref.ObjectID], null);
-                                }
+                                stack.Push(newObject);
+#if TEST_CODE
+                                elementsAdded++;
 #endif
-
                             }
                         }
                         else
                         {
-                            //var pdfObject28 = item as PdfObject;
-                            ////if (pdfObject28 != null)
-                            ////  Debug.Assert(Object.ReferenceEquals(pdfObject28.Document, _document));
-                            //if (pdfObject28 != null && (pdfObject28 is PdfDictionary || pdfObject28 is PdfArray))
-                            //if (pdfObject28 != null)
-                            //  Debug.Assert(Object.ReferenceEquals(pdfObject28.Document, _document));
-                            if (item is PdfObject pdfObj and (PdfDictionary or PdfArray))
-                                TransitiveClosureImplementation(objects, pdfObj);
+                            // Can we come here?
+                            logger.LogWarning("Document has no owner.");
+                        }
+                    }
+                    else
+                    {
+                        // Case: The item is a direct object.
+
+                        if (item is PdfObject pdfDictionaryOrArray and (PdfDictionary or PdfArray))
+                        {
+#if TEST_CODE_
+                            // Not useful, is too slow.
+                            if (stack.Contains(pdfDictionaryOrArray))
+                                _ = typeof(int);
+#endif
+                            stack.Push(pdfDictionaryOrArray);
+#if TEST_CODE
+                            elementsAdded++;
+#endif
                         }
                     }
                 }
             }
-            finally
-            {
-#if DEBUG
-                _nestingLevel--;
-#endif
-            }
         }
 
-        void TransitiveClosureImplementationNew(Dictionary<PdfItem, object?> objects, PdfObject pdfObject)
-        {
-            // ...
-        }
-
+#if true_  // Not used.
         /// <summary>
         /// Gets the cross-reference to an object used for undefined indirect references.
         /// </summary>
@@ -565,39 +718,10 @@ namespace PdfSharp.Pdf.Advanced
             }
         }
         PdfDictionary? _deadObject;
-
+#endif
         /// <summary>
         /// Represents the relation between PdfObjectID and PdfReference for a PdfDocument.
         /// </summary>
         readonly Dictionary<PdfObjectID, PdfReference> _objectTable = [];
     }
-
-    ///// <summary>
-    ///// Represents the cross-reference table of a PDF document. 
-    ///// It contains all indirect objects of a document.
-    ///// </summary>
-    //internal sealed class PdfCrossReferenceStreamTable  // Must not be derived from PdfObject.
-    //{
-    //    public PdfCrossReferenceStreamTable(PdfDocument document)
-    //    {
-    //        _document = document;
-    //    }
-    //    readonly PdfDocument _document;
-
-    //    public class Item
-    //    {
-    //        public PdfReference Reference;
-
-    //        public readonly List<CrossReferenceStreamEntry> Entries = new List<CrossReferenceStreamEntry>();
-    //    }
-    //}
-
-    //struct CrossReferenceStreamEntry
-    //{
-    //    public int Type;
-
-    //    public int Field2;
-
-    //    public int Field3;
-    //}
 }

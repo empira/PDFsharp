@@ -46,7 +46,7 @@ namespace PdfSharp.Drawing.Pdf
             _options = options;
             _gfx = gfx;
             _content = new StringBuilder();
-            page.RenderContent!._pdfRenderer = this; // NRT
+            page.RenderContent!.SetRenderer(this);
             _gfxState = new PdfGraphicsState(this);
         }
 
@@ -78,17 +78,17 @@ namespace PdfSharp.Drawing.Pdf
                 var content2 = _page.RenderContent!; // NRT
                 content2.CreateStream(PdfEncoders.RawEncoding.GetBytes(GetContent()));
 
-                _gfx = default!;
-                _page.RenderContent!._pdfRenderer = default!;
-                _page.RenderContent = default!;
-                _page = default!;
+                _gfx = null!;
+                _page.RenderContent!.SetRenderer(null);
+                _page.RenderContent = null!;
+                _page = null!;
             }
             else if (_form != null!)
             {
                 _form._pdfForm!.CreateStream(PdfEncoders.RawEncoding.GetBytes(GetContent())); // NRT
-                _gfx = default!;
-                _form.PdfRenderer = default!;
-                _form = default!;
+                _gfx = null!;
+                _form.PdfRenderer = null!;
+                _form = null!;
             }
         }
 

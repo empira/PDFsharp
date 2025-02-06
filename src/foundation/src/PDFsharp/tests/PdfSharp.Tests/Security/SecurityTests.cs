@@ -11,7 +11,7 @@ namespace PdfSharp.Tests.Security
     [Collection("PDFsharp")]
     public class SecurityTests
     {
-        //[Fact]  // TODO: Skip when finally tested.
+        //[Fact]  // The tests succeeds and is now skipped.
         [Fact(Skip = "Test only once, because it is slow and does not depend on PDFsharp source code.")]
         public void MD5_creation()
         {

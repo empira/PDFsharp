@@ -102,17 +102,18 @@ namespace PdfSharp.Pdf.IO
             WriteRaw(value.Value.ToString(CultureInfo.InvariantCulture));
         }
 
-        /// <summary>
-        /// Writes the specified value to the PDF stream.
-        /// </summary>
-#pragma warning disable CS0618 // Type or member is obsolete
-        public void Write(PdfUInteger value)
-#pragma warning restore CS0618 // Type or member is obsolete
-        {
-            WriteSeparator(CharCat.Character);
-            _lastCat = CharCat.Character;
-            WriteRaw(value.Value.ToString(CultureInfo.InvariantCulture));
-        }
+        // DELETE
+        ////        /// <summary>
+        ////        /// Writes the specified value to the PDF stream.
+        ////        /// </summary>
+        ////#pragma warning disable CS0618 // Type or member is obsolete
+        ////        public void Write(PdfUInteger value)
+        ////#pragma warning restore CS0618 // Type or member is obsolete
+        ////        {
+        ////            WriteSeparator(CharCat.Character);
+        ////            _lastCat = CharCat.Character;
+        ////            WriteRaw(value.Value.ToString(CultureInfo.InvariantCulture));
+        ////        }
 
         /// <summary>
         /// Writes the specified value to the PDF stream.

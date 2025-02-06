@@ -29,7 +29,7 @@ namespace PdfSharp.Tests.Build
             // Check to undo some temporary renames.
             const string automatic = nameof(PdfFontEmbedding.TryComputeSubset);
             (!automatic.EndsWith("_")).Should().BeTrue("some identifiers must be re-renamed before release.");
-        _ = automatic;
+            _ = automatic;
         }
 #endif
 
@@ -200,9 +200,15 @@ namespace PdfSharp.Tests.Build
             }
         }
 
+        /// <summary>
+        /// Writes the file.
+        /// Must be called only if the file requires an update (add a non-existing BOM or remove an existing BOM).
+        /// </summary>
         static void WriteFile(String fileName, Byte[] bytes, Boolean addBom)
         {
             bool utf8Bom = bytes is [0xEF, 0xBB, 0xBF, ..];
+
+            (addBom == utf8Bom).Should().BeFalse("Should not come here.");
 
             using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
             {
@@ -210,18 +216,14 @@ namespace PdfSharp.Tests.Build
                 {
                     // Write new BOM.
                     fs.Write([0xEF, 0xBB, 0xBF], 0, 3);
-                }
 
-                if (!addBom && utf8Bom)
-                {
-                    // Write bytes without existing BOM.
-                    fs.Write(bytes, 3, bytes.Length - 3);
+                    // Write bytes as they are.
+                    fs.Write(bytes, 0, bytes.Length);
                 }
                 else
                 {
-                    Debug.Assert(addBom && !utf8Bom, "Should not come here for other cases.");
-                    // Write bytes as they are.
-                    fs.Write(bytes, 0, bytes.Length);
+                    // Write bytes without existing BOM.
+                    fs.Write(bytes, 3, bytes.Length - 3);
                 }
             }
         }

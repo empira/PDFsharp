@@ -258,8 +258,8 @@ namespace MigraDoc.Rendering
                     PageBreakBefore = _paragraph.Format.PageBreakBefore,
                     MarginTop = _paragraph.Format.SpaceBefore.Point,
                     MarginBottom = _paragraph.Format.SpaceAfter.Point,
-                    //Don’t confuse margins with left or right indent.
-                    //Indents are invisible for the layouter.
+                    // Don’t confuse margins with left or right indent.
+                    // Indents are invisible for the layouter.
                     MarginRight = 0,
                     MarginLeft = 0,
                     KeepTogether = _paragraph.Format.KeepTogether,
@@ -447,7 +447,7 @@ namespace MigraDoc.Rendering
                         NRT.ThrowOnNull();
                     if (_formattingArea.X + tabStopPosition + _currentLineWidth / 2.0 > rect.X + rect.Width - RightIndent)
                     {
-                        //the text is too long on the right hand side of the tab stop => align to right indent.
+                        // The text is too long on the right hand side of the tab stop => align to right indent.
                         xPositionAfterTab = rect.X +
                           rect.Width -
                           RightIndent -
@@ -604,7 +604,7 @@ namespace MigraDoc.Rendering
         {
             _currentLineWidth = 0;
             _currentBlankCount = 0;
-            //Extra for auto tab after list symbol.
+            // Extra for auto tab after list symbol.
 
             //TODO_OLD: KLPO4KLPO: Check if this conditional statement is still required.
             if (_currentLeaf != null && IsTab(_currentLeaf.Current))
@@ -648,7 +648,7 @@ namespace MigraDoc.Rendering
 
                 lastPosition = tabStop.Position.Point;
             }
-            //Automatic tab stop: FirstLineIndent < 0 => automatic tab stop at LeftIndent.
+            // Automatic tab stop: FirstLineIndent < 0 => automatic tab stop at LeftIndent.
 
             if (format.FirstLineIndent < 0 ||
                 (format.Values.ListInfo is not null && !format.Values.ListInfo.IsNull() && format.ListInfo.NumberPosition < format.LeftIndent))
@@ -696,7 +696,7 @@ namespace MigraDoc.Rendering
                 else //if (phase == Phase.Rendering)
                 {
                     Area contentArea = _renderInfo.LayoutInfo.ContentArea;
-                    //next lines for non-fitting lines that produce an empty fitting rect:
+                    // Next lines for non-fitting lines that produce an empty fitting rect:
                     XUnitPt rectX = contentArea.X;
                     XUnitPt rectWidth = contentArea.Width;
 
@@ -737,7 +737,7 @@ namespace MigraDoc.Rendering
                 else //if (phase == Phase.Rendering)
                 {
                     Area contentArea = _renderInfo.LayoutInfo.ContentArea;
-                    //next lines for non-fitting lines that produce an empty fitting rect:
+                    // Next lines for non-fitting lines that produce an empty fitting rect:
                     XUnitPt rectX = contentArea.X;
                     XUnitPt rectWidth = contentArea.Width;
 
@@ -2096,7 +2096,7 @@ namespace MigraDoc.Rendering
                 case SymbolName.Not:
                     ch = '¬';
                     break;
-                //REM: Non-breakable blanks are still ignored.
+                // REM: Non-breakable blanks are still ignored.
                 //        case SymbolName.SymbolNonBreakableBlank:
                 //          return "\xA0";
                 //          break;

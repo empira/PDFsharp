@@ -110,9 +110,10 @@ namespace PdfSharp.Pdf
             {
                 // ReSharper disable once ObjectCreationAsStatement because the new object is set to this object
                 // in the constructor of PdfReference.
-                new PdfReference(this);
+                //new PdfReference(this);
+                PdfReference.CreateFromObject(this, objectID, 0);
                 Debug.Assert(_iref != null);
-                _iref.ObjectID = objectID;
+                //_iref.ObjectID = objectID;
             }
             _iref.Value = this;
             _iref.Document = _document;
@@ -146,7 +147,7 @@ namespace PdfSharp.Pdf
         /// Gets or sets the comment for debugging purposes.
         /// </summary>
         public string Comment { get; set; } = "";
-        
+
         /// <summary>
         /// Indicates whether the object is an indirect object.
         /// </summary>
@@ -169,7 +170,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Saves the stream position. 2nd Edition.
         /// </summary>
-        internal override void WriteObject(PdfWriter writer) 
+        internal override void WriteObject(PdfWriter writer)
             => Debug.Assert(false, "Must not come here, WriteObject must be overridden in derived class.");
 
         /// <summary>
@@ -364,7 +365,7 @@ namespace PdfSharp.Pdf
 
             PdfDictionary? dict;
             PdfArray? array;
-            if ((dict = value as PdfDictionary) != null)
+            if ((dict = value as PdfDictionary) is not null)
             {
                 // Case: The object is a dictionary.
                 // Set document for cloned direct objects.
@@ -418,13 +419,13 @@ namespace PdfSharp.Pdf
                             // The item is something else, e.g. a name.
                             // Nothing to do.
 
-                            // ...but let’s double check this case in DEBUG build.
+                            // ...but let’s double-check this case in DEBUG build.
                             DebugCheckNonObjects(item);
                         }
                     }
                 }
             }
-            else if ((array = value as PdfArray) != null)
+            else if ((array = value as PdfArray) is not null)
             {
                 // Case: The object is an array.
                 // Set document for cloned direct objects.
@@ -478,7 +479,7 @@ namespace PdfSharp.Pdf
                             // The item is something else, e.g. a name.
                             // Nothing to do.
 
-                            // ...but let’s double check this case in DEBUG build.
+                            // ...but let’s double-check this case in DEBUG build.
                             DebugCheckNonObjects(item);
                         }
                     }
@@ -490,7 +491,7 @@ namespace PdfSharp.Pdf
                 // Indirect integers, booleans, etc. are allowed, but PDFsharp do not create them.
                 // If such objects occur in imported PDF files from other producers, nothing more is to do.
                 // The owner was already set, which is double-checked by the assertions below.
-                if (value is PdfNameObject or PdfStringObject or PdfBooleanObject /*or PdfIntegerObject*/ or PdfNumberObject)
+                if (value is PdfNameObject or PdfStringObject or PdfBooleanObject or PdfNumberObject)
                 {
                     Debug.Assert(value.IsIndirect);
                     Debug.Assert(value.Owner == owner);

@@ -2,7 +2,6 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
-using PdfSharp.Internal;
 using PdfSharp.Drawing;
 
 using Fixed = System.Int32;
@@ -604,7 +603,7 @@ namespace PdfSharp.Fonts.OpenType
         }
     }
 
-    // UNDONE
+    // Not used in PDFsharp.
     class VerticalHeaderTable : OpenTypeFontTable
     {
         public const string Tag = TableTagNames.VHea;
@@ -697,9 +696,9 @@ namespace PdfSharp.Fonts.OpenType
     /// information (the advance heights and top sidebearings) for the vertical layout of each
     /// of the glyphs in the font.
     /// </summary>
+    // Not used in PDFsharp.
     class VerticalMetricsTable : OpenTypeFontTable
     {
-        // UNDONE
         public const string Tag = TableTagNames.VMtx;
 
         // Code comes from HorizontalMetricsTable.

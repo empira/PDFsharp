@@ -12,11 +12,14 @@ namespace PdfSharp.Internal
     // ReSharper disable once InconsistentNaming
     static class TH
     {
-        private const string SendUsTheFile = "\nPDFsharp cannot read this PDF file. " +
+        const string SendUsTheFile = "\nPDFsharp cannot read this PDF file. " +
             "If you think your file is a valid PDF file please send it to us so that we can fix this bug in the PDF parser.";
 
         public static InvalidOperationException InvalidOperationException_CouldNotFindMetadataDictionary() =>
             new("Could not find document’s metadata dictionary." + SendUsTheFile);
+
+        public static InvalidOperationException InvalidOperationException_ReferenceMustNotBeNull() =>
+            new("The reference must not be null.");
 
         #region Reader Messages
 

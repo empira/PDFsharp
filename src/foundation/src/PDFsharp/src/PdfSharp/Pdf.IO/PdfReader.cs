@@ -398,7 +398,7 @@ namespace PdfSharp.Pdf.IO
 
                 // 7. Replace all document’s placeholder references by references knowing their objects.
                 // Placeholder references are used, when reading indirect objects referring objects stored in object streams before reading and decoding them.
-                FinishReferences();
+                FinalizeReferences();
 
                 RereadUnicodeStrings();
 
@@ -449,19 +449,48 @@ namespace PdfSharp.Pdf.IO
             return _document;
         }
 
-        void FinishReferences()
+        /// <summary>
+        /// Ensures that all references in all objects refer to the actual object or to the null object (see ShouldUpdateReference method).
+        /// </summary>
+        void FinalizeReferences()
         {
             Debug.Assert(_document.IrefTable.IsUnderConstruction);
 
-            var finishedObjects = new HashSet<PdfObject>();
-
             foreach (var iref in _document.IrefTable.AllReferences)
             {
-                Debug.Assert(iref.Value != null,
+                var pdfObject = iref.Value;
+
+                Debug.Assert(pdfObject != null,
                     "All references saved in IrefTable should have been created when their referred PdfObject has been accessible.");
 
-                // Get and update object’s references.
-                FinishItemReferences(iref.Value, _document, finishedObjects);
+                // Update all references to PdfDictionary’s and PdfArray’s child objects.
+                switch (pdfObject)
+                {
+                    case PdfDictionary dictionary:
+                        // Dictionary elements are modified inside the loop. Avoid "Collection was modified; enumeration operation may not execute" error occuring in net 4.6.2.
+                        // There is no way to access KeyValuePairs via index natively to use a for loop with.
+                        // Instead, enumerate Keys and get value via Elements[key], which should be O(1).
+                        foreach (var key in dictionary.Elements.Keys)
+                        {
+                            var item = dictionary.Elements[key];
+
+                            // Replace each reference with its final item, if necessary.
+                            if (item is PdfReference currentReference && ShouldUpdateReference(currentReference, out var finalItem))
+                                dictionary.Elements[key] = finalItem;
+                        }
+                        break;
+                    case PdfArray array:
+                        var elements = array.Elements;
+                        for (var i = 0; i < elements.Count; i++)
+                        {
+                            var item = elements[i];
+
+                            // Replace each reference with its final item, if necessary.
+                            if (item is PdfReference currentReference && ShouldUpdateReference(currentReference, out var finalItem))
+                                elements[i] = finalItem;
+                        }
+                        break;
+                }
             }
 
             _document.IrefTable.IsUnderConstruction = false;
@@ -470,92 +499,16 @@ namespace PdfSharp.Pdf.IO
             _document.Trailer.Finish();
         }
 
-        void FinishItemReferences(PdfItem? pdfItem, PdfDocument document, HashSet<PdfObject> finishedObjects)
-        {
-            // Only PdfObjects may contain further PdfReferences.
-            if (pdfItem is not PdfObject pdfObject)
-                return;
-#if true
-            // Try to add object to finished objects.
-            // Return, if this object was already processed.
-            if (!finishedObjects.Add(pdfObject))
-                return;
-#else
-            // Return, if this object is already processed.
-            if (finishedObjects.Contains(pdfObject))
-                return;
-
-            // Mark object as processed.
-            finishedObjects.Add(pdfObject);
-#endif
-
-#if true
-            // For PdfDictionary and PdfArray, get and update child references.
-            switch (pdfObject)
-            {
-                case PdfDictionary childDictionary:
-                    FinishChildReferences(childDictionary, finishedObjects);
-                    break;
-                case PdfArray childArray:
-                    FinishChildReferences(childArray, finishedObjects);
-                    break;
-            }
-#else
-            // For PdfDictionary and PdfArray, get and update child references.
-            if (pdfObject is PdfDictionary childDictionary)
-                FinishChildReferences(childDictionary, document, finishedObjects);
-            if (pdfObject is PdfArray childArray)
-                FinishChildReferences(childArray, document, finishedObjects);
-#endif
-        }
-
-        void FinishChildReferences(PdfDictionary dictionary, HashSet<PdfObject> finishedObjects)
-        {
-            // Dictionary elements are modified inside loop. Avoid "Collection was modified; enumeration operation may not execute" error occuring in net 4.6.2.
-            // There is no way to access KeyValuePairs via index natively to use a for loop with.
-            // Instead, enumerate Keys and get value via Elements[key], which shall be O(1).
-            foreach (var key in dictionary.Elements.Keys)
-            {
-                var item = dictionary.Elements[key];
-
-                // For PdfReference: Update reference, if necessary, and continue with referred item.
-                if (item is PdfReference iref)
-                {
-                    if (FinishReference(iref, out var newIref, out var value))
-                        dictionary.Elements[key] = newIref;
-                    item = value;
-                }
-
-                // Get and update item’s references.
-                FinishItemReferences(item, _document, finishedObjects);
-            }
-        }
-
-        void FinishChildReferences(PdfArray array, HashSet<PdfObject> finishedObjects)
-        {
-            var elements = array.Elements;
-            for (var i = 0; i < elements.Count; i++)
-            {
-                var item = elements[i];
-
-                // For PdfReference: Update reference, if necessary, and continue with referred item.
-                if (item is PdfReference iref)
-                {
-                    if (FinishReference(iref, out var newIref, out var value))
-                        elements[i] = newIref;
-                    item = value;
-                }
-
-                // Get and update item’s references.
-                FinishItemReferences(item, _document, finishedObjects);
-            }
-        }
-
-        bool FinishReference(PdfReference currentReference, out PdfItem actualReference, out PdfItem value)
+        /// <summary>
+        /// Gets the final PdfItem that shall perhaps replace currentReference. It will be outputted in finalItem.
+        /// </summary>
+        /// <returns>True, if finalItem has changes compared to currentReference.</returns>
+        bool ShouldUpdateReference(PdfReference currentReference, out PdfItem finalItem)
         {
             var isChanged = false;
             PdfItem? reference = currentReference;
 
+            // Step 1:
             // The value of the reference may be null.
             // If a file level PdfObject refers object stream level PdfObjects, that were not yet decompressed when reading it,
             // placeholder references are used. 
@@ -565,32 +518,22 @@ namespace PdfSharp.Pdf.IO
                 var newIref = _document.IrefTable[currentReference.ObjectID];
                 reference = newIref;
                 isChanged = true;
+                // reference may be null. Don’t return yet.
             }
 
+            // Step: 2
             // PDF Reference 2.0 section 7.3.10:
             // An indirect reference to an undefined object shall not be considered an error by a PDF processor;
             // it shall be treated as a reference to the null object.
-            if (reference is PdfReference { Value: null })
+            // Addition: A reference replaced with null in step 1, as no reference for the object ID has been found in _document.IrefTable,
+            // is also considered as a reference to an undefined object here.
+            if (reference is PdfReference { Value: null } or null)
             {
                 reference = PdfNull.Value;
                 isChanged = true;
             }
 
-            if (reference == null)
-            {
-                reference = PdfNull.Value;
-                isChanged = true;
-            }
-
-            actualReference = reference;
-
-            if (!isChanged)
-                value = currentReference.Value;
-            else if (actualReference is PdfReference r)
-                value = r.Value;
-            else
-                value = PdfNull.Value;
-
+            finalItem = reference;
             return isChanged;
         }
 

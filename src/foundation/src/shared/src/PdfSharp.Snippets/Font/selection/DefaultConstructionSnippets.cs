@@ -54,7 +54,7 @@ namespace PdfSharp.Snippets.Font
 #endif
 
 #if TIMES_NEW_ROMAN
-        private const string FamilyName = "Times New Roman";
+        const string FamilyName = "Times New Roman";
 #elif SEGOE_UI
         const string FamilyName = "Segoe UI";
 #endif
@@ -442,7 +442,7 @@ namespace PdfSharp.Snippets.Font
 #endif
 
 #if TIMES_NEW_ROMAN
-        private const string FamilyName = "Times New Roman";
+        const string FamilyName = "Times New Roman";
 #elif SEGOE_UI
         const string FamilyName = "Segoe UI";
 #endif

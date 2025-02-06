@@ -273,16 +273,12 @@ namespace PdfSharp.Drawing
         /// </summary>
         public static implicit operator XUnit(string value)
         {
-
             XUnit unit = default;
             value = value.Trim();
 
-            // #DELETE 2024-12-31 - Replace this special treatment for German numbers with an exception.
+            // No commas allowed anymore. ',' as decimal separator was a special hack for German numbers.
             if (value.Contains(','))
-            {
-                PdfSharpLogHost.Logger.LogError("A number string contains an illegal ','. It is replaced by '.'. Will throw exception in the future.");
-                value = value.Replace(',', '.');
-            }
+                throw new FormatException($"value '{value}' must not contain a comma as decimal or thousands separator.");
 
             int count = value.Length;
             int valLen = 0;
