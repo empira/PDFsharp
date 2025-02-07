@@ -187,13 +187,12 @@ namespace PdfSharp.Pdf.AcroForms
             {
                 var widget = Annotations.Elements[i];
                 var rect = widget.Rectangle;
-                if (widget.Page != null && !rect.IsEmpty)
+                if (widget.Page != null && !rect.IsZero)
                 {
                     // existing/imported field ?
                     if (widget.Elements.ContainsKey(PdfAnnotation.Keys.AP))
                     {
                         widget.Elements.SetName(PdfAnnotation.Keys.AS, i == SelectedIndex ? Options.ElementAt(i) : "/Off");
-
                     }
                     else
                         CreateAppearance(widget, GetNonOffValue(widget) ?? "/Yes");
@@ -212,7 +211,7 @@ namespace PdfSharp.Pdf.AcroForms
             nameOfOnState = nameOfOnState.TrimStart('/');
 
             var rect = widget.Rectangle;
-            if (widget.Page != null && !rect.IsEmpty)
+            if (widget.Page != null && !rect.IsZero)
             {
                 var xRect = new XRect(0, 0, Math.Max(1, rect.Width), Math.Max(1, rect.Height));
                 // checked state

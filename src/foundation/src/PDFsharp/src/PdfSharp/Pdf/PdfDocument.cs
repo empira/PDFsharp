@@ -753,7 +753,7 @@ namespace PdfSharp.Pdf
             if (form == null)
             {
                 form = new PdfAcroForm(this);
-                IrefTable.Add(new PdfReference(form));
+                IrefTable.Add(form);
                 if (form.Reference != null)
                     form.Reference.Document = this;
                 Catalog.AcroForm = form;

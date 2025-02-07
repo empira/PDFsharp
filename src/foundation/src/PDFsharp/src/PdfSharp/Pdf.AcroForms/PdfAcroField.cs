@@ -718,7 +718,7 @@ namespace PdfSharp.Pdf.AcroForms
                 return FontSize.Value;
 
             var fontSize = 10.0;
-            if (widget != null && !widget.Rectangle.IsEmpty)
+            if (widget != null && !widget.Rectangle.IsZero)
             {
                 var refValue = widget.Rotation == 0
                     || widget.Rotation == 180
@@ -902,7 +902,7 @@ namespace PdfSharp.Pdf.AcroForms
         /// <param name="rect"></param>
         protected virtual void RenderContentStream(PdfPage page, PdfDictionary streamDict, PdfRectangle rect)
         {
-            if (streamDict == null || streamDict.Stream == null || rect.IsEmpty)
+            if (streamDict == null || streamDict.Stream == null || rect.IsZero)
                 return;
             var stream = streamDict.Stream;
             var content = ContentReader.ReadContent(stream.UnfilteredValue);
