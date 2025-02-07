@@ -149,64 +149,37 @@ namespace PdfSharp.Pdf.Signatures
             _signatureFieldByteRangePdfArray = new PdfArrayWithPadding(Document, ByteRangePaddingLength, new PdfLongInteger(0), new PdfLongInteger(0), new PdfLongInteger(0), new PdfLongInteger(0));
 
             var signatureDictionary = GetSignatureDictionary(_placeholderItem, _signatureFieldByteRangePdfArray);
-            var signatureField = GetSignatureField(signatureDictionary);
-
-            var annotations = Document.Pages[Options.PageIndex].Elements.GetArray(PdfPage.Keys.Annots);
-            if (annotations == null)
-                Document.Pages[Options.PageIndex].Elements.Add(PdfPage.Keys.Annots, new PdfArray(Document, signatureField));
-            else
-                annotations.Elements.Add(signatureField);
 
             // acroform
 
-            var catalog = Document.Catalog;
-
-            if (catalog.Elements.GetObject(PdfCatalog.Keys.AcroForm) == null)
-                catalog.Elements.Add(PdfCatalog.Keys.AcroForm, new PdfAcroForm(Document));
-
-            if (!catalog.AcroForm.Elements.ContainsKey(PdfAcroForm.Keys.SigFlags))
-                catalog.AcroForm.Elements.Add(PdfAcroForm.Keys.SigFlags, new PdfInteger(3));
+            var acroForm = Document.GetOrCreateAcroForm();
+            if (!acroForm.Elements.ContainsKey(PdfAcroForm.Keys.SigFlags))
+                acroForm.Elements.Add(PdfAcroForm.Keys.SigFlags, new PdfInteger(3));
             else
             {
-                var sigFlagVersion = catalog.AcroForm.Elements.GetInteger(PdfAcroForm.Keys.SigFlags);
+                var sigFlagVersion = acroForm.Elements.GetInteger(PdfAcroForm.Keys.SigFlags);
                 if (sigFlagVersion < 3)
-                    catalog.AcroForm.Elements.SetInteger(PdfAcroForm.Keys.SigFlags, 3);
+                    acroForm.Elements.SetInteger(PdfAcroForm.Keys.SigFlags, 3);
             }
 
-            if (catalog.AcroForm.Elements.GetValue(PdfAcroForm.Keys.Fields) == null)
-                catalog.AcroForm.Elements.SetValue(PdfAcroForm.Keys.Fields, new PdfAcroField.PdfAcroFieldCollection(new PdfArray()));
-            catalog.AcroForm.Fields.Elements.Add(signatureField);
-        }
-
-        PdfSignatureField GetSignatureField(PdfSignature2 signatureDic)
-        {
-            var signatureField = new PdfSignatureField(Document);
-
-            signatureField.Elements.Add(PdfAcroField.Keys.V, signatureDic);
-
-            // Annotation keys.
-            signatureField.Elements.Add(PdfAcroField.Keys.FT, new PdfName("/Sig"));
-            signatureField.Elements.Add(PdfAcroField.Keys.T, new PdfString("Signature1")); // TODO_OLD If already exists, will it cause error? implement a name chooser if yes.
-            signatureField.Elements.Add(PdfAcroField.Keys.Ff, new PdfInteger(132));
-            signatureField.Elements.Add(PdfAcroField.Keys.DR, new PdfDictionary());
-            signatureField.Elements.Add(PdfSignatureField.Keys.Type, new PdfName("/Annot"));
-            signatureField.Elements.Add("/Subtype", new PdfName("/Widget"));
-            signatureField.Elements.Add("/P", Document.Pages[Options.PageIndex]);
-
-            signatureField.Elements.Add("/Rect", new PdfRectangle(Options.Rectangle));
-
-            signatureField.CustomAppearanceHandler = Options.AppearanceHandler ?? new DefaultSignatureAppearanceHandler()
+            acroForm.AddSignatureField(signatureField =>
             {
-                Location = Options.Location,
-                Reason = Options.Reason,
-                Signer = Signer.CertificateName
-            };
-            // TODO_OLD Call RenderCustomAppearance(); here.
-            signatureField.PrepareForSave(); // TODO_OLD PdfSignatureField.PrepareForSave() is not triggered automatically so let's call it manually from here, but it would be better to be called automatically.
+                // Note: number-suffix will be added/incremented if a field with the same name already exist
+                signatureField.Name = "Signature1";
+                signatureField.SetFlags = (PdfAcroFieldFlags)132;   // TODO: what is that ?
+                signatureField.Value = signatureDictionary;
+                signatureField.CustomAppearanceHandler = Options.AppearanceHandler ?? new DefaultSignatureAppearanceHandler()
+                {
+                    Location = Options.Location,
+                    Reason = Options.Reason,
+                    Signer = Signer.CertificateName
+                };
 
-            Document.Internals.AddObject(signatureField);
-
-            return signatureField;
+                signatureField.AddAnnotation(widget =>
+                {
+                    widget.AddToPage(Document.Pages[Options.PageIndex], new PdfRectangle(Options.Rectangle));
+                });
+            });
         }
 
         PdfSignature2 GetSignatureDictionary(PdfSignaturePlaceholderItem contents, PdfArray byteRange)

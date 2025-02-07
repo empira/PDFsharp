@@ -334,8 +334,8 @@ namespace PdfSharp.Pdf
             }
 
             /// <summary>
-            /// Gets the PdfArray with the specified index, or null if no such object exists. If the index refers to
-            /// a reference, the referenced PdfArray is returned.
+            /// Gets the PdfDictionary with the specified index, or null if no such object exists. If the index refers to
+            /// a reference, the referenced PdfDictionary is returned.
             /// </summary>
             public PdfDictionary? GetDictionary(int index)
                 => GetObject(index) as PdfDictionary;

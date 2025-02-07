@@ -3,6 +3,7 @@
 
 using PdfSharp.Drawing;
 using PdfSharp.Pdf.Advanced;
+using PdfSharp.Pdf.Annotations.enums;
 
 namespace PdfSharp.Pdf.Annotations
 {
@@ -53,6 +54,11 @@ namespace PdfSharp.Pdf.Annotations
         }
 
         /// <summary>
+        /// Gets or sets the border-properties of this Annotation
+        /// </summary>
+        public PdfAnnotationBorder Border { get; set; } = new PdfAnnotationBorder();
+
+        /// <summary>
         /// Gets or sets the annotation flags of this instance.
         /// </summary>
         public PdfAnnotationFlags Flags
@@ -75,6 +81,40 @@ namespace PdfSharp.Pdf.Annotations
         }
 
         PdfAnnotations? _parent;
+
+        /// <summary>
+        /// Gets or sets the page for this Annotation
+        /// </summary>
+        public PdfPage? Page
+        {
+            get
+            {
+                var pageRef = Elements.GetReference(Keys.Page);
+                if (pageRef == null)
+                {
+                    var page = TryFindPage();
+                    if (page != null)
+                    {
+                        Elements.SetReference(Keys.Page, page);
+                        pageRef = page.Reference;
+                    }
+                }
+                return pageRef != null && pageRef.Value is PdfDictionary
+                    ? Owner.Pages.FindPage(pageRef.ObjectID)
+                    : null;
+            }
+            set
+            {
+                if (value is null)
+                    throw new ArgumentNullException(nameof(value));
+
+                var curPage = Page;
+                curPage?.Annotations.Remove(this);
+                Elements.SetReference(Keys.Page, value);
+                if (Reference != null && !value.Annotations.Elements.Contains(Reference))
+                    value.Annotations.Add(this);
+            }
+        }
 
         /// <summary>
         /// Gets or sets the annotation rectangle, defining the location of the annotation
@@ -192,6 +232,136 @@ namespace PdfSharp.Pdf.Annotations
         }
 
         /// <summary>
+        /// Convenience-method that serves 2 purposes:<br></br>
+        /// 1: It allows setting the <see cref="Page"/> and the <see cref="Rectangle"/> with one call<br></br>
+        /// 2: It eases placing the annotation on the page by using the <b>top-left</b> of the page as the origin<br></br>
+        ///    (as opposed to the <b>bottom-left</b>, which would be the case when using <see cref="Rectangle"/> directly)
+        /// </summary>
+        /// <param name="page">The <see cref="PdfPage"/> the annotation should be placed on</param>
+        /// <param name="rectangle">The rectangle of the Annotation. The position should be relative to the top-left of the page</param>
+        public void AddToPage(PdfPage page, PdfRectangle rectangle)
+        {
+            Page = page ?? throw new ArgumentNullException(nameof(page));
+            if (rectangle == null)
+                throw new ArgumentNullException(nameof(rectangle));
+
+            var location = new XPoint(rectangle.X1, page.Height.Point - rectangle.Y2);
+            Rectangle = new PdfRectangle(location, rectangle.Size);
+        }
+
+        private PdfPage? TryFindPage()
+        {
+            if (_document != null)
+            {
+                for (var i = 0; i < _document.PageCount; i++)
+                {
+                    var page = _document.Pages[i];
+                    if (page.Annotations != null && page.Annotations.Count > 0)
+                    {
+                        for (var a = 0; a < page.Annotations.Count; a++)
+                        {
+                            var annot = page.Annotations[a];
+                            if (annot.Reference == Reference)
+                                return page;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Determines the border-characteristics of this annotation<br></br>
+        /// PdfReference 1.7, Chapter 12.5.2 and 12.5.4
+        /// </summary>
+        protected void DetermineBorder()
+        {
+            var bs = Elements.GetDictionary(Keys.BS);
+            if (bs != null)
+            {
+                if (bs.Elements.ContainsKey("/W"))
+                    Border.Width = Math.Max(0.0, bs.Elements.GetReal("/W"));
+                if (bs.Elements.ContainsKey("/S"))
+                {
+                    var styleName = bs.Elements.GetName("/S");
+                    Border.BorderStyle = styleName switch
+                    {
+                        "/S" => PdfAnnotationBorderStyle.Solid,
+                        "/D" => PdfAnnotationBorderStyle.Dashed,
+                        "/B" => PdfAnnotationBorderStyle.Beveled,
+                        "/I" => PdfAnnotationBorderStyle.Inset,
+                        "/U" => PdfAnnotationBorderStyle.Underline,
+                        _ => PdfAnnotationBorderStyle.None
+                    };
+                }
+                if (bs.Elements.ContainsKey("/D"))
+                {
+                    var patternArray = bs.Elements.GetArray("/D");
+                    if (patternArray?.Elements.Count > 0)
+                    {
+                        var numbers = new List<int>(patternArray.Elements.Count);
+                        foreach (var item in patternArray)
+                        {
+                            if (item is PdfInteger intItem)
+                                numbers.Add(intItem.Value);
+                        }
+                        Border.DashPattern = numbers.ToArray();
+                    }
+                }
+                return;     // BS takes precedence over Border
+            }
+            if (Elements.ContainsKey(Keys.Border))
+            {
+                var borderArray = Elements.GetArray(Keys.Border);
+                var hRadius = 0.0;
+                var vRadius = 0.0;
+                var width = 0.0;
+                int[]? dashPattern = null;
+                for (var i = 0; i < borderArray?.Elements.Count; i++)
+                {
+                    var val = borderArray.Elements[i];
+                    if (i == 0)
+                    {
+                        if (val is PdfInteger hItem)
+                            hRadius += hItem.Value;
+                        else if (val is PdfReal hRealItem)
+                            hRadius += hRealItem.Value;
+                    }
+                    if (i == 1)
+                    {
+                        if (val is PdfInteger vItem)
+                            vRadius = vItem.Value;
+                        else if (val is PdfReal vRealItem)
+                            vRadius += vRealItem.Value;
+                    }
+                    if (i == 2)
+                    {
+                        if (val is PdfInteger widthItem)
+                            width = widthItem.Value;
+                        else if (val is PdfReal widthRealItem)
+                            width = widthRealItem.Value;
+                    }
+                    if (i == 3 && val is PdfArray arrayItem)
+                    {
+                        var dash = new List<int>();
+                        foreach (var item in arrayItem)
+                        {
+                            if (item is PdfInteger intItem)
+                                dash.Add(intItem.Value);
+                        }
+                        if (dash.Count > 0)
+                            dashPattern = dash.ToArray();
+                    }
+                }
+                Border.Width = width;
+                Border.HorizontalRadius = hRadius;
+                Border.VerticalRadius = vRadius;
+                if (dashPattern != null)
+                    Border.DashPattern = dashPattern;
+            }
+        }
+
+        /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
         public class Keys : KeysBase
@@ -228,7 +398,14 @@ namespace PdfSharp.Pdf.Annotations
             [KeyInfo(KeyType.TextString | KeyType.Optional)]
             public const string Contents = "/Contents";
 
-            // P
+            /// <summary>
+            /// (Optional except as noted below; PDF 1.3; not used in FDF files) 
+            /// An indirect reference to the page object with which this annotation is associated.
+            /// This entry shall be present in screen annotations associated with rendition actions 
+            /// (PDF 1.5; see 12.5.6.18, 'Screen Annotations' and 12.6.4.13, 'Rendition Actions')
+            /// </summary>
+            [KeyInfo(KeyType = KeyType.Optional)]
+            public const string Page = "/P";
 
             /// <summary>
             /// (Optional; PDF 1.4) The annotation name, a text string uniquely identifying it

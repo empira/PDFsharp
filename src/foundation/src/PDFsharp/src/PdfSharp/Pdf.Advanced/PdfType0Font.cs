@@ -27,6 +27,8 @@ namespace PdfSharp.Pdf.Advanced
             var otDescriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptorFor(glyphTypeface);
             FontDescriptor = document.PdfFontDescriptorCache.GetOrCreatePdfDescriptorFor(otDescriptor, glyphTypeface.GetBaseName());
 
+            // TODO: even if we specify "Full" FontEmbedding in the XFont, the generated ToUnicodeMap
+            // and /W Array will only contain the "used" characters (specified in the cmapInfo)
             //FontOptions = font.PdfOptions;
             //Debug.Assert(FontOptions != null);
 
