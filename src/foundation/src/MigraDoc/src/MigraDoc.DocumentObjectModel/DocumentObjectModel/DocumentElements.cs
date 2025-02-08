@@ -53,10 +53,10 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new paragraph with the specified text to the collection.
         /// </summary>
-        public Paragraph AddParagraph(string text)
+        public Paragraph AddParagraph(string text, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
             var paragraph = new Paragraph();
-            paragraph.AddText(text);
+            paragraph.AddText(text, textRenderOption);
             Add(paragraph);
             return paragraph;
         }
@@ -64,10 +64,10 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new paragraph with the specified text and style to the collection.
         /// </summary>
-        public Paragraph AddParagraph(string text, string style)
+        public Paragraph AddParagraph(string text, string style, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
             var paragraph = new Paragraph();
-            paragraph.AddText(text);
+            paragraph.AddText(text, textRenderOption);
             paragraph.Style = style;
             Add(paragraph);
             return paragraph;

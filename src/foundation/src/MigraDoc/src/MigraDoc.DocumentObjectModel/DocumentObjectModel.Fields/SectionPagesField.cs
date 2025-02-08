@@ -11,7 +11,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
         /// <summary>
         /// Initializes a new instance of the SectionPagesField class.
         /// </summary>
-        public SectionPagesField()
+        public SectionPagesField(TextRenderOption textRenderOption = TextRenderOption.Default) : base(textRenderOption)
         {
             BaseValues = new SectionPagesFieldValues(this);
         }
@@ -19,7 +19,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
         /// <summary>
         /// Initializes a new instance of the SectionPagesField class with the specified parent.
         /// </summary>
-        internal SectionPagesField(DocumentObject parent) : base(parent)
+        internal SectionPagesField(DocumentObject parent, TextRenderOption textRenderOption = TextRenderOption.Default) : base(parent, textRenderOption)
         {
             BaseValues = new SectionPagesFieldValues(this);
         }
