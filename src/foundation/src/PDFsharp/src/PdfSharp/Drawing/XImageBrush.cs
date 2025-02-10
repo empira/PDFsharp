@@ -2,148 +2,110 @@
 // See the LICENSE file in the solution root for more information.
 
 #if WPF
-using System.IO;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-#endif
-
-#if GDI
-using PdfSharp.Internal;
 #endif
 
 namespace PdfSharp.Drawing
 {
-    public sealed class XImageBrush : XBrush
+    public sealed class XImageBrush : XBrush, IDisposable
     {
 
-#if GDI || WPF || CORE
         /// <summary>
         /// Creates an image from the specified file.
         /// </summary>
-        /// <param name="path">The path to a BMP, PNG, GIF, JPEG, TIFF file.</param>
+        /// <param name="path">The path to a BMP, PNG, GIF, JPEG, TIFF, or PDF file.</param>
         public static XImageBrush FromFile(string path)
         {
-            if (path == null)
+            if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentNullException(nameof(path));
 
-            path = Path.GetFullPath(path);
-            if (!File.Exists(path))
-                throw new FileNotFoundException(PsMsgs.FileNotFound(path));
+            var image = XImage.FromFile(path);
+            if (image == null)
+                throw new NullReferenceException(nameof(image));
 
-            return new XImageBrush(path);
+            return new XImageBrush(image);
         }
 
         /// <summary>
         /// Creates an image from the specified stream.<br/>
         /// </summary>
-        /// <param name="stream">The stream containing a BMP, PNG, GIF, JPEG, TIFF file.</param>
+        /// <param name="stream">The stream containing a BMP, PNG, GIF, JPEG, TIFF, or PDF file.</param>
         public static XImageBrush FromStream(Stream stream)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
-            return new XImageBrush(stream);
-        }
-#else
-        /// <summary>
-        /// Creates an image from the specified file.
-        /// </summary>
-        /// <param name="path">The path to a BMP, PNG, GIF, JPEG, TIFF file.</param>
-        public static XImageBrush FromFile(string path)
-        {
-            //throw new NotImplementedException();
+            var image = XImage.FromStream(stream);
+            if (image == null)
+                throw new NullReferenceException(nameof(image));
+
+            return new XImageBrush(image);
         }
 
-        /// <summary>
-        /// Creates an image from the specified stream.<br/>
-        /// </summary>
-        /// <param name="stream">The stream containing a BMP, PNG, GIF, JPEG, TIFF file.</param>
-        public static XImageBrush FromStream(Stream stream)
-        {
-            //throw new NotImplementedException();
-        }
-
-        XImageBrush()
-        {
-
-        }
-#endif
 
         internal XImage _xImage;
-        XImageBrush(string path)
+        XImageBrush(XImage xImage)
         {
-
-#if GDI
-            try
-            {
-                Lock.EnterGdiPlus();
-                Image _gdiImage = Image.FromFile(path);
-                _textureBrush = new TextureBrush(_gdiImage);
-            }
-            finally { Lock.ExitGdiPlus(); }
-
-#elif WPF
-            var wpfImage = BitmapFromUri(new Uri(path));
-            _imageBrush = new ImageBrush(wpfImage);
-
-#endif
-            _xImage = XImage.FromFile(path);
+            _xImage = xImage;
         }
 
-        XImageBrush(Stream stream) {
-
-#if GDI
-            // Create a GDI+ image.
-            try
-            {
-                Lock.EnterGdiPlus();
-                Image _gdiImage = Image.FromStream(stream);
-                _textureBrush = new TextureBrush(_gdiImage);
-            }
-            finally { Lock.ExitGdiPlus(); }
-#elif WPF
-            // Create a WPF BitmapImage.
-            BitmapImage bmi = new BitmapImage();
-            bmi.BeginInit();
-            bmi.StreamSource = stream;
-            bmi.EndInit();
-            _imageBrush = new ImageBrush(bmi);
-#endif
-            _xImage = XImage.FromStream(stream);
-        }
-
-
-#if GDI
-        TextureBrush _textureBrush;
-        internal override Brush RealizeGdiBrush() => _textureBrush;
-#endif
-
+        public void Dispose()
+        {
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+            _xImage?.Dispose();
+            _xImage = null;
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 #if WPF
-        ImageBrush _imageBrush;
-        internal override Brush RealizeWpfBrush() => _imageBrush;
-
-        /// <summary>
-        /// Creates an BitmapImage from URI. Sets BitmapCacheOption.OnLoad for WPF to prevent image file from being locked.
-        /// </summary>
-        public static BitmapImage BitmapFromUri(Uri uri)
-        {
-#if true
-            // Using new BitmapImage(uri) will leave a lock on the file, leading to problems with temporary image files in server environments.
-            // We use BitmapCacheOption.OnLoad to prevent this lock.
-            BitmapImage bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.UriSource = uri;
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.EndInit();
-            return bitmap;
-#else
-            return new BitmapImage(uri);
+            _imageBrush = null;
+#elif GDI
+            _textureBrush?.Dispose();
+            _textureBrush = null;
 #endif
         }
+
+#if GDI
+        TextureBrush? _textureBrush;
+        internal override Brush RealizeGdiBrush()
+        {
+            if (_textureBrush == null)
+            {
+                // Create a GDI+ image.
+                try
+                {
+                    Lock.EnterGdiPlus();
+                    _textureBrush = new TextureBrush(_xImage._gdiImage);
+                }
+                finally
+                {
+                    Lock.ExitGdiPlus();
+                }
+
+                if (_textureBrush == null)
+                    throw new NullReferenceException(nameof(_textureBrush));
+            }
+
+            return _textureBrush;
+        }
+#endif
+#if WPF
+        ImageBrush? _imageBrush;
+        internal override Brush RealizeWpfBrush()
+        {
+            if (_imageBrush == null)
+            {
+                // Create a WPF BitmapImage.
+                _imageBrush = new ImageBrush(_xImage._wpfImage);
+
+                if (_imageBrush == null)
+                    throw new NullReferenceException(nameof(_imageBrush));
+            }
+
+            return _imageBrush;
+        }
+
 #endif
 
-
-#if UWP
+#if WUI
         internal override ICanvasBrush RealizeCanvasBrush()
         {
             throw new NotImplementedException();
