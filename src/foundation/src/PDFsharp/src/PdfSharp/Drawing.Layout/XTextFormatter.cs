@@ -10,7 +10,7 @@ namespace PdfSharp.Drawing.Layout
     /// <summary>
     /// Represents a very simple text formatter.
     /// If this class does not satisfy your needs on formatting paragraphs, I recommend taking a look
-    /// at MigraDoc Foundation. Alternatively, you should copy this class in your own source code and modify it.
+    /// at MigraDoc. Alternatively, you should copy this class in your own source code and modify it.
     /// </summary>
     public class XTextFormatter
     {

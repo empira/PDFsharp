@@ -36,7 +36,7 @@ namespace PdfSharp.Pdf.Advanced
             {
                 _dests = new PdfNameTreeNode();
                 Owner.Internals.AddObject(_dests);
-                Elements.SetReference(Keys.Dests, _dests.Reference);
+                Elements.SetReference(Keys.Dests, _dests.Reference ?? throw TH.InvalidOperationException_ReferenceMustNotBeNull());
             }
 
             // destIndex > Owner.PageCount can happen when rendering pages using PDFsharp directly.
@@ -68,7 +68,7 @@ namespace PdfSharp.Pdf.Advanced
             {
                 _embeddedFiles = new PdfNameTreeNode();
                 Owner.Internals.AddObject(_embeddedFiles);
-                Elements.SetReference(Keys.EmbeddedFiles, _embeddedFiles.Reference);
+                Elements.SetReference(Keys.EmbeddedFiles, _embeddedFiles.Reference ?? throw TH.InvalidOperationException_ReferenceMustNotBeNull());
             }
 
             var embeddedFileStream = new PdfEmbeddedFileStream(Owner, stream);

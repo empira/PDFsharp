@@ -251,7 +251,7 @@ namespace MigraDoc.Rendering
                         if (_image.Values.PictureFormat != null)
                         {
                             PictureFormat picFormat = _image.PictureFormat;
-                            //Cropping in pixels.
+                            // Cropping in pixels.
                             XUnitPt cropLeft = picFormat.CropLeft.Point;
                             XUnitPt cropRight = picFormat.CropRight.Point;
                             XUnitPt cropTop = picFormat.CropTop.Point;
@@ -261,7 +261,7 @@ namespace MigraDoc.Rendering
                             formatInfo.CropWidth -= (int)(horzRes * (cropLeft + cropRight).Inch);
                             formatInfo.CropHeight -= (int)(vertRes * (cropTop + cropBottom).Inch);
 
-                            //Scaled cropping of the height and width.
+                            // Scaled cropping of the height and width.
                             double xScale = resultWidth / inherentWidth;
                             double yScale = resultHeight / inherentHeight;
 

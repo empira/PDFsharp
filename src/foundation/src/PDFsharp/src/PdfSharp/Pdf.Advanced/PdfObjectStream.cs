@@ -37,7 +37,7 @@ namespace PdfSharp.Pdf.Advanced
             int first = Elements.GetInteger(Keys.First);
             Stream.TryUncompress();
 
-            var parser = new Parser(_document, new MemoryStream(Stream.Value), documentParser);
+            var parser = new Parser(_document, new MemoryStream(Stream.UnfilteredValue), documentParser);
             _header = parser.ReadObjectStreamHeader(n, first);
 
 #if DEBUG_ && CORE
@@ -65,11 +65,9 @@ namespace PdfSharp.Pdf.Advanced
 
                 var objectID = new PdfObjectID(objectNumber);
 
-                // HACK_OLD: -1 indicates compressed object.
-                var iref = new PdfReference(objectID, -1);
-                ////iref.ObjectID = objectID;
-                ////iref.Value = xrefStream;
-                
+                // -1 indicates compressed object.
+                var iref = PdfReference.CreateForObjectID(objectID, -1);
+
                 _objectOffsets.Add(objectID, offset);
 
                 if (!xrefTable.Contains(iref.ObjectID))

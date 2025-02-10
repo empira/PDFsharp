@@ -39,7 +39,7 @@ namespace PdfSharp.Fonts.Internal
     /// </summary>
     static class FontHelper
     {
-#if true_ // #DELETE 24-12-31
+#if true_ // #DELETE 25-12-31
         /// <summary>
         /// Measure string directly from font data.
         /// </summary>
@@ -65,7 +65,7 @@ namespace PdfSharp.Fonts.Internal
             //codePoints = codeRun.Items;
 
             return MeasureString(codePoints, font);
-#if true_  // Keep until 2024-12-31 for reference
+#if true_  // Keep until 2025-12-31 for reference
             var size = new XSize();
             var descriptor = FontDescriptorCache.GetOrCreateDescriptorFor(font) as OpenTypeDescriptor;
             if (descriptor != null)

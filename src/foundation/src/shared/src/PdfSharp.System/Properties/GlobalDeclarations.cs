@@ -18,4 +18,4 @@ using System.Runtime.InteropServices;
 
 [assembly: ComVisible(false)]
 //[assembly: SuppressMessage("LoggingGenerator", "SYSLIB1006:Multiple logging methods cannot use the same event ID within a class",
-//    Justification = "We use logging event ids as documented, i.e. multiple times", Scope = "member"/*, Target = "~M:PdfSharp.Internal.Logging.LogMessages.XGraphicsCreated(Microsoft.Extensions.Logging.ILogger,System.String)"*/)]
+//    Justification = "We use logging event IDs as documented, i.e. multiple times", Scope = "member"/*, Target = "~M:PdfSharp.Internal.Logging.LogMessages.XGraphicsCreated(Microsoft.Extensions.Logging.ILogger,System.String)"*/)]

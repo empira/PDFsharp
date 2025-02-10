@@ -978,9 +978,9 @@ namespace PdfSharp.Pdf
                 return;
 
             var message = "The document was already saved and cannot be modified anymore. " +
-                          "Saving a document converts its in memory representation into a PDF file or stream. " +
+                          "Saving a document converts its in-memory representation into a PDF file or stream. " +
                           "This can only be done once. " +
-                          "After that process the in memory representation is outdated and protected against further modification.";
+                          "After that process the in-memory representation is outdated and protected against further modification.";
             throw new InvalidOperationException(message);
         }
 

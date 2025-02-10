@@ -26,7 +26,7 @@ namespace PdfSharp.Drawing.Internal
                     stream.CurrentOffset += 2;
 
                     var ipd = new ImagePrivateDataDct(stream.Data, stream.Length);
-                    var ii = new ImportedImageJpeg(this, ipd);
+                    var ii = new ImportedImageJpeg(ipd);
                     ii.Information.DefaultDPI = 72; // Assume 72 DPI if information not provided in the file.
                     if (TestJfifHeader(stream, ii))
                     {
@@ -400,8 +400,8 @@ namespace PdfSharp.Drawing.Internal
         /// <summary>
         /// Initializes a new instance of the <see cref="ImportedImageJpeg"/> class.
         /// </summary>
-        public ImportedImageJpeg(IImageImporter importer, ImagePrivateDataDct data)
-            : base(importer, data)
+        public ImportedImageJpeg(ImagePrivateDataDct data)
+            : base(data)
         { }
 
         internal override ImageData PrepareImageData(PdfDocumentOptions options)

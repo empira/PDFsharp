@@ -40,7 +40,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
             if (!String.IsNullOrEmpty(Values.Format))
                 str += "[Format = \"" + Format + "\"]";
             else
-                str += "[]"; //Has to be appended to avoid confusion with '[' in immediately following text.
+                str += "[]"; // Has to be appended to avoid confusion with '[' in immediately following text.
 
             serializer.Write(str);
         }

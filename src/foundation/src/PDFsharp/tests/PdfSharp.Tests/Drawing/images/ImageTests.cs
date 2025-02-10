@@ -248,7 +248,7 @@ namespace PdfSharp.Tests.Drawing
         }
 
         [Fact]
-        void PDF_with_Image_from_stream()
+        public void PDF_with_Image_from_stream()
         {
             // Attempt to avoid "image file locked" under .NET 4.6.2.
             GC.Collect();
@@ -261,7 +261,73 @@ namespace PdfSharp.Tests.Drawing
 
                 var imagePath = IOUtility.GetAssetsPath("PDFsharp/images/samples/jpeg/truecolorA.jpg")!;
 
-                var stream = new FileStream(imagePath, FileMode.Open);
+                var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read);
+                using var xImage = XImage.FromStream(stream);
+
+                gfx.DrawImage(xImage, 100, 100, 100, 100);
+
+                // Save the document...
+                var filename = PdfFileUtility.GetTempPdfFileName("ImageFromStream");
+                document.Save(filename);
+                // ...and start a viewer.
+                PdfFileUtility.ShowDocumentIfDebugging(filename);
+            }
+
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
+            GC.Collect();
+            GC.WaitForFullGCComplete();
+        }
+
+        [Fact]
+        public void PDF_with_Image_from_private_memorystream()
+        {
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
+            GC.Collect();
+            GC.WaitForFullGCComplete();
+
+            {
+                var document = new PdfDocument();
+                var page = document.AddPage();
+                var gfx = XGraphics.FromPdfPage(page);
+
+                var imagePath = IOUtility.GetAssetsPath("PDFsharp/images/samples/jpeg/truecolorA.jpg")!;
+                var pngBytes = File.ReadAllBytes(imagePath);
+
+                // Create a MemoryStream that does not allow GetBuffer.
+                var stream = new MemoryStream(pngBytes);
+                using var xImage = XImage.FromStream(stream);
+
+                gfx.DrawImage(xImage, 100, 100, 100, 100);
+
+                // Save the document...
+                var filename = PdfFileUtility.GetTempPdfFileName("ImageFromStream");
+                document.Save(filename);
+                // ...and start a viewer.
+                PdfFileUtility.ShowDocumentIfDebugging(filename);
+            }
+
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
+            GC.Collect();
+            GC.WaitForFullGCComplete();
+        }
+
+        [Fact]
+        public void PDF_with_Image_from_public_memorystream()
+        {
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
+            GC.Collect();
+            GC.WaitForFullGCComplete();
+
+            {
+                var document = new PdfDocument();
+                var page = document.AddPage();
+                var gfx = XGraphics.FromPdfPage(page);
+
+                var imagePath = IOUtility.GetAssetsPath("PDFsharp/images/samples/jpeg/truecolorA.jpg")!;
+                var pngBytes = File.ReadAllBytes(imagePath);
+
+                // Create a MemoryStream that allows GetBuffer.
+                var stream = new MemoryStream(pngBytes, 0, pngBytes.Length, false, true);
                 using var xImage = XImage.FromStream(stream);
 
                 gfx.DrawImage(xImage, 100, 100, 100, 100);

@@ -6,12 +6,20 @@
 // Checks correct settings and obsolete conditional compilation symbols.
 //
 
-#if !DEBUG && (TEST_CODE || TEST_CODE_)
-// Ensure not to accidentally rename TEST_CODE to TEST_CODE_
-// This would compile code previously disabled with #if TEST_CODE_
-#warning *********************************************************
-#warning ***** TEST_CODE MUST BE UNDEFINED FOR FINAL RELEASE *****
-#warning *********************************************************
+#if !DEBUG && TEST_CODE
+#warning ***********************************************************
+#warning ***** ‘TEST_CODE’ MUST BE UNDEFINED FOR FINAL RELEASE *****
+#warning ***********************************************************
+#endif
+
+#if TEST_CODE_  // ‘’
+// Ensure not to accidentally rename ‘TEST_CODE’ to ‘TEST_CODE_’.
+// This would compile code previously disabled with ‘#if TEST_CODE_’.
+// Rename ‘TEST_CODE’ always to ‘TEST_CODE_xxx’ in ‘Directory.Build.targets’.
+#warning *****************************************************
+#warning ***** ‘TEST_CODE_’ MUST NEVER BE DEFINED        *****
+#warning ***** THIS ACCIDENTALLY ACTIVATES EXCLUDED CODE *****
+#warning *****************************************************
 #endif
 
 #if GDI && WPF

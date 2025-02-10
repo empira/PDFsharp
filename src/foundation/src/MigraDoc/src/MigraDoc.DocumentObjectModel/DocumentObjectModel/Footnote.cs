@@ -18,7 +18,7 @@ namespace MigraDoc.DocumentObjectModel
         public Footnote()
         {
             BaseValues = new FootnoteValues(this);
-            //NYI: Nested footnote check!
+            // NYI: Nested footnote check!
         }
 
         /// <summary>

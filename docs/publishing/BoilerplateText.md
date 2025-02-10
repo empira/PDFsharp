@@ -4,9 +4,9 @@
 
 ## PDFsharp
 
-PDFsharp project       - PDFsharp
-PDFsharp Foundation    - PDFsharp library
-MigraDoc Foundation    - MigraDoc library
+PDFsharp Project       - PDFsharp
+PDFsharp Library       - PDFsharp
+MigraDoc Library       - Library
 
 
 Source
@@ -66,17 +66,17 @@ MigraDoc is a .NET library that allows developers to create documents such as PD
 Note: Do not replicate information from the metadata (like "6.0.0" or "prerelease").
 
 PDFsharp:
-This is a version of PDFsharp using .NET 6.
-The package ’PdfSharp’ can be used on any platform including Windows and Linux. The Target Frameworks are ’net6.0’ and ’netstandard2.0’.
-The packages ’PDFsharp-gdi’ and ’PDFsharp-wpf’ can be used under Windows only. The Target Frameworks are ’net6.0-windows’ and ’net462’.
+This is a version of PDFsharp compatible with .NET 6 and higher.
+The package ‘PdfSharp’ can be used on any platform including Windows and Linux. The Target Frameworks are ‘net6.0’, ‘net8.0’ and ‘netstandard2.0’.
+The packages ‘PDFsharp-gdi’ and ‘PDFsharp-wpf’ can be used under Windows only. The Target Frameworks are ‘net6.0-windows’, ‘net8.0-windows’ and ‘net462’.
 We also publish packages that contain PDFsharp plus MigraDoc.
 See the project docs site for further information:
 https://docs.pdfsharp.net/link/readme-v6.2.html
 
 
 PDFsharp & MigraDoc:
-This is a version of PDFsharp and MigraDoc Foundation using .NET 6.
-The package ’PDFsharp-MigraDoc’ can be used on any platform including Windows and Linux. The Target Frameworks are ’net6.0’ and ’netstandard2.0’.
-The packages ’PDFsharp-MigraDoc-GDI’ and ’PDFsharp-MigraDoc-WPF’ can be used under Windows only. The Target Frameworks are ’net6.0-windows’ and ’net462’.
+This is a version of PDFsharp and MigraDoc compatible with .NET 6 and higher.
+The package ‘PDFsharp-MigraDoc’ can be used on any platform including Windows and Linux. The Target Frameworks are ‘net6.0’, ‘net8.0’ and ‘netstandard2.0’.
+The packages ‘PDFsharp-MigraDoc-GDI’ and ‘PDFsharp-MigraDoc-WPF’ can be used under Windows only. The Target Frameworks are ‘net6.0-windows’, ‘net8.0-windows’ and ‘net462’.
 See the project docs site for further information:
 https://docs.pdfsharp.net/link/readme-v6.2.html

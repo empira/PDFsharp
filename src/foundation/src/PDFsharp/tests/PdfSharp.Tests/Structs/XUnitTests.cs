@@ -318,7 +318,7 @@ namespace PdfSharp.Tests.Structs
             const double d2 = 2;
 
             const double d2Cm = d2;
-            
+
             XUnit xUnit2Cm = XUnit.FromCentimeter(d2Cm);
             XUnitPt xUnitPt2Cm = XUnitPt.FromCentimeter(d2Cm);
 
@@ -333,6 +333,16 @@ namespace PdfSharp.Tests.Structs
             xUnitPt2CmAsXUnit.Should().NotBe(xUnit2Cm);
             xUnitPt2CmAsXUnit.Point.Should().Be(xUnit2Cm.Point);
             xUnitPt2CmAsXUnit.Centimeter.Should().BeApproximately(xUnit2Cm.Centimeter, acceptedRoundingError);
+        }
+
+        [Fact]
+        public void XUnit_No_commas_allowed_anymore_Test()
+        {
+            XUnit unit = "10000.0";
+            unit.Value.Should().Be(10_000);
+
+            Func<XUnit> createUnit = () => unit = "10000,0";
+            createUnit.Should().Throw<FormatException>();
         }
     }
 }

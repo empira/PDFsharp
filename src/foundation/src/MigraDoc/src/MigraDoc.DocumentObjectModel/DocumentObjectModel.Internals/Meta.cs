@@ -79,8 +79,8 @@ namespace MigraDoc.DocumentObjectModel.Internals
 
             if (trail != null)
             {
-                //REVIEW DaSt: dom.GetValue(name) and call SetValue recursively,
-                //             or dom.GetValue(name.BisVorletzteElement) and then call SetValue?
+                // REVIEW DaSt: dom.GetValue(name) and call SetValue recursively,
+                //              or dom.GetValue(name.BisVorletzteElement) and then call SetValue?
                 var doc = (DocumentObject?)dom.GetValue(name);
                 if (doc == null)
                     throw new InvalidOperationException($"No value named '{name}' exists.");

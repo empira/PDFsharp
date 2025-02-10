@@ -41,7 +41,7 @@ namespace PdfSharp.Pdf.Advanced
             if (iref != null)
                 Elements.SetReference(Keys.Info, iref);
 
-            Elements.SetReference(Keys.Root, trailer.Elements.GetReference(Keys.Root));
+            Elements.SetReference(Keys.Root, trailer.Elements.GetReference(Keys.Root) ?? throw TH.InvalidOperationException_ReferenceMustNotBeNull());
 
             Elements.SetInteger(Keys.Size, trailer.Elements.GetInteger(Keys.Size));
 

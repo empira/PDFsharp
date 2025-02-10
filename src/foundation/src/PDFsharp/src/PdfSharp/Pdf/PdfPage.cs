@@ -53,7 +53,7 @@ namespace PdfSharp.Pdf
             {
                 // Setup page size from MediaBox.
                 var rectangle = Elements.GetRectangle(InheritablePageKeys.MediaBox, false);
-                if (rectangle.IsEmpty)
+                if (rectangle.IsZero)
                     throw new InvalidOperationException("Page has no MediaBox.");
 
                 _width = XUnit.FromPoint(rectangle.X2 - rectangle.X1);
@@ -180,7 +180,7 @@ namespace PdfSharp.Pdf
                     throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(PageSize));
 
                 var size = PageSizeConverter.ToSize(value);
-                MediaBox = new PdfRectangle(0, 0, size.Width, size.Height);
+                MediaBox = new(0, 0, size.Width, size.Height);
             }
         }
 
@@ -191,14 +191,12 @@ namespace PdfSharp.Pdf
         {
             get
             {
-                if (_trimMargins == default!)
-                    _trimMargins = new TrimMargins();
+                _trimMargins ??= new TrimMargins();
                 return _trimMargins;
             }
             set
             {
-                if (_trimMargins == default!)
-                    _trimMargins = new TrimMargins();
+                _trimMargins ??= new TrimMargins();
                 if (value != null!)
                 {
                     _trimMargins.Left = value.Left;
@@ -210,7 +208,7 @@ namespace PdfSharp.Pdf
                     _trimMargins.All = XUnit.Zero;
             }
         }
-        TrimMargins _trimMargins = new TrimMargins();
+        TrimMargins? _trimMargins;
 
         /// <summary>
         /// Gets or sets the media box directly. XGraphics is not prepared to work with a media box
@@ -233,12 +231,45 @@ namespace PdfSharp.Pdf
         }
 
         /// <summary>
+        /// Gets a value indicating whether a media box is set.
+        /// </summary>
+        public bool HasMediaBox => Elements[InheritablePageKeys.MediaBox] != null;
+
+        /// <summary>
+        /// Gets a copy of the media box if it exists, or PdfRectangle.Empty if no media box is set.
+        /// </summary>
+        public PdfRectangle MediaBoxReadOnly => Elements.GetRectangle(InheritablePageKeys.MediaBox, false);
+
+        /// <summary>
         /// Gets or sets the crop box.
         /// </summary>
         public PdfRectangle CropBox
         {
             get => Elements.GetRectangle(InheritablePageKeys.CropBox, true);
             set => Elements.SetRectangle(InheritablePageKeys.CropBox, value);
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether a crop box is set.
+        /// </summary>
+        public bool HasCropBox => Elements[InheritablePageKeys.CropBox] != null;
+
+        /// <summary>
+        /// Gets a copy of the crop box if it exists, or PdfRectangle.Empty if no crop box is set.
+        /// </summary>
+        public PdfRectangle CropBoxReadOnly => Elements.GetRectangle(InheritablePageKeys.CropBox, false);
+
+        /// <summary>
+        /// Gets a copy of the effective crop box if it exists, or PdfRectangle.Empty if neither crop box nor media box are set.
+        /// </summary>
+        public PdfRectangle EffectiveCropBoxReadOnly
+        {
+            get
+            {
+                if (HasCropBox)
+                    return CropBox;
+                return MediaBoxReadOnly;
+            }
         }
 
         /// <summary>
@@ -251,6 +282,29 @@ namespace PdfSharp.Pdf
         }
 
         /// <summary>
+        /// Gets a value indicating whether a bleed box is set.
+        /// </summary>
+        public bool HasBleedBox => Elements[Keys.BleedBox] != null;
+
+        /// <summary>
+        /// Gets a copy of the bleed box if it exists, or PdfRectangle.Empty if no bleed box is set.
+        /// </summary>
+        public PdfRectangle BleedBoxReadOnly => Elements.GetRectangle(Keys.BleedBox, false);
+
+        /// <summary>
+        /// Gets a copy of the effective bleed box if it exists, or PdfRectangle.Empty if neither bleed box nor crop box nor media box are set.
+        /// </summary>
+        public PdfRectangle EffectiveBleedBoxReadOnly
+        {
+            get
+            {
+                if (HasBleedBox)
+                    return BleedBox;
+                return EffectiveCropBoxReadOnly;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the art box.
         /// </summary>
         public PdfRectangle ArtBox
@@ -260,12 +314,58 @@ namespace PdfSharp.Pdf
         }
 
         /// <summary>
+        /// Gets a value indicating whether an art box is set.
+        /// </summary>
+        public bool HasArtBox => Elements[Keys.ArtBox] != null;
+
+        /// <summary>
+        /// Gets a copy of the art box if it exists, or PdfRectangle.Empty if no art box is set.
+        /// </summary>
+        public PdfRectangle ArtBoxReadOnly => Elements.GetRectangle(Keys.ArtBox, false);
+
+        /// <summary>
+        /// Gets a copy of the effective art box if it exists, or PdfRectangle.Empty if neither art box nor crop box nor media box are set.
+        /// </summary>
+        public PdfRectangle EffectiveArtBoxReadOnly
+        {
+            get
+            {
+                if (HasArtBox)
+                    return ArtBox;
+                return EffectiveCropBoxReadOnly;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the trim box.
         /// </summary>
         public PdfRectangle TrimBox
         {
             get => Elements.GetRectangle(Keys.TrimBox, true);
             set => Elements.SetRectangle(Keys.TrimBox, value);
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether a trim box is set.
+        /// </summary>
+        public bool HasTrimBox => Elements[Keys.TrimBox] != null;
+
+        /// <summary>
+        /// Gets a copy of the trim box if it exists, or PdfRectangle.Empty if no trim box is set.
+        /// </summary>
+        public PdfRectangle TrimBoxReadOnly => Elements.GetRectangle(Keys.TrimBox, false);
+
+        /// <summary>
+        /// Gets a copy of the effective trim box if it exists, or PdfRectangle.Empty if neither trim box nor crop box nor media box are set.
+        /// </summary>
+        public PdfRectangle EffectiveTrimBoxReadOnly
+        {
+            get
+            {
+                if (HasTrimBox)
+                    return TrimBox;
+                return EffectiveCropBoxReadOnly;
+            }
         }
 
         /// <summary>
@@ -820,15 +920,17 @@ namespace PdfSharp.Pdf
 
         internal override void PrepareForSave()
         {
-            if (_trimMargins.AreSet)
+            if (_trimMargins?.AreSet ?? false)
             {
                 // These are the values InDesign set for an A4 page with 3mm crop margin at each edge.
-                // (recall that PDF rect are two points and NOT a point and a width)
-                // /MediaBox[0.0 0.0 612.283 858.898]  216 302.7
-                // /CropBox[0.0 0.0 612.283 858.898]
-                // /BleedBox[0.0 0.0 612.283 858.898]
-                // /ArtBox[8.50394 8.50394 603.78 850.394] 3 3 213 300
-                // /TrimBox[8.50394 8.50394 603.78 850.394]
+                // (recall that PDF rectangles are two points and NOT a point and width and height)
+                // /MediaBox[0.0 0.0 612.283 858.898]       # in millimeter: (0 0) (216 302.7)
+                // /CropBox[0.0 0.0 612.283 858.898]        # -------------- " ---------------
+                // /BleedBox[0.0 0.0 612.283 858.898]       # -------------- " ---------------
+                // /ArtBox[8.50394 8.50394 603.78 850.394]  # in millimeter: (3 3) (213 300)
+                // /TrimBox[8.50394 8.50394 603.78 850.394] # ------------- " --------------
+                //
+                // An A4 page has a size of 210 x 297 mm²
 
                 double width = _trimMargins.Left.Point + Width.Point + _trimMargins.Right.Point;
                 double height = _trimMargins.Top.Point + Height.Point + _trimMargins.Bottom.Point;

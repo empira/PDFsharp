@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="Build\CompilerServices.cs" />
+    <Compile Include="..\PdfSharp.Tests\Properties\GlobalDeclarations.cs" Link="Properties\GlobalDeclarations.cs" />
     <Compile Include="..\PdfSharp.Tests\Build\CSharpFeaturesTests.cs" Link="Build\CSharpFeaturesTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Build\ReleaseBuildTests.cs" Link="Build\ReleaseBuildTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Core\GlobalsTests.cs" Link="Core\GlobalsTests.cs" />

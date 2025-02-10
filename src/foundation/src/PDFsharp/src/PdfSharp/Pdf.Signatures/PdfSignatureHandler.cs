@@ -230,7 +230,6 @@ namespace PdfSharp.Pdf.Signatures
             propertyItems.Elements.Add("/Name",
                 String.IsNullOrWhiteSpace(Options.AppName) ?
                 new PdfName("/PDFsharp http://www.pdfsharp.net") :
-                //new PdfName($"/{Options.AppName}")); // #DELETE
                 PdfName.FromString(Options.AppName));
 
             Document.Internals.AddObject(signatureDic);

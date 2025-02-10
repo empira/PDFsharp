@@ -65,7 +65,7 @@ The **XFont** exists independently of a PDF docuemnt.
 You can think of an XFont as a moniker to a specific font face plus a specific font size.
 It is a fascade to XGlyphTypeface.
 Holds a reference to **OpenTypeDescriptor** to get all information about a the font face.
-This is possible because once loaded font faces persists in memory.
+This is possible because once loaded font faces persist in memory.
 Holds a reference to **XGlyphTypeface**. That keeps the reference to the font face.
 In contrast to an **XGlyphTypeface** a font holds the following additional information.
 * The font em-size used for rendering the font.
@@ -152,7 +152,7 @@ Holds a reference ...
 
 The class **PdfCIDFont** represents character encoded PDF fonts.
 It is used together with **PdfType0Font** to represent text in a content by a sequence of the 
-glyph ids of the Unicode code points of the original UTF-32 encoded text.
+glyph IDs of the Unicode code points of the original UTF-32 encoded text.
 
 ### PdfTrueTypeFont : PdfFont
 
@@ -165,7 +165,7 @@ but the character set is limited to (roughly) ANSI characters (codepage 1252).
 
 The class **PdfType0Font** represents a PDF font dictionary derived from **PdfCIDFont**.
 Together with **PdfCIDFont** t is used to represent text in a content stream by a sequende of 
-glyph ids of the Unicode code points of the original text. This class hold the reference to the
+glyph IDs of the Unicode code points of the original text. This class hold the reference to the
 ToUnicode map.
 
 ### sealed PdfFontDescriptor : PdfDictionary

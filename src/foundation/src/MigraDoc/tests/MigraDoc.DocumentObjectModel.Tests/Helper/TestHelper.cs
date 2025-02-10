@@ -10,21 +10,6 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
 {
     public class TestHelper
     {
-        //[Obsolete("Not needed anymore")]
-        //public static void InitializeFontResolver()
-        //{
-        //}
-
-        //[Obsolete("Not needed anymore")]
-        //public static void InitializeFontResolverWithSegoeWpAsDefault(Document doc)
-        //{
-        //    InitializeFontResolver();
-
-        //    var style = doc.Styles[StyleNames.Normal];
-        //    style.Should().NotBeNull();
-        //    //style!.Font.Name = "segoe wp";
-        //}
-
         public static void RemoveStyles(Document doc)
         {
             for (var i = doc.Styles.Count - 1; i >= 0; i--)

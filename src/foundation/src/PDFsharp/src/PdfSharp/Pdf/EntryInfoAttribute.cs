@@ -66,14 +66,19 @@ namespace PdfSharp.Pdf
             KeyType = keyType;
         }
 
-        public KeyInfoAttribute(KeyType keyType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type objectType)
+        public KeyInfoAttribute(KeyType keyType,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            Type objectType)
         {
             //_version = version;
             KeyType = keyType;
             _objectType = objectType;
         }
 
-        public KeyInfoAttribute(string version, KeyType keyType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type objectType)
+        public KeyInfoAttribute(string version,
+            KeyType keyType,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            Type objectType)
         {
             //_version = version;
             KeyType = keyType;

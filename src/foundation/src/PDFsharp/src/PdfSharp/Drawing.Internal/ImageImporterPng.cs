@@ -2,7 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 #if CORE
-using PdfSharp.BigGustave;
+using PdfSharp.Internal.Png.BigGustave;
 #endif
 using PdfSharp.Pdf;
 
@@ -25,7 +25,7 @@ namespace PdfSharp.Drawing.Internal
                 stream.CurrentOffset = 0;
                 if (TestPngFileHeader(stream))
                 {
-                    ImportedImage ii = new ImportedImagePng(this);
+                    ImportedImage ii = new ImportedImagePng();
                     if (TestPngInfoHeader(stream, ii))
                     {
                         return ii;
@@ -551,8 +551,8 @@ namespace PdfSharp.Drawing.Internal
         /// <summary>
         /// Initializes a new instance of the <see cref="ImportedImagePng"/> class.
         /// </summary>
-        public ImportedImagePng(IImageImporter importer)
-            : base(importer)
+        public ImportedImagePng()
+            : base()
         { }
 
         internal override ImageData PrepareImageData(PdfDocumentOptions options)

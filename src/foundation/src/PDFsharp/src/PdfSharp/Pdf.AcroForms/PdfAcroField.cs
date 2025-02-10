@@ -117,8 +117,7 @@ namespace PdfSharp.Pdf.AcroForms
         /// </summary>
         [Obsolete("Use GetDescendantNames")]
         public string[] DescendantNames  // Properties should not return arrays.
-            =>
-                GetDescendantNames();
+            => GetDescendantNames();
 
         /// <summary>
         /// Gets the names of all descendants of this field.
