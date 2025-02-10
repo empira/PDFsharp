@@ -1114,7 +1114,7 @@ namespace PdfSharp.Drawing.Pdf
 
             XPoint[]? xPoints = GetXPoints(graphicsPath);
             XRect? xRect = GetRectForImageBrush(xPoints);
-            if (xRect != null)
+            if (xRect != null && xRect.Value.Width > 0 && xRect.Value.Height > 0)
             {
                 int xCount = (int)Math.Ceiling(xRect.Value.Width / image.PixelWidth);
                 int yCount = (int)Math.Ceiling(xRect.Value.Height / image.PixelHeight);
