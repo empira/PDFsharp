@@ -1,6 +1,9 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Drawing;
+using PdfSharp.Fonts.StandardFonts;
+
 namespace PdfSharp.Pdf
 {
     /// <summary>
@@ -33,6 +36,16 @@ namespace PdfSharp.Pdf
         /// </summary>
         [Obsolete("Renamed to EmbedCompleteFontFile.")]
         Always = 1,
+
+        /// <summary>
+        /// No embedding if the font is one of the 14 standard-fonts defined in the PDF-specification. (PDF 1.0 to PDF 1.7)<br></br>
+        /// If the font is not one of the standard-fonts, an exception is raised when creating an <see cref="XFont"/> and specifying this value.<br></br>
+        /// See also <see cref="StandardFontNames"/>
+        /// </summary>
+        /// <remarks>
+        /// This value should not be used, unless you prefer small files over PDF/A compliance.
+        /// </remarks>
+        OmitStandardFont = 2,
 
         /// <summary>
         /// Fonts are not embedded. This is not an option anymore.

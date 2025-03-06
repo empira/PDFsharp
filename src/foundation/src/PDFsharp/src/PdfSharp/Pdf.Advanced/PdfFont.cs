@@ -45,7 +45,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public bool IsSymbolFont => FontDescriptor.IsSymbolFont;
 
-        internal void AddChars(CodePointGlyphIndexPair[] codePoints)
+        internal virtual void AddChars(CodePointGlyphIndexPair[] codePoints)
         {
             _cmapInfo.AddChars(codePoints);
             _fontDescriptor.CMapInfo.AddChars(codePoints);

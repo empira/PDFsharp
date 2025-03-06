@@ -648,11 +648,13 @@ namespace PdfSharp.Pdf.AcroForms
                     byte[]? fontData = null;
                     FontType fontType = FontType.TrueTypeWinAnsi;
                     // Standard-font that is not embedded
-                    if (subType == "/Type1" && fontDescriptor == null)
+                    if (subType == "/Type1" && fontDescriptor == null && !string.IsNullOrEmpty(fontName))
                     {
+                        fontName = fontName.TrimStart('/');
                         if (StandardFontData.IsStandardFont(fontName))
                         {
                             fontData = StandardFontData.GetFontData(fontName)!;
+                            fontType = FontType.Type1StandardFont;
                         }
                     }
                     // embedded true-type font
@@ -695,8 +697,11 @@ namespace PdfSharp.Pdf.AcroForms
                             style |= XFontStyleEx.Bold;
                         if (typeFace.IsItalic)
                             style |= XFontStyleEx.Italic;
-                        xFont = new XFont(typeFace.FamilyName, Math.Max(_fontSize ?? 0, 10.0), style,
-                            new XPdfFontOptions(PdfFontEncoding.Automatic, PdfFontEmbedding.EmbedCompleteFontFile));
+                        if (string.IsNullOrEmpty(fontName) || fontType != FontType.Type1StandardFont)
+                            fontName = typeFace.FamilyName;
+                        xFont = new XFont(fontName, Math.Max(_fontSize ?? 0, 10.0), style,
+                            new XPdfFontOptions(PdfFontEncoding.Automatic,
+                            fontType == FontType.Type1StandardFont ? PdfFontEmbedding.OmitStandardFont : PdfFontEmbedding.EmbedCompleteFontFile));
                         return true;
                     }
                 }
@@ -742,6 +747,10 @@ namespace PdfSharp.Pdf.AcroForms
             if (Font is null)
                 return;
 
+            // do not change the encoding for standard-fonts
+            if (Font.PdfOptions.FontEmbedding == PdfFontEmbedding.OmitStandardFont)
+                return;
+
             if (Font.PdfOptions.FontEncoding != PdfFontEncoding.Unicode && fontType == FontType.Type0Unicode)
                 Font = new XFont(Font.GlyphTypeface, Font.Size,
                     new XPdfFontOptions(PdfFontEncoding.Unicode, PdfFontEmbedding.EmbedCompleteFontFile));
@@ -756,9 +765,11 @@ namespace PdfSharp.Pdf.AcroForms
             if (Font is null)
                 return;
 
-            var fontType = Font.PdfOptions.FontEncoding == PdfFontEncoding.Unicode
-                ? FontType.Type0Unicode
-                : FontType.TrueTypeWinAnsi;
+            var fontType = Font.PdfOptions.FontEmbedding == PdfFontEmbedding.OmitStandardFont
+                ? FontType.Type1StandardFont
+                : Font.PdfOptions.FontEncoding == PdfFontEncoding.Unicode
+                    ? FontType.Type0Unicode
+                    : FontType.TrueTypeWinAnsi;
             var docFont = _document.FontTable.GetOrCreateFont(Font.GlyphTypeface, fontType);
             form.PdfForm.Resources.AddFont(docFont);
         }
@@ -770,9 +781,11 @@ namespace PdfSharp.Pdf.AcroForms
             if (Font != null && _document.AcroForm != null)
             {
                 var formResources = _document.AcroForm.GetOrCreateResources();
-                var fontType = Font.PdfOptions.FontEncoding == PdfFontEncoding.Unicode
-                    ? FontType.Type0Unicode
-                    : FontType.TrueTypeWinAnsi;
+                var fontType = Font.PdfOptions.FontEmbedding == PdfFontEmbedding.OmitStandardFont
+                    ? FontType.Type1StandardFont
+                    : Font.PdfOptions.FontEncoding == PdfFontEncoding.Unicode
+                        ? FontType.Type0Unicode
+                        : FontType.TrueTypeWinAnsi;
                 var pdfFont = _document.FontTable.GetOrCreateFont(Font.GlyphTypeface, fontType);
                 formResources.AddFont(pdfFont);
             }

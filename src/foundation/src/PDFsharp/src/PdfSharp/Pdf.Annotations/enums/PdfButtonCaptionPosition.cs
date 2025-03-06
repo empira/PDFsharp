@@ -1,4 +1,9 @@
-﻿namespace PdfSharp.Pdf.Annotations.enums
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+using PdfSharp.Pdf.AcroForms;
+
+namespace PdfSharp.Pdf.Annotations.enums
 {
     /// <summary>
     /// <see cref="PdfPushButtonField"/>s only:<br></br>

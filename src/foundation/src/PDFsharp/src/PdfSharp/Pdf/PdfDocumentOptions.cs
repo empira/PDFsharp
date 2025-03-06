@@ -81,5 +81,14 @@ namespace PdfSharp.Pdf
             set => _useFlateDecoderForJpegImages = value;
         }
         PdfUseFlateDecoderForJpegImages _useFlateDecoderForJpegImages = PdfUseFlateDecoderForJpegImages.Never;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a metadata-stream in XMP-format should be created when saving the document.<br></br>
+        /// The default value is <b>true</b>.<br></br>
+        /// </summary>
+        /// <remarks>
+        /// Should only be set to <b>false</b> if you prefer small files over PDF/A compliance.
+        /// </remarks>
+        public bool CreateMetadata { get; set; } = true;
     }
 }

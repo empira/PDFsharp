@@ -19,6 +19,7 @@ using UwpFontFamily = Windows.UI.Xaml.Media.FontFamily;
 using PdfSharp.Fonts;
 using PdfSharp.Fonts.Internal;
 using PdfSharp.Fonts.OpenType;
+using PdfSharp.Fonts.StandardFonts;
 using PdfSharp.Internal;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
@@ -42,10 +43,7 @@ namespace PdfSharp.Drawing
         /// <returns></returns>
         public static XFont FromExisting(XFont existingFont, double emSize, XPdfFontOptions? pdfOptions = null)
         {
-            return new XFont(existingFont.GlyphTypeface, emSize, pdfOptions ?? existingFont.PdfOptions)
-            {
-                _familyName = existingFont.FamilyName
-            };
+            return new XFont(existingFont.GlyphTypeface, emSize, pdfOptions ?? existingFont.PdfOptions);
         }
 
         /// <summary>
@@ -74,6 +72,9 @@ namespace PdfSharp.Drawing
         /// <param name="emSize">The em size.</param>
         /// <param name="style">The font style.</param>
         /// <param name="pdfOptions">Additional PDF options.</param>
+        /// <exception cref="InvalidOperationException">
+        /// <see cref="PdfFontEmbedding.OmitStandardFont"/> is specified in the <paramref name="pdfOptions"/> and <paramref name="familyName"/> is not one of the standard fonts defined in <see cref="StandardFontNames"/>
+        /// </exception>
         public XFont(string familyName, double emSize, XFontStyleEx style, XPdfFontOptions pdfOptions)
         {
             _familyName = familyName;
@@ -143,7 +144,7 @@ namespace PdfSharp.Drawing
         public XFont(XGlyphTypeface glyphTypeface, double emSize, XPdfFontOptions? pdfOptions = null, XStyleSimulations? styleSimulations = null)
         {
             GlyphTypeface = glyphTypeface;
-            _familyName = glyphTypeface.FamilyName;
+            _familyName = glyphTypeface.XFamilyName ?? glyphTypeface.FamilyName;
             _emSize = emSize;
             _style = (glyphTypeface.IsBold ? XFontStyleEx.Bold : XFontStyleEx.Regular) |
                      (glyphTypeface.IsItalic ? XFontStyleEx.Italic : XFontStyleEx.Regular);
@@ -351,6 +352,13 @@ namespace PdfSharp.Drawing
             if (_familyName == "Segoe UI Semilight" && (_style & XFontStyleEx.BoldItalic) == XFontStyleEx.Italic)
                 _ = typeof(int);
 #endif
+            if (_pdfOptions.FontEmbedding == PdfFontEmbedding.OmitStandardFont &&
+                !StandardFontData.IsStandardFont(_familyName))
+            {
+                throw new InvalidOperationException(
+                    $"The font '{_familyName}' is not one of the 14 standard-fonts and cannot be used with the embedding-option '{nameof(PdfFontEmbedding.OmitStandardFont)}'");
+            }
+
             FontResolvingOptions fontResolvingOptions = OverrideStyleSimulations
                 ? new FontResolvingOptions(_style, StyleSimulations)
                 : new FontResolvingOptions(_style);
@@ -359,6 +367,7 @@ namespace PdfSharp.Drawing
             {
                 // In principle an XFont is an XGlyphTypeface plus an em-size.
                 GlyphTypeface = XGlyphTypeface.GetOrCreateFrom(_familyName, fontResolvingOptions);
+                GlyphTypeface.XFamilyName = _familyName;
 
                 GlyphTypeface.FontFace.SetFontEmbedding(_pdfOptions.FontEmbedding);
             }

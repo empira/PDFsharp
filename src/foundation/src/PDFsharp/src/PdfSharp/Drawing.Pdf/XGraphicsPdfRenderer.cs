@@ -510,6 +510,11 @@ namespace PdfSharp.Drawing.Pdf
                     isAnsi = fontType == FontType.TrueTypeWinAnsi;
                 }
             }
+            if (font.PdfOptions.FontEmbedding == PdfFontEmbedding.OmitStandardFont)
+            {
+                fontType = FontType.Type1StandardFont;
+                isAnsi = true;
+            }
 
             //Realize(font, brush, boldSimulation ? 2 : 0);
             //Realize(glyphTypeface, font.Size, brush, boldSimulation ? 2 : 0, font.FontTypeFromUnicodeFlag);

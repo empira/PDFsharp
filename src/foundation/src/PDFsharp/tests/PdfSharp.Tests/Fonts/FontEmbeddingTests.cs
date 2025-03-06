@@ -7,6 +7,7 @@ using System.IO;
 using FluentAssertions;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
+using PdfSharp.Fonts.StandardFonts;
 using PdfSharp.Pdf;
 using PdfSharp.Quality;
 using Xunit;
@@ -94,6 +95,50 @@ namespace PdfSharp.Tests.Fonts
             var count = FontHelperTests.CountGlyphs(fontEmoji);
 
             size.Should().BeGreaterThan(1_000_000);
+        }
+
+        [Fact]
+        public void Omit_Standard_Fonts()
+        {
+            GlobalFontSettings.FontResolver = new StandardFontResolver();
+
+            var doc = new PdfDocument();
+
+            // squeeze out an additional KB of data by NOT creating a metadata-stream
+            doc.Options.CreateMetadata = false;
+
+            var page = doc.AddPage();
+            var gfx = XGraphics.FromPdfPage(page);
+
+            double x = 50, y = 50;
+            foreach (var fontName in StandardFontData.FontNames)
+            {
+                if (fontName == StandardFontNames.Symbol || fontName == StandardFontNames.ZapfDingbats)
+                    continue;
+
+                var font = new XFont(fontName, 12, XFontStyleEx.Regular,
+                    new XPdfFontOptions(PdfFontEmbedding.OmitStandardFont));
+
+                gfx.DrawString(fontName, font, XBrushes.Black, x, y);
+                y += 20;
+                // english pangram
+                //gfx.DrawString("The quick brown fox jumps over the lazy dog.", font, XBrushes.Black, x, y);
+                // german pangram
+                gfx.DrawString("Typograf Jakob zürnt schweißgequält vom öden Text.", font, XBrushes.Black, x, y);
+
+                y += 40;
+            }
+
+            var fileName = PdfFileUtility.GetTempPdfFullFileName(
+                "PDFsharp/UnitTest/Fonts/FontEmbeddingTests/" + nameof(Omit_Standard_Fonts));
+            doc.Save(fileName);
+            var info = new FileInfo(fileName);
+            var size = info.Length;
+#if DEBUG
+            size.Should().BeLessThan(10_000);
+#else
+            size.Should().BeLessThan(5_000);
+#endif
         }
     }
 }

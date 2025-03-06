@@ -75,9 +75,11 @@ namespace PdfSharp.Pdf.AcroForms
                 throw new ArgumentException("Font size must be greater or equal to zero", nameof(fontSize));
 
             var formResources = GetOrCreateResources();
-            var fontType = font.PdfOptions.FontEncoding == PdfFontEncoding.Unicode
-                ? FontType.Type0Unicode
-                : FontType.TrueTypeWinAnsi;
+            var fontType = font.PdfOptions.FontEmbedding == PdfFontEmbedding.OmitStandardFont
+                ? FontType.Type1StandardFont
+                : font.PdfOptions.FontEncoding == PdfFontEncoding.Unicode
+                    ? FontType.Type0Unicode
+                    : FontType.TrueTypeWinAnsi;
             var docFont = _document.FontTable.GetOrCreateFont(font.GlyphTypeface, fontType);
             var fontName = formResources.AddFont(docFont);
             var da = string.Format(CultureInfo.InvariantCulture, "{0} {1:F2} Tf {2:F4} {3:F4} {4:F4} rg",

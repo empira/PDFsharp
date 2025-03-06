@@ -483,7 +483,7 @@ namespace PdfSharp.Tests.AcroForms
             var page2 = document.AddPage();
             var acroForm = document.GetOrCreateAcroForm();
             var textFont = new XFont(StandardFontNames.Helvetica, 12, XFontStyleEx.Regular,
-                new XPdfFontOptions(PdfFontEncoding.Automatic, PdfFontEmbedding.EmbedCompleteFontFile));
+                new XPdfFontOptions(PdfFontEncoding.Automatic, PdfFontEmbedding.OmitStandardFont));
             // use same font with different size
             var textFontBig = XFont.FromExisting(textFont, 24);
 
