@@ -135,9 +135,14 @@ namespace PdfSharp.Pdf.Filters
                 }
                 else if (ch == '~')
                 {
-                    if ((char)data[idx + 1] != '>')
-                        throw new ArgumentException("Illegal character.", nameof(data));
-                    break;
+                    if ((char)data[idx + 1] == '>') {
+                        break;
+                    }
+                    if((char)data[idx + 1] == '\n' && (char)data[idx + 2] == '>') {
+                        idx++;
+                        break;
+                    }
+                    throw new ArgumentException("Illegal character.", nameof(data));
                 }
                 // ignore unknown character
             }
