@@ -776,8 +776,9 @@ namespace PdfSharp.Pdf
                             if (key == "/Info")
                             {
                                 // We come here if PDFsharp was fully trimmed and meta-data could not be found by reflection.
-                                throw new InvalidOperationException("PDFsharp relies on reflection and does not work when a fully-trimmed self-contained file is used.\r\n" +
-                                                                    "See https://docs.pdfsharp.net/ for further information.");
+                                // Note: Should not occur since we added attributes that prevent trimming of certain parts.
+                                throw new InvalidOperationException($"PDFsharp relies on reflection and does not work when a fully-trimmed self-contained file is used.\r\n" +
+                                                                    $"See {UrlLiterals.LinkToRoot} for further information.");
                             }
                             else
                             {

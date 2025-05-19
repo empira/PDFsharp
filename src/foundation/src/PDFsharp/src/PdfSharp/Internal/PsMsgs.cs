@@ -127,7 +127,7 @@ namespace PdfSharp.Internal
 
         public static string MultiplePageInsert => "The page cannot be added to this document because the document already owned this page.";
 
-        public static string UnexpectedTokenInPdfFile => "Unexpected token in PDF file. The PDF file may be corrupt. If it is not, please send us the file for service (issues (at) pdfsharp.net).";
+        public static string UnexpectedTokenInPdfFile => $"Unexpected token in PDF file. The PDF file may be corrupt. If you think this is a bug in PDFsharp, please visit {UrlLiterals.LinkToCannotOpenPdfFile} for further information.";
 
         public static string InappropriateColorSpace(PdfColorMode colorMode, XColorSpace colorSpace)
         {

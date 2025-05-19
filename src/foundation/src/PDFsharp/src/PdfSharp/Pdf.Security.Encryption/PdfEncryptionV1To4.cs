@@ -370,6 +370,12 @@ namespace PdfSharp.Pdf.Security.Encryption
                 // The encryption and MD5 hashing key length (in bytes) shall depend on the Length value (in bits).
                 keyLength = ActualLength!.Value / 8;
 
+#if !NET6_0_OR_GREATER
+                // We have to call Initialize here for .NET 4.6.2.
+                // .NET 6/8 include Initialize in "_md5.TransformFinalBlock()".
+                _md5.Initialize();
+#endif
+
                 // Create the hash 50 times (only for 128 bit).
                 for (var idx = 0; idx < 50; idx++)
                 {

@@ -10,6 +10,7 @@ using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Visitors;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.DocumentObjectModel.Tables;
+using PdfSharp.Internal;
 
 namespace MigraDoc.Rendering
 {
@@ -325,7 +326,7 @@ namespace MigraDoc.Rendering
                 catch (Exception ex)
                 {
                     throw new InvalidOperationException(
-                        $"The font '{familyName}' cannot be resolved for {propertyDescription}. Use another font name or fix your font resolver.", ex);
+                        $"The font '{familyName}' cannot be resolved for {propertyDescription}. Use another font name or fix your font resolver. See {UrlLiterals.LinkToMigraDocFontResolving} and {UrlLiterals.LinkToFontResolving} for further information.", ex);
                 }
             }
 
