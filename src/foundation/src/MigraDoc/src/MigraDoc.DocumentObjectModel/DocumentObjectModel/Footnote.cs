@@ -10,12 +10,12 @@ namespace MigraDoc.DocumentObjectModel
     /// <summary>
     /// Represents a footnote in a paragraph.
     /// </summary>
-    public class Footnote : DocumentObject, IVisitable
+    public class Footnote : TextBasedDocumentObject, IVisitable
     {
         /// <summary>
         /// Initializes a new instance of the Footnote class.
         /// </summary>
-        public Footnote()
+        public Footnote(TextRenderOption textRenderOption = TextRenderOption.Default) : base(textRenderOption)
         {
             BaseValues = new FootnoteValues(this);
             // NYI: Nested footnote check!
@@ -24,7 +24,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Initializes a new instance of the Footnote class with the specified parent.
         /// </summary>
-        internal Footnote(DocumentObject parent) : base(parent)
+        internal Footnote(DocumentObject parent, TextRenderOption textRenderOption = TextRenderOption.Default) : base(parent, textRenderOption)
         {
             BaseValues = new FootnoteValues(this);
         }
@@ -32,9 +32,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Initializes a new instance of the Footnote class with a text the Footnote shall contain.
         /// </summary>
-        internal Footnote(string content) : this()
+        internal Footnote(string content, TextRenderOption textRenderOption = TextRenderOption.Default) : this(textRenderOption)
         {
-            Elements.AddParagraph(content);
+            Elements.AddParagraph(content, textRenderOption);
         }
 
         /// <summary>
@@ -71,8 +71,8 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new paragraph with the specified text to the footnote.
         /// </summary>
-        public Paragraph AddParagraph(string text)
-            => Elements.AddParagraph(text);
+        public Paragraph AddParagraph(string text, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddParagraph(text, textRenderOption);
 
         /// <summary>
         /// Adds a new table to the footnote.

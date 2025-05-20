@@ -89,17 +89,17 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new paragraph with the specified text to the section.
         /// </summary>
-        public Paragraph AddParagraph(string paragraphText)
+        public Paragraph AddParagraph(string paragraphText, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddParagraph(paragraphText);
+            return Elements.AddParagraph(paragraphText, textRenderOption);
         }
 
         /// <summary>
         /// Adds a new paragraph with the specified text and style to the section.
         /// </summary>
-        public Paragraph AddParagraph(string paragraphText, string style)
+        public Paragraph AddParagraph(string paragraphText, string style, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddParagraph(paragraphText, style);
+            return Elements.AddParagraph(paragraphText, style, textRenderOption);
         }
 
         /// <summary>

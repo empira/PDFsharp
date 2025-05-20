@@ -11,7 +11,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
         /// <summary>
         /// Initializes a new instance of the PageField class.
         /// </summary>
-        public PageField()
+        public PageField(TextRenderOption textRenderOption = TextRenderOption.Default) : base(textRenderOption)
         {
             BaseValues = new PageFieldValues(this);
         }
@@ -19,7 +19,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
         /// <summary>
         /// Initializes a new instance of the PageField class with the specified parent.
         /// </summary>
-        internal PageField(DocumentObject parent) : base(parent)
+        internal PageField(DocumentObject parent, TextRenderOption textRenderOption = TextRenderOption.Default) : base(parent, textRenderOption)
         {
             BaseValues = new PageFieldValues(this);
         }
