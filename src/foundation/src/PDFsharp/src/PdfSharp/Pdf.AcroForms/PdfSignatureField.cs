@@ -1,9 +1,11 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using PdfSharp.Pdf.IO;
 using PdfSharp.Drawing;
+using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Annotations;
+using PdfSharp.Pdf.IO;
+using PdfSharp.Pdf.Signatures;
 
 namespace PdfSharp.Pdf.AcroForms
 {
@@ -18,6 +20,7 @@ namespace PdfSharp.Pdf.AcroForms
         internal PdfSignatureField(PdfDocument document)
             : base(document)
         {
+            Elements.SetName(PdfAcroField.Keys.FT, "Sig");
             CustomAppearanceHandler = null!;
         }
 
@@ -25,6 +28,15 @@ namespace PdfSharp.Pdf.AcroForms
             : base(dict)
         {
             CustomAppearanceHandler = null!;
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="PdfSignature2"/> for this signature field
+        /// </summary>
+        public new PdfSignature2? Value
+        {
+            get => Elements.GetValue(PdfAcroField.Keys.V) as PdfSignature2;
+            set => Elements[PdfAcroField.Keys.V] = value;
         }
 
         /// <summary>
@@ -38,35 +50,42 @@ namespace PdfSharp.Pdf.AcroForms
         /// </summary>
         void RenderCustomAppearance()
         {
-            var rect = Elements.GetRectangle(PdfAnnotation.Keys.Rect);
-
-            var visible = rect.X1 + rect.X2 + rect.Y1 + rect.Y2 != 0;
-
-            if (!visible)
-                return;
-
-            if (CustomAppearanceHandler == null)
-                throw new Exception("AppearanceHandler is not set.");
-
-            var form = new XForm(_document, rect.Size);
-            var gfx = XGraphics.FromForm(form);
-
-            CustomAppearanceHandler.DrawAppearance(gfx, rect.ToXRect());
-
-            form.DrawingFinished();
-
-            // Get existing or create new appearance dictionary
-            if (Elements[PdfAnnotation.Keys.AP] is not PdfDictionary ap)
+            for (var i = 0; i < Annotations.Elements.Count; i++)
             {
-                ap = new PdfDictionary(_document);
-                Elements[PdfAnnotation.Keys.AP] = ap;
+                var widget = Annotations.Elements[i];
+                if (widget == null)
+                    continue;
+
+                var rect = widget.Rectangle;
+
+                var visible = rect.X1 + rect.X2 + rect.Y1 + rect.Y2 != 0;
+
+                if (!visible)
+                    continue;
+
+                if (CustomAppearanceHandler == null)
+                    throw new Exception("AppearanceHandler is null");
+
+                var form = new XForm(_document, rect.Size);
+                var gfx = XGraphics.FromForm(form);
+
+                CustomAppearanceHandler.DrawAppearance(gfx, rect.ToXRect());
+
+                form.DrawingFinished();
+
+                // Get existing or create new appearance dictionary
+                if (widget.Elements[PdfAnnotation.Keys.AP] is not PdfDictionary ap)
+                {
+                    ap = new PdfDictionary(_document);
+                    widget.Elements[PdfAnnotation.Keys.AP] = ap;
+                }
+
+                // Set XRef to normal state
+                ap.Elements["/N"] = form.PdfForm.Reference;
+
+                // PdfRenderer can be null.
+                form.PdfRenderer?.Close();
             }
-
-            // Set XRef to normal state
-            ap.Elements["/N"] = form.PdfForm.Reference;
-
-            // PdfRenderer can be null.
-            form.PdfRenderer?.Close();
         }
 
         internal override void PrepareForSave()
@@ -74,6 +93,62 @@ namespace PdfSharp.Pdf.AcroForms
             base.PrepareForSave();
             if (CustomAppearanceHandler != null!)
                 RenderCustomAppearance();
+            else
+                RenderAppearance();
+        }
+
+        /// <summary>
+        /// Renders the appearance of this field
+        /// </summary>
+        protected override void RenderAppearance()
+        {
+            for (var i = 0; i < Annotations.Elements.Count; i++)
+            {
+                var widget = Annotations.Elements[i];
+                if (widget == null)
+                    continue;
+
+                var rect = widget.Rectangle;
+                var width = Math.Abs(rect.Width);
+                var height = Math.Abs(rect.Height);
+                // ensure a minimum size of 1x1, otherwise an exception is thrown
+                if (width < 1.0 || height < 1.0)
+                    continue;
+
+                var xRect = new XRect(0, 0, width, height);
+                var form = (widget.Rotation == 90 || widget.Rotation == 270) && (widget.Flags & PdfAnnotationFlags.NoRotate) == 0
+                    ? new XForm(_document, XUnit.FromPoint(rect.Height), XUnit.FromPoint(rect.Width))
+                    : new XForm(_document, xRect);
+
+                if (widget.Rotation != 0 && (widget.Flags & PdfAnnotationFlags.NoRotate) == 0)
+                {
+                    // I could not get this to work using gfx.Rotate/Translate Methods...
+                    const double deg2Rad = 0.01745329251994329576923690768489;  // PI/180
+                    var sr = Math.Sin(widget.Rotation * deg2Rad);
+                    var cr = Math.Cos(widget.Rotation * deg2Rad);
+                    // see PdfReference 1.7, Chapter 8.3.3 (Common Transformations)
+                    // TODO: Is this always correct ? I had only the chance to test this with a 90 degree rotation...
+                    form.PdfForm.Elements.SetMatrix(PdfFormXObject.Keys.Matrix, new XMatrix(cr, sr, -sr, cr, xRect.Width, 0));
+                    if (widget.Rotation == 90 || widget.Rotation == 270)
+                        xRect = new XRect(0, 0, rect.Height, rect.Width);
+                }
+
+                using (var gfx = XGraphics.FromForm(form))
+                {
+                    gfx.IntersectClip(xRect);
+                    Owner.AcroForm?.FieldRenderer.SignatureFieldRenderer.Render(this, widget, gfx, xRect);
+                }
+                form.DrawingFinished();
+
+                // Get existing or create new appearance dictionary.
+                if (widget.Elements[PdfAnnotation.Keys.AP] is not PdfDictionary ap)
+                {
+                    ap = new PdfDictionary(_document);
+                    widget.Elements[PdfAnnotation.Keys.AP] = ap;
+                }
+
+                ap.Elements["/N"] = form.PdfForm.Reference;
+            }
         }
 
         /// <summary>
@@ -99,6 +174,25 @@ namespace PdfSharp.Pdf.AcroForms
         /// </summary>
         public new class Keys : PdfAcroField.Keys
         {
+            /// <summary>
+            /// (Optional; shall be an indirect reference; PDF 1.5) A signature field lock dictionary
+            /// that specifies a set of form fields that shall be locked when this signature field is signed.
+            /// </summary>
+            [KeyInfo(KeyType.Dictionary | KeyType.Optional)]
+            public const string Lock = "/Lock";
+
+            /// <summary>
+            /// (Optional; shall be an indirect reference; PDF 1.5) A seed value dictionary (see Table 234)
+            /// containing information that constrains the properties of a signature that is applied to this field.
+            /// </summary>
+            [KeyInfo(KeyType.Dictionary | KeyType.Optional)]
+            public const string SV = "/SV";
+
+            //
+            // NOTE: The following entries are not part of a Signature field.
+            // Rather, these are the key of a signature-dictionary (see PdfReference 1.7, Chapter 12.8)
+            //
+
             /// <summary>
             /// (Optional) The type of PDF object that this dictionary describes; if present,
             /// must be Sig for a signature dictionary.

@@ -44,12 +44,15 @@ namespace PdfSharp.Quality
         /// Gets the root path of the current solution, or null, if no parent
         /// directory with a solution file exists.
         /// </summary>
-        public static string? GetSolutionRoot()
+        public static string? GetSolutionRoot([CallerFilePath] string? callerFilePath = null)
         {
             if (_solutionRoot is not null)
                 return _solutionRoot;
 
-            var path = Directory.GetCurrentDirectory();
+            // when running tests from within VS, Directory.GetCurrentDirectory may return a path below %temp%
+            if (callerFilePath != null)
+                callerFilePath = Path.GetDirectoryName(callerFilePath);
+            var path = callerFilePath ?? Directory.GetCurrentDirectory();
             while (true)
             {
                 string[] files = Directory.GetFiles(path, "*.sln", SearchOption.TopDirectoryOnly);

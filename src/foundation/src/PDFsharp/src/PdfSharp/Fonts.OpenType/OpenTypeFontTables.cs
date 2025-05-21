@@ -110,6 +110,25 @@ namespace PdfSharp.Fonts.OpenType
                 throw new InvalidOperationException(PsMsgs.ErrorReadingFontData, ex);
             }
         }
+
+        internal HashSet<int> GetSupportedCharacters()
+        {
+            var characterSet = new HashSet<int>();
+
+            int segCount = segCountX2 / 2;
+            for (var i = 0; i < segCount; i++)
+            {
+                var start = startCount[i];
+                var end = endCount[i];
+                if (start == 0xffff && end == 0xffff)
+                    break;
+                for (var c = start; c <= end; c++)
+                {
+                    characterSet.Add(c);
+                }
+            }
+            return characterSet;
+        }
     }
 
     /// <summary>
@@ -166,6 +185,22 @@ namespace PdfSharp.Fonts.OpenType
             {
                 throw new InvalidOperationException(PsMsgs.ErrorReadingFontData, ex);
             }
+        }
+
+        public HashSet<int> GetSupportedCharacters()
+        {
+            var characterSet = new HashSet<int>();
+
+            foreach (var group in groups)
+            {
+                var start = group.startCharCode;
+                var end = group.endCharCode;
+                for (var c = start; c <= end; c++)
+                {
+                    characterSet.Add((int)c);
+                }
+            }
+            return characterSet;
         }
     }
 
@@ -250,6 +285,13 @@ namespace PdfSharp.Fonts.OpenType
                 throw new InvalidOperationException(PsMsgs.ErrorReadingFontData, ex);
             }
         }
+
+        internal HashSet<int> GetSupportedCharacters()
+        {
+            return cmap12?.GetSupportedCharacters() ?? cmap4?.GetSupportedCharacters() ?? emptySet;
+        }
+
+        private static readonly HashSet<int> emptySet = [];
     }
 
     /// <summary>

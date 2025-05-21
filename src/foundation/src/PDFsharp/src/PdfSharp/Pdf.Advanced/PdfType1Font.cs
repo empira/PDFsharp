@@ -1,33 +1,38 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-#if true_  // Not yet implemented-
 
+using PdfSharp.Fonts;
+using PdfSharp.Internal;
 using System;
 using System.Collections;
 using System.Text;
-using PdfSharp.Internal;
 
 namespace PdfSharp.Pdf.Advanced
 {
     /// <summary>
-    /// Not implemented - just for illustration of the class hierarchy.
+    /// Type1 font used for the 14 standard fonts defined in the PDF-specification.
     /// </summary>
     internal sealed class PdfType1Font : PdfFont
     {
         public PdfType1Font(PdfDocument document)
             : base(document)
         {
-            Elements["\\Type"] = new PdfName("Font");
-            Elements["\\Subtype"] = new PdfName("Type1");
+            Elements.SetName(Keys.Type, "Font");
+            Elements.SetName(Keys.Subtype, "Type1");
+            Elements.SetName(Keys.Encoding, "WinAnsiEncoding");
         }
 
-        //public string BaseFont
-        //{
-        //  get {return baseFont;}
-        //  set {baseFont = value;}
-        //}
-        //string baseFont;
+        public string BaseFont
+        {
+            get { return Elements.GetName(Keys.BaseFont); }
+            set { Elements.SetName(Keys.BaseFont, value); }
+        }
+
+        internal override void AddChars(CodePointGlyphIndexPair[] codePoints)
+        {
+            // nothing to do here
+        }
 
         //    internal override void AssignObjectID(ref int objectID)
         //    {
@@ -153,4 +158,3 @@ namespace PdfSharp.Pdf.Advanced
         }
     }
 }
-#endif

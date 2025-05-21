@@ -25,9 +25,10 @@ namespace PdfSharp.Pdf.Annotations
         /// <param name="annotation">The annotation.</param>
         public void Add(PdfAnnotation annotation)
         {
-            annotation.Document = Owner;
-            Owner.IrefTable.Add(annotation);
+            if (annotation.ObjectID.IsEmpty || !Owner.IrefTable.Contains(annotation.ObjectID))
+                Owner.IrefTable.Add(annotation);
             Elements.Add(annotation.ReferenceNotNull);
+            annotation.Parent = this;
         }
 
         /// <summary>

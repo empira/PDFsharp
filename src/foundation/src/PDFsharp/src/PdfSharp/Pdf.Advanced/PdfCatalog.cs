@@ -184,13 +184,29 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets the AcroForm dictionary of this document.
         /// </summary>
-        public PdfAcroForm AcroForm
+        public PdfAcroForm? AcroForm
         {
             get
             {
                 if (_acroForm == null)
-                    _acroForm = (PdfAcroForm?)Elements.GetValue(Keys.AcroForm) ?? NRT.ThrowOnNull<PdfAcroForm>();
+                    _acroForm = (PdfAcroForm?)Elements.GetValue(Keys.AcroForm);
                 return _acroForm;
+            }
+            internal set
+            {
+                if (value != null)
+                {
+                    if (!value.IsIndirect)
+                        throw new InvalidOperationException("Setting the AcroForm requires an indirect object");
+                    Elements.SetReference(Keys.AcroForm, value);
+                }
+                else
+                {
+                    if (AcroForm != null && AcroForm.Reference != null)
+                        _document.IrefTable.Remove(AcroForm.Reference);
+                    Elements.Remove(Keys.AcroForm);
+                    _acroForm = null;
+                }
             }
         }
         PdfAcroForm? _acroForm;

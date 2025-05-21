@@ -2,6 +2,11 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
+using PdfSharp.Fonts;
+using PdfSharp.Fonts.OpenType;
+using PdfSharp.Fonts.StandardFonts;
+using PdfSharp.Internal;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PdfSharp.Pdf.Advanced
 {
@@ -18,6 +23,11 @@ namespace PdfSharp.Pdf.Advanced
         /// TrueType with Identity-H or Identity-V encoding (Unicode).
         /// </summary>
         Type0Unicode = 2,  // #RENAME better name
+
+        /// <summary>
+        /// One of the 14 standard-fonts with WinAnsi encoding
+        /// </summary>
+        Type1StandardFont = 3
     }
 
     /// <summary>
@@ -30,7 +40,8 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public PdfFontTable(PdfDocument document)
             : base(document)
-        { }
+        {
+        }
 
         /// <summary>
         /// Gets a PdfFont from an XFont. If no PdfFont already exists, a new one is created.
@@ -45,12 +56,37 @@ namespace PdfSharp.Pdf.Advanced
                     pdfFont = new PdfType0Font(Owner, glyphTypeface, false);
                 else if (fontType == FontType.TrueTypeWinAnsi)
                     pdfFont = new PdfTrueTypeFont(Owner, glyphTypeface);
+                else if (fontType == FontType.Type1StandardFont)
+                {
+                    Debug.Assert(!string.IsNullOrEmpty(glyphTypeface.XFamilyName), "XFamilyName should be set here");
+                    pdfFont = new PdfType1Font(Owner) { BaseFont = glyphTypeface.XFamilyName };
+                }
                 else
-                    throw new InvalidOperationException($"Invalid font type '{fontType.ToString()}'.");
+                    throw new InvalidOperationException($"Invalid font type '{fontType}'.");
                 Debug.Assert(pdfFont.Owner == Owner);
                 _fonts[selector] = pdfFont;
             }
             return pdfFont;
+        }
+
+        /// <summary>
+        /// Caches a font from an existing document.<br></br>
+        /// Used to prevent adding new fonts when filling existing AcroForms.
+        /// </summary>
+        /// <param name="fontDict"></param>
+        /// <param name="glyphTypeface"></param>
+        /// <param name="fontType"></param>
+        internal void CacheExistingFont(PdfDictionary fontDict, XGlyphTypeface glyphTypeface, FontType fontType)
+        {
+            var selector = ComputePdfFontKey(glyphTypeface, fontType);
+            if (!_fonts.ContainsKey(selector))
+            {
+                var otDescriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptorFor(glyphTypeface);
+                var descriptor = Owner.PdfFontDescriptorCache.GetOrCreatePdfDescriptorFor(otDescriptor, glyphTypeface.GetBaseName());
+
+                var font = new PdfFont(fontDict, descriptor, PdfFontEncoding.Automatic);
+                _fonts[selector] = font;
+            }
         }
 
 #if true
@@ -99,7 +135,7 @@ namespace PdfSharp.Pdf.Advanced
         internal static string ComputePdfFontKey(XGlyphTypeface glyphTypeface, FontType fontType)
         {
             // fontType must be defined to compute the key.
-            Debug.Assert(fontType is FontType.TrueTypeWinAnsi or FontType.Type0Unicode);
+            Debug.Assert(fontType is FontType.TrueTypeWinAnsi or FontType.Type0Unicode or FontType.Type1StandardFont);
 
             // TODO_OLD Check if StringBuilder is more efficient here.
             //var glyphTypeface = font.GlyphTypeface;
@@ -109,7 +145,7 @@ namespace PdfSharp.Pdf.Advanced
             var faceName = glyphTypeface.FontFace.FullFaceName.ToLowerInvariant();
             var bold = glyphTypeface.IsBold;
             var italic = glyphTypeface.IsItalic;
-            var type = fontType == FontType.TrueTypeWinAnsi ? "+A" : "+U";
+            var type = fontType is FontType.TrueTypeWinAnsi or FontType.Type1StandardFont ? "+A" : "+U";
             var key = bold switch
             {
                 false when !italic => faceName + type,

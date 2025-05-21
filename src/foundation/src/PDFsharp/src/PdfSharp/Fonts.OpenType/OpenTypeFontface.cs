@@ -78,7 +78,7 @@ namespace PdfSharp.Fonts.OpenType
             _fullFaceName = name.FullFontName;
         }
 
-        public static OpenTypeFontFace CetOrCreateFrom(XFontSource fontSource)
+        public static OpenTypeFontFace GetOrCreateFrom(XFontSource fontSource)
         {
             if (OpenTypeFontFaceCache.TryGetFontFace(fontSource.Key, out var fontFace))
                 return fontFace;
@@ -111,7 +111,7 @@ namespace PdfSharp.Fonts.OpenType
 
         public void SetFontEmbedding(PdfFontEmbedding fontEmbedding)
         {
-            Debug.Assert(fontEmbedding is PdfFontEmbedding.TryComputeSubset or PdfFontEmbedding.EmbedCompleteFontFile);
+            Debug.Assert(fontEmbedding is PdfFontEmbedding.TryComputeSubset or PdfFontEmbedding.EmbedCompleteFontFile or PdfFontEmbedding.OmitStandardFont);
 
             if (_fontEmbedding == (PdfFontEmbedding)(-1))
             {
@@ -126,6 +126,10 @@ namespace PdfSharp.Fonts.OpenType
             {
                 // Case: _fontEmbedding is already set to EmbedCompleteFontFile.
                 PdfSharpLogHost.Logger.LogError("Font embedding option was already set to EmbedCompleteFontFile. Setting to TryComputeSubset is ignored.");
+            }
+            else if (fontEmbedding == PdfFontEmbedding.OmitStandardFont)
+            {
+                PdfSharpLogHost.Logger.LogError("Font embedding option was already set to {embedding}. Setting to OmitStandardFont is ignored.", _fontEmbedding);
             }
             else
             {
@@ -398,7 +402,7 @@ namespace PdfSharp.Fonts.OpenType
         {
             // Do not create a subset?
             // No loca table means font has postscript outline.
-            if (_fontEmbedding == PdfFontEmbedding.EmbedCompleteFontFile || loca == null!)
+            if (glyphs.Count == 0 || _fontEmbedding != PdfFontEmbedding.TryComputeSubset || loca == null!)
                 return this;
 
             // Create new font image.

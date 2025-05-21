@@ -18,6 +18,15 @@ namespace PdfSharp.Pdf.Advanced
             : base(document)
         { }
 
+        internal PdfFont(PdfDictionary dict, PdfFontDescriptor fontDescriptor, PdfFontEncoding encoding)
+            :base(dict)
+        {
+            FontDescriptor = fontDescriptor;
+            FontEncoding = encoding;
+            _cmapInfo = new CMapInfo(fontDescriptor.Descriptor);
+            _toUnicodeMap = new PdfToUnicodeMap(Owner);
+        }
+
         internal PdfFontDescriptor FontDescriptor
         {
             get
@@ -36,7 +45,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public bool IsSymbolFont => FontDescriptor.IsSymbolFont;
 
-        internal void AddChars(CodePointGlyphIndexPair[] codePoints)
+        internal virtual void AddChars(CodePointGlyphIndexPair[] codePoints)
         {
             _cmapInfo.AddChars(codePoints);
             _fontDescriptor.CMapInfo.AddChars(codePoints);

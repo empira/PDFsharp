@@ -18,35 +18,41 @@ namespace PdfSharp.Pdf.AcroForms
         /// </summary>
         internal PdfTextField(PdfDocument document)
             : base(document)
-        { }
+        {
+            Elements.SetName(PdfAcroField.Keys.FT, "Tx");
+        }
 
         internal PdfTextField(PdfDictionary dict)
             : base(dict)
         { }
 
         /// <summary>
+        /// Same as <see cref="Text"/> (which should be used instead)
+        /// </summary>
+        public new string Value
+        {
+            get => Text;
+            set => Text = value;
+        }
+
+        /// <summary>
         /// Gets or sets the text value of the text field.
         /// </summary>
         public string Text
         {
-            get => Elements.GetString(PdfAcroField.Keys.V);
-            set { Elements.SetString(PdfAcroField.Keys.V, value); RenderAppearance(); } //HACK_OLD in PdfTextField
+            get
+            {
+                var ancestor = FindParentHavingKey(PdfAcroField.Keys.V);
+                return ancestor.Elements.GetString(PdfAcroField.Keys.V);
+            }
+            set
+            {
+                if (ReadOnly)
+                    throw new InvalidOperationException("The field is read only.");
+                // TODO: check MaxLength ? (risky -> potential data-loss)
+                Elements.SetString(PdfAcroField.Keys.V, value ?? string.Empty);
+            }
         }
-
-        /// <summary>
-        /// Gets or sets the font used to draw the text of the field.
-        /// </summary>
-        public XFont Font { get; set; } = new XFont("Courier New", 10);
-
-        /// <summary>
-        /// Gets or sets the foreground color of the field.
-        /// </summary>
-        public XColor ForeColor { get; set; } = XColors.Black;
-
-        /// <summary>
-        /// Gets or sets the background color of the field.
-        /// </summary>
-        public XColor BackColor { get; set; } = XColor.Empty;
 
         /// <summary>
         /// Gets or sets the maximum length of the field.
@@ -54,8 +60,12 @@ namespace PdfSharp.Pdf.AcroForms
         /// <value>The length of the max.</value>
         public int MaxLength
         {
-            get => Elements.GetInteger(Keys.MaxLen);
-            set => Elements.SetInteger(Keys.MaxLen, value);
+            get
+            {
+                var ancestor = FindParentHavingKey(Keys.MaxLen);
+                return ancestor.Elements.GetInteger(Keys.MaxLen);
+            }
+            set { Elements.SetInteger(Keys.MaxLen, value); }
         }
 
         /// <summary>
@@ -63,7 +73,7 @@ namespace PdfSharp.Pdf.AcroForms
         /// </summary>
         public bool MultiLine
         {
-            get => (Flags & PdfAcroFieldFlags.Multiline) != 0;
+            get { return (Flags & PdfAcroFieldFlags.Multiline) != 0; }
             set
             {
                 if (value)
@@ -78,7 +88,7 @@ namespace PdfSharp.Pdf.AcroForms
         /// </summary>
         public bool Password
         {
-            get => (Flags & PdfAcroFieldFlags.Password) != 0;
+            get { return (Flags & PdfAcroFieldFlags.Password) != 0; }
             set
             {
                 if (value)
@@ -89,138 +99,128 @@ namespace PdfSharp.Pdf.AcroForms
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this field is a combined field.
+        /// A combined field is a text field made up of multiple "combs" of equal width. The number of combs is determined by <see cref="MaxLength"/>.
+        /// </summary>
+        public bool Combined
+        {
+            get { return (Flags & PdfAcroFieldFlags.CombTextField) != 0; }
+            set
+            {
+                if (value)
+                    SetFlags |= PdfAcroFieldFlags.CombTextField;
+                else
+                    SetFlags &= ~PdfAcroFieldFlags.CombTextField;
+            }
+        }
+
+        /// <summary>
+        /// Sets the default appearance for this field.
+        /// </summary>
+        public void SetDefaultAppearance(XFont font, double fontSize, XColor textColor)
+        {
+            if (font is null)
+                throw new ArgumentNullException(nameof(font));
+            if (fontSize < 0.0)
+                throw new ArgumentException("Font size must be greater or equal to zero", nameof(fontSize));
+            if (Owner.AcroForm is null)
+                throw new InvalidOperationException("AcroForm has to be created first");
+
+            var formResources = Owner.AcroForm.GetOrCreateResources();
+            var fontType = font.PdfOptions.FontEmbedding == PdfFontEmbedding.OmitStandardFont
+                ? FontType.Type1StandardFont
+                : font.PdfOptions.FontEncoding == PdfFontEncoding.Unicode
+                    ? FontType.Type0Unicode
+                    : FontType.TrueTypeWinAnsi;
+            var docFont = _document.FontTable.GetOrCreateFont(font.GlyphTypeface, fontType);
+            var fontName = formResources.AddFont(docFont);
+            var da = string.Format(CultureInfo.InvariantCulture, "{0} {1:F2} Tf {2:F4} {3:F4} {4:F4} rg",
+                fontName, fontSize, textColor.R / 255, textColor.G / 255, textColor.B / 255);
+            Elements.SetString(PdfAcroField.Keys.DA, da);
+        }
+
+        /// <summary>
         /// Creates the normal appearance form X object for the annotation that represents
         /// this acro form text field.
         /// </summary>
-        void RenderAppearance()
+        protected override void RenderAppearance()
         {
-#if true_
-            PdfFormXObject xobj = new PdfFormXObject(Owner);
-            Owner.Internals.AddObject(xobj);
-            xobj.Elements["/BBox"] = new PdfLiteral("[0 0 122.653 12.707]");
-            xobj.Elements["/FormType"] = new PdfLiteral("1");
-            xobj.Elements["/Matrix"] = new PdfLiteral("[1 0 0 1 0 0]");
-            PdfDictionary res = new PdfDictionary(Owner);
-            xobj.Elements["/Resources"] = res;
-            res.Elements["/Font"] = new PdfLiteral("<< /Helv 28 0 R >> /ProcSet [/PDF /Text]");
-            xobj.Elements["/Subtype"] = new PdfLiteral("/Form");
-            xobj.Elements["/Type"] = new PdfLiteral("/XObject");
+            if (Font == null || string.IsNullOrEmpty(Text))
+                return;
 
-            string s =
-              "/Tx BMC " + '\n' +
-              "q" + '\n' +
-              "1 1 120.653 10.707 re" + '\n' +
-              "W" + '\n' +
-              "n" + '\n' +
-              "BT" + '\n' +
-              "/Helv 7.93 Tf" + '\n' +
-              "0 g" + '\n' +
-              "2 3.412 Td" + '\n' +
-              "(Hello ) Tj" + '\n' +
-              "20.256 0 Td" + '\n' +
-              "(XXX) Tj" + '\n' +
-              "ET" + '\n' +
-              "Q" + '\n' +
-              "";//"EMC";
-            int length = s.Length;
-            byte[] stream = new byte[length];
-            for (int idx = 0; idx < length; idx++)
-                stream[idx] = (byte)s[idx];
-            xobj.CreateStream(stream);
-
-            // Get existing or create new appearance dictionary
-            PdfDictionary ap = Elements[PdfAnnotation.Keys.AP] as PdfDictionary;
-            if (ap == null)
+            for (var i = 0; i < Annotations.Elements.Count; i++)
             {
-                ap = new PdfDictionary(_document);
-                Elements[PdfAnnotation.Keys.AP] = ap;
-            }
+                var widget = Annotations.Elements[i];
+                if (widget == null)
+                    continue;
 
-            // Set XRef to normal state
-            ap.Elements["/N"] = xobj.Reference;
+                var rect = widget.Rectangle;
+                var width = Math.Abs(rect.Width);
+                var height = Math.Abs(rect.Height);
+                // ensure a minimum size of 1x1, otherwise an exception is thrown
+                if (width < 1.0 || height < 1.0)
+                    continue;
 
-            //string m =
-            //"<?xpacket begin=\" \" id=\"W5M0MpCehiHzreSzNTczkc9d\"?>" + '\n' +
-            //"<x:xmpmeta xmlns:x=\"adobe:ns:meta/\" x:xmptk=\"Adobe XMP Core 4.0-c321 44.398116, Tue Aug 04 2009 14:24:39\"> " + '\n' +
-            //"   <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"> " + '\n' +
-            //"      <rdf:Description rdf:about=\"\" " + '\n' +
-            //"            xmlns:pdf=\"http://ns.adobe.com/pdf/1.3/\"> " + '\n' +
-            //"         <pdf:Producer>PDFsharp 1.40.2150-g (www.pdfsharp.com) (Original: Powered By Crystal)</pdf:Producer> " + '\n' +
-            //"      </rdf:Description> " + '\n' +
-            //"      <rdf:Description rdf:about=\"\" " + '\n' +
-            //"            xmlns:xap=\"http://ns.adobe.com/xap/1.0/\"> " + '\n' +
-            //"         <xap:ModifyDate>2011-07-11T23:15:09+02:00</xap:ModifyDate> " + '\n' +
-            //"         <xap:CreateDate>2011-05-19T16:26:51+03:00</xap:CreateDate> " + '\n' +
-            //"         <xap:MetadataDate>2011-07-11T23:15:09+02:00</xap:MetadataDate> " + '\n' +
-            //"         <xap:CreatorTool>Crystal Reports</xap:CreatorTool> " + '\n' +
-            //"      </rdf:Description> " + '\n' +
-            //"      <rdf:Description rdf:about=\"\" " + '\n' +
-            //"            xmlns:dc=\"http://purl.org/dc/elements/1.1/\"> " + '\n' +
-            //"         <dc:format>application/pdf</dc:format> " + '\n' +
-            //"      </rdf:Description> " + '\n' +
-            //"      <rdf:Description rdf:about=\"\" " + '\n' +
-            //"            xmlns:xapMM=\"http://ns.adobe.com/xap/1.0/mm/\"> " + '\n' +
-            //"         <xapMM:DocumentID>uuid:68249d89-baed-4384-9a2d-fbf8ace75c45</xapMM:DocumentID> " + '\n' +
-            //"         <xapMM:InstanceID>uuid:3d5f2f46-c140-416f-baf2-7f9c970cef1d</xapMM:InstanceID> " + '\n' +
-            //"      </rdf:Description> " + '\n' +
-            //"   </rdf:RDF> " + '\n' +
-            //"</x:xmpmeta> " + '\n' +
-            //"                                                                          " + '\n' +
-            //"                                                                          " + '\n' +
-            //"                                                                          " + '\n' +
-            //"                                                                          " + '\n' +
-            //"                                                                          " + '\n' +
-            //"                                                                          " + '\n' +
-            //"                                                                          " + '\n' +
-            //"                                                                          " + '\n' +
-            //"                                                                          " + '\n' +
-            //"                                                                          " + '\n' +
-            //"<?xpacket end=\"w\"?>";
+                var xRect = new XRect(0, 0, width, height);
+                var form = (widget.Rotation == 90 || widget.Rotation == 270) && (widget.Flags & PdfAnnotationFlags.NoRotate) == 0
+                    ? new XForm(_document, XUnit.FromPoint(rect.Height), XUnit.FromPoint(rect.Width))
+                    : new XForm(_document, xRect);
 
-            //PdfDictionary mdict = (PdfDictionary)_document.Internals.GetObject(new PdfObjectID(32));
+                if (widget.Rotation != 0 && (widget.Flags & PdfAnnotationFlags.NoRotate) == 0)
+                {
+                    // I could not get this to work using gfx.Rotate/Translate Methods...
+                    const double deg2Rad = 0.01745329251994329576923690768489;  // PI/180
+                    var sr = Math.Sin(widget.Rotation * deg2Rad);
+                    var cr = Math.Cos(widget.Rotation * deg2Rad);
+                    // see PdfReference 1.7, Chapter 8.3.3 (Common Transformations)
+                    // TODO: Is this always correct ? I had only the chance to test this with a 90 degree rotation...
+                    form.PdfForm.Elements.SetMatrix(PdfFormXObject.Keys.Matrix, new XMatrix(cr, sr, -sr, cr, xRect.Width, 0));
+                    if (widget.Rotation == 90 || widget.Rotation == 270)
+                        xRect = new XRect(0, 0, rect.Height, rect.Width);
+                }
 
-            //length = m.Length;
-            //stream = new byte[length];
-            //for (int idx = 0; idx < length; idx++)
-            //  stream[idx] = (byte)m[idx];
+                var preferredFontType = AnsiEncoding.IsAnsi(Text) ? FontType.TrueTypeWinAnsi : FontType.Type0Unicode;
+                SetFontType(preferredFontType);
 
-            //mdict.Stream.Value = stream;
-#else
-            var rect = Elements.GetRectangle(PdfAnnotation.Keys.Rect);
-            var form = new XForm(_document, rect.Size);
-            var gfx = XGraphics.FromForm(form);
+                using (var gfx = XGraphics.FromForm(form))
+                {
+                    gfx.IntersectClip(xRect);
+                    Owner.AcroForm?.FieldRenderer.TextFieldRenderer.Render(this, widget, gfx, xRect);
+                }
+                form.DrawingFinished();
+                SetXFormFont(form);
 
-            if (BackColor != XColor.Empty)
-                gfx.DrawRectangle(new XSolidBrush(BackColor), rect.ToXRect() - rect.Location);
+                // Get existing or create new appearance dictionary.
+                if (widget.Elements[PdfAnnotation.Keys.AP] is not PdfDictionary ap)
+                {
+                    ap = new PdfDictionary(_document);
+                    widget.Elements[PdfAnnotation.Keys.AP] = ap;
+                }
 
-            string text = Text;
-            if (text.Length > 0)
-                gfx.DrawString(Text, Font, new XSolidBrush(ForeColor),
-                  rect.ToXRect() - rect.Location + new XPoint(2, 0), XStringFormats.TopLeft);
+                ap.Elements["/N"] = form.PdfForm.Reference;
 
-            form.DrawingFinished();
-            form.PdfForm.Elements.Add("/FormType", new PdfLiteral("1"));
-
-            // Get existing or create new appearance dictionary.
-            if (Elements[PdfAnnotation.Keys.AP] is not PdfDictionary ap)
-            {
-                ap = new PdfDictionary(_document);
-                Elements[PdfAnnotation.Keys.AP] = ap;
-            }
-
-            // Set XRef to normal state.
-            ap.Elements["/N"] = form.PdfForm.Reference;
-
-            form.PdfRenderer.Close();
-
-            var xobj = form.PdfForm;
-            string s = xobj.Stream?.ToString() ?? "";
-            // Thank you Adobe: Without putting the content in 'EMC brackets'
-            // the text is not rendered by PDF Reader 9 or higher.
-            s = "/Tx BMC\n" + s + "\nEMC";
-            if (xobj.Stream != null)
+                var xobj = form.PdfForm;
+                var s = xobj.Stream.ToString();
+                // Thank you Adobe: Without putting the content in 'EMC brackets'
+                // the text is not rendered by PDF Reader 9 or higher.
+                s = "/Tx BMC\n" + s + "\nEMC";
                 xobj.Stream.Value = new RawEncoding().GetBytes(s);
-#endif
+            }
+            // create DefaultAppearance for newly created fields (required according to the spec)
+            if (!Elements.ContainsKey(PdfAcroField.Keys.DA) && _document.AcroForm != null)
+            {
+                var fontType = Font.PdfOptions.FontEmbedding == PdfFontEmbedding.OmitStandardFont
+                    ? FontType.Type1StandardFont
+                    : Font.PdfOptions.FontEncoding == PdfFontEncoding.Unicode
+                        ? FontType.Type0Unicode
+                        : FontType.TrueTypeWinAnsi;
+                var pdfFont = _document.FontTable.GetOrCreateFont(Font.GlyphTypeface, fontType);
+                var formResources = _document.AcroForm.GetOrCreateResources();
+                var fontName = formResources.AddFont(pdfFont);
+                Elements.Add(PdfAcroField.Keys.DA, new PdfString(string.Format(
+                    CultureInfo.InvariantCulture, "{0} {1:0.###} Tf {2:0.###} {3:0.###} {4:0.###} rg",
+                    fontName, FontSize ?? Font.Size, ForeColor.R / 255.0, ForeColor.G / 255.0, ForeColor.B / 255.0)));
+            }
         }
 
         internal override void PrepareForSave()

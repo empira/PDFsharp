@@ -22,10 +22,13 @@ using Windows.UI.Xaml.Media;
 #endif
 using Microsoft.Extensions.Logging;
 using PdfSharp.Fonts;
+using PdfSharp.Fonts.StandardFonts;
 using PdfSharp.Fonts.Internal;
 using PdfSharp.Fonts.OpenType;
 using PdfSharp.Internal;
 using PdfSharp.Logging;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.Advanced;
 
 namespace PdfSharp.Drawing
 {
@@ -50,7 +53,7 @@ namespace PdfSharp.Drawing
             FontFamily = fontFamily;
             FontSource = fontSource;
 
-            FontFace = OpenTypeFontFace.CetOrCreateFrom(fontSource);
+            FontFace = OpenTypeFontFace.GetOrCreateFrom(fontSource);
             
             // Check why it fails.
             //Debug.Assert(ReferenceEquals(FontSource.FontFace, FontFace));
@@ -67,7 +70,7 @@ namespace PdfSharp.Drawing
             FontFamily = fontFamily;
             FontSource = fontSource;
 
-            FontFace = OpenTypeFontFace.CetOrCreateFrom(fontSource);
+            FontFace = OpenTypeFontFace.GetOrCreateFrom(fontSource);
             Debug.Assert(ReferenceEquals(FontSource.FontFace, FontFace));
 
             _gdiFont = gdiFont;
@@ -105,7 +108,7 @@ namespace PdfSharp.Drawing
             FontSource = fontSource;
             StyleSimulations = styleSimulations;
 
-            FontFace = OpenTypeFontFace.CetOrCreateFrom(fontSource);
+            FontFace = OpenTypeFontFace.GetOrCreateFrom(fontSource);
             Debug.Assert(ReferenceEquals(FontSource.FontFace, FontFace));
 
             WpfTypeface = wpfTypeface;
@@ -410,6 +413,16 @@ namespace PdfSharp.Drawing
         /// Gets the English family name of the font, for example "Arial".
         /// </summary>
         public string FamilyName { get; private set; } = default!;
+
+        /// <summary>
+        /// When constructed from an XFont, gets the family-name with which the XFont was initialized.<br></br>
+        /// This is a HACK to pass the family-name used to create an <see cref="XFont"/> to 
+        /// <see cref="PdfFontTable.GetOrCreateFont(XGlyphTypeface, FontType)"/>.<br></br>
+        /// Required for the <see cref="StandardFontNames"/> in conjuction with 
+        /// <see cref="PdfFontEmbedding.OmitStandardFont"/> where the actual face-name (as stored in the font)
+        /// differs from the name used to create an <see cref="XFont"/>.
+        /// </summary>
+        internal string XFamilyName { get; set; } = default!;
 
         /// <summary>
         /// Gets the English subfamily name of the font,

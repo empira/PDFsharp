@@ -35,6 +35,14 @@ namespace PdfSharp.Pdf.Advanced
             //{ }
         }
 
+        internal PdfFormXObject(PdfDictionary dict)
+            : base(dict.Owner)
+        {
+            if (dict.Elements.GetName(Keys.Subtype) != "/Form")
+                throw new ArgumentException("Dictionary does not specify the required Subtype", nameof(dict));
+        }
+
+
         internal double DpiX { get; set; } = 72;
 
         internal double DpiY { get; set; } = 72;
