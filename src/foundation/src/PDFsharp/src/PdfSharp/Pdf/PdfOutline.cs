@@ -332,8 +332,7 @@ namespace PdfSharp.Pdf
                     destArray = dest as PdfArray;
                     if (destArray != null)
                     {
-                        // Replace Action with /Dest entry.
-                        Elements.Remove(Keys.A);
+                        // Add /Dest entry keeping existing action, as it can contain additional entries within action, like /Next
                         Elements.Add(Keys.Dest, destArray);
                         SplitDestinationPage(destArray);
                     }
@@ -359,8 +358,7 @@ namespace PdfSharp.Pdf
                         }
                         if (destArray != null)
                         {
-                            // Replace Action with /Dest entry.
-                            Elements.Remove(Keys.A);
+                            // Add /Dest entry keeping existing action, as it can contain additional entries within action, like /Next
                             Elements.Add(Keys.Dest, destArray);
                             SplitDestinationPage(destArray);
                         }
