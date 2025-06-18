@@ -99,6 +99,10 @@ namespace PdfSharp.Pdf.IO
 
         public ReaderProblemDelegate? ReaderProblemCallback { get; set; }
 
+        public bool EnableReferenceRenumbering { get; set; } = true;
+
+        public bool EnableReferenceCompaction { get; set; } = true;
+
         // Testing only
 
         //public bool UseOldCode { get; set; } = false;
