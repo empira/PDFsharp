@@ -281,6 +281,7 @@ namespace PdfSharp.Pdf.IO
                 _document.Options.EnableReferenceCompaction = _options.EnableReferenceCompaction;
                 _document.Options.EnableReferenceRenumbering = _options.EnableReferenceRenumbering;
                 _document.Options.EnableImplicitTransparencyGroup = _options.EnableImplicitTransparencyGroup;
+                _document.Options.EnableImplicitMetadata = _options.EnableImplicitMetadata;
                 _document._state |= DocumentState.Imported;
                 _document._openMode = openMode;
 

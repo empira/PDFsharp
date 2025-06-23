@@ -105,6 +105,8 @@ namespace PdfSharp.Pdf.IO
 
         public bool EnableImplicitTransparencyGroup { get; set; } = true;
 
+        public bool EnableImplicitMetadata { get; set; } = true;
+
         // Testing only
 
         //public bool UseOldCode { get; set; } = false;

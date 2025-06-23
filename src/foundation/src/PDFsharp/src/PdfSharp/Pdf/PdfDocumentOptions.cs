@@ -87,5 +87,7 @@ namespace PdfSharp.Pdf
         public bool EnableReferenceRenumbering { get; set; } = true;
 
         public bool EnableImplicitTransparencyGroup { get; set; } = true;
+
+        public bool EnableImplicitMetadata { get; set; } = true;
     }
 }
