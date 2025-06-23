@@ -278,8 +278,9 @@ namespace PdfSharp.Pdf.IO
 
                 var lexer = new Lexer(stream, _logger);
                 _document = new PdfDocument(lexer);
-                _document.EnableReferenceCompaction = _options.EnableReferenceCompaction;
-                _document.EnableReferenceRenumbering = _options.EnableReferenceRenumbering;
+                _document.Options.EnableReferenceCompaction = _options.EnableReferenceCompaction;
+                _document.Options.EnableReferenceRenumbering = _options.EnableReferenceRenumbering;
+                _document.Options.EnableImplicitTransparencyGroup = _options.EnableImplicitTransparencyGroup;
                 _document._state |= DocumentState.Imported;
                 _document._openMode = openMode;
 

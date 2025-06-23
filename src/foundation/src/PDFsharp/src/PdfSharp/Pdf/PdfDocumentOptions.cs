@@ -81,5 +81,11 @@ namespace PdfSharp.Pdf
             set => _useFlateDecoderForJpegImages = value;
         }
         PdfUseFlateDecoderForJpegImages _useFlateDecoderForJpegImages = PdfUseFlateDecoderForJpegImages.Never;
+
+        public bool EnableReferenceCompaction { get; set; } = true;
+
+        public bool EnableReferenceRenumbering { get; set; } = true;
+
+        public bool EnableImplicitTransparencyGroup { get; set; } = true;
     }
 }

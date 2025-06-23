@@ -138,10 +138,6 @@ namespace PdfSharp.Pdf
             }
             _state = DocumentState.Disposed | DocumentState.Saved;
         }
-        
-        public bool EnableReferenceCompaction { get; set; } = true;
-
-        public bool EnableReferenceRenumbering { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a user-defined object that contains arbitrary information associated with this document.

@@ -103,6 +103,8 @@ namespace PdfSharp.Pdf.IO
 
         public bool EnableReferenceCompaction { get; set; } = true;
 
+        public bool EnableImplicitTransparencyGroup { get; set; } = true;
+
         // Testing only
 
         //public bool UseOldCode { get; set; } = false;

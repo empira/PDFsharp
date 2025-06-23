@@ -29,10 +29,6 @@ namespace PdfSharp.Pdf.Advanced
     /// </remarks>
     sealed class PdfCrossReferenceTable(PdfDocument document) // Must not be derived from PdfObject.
     {
-        public bool EnableCompaction => document.EnableReferenceCompaction;
-
-        public bool EnableRenumbering => document.EnableReferenceRenumbering;
-
 #if TEST_CODE
         readonly Stopwatch _stopwatch = new();
 #endif
@@ -241,7 +237,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal int Compact()
         {
-            if (!EnableCompaction)
+            if (!document.Options.EnableReferenceCompaction)
                 return 0;
 
             // IMPROVE: remove PdfBooleanObject, PdfIntegerObject etc.
@@ -320,7 +316,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal void Renumber()
         {
-            if (!EnableRenumbering)
+            if (!document.Options.EnableReferenceRenumbering)
                 return;
 
             //CheckConsistence();
