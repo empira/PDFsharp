@@ -107,6 +107,8 @@ namespace PdfSharp.Pdf.IO
 
         public bool EnableImplicitMetadata { get; set; } = true;
 
+        public bool EnableWriterCommentInTrailer { get; set; } = true;
+
         // Testing only
 
         //public bool UseOldCode { get; set; } = false;

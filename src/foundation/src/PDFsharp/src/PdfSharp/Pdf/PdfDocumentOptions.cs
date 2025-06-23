@@ -89,5 +89,7 @@ namespace PdfSharp.Pdf
         public bool EnableImplicitTransparencyGroup { get; set; } = true;
 
         public bool EnableImplicitMetadata { get; set; } = true;
+
+        public bool EnableWriterCommentInTrailer { get; set; } = true;
     }
 }
