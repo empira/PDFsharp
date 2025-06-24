@@ -131,10 +131,15 @@ namespace PdfSharp.Drawing.Pdf
             Realize(pen);
 
             const string format = Config.SignificantDecimalPlaces4;
-            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
+            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m", points[0].X, points[0].Y);
+            _content.Append(Owner.Options.LineEnding);
             for (int idx = 1; idx < count; idx++)
-                AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", points[idx].X, points[idx].Y);
-            _content.Append("S\n");
+            {
+                AppendFormatPoint("{0:" + format + "} {1:" + format + "} l", points[idx].X, points[idx].Y); 
+                _content.Append(Owner.Options.LineEnding);
+            }
+            _content.Append("S"); 
+            _content.Append(Owner.Options.LineEnding);
         }
 
         // ----- DrawBezier ---------------------------------------------------------------------------
@@ -167,12 +172,16 @@ namespace PdfSharp.Drawing.Pdf
             Realize(pen);
 
             const string format = Config.SignificantDecimalPlaces4;
-            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
+            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m", points[0].X, points[0].Y); 
+            _content.Append(Owner.Options.LineEnding);
             for (int idx = 1; idx < count; idx += 3)
-                AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+            {
+                AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c",
                     points[idx].X, points[idx].Y,
                     points[idx + 1].X, points[idx + 1].Y,
                     points[idx + 2].X, points[idx + 2].Y);
+                _content.Append(Owner.Options.LineEnding);
+            }
 
             AppendStrokeFill(pen, null, XFillMode.Alternate, false);
         }
@@ -202,7 +211,8 @@ namespace PdfSharp.Drawing.Pdf
             Realize(pen);
 
             const string format = Config.SignificantDecimalPlaces4;
-            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
+            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m", points[0].X, points[0].Y); 
+            _content.Append(Owner.Options.LineEnding);
             if (count == 2)
             {
                 // Just draws a line.
@@ -252,14 +262,16 @@ namespace PdfSharp.Drawing.Pdf
 
             Realize(pen, brush);
             //AppendFormat123("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} re\n", x, y, width, -height);
-            AppendFormatRect("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} re\n", x, y + height, width, height);
+            AppendFormatRect("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} re", x, y + height, width, height); 
+            _content.Append(Owner.Options.LineEnding);
 
             if (pen != null && brush != null)
-                _content.Append("B\n");
+                _content.Append("B");
             else if (pen != null)
-                _content.Append("S\n");
+                _content.Append("S");
             else
-                _content.Append("f\n");
+                _content.Append("f"); 
+            _content.Append(Owner.Options.LineEnding);
         }
 
         // ----- DrawRectangles -----------------------------------------------------------------------
@@ -310,15 +322,20 @@ namespace PdfSharp.Drawing.Pdf
 
             // Approximate an ellipse by drawing four cubic splines.
             const string format = Config.SignificantDecimalPlaces4;
-            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", x0 + δx, y0);
-            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m", x0 + δx, y0); 
+            _content.Append(Owner.Options.LineEnding);
+            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c",
               x0 + δx, y0 + fy, x0 + fx, y0 + δy, x0, y0 + δy);
-            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+            _content.Append(Owner.Options.LineEnding);
+            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c",
               x0 - fx, y0 + δy, x0 - δx, y0 + fy, x0 - δx, y0);
-            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+            _content.Append(Owner.Options.LineEnding);
+            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c",
               x0 - δx, y0 - fy, x0 - fx, y0 - δy, x0, y0 - δy);
-            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+            _content.Append(Owner.Options.LineEnding);
+            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c",
               x0 + fx, y0 - δy, x0 + δx, y0 - fy, x0 + δx, y0);
+            _content.Append(Owner.Options.LineEnding);
             AppendStrokeFill(pen, brush, XFillMode.Winding, true);
         }
 
@@ -337,9 +354,13 @@ namespace PdfSharp.Drawing.Pdf
                 throw new ArgumentException(PsMsgs.PointArrayAtLeast(2), nameof(points));
 
             const string format = Config.SignificantDecimalPlaces4;
-            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
+            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m", points[0].X, points[0].Y); 
+            _content.Append(Owner.Options.LineEnding);
             for (int idx = 1; idx < count; idx++)
-                AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", points[idx].X, points[idx].Y);
+            {
+                AppendFormatPoint("{0:" + format + "} {1:" + format + "} l", points[idx].X, points[idx].Y); 
+                _content.Append(Owner.Options.LineEnding);
+            }
 
             AppendStrokeFill(pen, brush, fillmode, true);
         }
@@ -356,7 +377,8 @@ namespace PdfSharp.Drawing.Pdf
             Realize(pen, brush);
 
             const string format = Config.SignificantDecimalPlaces4;
-            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", x + width / 2, y + height / 2);
+            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m", x + width / 2, y + height / 2); 
+            _content.Append(Owner.Options.LineEnding);
             AppendPartialArc(x, y, width, height, startAngle, sweepAngle, PathStart.LineTo1st, new XMatrix());
             AppendStrokeFill(pen, brush, XFillMode.Alternate, true);
         }
@@ -381,7 +403,8 @@ namespace PdfSharp.Drawing.Pdf
             Realize(pen, brush);
 
             const string format = Config.SignificantDecimalPlaces4;
-            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
+            AppendFormatPoint("{0:" + format + "} {1:" + format + "} m", points[0].X, points[0].Y);
+            _content.Append(Owner.Options.LineEnding);
             if (count == 2)
             {
                 // Just draw a line.
@@ -687,12 +710,14 @@ namespace PdfSharp.Drawing.Pdf
                             var pos = new XPoint(x, y);
                             pos = WorldToView(pos);
                             AdjustTdOffset(ref pos, 0, false);
-                            AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} Td {2} Tj\n", pos.X, pos.Y, text);
+                            AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} Td {2} Tj", pos.X, pos.Y, text); 
+                            _content.Append(Owner.Options.LineEnding);
                         }
                         else
                         {
                             // Rest of the layers are rendered on top of the first layer.
-                            AppendFormatArgs("0 0 Td {0} Tj\n", text);
+                            AppendFormatArgs("0 0 Td {0} Tj", text); 
+                            _content.Append(Owner.Options.LineEnding);
                         }
                     }
                     x += chunkWidth;
@@ -744,7 +769,7 @@ namespace PdfSharp.Drawing.Pdf
             }
 
             // Select the number of decimal places used for the relative text positioning.
-            const string formatTj = Config.SignificantDecimalPlaces4;
+            const string format4 = Config.SignificantDecimalPlaces4;
 #if ITALIC_SIMULATION
             if (italicSimulation)
             {
@@ -752,25 +777,32 @@ namespace PdfSharp.Drawing.Pdf
                 {   // Case: Simulate Italic and simulation is already on.
 
                     // Build format string only once.
-                    s_format1 ??= "{0:" + formatTj + "} {1:" + formatTj + "} Td\n{2} Tj\n";
+                    const string s_format1 = "{0:" + format4 + "} {1:" + format4 + "} Td";
+                    const string s_format2 = "{0} Tj";
 
                     AdjustTdOffset(ref pos, verticalOffset, true);
                     // earlier:
                     //AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} Td\n{2} Tj\n", pos.X, pos.Y, text);
-                    AppendFormatArgs(s_format1, pos.X, pos.Y, text);
+                    AppendFormatArgs(s_format1, pos.X, pos.Y);
+                    _content.Append(Owner.Options.LineEnding);
+                    AppendFormatArgs(s_format2, text);
+                    _content.Append(Owner.Options.LineEnding);
                 }
                 else
                 {   // Case: Simulate Italic and turn simulation on.
 
-                    s_format2 ??= "{0:" + formatTj + "} {1:" + formatTj + "} {2:" + formatTj + "} {3:" + formatTj + "} {4:"
-                                  + formatTj + "} {5:" + formatTj + "} Tm\n{6} Tj\n";
+                    const string s_format1 = "{0:" + format4 + "} {1:" + format4 + "} {2:" + format4 + "} {3:" + format4 + "} {4:" + format4 + "} {5:" + format4 + "} Tm";
+                    const string s_format2 = "{0} Tj";
 
                     // Italic simulation is done by skewing characters 20° to the right.
                     var m = new XMatrix(1, 0, Const.ItalicSkewAngleSinus, 1, pos.X, pos.Y);
                     // earlier:
                     //AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} {2:" + format2 + "} {3:" + format2 + "} {4:" + format2 + "} {5:" + format2 + "} Tm\n{6} Tj\n",
                     //    m.M11, m.M12, m.M21, m.M22, m.OffsetX, m.OffsetY, text);
-                    AppendFormatArgs(s_format2, m.M11, m.M12, m.M21, m.M22, m.OffsetX, m.OffsetY, text);
+                    AppendFormatArgs(s_format1, m.M11, m.M12, m.M21, m.M22, m.OffsetX, m.OffsetY);
+                    _content.Append(Owner.Options.LineEnding);
+                    AppendFormatArgs(s_format2, text);
+                    _content.Append(Owner.Options.LineEnding);
                     _gfxState.ItalicSimulationOn = true;
                     AdjustTdOffset(ref pos, verticalOffset, false);
                 }
@@ -781,14 +813,17 @@ namespace PdfSharp.Drawing.Pdf
                 {   // Case: Do not simulate Italic but simulation is currently on.
 
                     // Same as format2, but keep code clear.
-                    s_format3 ??= "{0:" + formatTj + "} {1:" + formatTj + "} {2:" + formatTj + "} {3:" + formatTj + "} {4:"
-                                  + formatTj + "} {5:" + formatTj + "} Tm\n{6} Tj\n";
+                    const string s_format1 = "{0:" + format4 + "} {1:" + format4 + "} {2:" + format4 + "} {3:" + format4 + "} {4:" + format4 + "} {5:" + format4 + "} Tm";
+                    const string s_format2 = "{0} Tj";
 
                     var m = new XMatrix(1, 0, 0, 1, pos.X, pos.Y);
                     // earlier:
                     //AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} {2:" + format2 + "} {3:" + format2 + "} {4:" + format2 + "} {5:" + format2 + "} Tm\n{6} Tj\n",
                     //    m.M11, m.M12, m.M21, m.M22, m.OffsetX, m.OffsetY, text);
-                    AppendFormatArgs(s_format3, m.M11, m.M12, m.M21, m.M22, m.OffsetX, m.OffsetY, text);
+                    AppendFormatArgs(s_format1, m.M11, m.M12, m.M21, m.M22, m.OffsetX, m.OffsetY);
+                    _content.Append(Owner.Options.LineEnding);
+                    AppendFormatArgs(s_format2, text);
+                    _content.Append(Owner.Options.LineEnding);
                     _gfxState.ItalicSimulationOn = false;
                     AdjustTdOffset(ref pos, verticalOffset, false);
                 }
@@ -796,17 +831,22 @@ namespace PdfSharp.Drawing.Pdf
                 {   // Case: Do not simulate Italic and simulation is already off.
 
                     // Same as format1, but keep code clear.
-                    s_format4 ??= "{0:" + formatTj + "} {1:" + formatTj + "} Td\n{2} Tj\n";
+                    const string s_format1 = "{0:" + format4 + "} {1:" + format4 + "} Td";
+                    const string s_format2 = "{0} Tj";
 
                     AdjustTdOffset(ref pos, verticalOffset, false);
                     // earlier:
                     //AppendFormatArgs("{0:" + format2 + "} {1:" + format2 + "} Td {2} Tj\n", pos.X, pos.Y, text);
-                    AppendFormatArgs(s_format4, pos.X, pos.Y, text);
+                    AppendFormatArgs(s_format1, pos.X, pos.Y);
+                    _content.Append(Owner.Options.LineEnding);
+                    AppendFormatArgs(s_format2, text);
+                    _content.Append(Owner.Options.LineEnding);
                 }
             }
 #else
                 AdjustTextMatrix(ref pos);
-                AppendFormat2("{0:" + format2 + "} {1:" + format2 + "} Td {2} Tj\n", pos.X, pos.Y, text);
+                AppendFormat2("{0:" + format2 + "} {1:" + format2 + "} Td {2} Tj", pos.X, pos.Y, text);
+                _content.Append(Owner.Options.LineEnding);
 #endif
             if (underline)
             {
@@ -830,13 +870,6 @@ namespace PdfSharp.Drawing.Pdf
                 DrawRectangle(null, brush, x, strikeoutRectY, width, strikeoutSize);
             }
         }
-
-        // ReSharper disable InconsistentNaming
-        static string? s_format1;
-        static string? s_format2;
-        static string? s_format3;
-        static string? s_format4;
-        // ReSharper restore InconsistentNaming
 
         public void DrawString(string s, XGlyphTypeface typeface, XBrush brush, XRect rect, XStringFormat format)
         {
@@ -890,13 +923,13 @@ namespace PdfSharp.Drawing.Pdf
             {
                 if (_gfx.PageDirection == XPageDirection.Downwards)
                 {
-                    AppendFormatImage("q {2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q\n",
-                        x, y + height, width, height, name);
+                    AppendFormatImage("q {2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q", x, y + height, width, height, name);
+                    _content.Append(Owner.Options.LineEnding);
                 }
                 else
                 {
-                    AppendFormatImage("q {2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q\n",
-                        x, y, width, height, name);
+                    AppendFormatImage("q {2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q", x, y, width, height, name);
+                    _content.Append(Owner.Options.LineEnding);
                 }
             }
             else
@@ -915,7 +948,7 @@ namespace PdfSharp.Drawing.Pdf
                     var xForm = form as XPdfForm;
                     // Reset colors in this graphics state. Usually PDF images should set them.
                     // But in rare cases they aren’t which may result in changed colors inside the image.
-                    var resetColor = xForm != null ? "\n0 g\n0 G\n" : " ";
+                    var resetColor = xForm != null ? $" 0 g 0 G " : " ";
 
                     if (_gfx.PageDirection == XPageDirection.Downwards)
                     {
@@ -928,14 +961,14 @@ namespace PdfSharp.Drawing.Pdf
                             xDraw -= xForm.Page!.MediaBox.X1;
                             yDraw += xForm.Page.MediaBox.Y1;
                         }
-                        AppendFormatImage("q" + resetColor + "{2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm 100 Tz {4} Do Q\n",
-                            xDraw, yDraw + height, cx, cy, name);
+                        AppendFormatImage("q" + resetColor + "{2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm 100 Tz {4} Do Q", xDraw, yDraw + height, cx, cy, name);
+                        _content.Append(Owner.Options.LineEnding);
                     }
                     else
                     {
                         // TODO_OLD Translation for MediaBox.
-                        AppendFormatImage("q" + resetColor + "{2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q\n",
-                            x, y, cx, cy, name);
+                        AppendFormatImage("q" + resetColor + "{2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q", x, y, cx, cy, name);
+                        _content.Append(Owner.Options.LineEnding);
                     }
                 }
             }
@@ -960,13 +993,13 @@ namespace PdfSharp.Drawing.Pdf
             {
                 if (_gfx.PageDirection == XPageDirection.Downwards)
                 {
-                    AppendFormatImage("q {2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do\nQ\n",
-                        x, y + height, width, height, name);
+                    AppendFormatImage("q {2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q", x, y + height, width, height, name);
+                    _content.Append(Owner.Options.LineEnding);
                 }
                 else
                 {
-                    AppendFormatImage("q {2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q\n",
-                        x, y, width, height, name);
+                    AppendFormatImage("q {2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q", x, y, width, height, name);
+                    _content.Append(Owner.Options.LineEnding);
                 }
             }
             else
@@ -984,7 +1017,7 @@ namespace PdfSharp.Drawing.Pdf
                 {
                     var xForm = form as XPdfForm;
                     // Reset colors in this graphics state. Usually PDF images should set them, but in rare cases they don’t and this may result in changed colors inside the image.
-                    var resetColor = xForm != null ? "\n0 g\n0 G\n" : " ";
+                    var resetColor = xForm != null ? " 0 g 0 G " : " ";
 
                     if (_gfx.PageDirection == XPageDirection.Downwards)
                     {
@@ -996,14 +1029,14 @@ namespace PdfSharp.Drawing.Pdf
                             xDraw -= xForm.Page!.MediaBox.X1;
                             yDraw += xForm.Page.MediaBox.Y1;
                         }
-                        AppendFormatImage("q" + resetColor + "{2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q\n",
-                            xDraw, yDraw + height, cx, cy, name);
+                        AppendFormatImage("q" + resetColor + "{2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q", xDraw, yDraw + height, cx, cy, name);
+                        _content.Append(Owner.Options.LineEnding);
                     }
                     else
                     {
                         // TODO_OLD Translation for MediaBox.
-                        AppendFormatImage("q" + resetColor + "{2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q\n",
-                            x, y, cx, cy, name);
+                        AppendFormatImage("q" + resetColor + "{2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q", x, y, cx, cy, name);
+                        _content.Append(Owner.Options.LineEnding);
                     }
                 }
             }
@@ -1165,9 +1198,10 @@ namespace PdfSharp.Drawing.Pdf
         /// </summary>
         public void WriteComment(string comment)
         {
-            comment = comment.Replace("\n", "\n% ");
+            comment = comment.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", Owner.Options.LineEnding + "% ");
             // Nothing right of '% ' can break a PDF file.
-            Append("% " + comment + "\n");
+            Append(Invariant($"% {comment}"));
+            Append(Owner.Options.LineEnding);
         }
 
         #endregion
@@ -1344,12 +1378,14 @@ namespace PdfSharp.Drawing.Pdf
                 {
                     case PathStart.MoveTo1st:
                         pt1 = matrix.Transform(new XPoint(x0 + δx * cosα, y0 + δy * sinα));
-                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", pt1.X, pt1.Y);
+                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} m", pt1.X, pt1.Y);
+                        _content.Append(Owner.Options.LineEnding);
                         break;
 
                     case PathStart.LineTo1st:
                         pt1 = matrix.Transform(new XPoint(x0 + δx * cosα, y0 + δy * sinα));
-                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", pt1.X, pt1.Y);
+                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} l", pt1.X, pt1.Y);
+                        _content.Append(Owner.Options.LineEnding);
                         break;
 
                     case PathStart.Ignore1st:
@@ -1358,8 +1394,9 @@ namespace PdfSharp.Drawing.Pdf
                 pt1 = matrix.Transform(new XPoint(x0 + δx * (cosα - κ * sinα), y0 + δy * (sinα + κ * cosα)));
                 pt2 = matrix.Transform(new XPoint(x0 + δx * (cosβ + κ * sinβ), y0 + δy * (sinβ - κ * cosβ)));
                 pt3 = matrix.Transform(new XPoint(x0 + δx * cosβ, y0 + δy * sinβ));
-                AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c",
                   pt1.X, pt1.Y, pt2.X, pt2.Y, pt3.X, pt3.Y);
+                _content.Append(Owner.Options.LineEnding);
             }
             else
             {
@@ -1368,12 +1405,14 @@ namespace PdfSharp.Drawing.Pdf
                 {
                     case PathStart.MoveTo1st:
                         pt1 = matrix.Transform(new XPoint(x0 - δx * cosα, y0 - δy * sinα));
-                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", pt1.X, pt1.Y);
+                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} m", pt1.X, pt1.Y);
+                        _content.Append(Owner.Options.LineEnding);
                         break;
 
                     case PathStart.LineTo1st:
                         pt1 = matrix.Transform(new XPoint(x0 - δx * cosα, y0 - δy * sinα));
-                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", pt1.X, pt1.Y);
+                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} l", pt1.X, pt1.Y);
+                        _content.Append(Owner.Options.LineEnding);
                         break;
 
                     case PathStart.Ignore1st:
@@ -1382,8 +1421,9 @@ namespace PdfSharp.Drawing.Pdf
                 pt1 = matrix.Transform(new XPoint(x0 - δx * (cosα - κ * sinα), y0 - δy * (sinα + κ * cosα)));
                 pt2 = matrix.Transform(new XPoint(x0 - δx * (cosβ + κ * sinβ), y0 - δy * (sinβ - κ * cosβ)));
                 pt3 = matrix.Transform(new XPoint(x0 - δx * cosβ, y0 - δy * sinβ));
-                AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c",
                     pt1.X, pt1.Y, pt2.X, pt2.Y, pt3.X, pt3.Y);
+                _content.Append(Owner.Options.LineEnding);
             }
         }
 
@@ -1403,12 +1443,19 @@ namespace PdfSharp.Drawing.Pdf
             int count = points.Count;
             int start = count % 3 == 1 ? 1 : 0;
             if (start == 1)
-                AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
+            {
+                AppendFormatPoint("{0:" + format + "} {1:" + format + "} m", points[0].X, points[0].Y);
+                _content.Append(Owner.Options.LineEnding);
+            }
+
             for (int idx = start; idx < count; idx += 3)
-                AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+            {
+                AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c",
                   points[idx].X, points[idx].Y,
                   points[idx + 1].X, points[idx + 1].Y,
                   points[idx + 2].X, points[idx + 2].Y);
+                _content.Append(Owner.Options.LineEnding);
+            }
         }
 #endif
 
@@ -1418,10 +1465,11 @@ namespace PdfSharp.Drawing.Pdf
         void AppendCurveSegment(XPoint pt0, XPoint pt1, XPoint pt2, XPoint pt3, double tension3)
         {
             const string format = Config.SignificantDecimalPlaces4;
-            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c",
                 pt1.X + tension3 * (pt2.X - pt0.X), pt1.Y + tension3 * (pt2.Y - pt0.Y),
                 pt2.X - tension3 * (pt3.X - pt1.X), pt2.Y - tension3 * (pt3.Y - pt1.Y),
                 pt2.X, pt2.Y);
+            _content.Append(Owner.Options.LineEnding);
         }
 
 #if _CORE_
@@ -1452,14 +1500,19 @@ namespace PdfSharp.Drawing.Pdf
                 {
                     case PathPointTypeStart:
                         //PDF_moveto(pdf, points[idx].X, points[idx].Y);
-                        AppendFormat("{0:" + format + "} {1:" + format + "} m\n", points[idx].X, points[idx].Y);
+                        AppendFormat("{0:" + format + "} {1:" + format + "} m", points[idx].X, points[idx].Y);
+                        _content.Append(Owner.Options.LineEnding);
                         break;
 
                     case PathPointTypeLine:
                         //PDF_lineto(pdf, points[idx].X, points[idx].Y);
-                        AppendFormat("{0:" + format + "} {1:" + format + "} l\n", points[idx].X, points[idx].Y);
+                        AppendFormat("{0:" + format + "} {1:" + format + "} l", points[idx].X, points[idx].Y);
+                        _content.Append(Owner.Options.LineEnding);
                         if ((type & PathPointTypeCloseSubpath) != 0)
-                            Append("h\n");
+                        {
+                            Append("h");
+                            _content.Append(Owner.Options.LineEnding);
+                        }
                         break;
 
                     case PathPointTypeBezier:
@@ -1467,10 +1520,15 @@ namespace PdfSharp.Drawing.Pdf
                         //PDF_curveto(pdf, points[idx].X, points[idx].Y, 
                         //                 points[idx + 1].X, points[idx + 1].Y, 
                         //                 points[idx + 2].X, points[idx + 2].Y);
-                        AppendFormat("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n", points[idx].X, points[idx].Y,
+                        AppendFormat("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c", points[idx].X, points[idx].Y,
                             points[++idx].X, points[idx].Y, points[++idx].X, points[idx].Y);
+                        _content.Append(Owner.Options.LineEnding);
                         if ((types[idx] & PathPointTypeCloseSubpath) != 0)
-                            Append("h\n");
+                        {
+                            Append("h");
+                            _content.Append(Owner.Options.LineEnding);
+                        }
+
                         break;
                 }
             }
@@ -1566,14 +1624,19 @@ namespace PdfSharp.Drawing.Pdf
                 {
                     case PathPointTypeStart:
                         //PDF_moveto(pdf, points[idx].X, points[idx].Y);
-                        AppendFormat("{0:" + format + "} {1:" + format + "} m\n", points[idx].X, points[idx].Y);
+                        AppendFormat("{0:" + format + "} {1:" + format + "} m", points[idx].X, points[idx].Y);
+                        _content.Append(Owner.Options.LineEnding);
                         break;
 
                     case PathPointTypeLine:
                         //PDF_lineto(pdf, points[idx].X, points[idx].Y);
-                        AppendFormat("{0:" + format + "} {1:" + format + "} l\n", points[idx].X, points[idx].Y);
+                        AppendFormat("{0:" + format + "} {1:" + format + "} l", points[idx].X, points[idx].Y);
+                        _content.Append(Owner.Options.LineEnding);
                         if ((type & PathPointTypeCloseSubpath) != 0)
-                            Append("h\n");
+                        {
+                            Append("h"); 
+                            _content.Append(Owner.Options.LineEnding);
+                        }
                         break;
 
                     case PathPointTypeBezier:
@@ -1581,10 +1644,14 @@ namespace PdfSharp.Drawing.Pdf
                         //PDF_curveto(pdf, points[idx].X, points[idx].Y, 
                         //                 points[idx + 1].X, points[idx + 1].Y, 
                         //                 points[idx + 2].X, points[idx + 2].Y);
-                        AppendFormat("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n", points[idx].X, points[idx].Y,
+                        AppendFormat("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c", points[idx].X, points[idx].Y,
                             points[++idx].X, points[idx].Y, points[++idx].X, points[idx].Y);
+                        _content.Append(Owner.Options.LineEnding);
                         if ((types[idx] & PathPointTypeCloseSubpath) != 0)
-                            Append("h\n");
+                        {
+                            Append("h");
+                            _content.Append(Owner.Options.LineEnding);
+                        }
                         break;
                 }
             }
@@ -1618,14 +1685,19 @@ namespace PdfSharp.Drawing.Pdf
                 {
                     case PathPointTypeStart:
                         //PDF_moveto(pdf, points[idx].X, points[idx].Y);
-                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[idx].X, points[idx].Y);
+                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} m", points[idx].X, points[idx].Y);
+                        _content.Append(Owner.Options.LineEnding);
                         break;
 
                     case PathPointTypeLine:
                         //PDF_lineto(pdf, points[idx].X, points[idx].Y);
-                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", points[idx].X, points[idx].Y);
+                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} l", points[idx].X, points[idx].Y);
+                        _content.Append(Owner.Options.LineEnding);
                         if ((type & PathPointTypeCloseSubpath) != 0)
-                            Append("h\n");
+                        {
+                            Append("h");
+                            _content.Append(Owner.Options.LineEnding);
+                        }
                         break;
 
                     case PathPointTypeBezier:
@@ -1633,10 +1705,14 @@ namespace PdfSharp.Drawing.Pdf
                         //PDF_curveto(pdf, points[idx].X, points[idx].Y, 
                         //                 points[idx + 1].X, points[idx + 1].Y, 
                         //                 points[idx + 2].X, points[idx + 2].Y);
-                        AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n", points[idx].X, points[idx].Y,
+                        AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c", points[idx].X, points[idx].Y,
                             points[++idx].X, points[idx].Y, points[++idx].X, points[idx].Y);
+                        _content.Append(Owner.Options.LineEnding);
                         if ((types[idx] & PathPointTypeCloseSubpath) != 0)
-                            Append("h\n");
+                        {
+                            Append("h");
+                            _content.Append(Owner.Options.LineEnding);
+                        }
                         break;
                 }
             }
@@ -1673,7 +1749,8 @@ namespace PdfSharp.Drawing.Pdf
                 {
                     // Move to start point.
                     var currentPoint = figure.StartPoint;
-                    AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", currentPoint.X, currentPoint.Y);
+                    AppendFormatPoint("{0:" + format + "} {1:" + format + "} m", currentPoint.X, currentPoint.Y);
+                    _content.Append(Owner.Options.LineEnding);
 
                     foreach (PathSegment segment in figure.Segments)
                     {
@@ -1683,7 +1760,8 @@ namespace PdfSharp.Drawing.Pdf
                                 {
                                     // Draw a single line.
                                     var point = lineSegment.Point;
-                                    AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", point.X, point.Y);
+                                    AppendFormatPoint("{0:" + format + "} {1:" + format + "} l", point.X, point.Y);
+                                    _content.Append(Owner.Options.LineEnding);
                                     currentPoint = point;
                                 }
                                 break;
@@ -1694,7 +1772,8 @@ namespace PdfSharp.Drawing.Pdf
                                     var points = polyLineSegment.Points;
                                     foreach (SysPoint point in points)
                                     {
-                                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", point.X, point.Y);
+                                        AppendFormatPoint("{0:" + format + "} {1:" + format + "} l", point.X, point.Y);
+                                        _content.Append(Owner.Options.LineEnding);
                                     }
                                     currentPoint = points[^1];
                                 }
@@ -1706,8 +1785,9 @@ namespace PdfSharp.Drawing.Pdf
                                     var point1 = bezierSegment.Point1;
                                     var point2 = bezierSegment.Point2;
                                     var point3 = bezierSegment.Point3;
-                                    AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                                    AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c",
                                         point1.X, point1.Y, point2.X, point2.Y, point3.X, point3.Y);
+                                    _content.Append(Owner.Options.LineEnding);
                                     currentPoint = point3;
                                 }
                                 break;
@@ -1725,8 +1805,9 @@ namespace PdfSharp.Drawing.Pdf
                                             var point1 = points[idx];
                                             var point2 = points[idx + 1];
                                             var point3 = points[idx + 2];
-                                            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                                            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c",
                                                 point1.X, point1.Y, point2.X, point2.Y, point3.X, point3.Y);
+                                            _content.Append(Owner.Options.LineEnding);
                                         }
                                         currentPoint = points[count - 1];
                                     }
@@ -1771,8 +1852,9 @@ namespace PdfSharp.Drawing.Pdf
                                     var point1 = quadraticBezierSegment.Point1;
                                     var point2 = quadraticBezierSegment.Point2;
                                     var controlPoints = QuadraticToCubic(currentPoint.X, currentPoint.Y, point1.X, point1.Y, point2.X, point2.Y);
-                                    AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                                    AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c",
                                         controlPoints.C1X, controlPoints.C1Y, controlPoints.C2X, controlPoints.C2Y, point2.X, point2.Y);
+                                    _content.Append(Owner.Options.LineEnding);
                                     currentPoint = point2;
                                 }
                                 break;
@@ -1792,8 +1874,9 @@ namespace PdfSharp.Drawing.Pdf
                                             var point2 = points[idx + 1];
                                             var controlPoints = QuadraticToCubic(currentPoint.X, currentPoint.Y, point1.X, point1.Y, point2.X, point2.Y);
 
-                                            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
+                                            AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c",
                                                 controlPoints.C1X, controlPoints.C1Y, controlPoints.C2X, controlPoints.C2Y, point2.X, point2.Y);
+                                            _content.Append(Owner.Options.LineEnding);
                                             currentPoint = point2;
                                         }
                                     }
@@ -1811,7 +1894,10 @@ namespace PdfSharp.Drawing.Pdf
                         }
                     }
                     if (figure.IsClosed)
-                        Append("h\n");
+                    {
+                        Append("h");
+                        _content.Append(Owner.Options.LineEnding);
+                    }
                 }
             }
         }
@@ -1820,6 +1906,36 @@ namespace PdfSharp.Drawing.Pdf
         internal void Append(string value)
         {
             _content.Append(value);
+        }
+
+        internal void AppendFormatArgs(string format, object arg1)
+        {
+            _content.AppendFormat(CultureInfo.InvariantCulture, format, arg1);
+#if DEBUG_
+            string dummy = _content.ToString();
+            dummy = dummy.Substring(Math.Max(0, dummy.Length - 100));
+            dummy.GetType();
+#endif
+        }
+
+        internal void AppendFormatArgs(string format, object arg1, object arg2)
+        {
+            _content.AppendFormat(CultureInfo.InvariantCulture, format, arg1, arg2);
+#if DEBUG_
+            string dummy = _content.ToString();
+            dummy = dummy.Substring(Math.Max(0, dummy.Length - 100));
+            dummy.GetType();
+#endif
+        }
+
+        internal void AppendFormatArgs(string format, object arg1, object arg2, object arg3)
+        {
+            _content.AppendFormat(CultureInfo.InvariantCulture, format, arg1, arg2, arg3);
+#if DEBUG_
+            string dummy = _content.ToString();
+            dummy = dummy.Substring(Math.Max(0, dummy.Length - 100));
+            dummy.GetType();
+#endif
         }
 
         internal void AppendFormatArgs(string format, params object[] args)
@@ -1898,20 +2014,22 @@ namespace PdfSharp.Drawing.Pdf
             if (fillMode == XFillMode.Winding)
             {
                 if (pen != null && brush != null)
-                    _content.Append("B\n");
+                    _content.Append("B");
                 else if (pen != null)
-                    _content.Append("S\n");
+                    _content.Append("S");
                 else
-                    _content.Append("f\n");
+                    _content.Append("f");
+                _content.Append(Owner.Options.LineEnding);
             }
             else
             {
                 if (pen != null && brush != null)
-                    _content.Append("B*\n");
+                    _content.Append("B*");
                 else if (pen != null)
-                    _content.Append("S\n");
+                    _content.Append("S");
                 else
-                    _content.Append("f*\n");
+                    _content.Append("f*");
+                _content.Append(Owner.Options.LineEnding);
             }
         }
         #endregion
@@ -2050,7 +2168,8 @@ namespace PdfSharp.Drawing.Pdf
         {
             if (_streamMode == StreamMode.Text)
             {
-                _content.Append("ET\n");
+                _content.Append("ET");
+                _content.Append(Owner.Options.LineEnding);
                 _streamMode = StreamMode.Graphic;
             }
 
@@ -2079,7 +2198,10 @@ namespace PdfSharp.Drawing.Pdf
 
             // Why the check?
             if (_streamMode == StreamMode.Text)
-                _content.Append("ET\n");
+            {
+                _content.Append("ET");
+                _content.Append(Owner.Options.LineEnding);
+            }
 
             _streamMode = StreamMode.Graphic;
         }
@@ -2095,7 +2217,8 @@ namespace PdfSharp.Drawing.Pdf
             Debug.Assert(_streamMode == StreamMode.Graphic, "Undefined stream mode. Check what happened.");
 
             _streamMode = StreamMode.Text;
-            _content.Append("BT\n");
+            _content.Append("BT");
+            _content.Append(Owner.Options.LineEnding);
             // Text matrix is empty after BT.
             _gfxState.RealizedTextPosition = new XPoint();
             _gfxState.ItalicSimulationOn = false;
@@ -2380,7 +2503,8 @@ namespace PdfSharp.Drawing.Pdf
             _gfxStateStack.Push(_gfxState);
             _gfxState = _gfxState.Clone();
             _gfxState.Level = _gfxStateStack.Count;
-            Append("q\n");
+            Append("q");
+            _content.Append(Owner.Options.LineEnding);
         }
 
         /// <summary>
@@ -2391,7 +2515,8 @@ namespace PdfSharp.Drawing.Pdf
             Debug.Assert(_streamMode == StreamMode.Graphic, "Cannot restore state in text mode.");
 
             _gfxState = _gfxStateStack.Pop();
-            Append("Q\n");
+            Append("Q");
+            _content.Append(Owner.Options.LineEnding);
         }
 
         PdfGraphicsState RestoreState(InternalGraphicsState state)
@@ -2400,11 +2525,13 @@ namespace PdfSharp.Drawing.Pdf
             var top = _gfxStateStack.Pop();
             while (top.InternalState != state)
             {
-                Append("Q\n");
+                Append("Q");
+                _content.Append(Owner.Options.LineEnding);
                 count++;
                 top = _gfxStateStack.Pop();
             }
-            Append("Q\n");
+            Append("Q");
+            _content.Append(Owner.Options.LineEnding);
             _gfxState = top;
             return top;
         }

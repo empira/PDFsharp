@@ -374,7 +374,8 @@ namespace PdfSharp.Pdf
                 // ReSharper disable once RedundantCast. Redundant only if 64 bit.
                 var startXRef = (SizeType)writer.Position;
                 IrefTable.WriteObject(writer);
-                writer.WriteRaw("trailer\n");
+                writer.WriteRaw("trailer");
+                writer.WriteRaw(Options.LineEnding);
                 Trailer.Elements.SetInteger("/Size", count + 1);
                 Trailer.WriteObject(writer);
                 writer.WriteEof(this, startXRef);

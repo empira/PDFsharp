@@ -42,13 +42,15 @@ namespace PdfSharp.Drawing.Pdf
         public void PushState()
         {
             // BeginGraphic
-            renderer.Append("q/n");
+            renderer.Append("q");
+            renderer.Append(renderer.Owner.Options.LineEnding);
         }
 
         public void PopState()
         {
             //BeginGraphic
-            renderer.Append("Q/n");
+            renderer.Append("Q");
+            renderer.Append(renderer.Owner.Options.LineEnding);
         }
 
         #region Stroke
@@ -64,8 +66,8 @@ namespace PdfSharp.Drawing.Pdf
 
         public void RealizePen(XPen pen, PdfColorMode colorMode)
         {
-            const string format = Config.SignificantDecimalPlaces3;
             const string format2 = Config.SignificantDecimalPlaces2;
+            const string format3 = Config.SignificantDecimalPlaces3;
 
             XColor color = pen.Color;
             bool overPrint = pen.Overprint;
@@ -73,19 +75,22 @@ namespace PdfSharp.Drawing.Pdf
 
             if (_realizedLineWith != pen.Width)
             {
-                renderer.AppendFormatArgs("{0:" + format + "} w\n", pen.Width);
+                renderer.AppendFormatArgs("{0:" + format3 + "} w", pen.Width);
+                renderer.Append(renderer.Owner.Options.LineEnding);
                 _realizedLineWith = pen.Width;
             }
 
             if (_realizedLineCap != (int)pen.LineCap)
             {
-                renderer.AppendFormatArgs("{0} J\n", (int)pen.LineCap);
+                renderer.AppendFormatArgs("{0} J", (int)pen.LineCap);
+                renderer.Append(renderer.Owner.Options.LineEnding);
                 _realizedLineCap = (int)pen.LineCap;
             }
 
             if (_realizedLineJoin != (int)pen.LineJoin)
             {
-                renderer.AppendFormatArgs("{0} j\n", (int)pen.LineJoin);
+                renderer.AppendFormatArgs("{0} j", (int)pen.LineJoin);
+                renderer.Append(renderer.Owner.Options.LineEnding);
                 _realizedLineJoin = (int)pen.LineJoin;
             }
 
@@ -93,7 +98,8 @@ namespace PdfSharp.Drawing.Pdf
             {
                 if (_realizedMiterLimit != (int)pen.MiterLimit && (int)pen.MiterLimit != 0)
                 {
-                    renderer.AppendFormatInt("{0} M\n", (int)pen.MiterLimit);
+                    renderer.AppendFormatInt("{0} M", (int)pen.MiterLimit);
+                    renderer.Append(renderer.Owner.Options.LineEnding);
                     _realizedMiterLimit = (int)pen.MiterLimit;
                 }
             }
@@ -111,23 +117,28 @@ namespace PdfSharp.Drawing.Pdf
                 switch (dashStyle)
                 {
                     case XDashStyle.Solid:
-                        renderer.Append("[]0 d\n");
+                        renderer.Append("[]0 d");
+                        renderer.Append(renderer.Owner.Options.LineEnding);
                         break;
 
                     case XDashStyle.Dash:
-                        renderer.AppendFormatArgs("[{0:" + format2 + "} {1:" + format2 + "}]0 d\n", dash, dot);
+                        renderer.AppendFormatArgs("[{0:" + format2 + "} {1:" + format2 + "}]0 d", dash, dot);
+                        renderer.Append(renderer.Owner.Options.LineEnding);
                         break;
 
                     case XDashStyle.Dot:
-                        renderer.AppendFormatArgs("[{0:" + format2 + "}]0 d\n", dot);
+                        renderer.AppendFormatArgs("[{0:" + format2 + "}]0 d", dot);
+                        renderer.Append(renderer.Owner.Options.LineEnding);
                         break;
 
                     case XDashStyle.DashDot:
-                        renderer.AppendFormatArgs("[{0:" + format2 + "} {1:" + format2 + "} {1:" + format2 + "} {1:" + format2 + "}]0 d\n", dash, dot);
+                        renderer.AppendFormatArgs("[{0:" + format2 + "} {1:" + format2 + "} {1:" + format2 + "} {1:" + format2 + "}]0 d", dash, dot);
+                        renderer.Append(renderer.Owner.Options.LineEnding);
                         break;
 
                     case XDashStyle.DashDotDot:
-                        renderer.AppendFormatArgs("[{0:" + format2 + "} {1:" + format2 + "} {1:" + format2 + "} {1:" + format2 + "} {1:" + format2 + "} {1:" + format2 + "}]0 d\n", dash, dot);
+                        renderer.AppendFormatArgs("[{0:" + format2 + "} {1:" + format2 + "} {1:" + format2 + "} {1:" + format2 + "} {1:" + format2 + "} {1:" + format2 + "}]0 d", dash, dot);
+                        renderer.Append(renderer.Owner.Options.LineEnding);
                         break;
 
                     case XDashStyle.Custom:
@@ -146,7 +157,8 @@ namespace PdfSharp.Drawing.Pdf
                                 pdf.Append(' ');
                                 pdf.Append(PdfEncoders.ToString(0.2 * pen.Width));
                             }
-                            pdf.AppendFormat(CultureInfo.InvariantCulture, "]{0:" + format + "} d\n", pen.DashOffset * pen.Width);
+                            pdf.AppendFormat(CultureInfo.InvariantCulture, "]{0:" + format3 + "} d", pen.DashOffset * pen.Width);
+                            pdf.Append(renderer.Owner.Options.LineEnding);
                             string pattern = pdf.ToString();
 
                             // IMPROVE
@@ -168,7 +180,8 @@ namespace PdfSharp.Drawing.Pdf
                 if (_realizedStrokeColor.Rgb != color.Rgb)
                 {
                     renderer.Append(PdfEncoders.ToString(color, PdfColorMode.Rgb));
-                    renderer.Append(" RG\n");
+                    renderer.Append(" RG");
+                    renderer.Append(renderer.Owner.Options.LineEnding);
                 }
             }
             else
@@ -176,7 +189,8 @@ namespace PdfSharp.Drawing.Pdf
                 if (!ColorSpaceHelper.IsEqualCmyk(_realizedStrokeColor, color))
                 {
                     renderer.Append(PdfEncoders.ToString(color, PdfColorMode.Cmyk));
-                    renderer.Append(" K\n");
+                    renderer.Append(" K");
+                    renderer.Append(renderer.Owner.Options.LineEnding);
                 }
             }
 
@@ -184,7 +198,8 @@ namespace PdfSharp.Drawing.Pdf
             {
                 PdfExtGState extGState = renderer.Owner.ExtGStateTable.GetExtGStateStroke(color.A, overPrint);
                 string gs = renderer.Resources.AddExtGState(extGState);
-                renderer.AppendFormatString("{0} gs\n", gs);
+                renderer.AppendFormatString("{0} gs", gs);
+                renderer.Append(renderer.Owner.Options.LineEnding);
 
                 // Must create transparency group.
                 if (renderer._page != null! && color.A < 1)
@@ -238,8 +253,10 @@ namespace PdfSharp.Drawing.Pdf
                     PdfShadingPattern pattern = new PdfShadingPattern(renderer.Owner);
                     pattern.SetupFromBrush(gradientBrush, matrix, renderer);
                     string name = renderer.Resources.AddPattern(pattern);
-                    renderer.AppendFormatString("/Pattern cs\n", name);
-                    renderer.AppendFormatString("{0} scn\n", name);
+                    renderer.AppendFormatString("/Pattern cs", name);
+                    renderer.Append(renderer.Owner.Options.LineEnding);
+                    renderer.AppendFormatString("{0} scn", name);
+                    renderer.Append(renderer.Owner.Options.LineEnding);
 
                     // Invalidate fill color.
                     _realizedFillColor = XColor.Empty;
@@ -256,7 +273,8 @@ namespace PdfSharp.Drawing.Pdf
                 if (_realizedFillColor.IsEmpty || _realizedFillColor.Rgb != color.Rgb)
                 {
                     renderer.Append(PdfEncoders.ToString(color, PdfColorMode.Rgb));
-                    renderer.Append(" rg\n");
+                    renderer.Append(" rg");
+                    renderer.Append(renderer.Owner.Options.LineEnding);
                 }
             }
             else
@@ -266,7 +284,8 @@ namespace PdfSharp.Drawing.Pdf
                 if (_realizedFillColor.IsEmpty || !ColorSpaceHelper.IsEqualCmyk(_realizedFillColor, color))
                 {
                     renderer.Append(PdfEncoders.ToString(color, PdfColorMode.Cmyk));
-                    renderer.Append(" k\n");
+                    renderer.Append(" k");
+                    renderer.Append(renderer.Owner.Options.LineEnding);
                 }
             }
 
@@ -275,7 +294,8 @@ namespace PdfSharp.Drawing.Pdf
 
                 PdfExtGState extGState = renderer.Owner.ExtGStateTable.GetExtGStateNonStroke(color.A, overPrint);
                 string gs = renderer.Resources.AddExtGState(extGState);
-                renderer.AppendFormatString("{0} gs\n", gs);
+                renderer.AppendFormatString("{0} gs", gs);
+                renderer.Append(renderer.Owner.Options.LineEnding);
 
                 // Must create transparency group.
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
@@ -307,7 +327,8 @@ namespace PdfSharp.Drawing.Pdf
 
         public void RealizeFont(XGlyphTypeface glyphTypeface, double emSize, XBrush brush, int renderingMode, FontType fontType)
         {
-            const string format = Config.SignificantDecimalPlaces3;
+            const string format3 = Config.SignificantDecimalPlaces3;
+            const string format = "{0} {1:" + format3 + "} Tf";
 
             // So far rendering mode 0 (fill text) and 2 (fill, then stroke text) only.
             RealizeBrush(brush, renderer._colorMode, renderingMode, emSize); // _renderer.page.document.Options.ColorMode);
@@ -315,7 +336,8 @@ namespace PdfSharp.Drawing.Pdf
             // Realize rendering mode.
             if (_realizedRenderingMode != renderingMode)
             {
-                renderer.AppendFormatInt("{0} Tr\n", renderingMode);
+                renderer.AppendFormatInt("{0} Tr", renderingMode);
+                renderer.Append(renderer.Owner.Options.LineEnding);
                 _realizedRenderingMode = renderingMode;
             }
 
@@ -324,7 +346,8 @@ namespace PdfSharp.Drawing.Pdf
             {
                 if (_realizedCharSpace != 0)
                 {
-                    renderer.Append("0 Tc\n");
+                    renderer.Append("0 Tc");
+                    renderer.Append(renderer.Owner.Options.LineEnding);
                     _realizedCharSpace = 0;
                 }
             }
@@ -333,7 +356,8 @@ namespace PdfSharp.Drawing.Pdf
                 double charSpace = emSize * Const.BoldEmphasis;
                 if (_realizedCharSpace != charSpace)
                 {
-                    renderer.AppendFormatDouble("{0:" + format + "} Tc\n", charSpace);
+                    renderer.AppendFormatDouble("{0:" + format3 + "} Tc", charSpace);
+                    renderer.Append(renderer.Owner.Options.LineEnding);
                     _realizedCharSpace = charSpace;
                 }
             }
@@ -342,26 +366,24 @@ namespace PdfSharp.Drawing.Pdf
             string fontName = renderer.GetFontName(glyphTypeface, fontType, out _realizedFont);
             if (fontName != _realizedFontName || _realizedFontSize != emSize)
             {
-                s_formatTf ??= "{0} {1:" + format + "} Tf\n";
                 if (renderer.Gfx.PageDirection == XPageDirection.Downwards)
                 {
                     // earlier:
                     // renderer.AppendFormatFont("{0} {1:" + format + "} Tf\n", fontName, emSize);
-                    renderer.AppendFormatFont(s_formatTf, fontName, emSize);
+                    renderer.AppendFormatFont(format, fontName, emSize);
+                    renderer.Append(renderer.Owner.Options.LineEnding);
                 }
                 else
                 {
                     // earlier:
                     // renderer.AppendFormatFont("{0} {1:" + format + "} Tf\n", fontName, emSize);
-                    renderer.AppendFormatFont(s_formatTf, fontName, emSize);
+                    renderer.AppendFormatFont(format, fontName, emSize);
+                    renderer.Append(renderer.Owner.Options.LineEnding);
                 }
                 _realizedFontName = fontName;
                 _realizedFontSize = emSize;
             }
         }
-        // ReSharper disable InconsistentNaming
-        static string? s_formatTf;
-        // ReSharper restore InconsistentNaming
 
         public XPoint RealizedTextPosition;
 
@@ -445,21 +467,22 @@ namespace PdfSharp.Drawing.Pdf
         /// </summary>
         public void RealizeCtm()
         {
+            const string format7 = Config.SignificantDecimalPlaces7;
+            const string format = "{0:" + format7 + "} {1:" + format7 + "} {2:" + format7 + "} {3:" + format7 + "} {4:"
+                                    + format7 + "} {5:" + format7 + "} cm";
+
             //if (MustRealizeCtm)
             if (!UnrealizedCtm.IsIdentity)
             {
                 Debug.Assert(!UnrealizedCtm.IsIdentity, "mrCtm is unnecessarily set.");
-
-                const string format = Config.SignificantDecimalPlaces7;
-                s_formatCtm ??= "{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:"
-                                + format + "} {5:" + format + "} cm\n";
 
                 double[] matrix = UnrealizedCtm.GetElements();
                 // Use up to six decimal digits to prevent round up problems.
                 // earlier:
                 // renderer.AppendFormatArgs("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} cm\n",
                 //     matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
-                renderer.AppendFormatArgs(s_formatCtm, matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
+                renderer.AppendFormatArgs(format, matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
+                renderer.Append(renderer.Owner.Options.LineEnding);
 
                 RealizedCtm.Prepend(UnrealizedCtm);
                 UnrealizedCtm = new XMatrix();
@@ -468,9 +491,6 @@ namespace PdfSharp.Drawing.Pdf
                 InverseEffectiveCtm.Invert();
             }
         }
-        // ReSharper disable InconsistentNaming
-        static string? s_formatCtm;
-        // ReSharper restore InconsistentNaming
         #endregion
 
         #region Clip Path
@@ -519,7 +539,8 @@ namespace PdfSharp.Drawing.Pdf
             else
                 renderer.AppendPath(clipPath._pathGeometry);
 #endif
-            renderer.Append(clipPath.FillMode == XFillMode.Winding ? "W n\n" : "W* n\n");
+            renderer.Append(clipPath.FillMode == XFillMode.Winding ? "W n" : "W* n");
+            renderer.Append(renderer.Owner.Options.LineEnding);
         }
 
         #endregion

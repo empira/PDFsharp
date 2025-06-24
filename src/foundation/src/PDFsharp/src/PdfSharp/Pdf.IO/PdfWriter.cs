@@ -355,9 +355,15 @@ namespace PdfSharp.Pdf.IO
             if (indirect)
             {
                 if (obj is PdfArray)
-                    WriteRaw("[\n");
+                {
+                    WriteRaw("["); 
+                    WriteRaw(_document.Options.LineEnding);
+                }
                 else if (obj is PdfDictionary)
-                    WriteRaw("<<\n");
+                {
+                    WriteRaw("<<"); 
+                    WriteRaw(_document.Options.LineEnding);
+                }
                 _lastCat = CharCat.NewLine;
             }
             else
@@ -372,7 +378,8 @@ namespace PdfSharp.Pdf.IO
                 {
                     NewLine();
                     WriteSeparator(CharCat.Delimiter);
-                    WriteRaw("<<\n");
+                    WriteRaw("<<"); 
+                    WriteRaw(_document.Options.LineEnding);
                     _lastCat = CharCat.NewLine;
                 }
             }
@@ -401,7 +408,9 @@ namespace PdfSharp.Pdf.IO
             {
                 if (indirect)
                 {
-                    WriteRaw("\n]\n");
+                    WriteRaw(_document.Options.LineEnding); 
+                    WriteRaw("]"); 
+                    WriteRaw(_document.Options.LineEnding);
                     _lastCat = CharCat.NewLine;
                 }
                 else
@@ -415,22 +424,30 @@ namespace PdfSharp.Pdf.IO
                 if (indirect)
                 {
                     if (!stackItem.HasStream)
-                        WriteRaw(_lastCat == CharCat.NewLine ? ">>\n" : " >>\n");
+                    {
+                        WriteRaw(_lastCat == CharCat.NewLine ? ">>" : " >>");
+                        WriteRaw(_document.Options.LineEnding);
+                    }
                 }
                 else
                 {
                     Debug.Assert(!stackItem.HasStream, "Direct object with stream??");
                     WriteSeparator(CharCat.NewLine);
-                    WriteRaw(">>\n");
+                    WriteRaw(">>"); 
+                    WriteRaw(_document.Options.LineEnding);
                     _lastCat = CharCat.NewLine;
                 }
             }
             if (indirect)
             {
                 NewLine();
-                WriteRaw("endobj\n");
+                WriteRaw("endobj"); 
+                WriteRaw(_document.Options.LineEnding);
                 if (Layout == PdfWriterLayout.Verbose)
-                    WriteRaw("%--------------------------------------------------------------------------------------------------\n");
+                {
+                    WriteRaw("%--------------------------------------------------------------------------------------------------"); 
+                    WriteRaw(_document.Options.LineEnding);
+                }
             }
         }
 
@@ -444,11 +461,15 @@ namespace PdfSharp.Pdf.IO
             Debug.Assert(stackItem.Object.IsIndirect);
             stackItem.HasStream = true;
 
-            WriteRaw(_lastCat == CharCat.NewLine ? ">>\nstream\n" : " >>\nstream\n");
+            WriteRaw(_lastCat == CharCat.NewLine ? ">>" : " >>");
+            WriteRaw(_document.Options.LineEnding);
+            WriteRaw("stream");
+            WriteRaw(_document.Options.LineEnding);
 
             if (omitStream)
             {
-                WriteRaw("  «…stream content omitted…»\n");  // useful for debugging only
+                WriteRaw("  «…stream content omitted…»"); // useful for debugging only
+                WriteRaw(_document.Options.LineEnding);
             }
             else
             {
@@ -458,7 +479,9 @@ namespace PdfSharp.Pdf.IO
                 if (bytes.Length != 0)
                     Write(bytes);
             }
-            WriteRaw("\nendstream\n");
+            WriteRaw(_document.Options.LineEnding); 
+            WriteRaw("endstream"); 
+            WriteRaw(_document.Options.LineEnding);
         }
 
         public void WriteRaw(string rawString)
@@ -493,83 +516,103 @@ namespace PdfSharp.Pdf.IO
             if (Layout == PdfWriterLayout.Verbose)
             {
                 string comment = value.Comment;
-                if (!String.IsNullOrEmpty(comment))
-                    comment = $" -- {value.Comment}";
+                if (String.IsNullOrEmpty(comment))
+                    comment = value.GetType().FullName!;
+                else
+                    comment = $"{value.GetType().FullName} -- {value.Comment}";
 
+                comment = comment.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", _document.Options.LineEnding + "% ");
+
+                // Nothing right of '% ' can break a PDF file.
 #if DEBUG_
                 if (_document is null)
                     _ = typeof(int);
 #endif
                 // #PDF-A
-                if (_document.IsPdfA)
+                //if (_document.IsPdfA)
                 {
                     // Write full type name and comment in a separate line to be PDF-A conform.
-                    WriteRaw(Invariant($"% {value.GetType().FullName}{comment}\n"));
-                    WriteRaw(Invariant($"{value.ObjectID.ObjectNumber} {value.ObjectID.GenerationNumber} obj\n"));
+                    WriteRaw(Invariant($"% {comment}")); 
+                    WriteRaw(_document.Options.LineEnding);
+                    WriteRaw(Invariant($"{value.ObjectID.ObjectNumber} {value.ObjectID.GenerationNumber} obj")); 
+                    WriteRaw(_document.Options.LineEnding);
                 }
-                else
-                {
-                    // Write object number and full type name and comment in one line.
-                    WriteRaw(Invariant($"{value.ObjectID.ObjectNumber} {value.ObjectID.GenerationNumber} obj   % {value.GetType().FullName}{comment}\n"));
-                }
+                //else
+                //{
+                //    // Write object number and full type name and comment in one line.
+                //    WriteRaw(Invariant($"{value.ObjectID.ObjectNumber} {value.ObjectID.GenerationNumber} obj   % {value.GetType().FullName}{comment}")); 
+                //    WriteRaw(_document.Options.LineEnding);
+                //}
             }
             else
             {
                 // Write object number only.
-                WriteRaw(Invariant($"{value.ObjectID.ObjectNumber} {value.ObjectID.GenerationNumber} obj\n"));
+                WriteRaw(Invariant($"{value.ObjectID.ObjectNumber} {value.ObjectID.GenerationNumber} obj")); 
+                WriteRaw(_document.Options.LineEnding);
             }
         }
 
+        const string blank = "%                                                ";
+
         public void WriteFileHeader(PdfDocument document)
         {
-            var header = new StringBuilder("%PDF-");
             int version = document._version;
-            //header.Append((version / 10).ToString(CultureInfo.InvariantCulture) + "." +
-            //  (version % 10).ToString(CultureInfo.InvariantCulture) + "\n%\xD3\xF4\xCC\xE1\n");
-            header.Append(Invariant($"{version / 10}.{version % 10}\n%\xD3\xF4\xCC\xE1\n"));
-            WriteRaw(header.ToString());
+            WriteRaw(Invariant($"%PDF-{version / 10}.{version % 10}"));
+            WriteRaw(document.Options.LineEnding);
+            WriteRaw("%\xD3\xF4\xCC\xE1");
+            WriteRaw(document.Options.LineEnding);
 
             if (Layout == PdfWriterLayout.Verbose)
             {
-                WriteRaw($"% PDFsharp Version {PdfSharpProductVersionInformation.Version} (verbose mode)\n");
+                WriteRaw($"% PDFsharp Version {PdfSharpProductVersionInformation.Version} (verbose mode)"); 
+                WriteRaw(_document.Options.LineEnding);
                 // Keep some space for later fix-up.
                 _commentPosition = (int)_stream.Position + 2;
-                WriteRaw("%                                                \n");  // Creation date placeholder
-                WriteRaw("%                                                \n");  // Creation time placeholder
-                WriteRaw("%                                                \n");  // File size placeholder
-                WriteRaw("%                                                \n");  // Pages placeholder
-                WriteRaw("%                                                \n");  // Objects placeholder
+
+                //Should match lineLen below
+                WriteRaw(blank); WriteRaw(document.Options.LineEnding);  // Creation date placeholder
+                WriteRaw(blank); WriteRaw(document.Options.LineEnding);  // Creation time placeholder
+                WriteRaw(blank); WriteRaw(document.Options.LineEnding);  // File size placeholder
+                WriteRaw(blank); WriteRaw(document.Options.LineEnding);  // Pages placeholder
+                WriteRaw(blank); WriteRaw(document.Options.LineEnding);  // Objects placeholder
 #if DEBUG
-                WriteRaw("% This document is created from a DEBUG build. Do not use a DEBUG build of PDFsharp for production.\n");
+                WriteRaw("% This document is created from a DEBUG build. Do not use a DEBUG build of PDFsharp for production."); 
+                WriteRaw(document.Options.LineEnding);
 #endif
-                WriteRaw("%--------------------------------------------------------------------------------------------------\n");
             }
         }
 
         public void WriteEof(PdfDocument document, SizeType startxref)
         {
             if(document.Options.EnableWriterCommentInTrailer)
-                WriteRaw($"% Created with PDFsharp {PdfSharpProductVersionInformation.SemanticVersion} ({Capabilities.Build.BuildName}) under .NET {Capabilities.Build.Framework}\n");
-            WriteRaw("startxref\n");
-            WriteRaw(startxref.ToString(CultureInfo.InvariantCulture));
-            WriteRaw("\n%%EOF\n");
-            SizeType fileSize = (SizeType)_stream.Position;
+            {
+                WriteRaw($"% Created with PDFsharp {PdfSharpProductVersionInformation.SemanticVersion} ({Capabilities.Build.BuildName}) under .NET {Capabilities.Build.Framework}"); 
+                WriteRaw(document.Options.LineEnding);
+            }
+            WriteRaw("startxref"); 
+            WriteRaw(document.Options.LineEnding);
+            WriteRaw(startxref.ToString(CultureInfo.InvariantCulture)); 
+            WriteRaw(document.Options.LineEnding);
+            WriteRaw("%%EOF"); 
+            WriteRaw(document.Options.LineEnding);
             if (Layout == PdfWriterLayout.Verbose)
             {
+                var fileSize = _stream.Position;
                 TimeSpan duration = DateTime.Now - document._creation;
+                var lineLen = blank.Length + document.Options.LineEnding.Length;
 
                 _stream.Position = _commentPosition;
                 // Without InvariantCulture parameter the following line fails if the current culture is e.g.
                 // a Far East culture, because the date string contains non-ASCII characters.
                 // So never never never never use ToString without a culture info.
                 WriteRaw(Invariant($"Creation date: {document._creation:G}"));
-                _stream.Position = _commentPosition + 50;
+                _stream.Position = _commentPosition + lineLen;
                 WriteRaw(Invariant($"Creation time: {duration.TotalSeconds:0.000} seconds"));
-                _stream.Position = _commentPosition + 100;
+                _stream.Position = _commentPosition + 2* lineLen;
                 WriteRaw(Invariant($"File size: {fileSize:#,###} bytes"));
-                _stream.Position = _commentPosition + 150;
+                _stream.Position = _commentPosition + 3* lineLen;
                 WriteRaw(Invariant($"Pages: {document.Pages.Count:#}"));  // No thousands separator here.
-                _stream.Position = _commentPosition + 200;
+                _stream.Position = _commentPosition + 4* lineLen;
                 WriteRaw(Invariant($"Objects: {document.IrefTable.Count:#,###}"));
             }
         }
@@ -641,7 +684,7 @@ namespace PdfSharp.Pdf.IO
         public void NewLine()
         {
             if (_lastCat != CharCat.NewLine)
-                WriteRaw('\n');
+                WriteRaw(_document.Options.LineEnding);
         }
 
         static CharCat GetCategory(char ch)

@@ -100,7 +100,13 @@ namespace PdfSharp.Pdf.Advanced
             // PDFsharp does not yet support PDF 1.5 object streams for writing.
 
             // Each line must be exactly 20 bytes long, otherwise Acrobat repairs the file.
-            writer.WriteRaw(Invariant($"{_position:0000000000} {_objectID.GenerationNumber:00000} n \n"));
+            switch (Document.Options.LineEnding.Length)
+            {
+                case 1: writer.WriteRaw(Invariant($"{_position:0000000000} {_objectID.GenerationNumber:00000} n ")); break;
+                case 2: writer.WriteRaw(Invariant($"{_position:0000000000} {_objectID.GenerationNumber:00000} n")); break;
+                default: throw new ArgumentOutOfRangeException(nameof(Document.Options.LineEnding), Document.Options.LineEnding.Length, "Line ending length is invalid");
+            }
+            writer.WriteRaw(Document.Options.LineEnding);
         }
 
         /// <summary>

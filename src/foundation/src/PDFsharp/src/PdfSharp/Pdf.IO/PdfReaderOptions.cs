@@ -109,6 +109,8 @@ namespace PdfSharp.Pdf.IO
 
         public bool EnableWriterCommentInTrailer { get; set; } = true;
 
+        public bool EnableLfLineEndings { get; set; } = true;
+
         // Testing only
 
         //public bool UseOldCode { get; set; } = false;

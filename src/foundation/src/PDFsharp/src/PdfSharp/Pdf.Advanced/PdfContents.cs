@@ -76,23 +76,26 @@ namespace PdfSharp.Pdf.Advanced
         /// Creates a single content stream with the bytes from the array of the content streams.
         /// This operation does not modify any of the content streams in this array.
         /// </summary>
+        /// <remarks>This operation actually concats multiple streams by new line</remarks>
         public PdfContent CreateSingleContent()
         {
-            byte[] bytes = [];
-            byte[] bytes1;
-            byte[] bytes2;
-            foreach (PdfItem iref in Elements)
+            var content = new PdfContent(Owner);
+            var lineEnding = _document.Options.LineEndingBytes;
+            using (var stream = new MemoryStream())
             {
-                PdfDictionary cont = (PdfDictionary)((PdfReference)iref).Value;
-                bytes1 = bytes;
-                bytes2 = cont.Stream!.UnfilteredValue;
-                bytes = new byte[bytes1.Length + bytes2.Length + 1];
-                bytes1.CopyTo(bytes, 0);
-                bytes[bytes1.Length] = (byte)'\n';
-                bytes2.CopyTo(bytes, bytes1.Length + 1);
+                foreach (PdfItem iref in Elements)
+                {
+                    var cont = (PdfDictionary)((PdfReference)iref).Value;
+                    var data = cont.Stream!.UnfilteredValue;
+                    stream.Write(data, 0, data.Length);
+                    stream.Write(lineEnding, 0, lineEnding.Length);
+                }
+
+                if (stream.Length > 0)
+                    stream.SetLength(stream.Length - lineEnding.Length);
+
+                content.Stream = new PdfStream(stream.ToArray(), content);
             }
-            PdfContent content = new PdfContent(Owner);
-            content.Stream = new PdfDictionary.PdfStream(bytes, content);
             return content;
         }
 
@@ -140,30 +143,53 @@ namespace PdfSharp.Pdf.Advanced
                 else if (count > 1)
                 {
                     // Surround content streams with q/Q operations
-                    byte[] value;
-                    int length;
-                    PdfContent content = (PdfContent)((PdfReference)Elements[0]).Value;
+                    var lineEnding = _document.Options.LineEndingBytes;
+
+                    var content = (PdfContent)((PdfReference)Elements[0]).Value;
                     if (content != null && content.Stream != null)
                     {
-                        length = content.Stream.Length;
-                        value = new byte[length + 2];
-                        value[0] = (byte)'q';
-                        value[1] = (byte)'\n';
-                        Array.Copy(content.Stream.Value, 0, value, 2, length);
+                        int written = 0;
+                        var length = content.Stream.Length;
+                        var value = new byte[length + 1 + lineEnding.Length];
+                        
+                        value[written] = (byte)'q';
+                        written++;
+
+                        Array.Copy(lineEnding, 0, value, written, lineEnding.Length);
+                        written += lineEnding.Length;
+
+                        Array.Copy(content.Stream.Value, 0, value, written, length);
+                        written += length;
+#if DEBUG
+                        Debug.Assert(written == value.Length);
+#endif
                         content.Stream.Value = value;
-                        content.Elements.SetInteger("/Length", length + 2);
+                        content.Elements.SetInteger("/Length", value.Length);
                     }
+
                     content = (PdfContent)((PdfReference)Elements[count - 1]).Value;
                     if (content != null && content.Stream != null)
                     {
-                        length = content.Stream.Length;
-                        value = new byte[length + 3];
-                        Array.Copy(content.Stream.Value, 0, value, 0, length);
-                        value[length] = (byte)' ';
-                        value[length + 1] = (byte)'Q';
-                        value[length + 2] = (byte)'\n';
+                        int written = 0;
+                        var length = content.Stream.Length;
+                        var value = new byte[length + 2 + lineEnding.Length];
+
+                        Array.Copy(content.Stream.Value, 0, value, written, length);
+                        written += length;
+
+                        value[written] = (byte)' ';
+                        written++;
+
+                        value[written] = (byte)'Q';
+                        written++;
+
+                        Array.Copy(lineEnding, 0, value, written, lineEnding.Length);
+                        written += lineEnding.Length;
+#if DEBUG
+                        Debug.Assert(written == value.Length);
+#endif
                         content.Stream.Value = value;
-                        content.Elements.SetInteger("/Length", length + 3);
+                        content.Elements.SetInteger("/Length", value.Length);
                     }
                 }
             }

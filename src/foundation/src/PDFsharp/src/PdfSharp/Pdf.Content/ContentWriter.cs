@@ -68,6 +68,7 @@ namespace PdfSharp.Pdf.Content
             _lastCat = GetCategory((char)bytes[bytes.Length - 1]);
         }
 
+        [Obsolete("Does not honor document line endings")]
         public void WriteLineRaw(string rawString)
         {
             if (String.IsNullOrEmpty(rawString))
@@ -148,6 +149,7 @@ namespace PdfSharp.Pdf.Content
             WriteSeparator(cat, '\0');
         }
 
+        [Obsolete("Does not honor document line endings")]
         public void NewLine()
         {
             if (_lastCat != CharCat.NewLine)

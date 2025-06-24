@@ -181,20 +181,36 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal void WriteObject(PdfWriter writer)
         {
-            writer.WriteRaw("xref\n");
+            writer.WriteRaw("xref"); 
+            writer.WriteRaw(document.Options.LineEnding);
 
             var iRefs = AllReferences;
 
             int count = iRefs.Length;
-            writer.WriteRaw(Invariant($"0 {count + 1}\n"));
-            writer.WriteRaw(Invariant($"{0:0000000000} {65535:00000} f \n"));
+            writer.WriteRaw(Invariant($"0 {count + 1}"));
+            writer.WriteRaw(document.Options.LineEnding);
+
+            // Acrobat is very pedantic; it must be exactly 20 bytes per line.
+            switch (document.Options.LineEnding.Length)
+            {
+                case 1: writer.WriteRaw("0000000000 65535 f "); break;
+                case 2: writer.WriteRaw("0000000000 65535 f"); break;
+                default: throw new ArgumentOutOfRangeException(nameof(document.Options.LineEnding), document.Options.LineEnding.Length, "Line ending length is invalid");
+            }
+            writer.WriteRaw(document.Options.LineEnding);
 
             for (int idx = 0; idx < count; idx++)
             {
                 var iref = iRefs[idx];
 
                 // Acrobat is very pedantic; it must be exactly 20 bytes per line.
-                writer.WriteRaw(Invariant($"{iref.Position:0000000000} {iref.GenerationNumber:00000} n \n"));
+                switch (document.Options.LineEnding.Length)
+                {
+                    case 1: writer.WriteRaw(Invariant($"{iref.Position:0000000000} {iref.GenerationNumber:00000} n ")); break;
+                    case 2: writer.WriteRaw(Invariant($"{iref.Position:0000000000} {iref.GenerationNumber:00000} n")); break;
+                    default: throw new ArgumentOutOfRangeException(nameof(document.Options.LineEnding), document.Options.LineEnding.Length, "Line ending length is invalid");
+                }
+                writer.WriteRaw(document.Options.LineEnding);
             }
         }
 

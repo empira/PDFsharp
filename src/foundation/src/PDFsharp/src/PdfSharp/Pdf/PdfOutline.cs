@@ -610,7 +610,7 @@ namespace PdfSharp.Pdf
         internal override void WriteObject(PdfWriter writer)
         {
 #if DEBUG
-            writer.WriteRaw("% Title = " + FilterUnicode(Title) + "\n");
+            writer.WriteRaw("% Title = " + FilterUnicode(Title) + Owner.Options.LineEnding);//
 #endif
             // TODO_OLD: Proof that there is nothing to do here.
             bool hasKids = HasChildren;

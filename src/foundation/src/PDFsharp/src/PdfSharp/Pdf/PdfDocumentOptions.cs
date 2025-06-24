@@ -3,6 +3,8 @@
 
 // ReSharper disable ConvertToAutoProperty
 
+using System.Text;
+
 namespace PdfSharp.Pdf
 {
     /// <summary>
@@ -91,5 +93,11 @@ namespace PdfSharp.Pdf
         public bool EnableImplicitMetadata { get; set; } = true;
 
         public bool EnableWriterCommentInTrailer { get; set; } = true;
+
+        public bool EnableLfLineEndings { get; set; } = true;
+
+        public string LineEnding => EnableLfLineEndings ? "\n" : "\r\n";
+
+        public byte[] LineEndingBytes => Encoding.ASCII.GetBytes(LineEnding);
     }
 }
