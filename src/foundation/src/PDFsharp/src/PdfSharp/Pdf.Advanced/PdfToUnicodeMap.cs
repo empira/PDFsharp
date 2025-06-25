@@ -38,11 +38,11 @@ namespace PdfSharp.Pdf.Advanced
 
             // This code comes literally from PDF Reference.
             string prefix =
-              "/CIDInit /ProcSet findresource begin\n" +
-              "12 dict begin\n" +
-              "begincmap\n" +
-              "/CIDSystemInfo << /Registry (Adobe)/Ordering (UCS)/Supplement 0>> def\n" +
-              "/CMapName /Adobe-Identity-UCS def /CMapType 2 def\n";
+              "/CIDInit /ProcSet findresource begin" + _document.Options.LineEnding +
+              "12 dict begin" + _document.Options.LineEnding +
+              "begincmap" + _document.Options.LineEnding +
+              "/CIDSystemInfo << /Registry (Adobe)/Ordering (UCS)/Supplement 0>> def" + _document.Options.LineEnding +
+              "/CMapName /Adobe-Identity-UCS def /CMapType 2 def" + _document.Options.LineEnding;
             string suffix = "endcmap CMapName currentdict /CMap defineresource pop end end";
 
             //var glyphIndexToCharacter = new Dictionary<int, char>();

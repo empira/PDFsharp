@@ -1180,7 +1180,7 @@ namespace PdfSharp.Pdf.IO
                         //Chars.SP => "・",  // U+30FB
 
                         //<= ' ' => $"⁌((int)ch).ToString(\"X2\")⁍",
-                        <= ' ' => $"""⟬{(((int)ch).ToString("X2"))}⟭""",
+                        <= ' ' => $"⟬{(int)ch:X2}⟭",
 
                         _ => ch.ToString()
                     };

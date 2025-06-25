@@ -217,7 +217,7 @@ namespace PdfSharp.Pdf.AcroForms
             string s = xobj.Stream?.ToString() ?? "";
             // Thank you Adobe: Without putting the content in 'EMC brackets'
             // the text is not rendered by PDF Reader 9 or higher.
-            s = "/Tx BMC\n" + s + "\nEMC";
+            s = "/Tx BMC" + _document.Options.LineEnding + s + _document.Options.LineEnding + "EMC";
             if (xobj.Stream != null)
                 xobj.Stream.Value = new RawEncoding().GetBytes(s);
 #endif

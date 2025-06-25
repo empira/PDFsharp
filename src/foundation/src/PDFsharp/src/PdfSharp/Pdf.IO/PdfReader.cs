@@ -267,8 +267,7 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Opens a PDF document from a stream.
         /// </summary>
-        PdfDocument OpenFromStream(Stream stream, string? password, PdfDocumentOpenMode openMode,
-            PdfPasswordProvider? passwordProvider, PdfReaderOptions? options = null)
+        PdfDocument OpenFromStream(Stream stream, string? password, PdfDocumentOpenMode openMode, PdfPasswordProvider? passwordProvider)
         {
             try
             {
@@ -279,6 +278,17 @@ namespace PdfSharp.Pdf.IO
 
                 var lexer = new Lexer(stream, _logger);
                 _document = new PdfDocument(lexer);
+
+                _document.Options.EnableReferenceRenumbering = _options.EnableReferenceRenumbering;
+                _document.Options.EnableReferenceCompaction = _options.EnableReferenceCompaction;
+                _document.Options.EnableImplicitTransparencyGroup = _options.EnableImplicitTransparencyGroup;
+                _document.Options.EnableImplicitMetadata = _options.EnableImplicitMetadata;
+                _document.Options.EnableWriterCommentInTrailer = _options.EnableWriterCommentInTrailer;
+                _document.Options.EnableLfLineEndings = _options.EnableLfLineEndings;
+                _document.Options.EnableOwnBinaryHeader = _options.EnableOwnBinaryHeader;
+                _document.Options.EnableLineBreakInArrayObjects = _options.EnableLineBreakInArrayObjects;
+                _document.Options.DisablePagesAndCatalogAtEnd = _options.DisablePagesAndCatalogAtEnd;
+
                 _document._state |= DocumentState.Imported;
                 _document._openMode = openMode;
 
@@ -310,7 +320,7 @@ namespace PdfSharp.Pdf.IO
                 // After reading all objects, all documents placeholder references get replaced by references knowing their objects in FinishReferences(),
                 // which finally sets IsUnderConstruction to false.
                 _document.IrefTable.IsUnderConstruction = true;
-                var parser = new Parser(_document, options ?? new PdfReaderOptions(), _logger);
+                var parser = new Parser(_document, _options , _logger);
 
                 // 1. Read all trailers or cross-reference streams, but no objects.
                 _document.Trailer = parser.ReadTrailer();

@@ -815,7 +815,7 @@ namespace PdfSharp.Pdf
                 // we respect this and skip the transparency group.
                 TransparencyUsed = true; // TODO_OLD: check XObjects
                 if (TransparencyUsed && !Elements.ContainsKey(Keys.Group) &&
-                    _document.Options.ColorMode != PdfColorMode.Undefined)
+                    _document.Options.ColorMode != PdfColorMode.Undefined && _document.Options.EnableImplicitTransparencyGroup)
                 {
                     var group = new PdfDictionary();
                     Elements["/Group"] = group;

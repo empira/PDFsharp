@@ -93,23 +93,39 @@ namespace PdfSharp.Pdf.Advanced
             // prepended or appended. Some nasty PDF tools do not preserve the graphical state correctly.
             // Therefore, we try to relieve the problem by surrounding the content stream with push/restore 
             // graphic state operation.
-            if (Stream != null!)
+            if (Stream != null)
             {
                 var value = Stream.Value;
-                if (value != null!)  // NRT
+                if (value != null)  // NRT
                 {
                     int length = value.Length;
-                    if (length > 1 && ((value[0] != (byte)'q' || value[1] != (byte)'\n')))
+                    if (length > 1 && (value[0] != (byte)'q' || value[1] is not (byte)'\r' and not (byte)'\n' and not (byte)' '))
                     {
-                        var newValue = new byte[length + 2 + 3];
-                        newValue[0] = (byte)'q';
-                        newValue[1] = (byte)'\n';
-                        Array.Copy(value, 0, newValue, 2, length);
-                        newValue[length + 2] = (byte)' ';
-                        newValue[length + 3] = (byte)'Q';
-                        newValue[length + 4] = (byte)'\n';
+                        var lineEnding = _document.Options.LineEndingBytes;
+                        var newValue = new byte[length + 2 * lineEnding.Length + 3];
+                        int written = 0;
+
+                        newValue[written] = (byte)'q';
+                        written++;
+                        Array.Copy(lineEnding, 0, newValue, written, lineEnding.Length);
+                        written += lineEnding.Length;
+
+                        Array.Copy(value, 0, newValue, written, length);
+                        written += length;
+
+                        newValue[written] = (byte)' ';
+                        written++;
+                        newValue[written] = (byte)'Q';
+                        written++;
+                        Array.Copy(lineEnding, 0, newValue, written, lineEnding.Length);
+                        written += lineEnding.Length;
+
+#if DEBUG
+                        Debug.Assert(written == newValue.Length);
+#endif
+
                         Stream.Value = newValue;
-                        Elements.SetInteger("/Length", Stream.Length);
+                        Elements.SetInteger("/Length", newValue.Length);
                     }
                 }
             }

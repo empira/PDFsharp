@@ -3,6 +3,8 @@
 
 // ReSharper disable ConvertToAutoProperty
 
+using System.Text;
+
 namespace PdfSharp.Pdf
 {
     /// <summary>
@@ -81,5 +83,51 @@ namespace PdfSharp.Pdf
             set => _useFlateDecoderForJpegImages = value;
         }
         PdfUseFlateDecoderForJpegImages _useFlateDecoderForJpegImages = PdfUseFlateDecoderForJpegImages.Never;
+
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
+        public bool EnableReferenceRenumbering { get; set; } = true;
+
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
+        public bool EnableReferenceCompaction { get; set; } = true;
+
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
+        public bool EnableImplicitTransparencyGroup { get; set; } = true;
+
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
+        public bool EnableImplicitMetadata { get; set; } = true;
+
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
+        public bool EnableWriterCommentInTrailer { get; set; } = true;
+
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
+        public bool EnableLfLineEndings { get; set; } = true;
+
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
+        public bool EnableOwnBinaryHeader { get; set; } = true;
+
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
+        public bool EnableLineBreakInArrayObjects { get; set; } = true;
+
+        public bool DisablePagesAndCatalogAtEnd { get; set; } = true;
+
+        public string LineEnding => EnableLfLineEndings ? "\n" : "\r\n";
+
+        public byte[] LineEndingBytes => Encoding.ASCII.GetBytes(LineEnding);
     }
 }

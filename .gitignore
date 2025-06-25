@@ -53,3 +53,4 @@ InternalAgentState.json
 *tempfile.*
 launchsettings.json
 testEnvironments.json
+.cr/

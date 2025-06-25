@@ -359,22 +359,38 @@ namespace PdfSharp.Pdf
                 effectiveSecurityHandler?.PrepareForWriting();
 
                 writer.WriteFileHeader(this);
-                var irefs = IrefTable.AllReferences;
-                int count = irefs.Length;
-                for (int idx = 0; idx < count; idx++)
+                var irefs = IrefTable.AllReferences.ToList();
+                if (!Options.DisablePagesAndCatalogAtEnd)
                 {
-                    PdfReference iref = irefs[idx];
-#if DEBUG_
-                    if (iref.ObjectNumber == 378)
-                        _ = typeof(int);
-#endif
+                    irefs.Sort((a, b) =>
+                    {
+                        int getPrio(PdfReference r) => r.Value switch
+                        {
+                            PdfPages => 1,
+                            PdfCatalog => 2,
+                            _ => 0,
+                        };
+                        var cmp = getPrio(a).CompareTo(getPrio(b));
+                        if (cmp != 0)
+                            return cmp;
+                        cmp = a.GenerationNumber.CompareTo(b.GenerationNumber);
+                        if (cmp != 0)
+                            return cmp;
+                        cmp = a.ObjectNumber.CompareTo(b.ObjectNumber);
+                        return cmp;
+                    });
+                }
+                int count = irefs.Count;
+                foreach(var iref in irefs)
+                {
                     iref.Position = writer.Position;
                     iref.Value.WriteObject(writer);
                 }
                 // ReSharper disable once RedundantCast. Redundant only if 64 bit.
                 var startXRef = (SizeType)writer.Position;
                 IrefTable.WriteObject(writer);
-                writer.WriteRaw("trailer\n");
+                writer.WriteRaw("trailer");
+                writer.WriteRaw(Options.LineEnding);
                 Trailer.Elements.SetInteger("/Size", count + 1);
                 Trailer.WriteObject(writer);
                 writer.WriteEof(this, startXRef);
@@ -502,7 +518,8 @@ namespace PdfSharp.Pdf
 
             // #PDF-UA
             // Create PdfMetadata now to include the final document information in XMP generation.
-            Catalog.Elements.SetReference(PdfCatalog.Keys.Metadata, new PdfMetadata(this));
+            if (Options.EnableImplicitMetadata)
+                Catalog.Elements.SetReference(PdfCatalog.Keys.Metadata, new PdfMetadata(this));
         }
 
         /// <summary>

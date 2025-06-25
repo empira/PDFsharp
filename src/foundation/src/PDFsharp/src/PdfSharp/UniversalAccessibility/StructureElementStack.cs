@@ -110,13 +110,15 @@ namespace PdfSharp.UniversalAccessibility
         {
             base.BeginItem();
             // Begin marked content.
-            StructureBuilder.Content.Write($"{Tag}<</MCID {Mcid}>>BDC\n");
+            StructureBuilder.Content.Write($"{Tag}<</MCID {Mcid}>>BDC");
+            StructureBuilder.Content.Write(StructureBuilder.UaManager.Owner.Options.LineEnding);
         }
 
         public override void EndItem()
         {
             // End marked content.
-            StructureBuilder.Content.Write("EMC\n");
+            StructureBuilder.Content.Write("EMC");
+            StructureBuilder.Content.Write(StructureBuilder.UaManager.Owner.Options.LineEnding);
             base.EndItem();
         }
     }
@@ -134,13 +136,15 @@ namespace PdfSharp.UniversalAccessibility
         {
             base.BeginItem();
             // Begin artifact.
-            StructureBuilder.Content.Write("/Artifact BMC\n");
+            StructureBuilder.Content.Write("/Artifact BMC");
+            StructureBuilder.Content.Write(StructureBuilder.UaManager.Owner.Options.LineEnding);
         }
 
         public override void EndItem()
         {
             // End artifact.
-            StructureBuilder.Content.Write("EMC\n");
+            StructureBuilder.Content.Write("EMC");
+            StructureBuilder.Content.Write(StructureBuilder.UaManager.Owner.Options.LineEnding);
             base.EndItem();
         }
     }
