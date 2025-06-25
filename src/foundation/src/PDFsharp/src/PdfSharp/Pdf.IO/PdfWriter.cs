@@ -357,7 +357,7 @@ namespace PdfSharp.Pdf.IO
                 if (obj is PdfArray)
                 {
                     WriteRaw("["); 
-                    WriteRaw(_document.Options.LineEnding);
+                    //WriteRaw(_document.Options.LineEnding);
                 }
                 else if (obj is PdfDictionary)
                 {
@@ -408,7 +408,7 @@ namespace PdfSharp.Pdf.IO
             {
                 if (indirect)
                 {
-                    WriteRaw(_document.Options.LineEnding); 
+                    //WriteRaw(_document.Options.LineEnding); 
                     WriteRaw("]"); 
                     WriteRaw(_document.Options.LineEnding);
                     _lastCat = CharCat.NewLine;
