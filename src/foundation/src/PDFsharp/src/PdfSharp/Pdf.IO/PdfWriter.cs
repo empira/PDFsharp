@@ -357,7 +357,8 @@ namespace PdfSharp.Pdf.IO
                 if (obj is PdfArray)
                 {
                     WriteRaw("["); 
-                    //WriteRaw(_document.Options.LineEnding);
+                    if(_document.Options.EnableLineBreakInArrayObjects)
+                        WriteRaw(_document.Options.LineEnding);
                 }
                 else if (obj is PdfDictionary)
                 {
@@ -408,7 +409,8 @@ namespace PdfSharp.Pdf.IO
             {
                 if (indirect)
                 {
-                    //WriteRaw(_document.Options.LineEnding); 
+                    if (_document.Options.EnableLineBreakInArrayObjects)
+                        WriteRaw(_document.Options.LineEnding);
                     WriteRaw("]"); 
                     WriteRaw(_document.Options.LineEnding);
                     _lastCat = CharCat.NewLine;
@@ -559,8 +561,10 @@ namespace PdfSharp.Pdf.IO
             int version = document._version;
             WriteRaw(Invariant($"%PDF-{version / 10}.{version % 10}"));
             WriteRaw(document.Options.LineEnding);
-            //WriteRaw("%\xD3\xF4\xCC\xE1");
-            WriteRaw("%\xE2\xE3\xCF\xD3");
+            if(document.Options.EnableOwnBinaryHeader)
+                WriteRaw("%\xD3\xF4\xCC\xE1");
+            else
+                WriteRaw("%\xE2\xE3\xCF\xD3");
             WriteRaw(document.Options.LineEnding);
 
             if (Layout == PdfWriterLayout.Verbose)

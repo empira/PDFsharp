@@ -360,23 +360,26 @@ namespace PdfSharp.Pdf
 
                 writer.WriteFileHeader(this);
                 var irefs = IrefTable.AllReferences.ToList();
-                irefs.Sort((a, b) =>
+                if (!Options.DisablePagesAndCatalogAtEnd)
                 {
-                    int getPrio(PdfReference r) => r.Value switch
+                    irefs.Sort((a, b) =>
                     {
-                        PdfPages => 1,
-                        PdfCatalog => 2,
-                        _ => 0,
-                    };
-                    var cmp = getPrio(a).CompareTo(getPrio(b));
-                    if (cmp != 0)
+                        int getPrio(PdfReference r) => r.Value switch
+                        {
+                            PdfPages => 1,
+                            PdfCatalog => 2,
+                            _ => 0,
+                        };
+                        var cmp = getPrio(a).CompareTo(getPrio(b));
+                        if (cmp != 0)
+                            return cmp;
+                        cmp = a.GenerationNumber.CompareTo(b.GenerationNumber);
+                        if (cmp != 0)
+                            return cmp;
+                        cmp = a.ObjectNumber.CompareTo(b.ObjectNumber);
                         return cmp;
-                    cmp = a.GenerationNumber.CompareTo(b.GenerationNumber);
-                    if (cmp != 0)
-                        return cmp;
-                    cmp = a.ObjectNumber.CompareTo(b.ObjectNumber);
-                    return cmp;
-                });
+                    });
+                }
                 int count = irefs.Count;
                 foreach(var iref in irefs)
                 {

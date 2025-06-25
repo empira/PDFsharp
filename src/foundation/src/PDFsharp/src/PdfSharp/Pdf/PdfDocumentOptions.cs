@@ -84,17 +84,47 @@ namespace PdfSharp.Pdf
         }
         PdfUseFlateDecoderForJpegImages _useFlateDecoderForJpegImages = PdfUseFlateDecoderForJpegImages.Never;
 
-        public bool EnableReferenceCompaction { get; set; } = true;
-
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
         public bool EnableReferenceRenumbering { get; set; } = true;
 
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
+        public bool EnableReferenceCompaction { get; set; } = true;
+
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
         public bool EnableImplicitTransparencyGroup { get; set; } = true;
 
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
         public bool EnableImplicitMetadata { get; set; } = true;
 
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
         public bool EnableWriterCommentInTrailer { get; set; } = true;
 
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
         public bool EnableLfLineEndings { get; set; } = true;
+
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
+        public bool EnableOwnBinaryHeader { get; set; } = true;
+
+        /// <summary>
+        /// Set to <see langword="false"/> to enable greater compatibility
+        /// </summary>
+        public bool EnableLineBreakInArrayObjects { get; set; } = true;
+
+        public bool DisablePagesAndCatalogAtEnd { get; set; } = true;
 
         public string LineEnding => EnableLfLineEndings ? "\n" : "\r\n";
 

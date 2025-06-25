@@ -278,12 +278,17 @@ namespace PdfSharp.Pdf.IO
 
                 var lexer = new Lexer(stream, _logger);
                 _document = new PdfDocument(lexer);
-                _document.Options.EnableReferenceCompaction = _options.EnableReferenceCompaction;
+
                 _document.Options.EnableReferenceRenumbering = _options.EnableReferenceRenumbering;
+                _document.Options.EnableReferenceCompaction = _options.EnableReferenceCompaction;
                 _document.Options.EnableImplicitTransparencyGroup = _options.EnableImplicitTransparencyGroup;
                 _document.Options.EnableImplicitMetadata = _options.EnableImplicitMetadata;
                 _document.Options.EnableWriterCommentInTrailer = _options.EnableWriterCommentInTrailer;
                 _document.Options.EnableLfLineEndings = _options.EnableLfLineEndings;
+                _document.Options.EnableOwnBinaryHeader = _options.EnableOwnBinaryHeader;
+                _document.Options.EnableLineBreakInArrayObjects = _options.EnableLineBreakInArrayObjects;
+                _document.Options.DisablePagesAndCatalogAtEnd = _options.DisablePagesAndCatalogAtEnd;
+
                 _document._state |= DocumentState.Imported;
                 _document._openMode = openMode;
 
