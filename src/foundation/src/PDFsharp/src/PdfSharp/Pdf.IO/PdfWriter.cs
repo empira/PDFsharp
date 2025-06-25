@@ -559,7 +559,8 @@ namespace PdfSharp.Pdf.IO
             int version = document._version;
             WriteRaw(Invariant($"%PDF-{version / 10}.{version % 10}"));
             WriteRaw(document.Options.LineEnding);
-            WriteRaw("%\xD3\xF4\xCC\xE1");
+            //WriteRaw("%\xD3\xF4\xCC\xE1");
+            WriteRaw("%\xE2\xE3\xCF\xD3");
             WriteRaw(document.Options.LineEnding);
 
             if (Layout == PdfWriterLayout.Verbose)
