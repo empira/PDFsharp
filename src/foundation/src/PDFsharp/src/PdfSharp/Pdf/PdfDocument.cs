@@ -359,14 +359,26 @@ namespace PdfSharp.Pdf
                 effectiveSecurityHandler?.PrepareForWriting();
 
                 writer.WriteFileHeader(this);
-                var irefs = IrefTable.AllReferences;
-                int count = irefs.Length;
-                foreach(var iref in irefs.Where(x=>x.Value is not PdfPages))
+                var irefs = IrefTable.AllReferences.ToList();
+                irefs.Sort((a, b) =>
                 {
-                    iref.Position = writer.Position;
-                    iref.Value.WriteObject(writer);
-                }
-                foreach (var iref in irefs.Where(x => x.Value is PdfPages))
+                    int getPrio(PdfReference r) => r.Value switch
+                    {
+                        PdfPages => 1,
+                        PdfCatalog => 2,
+                        _ => 0,
+                    };
+                    var cmp = getPrio(a).CompareTo(getPrio(b));
+                    if (cmp != 0)
+                        return cmp;
+                    cmp = a.GenerationNumber.CompareTo(b.GenerationNumber);
+                    if (cmp != 0)
+                        return cmp;
+                    cmp = a.ObjectNumber.CompareTo(b.ObjectNumber);
+                    return cmp;
+                });
+                int count = irefs.Count;
+                foreach(var iref in irefs)
                 {
                     iref.Position = writer.Position;
                     iref.Value.WriteObject(writer);
