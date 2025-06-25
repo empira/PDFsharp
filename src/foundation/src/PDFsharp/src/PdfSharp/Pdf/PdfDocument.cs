@@ -361,13 +361,13 @@ namespace PdfSharp.Pdf
                 writer.WriteFileHeader(this);
                 var irefs = IrefTable.AllReferences;
                 int count = irefs.Length;
-                for (int idx = 0; idx < count; idx++)
+                foreach(var iref in irefs.Where(x=>x.Value is not PdfPages))
                 {
-                    PdfReference iref = irefs[idx];
-#if DEBUG_
-                    if (iref.ObjectNumber == 378)
-                        _ = typeof(int);
-#endif
+                    iref.Position = writer.Position;
+                    iref.Value.WriteObject(writer);
+                }
+                foreach (var iref in irefs.Where(x => x.Value is PdfPages))
+                {
                     iref.Position = writer.Position;
                     iref.Value.WriteObject(writer);
                 }
