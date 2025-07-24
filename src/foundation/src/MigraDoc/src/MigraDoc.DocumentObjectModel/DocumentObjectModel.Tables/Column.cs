@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics.CodeAnalysis;
@@ -118,7 +118,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         /// <summary>
         /// Gets a cell by its row index. The first cell has index 0.
         /// </summary>
-        public Cell? this[int index] => Values.Index is not null ? Table.Rows[index][Values.Index.Value] : null; // BUG_OLD Doesn�t use Index property to guarantee getter loop ran.
+        public Cell? this[int index] => Values.Index is not null ? Table.Rows[index][Values.Index.Value] : null; // BUG_OLD Doesn’t use Index property to guarantee getter loop ran.
 
         /// <summary>
         /// Sets or gets the default style name for all cells of the column.

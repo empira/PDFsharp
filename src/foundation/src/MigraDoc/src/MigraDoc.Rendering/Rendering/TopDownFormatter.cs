@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using MigraDoc.DocumentObjectModel;
@@ -66,7 +66,7 @@ namespace MigraDoc.Rendering
                 {
                     if (docObj is Paragraph p && p.Format.SpaceBefore > Unit.Zero)
                     {
-                        // IsFirstOnPage isn�t true for an element in _elements following a PageBreak. IsFirstOnRenderedPage is also true if the last element was a PageBreak.
+                        // IsFirstOnPage isn’t true for an element in _elements following a PageBreak. IsFirstOnRenderedPage is also true if the last element was a PageBreak.
                         bool isFirstOnRenderedPage = isFirstOnPage || idx > 0 && _elements[idx - 1] is PageBreak;
                         if (isFirstOnRenderedPage)
                             p.Format.SpaceBefore = Unit.Zero;

@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using FluentAssertions;
@@ -18,7 +18,7 @@ namespace PdfSharp.Tests.Build
     /// <summary>
     /// Test what features of C# 11 to C# 12 can be used with
     /// .NET 6/8 and C# 11 to C# 12 with .NET 4.62 / .NET Standard 2.0.
-    /// That�s amazing!
+    /// That’s amazing!
     /// </summary>
     [Collection("PDFsharp")]
     public class CSharpFeaturesTests

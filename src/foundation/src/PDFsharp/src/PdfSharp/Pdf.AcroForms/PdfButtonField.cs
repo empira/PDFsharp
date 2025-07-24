@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System;
@@ -34,7 +34,7 @@ namespace PdfSharp.Pdf.AcroForms
         {
             // Try to get the information from the appearance dictionary.
             // Just return the first key that is not /Off.
-            // I�m not sure what is the right solution to get this value.
+            // I’m not sure what is the right solution to get this value.
             var ap = Elements[PdfAnnotation.Keys.AP] as PdfDictionary;
             if (ap != null)
             {

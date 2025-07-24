@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 //
@@ -8,16 +8,16 @@
 
 #if !DEBUG && TEST_CODE
 #warning ***********************************************************
-#warning ***** ‘TEST_CODE’ MUST BE UNDEFINED FOR FINAL RELEASE *****
+#warning ***** â€˜TEST_CODEâ€™ MUST BE UNDEFINED FOR FINAL RELEASE *****
 #warning ***********************************************************
 #endif
 
-#if TEST_CODE_  // ‘’
-// Ensure not to accidentally rename ‘TEST_CODE’ to ‘TEST_CODE_’.
-// This would compile code previously disabled with ‘#if TEST_CODE_’.
-// Rename ‘TEST_CODE’ always to ‘TEST_CODE_xxx’ in ‘Directory.Build.targets’.
+#if TEST_CODE_  // â€˜â€™
+// Ensure not to accidentally rename â€˜TEST_CODEâ€™ to â€˜TEST_CODE_â€™.
+// This would compile code previously disabled with â€˜#if TEST_CODE_â€™.
+// Rename â€˜TEST_CODEâ€™ always to â€˜TEST_CODE_xxxâ€™ in â€˜Directory.Build.targetsâ€™.
 #warning *****************************************************
-#warning ***** ‘TEST_CODE_’ MUST NEVER BE DEFINED        *****
+#warning ***** â€˜TEST_CODE_â€™ MUST NEVER BE DEFINED        *****
 #warning ***** THIS ACCIDENTALLY ACTIVATES EXCLUDED CODE *****
 #warning *****************************************************
 #endif

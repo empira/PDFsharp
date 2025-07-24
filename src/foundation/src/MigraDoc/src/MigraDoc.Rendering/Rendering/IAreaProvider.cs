@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc.Rendering
@@ -14,7 +14,7 @@ namespace MigraDoc.Rendering
         Area? GetNextArea();
 
         /// <summary>
-        /// Probes the next area to render into like GetNextArea, but doesn�t change the provider state. 
+        /// Probes the next area to render into like GetNextArea, but doesn’t change the provider state. 
         /// </summary>
         /// <returns>The area for the next rendering act.</returns>
         Area? ProbeNextArea();

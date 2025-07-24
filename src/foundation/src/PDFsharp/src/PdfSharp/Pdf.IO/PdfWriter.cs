@@ -19,9 +19,8 @@ namespace PdfSharp.Pdf.IO
             _stream = pdfStream ?? throw new ArgumentNullException(nameof(pdfStream));
             _document = document ?? throw new ArgumentNullException(nameof(document));
             EffectiveSecurityHandler = effectiveSecurityHandler;
-#if DEBUG
-            Layout = PdfWriterLayout.Verbose;
-#endif
+
+            Layout = document.Options.Layout;
         }
 
         public void Close(bool closeUnderlyingStream)
@@ -39,6 +38,14 @@ namespace PdfSharp.Pdf.IO
         /// Gets or sets the kind of layout.
         /// </summary>
         public PdfWriterLayout Layout { get; set; }
+
+        internal bool IsCompactLayout => Layout == PdfWriterLayout.Compact;
+
+        internal bool IsStandardLayout => Layout >= PdfWriterLayout.Standard;
+
+        internal bool IsIndentedLayout => Layout >= PdfWriterLayout.Indented;
+
+        internal bool IsVerboseLayout => Layout >= PdfWriterLayout.Verbose;
 
         public PdfWriterOptions Options { get; set; }
 
@@ -226,12 +233,12 @@ namespace PdfSharp.Pdf.IO
             // in any natural language, subject to the implementation limit on the length of a
             // name.
 
-            WriteSeparator(CharCat.Delimiter/*, '/'*/);
+            WriteSeparator(CharCat.Delimiter);
             string name = value.Value;
             Debug.Assert(name[0] == '/');
 
-            // Encode to raw UTF-8 is any char is larger than 126.
-            // 127 [DEL] is not a valid value and is also get encoded.
+            // Encode to raw UTF-8 if any char is larger than 126.
+            // 127 [DEL] is not a valid value and is also encoded.
             for (int idx = 1; idx < name.Length; idx++)
             {
                 char ch = name[idx];
@@ -265,6 +272,8 @@ namespace PdfSharp.Pdf.IO
                         case ')':
                         case '[':
                         case ']':
+                        case '{':
+                        case '}':
                         case '#':
                             break;
 
@@ -286,9 +295,12 @@ namespace PdfSharp.Pdf.IO
 
         public void Write(PdfLiteral value)
         {
-            WriteSeparator(CharCat.Character);
-            WriteRaw(value.Value);
-            _lastCat = CharCat.Character;
+            var rawString = value.Value;
+            var first = rawString[0];
+            var last = rawString[^1];
+            WriteSeparator(GetCategory(first));
+            WriteRaw(rawString);
+            _lastCat = GetCategory(last);
         }
 
         public void Write(PdfRectangle rect)
@@ -345,38 +357,115 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public void WriteBeginObject(PdfObject obj)
         {
-            bool indirect = obj.IsIndirect;
-            if (indirect)
+            bool isIndirect = obj.IsIndirect;
+            if (isIndirect)
             {
                 WriteObjectAddress(obj);
-                EffectiveSecurityHandler?.EnterObject(obj.ObjectID);
             }
             _stack.Add(new StackItem(obj));
-            if (indirect)
+
+            string? suffix = null;
+            if (IsVerboseLayout && _stack.Count > 1)
+                suffix = GetTypeAndComment(obj);
+
+            if (isIndirect)
             {
                 if (obj is PdfArray)
-                    WriteRaw("[\n");
+                {
+                    if (IsCompactLayout)
+                    {
+                        WriteRaw('[');
+                    }
+                    else
+                    {
+                        if (suffix != null)
+                            WriteRaw("[" + suffix);
+                        else
+                            WriteRaw("[\n");
+
+                    }
+                }
                 else if (obj is PdfDictionary)
-                    WriteRaw("<<\n");
+                {
+                    if (IsCompactLayout)
+                    {
+                        WriteRaw("<<");
+                    }
+                    else
+                    {
+                        if (suffix != null)
+                            WriteRaw("<<" + suffix);
+                        else
+                            WriteRaw("<<\n");
+                    }
+                }
+                else
+                {
+                    // Case: PdfIntegerObject or PdfNullObject
+
+                    //Debug.Assert(false, "Should not come here.");
+                    Debug.Assert(obj is not null, "Should not come here.");
+                }
                 _lastCat = CharCat.NewLine;
             }
             else
             {
                 if (obj is PdfArray)
                 {
+#if true_
+                    // Same as PdfDictionary
+                    NewLine();
                     WriteSeparator(CharCat.Delimiter);
-                    WriteRaw('[');
-                    _lastCat = CharCat.Delimiter;
+                    WriteRaw("[\n");
+                    _lastCat = CharCat.NewLine;
+#else
+                    if (IsCompactLayout)
+                    {
+                        WriteRaw('[');
+                    }
+                    else
+                    {
+                        //NewLine();
+                        //WriteSeparator(CharCat.Delimiter);
+                        if (suffix != null)
+                        {
+                            WriteRaw("[   " + GetTypeAndComment(obj));
+                            _lastCat = CharCat.NewLine;
+                        }
+                        else
+                        {
+                            WriteRaw('[');
+                            _lastCat = CharCat.Delimiter;
+                        }
+                    }
+#endif
                 }
                 else if (obj is PdfDictionary)
                 {
-                    NewLine();
-                    WriteSeparator(CharCat.Delimiter);
-                    WriteRaw("<<\n");
-                    _lastCat = CharCat.NewLine;
+                    if (IsCompactLayout)
+                    {
+                        WriteRaw("<<");
+                    }
+                    else
+                    {
+                        NewLine();
+                        WriteSeparator(CharCat.Delimiter);
+                        if (suffix != null)
+                            WriteRaw("<<   " + GetTypeAndComment(obj));
+                        else
+                            WriteRaw("<<\n");
+                        _lastCat = CharCat.NewLine;
+                    }
+                }
+                else
+                {
+                    // Case: PdfIntegerObject or PdfNullObject
+
+                    //Debug.Assert(false, "Should not come here.");
+                    Debug.Assert(obj is not null, "Should not come here.");
                 }
             }
-            if (Layout == PdfWriterLayout.Verbose)
+            if (IsVerboseLayout)
                 IncreaseIndent();
         }
 
@@ -385,6 +474,8 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public void WriteEndObject()
         {
+            bool noLayout = Layout == PdfWriterLayout.Compact;
+
             int count = _stack.Count;
             Debug.Assert(count > 0, "PdfWriter stack underflow.");
 
@@ -393,72 +484,140 @@ namespace PdfSharp.Pdf.IO
 
             PdfObject value = stackItem.Object;
             var indirect = value.IsIndirect;
-            if (indirect)
-                EffectiveSecurityHandler?.LeaveObject();
-            if (Layout == PdfWriterLayout.Verbose)
+
+            if (IsVerboseLayout)
                 DecreaseIndent();
+
             if (value is PdfArray)
             {
                 if (indirect)
                 {
-                    WriteRaw("\n]\n");
-                    _lastCat = CharCat.NewLine;
+                    if (IsCompactLayout)
+                    {
+                        WriteRaw("]\n");
+                        _lastCat = CharCat.NewLine;
+                    }
+                    else
+                    {
+
+                        WriteRaw("\n]\n");
+                        _lastCat = CharCat.Delimiter;
+                    }
                 }
                 else
                 {
-                    WriteRaw("]");
-                    _lastCat = CharCat.Delimiter;
+                    if (IsCompactLayout)
+                    {
+                        WriteRaw("]");
+                        _lastCat = CharCat.Delimiter;
+                    }
+                    else
+                    {
+                        //WriteSeparator(CharCat.NewLine);
+                        WriteRaw("]");
+                        _lastCat = CharCat.Delimiter;
+                    }
                 }
             }
             else if (value is PdfDictionary)
             {
                 if (indirect)
                 {
-                    if (!stackItem.HasStream)
-                        WriteRaw(_lastCat == CharCat.NewLine ? ">>\n" : " >>\n");
+                    if (IsCompactLayout)
+                    {
+                        if (!stackItem.HasStream)
+                            WriteRaw(">>\n");
+                        _lastCat = CharCat.NewLine;
+                    }
+                    else
+                    {
+                        if (!stackItem.HasStream)
+                            WriteRaw(">>\n");
+                        _lastCat = CharCat.NewLine;
+                    }
                 }
                 else
                 {
                     Debug.Assert(!stackItem.HasStream, "Direct object with stream??");
-                    WriteSeparator(CharCat.NewLine);
-                    WriteRaw(">>\n");
-                    _lastCat = CharCat.NewLine;
+                    if (IsCompactLayout)
+                    {
+                        WriteSeparator(CharCat.NewLine);
+                        WriteRaw(">>");
+                        _lastCat = CharCat.Delimiter;
+                    }
+                    else
+                    {
+                        WriteSeparator(CharCat.NewLine);
+                        if (IsVerboseLayout)
+                        {
+                            WriteRaw(">>\n");
+                            _lastCat = CharCat.NewLine;
+                        }
+                        else
+                        {
+                            WriteRaw(">>");
+                            _lastCat = CharCat.Delimiter;
+                        }
+                    }
                 }
             }
             if (indirect)
             {
-                NewLine();
-                WriteRaw("endobj\n");
-                if (Layout == PdfWriterLayout.Verbose)
-                    WriteRaw("%--------------------------------------------------------------------------------------------------\n");
+                if (IsCompactLayout)
+                {
+                    NewLine();
+                    WriteRaw("endobj\n");
+                }
+                else
+                {
+                    NewLine();
+                    WriteRaw("endobj\n");
+                    if (IsVerboseLayout)
+                        WriteRaw("%--------------------------------------------------------------------------------------------------\n");
+                }
             }
         }
 
         /// <summary>
         /// Writes the stream of the specified dictionary.
         /// </summary>
-        public void WriteStream(PdfDictionary value, bool omitStream)
+        public void WriteStream(PdfDictionary dict, bool omitStream)
         {
             var stackItem = _stack[^1];
             Debug.Assert(stackItem.Object is PdfDictionary);
             Debug.Assert(stackItem.Object.IsIndirect);
             stackItem.HasStream = true;
 
-            WriteRaw(_lastCat == CharCat.NewLine ? ">>\nstream\n" : " >>\nstream\n");
-
-            if (omitStream)
+            var bytes = dict.Stream!.Value;
+            if (IsCompactLayout)
             {
-                WriteRaw("  «…stream content omitted…»\n");  // useful for debugging only
+                WriteRaw(">>\nstream\n");
+
+                // Earlier versions of PDFsharp skipped the '\n' before 'endstream' if the last byte of
+                // the stream is a linefeed. This was wrong and is now fixed.
+                Write(bytes);
+
+                WriteRaw("\nendstream\n");
             }
             else
             {
-                // Earlier versions of PDFsharp skipped the '\n' before 'endstream' if the last byte of
-                // the stream is a linefeed. This was wrong and now fixed.
-                var bytes = value.Stream.Value;
-                if (bytes.Length != 0)
+                //WriteRaw(_lastCat == CharCat.NewLine ? ">>\nstream\n" : " >>\nstream\n");
+
+                if (IsVerboseLayout)
+                    WriteRaw(Invariant($">>\n% Length: {bytes.Length}\nstream\n"));
+                else
+                    WriteRaw(">>\nstream\n");
+
+                if (omitStream)
+                {
+                    WriteRaw("  «…stream content omitted…»\n");  // Useful for debugging only. PDF file is always invalid.
+                }
+                else
+                {
                     Write(bytes);
+                }
+                WriteRaw("\nendstream\n");
             }
-            WriteRaw("\nendstream\n");
         }
 
         public void WriteRaw(string rawString)
@@ -571,6 +730,32 @@ namespace PdfSharp.Pdf.IO
                 _stream.Position = _commentPosition + 200;
                 WriteRaw(Invariant($"Objects: {document.IrefTable.Count:#,###}"));
             }
+        }
+
+        //static string GetFullTypeName(PdfObject obj) => obj.GetType().FullName ?? "?";
+        static string? GetTypeAndComment(PdfObject value, bool typenameAlways = false)
+        {
+            var type = value.GetType();
+            string comment = value.Comment;
+
+            bool showType = typenameAlways || (type != typeof(PdfDictionary) && type != typeof(PdfArray));
+            string? result;
+
+            if (showType)
+            {
+                if (!String.IsNullOrEmpty(comment))
+                    result = Invariant($"% {value.GetType().Name} ({value.GetType().FullName}) -- {comment}\n");
+                else
+                    result = $"% {value.GetType().Name} ({value.GetType().FullName})\n";
+            }
+            else
+            {
+                if (!String.IsNullOrEmpty(comment))
+                    result = Invariant($"% {comment}\n");
+                else
+                    result = null;
+            }
+            return result;
         }
 
         /// <summary>

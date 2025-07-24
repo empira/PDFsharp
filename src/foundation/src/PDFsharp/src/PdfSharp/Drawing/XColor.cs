@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System.ComponentModel;
@@ -291,8 +291,8 @@ namespace PdfSharp.Drawing
         {
 #if GDI
             // The implementation in System.Drawing.dll is interesting. It uses a ColorConverter
-            // with hash tables, locking mechanisms etc. I’m not sure what problems that solves.
-            // So I don’t use the source, but the reflection.
+            // with hash tables, locking mechanisms etc. Iâ€™m not sure what problems that solves.
+            // So I donâ€™t use the source, but the reflection.
             try
             {
                 return new XColor((KnownColor)Enum.Parse(typeof(KnownColor), name, true));

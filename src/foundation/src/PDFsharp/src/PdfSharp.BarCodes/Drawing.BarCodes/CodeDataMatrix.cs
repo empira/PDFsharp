@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System;
@@ -119,7 +119,7 @@ namespace PdfSharp.Drawing.BarCodes
         }
 
         /// <summary>
-        /// Gets or sets the size of the Matrix� Quiet Zone.
+        /// Gets or sets the size of the Matrix¹ Quiet Zone.
         /// </summary>
         public int QuietZone
         {

@@ -152,10 +152,10 @@ namespace PdfSharp.Pdf
                 {
                     if (r != null)
                         return String.Compare(l.Value, r.Value, StringComparison.Ordinal);
-                    return -1;
+                    return 1;
                 }
                 if (r != null)
-                    return 1;
+                    return -1;
                 return 0;
             }
         }
