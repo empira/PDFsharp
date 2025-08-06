@@ -19,18 +19,18 @@ try {
 
     Push-Location ..
     try {
-        Write-Host "Invoking ’dotnet build’"
+        Write-Host "Invoking ‘dotnet build’"
         dotnet build -c release
         $build = $LASTEXITCODE
-        Write-Host "’dotnet build’ has finished"
+        Write-Host "‘dotnet build’ has finished"
     }
     finally {
         Pop-Location
     }
 
     if ($build -gt 0) {
-        Write-Host "’dotnet build’ failed with code " $build
-        throw "’dotnet build’ failed with code " + $build
+        Write-Host "‘dotnet build’ failed with code " $build
+        throw "‘dotnet build’ failed with code " + $build
     }
 
     .\update-local-nuget-packages-release.ps1

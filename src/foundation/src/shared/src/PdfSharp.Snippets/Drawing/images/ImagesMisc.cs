@@ -1,11 +1,7 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using PdfSharp.Pdf;
+
 using PdfSharp.Drawing;
 using PdfSharp.Quality;
 
@@ -22,7 +18,7 @@ namespace PdfSharp.Snippets.Drawing
         {
             BeginBox(gfx, 1, BoxOptions.Tile);
             {
-                // PNG always worked. However WPF build only gets 16 shades of gray while image has 256 shades.
+                // PNG always worked. However, WPF build only gets 16 shades of gray while image has 256 shades.
                 var img = ImageHelper.GetPngImage(ImageHelper.PngImages.Windows7Problem);
                 gfx.DrawImage(img, 28, 18, 152, 114);
             }
@@ -50,7 +46,6 @@ namespace PdfSharp.Snippets.Drawing
                 // Test Interpolate.
                 var img = ImageHelper.GetPngImage(ImageHelper.PngImages.Color4A);
                 img.Interpolate = false;
-                // THHO4STLA: Adds a second reference with "img.Interpolate = true;" - bug or feature? BUG!
                 gfx.DrawImage(img, 68, 18, 114, 114);
             }
             EndBox(gfx);
@@ -130,7 +125,7 @@ namespace PdfSharp.Snippets.Drawing
 
             BeginBox(gfx, 6, BoxOptions.Box);
             {
-                // OS2 BMP test. StL@THHO: Do we really need OS2 bitmaps anymore?
+                // OS2 BMP test. Does anyone use OS2 bitmaps anymore? Anyway, Windows still supports them, but PDFsharp Core does not.
                 var img = ImageHelper.GetBmpImage(ImageHelper.BmpImages.Test_OS2);
                 gfx.DrawImage(img, 28, 18, 114 * 510 / 358d, 114);
             }

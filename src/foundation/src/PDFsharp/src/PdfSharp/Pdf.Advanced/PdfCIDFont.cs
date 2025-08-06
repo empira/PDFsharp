@@ -30,7 +30,7 @@ namespace PdfSharp.Pdf.Advanced
             cid.Elements.SetString("/Registry", "Adobe");
             cid.Elements.SetInteger("/Supplement", 0);
             Elements.SetValue(Keys.CIDSystemInfo, cid);
-            // @PDF/UA / 'Identity' or a stream must obviously be set for CIDFonts to satisfy PDF/UA requirements.
+            // #PDF-UA: 'Identity' or a stream must obviously be set for CIDFonts to satisfy PDF/UA requirements.
             Elements.SetName(Keys.CIDToGIDMap, "Identity");
 
             FontDescriptor = fontDescriptor;
@@ -52,7 +52,7 @@ namespace PdfSharp.Pdf.Advanced
             cid.Elements.SetString("/Registry", "Adobe");
             cid.Elements.SetInteger("/Supplement", 0);
             Elements.SetValue(Keys.CIDSystemInfo, cid);
-            // @PDF/UA / 'Identity' or a stream must obviously be set for CIDFonts to satisfy PDF/UA requirements.
+            // #PDF-UA: 'Identity' or a stream must obviously be set for CIDFonts to satisfy PDF/UA requirements.
             Elements.SetName(Keys.CIDToGIDMap, "Identity");
 
             FontDescriptor = fontDescriptor;

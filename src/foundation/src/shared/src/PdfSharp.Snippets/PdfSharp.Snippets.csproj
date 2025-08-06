@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0;netstandard2.0</TargetFrameworks>
     <RootNamespace>PdfSharp.Snippets</RootNamespace>
     <AssemblyName>PdfSharp.Snippets</AssemblyName>
     <DefineConstants>TRACE;CORE</DefineConstants>
@@ -19,6 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PdfSharp.Shared\PdfSharp.Shared.csproj" />
+    <ProjectReference Include="..\PdfSharp.System\PdfSharp.System.csproj" />
     <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp.Charting\PdfSharp.Charting.csproj" />
     <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp\PdfSharp.csproj" />
     <ProjectReference Include="..\PdfSharp.Quality\PdfSharp.Quality.csproj" />
@@ -27,6 +29,11 @@
 
   <ItemGroup>
     <Folder Include="Image\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
+    <PackageReference Include="BouncyCastle.Cryptography" />
   </ItemGroup>
 
 </Project>

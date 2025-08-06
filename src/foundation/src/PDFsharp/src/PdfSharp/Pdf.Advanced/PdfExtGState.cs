@@ -1,6 +1,8 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using Microsoft.Extensions.Logging;
+using PdfSharp.Logging;
 #if GDI
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -114,6 +116,13 @@ namespace PdfSharp.Pdf.Advanced
         {
             set
             {
+                // #PDF-A
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                if (_document.IsPdfA && value != 1.0)
+                {
+                    PdfSharpLogHost.Logger.LogWarning("PDF/A: Stroke alpha value set to 1.");
+                    value = 1.0;
+                }
                 _strokeAlpha = value;
                 Elements.SetReal(Keys.CA, value);
                 UpdateKey();
@@ -129,6 +138,13 @@ namespace PdfSharp.Pdf.Advanced
         {
             set
             {
+                // #PDF-A
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                if (_document.IsPdfA && value != 1.0)
+                {
+                    PdfSharpLogHost.Logger.LogWarning("PDF/A: Non-stroke alpha value set to 1.");
+                    value = 1.0;
+                }
                 _nonStrokeAlpha = value;
                 Elements.SetReal(Keys.ca, value);
                 UpdateKey();

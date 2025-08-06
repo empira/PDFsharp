@@ -21,7 +21,7 @@ namespace PdfSharp.Features.Font
         protected static void RenderSnippetAsPdf(RenderInstalledFontsSnippet snippet)
         {
             snippet.RenderSnippetAsPdfMultiPage();
-#if !UWP
+#if !WUI
             snippet.SaveAndShowFile(snippet.PdfBytes, "Test_tempfile.pdf", true);
 #else
             snippet.UwpSaveAndShowFile(snippet.PdfBytes, "Test_tempfile.pdf", true);
@@ -36,9 +36,12 @@ namespace PdfSharp.Features.Font
 #else
         static readonly XPdfFontOptions PdfOptions = XPdfFontOptions.UnicodeDefault;
 #endif
-        // WPF’s System.Windows.Media.Fonts.SystemFontFamilies gets fewer families than InstalledFontCollection().Families, because some faces are embedded in a family here, while they are not in InstalledFontCollection().Families.
-        // E.g. Arial Black is included in Arial in WPF, but not in CORE and GDI. To get the same fonts set, you can manually add the fonts found by CORE and GDI here (but don’t check-in the changes).
-        // For the fonts that would not be found by System.Windows.Media.Fonts.SystemFontFamilies, but by the name in this list, some FontStyles may not be applied correctly.
+        // WPF’s System.Windows.Media.Fonts.SystemFontFamilies gets fewer families than InstalledFontCollection().Families,
+        // because some faces are embedded in a family here, while they are not in InstalledFontCollection().Families.
+        // E.g. Arial Black is included in Arial in WPF, but not in Core and GDI.
+        // To get the same fonts set, you can manually add the fonts found by Core and GDI here (but don’t check in the changes).
+        // For the fonts that would not be found by System.Windows.Media.Fonts.SystemFontFamilies,
+        // but by the name in this list, some FontStyles may not be applied correctly.
         readonly List<string> _wpfFonts = new()
         {
         };
@@ -52,13 +55,15 @@ namespace PdfSharp.Features.Font
         const int FaceOffset = 20;
 
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
-        /*readonly*/ List<string> _fonts = new List<string>();
+        /*readonly*/ List<string> _fonts = new();
         int _fontIdx = -1;
 
-        // Fonts starting with one of the strings in _excludedFonts* are excluded. Use "/r", "/b", "/i", "/bi" to exclude only regular, bold, italic or bolditalic face (Combine it to exclude several faces: e.g. "/b/i/bi").
-        readonly List<string> _excludedFonts = new List<string>();
-        readonly List<string> _excludedFontsUnicode = new List<string>();
-        readonly List<string> _excludedFontsWinAnsi = new List<string> { "Myriad Pro", "rotis" };
+        // Fonts starting with one of the strings in _excludedFonts* are excluded.
+        // Use "/r", "/b", "/i", "/bi" to exclude only regular, bold,
+        // italic or bolditalic face (Combine it to exclude several faces: e.g. "/b/i/bi").
+        readonly List<string> _excludedFonts = [];
+        readonly List<string> _excludedFontsUnicode = [];
+        readonly List<string> _excludedFontsWinAnsi = ["Myriad Pro", "rotis"];
 
         XFont? _headingFont;
         XFont? _exceptionFont;
@@ -125,9 +130,9 @@ namespace PdfSharp.Features.Font
                 gfx.DrawString($"{font} - {styleName}", xFont, XBrushes.Black, posX, posY);
                 gfx.DrawString(TestString, xFont, XBrushes.Black, PosXTestString, posY);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                gfx.DrawString($"{font} - {styleName} - Exception: {e.Message}", _exceptionFont!, XBrushes.Red, posX, posY);
+                gfx.DrawString($"{font} - {styleName} - Exception: {ex.Message}", _exceptionFont!, XBrushes.Red, posX, posY);
             }
         }
 

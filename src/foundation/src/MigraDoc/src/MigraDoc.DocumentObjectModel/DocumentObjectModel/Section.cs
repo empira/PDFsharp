@@ -198,7 +198,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.PageSetup ??= new PageSetup(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.PageSetup = value;
             }
         }
@@ -211,7 +211,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Headers ??= new HeadersFooters(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Headers = value;
             }
         }
@@ -224,7 +224,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Footers ??= new HeadersFooters(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Footers = value;
             }
         }
@@ -237,7 +237,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Elements ??= new DocumentElements(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Elements = value;
             }
         }
@@ -304,14 +304,14 @@ namespace MigraDoc.DocumentObjectModel
             serializer.WriteLine("\\section");
 
             var pos = serializer.BeginAttributes();
-            if (Values.PageSetup is not null) // BUG: Is there a reason to check the Values value / backing field and not the property like done below with Headers etc.?
+            if (Values.PageSetup is not null) // BUG_OLD: Is there a reason to check the Values value / backing field and not the property like done below with Headers etc.?
                 PageSetup.Serialize(serializer);
             serializer.EndAttributes(pos);
 
             serializer.BeginContent();
             Values.Headers?.Serialize(serializer);
             Values.Footers?.Serialize(serializer);
-            if (!Values.Elements.IsValueNullOrEmpty()) // BUG: IsNull("elements") uses DocumentObject.IsNull(). DocumentElements inherits DocumentObjectCollection, which overrides IsNull() with its own implementation checking IsNull() of its children.
+            if (!Values.Elements.IsValueNullOrEmpty()) // BUG_OLD: IsNull("elements") uses DocumentObject.IsNull(). DocumentElements inherits DocumentObjectCollection, which overrides IsNull() with its own implementation checking IsNull() of its children.
                 Values.Elements?.Serialize(serializer);
 
             serializer.EndContent();
@@ -333,7 +333,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

@@ -91,14 +91,14 @@ namespace PdfSharp.Snippets.Drawing
 
             BeginBox(gfx, 3, BoxOptions.Tile, "Windings");
             {
-                // Draw glyphs of 0 to 9 in a circls.
+                // Draw glyphs of 0 to 9 in a circle.
                 var text = "\u008b\u008c\u008d\u008e\u008f\u0090\u0091\u0092\u0093\u0094";
                 gfx.DrawString(text, fontWindings, XBrushes.DarkSlateGray, 10, 30);
                 gfx.DrawMeasureBox(text, fontWindings, new(10, 30));
             }
             EndBox(gfx);
 
-            BeginBox(gfx, 4, BoxOptions.Fill, "All Windings glyphs");
+            BeginBox(gfx, 4, BoxOptions.Fill, "All Wingdings glyphs");
             {
                 double x = 10;
                 double y = 15;
@@ -120,7 +120,7 @@ namespace PdfSharp.Snippets.Drawing
             }
             EndBox(gfx);
 
-            BeginBox(gfx, 5, BoxOptions.Fill, "All Windings2 glyphs");
+            BeginBox(gfx, 5, BoxOptions.Fill, "All Wingdings2 glyphs");
             {
                 double x = 10;
                 double y = 15;
@@ -142,7 +142,7 @@ namespace PdfSharp.Snippets.Drawing
             }
             EndBox(gfx);
 
-            BeginBox(gfx, 6, BoxOptions.Fill, "All Windings3 glyphs");
+            BeginBox(gfx, 6, BoxOptions.Fill, "All Wingdings3 glyphs");
             {
                 double x = 10;
                 double y = 15;

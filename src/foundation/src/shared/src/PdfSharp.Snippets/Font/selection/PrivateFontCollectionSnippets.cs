@@ -64,10 +64,10 @@ namespace PdfSharp.Snippets.Font
             // Add Arial and Tahoma from the Fonts directory to the private font collection.
 #if true
             // Register regular first.
-            string[] fonts = {
-                                "arial.ttf", "arialbd.ttf",
-                                "TAHOMA.ttf", "TAHOMABD.ttf"
-                             };
+            string[] fonts =
+            [
+                "arial.ttf", "arialbd.ttf", "TAHOMA.ttf", "TAHOMABD.ttf"
+            ];
 #else
             // Register bold first.
             // BOX3 causes an exception if bold fonts are loaded before regular fonts.

@@ -10,11 +10,12 @@ using System.Drawing;
 using System.Windows;
 using System.Windows.Media;
 #endif
-#if UWP
+#if WUI
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Brushes;
 using UwpBrush = Windows.UI.Xaml.Media.Brush;
 #endif
+using PdfSharp.Internal;
 
 namespace PdfSharp.Drawing
 {
@@ -59,7 +60,7 @@ namespace PdfSharp.Drawing
             set
             {
                 if (_immutable)
-                    throw new ArgumentException(PSSR.CannotChangeImmutableObject("XSolidBrush"));
+                    throw new ArgumentException(PsMsgs.CannotChangeImmutableObject(nameof(XSolidBrush)));
 #if GDI
                 _gdiDirty = _gdiDirty || _color != value;
 #endif
@@ -84,7 +85,7 @@ namespace PdfSharp.Drawing
             set
             {
                 if (_immutable)
-                    throw new ArgumentException(PSSR.CannotChangeImmutableObject("XSolidBrush"));
+                    throw new ArgumentException(PsMsgs.CannotChangeImmutableObject(nameof(XSolidBrush)));
                 _overprint = value;
             }
         }
@@ -132,7 +133,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if UWP
+#if WUI
         internal override ICanvasBrush RealizeCanvasBrush()
         {
             return new CanvasSolidColorBrush(CanvasDevice.GetSharedDevice(), _color.ToUwpColor());

@@ -37,10 +37,9 @@ namespace PdfSharp.Internal
     }
 
     // Experimental - not yet in use.
-
 #if true_
 
-    interface IErrorResult// TODO: Find final name
+    interface IErrorResult// TODO_OLD: Find final name
     {
         uint HResult { get; }
 

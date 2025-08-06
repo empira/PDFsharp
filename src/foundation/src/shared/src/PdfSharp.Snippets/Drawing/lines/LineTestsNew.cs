@@ -35,7 +35,7 @@ namespace PdfSharp.Snippets.Drawing
 
             BeginBox(gfx, 4, BoxOptions.Tile);
             {
-                gfx.DrawBeziers(XPens.Black, new []{new XPoint(160, 20), new XPoint(310, -30), new XPoint(-90, 170), new XPoint(60, 120), new XPoint(20, 120), new XPoint(60, 20), new XPoint(20, 20)});
+                gfx.DrawBeziers(XPens.Black, new[] { new XPoint(160, 20), new XPoint(310, -30), new XPoint(-90, 170), new XPoint(60, 120), new XPoint(20, 120), new XPoint(60, 20), new XPoint(20, 20) });
             }
             EndBox(gfx);
 

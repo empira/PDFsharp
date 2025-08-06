@@ -33,7 +33,7 @@ namespace MigraDoc.DocumentObjectModel
         public bool HasBorder(BorderType type)
         {
             if (!Enum.IsDefined(typeof(BorderType), type))
-                throw new /*InvalidEnum*/ArgumentException(DomSR.InvalidEnumValue(type), "type");
+                throw new /*InvalidEnum*/ArgumentException(MdDomMsgs.InvalidEnumValue(type).Message, nameof(type));
 
             return GetBorder(type) is not null;
         }
@@ -66,7 +66,7 @@ namespace MigraDoc.DocumentObjectModel
             }
 
             if (!Enum.IsDefined(typeof(BorderType), type))
-                throw new InvalidEnumArgumentException(DomSR.InvalidEnumValue(type));
+                throw new InvalidEnumArgumentException(MdDomMsgs.InvalidEnumValue(type).Message);
             return null;
         }
 
@@ -154,7 +154,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Top ??= new Border(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Top = value;
             }
         }
@@ -167,7 +167,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Left ??= new Border(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Left = value;
             }
         }
@@ -180,7 +180,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Bottom ??= new Border(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Bottom = value;
             }
         }
@@ -193,7 +193,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Right ??= new Border(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Right = value;
             }
         }
@@ -206,7 +206,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.DiagonalUp ??= new Border(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.DiagonalUp = value;
             }
         }
@@ -219,7 +219,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.DiagonalDown ??= new Border(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.DiagonalDown = value;
             }
         }
@@ -475,7 +475,7 @@ namespace MigraDoc.DocumentObjectModel
         //        }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0-windows;net472-windows</TargetFrameworks>
+    <TargetFrameworks>net6.0-windows;net8.0-windows;net462</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <RootNamespace>PdfSharp.Snippets</RootNamespace>
     <UseWPF>true</UseWPF>
@@ -13,12 +13,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-wpf\PdfSharp-wpf.csproj" />
-    <ProjectReference Include="..\PdfSharp.Quality-wpf\PdfSharp.Quality-wpf.csproj" />
-    <ProjectReference Include="..\PdfSharp.WPFonts\PdfSharp.WPFonts.csproj" />
-  </ItemGroup>
 
   <ItemGroup>
     <Compile Include="..\PdfSharp.Snippets\Drawing\brushes\BrushTypes.cs" Link="Drawing\brushes\BrushTypes.cs" />
@@ -74,11 +68,25 @@
     <Compile Include="..\PdfSharp.Snippets\IO\creation\PdfFileCreator.cs" Link="IO\creation\PdfFileCreator.cs" />
     <Compile Include="..\PdfSharp.Snippets\IO\security\Passwords.cs" Link="IO\security\Passwords.cs" />
     <Compile Include="..\PdfSharp.Snippets\Pdf\annotations\LinkAnnotations.cs" Link="Pdf\annotations\LinkAnnotations.cs" />
+    <Compile Include="..\PdfSharp.Snippets\Pdf\signatures\BouncyCastleSigner.cs" Link="Pdf\signatures\BouncyCastleSigner.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="..\..\..\..\..\..\assets\pdfsharp-6.x\fonts\SampleFonts\Oblivious.ttf" Link="assets\fonts\Oblivious.ttf" />
     <EmbeddedResource Include="..\..\..\..\..\..\assets\pdfsharp-6.x\fonts\SampleFonts\xfiles.ttf" Link="assets\fonts\xfiles.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
+    <PackageReference Include="BouncyCastle.Cryptography" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PdfSharp.Shared\PdfSharp.Shared.csproj" />
+    <ProjectReference Include="..\PdfSharp.System\PdfSharp.System.csproj" />
+    <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp-wpf\PdfSharp-wpf.csproj" />
+    <ProjectReference Include="..\PdfSharp.Quality-wpf\PdfSharp.Quality-wpf.csproj" />
+    <ProjectReference Include="..\PdfSharp.WPFonts\PdfSharp.WPFonts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

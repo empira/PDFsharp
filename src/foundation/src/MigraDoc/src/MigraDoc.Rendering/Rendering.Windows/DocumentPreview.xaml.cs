@@ -38,12 +38,12 @@ namespace MigraDoc.Rendering.Windows
         /// Sets a DDL string or file.
         /// Commit renderEvents to allow RenderTextEvent calls.
         /// </summary>
-        public void SetDdl(string ddl, RenderEvents renderEvents)
+        public void SetDdl(string ddl, RenderEvents? renderEvents = null)
         {
             Ddl = ddl;
             RenderEvents = renderEvents;
 
-            if (Ddl != null)
+            if (!String.IsNullOrEmpty(Ddl))
             {
                 Document = DdlReader.DocumentFromString(Ddl);
                 Renderer = new DocumentRenderer(Document);
@@ -234,16 +234,9 @@ namespace MigraDoc.Rendering.Windows
             }
 
             var pageInfo = Renderer.FormattedDocument.GetPageInfo(page);
-            if (pageInfo.Orientation == PdfSharp.PageOrientation.Portrait)
-            {
-                width = pageInfo.Width;
-                height = pageInfo.Height;
-            }
-            else
-            {
-                width = pageInfo.Height;
-                height = pageInfo.Width;
-            }
+            width = pageInfo.Width;
+            height = pageInfo.Height;
+
             return new Size(width.Presentation, height.Presentation);
         }
 
@@ -256,12 +249,12 @@ namespace MigraDoc.Rendering.Windows
         /// Sets the MigraDoc document that is previewed in this control.
         /// Commit renderEvents to allow RenderTextEvent calls.
         /// </summary>
-        public void SetDocument(Document document, RenderEvents renderEvents)
+        public void SetDocument(Document document, RenderEvents? renderEvents = null)
         {
             Document = document;
             RenderEvents = renderEvents;
 
-            Renderer = new DocumentRenderer(Document);
+            Renderer = new(Document);
             Renderer.PrepareDocument(RenderEvents);
             Page = 1;
             //this.preview.Invalidate();

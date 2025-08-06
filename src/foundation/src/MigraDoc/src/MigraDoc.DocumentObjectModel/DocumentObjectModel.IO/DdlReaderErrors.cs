@@ -36,14 +36,11 @@ namespace MigraDoc.DocumentObjectModel.IO
                 return count;
             }
         }
-        readonly List<DdlReaderError> _errors = new();
+        readonly List<DdlReaderError> _errors = [];
 
         /// <summary>
         /// Returns an enumerator that iterates through the error collection.
         /// </summary>
-        public IEnumerator GetEnumerator()
-        {
-            return _errors.GetEnumerator();
-        }
+        public IEnumerator GetEnumerator() => _errors.GetEnumerator();
     }
 }

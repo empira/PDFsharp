@@ -70,7 +70,7 @@ namespace PdfSharp.Snippets.Drawing
                 path.AddBezier(new XPoint(160, 60), new XPoint(140, 70), new XPoint(180, 70), new XPoint(160, 80));
                 path.CloseFigure();
 
-                path.AddCurve(new []{new XPoint(190, 50), new XPoint(170, 30), new XPoint(210, 30), new XPoint(190, 10) });
+                path.AddCurve(new[] { new XPoint(190, 50), new XPoint(170, 30), new XPoint(210, 30), new XPoint(190, 10) });
                 path.CloseFigure();
 
                 path.AddLine(new XPoint(90, 20), new XPoint(70, 40));

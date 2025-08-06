@@ -1,7 +1,6 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using PdfSharp.Internal;
 using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Pdf.Advanced
@@ -36,9 +35,9 @@ namespace PdfSharp.Pdf.Advanced
         {
             int n = Elements.GetInteger(Keys.N);
             int first = Elements.GetInteger(Keys.First);
-            Stream.TryUnfilter();
+            Stream.TryUncompress();
 
-            var parser = new Parser(null, new MemoryStream(Stream.Value), documentParser);
+            var parser = new Parser(_document, new MemoryStream(Stream.UnfilteredValue), documentParser);
             _header = parser.ReadObjectStreamHeader(n, first);
 
 #if DEBUG_ && CORE
@@ -50,12 +49,12 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         /// <summary>
-        /// Reads the compressed object with the specified index.
+        /// Reads all references inside the ObjectStream and returns all ObjectIDs and offsets for its objects.
         /// </summary>
-        internal void ReadReferences(PdfCrossReferenceTable xrefTable)
+        internal ICollection<KeyValuePair<PdfObjectID, SizeType>> ReadReferencesAndOffsets(PdfCrossReferenceTable xrefTable)
         {
             var length = _header.Length;
-            _objectOffsets = new();
+            _objectOffsets = [];
 
             ////// Create parser for stream.
             ////Parser parser = new Parser(_document, new MemoryStream(Stream.Value));
@@ -66,11 +65,9 @@ namespace PdfSharp.Pdf.Advanced
 
                 var objectID = new PdfObjectID(objectNumber);
 
-                // HACK: -1 indicates compressed object.
-                var iref = new PdfReference(objectID, -1);
-                ////iref.ObjectID = objectID;
-                ////iref.Value = xrefStream;
-                
+                // -1 indicates compressed object.
+                var iref = PdfReference.CreateForObjectID(objectID, -1);
+
                 _objectOffsets.Add(objectID, offset);
 
                 if (!xrefTable.Contains(iref.ObjectID))
@@ -84,6 +81,8 @@ namespace PdfSharp.Pdf.Advanced
 #endif
                 }
             }
+
+            return _objectOffsets;
         }
 
         /// <summary>

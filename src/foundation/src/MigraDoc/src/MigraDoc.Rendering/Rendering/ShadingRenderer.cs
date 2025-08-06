@@ -45,19 +45,19 @@ namespace MigraDoc.Rendering
             switch (roundedCorner)
             {
                 case RoundedCorner.TopLeft:
-                    path.AddArc(new XRect(x, y, width * 2, height * 2), 180, 90); // Error in CORE: _corePath.AddArc().
+                    path.AddArc(new XRect(x, y, width * 2, height * 2), 180, 90); // Error in Core: _corePath.AddArc().
                     path.AddLine(new XPoint(x + width, y), new XPoint(x + width, y + height));
                     break;
                 case RoundedCorner.TopRight:
-                    path.AddArc(new XRect(x - width, y, width * 2, height * 2), 270, 90); // Error in CORE: _corePath.AddArc().
+                    path.AddArc(new XRect(x - width, y, width * 2, height * 2), 270, 90); // Error in Core: _corePath.AddArc().
                     path.AddLine(new XPoint(x + width, y + height), new XPoint(x, y + height));
                     break;
                 case RoundedCorner.BottomRight:
-                    path.AddArc(new XRect(x - width, y - height, width * 2, height * 2), 0, 90); // Error in CORE: _corePath.AddArc().
+                    path.AddArc(new XRect(x - width, y - height, width * 2, height * 2), 0, 90); // Error in Core: _corePath.AddArc().
                     path.AddLine(new XPoint(x, y + height), new XPoint(x, y));
                     break;
                 case RoundedCorner.BottomLeft:
-                    path.AddArc(new XRect(x, y - height, width * 2, height * 2), 90, 90); // Error in CORE: _corePath.AddArc().
+                    path.AddArc(new XRect(x, y - height, width * 2, height * 2), 90, 90); // Error in Core: _corePath.AddArc().
                     path.AddLine(new XPoint(x, y), new XPoint(x + width, y));
                     break;
             }

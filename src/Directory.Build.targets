@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <!-- USE_LONG_SIZE: Read/write PDF files larger than 2 GiB -->
-    <!-- TEST_CODE - Must be renamed in every release build. DO NOT RENAME TO TEST_CODE_ -->
-    <DefineConstants>$(DefineConstants);USE_LONG_SIZE;_TEST_CODE_XXX</DefineConstants>
+    <!-- TEST_CODE - Must be set to TEST_CODE_xxx in every release build. DO NOT RENAME TO TEST_CODE_ -->
+    <DefineConstants>$(DefineConstants);USE_LONG_SIZE;TEST_CODE_xxx</DefineConstants>
   </PropertyGroup>
 </Project>

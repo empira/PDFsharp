@@ -5,16 +5,11 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
-#if true || GDI || WPF
 using PdfSharp.Drawing;
-#endif
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.Logging;
-using MigraDoc.RtfRendering.Resources;
-using PdfSharp.Diagnostics;
 using Image = MigraDoc.DocumentObjectModel.Shapes.Image;
-//using System.Security.Policy;
 
 namespace MigraDoc.RtfRendering
 {
@@ -30,7 +25,7 @@ namespace MigraDoc.RtfRendering
 
             _filePath = _image.GetFilePath(_docRenderer.WorkingDirectory);
             _isInline = DocumentRelations.HasParentOfType(_image, typeof(Paragraph)) ||
-                       RenderInParagraph();
+                        RenderInParagraph();
 
             CalculateImageDimensions();
         }
@@ -45,7 +40,7 @@ namespace MigraDoc.RtfRendering
             if (DocumentRelations.GetParent(_image) is DocumentElements elms && !renderInParagraph &&
                 !(DocumentRelations.GetParent(elms) is Section || DocumentRelations.GetParent(elms) is HeaderFooter))
             {
-                MigraDocLogHost.RtfRenderingLogger.LogWarning(Messages2.ImageFreelyPlacedInWrongContext(_image.Name));
+                MigraDocLogHost.RtfRenderingLogger.LogWarning(MdRtfMsgs.ImageFreelyPlacedInWrongContext(_image.Name).Message);
                 //Debug.WriteLine(Messages2.ImageFreelyPlacedInWrongContext(_image.Name), "warning");
                 return;
             }
@@ -152,7 +147,7 @@ namespace MigraDoc.RtfRendering
                     _rtfWriter.WriteControl("pngblip");
                     break;
 
-                //// TODO BMP files. It is not that simple. Must extract the bytes we need.
+                //// TODO_OLD BMP files. It is not that simple. Must extract the bytes we need.
                 //case ".bmp":
                 //    _rtfWriter.WriteControl("dibitmap0");
                 //    break;
@@ -168,7 +163,7 @@ namespace MigraDoc.RtfRendering
                     break;
 
                 default:
-                    MigraDocLogHost.RtfRenderingLogger.LogError(Messages2.ImageTypeNotSupported(_image.Name));
+                    MigraDocLogHost.RtfRenderingLogger.LogError(MdRtfMsgs.ImageTypeNotSupported(_image.Name).Message);
                     //Debug.WriteLine(Messages2.ImageTypeNotSupported(_image.Name), "warning");
                     _imageFile = null;
                     break;
@@ -286,12 +281,12 @@ namespace MigraDoc.RtfRendering
             }
             catch (FileNotFoundException)
             {
-                MigraDocLogHost.RtfRenderingLogger.LogError(Messages2.ImageNotFound(_image.Name));
+                MigraDocLogHost.RtfRenderingLogger.LogError(MdRtfMsgs.ImageNotFound(_image.Name).Message);
                 //Debug.WriteLine(Messages2.ImageNotFound(_image.Name), "warning");
             }
             catch (Exception exc)
             {
-                MigraDocLogHost.RtfRenderingLogger.LogError(Messages2.ImageNotReadable(_image.Name, exc.Message));
+                MigraDocLogHost.RtfRenderingLogger.LogError(MdRtfMsgs.ImageNotReadable(_image.Name, exc.Message).Message);
                 //Debug.WriteLine(Messages2.ImageNotReadable(_image.Name, exc.Message), "warning");
             }
             finally
@@ -393,7 +388,7 @@ namespace MigraDoc.RtfRendering
         Unit _originalHeight;
         Unit _originalWidth;
 
-        //this is the user defined scaling, not the stuff to render as scalex, scaley
+        // This is the user-defined scaling, not the stuff to render as scalex, scaley.
         double _scaleHeight;
         double _scaleWidth;
     }

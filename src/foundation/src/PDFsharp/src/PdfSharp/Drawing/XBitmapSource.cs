@@ -8,7 +8,7 @@ using PdfSharp.Internal;
 #endif
 #if WPF
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media.Imaging;
 #endif
 
@@ -19,7 +19,7 @@ namespace PdfSharp.Drawing
     /// </summary>
     public abstract class XBitmapSource : XImage
     {
-        // TODO: Move code from XImage to this class.
+        // TODO_OLD: Move code from XImage to this class.
 
         /// <summary>
         /// Gets the width of the image in pixels.
@@ -50,7 +50,7 @@ namespace PdfSharp.Drawing
 #if WPF && !GDI
                 return _wpfImage.PixelWidth;
 #endif
-#if UWP
+#if WUI
                 return _wrtImage.PixelWidth;
 #endif
             }
@@ -85,7 +85,7 @@ namespace PdfSharp.Drawing
 #if WPF && !GDI
                 return _wpfImage.PixelHeight;
 #endif
-#if UWP
+#if WUI
                 return _wrtImage.PixelHeight;
 #endif
             }

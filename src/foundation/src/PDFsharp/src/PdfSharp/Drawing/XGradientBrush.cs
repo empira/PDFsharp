@@ -17,7 +17,7 @@ using SysSize = System.Windows.Size;
 using SysRect = System.Windows.Rect;
 using WpfBrush = System.Windows.Media.Brush;
 #endif
-#if UWP
+#if WUI
 using Windows.UI;
 using Windows.UI.Xaml.Media;
 using Microsoft.Graphics.Canvas;

@@ -25,7 +25,7 @@ namespace PdfSharp.Fonts
         /// <returns>Information about the physical font, or null if the request cannot be satisfied.</returns>
         FontResolverInfo? ResolveTypeface(string familyName, bool bold, bool italic);
 
-        //FontResolverInfo ResolveTypeface(Typeface); TODO in future PDFsharp
+        //FontResolverInfo ResolveTypeface(Typeface); TODO_OLD in future PDFsharp
 
         /// <summary>
         /// Gets the bytes of a physical font with specified face name.

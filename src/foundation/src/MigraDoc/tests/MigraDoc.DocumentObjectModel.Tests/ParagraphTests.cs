@@ -3,21 +3,35 @@
 
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
-using PdfSharp.Fonts;
-using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
 using PdfSharp.Quality;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.Rendering;
 using Xunit;
+#if CORE
+#endif
 using FluentAssertions;
+using PdfSharp.Fonts;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
     [Collection("PDFsharp")]
-    public class ParagraphTests
+    public class ParagraphTests : IDisposable
     {
+        public ParagraphTests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void Test_Empty_Paragraph()
         {
@@ -86,7 +100,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
 
                         // Leave 10 cm for content.
                         section.PageSetup.TopMargin = Unit.FromCentimeter(5);
-                        section.PageSetup.BottomMargin= Unit.FromCentimeter(14.7);
+                        section.PageSetup.BottomMargin = Unit.FromCentimeter(14.7);
 
                         // Add informational content.
                         var tf = section.AddTextFrame();
@@ -157,12 +171,12 @@ namespace MigraDoc.DocumentObjectModel.Tests
                             sumDoc.AddPage();
 
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
                         var message = $"Exception while generating test document with {offset} mm offset and {oneOrMultipleWordsStr}.";
 
                         // Add exception to list to continue tests and throw one AggregatedException at the end.
-                        exceptions.Add(new Exception(message, e));
+                        exceptions.Add(new Exception(message, ex));
 
                         // Create temporary document with the exception and stacktrace.
                         var document = new Document();
@@ -178,8 +192,8 @@ namespace MigraDoc.DocumentObjectModel.Tests
                         var section = document.AddSection();
                         var p = section.AddParagraph(message);
                         p.Style = StyleNames.Heading1;
-                        section.AddParagraph(e.Message);
-                        section.AddParagraph(e.StackTrace ?? "Empty stacktrace");
+                        section.AddParagraph(ex.Message);
+                        section.AddParagraph(ex.StackTrace ?? "Empty stacktrace");
 
                         // Render document and add it to sumDoc.
                         var pdfRenderer = new PdfDocumentRenderer { Document = document };
@@ -218,7 +232,6 @@ namespace MigraDoc.DocumentObjectModel.Tests
         [Fact]
         public void Test_Trailing_Objects_Border_Paragraph_PageBreak()
         {
-            PdfSharpCore.ResetAll();
             var trailingObjects = new Dictionary<DocumentObject, string>
             {
                 { new Text(" "), "Text with one space only" },
@@ -317,12 +330,12 @@ namespace MigraDoc.DocumentObjectModel.Tests
                         sumDoc.AddPage();
 
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
                     var message = $"Exception while generating test document with trailing object {trailingObject.Value}.";
 
                     // Add exception to list to continue tests and throw one AggregatedException at the end.
-                    exceptions.Add(new Exception(message, e));
+                    exceptions.Add(new Exception(message, ex));
 
                     // Create temporary document with the exception and stacktrace.
                     var document = new Document();
@@ -338,8 +351,8 @@ namespace MigraDoc.DocumentObjectModel.Tests
                     var section = document.AddSection();
                     var p = section.AddParagraph(message);
                     p.Style = StyleNames.Heading1;
-                    section.AddParagraph(e.Message);
-                    section.AddParagraph(e.StackTrace ?? "Empty stacktrace");
+                    section.AddParagraph(ex.Message);
+                    section.AddParagraph(ex.StackTrace ?? "Empty stacktrace");
 
                     // Render document and add it to sumDoc.
                     var pdfRenderer = new PdfDocumentRenderer { Document = document };
@@ -501,7 +514,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             offset = lastY - textInfo!.Y;
             offset.Should().BeApproximately(offsetSize14, offsetPrecision);
             lastY = textInfo.Y;
-            
+
             // Lines with font size 10.
             streamEnumerator.Text.MoveAndGetNext(x => x.Text == newLineWord, true, out textInfo).Should().BeTrue();
             var offsetSize10After14 = lastY - textInfo!.Y;
@@ -522,7 +535,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
 
             var ascenderDifference = offsetSize14After10 - offsetSize10; // The 14 pt ascender is bigger as the 10 pt ascender by this value.
             var descenderDifference = offsetSize10After14 - offsetSize10; // The 14 pt descender is bigger as the 10 pt descender by this value.
-            
+
 
             // Inspect the line spacing examples.
             foreach (var lineSpacingRule in lineSpacingRules)
@@ -590,6 +603,104 @@ namespace MigraDoc.DocumentObjectModel.Tests
                 offset = lastY - textInfo!.Y;
                 offset.Should().BeApproximately(usualOffset, offsetPrecision);
             }
+        }
+
+        [Fact]
+        public void Test_PageBreak_And_Fitting_Line_Height()
+        {
+            // For 6.2.0-preview-1 this test caused an endless loop, because a new page was added due to ParagraphRenderer.StartNewLine
+            // assuming the second line would have the same height as the first one and would therefore not fit on the first page.
+            // However, TopDownFormatter.PreviousRendererNeedsRemoveEnding correctly calculated that both lines would fit on a next page.
+            // So, the first line was removed from the page and the loop was restarted trying to place both lines on the next page.
+
+            // Create a MigraDoc document.
+            var document = new Document();
+
+            // Add a section to the document.
+            Section section = document.AddSection();
+
+            var paragraph = section.AddParagraph();
+
+            // Paragraph containing two lines shall be placed on one page.
+            paragraph.Format.WidowControl = true;
+
+            // Fits on the first line and on the page.
+            var ft = paragraph.AddFormattedText("1");
+            ft.Font.Size = Unit.FromCentimeter(15);
+            ft.Font.Italic = true;
+
+            // Needs a break to the second line and fits on it.
+            // Fits on the page, but would not, if it had the same height as the first line.
+            ft = paragraph.AddFormattedText("2345");
+            ft.Font.Size = Unit.FromCentimeter(5);
+            ft.Font.Bold = true;
+
+            // Create a renderer for the MigraDoc document.
+            var pdfRenderer = new PdfDocumentRenderer()
+            {
+                // Associate the MigraDoc document with a renderer.
+                Document = document,
+                // Let the PDF viewer show this PDF with full pages.
+                PdfDocument =
+                {
+                    PageLayout = PdfPageLayout.TwoPageLeft,
+                    ViewerPreferences =
+                    {
+                        FitWindow = true
+                    }
+                }
+            };
+
+            // Layout and render document to PDF.
+            pdfRenderer.RenderDocument();
+
+            // Save the document...
+            var filename = PdfFileUtility.GetTempPdfFileName("Test_PageBreak_And_Fitting_Line_Height");
+            pdfRenderer.PdfDocument.Save(filename);
+            // ...and start a viewer.
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
+        }
+
+        [Fact]
+        public void Test_Line_And_PageBreak_Big_Words()
+        {
+            // For 6.2.0-preview-1 this test showed empty lines that should not occur after a line break caused by one word longer than the line.
+            // For WidowControl = true it showed also an empty line that should not occur after the last page break.
+
+            // Create a MigraDoc document.
+            var document = new Document();
+
+            // Add a section to the document.
+            Section section = document.AddSection();
+
+            var paragraph = section.AddParagraph("123 456 789 0AB");
+            paragraph.Format.Font.Size = Unit.FromCentimeter(10);
+            paragraph.Format.WidowControl = true;
+
+            // Create a renderer for the MigraDoc document.
+            var pdfRenderer = new PdfDocumentRenderer()
+            {
+                // Associate the MigraDoc document with a renderer.
+                Document = document,
+                // Let the PDF viewer show this PDF with full pages.
+                PdfDocument =
+                {
+                    PageLayout = PdfPageLayout.TwoPageLeft,
+                    ViewerPreferences =
+                    {
+                        FitWindow = true
+                    }
+                }
+            };
+
+            // Layout and render document to PDF.
+            pdfRenderer.RenderDocument();
+
+            // Save the document...
+            var filename = PdfFileUtility.GetTempPdfFileName("Test_Line_And_PageBreak_Big_Words");
+            pdfRenderer.PdfDocument.Save(filename);
+            // ...and start a viewer.
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
     }
 }

@@ -11,7 +11,7 @@ using SysPoint = System.Windows.Point;
 using SysSize = System.Windows.Size;
 using SysRect = System.Windows.Rect;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media;
 using SysPoint = Windows.Foundation.Point;
 using SysSize = Windows.Foundation.Size;
@@ -34,7 +34,7 @@ namespace PdfSharp.Drawing
         public XRect(double x, double y, double width, double height)
         {
             if (width < 0 || height < 0)
-                throw new ArgumentException("WidthAndHeightCannotBeNegative"); //SR.Get(SRID.Size_WidthAndHeightCannotBeNegative, new object[0]));
+                throw new ArgumentException("WidthAndHeightCannotBeNegative"); // TODO_OLD SR.Get(SRID.Size_WidthAndHeightCannotBeNegative, new object[0]));
             _x = x;
             _y = y;
             _width = width;
@@ -116,7 +116,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Initializes a new instance of the XRect class.
         /// </summary>
@@ -136,27 +136,20 @@ namespace PdfSharp.Drawing
         // ReSharper disable once IdentifierTypo
         public static XRect FromLTRB(double left, double top, double right, double bottom)
         // ReSharper restore InconsistentNaming
-        {
-            return new XRect(left, top, right - left, bottom - top);
-        }
+            => new(left, top, right - left, bottom - top);
 
         /// <summary>
         /// Determines whether the two rectangles are equal.
         /// </summary>
-        public static bool operator ==(XRect rect1, XRect rect2)
-        {
             // ReSharper disable CompareOfFloatsByEqualityOperator
-            return rect1.X == rect2.X && rect1.Y == rect2.Y && rect1.Width == rect2.Width && rect1.Height == rect2.Height;
-            // ReSharper restore CompareOfFloatsByEqualityOperator
-        }
+        public static bool operator ==(XRect rect1, XRect rect2) =>
+            rect1.X == rect2.X && rect1.Y == rect2.Y && rect1.Width == rect2.Width && rect1.Height == rect2.Height;
+        // ReSharper restore CompareOfFloatsByEqualityOperator
 
         /// <summary>
         /// Determines whether the two rectangles are not equal.
         /// </summary>
-        public static bool operator !=(XRect rect1, XRect rect2)
-        {
-            return !(rect1 == rect2);
-        }
+        public static bool operator !=(XRect rect1, XRect rect2) => !(rect1 == rect2);
 
         /// <summary>
         /// Determines whether the two rectangles are equal.
@@ -181,10 +174,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Determines whether this instance and the specified rect are equal.
         /// </summary>
-        public bool Equals(XRect value)
-        {
-            return Equals(this, value);
-        }
+        public bool Equals(XRect value) => Equals(this, value);
 
         /// <summary>
         /// Returns the hash code for this instance.
@@ -214,28 +204,19 @@ namespace PdfSharp.Drawing
         }
 
         /// <summary>
-        /// Converts this XRect to a human readable string.
+        /// Converts this XRect to a human-readable string.
         /// </summary>
-        public override string ToString()
-        {
-            return ConvertToString(null, null);
-        }
+        public override string ToString() => ConvertToString(null, null);
 
         /// <summary>
-        /// Converts this XRect to a human readable string.
+        /// Converts this XRect to a human-readable string.
         /// </summary>
-        public string ToString(IFormatProvider provider)
-        {
-            return ConvertToString(null, provider);
-        }
+        public string ToString(IFormatProvider provider) => ConvertToString(null, provider);
 
         /// <summary>
-        /// Converts this XRect to a human readable string.
+        /// Converts this XRect to a human-readable string.
         /// </summary>
-        string IFormattable.ToString(string? format, IFormatProvider? provider)
-        {
-            return ConvertToString(format, provider);
-        }
+        string IFormattable.ToString(string? format, IFormatProvider? provider) => ConvertToString(format, provider);
 
         internal string ConvertToString(string? format, IFormatProvider? provider)
         {
@@ -277,7 +258,6 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Gets or sets the size of the rectangle.
         /// </summary>
-        //[Browsable(false)]
         public XSize Size
         {
             get
@@ -313,7 +293,6 @@ namespace PdfSharp.Drawing
                 _x = value;
             }
         }
-
         double _x;
 
         /// <summary>
@@ -329,7 +308,6 @@ namespace PdfSharp.Drawing
                 _y = value;
             }
         }
-
         double _y;
 
         /// <summary>
@@ -341,14 +319,13 @@ namespace PdfSharp.Drawing
             set
             {
                 if (IsEmpty)
-                    throw new InvalidOperationException("CannotModifyEmptyRect"); //SR.Get(SRID.Rect_CannotModifyEmptyRect, new object[0]));
+                    throw new InvalidOperationException("CannotModifyEmptyRect"); // TODO_OLD SR.Get(SRID.Rect_CannotModifyEmptyRect, new object[0]));
                 if (value < 0)
-                    throw new ArgumentException("WidthCannotBeNegative"); //SR.Get(SRID.Size_WidthCannotBeNegative, new object[0]));
+                    throw new ArgumentException("WidthCannotBeNegative"); // TODO_OLD SR.Get(SRID.Size_WidthCannotBeNegative, new object[0]));
 
                 _width = value;
             }
         }
-
         double _width;
 
         /// <summary>
@@ -366,7 +343,6 @@ namespace PdfSharp.Drawing
                 _height = value;
             }
         }
-
         double _height;
 
         /// <summary>
@@ -434,10 +410,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Indicates whether the rectangle contains the specified point.
         /// </summary>
-        public bool Contains(XPoint point)
-        {
-            return Contains(point.X, point.Y);
-        }
+        public bool Contains(XPoint point) => Contains(point.X, point.Y);
 
         /// <summary>
         /// Indicates whether the rectangle contains the specified point.
@@ -541,10 +514,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Sets current rectangle to the union of the current rectangle and the specified point.
         /// </summary>
-        public void Union(XPoint point)
-        {
-            Union(new XRect(point, point));
-        }
+        public void Union(XPoint point) => Union(new XRect(point, point));
 
         /// <summary>
         /// Returns the union of a rectangle and a point.
@@ -598,28 +568,19 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Translates the rectangle by adding the specified point.
         /// </summary>
-        //[Obsolete("Use Offset.")]
         public static XRect operator +(XRect rect, XPoint point)
-        {
-            return new XRect(rect._x + point.X, rect.Y + point.Y, rect._width, rect._height);
-        }
+            => new(rect._x + point.X, rect.Y + point.Y, rect._width, rect._height);
 
         /// <summary>
         /// Translates the rectangle by subtracting the specified point.
         /// </summary>
-        //[Obsolete("Use Offset.")]
         public static XRect operator -(XRect rect, XPoint point)
-        {
-            return new XRect(rect._x - point.X, rect.Y - point.Y, rect._width, rect._height);
-        }
+            => new(rect._x - point.X, rect.Y - point.Y, rect._width, rect._height);
 
         /// <summary>
         /// Expands the rectangle by using the specified Size, in all directions.
         /// </summary>
-        public void Inflate(XSize size)
-        {
-            Inflate(size.Width, size.Height);
-        }
+        public void Inflate(XSize size) => Inflate(size.Width, size.Height);
 
         /// <summary>
         /// Expands or shrinks the rectangle by using the specified width and height amounts, in all directions.
@@ -669,9 +630,7 @@ namespace PdfSharp.Drawing
         /// Transforms the rectangle by applying the specified matrix.
         /// </summary>
         public void Transform(XMatrix matrix)
-        {
-            XMatrix.MatrixHelper.TransformRect(ref this, ref matrix);
-        }
+            => XMatrix.MatrixHelper.TransformRect(ref this, ref matrix);
 
         /// <summary>
         /// Multiplies the size of the current rectangle by the specified x and y values.
@@ -701,57 +660,42 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Converts this instance to a System.Drawing.RectangleF.
         /// </summary>
-        public RectangleF ToRectangleF()
-        {
-            return new RectangleF((float)_x, (float)_y, (float)_width, (float)_height);
-        }
+        public RectangleF ToRectangleF() 
+            => new((float)_x, (float)_y, (float)_width, (float)_height);
 #endif
 
 #if GDI
         /// <summary>
         /// Performs an implicit  conversion from a System.Drawing.Rectangle to an XRect.
         /// </summary>
-        public static implicit operator XRect(Rectangle rect)
-        {
-            return new XRect(rect.X, rect.Y, rect.Width, rect.Height);
-        }
+        public static implicit operator XRect(Rectangle rect) 
+            => new(rect.X, rect.Y, rect.Width, rect.Height);
 
         /// <summary>
         /// Performs an implicit  conversion from a System.Drawing.RectangleF to an XRect.
         /// </summary>
-        public static implicit operator XRect(RectangleF rect)
-        {
-            return new XRect(rect.X, rect.Y, rect.Width, rect.Height);
-        }
+        public static implicit operator XRect(RectangleF rect) 
+            => new(rect.X, rect.Y, rect.Width, rect.Height);
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Performs an implicit conversion from System.Windows.Rect to XRect.
         /// </summary>
-        public static implicit operator XRect(SysRect rect)
-        {
-            return new XRect(rect.X, rect.Y, rect.Width, rect.Height);
-        }
+        public static implicit operator XRect(SysRect rect) 
+            => new(rect.X, rect.Y, rect.Width, rect.Height);
 #endif
 
         bool ContainsInternal(double x, double y)
-        {
-            return x >= _x && x - _width <= _x && y >= _y && y - _height <= _y;
-        }
+            => x >= _x && x - _width <= _x && y >= _y && y - _height <= _y;
 
-        static XRect CreateEmptyRect()
+        static readonly XRect s_empty = new()
         {
-            return new()
-            {
-                _x = double.PositiveInfinity,
-                _y = double.PositiveInfinity,
-                _width = double.NegativeInfinity,
-                _height = double.NegativeInfinity
-            };
-        }
-
-        static readonly XRect s_empty = CreateEmptyRect();
+            _x = Double.PositiveInfinity,
+            _y = Double.PositiveInfinity,
+            _width = Double.NegativeInfinity,
+            _height = Double.NegativeInfinity
+        };
 
         /// <summary>
         /// Gets the DebuggerDisplayAttribute text.

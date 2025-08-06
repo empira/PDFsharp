@@ -6,7 +6,7 @@ namespace MigraDoc.DocumentObjectModel
     /// <summary>
     /// Represents a special character in paragraph text.
     /// </summary>
-    // TODO: Change this class and store symbolName and char in different fields.
+    // TODO_OLD: Change this class and store symbolName and char in different fields.
     public class Character : DocumentObject
     {
         // ===== \space =====
@@ -113,7 +113,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public SymbolName SymbolName
         {
-            get => Values.SymbolName ?? default; // BUG What if value is null? Show ? character
+            get => Values.SymbolName ?? default; // BUG_OLD What if value is null? Show ? character
             set => Values.SymbolName = value;
         }
 
@@ -128,7 +128,7 @@ namespace MigraDoc.DocumentObjectModel
                     return (char)Values.SymbolName!;
                 return '\0';
             }
-            set => Values.SymbolName = (SymbolName)value; // BUG
+            set => Values.SymbolName = (SymbolName)value; // BUG_OLD
         }
 
         /// <summary>
@@ -171,9 +171,9 @@ namespace MigraDoc.DocumentObjectModel
                 {
                     if (SymbolName == SymbolName.Blank)
                     {
-                        //Note: Don’t try to optimize it by leaving away the braces in case a single space is added.
-                        //This would lead to confusion with '(' in directly following text.
-                        text = "\\space(" + Count + ")";
+                        // Note: Don’t try to optimize it by leaving away the braces in case a single space is added.
+                        // This would lead to confusion with '(' in directly following text.
+                        text = Invariant($@"\\space({Count})");
                     }
                     else
                     {
@@ -198,7 +198,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

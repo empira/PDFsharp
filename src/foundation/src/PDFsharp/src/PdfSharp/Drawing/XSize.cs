@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 using SysPoint = System.Windows.Point;
 using SysSize = System.Windows.Size;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media;
 using SysPoint = Windows.Foundation.Point;
 using SysSize = Windows.Foundation.Size;
@@ -31,7 +31,7 @@ namespace PdfSharp.Drawing
         public XSize(double width, double height)
         {
             if (width < 0 || height < 0)
-                throw new ArgumentException("WidthAndHeightCannotBeNegative"); //SR.Get(SRID.Size_WidthAndHeightCannotBeNegative, new object[0]));
+                throw new ArgumentException("WidthAndHeightCannotBeNegative"); // TODO_OLD SR.Get(SRID.Size_WidthAndHeightCannotBeNegative, new object[0]));
 
             _width = width;
             _height = height;
@@ -50,10 +50,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Determines whether two size objects are not equal.
         /// </summary>
-        public static bool operator !=(XSize size1, XSize size2)
-        {
-            return !(size1 == size2);
-        }
+        public static bool operator !=(XSize size1, XSize size2) => !(size1 == size2);
 
         /// <summary>
         /// Indicates whether these two instances are equal.
@@ -78,10 +75,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Indicates whether this instance and a specified size are equal.
         /// </summary>
-        public bool Equals(XSize value)
-        {
-            return Equals(this, value);
-        }
+        public bool Equals(XSize value) => Equals(this, value);
 
         /// <summary>
         /// Returns the hash code for this instance.
@@ -123,59 +117,41 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Converts this XSize to an XPoint.
         /// </summary>
-        public XPoint ToXPoint()
-        {
-            return new XPoint(_width, _height);
-        }
+        public XPoint ToXPoint() => new(_width, _height);
 
         /// <summary>
         /// Converts this XSize to an XVector.
         /// </summary>
-        public XVector ToXVector()
-        {
-            return new XVector(_width, _height);
-        }
+        public XVector ToXVector() => new(_width, _height);
 
 #if GDI
         /// <summary>
         /// Converts this XSize to a SizeF.
         /// </summary>
-        public SizeF ToSizeF()
-        {
-            return new SizeF((float)_width, (float)_height);
-        }
+        public SizeF ToSizeF() => new((float)_width, (float)_height);
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Converts this XSize to a System.Windows.Size.
         /// </summary>
-        public SysSize ToSize()
-        {
-            return new SysSize(_width, _height);
-        }
+        public SysSize ToSize() => new(_width, _height);
 #endif
 
 #if GDI
         /// <summary>
         /// Creates an XSize from a System.Drawing.Size.
         /// </summary>
-        public static XSize FromSize(Size size)
-        {
-            return new XSize(size.Width, size.Height);
-        }
+        public static XSize FromSize(Size size) => new(size.Width, size.Height);
 
         /// <summary>
         /// Implicit conversion from XSize to System.Drawing.Size. The conversion must be implicit because the
         /// WinForms designer uses it.
         /// </summary>
-        public static implicit operator XSize(Size size)
-        {
-            return new XSize(size.Width, size.Height);
-        }
+        public static implicit operator XSize(Size size) => new(size.Width, size.Height);
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Creates an XSize from a System.Drawing.Size.
         /// </summary>
@@ -189,35 +165,24 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Creates an XSize from a System.Drawing.Size.
         /// </summary>
-        public static XSize FromSizeF(SizeF size)
-        {
-            return new XSize(size.Width, size.Height);
-        }
+        public static XSize FromSizeF(SizeF size) => new(size.Width, size.Height);
 #endif
 
         /// <summary>
-        /// Converts this XSize to a human readable string.
+        /// Converts this XSize to a human-readable string.
         /// </summary>
-        public override string ToString()
-        {
-            return ConvertToString(null, null);
-        }
+        public override string ToString() => ConvertToString(null, null);
 
         /// <summary>
-        /// Converts this XSize to a human readable string.
+        /// Converts this XSize to a human-readable string.
         /// </summary>
-        public string ToString(IFormatProvider provider)
-        {
-            return ConvertToString(null, provider);
-        }
+        public string ToString(IFormatProvider provider) => ConvertToString(null, provider);
 
         /// <summary>
-        /// Converts this XSize to a human readable string.
+        /// Converts this XSize to a human-readable string.
         /// </summary>
-        string IFormattable.ToString(string? format, IFormatProvider? provider)
-        {
-            return ConvertToString(format, provider);
-        }
+        string IFormattable.ToString(string? format, IFormatProvider? provider) 
+            => ConvertToString(format, provider);
 
         internal string ConvertToString(string? format, IFormatProvider? provider)
         {
@@ -257,9 +222,9 @@ namespace PdfSharp.Drawing
             set
             {
                 if (IsEmpty)
-                    throw new InvalidOperationException("CannotModifyEmptySize"); //SR.Get(SRID.Size_CannotModifyEmptySize, new object[0]));
+                    throw new InvalidOperationException("CannotModifyEmptySize"); // TODO_OLD SR.Get(SRID.Size_CannotModifyEmptySize, new object[0]));
                 if (value < 0)
-                    throw new ArgumentException("WidthCannotBeNegative"); //SR.Get(SRID.Size_WidthCannotBeNegative, new object[0]));
+                    throw new ArgumentException("WidthCannotBeNegative"); // TODO_OLD SR.Get(SRID.Size_WidthCannotBeNegative, new object[0]));
                 _width = value;
             }
         }
@@ -274,9 +239,9 @@ namespace PdfSharp.Drawing
             set
             {
                 if (IsEmpty)
-                    throw new InvalidOperationException("CannotModifyEmptySize"); // SR.Get(SRID.Size_CannotModifyEmptySize, new object[0]));
+                    throw new InvalidOperationException("CannotModifyEmptySize"); // TODO_OLD SR.Get(SRID.Size_CannotModifyEmptySize, new object[0]));
                 if (value < 0)
-                    throw new ArgumentException("HeightCannotBeNegative"); //SR.Get(SRID.Size_HeightCannotBeNegative, new object[0]));
+                    throw new ArgumentException("HeightCannotBeNegative"); // TODO_OLD SR.Get(SRID.Size_HeightCannotBeNegative, new object[0]));
                 _height = value;
             }
         }
@@ -285,27 +250,18 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Performs an explicit conversion from XSize to XVector.
         /// </summary>
-        public static explicit operator XVector(XSize size)
-        {
-            return new XVector(size._width, size._height);
-        }
+        public static explicit operator XVector(XSize size) => new(size._width, size._height);
 
         /// <summary>
         /// Performs an explicit conversion from XSize to XPoint.
         /// </summary>
-        public static explicit operator XPoint(XSize size)
-        {
-            return new XPoint(size._width, size._height);
-        }
+        public static explicit operator XPoint(XSize size) => new(size._width, size._height);
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Performs an explicit conversion from Size to XSize.
         /// </summary>
-        public static explicit operator XSize(SysSize size)
-        {
-            return new XSize(size.Width, size.Height);
-        }
+        public static explicit operator XSize(SysSize size) => new(size.Width, size.Height);
 #endif
 
         /// <summary>

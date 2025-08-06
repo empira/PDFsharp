@@ -6,16 +6,32 @@ using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.DocumentObjectModel.Shapes.Charts;
 using MigraDoc.Rendering;
+using PdfSharp.Diagnostics;
 using PdfSharp.Fonts;
 using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
+#if CORE
+#endif
 using Xunit;
 
 namespace MigraDoc.Tests
 {
     [Collection("PDFsharp")]
-    public class ChartTests
+    public class ChartTests : IDisposable
     {
+        public ChartTests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void Create_MigraDoc_Chart_Test()
         {

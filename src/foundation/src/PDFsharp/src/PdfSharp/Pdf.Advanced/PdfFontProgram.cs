@@ -23,13 +23,13 @@ namespace PdfSharp.Pdf.Advanced
         internal void CreateFontFileAndAddToDescriptor(PdfFontDescriptor pdfFontDescriptor, CMapInfo cmapInfo, bool cidFont)
         {
             var x = pdfFontDescriptor.Elements[PdfFontDescriptor.Keys.FontFile2];
-                
+
             OpenTypeFontFace subSet = pdfFontDescriptor.Descriptor.FontFace.CreateFontSubset(cmapInfo.GlyphIndices, cidFont);
             byte[] fontData = subSet.FontSource.Bytes;
 
             Owner.Internals.AddObject(this);
             pdfFontDescriptor.Elements[PdfFontDescriptor.Keys.FontFile2] = Reference;
-            
+
             Elements["/Length1"] = new PdfInteger(fontData.Length);
             if (!Owner.Options.NoCompression)
             {

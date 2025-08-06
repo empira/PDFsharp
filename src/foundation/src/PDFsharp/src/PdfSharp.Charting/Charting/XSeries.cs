@@ -65,7 +65,6 @@ namespace PdfSharp.Charting
         /// <summary>
         /// Gets the enumerator.
         /// </summary>
-        /// <returns></returns>
         public IEnumerator GetEnumerator()
             => _xSeriesElements.GetEnumerator();
 

@@ -154,7 +154,7 @@ namespace MigraDoc.DocumentObjectModel
             set => Values.Italic = value;
         }
 
-        // TODO Implement Strikethrough for PDFsharp and MigraDoc.
+        // TODO_OLD Implement Strikethrough for PDFsharp and MigraDoc.
         // THHO4STLA Implementation for Strikethrough in the forum: http://forum.pdfsharp.net/viewtopic.php?p=4636#p4636
         /// <summary>
         /// Gets or sets the underline property.
@@ -223,21 +223,6 @@ namespace MigraDoc.DocumentObjectModel
         //  * .Position = 0
         //    .Kerning = 0
         //    .Animation = wdAnimationNone
-
-        ///// <summary>
-        ///// Gets a value indicating whether the specified font exists.
-        ///// </summary>
-        //[Obsolete("This function is removed from DocumentObjectModel and always returns false.")]
-        //public static bool Exists(string fontName)
-        //{
-        //    //System.Drawing.FontFamily[] families = System.Drawing.FontFamily.Families;
-        //    //foreach (System.Drawing.FontFamily family in families)
-        //    //{
-        //    //  if (String.Compare(family.Name, fontName, true) == 0)
-        //    //    return true;
-        //    //}
-        //    return false;
-        //}
 
         /// <summary>
         /// Get a bitmask of all non-null properties.
@@ -324,7 +309,7 @@ namespace MigraDoc.DocumentObjectModel
                     serializer.WriteSimpleAttribute("Name", Name);
 
 #if DEBUG_ // Test
-                if (!_size.IsNull && Size != 0 && Size.Point == 0)
+                if (Size != Unit.Empty && Size != 0 && Size.Point == 0)
                     _ = typeof(int);
 #endif
 
@@ -395,7 +380,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

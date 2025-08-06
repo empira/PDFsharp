@@ -1,6 +1,8 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace PdfSharp.Pdf
 {
     /// <summary>
@@ -64,14 +66,19 @@ namespace PdfSharp.Pdf
             KeyType = keyType;
         }
 
-        public KeyInfoAttribute(KeyType keyType, Type objectType)
+        public KeyInfoAttribute(KeyType keyType,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            Type objectType)
         {
             //_version = version;
             KeyType = keyType;
             _objectType = objectType;
         }
 
-        public KeyInfoAttribute(string version, KeyType keyType, Type objectType)
+        public KeyInfoAttribute(string version,
+            KeyType keyType,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            Type objectType)
         {
             //_version = version;
             KeyType = keyType;
@@ -92,11 +99,13 @@ namespace PdfSharp.Pdf
         }
         KeyType _entryType;
 
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
         public Type ObjectType
         {
             get => _objectType!; // ?? NRT.ThrowOnNull<Type>(); Can be null.
             set => _objectType = value;
         }
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
         Type? _objectType;
 
         public string FixedValue

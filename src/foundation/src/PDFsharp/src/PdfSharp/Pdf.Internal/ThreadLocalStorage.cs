@@ -3,18 +3,14 @@
 
 using PdfSharp.Pdf.IO;
 
+#if true
 namespace PdfSharp.Pdf.Internal
 {
     /// <summary>
     /// Provides a thread-local cache for large objects.
     /// </summary>
-    class ThreadLocalStorage // #???
+    class ThreadLocalStorage
     {
-        public ThreadLocalStorage()
-        {
-            _importedDocuments = new Dictionary<string, PdfDocument.DocumentHandle>(StringComparer.OrdinalIgnoreCase);
-        }
-
         public void AddDocument(string path, PdfDocument document)
         {
             _importedDocuments.Add(path, document.Handle);
@@ -48,7 +44,7 @@ namespace PdfSharp.Pdf.Internal
         {
             get
             {
-                List<PdfDocument> list = new List<PdfDocument>();
+                List<PdfDocument> list = [];
                 foreach (PdfDocument.DocumentHandle handle in _importedDocuments.Values)
                 {
                     if (handle.IsAlive)
@@ -92,6 +88,7 @@ namespace PdfSharp.Pdf.Internal
         /// <summary>
         /// Maps path to document handle.
         /// </summary>
-        readonly Dictionary<string, PdfDocument.DocumentHandle> _importedDocuments;
+        private readonly Dictionary<string, PdfDocument.DocumentHandle> _importedDocuments = [];
     }
 }
+#endif

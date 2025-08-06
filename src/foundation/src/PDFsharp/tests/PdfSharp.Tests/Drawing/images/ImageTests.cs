@@ -1,8 +1,12 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+#if WPF
 using System.IO;
+using System.Net.Http;
+#endif
 using System.Reflection;
+using FluentAssertions;
 using PdfSharp.Diagnostics;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
@@ -13,13 +17,28 @@ using PdfSharp.Pdf.IO;
 using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
+#if CORE
+#endif
 using Xunit;
 
 namespace PdfSharp.Tests.Drawing
 {
     [Collection("PDFsharp")]
-    public class ImageTests
+    public class ImageTests : IDisposable
     {
+        public ImageTests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void PDF_with_Images()
         {
@@ -114,7 +133,6 @@ namespace PdfSharp.Tests.Drawing
         [Fact]
         public void WriteAndRead_PDF_with_FlateDecode()
         {
-            PdfSharpCore.ResetAll();
             // Create a new PDF document.
             var document = new PdfDocument();
             document.Info.Title = "Created with PDFsharp";
@@ -165,7 +183,7 @@ namespace PdfSharp.Tests.Drawing
                 "PDFsharp/images/samples/jpeg/windows7problem.jpg"
             };
 
-            // Attempt to avoid "Out of memory" under .NET 4.7.2.
+            // Attempt to avoid "Out of memory" under .NET 4.6.2.
             GC.Collect();
             GC.WaitForFullGCComplete();
 
@@ -216,7 +234,7 @@ namespace PdfSharp.Tests.Drawing
 
             void ExportJpeg(PdfDictionary image)
             {
-                // TODO Check filter types. This works for "/Filter [/FlateDecode /DCTDecode]" only.
+                // TODO_OLD Check filter types. This works for "/Filter [/FlateDecode /DCTDecode]" only.
                 var imageFilename = Path.Combine(dir, $"image-{Guid.NewGuid():N}.jpg");
 
                 var stream = image.Stream.Value;
@@ -230,9 +248,9 @@ namespace PdfSharp.Tests.Drawing
         }
 
         [Fact]
-        void PDF_with_Image_from_stream()
+        public void PDF_with_Image_from_stream()
         {
-            // Attempt to avoid "image file locked" under .NET 4.7.2.
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
             GC.Collect();
             GC.WaitForFullGCComplete();
 
@@ -243,7 +261,7 @@ namespace PdfSharp.Tests.Drawing
 
                 var imagePath = IOUtility.GetAssetsPath("PDFsharp/images/samples/jpeg/truecolorA.jpg")!;
 
-                var stream = new FileStream(imagePath, FileMode.Open);
+                var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read);
                 using var xImage = XImage.FromStream(stream);
 
                 gfx.DrawImage(xImage, 100, 100, 100, 100);
@@ -255,9 +273,110 @@ namespace PdfSharp.Tests.Drawing
                 PdfFileUtility.ShowDocumentIfDebugging(filename);
             }
 
-            // Attempt to avoid "image file locked" under .NET 4.7.2.
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
             GC.Collect();
             GC.WaitForFullGCComplete();
         }
+
+        [Fact]
+        public void PDF_with_Image_from_private_memorystream()
+        {
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
+            GC.Collect();
+            GC.WaitForFullGCComplete();
+
+            {
+                var document = new PdfDocument();
+                var page = document.AddPage();
+                var gfx = XGraphics.FromPdfPage(page);
+
+                var imagePath = IOUtility.GetAssetsPath("PDFsharp/images/samples/jpeg/truecolorA.jpg")!;
+                var pngBytes = File.ReadAllBytes(imagePath);
+
+                // Create a MemoryStream that does not allow GetBuffer.
+                var stream = new MemoryStream(pngBytes);
+                using var xImage = XImage.FromStream(stream);
+
+                gfx.DrawImage(xImage, 100, 100, 100, 100);
+
+                // Save the document...
+                var filename = PdfFileUtility.GetTempPdfFileName("ImageFromStream");
+                document.Save(filename);
+                // ...and start a viewer.
+                PdfFileUtility.ShowDocumentIfDebugging(filename);
+            }
+
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
+            GC.Collect();
+            GC.WaitForFullGCComplete();
+        }
+
+        [Fact]
+        public void PDF_with_Image_from_public_memorystream()
+        {
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
+            GC.Collect();
+            GC.WaitForFullGCComplete();
+
+            {
+                var document = new PdfDocument();
+                var page = document.AddPage();
+                var gfx = XGraphics.FromPdfPage(page);
+
+                var imagePath = IOUtility.GetAssetsPath("PDFsharp/images/samples/jpeg/truecolorA.jpg")!;
+                var pngBytes = File.ReadAllBytes(imagePath);
+
+                // Create a MemoryStream that allows GetBuffer.
+                var stream = new MemoryStream(pngBytes, 0, pngBytes.Length, false, true);
+                using var xImage = XImage.FromStream(stream);
+
+                gfx.DrawImage(xImage, 100, 100, 100, 100);
+
+                // Save the document...
+                var filename = PdfFileUtility.GetTempPdfFileName("ImageFromStream");
+                document.Save(filename);
+                // ...and start a viewer.
+                PdfFileUtility.ShowDocumentIfDebugging(filename);
+            }
+
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
+            GC.Collect();
+            GC.WaitForFullGCComplete();
+        }
+
+#if NET6_0_OR_GREATER
+        [Fact]
+        public async Task PDF_with_Image_from_http_stream()
+        {
+            {
+                var document = new PdfDocument();
+                var page = document.AddPage();
+                var gfx = XGraphics.FromPdfPage(page);
+
+                using var client = new HttpClient();
+                await using var imageStream =
+                    await client.GetStreamAsync("https://docs.pdfsharp.net/images/PDFsharp-80x80.png").ConfigureAwait(false);
+                //await using var imageStream =
+                //    await client.GetStreamAsync("https://upload.wikimedia.org/wikipedia/commons/7/70/Example.png").ConfigureAwait(false);
+
+#if WPF
+                XImage xImage = null!;
+                // ReSharper disable once AccessToDisposedClosure
+                Action createImage = () => xImage = XImage.FromStream(imageStream);
+                createImage.Should().Throw<InvalidOperationException>();
+#else
+                var xImage = XImage.FromBitmapImageStreamThatCannotSeek(imageStream);
+                gfx.DrawImage(xImage, 100, 100, 100, 100);
+
+                // Save the document...
+                var filename = PdfFileUtility.GetTempPdfFileName("ImageFromStream");
+                document.Save(filename);
+                // ...and start a viewer.
+                PdfFileUtility.ShowDocumentIfDebugging(filename);
+#endif
+
+            }
+        }
+#endif
     }
 }

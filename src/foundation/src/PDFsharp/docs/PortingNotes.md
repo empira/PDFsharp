@@ -31,4 +31,12 @@
 
 Drop
 * Drop code from Silverlight, Windows Phone, WinRT, and other UWP versions.
-* 
+
+## From 4.7.2 to 4.6.2
+
+Replace **net472** with **net462** in all `*.csproj` and in all `*.nuspec` files.
+
+Add (or change) `NET462` in the following files:
+`CompilerServices.cs` line 56
+`FlateDecode.cs` line 34
+

@@ -96,7 +96,7 @@ namespace MigraDoc.RtfRendering
             if (tabStops != null)
                 RendererFactory.CreateRenderer((TabStops)tabStops, _docRenderer).Render();
 
-            // TODO: ListInfo is still under construction.
+            // TODO_OLD: ListInfo is still under construction.
             var listInfo = GetValueAsIntended("ListInfo");
             if (listInfo != null)
             {

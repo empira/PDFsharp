@@ -54,12 +54,12 @@ namespace MigraDoc.DocumentObjectModel
         {
             var text = DdlEncoder.StringToText(Values.Content);
             // To make DDL more readable write soft hyphens as keywords.
-            text = text?.Replace(new string((char)173, 1), "\\-") ?? NRT.ThrowOnNull<string>(); // BUG New throw on null.
+            text = text?.Replace(new string((char)173, 1), "\\-") ?? NRT.ThrowOnNull<string>(); // BUG_OLD New throw on null.
             serializer.Write(text);
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

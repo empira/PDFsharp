@@ -7,13 +7,28 @@ using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Rendering;
+#if CORE
+#endif
 using Xunit;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
     [Collection("PDFsharp")]
-    public class Images
+    public class Images : IDisposable
     {
+        public Images()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void Create_Hello_World_Images()
         {

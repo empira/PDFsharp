@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System;
@@ -47,7 +47,7 @@ namespace PdfSharp.Drawing
         public XStringFormat()
         { }
 
-        //TODO public StringFormat(StringFormat format);
+        //TODO_OLD public StringFormat(StringFormat format);
         //public StringFormat(StringFormatFlags options);
         //public StringFormat(StringFormatFlags options, int language);
         //public object Clone();
@@ -161,7 +161,7 @@ namespace PdfSharp.Drawing
                 //_stringFormat.FormatFlags = (StringFormatFlags)_formatFlags;
 
                 // Bugfix: Set MeasureTrailingSpaces to get the correct width with Graphics.MeasureString().
-                // Before, MeasureString() didn�t include blanks in width calculation, which could result in text overflowing table or page border before wrapping. $MaOs
+                // Before, MeasureString() didn’t include blanks in width calculation, which could result in text overflowing table or page border before wrapping. $MaOs
                 _stringFormat.FormatFlags = _stringFormat.FormatFlags | StringFormatFlags.MeasureTrailingSpaces;
             }
             return _stringFormat;

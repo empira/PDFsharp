@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net6.0;net472</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0;net462</TargetFrameworks>
     <RootNamespace>MigraDoc.GBE_Runner</RootNamespace>
     <StartupObject>MigraDoc.GBE_Runner.Program</StartupObject>
   </PropertyGroup>
@@ -81,6 +81,7 @@
     <ProjectReference Include="..\..\..\..\..\tools\src\PdfSharp.TestHelper\PdfSharp.TestHelper.csproj" />
     <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp\PdfSharp.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets\PdfSharp.Snippets.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.Testing\PdfSharp.Testing.csproj" />
     <ProjectReference Include="..\..\src\MigraDoc.DocumentObjectModel\MigraDoc.DocumentObjectModel.csproj" />
     <ProjectReference Include="..\..\src\MigraDoc.Rendering\MigraDoc.Rendering.csproj" />
   </ItemGroup>

@@ -50,7 +50,7 @@ namespace MigraDoc.Rendering.UnitTest
             sec.PageSetup.TopMargin = 0;
             sec.PageSetup.BottomMargin = 0;
 
-            for (int idx = 1; idx <= 1000; ++idx)
+            for (int idx = 1; idx <= 1000; idx++)
             {
                 var par = sec.AddParagraph();
                 par.AddText("Paragraph " + idx + ": ");

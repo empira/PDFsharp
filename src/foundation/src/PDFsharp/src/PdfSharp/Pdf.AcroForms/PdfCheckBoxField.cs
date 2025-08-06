@@ -28,7 +28,7 @@ namespace PdfSharp.Pdf.AcroForms
         /// <summary>
         /// Indicates whether the field is checked.
         /// </summary>
-        public bool Checked  //R080317 // TODO
+        public bool Checked  //R080317 // TODO_OLD
         {
             get
             {
@@ -42,7 +42,7 @@ namespace PdfSharp.Pdf.AcroForms
                 if (Fields.Elements.Items.Length == 2)
                 {
                     string value = ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements.GetString(Keys.V);
-                    //bool bReturn = value.Length != 0 && value != UncheckedValue; //R081114 (3Std.!!) auch auf Nein prüfen; //TODO woher kommt der Wert?
+                    //bool bReturn = value.Length != 0 && value != UncheckedValue; //R081114 (3Std.!!) auch auf Nein prüfen; //TODO_OLD woher kommt der Wert?
                     bool bReturn = value.Length != 0 && value == CheckedName;
                     return bReturn;
                 }
@@ -191,7 +191,7 @@ namespace PdfSharp.Pdf.AcroForms
                     if (Fields.Elements.Items.Length == 2)
                     {
                         string value = ((PdfDictionary)(((PdfReference)(Fields.Elements.Items[0])).Value)).Elements.GetString(PdfAcroField.Keys.V);
-                        bool bReturn = value.Length != 0 && value != "/Off" && value != "/Nein"; //R081114 (3Std.!!) auch auf Nein prüfen; //TODO woher kommt der Wert?
+                        bool bReturn = value.Length != 0 && value != "/Off" && value != "/Nein"; //R081114 (3Std.!!) auch auf Nein prüfen; //TODO_OLD woher kommt der Wert?
                         return bReturn;
                     }
                     else

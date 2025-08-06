@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 using SysPoint = System.Windows.Point;
 using SysSize = System.Windows.Size;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media;
 using SysPoint = Windows.Foundation.Point;
 using SysSize = Windows.Foundation.Size;
@@ -48,7 +48,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Initializes a new instance of the XPoint class with the specified point.
         /// </summary>
@@ -109,18 +109,12 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Indicates whether this instance and a specified point are equal.
         /// </summary>
-        public bool Equals(XPoint value)
-        {
-            return Equals(this, value);
-        }
+        public bool Equals(XPoint value) => Equals(this, value);
 
         /// <summary>
         /// Returns the hash code for this instance.
         /// </summary>
-        public override int GetHashCode()
-        {
-            return X.GetHashCode() ^ Y.GetHashCode();
-        }
+        public override int GetHashCode() => X.GetHashCode() ^ Y.GetHashCode();
 
         /// <summary>
         /// Parses the point from a string.
@@ -177,45 +171,30 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Converts this XPoint to a System.Drawing.Point.
         /// </summary>
-        public PointF ToPointF()
-        {
-            return new PointF((float)_x, (float)_y);
-        }
+        public PointF ToPointF() => new((float)_x, (float)_y);
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Converts this XPoint to a System.Windows.Point.
         /// </summary>
-        public SysPoint ToPoint()
-        {
-            return new SysPoint(_x, _y);
-        }
+        public SysPoint ToPoint() => new(_x, _y);
 #endif
 
         /// <summary>
-        /// Converts this XPoint to a human readable string.
+        /// Converts this XPoint to a human-readable string.
         /// </summary>
-        public override string ToString()
-        {
-            return ConvertToString(null, null);
-        }
+        public override string ToString() => ConvertToString(null, null);
 
         /// <summary>
-        /// Converts this XPoint to a human readable string.
+        /// Converts this XPoint to a human-readable string.
         /// </summary>
-        public string ToString(IFormatProvider provider)
-        {
-            return ConvertToString(null, provider);
-        }
+        public string ToString(IFormatProvider provider) => ConvertToString(null, provider);
 
         /// <summary>
-        /// Converts this XPoint to a human readable string.
+        /// Converts this XPoint to a human-readable string.
         /// </summary>
-        string IFormattable.ToString(string? format, IFormatProvider? provider)
-        {
-            return ConvertToString(format, provider);
-        }
+        string IFormattable.ToString(string? format, IFormatProvider? provider) => ConvertToString(format, provider);
 
         /// <summary>
         /// Implements ToString.
@@ -242,132 +221,96 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Adds a point and a vector.
         /// </summary>
-        public static XPoint operator +(XPoint point, XVector vector)
-        {
-            return new XPoint(point._x + vector.X, point._y + vector.Y);
-        }
+        public static XPoint operator +(XPoint point, XVector vector) => new(point._x + vector.X, point._y + vector.Y);
 
         /// <summary>
         /// Adds a point and a size.
         /// </summary>
-        public static XPoint operator +(XPoint point, XSize size) // TODO: make obsolete
-        {
-            return new XPoint(point._x + size.Width, point._y + size.Height);
-        }
+        public static XPoint operator +(XPoint point, XSize size) // TODO_OLD: make obsolete
+            => new(point._x + size.Width, point._y + size.Height);
 
         /// <summary>
         /// Adds a point and a vector.
         /// </summary>
         public static XPoint Add(XPoint point, XVector vector)
-        {
-            return new XPoint(point._x + vector.X, point._y + vector.Y);
-        }
+            => new(point._x + vector.X, point._y + vector.Y);
 
         /// <summary>
         /// Subtracts a vector from a point.
         /// </summary>
-        public static XPoint operator -(XPoint point, XVector vector)
-        {
-            return new XPoint(point._x - vector.X, point._y - vector.Y);
-        }
+        public static XPoint operator -(XPoint point, XVector vector) 
+            => new(point._x - vector.X, point._y - vector.Y);
 
         /// <summary>
         /// Subtracts a vector from a point.
         /// </summary>
-        public static XPoint Subtract(XPoint point, XVector vector)
-        {
-            return new XPoint(point._x - vector.X, point._y - vector.Y);
-        }
+        public static XPoint Subtract(XPoint point, XVector vector) 
+            => new(point._x - vector.X, point._y - vector.Y);
 
         /// <summary>
         /// Subtracts a point from a point.
         /// </summary>
-        public static XVector operator -(XPoint point1, XPoint point2)
-        {
-            return new XVector(point1._x - point2._x, point1._y - point2._y);
-        }
+        public static XVector operator -(XPoint point1, XPoint point2) 
+            => new(point1._x - point2._x, point1._y - point2._y);
 
         /// <summary>
         /// Subtracts a size from a point.
         /// </summary>
         [Obsolete("Use XVector instead of XSize as second parameter.")]
-        public static XPoint operator -(XPoint point, XSize size)
-        {
-            return new XPoint(point._x - size.Width, point._y - size.Height);
-        }
+        public static XPoint operator -(XPoint point, XSize size) 
+            => new(point._x - size.Width, point._y - size.Height);
 
         /// <summary>
         /// Subtracts a point from a point.
         /// </summary>
-        public static XVector Subtract(XPoint point1, XPoint point2)
-        {
-            return new XVector(point1._x - point2._x, point1._y - point2._y);
-        }
+        public static XVector Subtract(XPoint point1, XPoint point2) 
+            => new(point1._x - point2._x, point1._y - point2._y);
 
         /// <summary>
         /// Multiplies a point with a matrix.
         /// </summary>
-        public static XPoint operator *(XPoint point, XMatrix matrix)
-        {
-            return matrix.Transform(point);
-        }
+        public static XPoint operator *(XPoint point, XMatrix matrix) 
+            => matrix.Transform(point);
 
         /// <summary>
         /// Multiplies a point with a matrix.
         /// </summary>
-        public static XPoint Multiply(XPoint point, XMatrix matrix)
-        {
-            return matrix.Transform(point);
-        }
+        public static XPoint Multiply(XPoint point, XMatrix matrix) 
+            => matrix.Transform(point);
 
         /// <summary>
         /// Multiplies a point with a scalar value.
         /// </summary>
-        public static XPoint operator *(XPoint point, double value)
-        {
-            return new XPoint(point._x * value, point._y * value);
-        }
+        public static XPoint operator *(XPoint point, double value) 
+            => new(point._x * value, point._y * value);
 
         /// <summary>
         /// Multiplies a point with a scalar value.
         /// </summary>
-        public static XPoint operator *(double value, XPoint point)
-        {
-            return new XPoint(value * point._x, value * point._y);
-        }
+        public static XPoint operator *(double value, XPoint point) 
+            => new(value * point._x, value * point._y);
 
         /// <summary>
         /// Performs an explicit conversion from XPoint to XSize.
         /// </summary>
-        public static explicit operator XSize(XPoint point)
-        {
-            return new XSize(Math.Abs(point._x), Math.Abs(point._y));
-        }
+        public static explicit operator XSize(XPoint point) 
+            => new(Math.Abs(point._x), Math.Abs(point._y));
 
         /// <summary>
         /// Performs an explicit conversion from XPoint to XVector.
         /// </summary>
-        public static explicit operator XVector(XPoint point)
-        {
-            return new XVector(point._x, point._y);
-        }
+        public static explicit operator XVector(XPoint point) => new(point._x, point._y);
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Performs an implicit conversion from XPoint to Point.
         /// </summary>
-        public static implicit operator SysPoint(XPoint point)
-        {
-            return new SysPoint(point.X, point.Y);
-        }
+        public static implicit operator SysPoint(XPoint point) => new(point.X, point.Y);
 
         /// <summary>
         /// Performs an implicit conversion from Point to XPoint.
         /// </summary>
-        public static implicit operator XPoint(SysPoint point)
-        {
-            return new XPoint(point.X, point.Y);
-        }
+        public static implicit operator XPoint(SysPoint point) => new(point.X, point.Y);
 #endif
 
         /// <summary>

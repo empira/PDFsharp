@@ -2,7 +2,6 @@
 // See the LICENSE file in the solution root for more information.
 
 using MigraDoc.DocumentObjectModel;
-using MigraDoc.RtfRendering.Resources;
 
 namespace MigraDoc.RtfRendering
 {
@@ -46,7 +45,7 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         protected virtual string GetFieldResult()
         {
-            return Messages2.UpdateField;
+            return MdRtfMsgs.UpdateField.Message;
         }
     }
 }

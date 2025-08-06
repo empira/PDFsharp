@@ -16,7 +16,6 @@ namespace PdfSharp.Pdf.Filters
         /// <param name="bpp">Bytes per pixel</param>
         /// <param name="inData">The input data</param>
         /// <param name="outData">The target array where the unfiltered data is stored</param>
-        /// <returns></returns>
         internal static void Unfilter(int stride, int bpp, byte[] inData, byte[] outData)
         {
             var prevRow = new byte[stride];

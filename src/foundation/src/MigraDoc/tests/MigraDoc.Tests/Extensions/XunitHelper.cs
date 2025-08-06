@@ -1,4 +1,7 @@
-﻿using System;
+﻿// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,7 +27,7 @@ namespace Xunit
 
         /// <summary>
         /// Gets a value indicating whether slow unit tests should be skipped.
-        /// This method is used for tests that run slow under .NET Framework 4.7.2, but much faster under .NET 6.
+        /// This method is used for tests that run slow under .NET Framework 4.6.2, but much faster under .NET 6.
         /// </summary>
         /// <returns>True if slow tests should be skipped.</returns>
         public static bool SkipSlowTestsUnderDotNetFramework()

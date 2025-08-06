@@ -7,6 +7,7 @@
 //using PdfSharp.Quality;
 //using PdfSharp.Snippets.Font;
 
+using PdfSharp.UniversalAccessibility;
 using Features = PdfSharp.Features.PdfSharpFeatures;
 
 namespace PdfSharp.Features
@@ -31,7 +32,7 @@ namespace PdfSharp.Features
             //features[PdfSharpFeatures.Names.Drawing_paths_Paths__PathMisc].Run();
             //features[PdfSharpFeatures.Names.Drawing_paths_Paths__PathShapes].Run();
             //features[PdfSharpFeatures.Names.Drawing_paths_Paths__PathText].Run();
-            features[PdfSharpFeatures.Names.Drawing_paths_Paths__PathWpf].Run();
+            //features[PdfSharpFeatures.Names.Drawing_paths_Paths__PathWpf].Run();
 
             // Drawing/graphics
             //features[PdfSharpFeatures.Names.Drawing_graphics_GraphicsUnit__Upwards].Run();
@@ -43,6 +44,13 @@ namespace PdfSharp.Features
             //features[PdfSharpFeatures.Names.Drawing_text_SymbolFonts__Symbols].Run();
 
             //features[PdfSharpFeatures.Names.Font_encoding_Encodings_AnsiEncoding].Run();
+
+            // Pdf/annotations
+
+            // Pdf/pdfa
+            features[PdfSharpFeatures.Names.Pdf_pdfa_PdfA].Run();
+
+
 
             // === reviewed up to here ===
 
