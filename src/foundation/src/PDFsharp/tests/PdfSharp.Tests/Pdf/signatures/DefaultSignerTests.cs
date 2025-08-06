@@ -95,7 +95,7 @@ namespace PdfSharp.Tests.Pdf
         // Time stamping not implemented for .NET Standard or .NET Framework.
         // Some arbitrarily selected timestamp servers.
         [InlineData("test-cert_rsa_1024", PdfMessageDigestType.SHA256, "http://zeitstempel.dfn.de")]
-        [InlineData("test-cert_rsa_1024", PdfMessageDigestType.SHA256, "http://timestamp.sectigo.com")]
+        // 2025-05-19 Commented out because tests failed sporadically [InlineData("test-cert_rsa_1024", PdfMessageDigestType.SHA256, "http://timestamp.sectigo.com")]
         [InlineData("test-cert_rsa_1024", PdfMessageDigestType.SHA256, "http://timestamp.apple.com/ts01")]
 #if DEBUG
         [InlineData("test-cert_rsa_1024", PdfMessageDigestType.SHA256, "http://timestamp.digicert.com")]
@@ -167,7 +167,7 @@ namespace PdfSharp.Tests.Pdf
         // Time stamping not implemented for .NET Standard or .NET Framework.
         // Some arbitrarily selected timestamp servers.
         [InlineData("test-cert_rsa_1024", PdfMessageDigestType.SHA256, "http://zeitstempel.dfn.de")]
-        [InlineData("test-cert_rsa_1024", PdfMessageDigestType.SHA256, "http://timestamp.sectigo.com")]
+        // 2025-05-19 Commented out because tests failed sporadically [InlineData("test-cert_rsa_1024", PdfMessageDigestType.SHA256, "http://timestamp.sectigo.com")]
         [InlineData("test-cert_rsa_1024", PdfMessageDigestType.SHA256, "http://timestamp.apple.com/ts01")]
 #if DEBUG
         [InlineData("test-cert_rsa_1024", PdfMessageDigestType.SHA256, "http://timestamp.digicert.com")]

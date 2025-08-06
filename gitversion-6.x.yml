@@ -1,9 +1,9 @@
-# Last update: 25-01-30
+# Last update: 25-05-19
 assembly-versioning-scheme: MajorMinorPatch
 # PDFSHARP_BUILD_VERSION are the days since 2005-01-01. #CHECK_BEFORE_RELEASE
 # Command Window: ? (DateTime.Now - new DateTime(2005, 1, 1)).Days;
 # C# Interactive: Console.WriteLine((DateTime.Now - new DateTime(2005, 1, 1)).Days);
-assembly-file-versioning-format: '{Major}.{Minor}.{Patch}.{env:PDFSHARP_BUILD_VERSION ?? 7334}'
+assembly-file-versioning-format: '{Major}.{Minor}.{Patch}.{env:PDFSHARP_BUILD_VERSION ?? 7443}'
 strategies: [Mainline]
 assembly-informational-format: '{InformationalVersion}'
 branches:

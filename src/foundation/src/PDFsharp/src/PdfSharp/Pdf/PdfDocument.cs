@@ -369,8 +369,18 @@ namespace PdfSharp.Pdf
                         _ = typeof(int);
 #endif
                     iref.Position = writer.Position;
-                    iref.Value.WriteObject(writer);
+
+                    var obj = iref.Value;
+
+                    // Enter indirect object in SecurityHandler to allow object encryption key generation for this object.
+                    effectiveSecurityHandler?.EnterObject(obj.ObjectID);
+
+                    obj.WriteObject(writer);
                 }
+
+                // Leaving only the last indirect object in SecurityHandler is sufficient, as this is the first time no indirect object is entered anymore.
+                effectiveSecurityHandler?.LeaveObject();
+
                 // ReSharper disable once RedundantCast. Redundant only if 64 bit.
                 var startXRef = (SizeType)writer.Position;
                 IrefTable.WriteObject(writer);

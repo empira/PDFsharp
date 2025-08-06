@@ -66,7 +66,7 @@ namespace PdfSharp.Pdf.Advanced
                 // because releasing 6.1.0 had a higher priority. We will fix this in a later release.
                 // However, using the last added object and logging an error is better than throwing an exception in all cases.
                 PdfSharpLogHost.PdfReadingLogger.LogError("Object '{ObjectID}' already exists in xref table’s objects, referring to position {Position}. The latter one referring to position {Position} is used. " +
-                                                          "This should not occur. If somebody came here, please send us your PDF file so that we can fix it (issues (at) pdfsharp.net.", oldIref.ObjectID, oldIref.Position, iref.Position);
+                                                          $"This should not occur. If you think this is a bug in PDFsharp, please visit {UrlLiterals.LinkToCannotOpenPdfFile} for further information.", oldIref.ObjectID, oldIref.Position, iref.Position);
 
                 _objectTable.Remove(iref.ObjectID);
             }

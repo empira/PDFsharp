@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics;
@@ -357,7 +357,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Renders a trailing standard paragraph in case the last element in elements isn�t a paragraph.
+        /// Renders a trailing standard paragraph in case the last element in elements isn’t a paragraph.
         /// (Some RTF elements need to close with a paragraph.)
         /// </summary>
         protected void RenderTrailingParagraph(DocumentElements elements)

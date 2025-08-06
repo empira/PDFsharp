@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
@@ -164,7 +164,7 @@ namespace PdfSharp.Pdf.Advanced
             }
 
             /// <summary>
-            /// Creates an instance of HashAlgorithm f�r use in ImageSelector.
+            /// Creates an instance of HashAlgorithm für use in ImageSelector.
             /// </summary>
             private HashAlgorithm GetHashCreator()
             {

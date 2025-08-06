@@ -1306,16 +1306,16 @@ namespace PdfSharp.Pdf.IO
             // Reference 2.0: 7.1  Table 2 — Delimiter characters / Page 23
             return ch switch
             {
-                '(' => true,
-                ')' => true,
-                '<' => true,
-                '>' => true,
-                '[' => true,
-                ']' => true,
-                '{' => true,
-                '}' => true,
-                '/' => true,
-                '%' => true,
+                '(' => true,  // PDF string delimiter
+                ')' => true,  //        "
+                '<' => true,  // PDF dictionary delimiter
+                '>' => true,  //        "
+                '[' => true,  // PDF array delimiter
+                ']' => true,  //        "
+                '{' => true,  // Type 4 PostScript calculator functions
+                '}' => true,  //        "
+                '/' => true,  // PDF names delimiter
+                '%' => true,  // PDF comments delimiter
                 _ => false
             };
         }

@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
@@ -22,7 +22,7 @@ namespace MigraDoc.DocumentObjectModel
             var sb = new StringBuilder(length + (length >> 2));
             for (int index = 0; index < length; index++)
             {
-                // Don�t convert characters into DDL.
+                // Don’t convert characters into DDL.
                 char ch = str[index];
                 switch (ch)
                 {

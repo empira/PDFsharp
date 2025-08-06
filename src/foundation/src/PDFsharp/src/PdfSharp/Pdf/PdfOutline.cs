@@ -3,6 +3,7 @@
 
 // Review: Under construction - StL/14-10-05
 
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf.Actions;
@@ -155,10 +156,12 @@ namespace PdfSharp.Pdf
 
         /// <summary>
         /// Gets or sets the destination page.
+        /// Can be null if destination page is not given directly.
         /// </summary>
+        [MaybeNull]
         public PdfPage DestinationPage
         {
-            get => _destinationPage ?? NRT.ThrowOnNull<PdfPage>();
+            get => _destinationPage;
             set => _destinationPage = value;
         }
         PdfPage? _destinationPage;
@@ -305,7 +308,6 @@ namespace PdfSharp.Pdf
 
             var dest = Elements.GetValue(Keys.Dest);
             var a = Elements.GetValue(Keys.A);
-            Debug.Assert(dest == null || a == null, "Either destination or goto action.");
 
             PdfArray? destArray;
             if (dest != null)
@@ -314,13 +316,15 @@ namespace PdfSharp.Pdf
                 if (destArray != null)
                 {
                     SplitDestinationPage(destArray);
+                    goto Done;
                 }
                 else
                 {
                     Debug.Assert(false, "See what to do when this happened.");
                 }
             }
-            else if (a != null)
+
+            if (a != null)
             {
                 // The dictionary should be a GoTo action.
                 if (a is PdfDictionary action && action.Elements.GetName(PdfAction.Keys.S) == "/GoTo")
@@ -329,12 +333,10 @@ namespace PdfSharp.Pdf
                     destArray = dest as PdfArray;
                     if (destArray != null)
                     {
-                        // Replace Action with /Dest entry.
-                        Elements.Remove(Keys.A);
-                        Elements.Add(Keys.Dest, destArray);
                         SplitDestinationPage(destArray);
+                        goto Done;
                     }
-                    else if (dest is PdfString namedDestination)
+                    if (dest is PdfString namedDestination)
                     {
                         // look in Destinations and name-tree
                         if (Owner.Catalog.Destinations.Contains(namedDestination.Value))
@@ -356,20 +358,17 @@ namespace PdfSharp.Pdf
                         }
                         if (destArray != null)
                         {
-                            // Replace Action with /Dest entry.
-                            Elements.Remove(Keys.A);
-                            Elements.Add(Keys.Dest, destArray);
                             SplitDestinationPage(destArray);
                         }
                     }
                     else
                     {
-                        throw new Exception("Destination Array or Name expected.");
+                        //throw new Exception("Destination Array or Name expected.");
                     }
                 }
                 else
                 {
-                    Debug.Assert(false, "See what to do when this happened.");
+                    //Debug.Assert(false, "See what to do when this happened.");
                 }
             }
             else
@@ -377,6 +376,7 @@ namespace PdfSharp.Pdf
                 // Neither destination page nor GoTo action.
             }
 
+        Done:
             InitializeChildren();
         }
 
@@ -544,38 +544,39 @@ namespace PdfSharp.Pdf
 
         PdfArray CreateDestArray()
         {
+            // Only called if DestinationPage is not null.
             PdfArray? dest = PageDestinationType switch
             {
                 // [page /XYZ left top zoom]
-                PdfPageDestinationType.Xyz => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                PdfPageDestinationType.Xyz => new PdfArray(Owner, DestinationPage!.ReferenceNotNull,
                     new PdfLiteral($"/XYZ {Fd(Left)} {Fd(Top)} {Fd(Zoom)}")),
 
                 // [page /Fit]
-                PdfPageDestinationType.Fit => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                PdfPageDestinationType.Fit => new PdfArray(Owner, DestinationPage!.ReferenceNotNull,
                     new PdfLiteral("/Fit")),
 
                 // [page /FitH top]
-                PdfPageDestinationType.FitH => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                PdfPageDestinationType.FitH => new PdfArray(Owner, DestinationPage!.ReferenceNotNull,
                     new PdfLiteral($"/FitH {Fd(Top)}")),
 
                 // [page /FitV left]
-                PdfPageDestinationType.FitV => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                PdfPageDestinationType.FitV => new PdfArray(Owner, DestinationPage!.ReferenceNotNull,
                     new PdfLiteral($"/FitV {Fd(Left)}")),
 
                 // [page /FitR left bottom right top]
-                PdfPageDestinationType.FitR => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                PdfPageDestinationType.FitR => new PdfArray(Owner, DestinationPage!.ReferenceNotNull,
                     new PdfLiteral($"/FitR {Fd(Left)} {Fd(Bottom)} {Fd(Right)} {Fd(Top)}")),
 
                 // [page /FitB]
-                PdfPageDestinationType.FitB => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                PdfPageDestinationType.FitB => new PdfArray(Owner, DestinationPage!.ReferenceNotNull,
                     new PdfLiteral("/FitB")),
 
                 // [page /FitBH top]
-                PdfPageDestinationType.FitBH => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                PdfPageDestinationType.FitBH => new PdfArray(Owner, DestinationPage!.ReferenceNotNull,
                     new PdfLiteral($"/FitBH {Fd(Top)}")),
 
                 // [page /FitBV left]
-                PdfPageDestinationType.FitBV => new PdfArray(Owner, DestinationPage.ReferenceNotNull,
+                PdfPageDestinationType.FitBV => new PdfArray(Owner, DestinationPage!.ReferenceNotNull,
                     new PdfLiteral($"/FitBV {Fd(Left)}")),
 
                 _ => throw new ArgumentOutOfRangeException()
@@ -590,9 +591,9 @@ namespace PdfSharp.Pdf
         {
             if (Double.IsNaN(value))
                 throw new InvalidOperationException("Value is not a valid Double.");
-            return value.ToString("#.##", CultureInfo.InvariantCulture);
+            return value.ToString("0.##", CultureInfo.InvariantCulture);
 
-            //return Double.IsNaN(value) ? "null" : value.ToString("#.##", CultureInfo.InvariantCulture);
+            //return Double.IsNaN(value) ? "null" : value.ToString("0.##", CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -600,7 +601,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         static string Fd(double? value)
         {
-            return value.HasValue ? value.Value.ToString("#.##", CultureInfo.InvariantCulture) : "null";
+            return value.HasValue ? value.Value.ToString("0.##", CultureInfo.InvariantCulture) : "null";
         }
 
         internal override void WriteObject(PdfWriter writer)

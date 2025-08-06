@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 #if NET6_0_OR_GREATER
@@ -34,7 +34,7 @@ namespace PdfSharp.Pdf.Signatures
 #if NET6_0_OR_GREATER
             TimeStampAuthorityUri = timeStampAuthorityUri;
 #else
-            // We don’t know how to get a time stamp with .NET Standard.
+            // We donâ€™t know how to get a time stamp with .NET Standard.
             // If you need it you must implement your own signer.
             if (timeStampAuthorityUri != null)
                 throw new ArgumentException(nameof(timeStampAuthorityUri) + " must be null when using .NET Framework or .NET Standard.");
@@ -60,7 +60,7 @@ namespace PdfSharp.Pdf.Signatures
                 _signatureSize = (await GetSignatureAsync(new MemoryStream([0])).ConfigureAwait(false)).Length;
                 if (MustAddTimeStamp)
                 {
-                    // Add arbitrary padding because TSA timestamp response’s length seems to vary from one call to another by 1 byte.
+                    // Add arbitrary padding because TSA timestamp responseâ€™s length seems to vary from one call to another by 1 byte.
                     _signatureSize += 10; // 2 was found to be too small. Make it 10 to allow for some DSA variation.
                 }
                 else

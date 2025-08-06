@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using FluentAssertions;
@@ -60,7 +60,7 @@ namespace MigraDoc.DocumentObjectModel.Tests.Structs
             (unitNull == null).Should().BeTrue();
             (unitNull != null).Should().BeFalse();
 
-            // Only check cm variables, which are totally equal because str2Cm with "2cm" won’t cause rounding errors.
+            // Only check cm variables, which are totally equal because str2Cm with "2cm" wonâ€™t cause rounding errors.
             (unit2Cm2 == unit2Cm).Should().BeTrue();
 
             // Use IsSameValue() for other variables.
@@ -69,7 +69,7 @@ namespace MigraDoc.DocumentObjectModel.Tests.Structs
             unit2CmPt2.IsSameValue(unit2CmPt).Should().BeTrue();
             unit2CmPc2.IsSameValue(unit2CmPc).Should().BeTrue();
 
-            // Only check cm variables, which are totally equal because str2Cm with "2cm" won’t cause rounding errors.
+            // Only check cm variables, which are totally equal because str2Cm with "2cm" wonâ€™t cause rounding errors.
             (unit2Cm2 != unit2Cm).Should().BeFalse();
 
             // Same value - other unit.

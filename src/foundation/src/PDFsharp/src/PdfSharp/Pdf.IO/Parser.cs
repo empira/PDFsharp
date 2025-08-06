@@ -400,7 +400,7 @@ namespace PdfSharp.Pdf.IO
                 {
                     throw new InvalidOperationException(
                         "Should not happen. Correcting stream length failed twice. There may be a bug in DetermineStreamLength. " +
-                        "Please send us your PDF file so that we can fix this (issues (at) pdfsharp.net).");
+                        $"If you think this is a bug in PDFsharp, please visit {UrlLiterals.LinkToCannotOpenPdfFile} for further information.");
                 }
                 retryCount++;
                 _lexer.Position = startPosition;
@@ -1336,7 +1336,7 @@ namespace PdfSharp.Pdf.IO
             // Implementation note 18 Appendix  H:
             // Acrobat viewers require only that the %%EOF marker appear somewhere within the last 1024 bytes of the file.
             int idx;
-            if (length < 1030)
+            if (length <= 1030)
             {
                 // Reading the final 30 bytes should work for all files. But often it does not.
                 string trail = _lexer.ScanRawString(length - 31, 30); //lexer.Pdf.Substring(length - 30);
@@ -1601,7 +1601,7 @@ namespace PdfSharp.Pdf.IO
                 if (oldIref.Position != xrefStart)
                 {
                     PdfSharpLogHost.PdfReadingLogger.LogError("Object '{ObjectID}' already exists in xref table’s references, referring to position {Position}. The latter one referring to position {Position} is used. " +
-                                                              "This should not occur. If somebody came here, please send us your PDF file so that we can fix it (issues (at) pdfsharp.net.", oldIref.ObjectID, oldIref.Position, xrefStart);
+                                                              $"This should not occur. If you think this is a bug in PDFsharp, please visit {UrlLiterals.LinkToCannotOpenPdfFile} for further information.", oldIref.ObjectID, oldIref.Position, xrefStart);
 
                     oldIref.Position = xrefStart;
                 }

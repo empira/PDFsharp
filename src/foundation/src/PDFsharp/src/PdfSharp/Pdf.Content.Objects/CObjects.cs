@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using System.Collections;
@@ -686,7 +686,7 @@ namespace PdfSharp.Pdf.Content.Objects  // TODO_OLD: split into single files
         }
 
         #region Printing/Debugger display
-        /// <summary>Function returning string that will be used to display object�s value in debugger for this type of objects.</summary>
+        /// <summary>Function returning string that will be used to display object’s value in debugger for this type of objects.</summary>
         public static Func<COperator, string> debuggerDisplay { get; set; } = o => o.ToString(15);
         string DebuggerDisplay => debuggerDisplay(this);
 

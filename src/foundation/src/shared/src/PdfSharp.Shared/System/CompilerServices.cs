@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 // This file contains code from the .NET source to use some newer C# features in .NET Standard / Framework.
@@ -151,8 +151,8 @@ namespace System
         /// <summary>Calculate the offset from the start using the giving collection length.</summary>
         /// <param name="length">The length of the collection that the Index will be used with. length has to be a positive value</param>
         /// <remarks>
-        /// For performance reason, we don’t validate the input length parameter and the returned offset value against negative values.
-        /// we don’t validate either the returned offset is greater than the input length.
+        /// For performance reason, we donâ€™t validate the input length parameter and the returned offset value against negative values.
+        /// we donâ€™t validate either the returned offset is greater than the input length.
         /// It is expected Index will be used with collections which always have non-negative length/count. If the returned offset is negative and
         /// then used to index a collection will get out of range exception which will be same affect as the validation.
         /// </remarks>
@@ -257,7 +257,7 @@ namespace System
         /// <summary>Calculate the start offset and length of range object using a collection length.</summary>
         /// <param name="length">The length of the collection that the range will be used with. length has to be a positive value.</param>
         /// <remarks>
-        /// For performance reason, we don’t validate the input length parameter against negative values.
+        /// For performance reason, we donâ€™t validate the input length parameter against negative values.
         /// It is expected Range will be used with collections which always have non-negative length/count.
         /// We validate the range is inside the length scope though.
         /// </remarks>

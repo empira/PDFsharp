@@ -15,6 +15,12 @@ namespace PdfSharp.Internal
 #endif
 
         /// <summary>
+        /// URL for index page.
+        /// "https://docs.pdfsharp.net/"
+        /// </summary>
+        public const string LinkToRoot = DocsPdfSharpUrl;
+
+        /// <summary>
         /// URL for missing assets error message.
         /// "https://docs.pdfsharp.net/link/download-assets.html"
         /// </summary>
@@ -25,5 +31,17 @@ namespace PdfSharp.Internal
         /// "https://docs.pdfsharp.net/link/font-resolving.html"
         /// </summary>
         public const string LinkToFontResolving = DocsPdfSharpUrl + "link/font-resolving.html";
+
+        /// <summary>
+        /// URL for missing MigraDoc error font.
+        /// "https://docs.pdfsharp.net/link/migradoc-font-resolving-6.2.html"
+        /// </summary>
+        public const string LinkToMigraDocFontResolving = DocsPdfSharpUrl + "link/migradoc-font-resolving-6.2.html";
+
+        /// <summary>
+        /// URL shown when a PDF file cannot be opened/parsed.
+        /// "https://docs.pdfsharp.net/link/cannot-open-pdf-6.2.html"
+        /// </summary>
+        public const string LinkToCannotOpenPdfFile = DocsPdfSharpUrl + "link/cannot-open-pdf-6.2.html";
     }
 }

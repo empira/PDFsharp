@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System.Globalization;
@@ -50,7 +50,7 @@ namespace MigraDoc.Tests
             var englishMonths = new[] { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
             var amPm = new[] { "AM", "PM" };
             var germanWeekdays = new[] { "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag" };
-            var germanMonths = new[] { "Januar", "Februar", "M�rz", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember" };
+            var germanMonths = new[] { "Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember" };
 
             // filenamePattern with placeholder for cultureInfo.
             var filenamePattern = IOUtility.GetTempFileName("DateTime{0}", "pdf");

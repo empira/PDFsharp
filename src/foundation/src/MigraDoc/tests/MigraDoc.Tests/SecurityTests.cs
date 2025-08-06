@@ -1,23 +1,27 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using PdfSharp.Pdf;
-using PdfSharp.Pdf.IO;
-using PdfSharp.Pdf.Security;
-using MigraDoc.Rendering;
-using Xunit;
+using System.IO;
+using System.Security.Cryptography.X509Certificates;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using MigraDoc.DocumentObjectModel;
+using MigraDoc.Rendering;
 using PdfSharp;
 using PdfSharp.Drawing;
+using PdfSharp.Drawing.Layout;
 using PdfSharp.Fonts;
 using PdfSharp.Logging;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
+using PdfSharp.Pdf.Security;
+using PdfSharp.Pdf.Signatures;
 using PdfSharp.Quality;
 using PdfSharp.TestHelper;
 using PdfSharp.TestHelper.Analysis.ContentStream;
-using static PdfSharp.TestHelper.SecurityTestHelper;
+using Xunit;
 using static MigraDoc.Tests.Helper.SecurityTestHelper;
+using static PdfSharp.TestHelper.SecurityTestHelper;
 
 namespace MigraDoc.Tests
 {
@@ -355,7 +359,7 @@ namespace MigraDoc.Tests
         [SkippableTheory]
         [ClassData(typeof(TestData.AllWriteVersions))]
         [ClassData(typeof(TestData.AllWriteVersionsSkipped), Skip = SkippedTestOptionsMessage)]
-        public void Test_Write_UserOwnerPassword(TestOptionsEnum optionsEnum)
+        public void Test_Write_UserAndOwnerPassword(TestOptionsEnum optionsEnum)
         {
             Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
 
@@ -989,6 +993,124 @@ namespace MigraDoc.Tests
             {
                 // Restore old logger factory to not disturb other tests.
                 LogHost.Factory = oldLoggerFactory;
+            }
+        }
+
+
+        [Fact]
+        public void Test_Hyperlink()
+        {
+            // Create a MigraDoc document.
+            var document = CreateDocument();
+            // Associate the MigraDoc document with a renderer.
+            var pdfRenderer = new PdfDocumentRenderer
+            {
+                Document = document,
+                PdfDocument = new PdfDocument
+                {
+                    PageLayout = PdfPageLayout.SinglePage
+                }
+            };
+            // Layout and render document to PDF.
+            pdfRenderer.RenderDocument();
+            // Set security settings directly on the PDF document
+            var securitySettings = pdfRenderer.PdfDocument.SecuritySettings;
+            securitySettings.OwnerPassword = "Secret";
+            // Save the document...
+            var filename = PdfFileUtility.GetTempPdfFullFileName("HyperlinkWithEncryptionTest");
+            pdfRenderer.PdfDocument.Save(filename);
+            // ...and start a viewer.
+            // Process.Start(new ProcessStartInfo(filename) { UseShellExecute = true });
+            // Creates minimalistic document with hyperlink.
+            static Document CreateDocument()
+            {
+                // Create a new MigraDoc document.
+                var document = new Document();
+                // Add a section to the document.
+                var section = document.AddSection();
+                // Add a paragraph to the section.
+                var paragraph = section.AddParagraph();
+                // Add a hyperlink to a web URL to the paragraph.
+                var hyperlink = paragraph.AddHyperlink("https://docs.pdfsharp.net", HyperlinkType.Url);
+                hyperlink.AddText("link");
+                return document;
+            }
+        }
+
+        [SkippableTheory]
+        [ClassData(typeof(TestData.AllWriteVersions))]
+        [ClassData(typeof(TestData.AllWriteVersionsSkipped), Skip = SkippedTestOptionsMessage)]
+        public void Test_SignedDocument(TestOptionsEnum optionsEnum)
+        {
+            var options = TestOptions.ByEnum(optionsEnum);
+            options.SetDefaultPasswords(true);
+
+            var filename = AddPrefixToFilename("SigningWithEncryptionTest.pdf", options);
+            
+            var document = CreateDocument();
+            SecureDocument(document, options);
+
+            // Save the document.
+            document.Save(filename);
+
+
+            // Creates minimalistic document with hyperlink.
+            static PdfDocument CreateDocument()
+            {
+                const int requiredAssets = 1014;
+                string? timestampURL = null;
+
+                var certType = "test-cert_rsa_1024";
+                var digestType = PdfMessageDigestType.SHA256;
+
+                IOUtility.EnsureAssetsVersion(requiredAssets);
+
+                var font = new XFont("Verdana", 10, XFontStyleEx.Regular);
+                var fontHeader = new XFont("Verdana", 18, XFontStyleEx.Regular);
+                var document = new PdfDocument();
+                var pdfPage = document.AddPage();
+                var xGraphics = XGraphics.FromPdfPage(pdfPage);
+                var layoutRectangle = new XRect(0, 72, pdfPage.Width.Point, pdfPage.Height.Point);
+                xGraphics.DrawString("Document Signature Test", fontHeader, XBrushes.Black, layoutRectangle, XStringFormats.TopCenter);
+                var textFormatter = new XTextFormatter(xGraphics);
+                layoutRectangle = new XRect(72, 144, pdfPage.Width.Point - 144, pdfPage.Height.Point - 144);
+
+                var text = "Lorem ipsum...";
+                textFormatter.DrawString(text, font, new XSolidBrush(XColor.FromKnownColor(XKnownColor.Black)), layoutRectangle, XStringFormats.TopLeft);
+
+                var pdfPosition = xGraphics.Transformer.WorldToDefaultPage(new XPoint(144, 216));
+                var options = new DigitalSignatureOptions
+                {
+                    // We do not set an appearance handler, so the default handler is used.
+                    // It is highly recommended to set an appearance handler to get a nicer representation of the signature.
+                    ContactInfo = "John Doe",
+                    Location = "Seattle",
+                    Reason = "License Agreement",
+                    Rectangle = new XRect(pdfPosition.X, pdfPosition.Y, 200, 50),
+                    AppName = "PDFsharp Library"
+                };
+
+                Uri? timestampURI = String.IsNullOrEmpty(timestampURL) ? null : new Uri(timestampURL, UriKind.Absolute);
+
+                var pdfSignatureHandler = DigitalSignatureHandler.ForDocument(document, new PdfSharpDefaultSigner(GetCertificate(certType), digestType, timestampURI), options);
+
+                return document;
+            }
+
+            static X509Certificate2 GetCertificate(string certName)
+            {
+                var certFolder = IOUtility.GetAssetsPath("pdfsharp-6.x/signatures");
+                var pfxFile = Path.Combine(certFolder ?? throw new InvalidOperationException("Call Download-Assets.ps1 before running the tests."), $"{certName}.pfx");
+                var rawData = File.ReadAllBytes(pfxFile);
+
+                // Do not use password literals for real certificates in source code.
+                var certificatePassword = "Seecrit1243";  //@@@???
+
+                var certificate = new X509Certificate2(rawData,
+                    certificatePassword,
+                    X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+
+                return certificate;
             }
         }
     }

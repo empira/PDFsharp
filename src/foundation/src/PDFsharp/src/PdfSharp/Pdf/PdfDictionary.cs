@@ -159,7 +159,6 @@ namespace PdfSharp.Pdf
             if (Stream != null)
                 Debug.Assert(Elements.ContainsKey("/Length"), "Dictionary has a stream but no length is set.");
 #endif
-
             if (_stream is not null && writer.EffectiveSecurityHandler != null)
             {
                 // Encryption could change the size of the stream.
@@ -170,16 +169,14 @@ namespace PdfSharp.Pdf
                 Elements[PdfStream.Keys.Length] = new PdfInteger(_stream?.Length ?? 0);
             }
 
-#if DEBUG
             // Sort keys for debugging purposes. Comparing PDF files with for example programs like
             // Araxis Merge is easier with sorted keys.
-            if (writer.Layout == PdfWriterLayout.Verbose)
+            if (writer.IsVerboseLayout)
             {
                 var list = new List<PdfName>(keys);
                 list.Sort(PdfName.Comparer);
                 list.CopyTo(keys, 0);
             }
-#endif
 
             foreach (var key in keys)
                 WriteDictionaryElement(writer, key);
@@ -194,22 +191,17 @@ namespace PdfSharp.Pdf
         /// </summary>
         internal virtual void WriteDictionaryElement(PdfWriter writer, PdfName key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-            var item = Elements[key];
+            Debug.Assert(key != null);
 #if DEBUG
-            // TODO_OLD: simplify PDFsharp
-            if (item is PdfObject { IsIndirect: true } pdfObject)
-            {
-                // Replace an indirect object by its Reference.
-                item = pdfObject.Reference;
-                Debug.Assert(false, "Check when we come here.");
-            }
+            if (key == "/Kids")
+                _ = typeof(int);
 #endif
+            var item = Elements[key]!;
             key.WriteObject(writer);
-            item?.WriteObject(writer);
-            writer.NewLine();
-        }
+            item.WriteObject(writer);
+            if (writer.Layout == PdfWriterLayout.Verbose)
+                writer.NewLine();
+}
 
         /// <summary>
         /// Writes the stream of this dictionary. This function is intended to be overridden
@@ -776,8 +768,9 @@ namespace PdfSharp.Pdf
                             if (key == "/Info")
                             {
                                 // We come here if PDFsharp was fully trimmed and meta-data could not be found by reflection.
-                                throw new InvalidOperationException("PDFsharp relies on reflection and does not work when a fully-trimmed self-contained file is used.\r\n" +
-                                                                    "See https://docs.pdfsharp.net/ for further information.");
+                                // Note: Should not occur since we added attributes that prevent trimming of certain parts.
+                                throw new InvalidOperationException($"PDFsharp relies on reflection and does not work when a fully-trimmed self-contained file is used.\r\n" +
+                                                                    $"See {UrlLiterals.LinkToRoot} for further information.");
                             }
                             else
                             {
