@@ -139,11 +139,11 @@ namespace MigraDoc.Rendering
             if (renderer != null)
                 renderer._documentRenderer = documentRenderer;
 #if DEBUG
-            // TODO Investigate why we can come here with "null".
+            // TODO_OLD Investigate why we can come here with "null".
             if (renderer == null)
                 _ = typeof(int);  // A place for a break point;
 #endif
-            return renderer!; // BUG??? => return type "Renderer?" // ?? NRT.ThrowOnNull<Renderer>();
+            return renderer!; // BUG_OLD??? => return type "Renderer?" // ?? NRT.ThrowOnNull<Renderer>();
         }
 
         /// <summary>

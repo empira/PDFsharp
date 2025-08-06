@@ -32,7 +32,7 @@ namespace PdfSharp.Pdf.Advanced
         //public void SetupFromBrush(XLinearGradientBrush brush, XMatrix matrix)
         //{
         //  if (brush == null)
-        //    throw new ArgumentNullException("brush");
+        //    throw new ArgumentNullException(nameof(brush));
 
         //  PdfShading shading = new PdfShading(document);
         //  shading.SetupFromBrush(brush);

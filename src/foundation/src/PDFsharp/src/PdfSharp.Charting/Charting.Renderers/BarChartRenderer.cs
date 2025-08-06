@@ -181,7 +181,7 @@ namespace PdfSharp.Charting.Renderers
             var seriesColl = cri.Chart.SeriesCollection;
             cri.SeriesRendererInfos = new SeriesRendererInfo[seriesColl.Count];
             // Lowest series is the first, like in Excel 
-            for (int idx = 0; idx < seriesColl.Count; ++idx)
+            for (int idx = 0; idx < seriesColl.Count; idx++)
             {
                 SeriesRendererInfo sri = new SeriesRendererInfo();
                 sri.Series = seriesColl[idx];

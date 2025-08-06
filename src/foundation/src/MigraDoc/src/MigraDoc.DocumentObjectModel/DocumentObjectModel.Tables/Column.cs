@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics.CodeAnalysis;
@@ -99,17 +99,17 @@ namespace MigraDoc.DocumentObjectModel.Tables
                     return _idx;
                 if (Values.Index is null && Parent is Columns clms)
                 {
-                    for (int i = 0; i < clms.Count; ++i)
+                    for (int idx = 0; idx < clms.Count; idx++)
                     {
-                        clms[i].Values.Index = i;
-                        clms[i]._idx = i;
-                        clms[i]._hasIdx = true;
+                        clms[idx].Values.Index = idx;
+                        clms[idx]._idx = idx;
+                        clms[idx]._hasIdx = true;
                     }
                     if (_hasIdx)
                         return _idx;
                 }
                 _hasIdx = true;
-                return _idx = Values.Index ?? throw new InvalidOperationException("Column index was not computed."); // TODO throw correct? Return -1 instead?
+                return _idx = Values.Index ?? throw new InvalidOperationException("Column index was not computed."); // TODO_OLD throw correct? Return -1 instead?
             }
         }
         int _idx;
@@ -118,7 +118,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         /// <summary>
         /// Gets a cell by its row index. The first cell has index 0.
         /// </summary>
-        public Cell? this[int index] => Values.Index is not null ? Table.Rows[index][Values.Index.Value] : null; // BUG Doesn�t use Index property to guarantee getter loop ran.
+        public Cell? this[int index] => Values.Index is not null ? Table.Rows[index][Values.Index.Value] : null; // BUG_OLD Doesn’t use Index property to guarantee getter loop ran.
 
         /// <summary>
         /// Sets or gets the default style name for all cells of the column.
@@ -138,7 +138,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
             get => Values.Format ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Format = value;
             }
         }
@@ -178,7 +178,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
             get => Values.Borders ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Borders = value;
             }
         }
@@ -210,7 +210,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
             get => Values.Shading ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Shading = value;
             }
         }
@@ -267,7 +267,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

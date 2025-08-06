@@ -12,7 +12,7 @@ using SysSize = System.Windows.Size;
 using SysRect = System.Windows.Rect;
 using WpfBrushes = System.Windows.Media.Brushes;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media;
 using SysPoint = Windows.Foundation.Point;
 using SysSize = Windows.Foundation.Size;
@@ -44,7 +44,7 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
             PathGeometry = new PathGeometry();
 #endif
         }
@@ -81,7 +81,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Gets the current path figure.
         /// </summary>
@@ -148,7 +148,7 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
             path.PathGeometry = PathGeometry.Clone();
 #endif
             return path;
@@ -874,7 +874,7 @@ namespace PdfSharp.Drawing
 
                 // Draw the rectangle manually.
                 GdipPath.StartFigure();
-                GdipPath.AddLines(new PointF[] { rect.TopLeft.ToPointF(), rect.TopRight.ToPointF(), rect.BottomRight.ToPointF(), rect.BottomLeft.ToPointF() });
+                GdipPath.AddLines([rect.TopLeft.ToPointF(), rect.TopRight.ToPointF(), rect.BottomRight.ToPointF(), rect.BottomLeft.ToPointF()]);
                 GdipPath.CloseFigure();
             }
             finally { Lock.ExitGdiPlus(); }
@@ -1014,7 +1014,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Adds a rectangle with rounded corners to this path.
         /// </summary>
@@ -1105,7 +1105,7 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
             double ex = ellipseWidth / 2;
             double ey = ellipseHeight / 2;
             StartFigure();
@@ -1258,7 +1258,7 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
 #if true
             PathGeometry.AddGeometry(new EllipseGeometry(new Rect(x, y, width, height)));
 #else
@@ -1307,13 +1307,13 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Adds a polygon to this path.
         /// </summary>
         public void AddPolygon(SysPoint[] points)
         {
-            // TODO: fill mode unclear here
+            // TODO_OLD: fill mode unclear here
 #if true
             PathGeometry.AddGeometry(GeometryHelper.CreatePolygonGeometry(points, XFillMode.Alternate, true));
             CloseFigure(); // StartFigure() isn’t needed because AddGeometry() implicitly starts a new figure, but CloseFigure() is needed for the next adding not to continue this figure.
@@ -1362,7 +1362,7 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
 #if true
             PathGeometry.AddGeometry(GeometryHelper.CreatePolygonGeometry(XGraphics.MakePointArray(points), XFillMode.Alternate, true));
 #else
@@ -1379,7 +1379,7 @@ namespace PdfSharp.Drawing
             figure.Segments.Add(segment);
             _pathGeometry.Figures.Add(figure);
 #endif
-            // TODO: NOT NEEDED
+            // TODO_OLD: NOT NEEDED
             //CloseFigure(); // StartFigure() isn’t needed because AddGeometry() implicitly starts a new figure, but CloseFigure() is needed for the next adding not to continue this figure.
 #endif
         }
@@ -1425,7 +1425,7 @@ namespace PdfSharp.Drawing
         public void AddPie(double x, double y, double width, double height, double startAngle, double sweepAngle)
         {
 #if CORE
-            const string message = "AddPie: This operation is not yet implemented in CORE build.";
+            const string message = "AddPie: This operation is not yet implemented in Core build.";
             DiagnosticsHelper.HandleNotImplemented(message, Capabilities.Action.PathOperations);
 #endif
 #if GDI
@@ -1436,7 +1436,7 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
             const string message = "AddPie: This operation is not yet implemented in WPF build.";
             DiagnosticsHelper.HandleNotImplemented(message, Capabilities.Action.PathOperations);
 #endif
@@ -1454,7 +1454,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Adds a closed curve to this path.
         /// </summary>
@@ -1492,7 +1492,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Adds a closed curve to this path.
         /// </summary>
@@ -1526,7 +1526,7 @@ namespace PdfSharp.Drawing
                 throw new ArgumentException("Not enough points.", nameof(points));
 
 #if CORE
-            const string message = "AddClosedCurve: This operation is not yet implemented in CORE build.";
+            const string message = "AddClosedCurve: This operation is not yet implemented in Core build.";
             DiagnosticsHelper.HandleNotImplemented(message, Capabilities.Action.PathOperations);
 #endif
 #if GDI
@@ -1537,7 +1537,7 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
             tension /= 3;
 
             StartFigure();
@@ -1567,7 +1567,7 @@ namespace PdfSharp.Drawing
         public void AddPath(XGraphicsPath path, bool connect)
         {
 #if CORE
-            const string message = "AddPath: This operation is not yet implemented in CORE build.";
+            const string message = "AddPath: This operation is not yet implemented in Core build.";
             DiagnosticsHelper.HandleNotImplemented(message, Capabilities.Action.PathOperations);
 #endif
 #if GDI
@@ -1578,7 +1578,7 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
             PathGeometry.AddGeometry(path.PathGeometry);
 #endif
         }
@@ -1604,7 +1604,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Adds a text string to this path.
         /// </summary>
@@ -1639,7 +1639,7 @@ namespace PdfSharp.Drawing
 #endif
 #if GDI
                 if (family.GdiFamily == null)
-                    throw new NotImplementedException(PSSR.NotImplementedForFontsRetrievedWithFontResolver(family.Name));
+                    throw new NotImplementedException(PsMsgs.NotImplementedForFontsRetrievedWithFontResolver(family.Name));
 
                 PointF p = origin.ToPointF();
                 p.Y += SimulateBaselineOffset(family, style, emSize, format);
@@ -1653,7 +1653,7 @@ namespace PdfSharp.Drawing
 #endif
 #if WPF
                 if (family.WpfFamily == null)
-                    throw new NotImplementedException(PSSR.NotImplementedForFontsRetrievedWithFontResolver(family.Name));
+                    throw new NotImplementedException(PsMsgs.NotImplementedForFontsRetrievedWithFontResolver(family.Name));
 
                 XFont font = new XFont(family.Name, emSize, style);
 
@@ -1689,7 +1689,7 @@ namespace PdfSharp.Drawing
                         break;
 
                     case XLineAlignment.Center:
-                        // TODO use CapHeight. PDFlib also uses 3/4 of ascent
+                        // TODO_OLD use CapHeight. PDFlib also uses 3/4 of ascent
                         y += -lineSpace / 2; //-formattedText.Baseline + (cyAscent * 2 / 4);
                         break;
 
@@ -1719,7 +1719,7 @@ namespace PdfSharp.Drawing
         public void AddString(string s, XFontFamily family, XFontStyleEx style, double emSize, Rectangle layoutRect, XStringFormat format)
         {
             if (family.GdiFamily == null)
-                throw new NotFiniteNumberException(PSSR.NotImplementedForFontsRetrievedWithFontResolver(family.Name));
+                throw new NotFiniteNumberException(PsMsgs.NotImplementedForFontsRetrievedWithFontResolver(family.Name));
 
             Rectangle rect = new Rectangle(layoutRect.X, layoutRect.Y, layoutRect.Width, layoutRect.Height);
             rect.Offset(new System.Drawing.Point(0, (int)SimulateBaselineOffset(family, style, emSize, format)));
@@ -1738,7 +1738,7 @@ namespace PdfSharp.Drawing
         public void AddString(string s, XFontFamily family, XFontStyleEx style, double emSize, RectangleF layoutRect, XStringFormat format)
         {
             if (family.GdiFamily == null)
-                throw new NotFiniteNumberException(PSSR.NotImplementedForFontsRetrievedWithFontResolver(family.Name));
+                throw new NotFiniteNumberException(PsMsgs.NotImplementedForFontsRetrievedWithFontResolver(family.Name));
 
             RectangleF rect = new RectangleF(layoutRect.X, layoutRect.Y, layoutRect.Width, layoutRect.Height);
             rect.Offset(new PointF(0, SimulateBaselineOffset(family, style, emSize, format)));
@@ -1761,7 +1761,6 @@ namespace PdfSharp.Drawing
         /// <param name="style"></param>
         /// <param name="emSize"></param>
         /// <param name="format"></param>
-        /// <returns></returns>
         private float SimulateBaselineOffset(XFontFamily family, XFontStyleEx style, double emSize, XStringFormat format)
         {
             XFont font = new XFont(family.Name, emSize, style);
@@ -1822,7 +1821,7 @@ namespace PdfSharp.Drawing
             //  format != null ? format.RealizeGdiStringFormat() : null);
 
             if (family.GdiFamily == null)
-                throw new NotFiniteNumberException(PSSR.NotImplementedForFontsRetrievedWithFontResolver(family.Name));
+                throw new NotFiniteNumberException(PsMsgs.NotImplementedForFontsRetrievedWithFontResolver(family.Name));
 
             RectangleF rect = layoutRect.ToRectangleF();
             rect.Offset(new PointF(0, SimulateBaselineOffset(family, style, emSize, format)));
@@ -1836,7 +1835,7 @@ namespace PdfSharp.Drawing
 #endif
 #if WPF && !GDI
             if (family.WpfFamily == null)
-                throw new NotFiniteNumberException(PSSR.NotImplementedForFontsRetrievedWithFontResolver(family.Name));
+                throw new NotFiniteNumberException(PsMsgs.NotImplementedForFontsRetrievedWithFontResolver(family.Name));
 
             // Just a first sketch, but currently we do not need it and there is enough to do...
             double x = layoutRect.X;
@@ -1891,7 +1890,7 @@ namespace PdfSharp.Drawing
                     //y += -formattedText.Baseline + (cyAscent * 2 / 4) + layoutRect.Height / 2;
 
                     // GDI seems to make it this simple:
-                    // TODO: Check WPF’s vertical alignment and make all implementations fit. $MaOs
+                    // TODO_OLD: Check WPF’s vertical alignment and make all implementations fit. $MaOs
                     y += layoutRect.Height / 2 - lineSpace / 2;
                     break;
 
@@ -1914,7 +1913,7 @@ namespace PdfSharp.Drawing
             //      break;
 
             //    case XLineAlignment.Center:
-            //      // TODO use CapHeight. PDFlib also uses 3/4 of ascent
+            //      // TODO_OLD use CapHeight. PDFlib also uses 3/4 of ascent
             //      //y += -(cyAscent * 3 / 4) / 2 + rect.Height / 2;
             //      break;
 
@@ -1930,12 +1929,12 @@ namespace PdfSharp.Drawing
 
             //if (bold && !descriptor.IsBoldFace)
             //{
-            //  // TODO: emulate bold by thicker outline
+            //  // TODO_OLD: emulate bold by thicker outline
             //}
 
             //if (italic && !descriptor.IsItalicFace)
             //{
-            //  // TODO: emulate italic by shearing transformation
+            //  // TODO_OLD: emulate italic by shearing transformation
             //}
 
             if (underline)
@@ -1978,7 +1977,7 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
             PathFigure figure = PeekCurrentFigure;
             if (figure != null && figure.Segments.Count != 0)
                 figure.IsClosed = true;
@@ -1991,8 +1990,7 @@ namespace PdfSharp.Drawing
         public void StartFigure()
         {
 #if CORE
-            // ReviewSTLA THHO4STLA
-            // TODO: ???
+            // Nothing to do.
 #endif
 #if GDI
             try
@@ -2002,7 +2000,7 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
             PathFigure figure = CurrentPathFigure;
             if (figure.Segments.Count != 0)
             {
@@ -2034,7 +2032,7 @@ namespace PdfSharp.Drawing
                 }
                 finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
                 PathGeometry.FillRule = value == XFillMode.Winding ? FillRule.Nonzero : FillRule.EvenOdd;
 #endif
             }
@@ -2061,7 +2059,7 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
             PathGeometry = PathGeometry.GetFlattenedPathGeometry();
 #endif
         }
@@ -2083,7 +2081,7 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
             PathGeometry = PathGeometry.GetFlattenedPathGeometry();
             PathGeometry.Transform = new MatrixTransform(matrix.ToWpfMatrix());
 #endif
@@ -2106,9 +2104,9 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
             PathGeometry = PathGeometry.GetFlattenedPathGeometry();
-            // TODO: matrix handling not yet tested
+            // TODO_OLD: matrix handling not yet tested
             if (!matrix.IsIdentity)
                 PathGeometry.Transform = new MatrixTransform(matrix.ToWpfMatrix());
 #endif
@@ -2134,7 +2132,7 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
             PathGeometry = PathGeometry.GetWidenedPathGeometry(pen.RealizeWpfPen());
 #endif
         }
@@ -2159,7 +2157,7 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
             PathGeometry = PathGeometry.GetWidenedPathGeometry(pen.RealizeWpfPen());
 #endif
         }
@@ -2181,7 +2179,7 @@ namespace PdfSharp.Drawing
             }
             finally { Lock.ExitGdiPlus(); }
 #endif
-#if WPF || UWP
+#if WPF || WUI
             PathGeometry = PathGeometry.GetWidenedPathGeometry(pen.RealizeWpfPen());
 #endif
         }
@@ -2197,7 +2195,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         internal CoreGraphicsPath CorePath;
 
-        const string AddStringMessage = "AddString: Converting a string into a graphical path is not available in CORE build.";
+        const string AddStringMessage = "AddString: Converting a string into a graphical path is not available in Core build.";
 #endif
 
 #if GDI
@@ -2207,9 +2205,9 @@ namespace PdfSharp.Drawing
         internal GraphicsPath GdipPath;
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
-        /// Gets access to underlying WPF/UWP path geometry.
+        /// Gets access to underlying WPF/WUI path geometry.
         /// </summary>
         internal PathGeometry PathGeometry;
 #endif

@@ -8,7 +8,7 @@ namespace PdfSharp.Pdf.Advanced
     /// <summary>
     /// Base class for all dictionaries that map resource names to objects.
     /// </summary>
-    class PdfResourceMap : PdfDictionary //, IEnumerable
+    class PdfResourceMap : PdfDictionary
     {
         public PdfResourceMap()
         { }
@@ -37,7 +37,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal void CollectResourceNames(Dictionary<string, object?> usedResourceNames)
         {
-            // ?TODO: Imported resources (e.g. fonts) can be reused, but I think this is rather difficult.
+            // ?TODO_OLD: Imported resources (e.g. fonts) can be reused, but I think this is rather difficult.
             var names = Elements.KeyNames;
             foreach (var name in names)
             {

@@ -14,15 +14,15 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         public XSeries()
         {
             BaseValues = new XSeriesValues(this);
-            XSeriesElements = new XSeriesElements();
+            XSeriesElements = new();
         }
 
         /// <summary>
         /// The actual value container of the XSeries.
         /// </summary>
-        protected internal XSeriesElements XSeriesElements // TODO Previous implementation did not have a property?
+        protected internal XSeriesElements XSeriesElements
         {
-            get => Values.XSeriesElements ??= new();
+            get => Values.XSeriesElements ??= [];
             set => Values.XSeriesElements = value;
         }
 
@@ -38,11 +38,8 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         protected override object DeepCopy()
         {
             XSeries xSeries = (XSeries)base.DeepCopy();
-            //if (xSeries.XSeriesElements != null)
-            //{
             xSeries.XSeriesElements = xSeries.XSeriesElements.Clone();
             xSeries.XSeriesElements.Parent = xSeries;
-            //}
             return xSeries;
         }
 
@@ -84,7 +81,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

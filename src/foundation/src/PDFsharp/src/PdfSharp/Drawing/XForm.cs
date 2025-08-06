@@ -320,7 +320,7 @@ namespace PdfSharp.Drawing
         {
             get;
             set;
-            // TODO: pdfForm = null
+            // TODO_OLD: pdfForm = null
         }
 
         /// <summary>
@@ -453,7 +453,7 @@ namespace PdfSharp.Drawing
         /// The PdfFormXObject gets invalid when PageNumber or transform changed. This is because a modification
         /// of an XPdfForm must not change objects that have already been drawn.
         /// </summary>
-        internal PdfFormXObject? _pdfForm;  // TODO: make private
+        internal PdfFormXObject? _pdfForm;  // TODO_OLD: make private
 
         internal XGraphicsPdfRenderer PdfRenderer = default!;
 

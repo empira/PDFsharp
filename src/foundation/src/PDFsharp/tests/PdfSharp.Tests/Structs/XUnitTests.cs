@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+ï»¿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using FluentAssertions;
@@ -54,7 +54,7 @@ namespace PdfSharp.Tests.Structs
             XUnit xUnit2CmPt2 = str2CmPt;
             XUnit xUnit2CmPu2 = str2CmPu;
 
-            // Only check cm variables, which are totally equal because str2Cm with "2cm" won’t cause rounding errors.
+            // Only check cm variables, which are totally equal because str2Cm with "2cm" wonâ€™t cause rounding errors.
             (xUnit2Cm2 == xUnit2Cm).Should().BeTrue();
 
             // Use IsSameValue() for other variables.
@@ -63,7 +63,7 @@ namespace PdfSharp.Tests.Structs
             xUnit2CmPt2.IsSameValue(xUnit2CmPt).Should().BeTrue();
             xUnit2CmPu2.IsSameValue(xUnit2CmPu).Should().BeTrue();
 
-            // Only check cm variables, which are totally equal because str2Cm with "2cm" won’t cause rounding errors.
+            // Only check cm variables, which are totally equal because str2Cm with "2cm" wonâ€™t cause rounding errors.
             (xUnit2Cm2 != xUnit2Cm).Should().BeFalse();
 
             // Same value - other unit.
@@ -318,7 +318,7 @@ namespace PdfSharp.Tests.Structs
             const double d2 = 2;
 
             const double d2Cm = d2;
-            
+
             XUnit xUnit2Cm = XUnit.FromCentimeter(d2Cm);
             XUnitPt xUnitPt2Cm = XUnitPt.FromCentimeter(d2Cm);
 
@@ -333,6 +333,16 @@ namespace PdfSharp.Tests.Structs
             xUnitPt2CmAsXUnit.Should().NotBe(xUnit2Cm);
             xUnitPt2CmAsXUnit.Point.Should().Be(xUnit2Cm.Point);
             xUnitPt2CmAsXUnit.Centimeter.Should().BeApproximately(xUnit2Cm.Centimeter, acceptedRoundingError);
+        }
+
+        [Fact]
+        public void XUnit_No_commas_allowed_anymore_Test()
+        {
+            XUnit unit = "10000.0";
+            unit.Value.Should().Be(10_000);
+
+            Func<XUnit> createUnit = () => unit = "10000,0";
+            createUnit.Should().Throw<FormatException>();
         }
     }
 }

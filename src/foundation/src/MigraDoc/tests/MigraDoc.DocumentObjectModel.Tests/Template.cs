@@ -3,6 +3,8 @@
 
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Rendering;
+#if CORE
+#endif
 using PdfSharp.Fonts;
 using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
@@ -12,8 +14,21 @@ using Xunit;
 namespace MigraDoc.DocumentObjectModel.Tests
 {
     [Collection("PDFsharp")]
-    public class Template
+    public class Template : IDisposable
     {
+        public Template()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void Create_Hello_World_TemplateDOM()
         {

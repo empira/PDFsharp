@@ -35,6 +35,7 @@ namespace MigraDoc.Rendering
         public ParagraphIterator? EndIter;
         public XUnitPt WordsWidth;
         public XUnitPt LineWidth;
+        public bool LineEndsWithLineBreak;
         public int BlankCount;
         public VerticalLineInfo Vertical;
         public List<TabOffset> TabOffsets;
@@ -65,11 +66,11 @@ namespace MigraDoc.Rendering
         internal int LineCount
             => _lineInfos.Count;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="mergeInfo"></param>
-        /// <returns></returns>
+        // Fake docs is not allowed.
+        /////// <summary>
+        /////// 
+        /////// </summary>
+        /////// <param name="mergeInfo"></param>
         internal void Append(FormatInfo mergeInfo)
         {
             ParagraphFormatInfo formatInfo = (ParagraphFormatInfo)mergeInfo;
@@ -82,7 +83,7 @@ namespace MigraDoc.Rendering
         /// <returns>True if the paragraph is ending.</returns>
         internal override bool IsEnding => _isEnding;
 
-        internal bool _isEnding;  // TODO auto prop
+        internal bool _isEnding;  // TODO_OLD auto prop
 
         /// <summary>
         /// Indicates whether the paragraph is starting.
@@ -90,7 +91,7 @@ namespace MigraDoc.Rendering
         /// <returns>True if the paragraph is starting.</returns>
         internal override bool IsStarting => _isStarting;
 
-        internal bool _isStarting;  // TODO auto prop
+        internal bool _isStarting;  // TODO_OLD auto prop
 
         internal override bool IsComplete => _isStarting && _isEnding;
 
@@ -105,7 +106,7 @@ namespace MigraDoc.Rendering
                 return _isStarting;
             }
         }
-        internal bool _widowControl;  // TODO auto prop
+        internal bool _widowControl;  // TODO_OLD auto prop
 
         internal override bool EndingIsComplete
         {

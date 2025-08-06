@@ -48,7 +48,7 @@ namespace PdfSharp.TestHelper
             return level != LogLevel.None && logLevel >= level;
         }
 
-        public IDisposable BeginScope<TState>(TState state) => default!;
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => default!;
 
         public string Name { get; }
 

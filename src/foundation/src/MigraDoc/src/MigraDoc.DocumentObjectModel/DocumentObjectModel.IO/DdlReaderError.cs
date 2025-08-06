@@ -6,13 +6,29 @@ namespace MigraDoc.DocumentObjectModel.IO
     /// <summary>
     /// Represents an error or diagnostic message reported by the DDL reader.
     /// </summary>
+    // Better name would be DdlReaderProblemDetails. But this class name
+    // is public. Therefore, we stay with it.
     public class DdlReaderError
     {
         /// <summary>
         /// Initializes a new instance of the DdlReaderError class.
         /// </summary>
+        internal DdlReaderError(DdlErrorLevel level, MdDomMsg domMsg,
+            string sourceFile = "", int sourceLine = 0, int sourceColumn = 0)
+        {
+            ErrorLevel = level;
+            ErrorMessage = domMsg.Message;
+            ErrorNumber = (int)domMsg.Id;
+            SourceFile = sourceFile;
+            SourceLine = sourceLine;
+            SourceColumn = sourceColumn;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the DdlReaderError class.
+        /// </summary>
         public DdlReaderError(DdlErrorLevel errorLevel, string errorMessage, int errorNumber,
-          string sourceFile, int sourceLine, int sourceColumn)
+            string sourceFile, int sourceLine, int sourceColumn)
         {
             ErrorLevel = errorLevel;
             ErrorMessage = errorMessage;
@@ -23,45 +39,10 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DdlReaderError"/> class.
-        /// </summary>
-        public DdlReaderError(DdlErrorLevel errorLevel, string errorMessage, int errorNumber)
-        {
-            ErrorLevel = errorLevel;
-            ErrorMessage = errorMessage;
-            ErrorNumber = errorNumber;
-            SourceFile = "";
-        }
-
-        //    public DdlReaderError(string errorName, DdlReaderError _level, DomMsgID _error, string message, string msg2,
-        //      string DocumentFileName, int CurrentLine, int CurrentLinePos)
-        //    {
-        //    }
-        //
-        //    public DdlReaderError(string errorName, int _level, string _error, string message, string adf,
-        //      string  DocumentFileName,  int CurrentLine, int CurrentLinePos)
-        //    {
-        //    }
-        //
-        //    public DdlReaderError(string errorName, DdlErrorLevel errorInfo , string _error, string message, string adf,
-        //      string  DocumentFileName,  int CurrentLine, int CurrentLinePos)
-        //    {
-        //    }
-        //
-        //    public DdlReaderError(string errorName, DdlErrorLevel errorInfo , DomMsgID _error, string message, string adf,
-        //      string  DocumentFileName,  int CurrentLine, int CurrentLinePos)
-        //    {
-        //    }
-
-        //public const int NoErrorNumber = -1;
-
-        /// <summary>
         /// Returns a string that represents the current DdlReaderError.
         /// </summary>
-        public override string ToString()
-        {
-            return $"[{SourceFile}({SourceLine},{SourceColumn}):] {"xxx"} DDL{ErrorNumber}: {ErrorMessage}";
-        }
+        public override string ToString() 
+            => $"[{SourceFile}({SourceLine},{SourceColumn}):] {"xxx"} DDL{ErrorNumber}: {ErrorMessage}";
 
         /// <summary>
         /// Specifies the severity of this diagnostic.

@@ -26,7 +26,7 @@ namespace PdfSharp.Drawing
         {
             return GdiLineJoin[(int)lineJoin];
         }
-        static readonly LineJoin[] GdiLineJoin = new LineJoin[] { LineJoin.Miter, LineJoin.Round, LineJoin.Bevel };
+        static readonly LineJoin[] GdiLineJoin = [LineJoin.Miter, LineJoin.Round, LineJoin.Bevel];
 #endif
 
 #if GDI
@@ -37,7 +37,7 @@ namespace PdfSharp.Drawing
         {
             return GdiLineCap[(int)lineCap];
         }
-        static readonly LineCap[] GdiLineCap = new[] { LineCap.Flat, LineCap.Round, LineCap.Square };
+        static readonly LineCap[] GdiLineCap = [LineCap.Flat, LineCap.Round, LineCap.Square];
 #endif
 
 #if WPF
@@ -48,7 +48,7 @@ namespace PdfSharp.Drawing
         {
             return WpfLineJoin[(int)lineJoin];
         }
-        static readonly PenLineJoin[] WpfLineJoin = new PenLineJoin[] { PenLineJoin.Miter, PenLineJoin.Round, PenLineJoin.Bevel };
+        static readonly PenLineJoin[] WpfLineJoin = [PenLineJoin.Miter, PenLineJoin.Round, PenLineJoin.Bevel];
 #endif
 
 #if WPF
@@ -59,7 +59,7 @@ namespace PdfSharp.Drawing
         {
             return WpfLineCap[(int)lineCap];
         }
-        static readonly PenLineCap[] WpfLineCap = { PenLineCap.Flat, PenLineCap.Round, PenLineCap.Square };
+        static readonly PenLineCap[] WpfLineCap = [PenLineCap.Flat, PenLineCap.Round, PenLineCap.Square];
 #endif
     }
 }

@@ -4,6 +4,8 @@
 using System.Reflection;
 using System.Runtime.Versioning;
 
+#pragma warning disable 0436
+
 namespace MigraDoc.Rendering
 {
     /// <summary>
@@ -40,7 +42,7 @@ namespace MigraDoc.Rendering
         {
             get
             {
-                // Hack since TargetPlatformAttribute is not available.
+                // TargetPlatformAttribute is not available under .NET Framework.
                 return "Unknown Target Platform";
             }
         }
@@ -53,7 +55,7 @@ namespace MigraDoc.Rendering
             get
             {
                 var attribute = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(TargetPlatformAttribute), false);
-                return attribute.Length == 1 ? ((TargetPlatformAttribute)attribute[0]).PlatformName : "";
+                return attribute.Length == 1 ? ((TargetPlatformAttribute)attribute[0]).PlatformName : "Unknown Target Platform";
             }
         }
 #endif

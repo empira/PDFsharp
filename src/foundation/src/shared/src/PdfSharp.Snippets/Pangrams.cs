@@ -19,7 +19,7 @@ namespace PdfSharp.Snippets
         public static string TwelveBoxer = "Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich. 1234567890 +-*/";
     }
 
-    public class xxxxxxxxxx
+    public class LeftToRightText
     {
         public static string Arabic = "نص حكيم له سر قاطع وذو شأن عظيم مكتوب على ثوب أخضر ومغلف بجلد أزرق";
         public static string Arabic2 = "يقفز الثعلب البني السريع فوق الكسول. 1234567890 +-*/";

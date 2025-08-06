@@ -43,17 +43,14 @@ namespace MigraDoc.DocumentObjectModel.IO
         {
             _serializer = null!;
 
-            if (_writer != null)
-            {
-                _writer.Close();
-                _writer = null;
-            }
+            _writer?.Close();
+            _writer = null;
         }
 
         /// <summary>
         /// Flushes the underlying TextWriter.
         /// </summary>
-        public void Flush() 
+        public void Flush()
             => _serializer.Flush();
 
         /// <summary>
@@ -95,13 +92,13 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Writes a DocumentObject type object to string.
         /// </summary>
-        public static string WriteToString(DocumentObject docObject) 
+        public static string WriteToString(DocumentObject docObject)
             => WriteToString(docObject, 2, 0);
 
         /// <summary>
         /// Writes a DocumentObject type object to string. Indent a new block by indent characters.
         /// </summary>
-        public static string WriteToString(DocumentObject docObject, int indent) 
+        public static string WriteToString(DocumentObject docObject, int indent)
             => WriteToString(docObject, indent, 0);
 
         /// <summary>
@@ -135,13 +132,13 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Writes a DocumentObjectCollection type object to string.
         /// </summary>
-        public static string WriteToString(DocumentObjectCollection docObjectContainer) 
+        public static string WriteToString(DocumentObjectCollection docObjectContainer)
             => WriteToString(docObjectContainer, 2, 0);
 
         /// <summary>
         /// Writes a DocumentObjectCollection type object to string. Indent a new block by _indent characters.
         /// </summary>
-        public static string WriteToString(DocumentObjectCollection docObjectContainer, int indent) 
+        public static string WriteToString(DocumentObjectCollection docObjectContainer, int indent)
             => WriteToString(docObjectContainer, indent, 0);
 
         /// <summary>
@@ -176,13 +173,13 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Writes a document object to a DDL file.
         /// </summary>
-        public static void WriteToFile(DocumentObject docObject, string filename) 
+        public static void WriteToFile(DocumentObject docObject, string filename)
             => WriteToFile(docObject, filename, 2, 0);
 
         /// <summary>
         /// Writes a document object to a DDL file. Indent a new block by the specified number of characters.
         /// </summary>
-        public static void WriteToFile(DocumentObject docObject, string filename, int indent) 
+        public static void WriteToFile(DocumentObject docObject, string filename, int indent)
             => WriteToFile(docObject, filename, indent, 0);
 
         /// <summary>
@@ -209,14 +206,14 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Writes a DocumentObjectCollection type object to a DDL file.
         /// </summary>
-        public static void WriteToFile(DocumentObjectCollection docObjectContainer, string filename) 
+        public static void WriteToFile(DocumentObjectCollection docObjectContainer, string filename)
             => WriteToFile(docObjectContainer, filename, 2, 0);
 
         /// <summary>
         /// Writes a DocumentObjectCollection type object to a DDL file. Indent a new block by
         /// indent + initialIndent characters.
         /// </summary>
-        public static void WriteToFile(DocumentObjectCollection docObjectContainer, string filename, int indent) 
+        public static void WriteToFile(DocumentObjectCollection docObjectContainer, string filename, int indent)
             => WriteToFile(docObjectContainer, filename, indent, 0);
 
         /// <summary>

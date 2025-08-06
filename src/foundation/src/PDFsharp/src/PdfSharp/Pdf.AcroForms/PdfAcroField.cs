@@ -117,21 +117,20 @@ namespace PdfSharp.Pdf.AcroForms
         /// </summary>
         [Obsolete("Use GetDescendantNames")]
         public string[] DescendantNames  // Properties should not return arrays.
-            =>
-                GetDescendantNames();
+            => GetDescendantNames();
 
         /// <summary>
         /// Gets the names of all descendants of this field.
         /// </summary>
         public string[] GetDescendantNames()
         {
-            List<string> names = new List<string>();
+            List<string> names = [];
             if (HasKids)
             {
                 PdfAcroFieldCollection fields = Fields;
                 fields.GetDescendantNames(ref names, null);
             }
-            List<string> temp = new List<string>();
+            List<string> temp = [];
             foreach (string name in names)
                 temp.Add(name);
             return temp.ToArray();
@@ -267,7 +266,7 @@ namespace PdfSharp.Pdf.AcroForms
         /// </summary>
         public sealed class PdfAcroFieldCollection : PdfArray
         {
-            PdfAcroFieldCollection(PdfArray array)
+            internal PdfAcroFieldCollection(PdfArray array)
                 : base(array)
             { }
 
@@ -353,11 +352,7 @@ namespace PdfSharp.Pdf.AcroForms
                 if (String.IsNullOrEmpty(name))
                     return null;
 
-#if NET6_0_OR_GREATER
-                int dot = name.IndexOf('.', StringComparison.Ordinal);
-#else
-                int dot = name.IndexOf(".", StringComparison.Ordinal);
-#endif
+                int dot = name.IndexOf('.');
                 string prefix = dot == -1 ? name : name.Substring(0, dot);
                 string suffix = dot == -1 ? "" : name.Substring(dot + 1);
 

@@ -1,8 +1,6 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-// #??? Clean up
-
 using System.ComponentModel;
 #if GDI
 using GdiFontFamily = System.Drawing.FontFamily;
@@ -15,7 +13,7 @@ using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfTypeface = System.Windows.Media.Typeface;
 using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
 #endif
-#if UWP
+#if WUI
 using UwpFontFamily = Windows.UI.Xaml.Media.FontFamily;
 #endif
 using PdfSharp.Fonts;
@@ -361,7 +359,7 @@ namespace PdfSharp.Drawing
             WpfFontFamily = GlyphTypeface.FontFamily.WpfFamily;
             WpfTypeface = GlyphTypeface.WpfTypeface;
 
-            WpfFontFamily ??= new WpfFontFamily(Name);
+            WpfFontFamily ??= new WpfFontFamily(Name2);
 
             WpfTypeface ??= FontHelper.CreateTypeface(WpfFontFamily ?? NRT.ThrowOnNull<WpfFontFamily>(), _style);
 #endif
@@ -391,7 +389,7 @@ namespace PdfSharp.Drawing
                     string name3 = _gdiFont.SystemFontName;
 #endif
                     _familyName = GdiFont.FontFamily.Name;
-                    // TODO: _glyphTypeface = XGlyphTypeface.GetOrCreateFrom(_gdiFont);
+                    // TODO_OLD: _glyphTypeface = XGlyphTypeface.GetOrCreateFrom(_gdiFont);
                 }
                 else
                 {
@@ -437,11 +435,11 @@ namespace PdfSharp.Drawing
         /// (Setup properties in their getters caused side effects during debugging because Visual Studio calls a getter
         /// too early to show its value in a debugger window.)
         /// </summary>
-        void CreateDescriptorAndInitializeFontMetrics()  // TODO: refactor
+        void CreateDescriptorAndInitializeFontMetrics()  // TODO_OLD: refactor
         {
             Debug.Assert(_fontMetrics == null, "InitializeFontMetrics() was already called.");
             OpenTypeDescriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptorFor(this); //_familyName, _style, _glyphTypeface.FontFace);
-            _fontMetrics = new XFontMetrics(OpenTypeDescriptor.FontName2, OpenTypeDescriptor.UnitsPerEm, OpenTypeDescriptor.Ascender, OpenTypeDescriptor.Descender,
+            _fontMetrics = new XFontMetrics(OpenTypeDescriptor.FontName3, OpenTypeDescriptor.UnitsPerEm, OpenTypeDescriptor.Ascender, OpenTypeDescriptor.Descender,
                 OpenTypeDescriptor.Leading, OpenTypeDescriptor.LineSpacing, OpenTypeDescriptor.CapHeight, OpenTypeDescriptor.XHeight, OpenTypeDescriptor.StemV, 0, 0, 0,
                 OpenTypeDescriptor.UnderlinePosition, OpenTypeDescriptor.UnderlineThickness, OpenTypeDescriptor.StrikeoutPosition, OpenTypeDescriptor.StrikeoutSize);
 
@@ -481,13 +479,11 @@ namespace PdfSharp.Drawing
         [Browsable(false)]
         public XFontFamily FontFamily => GlyphTypeface.FontFamily;
 
-        // TODO XFont.Name
         /// <summary>
-        /// WRONG: Gets the face name of this Font object.
-        /// Indeed, it returns the font family name.
+        /// Gets the font family name.
         /// </summary>
         // [Obsolete("This function returns the font family name, not the face name. Use xxx.FontFamily.Name or xxx.FaceName")]
-        public string Name => GlyphTypeface.FontFamily.Name;
+        public string Name2 => GlyphTypeface.FontFamily.Name;
 
         internal string FaceName => GlyphTypeface.FaceName;
 
@@ -525,16 +521,6 @@ namespace PdfSharp.Drawing
         /// Indicates whether this XFont object is underlined.
         /// </summary>
         public bool Underline => (_style & XFontStyleEx.Underline) == XFontStyleEx.Underline;
-
-        /// <summary>
-        /// Temporary HACK for XPS to PDF converter.
-        /// </summary>
-        internal bool IsVertical
-        {
-            get => _isVertical;
-            set => _isVertical = value;
-        }
-        bool _isVertical;
 
         /// <summary>
         /// Indicates whether this XFont object is a symbol font.
@@ -620,12 +606,12 @@ namespace PdfSharp.Drawing
         public double GetHeight()
         {
             double value = CellSpace * _emSize / UnitsPerEm;
-#if CORE || UWP
+#if CORE || WUI
             return value;
 #endif
 #if GDI && !WPF
 #if DEBUG_
-            double gdiValue = Font.GetHeight();
+            double gdiValue = GdiFont.GetHeight();
             Debug.Assert(DoubleUtil.AreRoughlyEqual(gdiValue, value, 5));
 #endif
             return value;
@@ -649,7 +635,7 @@ namespace PdfSharp.Drawing
 #if true
             throw new InvalidOperationException("Honestly: Use GetHeight() without parameter!");
 #else
-#if CORE || UWP
+#if CORE || WUI
             double value = CellSpace * _emSize / UnitsPerEm;
             return value;
 #endif
@@ -777,10 +763,7 @@ namespace PdfSharp.Drawing
         string DebuggerDisplay
         // ReSharper restore UnusedMember.Local
         {
-            get
-            {
-                return Invariant($"font=('{Name}' {Size:0.##}{(Bold ? " bold" : "")}{(Italic ? " italic" : "")} {GlyphTypeface.StyleSimulations})");
-            }
+            get => Invariant($"font=('{Name2}' {Size:0.##}{(Bold ? " bold" : "")}{(Italic ? " italic" : "")} {GlyphTypeface.StyleSimulations})");
         }
     }
 }

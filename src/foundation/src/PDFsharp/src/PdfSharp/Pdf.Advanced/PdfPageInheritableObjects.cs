@@ -13,7 +13,7 @@ namespace PdfSharp.Pdf.Advanced
         public PdfPageInheritableObjects()
         { }
 
-        // TODO Inheritable Resources not yet supported
+        // TODO_OLD Inheritable Resources not yet supported
 
         /// <summary>
         /// 

@@ -139,6 +139,10 @@ namespace MigraDoc.DocumentObjectModel
 
         /// <summary>
         /// Gets or sets the page orientation of the section.
+        /// If Orientation is set, the PageFormat will be rotated if necessary.
+        /// If PageWidth and PageHeight are set, the actual orientation will be defined by width and height.
+        /// This applies also if only one of those values is set and the other one is calculated according to PageFormat and Orientation values. 
+        /// A quadratic page is considered to be Portrait.
         /// </summary>
         public Orientation Orientation
         {
@@ -146,16 +150,14 @@ namespace MigraDoc.DocumentObjectModel
             set
             {
                 EnsureNotFrozen();
-                Values.Orientation = value;
+                            Values.Orientation = value;
             }
         }
 
         bool IsLandscape => Orientation == Orientation.Landscape;
 
-        // TODO To be compatible with Word, PageWidth should always return the actual width (e.g. 21 cm for DIN A 4 portrait and 29.7 cm for DIN A 4 landscape).
-        // TODO Page margins are also "moving": portrait-left becomes landscape-top
         /// <summary>
-        /// Gets or sets the page width. If Orientation is set to Landscape, the PageWidth specifies the height of the page.
+        /// Gets or sets the page width.
         /// </summary>
         public Unit PageWidth
         {
@@ -168,9 +170,11 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Gets the effective page width, depending on the Orientation this will either be the height or the width.
+        /// This is now the same as PageWidth.
         /// </summary>
-        public Unit EffectivePageWidth => IsLandscape ? PageHeight : PageWidth;
+        [Obsolete("EffectivePageWidth used to return the actual width of the page, while PageWidth returned the width of the non-rotated page format." +
+                  "As of now, PageWidth is already the effective page width.")]
+        public Unit EffectivePageWidth => PageWidth;
 
         /// <summary>
         /// Gets or sets the starting number for the first section page.
@@ -186,7 +190,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Gets or sets the page height. If Orientation is set to Landscape, the PageHeight specifies the width of the page.
+        /// Gets or sets the page height.
         /// </summary>
         public Unit PageHeight
         {
@@ -199,9 +203,26 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Gets the effective page height, depending on the Orientation this will either be the height or the width.
+        /// Resets PageWidth, PageHeight, PageFormat, and Orientation. 
+        /// Useful for example before defining a new page size for a cloned PageSetup.
+        /// This ensures that no other previously set page size values will interfere with the newly set values.
         /// </summary>
-        public Unit EffectivePageHeight => IsLandscape ? PageWidth : PageHeight;
+        public void ResetPageSize()
+        {
+            EnsureNotFrozen();
+
+            Values.PageWidth = null;
+            Values.PageHeight = null;
+            Values.PageFormat = null;
+            Values.Orientation = null;
+        }
+
+        /// <summary>
+        /// This is now the same as PageHeight.
+        /// </summary>
+        [Obsolete("EffectivePageHeight used to return the actual height of the page, while PageHeight returned the height of the non-rotated page format." +
+                  "As of now, PageHeight is already the effective page height.")]
+        public Unit EffectivePageHeight => PageHeight;
 
         /// <summary>
         /// Gets or sets the top margin of the pages in the section.
@@ -344,7 +365,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public PageFormat PageFormat
         {
-            get => Values.PageFormat ?? PageFormat.A0; // BUG??? Use A4?
+            get => Values.PageFormat ?? PageFormat.A0;
             set
             {
                 EnsureNotFrozen();
@@ -410,7 +431,7 @@ namespace MigraDoc.DocumentObjectModel
                         MirrorMargins = false,
                         HorizontalPageBreak = false
                     };
-#else // #KEEP for reference if we create a non-metric setup and fix the MDDDL issue.
+#else // KEEP for reference if we create a non-metric setup and fix the MDDDL issue.
                     // Check if the current country/region uses the metric system of measurement
                     // and then use page format A4 anyway.
                     var culture = CultureInfo.CurrentCulture;
@@ -446,7 +467,7 @@ namespace MigraDoc.DocumentObjectModel
                     }
                     else
                     {
-                        // TODO: Maybe useful in the future, but MDDDL now depends on the settings when it was created.
+                        // TODO_OLD: Maybe useful in the future, but MDDDL now depends on the settings when it was created.
                         // Just go to metric case.
                         isMetric = true;
                         goto Metric;
@@ -529,7 +550,7 @@ namespace MigraDoc.DocumentObjectModel
         bool _frozen;
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

@@ -10,7 +10,7 @@ namespace PdfSharp.Drawing.Layout
     /// <summary>
     /// Represents a very simple text formatter.
     /// If this class does not satisfy your needs on formatting paragraphs, I recommend taking a look
-    /// at MigraDoc Foundation. Alternatively, you should copy this class in your own source code and modify it.
+    /// at MigraDoc. Alternatively, you should copy this class in your own source code and modify it.
     /// </summary>
     public class XTextFormatter
     {
@@ -42,7 +42,7 @@ namespace PdfSharp.Drawing.Layout
             get => _font;
             set
             {
-                _font = value ?? throw new ArgumentNullException("Font");
+                _font = value ?? throw new ArgumentNullException(nameof(Font));
 
                 _lineSpace = _font.GetHeight(); // old: _font.GetHeight(_gfx);
                 _cyAscent = _lineSpace * _font.CellAscent / _font.CellSpace;
@@ -352,7 +352,7 @@ namespace PdfSharp.Drawing.Layout
             /// </summary>
             public bool Stop;
         }
-        // TODO: Possible Improvements for XTextFormatter:
+        // TODO_OLD: Possible Improvements for XTextFormatter:
         // - more XStringFormat variations
         // - calculate bounding box
         // - left and right indent

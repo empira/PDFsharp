@@ -2,6 +2,8 @@
 // See the LICENSE file in the solution root for more information.
 
 global using System.IO;
+global using PdfSharp.Internal;
+
 
 #if USE_LONG_SIZE
 global using SizeType = System.Int64;
@@ -17,9 +19,9 @@ using System.Runtime.InteropServices;
 
 [assembly: ComVisible(false)]
 [assembly: SuppressMessage("LoggingGenerator", "SYSLIB1006:Multiple logging methods cannot use the same event ID within a class",
-    Justification = "We use logging event ids as documented, i.e. multiple times", Scope = "member"/*, Target = "~M:PdfSharp.Internal.Logging.LogMessages.XGraphicsCreated(Microsoft.Extensions.Logging.ILogger,System.String)"*/)]
+    Justification = "We use logging event IDs as documented, i.e. multiple times", Scope = "member"/*, Target = "~M:PdfSharp.Internal.Logging.LogMessages.XGraphicsCreated(Microsoft.Extensions.Logging.ILogger,System.String)"*/)]
 
-// TODO We should add a WPF Preview panel
+// TODO_OLD We should add a WPF Preview panel
 //#if WPF
 //[assembly: XmlnsDefinition("http://schemas.empira.com/pdfsharp/2010/xaml/presentation", "PdfSharp.Windows")]
 //#endif

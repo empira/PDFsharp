@@ -11,7 +11,7 @@ using System.Windows.Media;
 using SysPoint = System.Windows.Point;
 using SysSize = System.Windows.Size;
 #endif
-#if UWP
+#if WUI
 using Windows.UI.Xaml.Media;
 using SysPoint = Windows.Foundation.Point;
 using SysSize = Windows.Foundation.Size;
@@ -28,7 +28,7 @@ namespace PdfSharp.Drawing
     /// </summary>
     static class GeometryHelper
     {
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Appends a Bézier segment from a curve.
         /// </summary>
@@ -49,7 +49,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Creates a path geometry from a polygon.
         /// </summary>
@@ -77,7 +77,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Creates a path geometry from a polygon.
         /// </summary>
@@ -93,7 +93,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if WPF || UWP
+#if WPF || WUI
         /// <summary>
         /// Creates the arc segment from parameters of the GDI+ DrawArc function.
         /// </summary>
@@ -460,7 +460,7 @@ namespace PdfSharp.Drawing
         // with the MinBar Test Suite from QualityLogic and could not find out why it does not match.
         // My Bézier curves came very close to the arc, but in some cases they do simply not match.
         // So I gave up and use the original WPF code.
-#if WPF || UWP
+#if WPF || WUI
 
         // ReSharper disable InconsistentNaming
         const double FUZZ = 1e-6;           // Relative 0

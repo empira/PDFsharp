@@ -46,7 +46,7 @@ namespace PdfSharp.Charting
 
             int count = Count;
             coll._elements = new List<DocumentObject?>(count);
-            for (int index = 0; index < count; ++index)
+            for (int index = 0; index < count; index++)
                 coll._elements.Add((DocumentObject?)this[index]?.Clone());
             return coll;
         }
@@ -55,7 +55,7 @@ namespace PdfSharp.Charting
         /// Copies the Array or a portion of it to a one-dimensional array.
         /// </summary>
         public void CopyTo(Array array, int index)
-            => _elements.CopyTo(_elements.ToArray(), index); // 4STLA Check this implementation. "array" is not used.
+            => _elements.ToArray().CopyTo(array, index);
 
         /// <summary>
         /// Removes all elements from the collection.
@@ -132,39 +132,39 @@ namespace PdfSharp.Charting
         void IList.RemoveAt(int index)
         {
             throw new NotImplementedException("IList.RemoveAt");
-            // TODO:  Add DocumentObjectCollection.RemoveAt implementation
+            // TODO_OLD:  Add DocumentObjectCollection.RemoveAt implementation
         }
 
         void IList.Insert(int index, object? value)
         {
             throw new NotImplementedException("IList.Insert");
-            // TODO:  Add DocumentObjectCollection.Insert implementation
+            // TODO_OLD:  Add DocumentObjectCollection.Insert implementation
         }
 
         void IList.Remove(object? value)
         {
             throw new NotImplementedException("IList.Remove");
-            // TODO:  Add DocumentObjectCollection.Remove implementation
+            // TODO_OLD:  Add DocumentObjectCollection.Remove implementation
         }
 
         bool IList.Contains(object? value)
         {
             throw new NotImplementedException("IList.Contains");
-            // TODO:  Add DocumentObjectCollection.Contains implementation
+            // TODO_OLD:  Add DocumentObjectCollection.Contains implementation
             //return false;
         }
 
         int IList.IndexOf(object? value)
         {
             throw new NotImplementedException("IList.IndexOf");
-            // TODO:  Add DocumentObjectCollection.System.Collections.IList.IndexOf implementation
+            // TODO_OLD:  Add DocumentObjectCollection.System.Collections.IList.IndexOf implementation
             //return 0;
         }
 
         int IList.Add(object? value)
         {
             throw new NotImplementedException("IList.Add");
-            // TODO:  Add DocumentObjectCollection.Add implementation
+            // TODO_OLD:  Add DocumentObjectCollection.Add implementation
             //return 0;
         }
         #endregion

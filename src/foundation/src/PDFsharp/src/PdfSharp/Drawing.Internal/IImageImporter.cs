@@ -1,6 +1,8 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using Microsoft.Extensions.Logging;
+using PdfSharp.Logging;
 using PdfSharp.Pdf;
 
 namespace PdfSharp.Drawing
@@ -35,83 +37,103 @@ namespace PdfSharp.Drawing
 
         internal StreamReaderHelper(Stream stream, int streamLength)
         {
-            // TODO: Use the Stream as it is or ensure it is a MemoryStream?
-#if CORE || GDI || WPF
             OriginalStream = stream;
-            // Only copy when necessary.
-            //MemoryStream ms;
-            if (stream is not MemoryStream ms)
+
+            if (stream is MemoryStream ms)
             {
-                OwnedMemoryStream = ms = streamLength > -1 ? new MemoryStream(streamLength) : new();
-#if false
-                CopyStream(stream, ms);
-#else
-                // For .NET 4:
-                stream.CopyTo(ms);
-#endif
+                // If the given stream is a MemoryStream, work with it.
+                if (ms.TryGetBuffer(out var buffer))
+                {
+                    // Buffer is accessible - use it.
+                    Data = buffer.Array ?? throw new ArgumentNullException(nameof(stream), "Stream has no content byte array.");
+                    Length = (int)ms.Length;
+                }
+                else
+                {
+                    // Buffer of given stream is not accessible, so read stream into new buffer.
+                    OwnedMemoryStream = new(streamLength);
+                    stream.CopyTo(OwnedMemoryStream);
+                    Data = OwnedMemoryStream.GetBuffer();
+                    Length = (int)OwnedMemoryStream.Length;
+                    PdfSharpLogHost.Logger.LogWarning("LoadImage: MemoryStream with buffer that is not publicly visible was used. " +
+                                                      "For better performance, set 'publiclyVisible' to true when creating the MemoryStream.");
+                }
             }
-            Data = ms.GetBuffer();
-            Length = (int)ms.Length;
-            if (Data.Length > Length)
+            else
             {
-                var tmp = new Byte[Length];
-                Buffer.BlockCopy(Data, 0, tmp, 0, Length);
-                Data = tmp;
+                // If the given stream is not a MemoryStream, copy the stream to a new MemoryStream.
+                if (streamLength > -1)
+                {
+                    // Simple case: length of stream is known, create a MemoryStream with correct buffer size.
+                    OwnedMemoryStream = new(streamLength);
+                    stream.CopyTo(OwnedMemoryStream);
+                    Data = OwnedMemoryStream.GetBuffer();
+                    Length = (int)OwnedMemoryStream.Length;
+                }
+                else
+                {
+                    // Complex case: length of stream is not known.
+                    // This only occurs with streams that do not support the Length property.
+                    OwnedMemoryStream = new();
+                    stream.CopyTo(OwnedMemoryStream);
+                    Data = OwnedMemoryStream.GetBuffer();
+                    Length = (int)OwnedMemoryStream.Length;
+                    // If buffer is larger than needed, create a new buffer with required size.
+                    if (Data.Length > Length)
+                    {
+                        var tmp = new Byte[Length];
+                        Buffer.BlockCopy(Data, 0, tmp, 0, Length);
+                        Data = tmp;
+                    }
+                }
             }
-#else
-            // For Win_RT there is no GetBuffer() => alternative implementation for Win_RT.
-            // TODO: Are there advantages of GetBuffer()? It should reduce LOH fragmentation.
-            this.stream = stream;
-            this.stream.Position = 0;
-            if (this.stream.Length > Int32.MaxValue)
-                throw new ArgumentException("Stream is too large.", nameof(stream));
-            Length = (int)this.stream.Length;
-            Data = new byte[Length];
-            this.stream.Read(Data, 0, Length);
-#endif
         }
 
         internal byte GetByte(int offset)
         {
             if (CurrentOffset + offset >= Length)
-            {
-                Debug.Assert(false);
-                return 0;
-            }
+                throw new InvalidOperationException("Index out of range.");
+
             return Data[CurrentOffset + offset];
         }
 
         internal ushort GetWord(int offset, bool bigEndian)
         {
-            return (ushort)(bigEndian ?
-                (GetByte(offset) << 8) + GetByte(offset + 1) :
-                GetByte(offset) + (GetByte(offset + 1) << 8));
+            if (CurrentOffset + offset + 1 >= Length)
+                throw new InvalidOperationException("Index out of range.");
+
+            return (ushort)(bigEndian
+                ? (Data[CurrentOffset + offset++] << 8) + Data[CurrentOffset + offset]
+                : Data[CurrentOffset + offset++] + (Data[CurrentOffset + offset] << 8));
         }
 
         internal uint GetDWord(int offset, bool bigEndian)
         {
-            return (uint)(bigEndian ?
-                (GetWord(offset, true) << 16) + GetWord(offset + 2, true) :
-                GetWord(offset, false) + (GetWord(offset + 2, false) << 16));
-        }
+            if (CurrentOffset + offset + 3 >= Length)
+                throw new InvalidOperationException("Index out of range.");
 
-        //static void CopyStream(Stream input, Stream output)
-        //{
-        //    var buffer = new byte[65536];
-        //    int read;
-        //    while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
-        //    {
-        //        output.Write(buffer, 0, read);
-        //    }
-        //}
+            // Are you a good developer?
+            // What’s wrong with this code?
+            //return (bigEndian
+            //    ? ((uint)Data[CurrentOffset + offset++] << 24) + ((uint)Data[CurrentOffset + offset++] << 16) 
+            //       + ((uint)Data[CurrentOffset + offset++] << 8) + Data[CurrentOffset + offset]
+            //    : Data[CurrentOffset + offset++] + ((uint)Data[CurrentOffset + offset++] << 8)) 
+            //       + ((uint)Data[CurrentOffset + offset++] << 16) + ((uint)Data[CurrentOffset + offset] << 24);
+            return (uint)(bigEndian
+                ? (Data[CurrentOffset + offset++] << 24) +
+                  (Data[CurrentOffset + offset++] << 16) +
+                  (Data[CurrentOffset + offset++] << 8) +
+                   Data[CurrentOffset + offset]
+                 : Data[CurrentOffset + offset++] +
+                  (Data[CurrentOffset + offset++] << 8) +
+                  (Data[CurrentOffset + offset++] << 16) +
+                  (Data[CurrentOffset + offset] << 24));
+        }
 
         /// <summary>
         /// Resets this instance.
         /// </summary>
-        public void Reset()
-        {
-            CurrentOffset = 0;
-        }
+        public void Reset() => CurrentOffset = 0;
 
         /// <summary>
         /// Gets the original stream.
@@ -154,19 +176,18 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Initializes a new instance of the <see cref="ImportedImage"/> class.
         /// </summary>
-        protected ImportedImage(IImageImporter importer, ImagePrivateData? data)
+        protected ImportedImage(ImagePrivateData? data)
         {
             Data = data;
             if (data != null)
                 data.Image = this;
-            //_importer = importer;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImportedImage"/> class.
         /// </summary>
-        protected ImportedImage(IImageImporter importer)
-            : this(importer, null)
+        protected ImportedImage()
+            : this(null)
         { }
 
         /// <summary>
@@ -219,6 +240,10 @@ namespace PdfSharp.Drawing
         internal enum ImageFormats
         {
             // ReSharper disable InconsistentNaming
+            /// <summary>
+            /// Value not set.
+            /// </summary>
+            Undefined = -1,
 
             /// <summary>
             /// Standard JPEG format (RGB).
@@ -250,7 +275,7 @@ namespace PdfSharp.Drawing
             // ReSharper restore InconsistentNaming
         }
 
-        internal ImageFormats ImageFormat;
+        internal ImageFormats ImageFormat = ImageFormats.Undefined;
 
         /// <summary>
         /// The width of the image in pixel.

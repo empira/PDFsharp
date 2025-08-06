@@ -21,7 +21,7 @@ namespace PdfSharp.Snippets.Drawing
         public override void RenderSnippet(XGraphics gfx)
         {
             // Draw rectangle via path.
-            BeginBox(gfx, 1, BoxOptions.Tile, "CORE");
+            BeginBox(gfx, 1, BoxOptions.Tile, "Core");
             {
                 var path = new XGraphicsPath();
                 path.AddRectangle(20, 20, 184, 104);
@@ -48,7 +48,7 @@ namespace PdfSharp.Snippets.Drawing
             EndBox(gfx);
 
             // Draw pentagram via path.
-            BeginBox(gfx, 3, BoxOptions.Tile, "CORE");
+            BeginBox(gfx, 3, BoxOptions.Tile, "Core");
             {
                 var path = new XGraphicsPath();
                 path.AddPolygon(GetPentagram(52, BoxCenter));

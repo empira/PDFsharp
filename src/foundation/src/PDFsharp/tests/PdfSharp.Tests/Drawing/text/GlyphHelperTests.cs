@@ -3,8 +3,8 @@
 
 using FluentAssertions;
 using PdfSharp.Drawing;
-using PdfSharp.FontResolver;
 using PdfSharp.Fonts;
+using PdfSharp.Quality;
 using Xunit;
 
 namespace PdfSharp.Tests.Drawing
@@ -66,7 +66,7 @@ namespace PdfSharp.Tests.Drawing
         [Fact]
         public void Glyphs_from_invalid_ANSI_codes()
         {
-            // Ensure no glyph ids for non ANSI characters.
+            // Ensure no glyph IDs for non ANSI characters.
 
             var font = new XFont("Arial", 10);
 

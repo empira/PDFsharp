@@ -78,7 +78,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public PdfContent CreateSingleContent()
         {
-            byte[] bytes = Array.Empty<byte>();
+            byte[] bytes = [];
             byte[] bytes1;
             byte[] bytes2;
             foreach (PdfItem iref in Elements)
@@ -221,7 +221,7 @@ namespace PdfSharp.Pdf.Advanced
                 get
                 {
                     if (_index == -1 || _index >= _contents.Elements.Count)
-                        throw new InvalidOperationException(PSSR.ListEnumCurrentOutOfRange);
+                        throw new InvalidOperationException(PsMsgs.ListEnumCurrentOutOfRange);
                     return _currentElement??throw new InvalidOperationException("Current called before MoveNext.");
                 }
             }

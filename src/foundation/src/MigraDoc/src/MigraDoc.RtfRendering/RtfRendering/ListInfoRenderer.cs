@@ -98,23 +98,29 @@ namespace MigraDoc.RtfRendering
 
                 case ListType.BulletList1:
                     levelText1 = "'01";
-                    levelText2 = "u9679 ?";
-                    fontIdx = _docRenderer.GetFontIndex("Courier New");
+                    levelText2 = GetBulletItemText2(PredefinedFontsAndChars.Bullets.Level1Character);
+                    fontIdx = _docRenderer.GetFontIndex(PredefinedFontsAndChars.Bullets.Level1FontName);
                     break;
 
                 case ListType.BulletList2:
                     levelText1 = "'01";
-                    levelText2 = "u9675 ?";
-                    fontIdx = _docRenderer.GetFontIndex("Courier New");
+                    levelText2 = GetBulletItemText2(PredefinedFontsAndChars.Bullets.Level2Character);
+                    fontIdx = _docRenderer.GetFontIndex(PredefinedFontsAndChars.Bullets.Level2FontName);
                     break;
 
                 case ListType.BulletList3:
                     levelText1 = "'01";
-                    levelText2 = "u9642 ?";
-                    fontIdx = _docRenderer.GetFontIndex("Courier New");
+                    levelText2 = GetBulletItemText2(PredefinedFontsAndChars.Bullets.Level3Character);
+                    fontIdx = _docRenderer.GetFontIndex(PredefinedFontsAndChars.Bullets.Level3FontName);
                     break;
             }
             WriteListLevel(levelText1, levelText2, levelNumbers, fontIdx);
+        }
+
+        string GetBulletItemText2(char c)
+        {
+            var text2 = Invariant($"u{(int)c} ?");
+            return text2;
         }
 
         void WriteListLevel(string levelText1, string levelText2, string levelNumbers, int fontIdx)

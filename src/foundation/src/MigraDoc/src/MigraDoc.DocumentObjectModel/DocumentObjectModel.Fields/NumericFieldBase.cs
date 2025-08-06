@@ -16,13 +16,13 @@ namespace MigraDoc.DocumentObjectModel.Fields
         /// The valid format strings for the supported numeric types.
         /// </summary>
         protected static readonly string[] ValidFormatStrings =
-        {
+        [
             "",
             "ROMAN",
             "roman",
             "ALPHABETIC",
             "alphabetic"
-        };
+        ];
 
         /// <summary>
         /// Initializes a new instance of the NumericFieldBase class.
@@ -62,7 +62,7 @@ namespace MigraDoc.DocumentObjectModel.Fields
                 if (IsValidFormat(value))
                     Values.Format = value;
                 else
-                    throw new ArgumentException(DomSR.InvalidFieldFormat(value));
+                    throw new ArgumentException(MdDomMsgs.InvalidFieldFormat(value).Message);
             }
         }
 

@@ -61,7 +61,6 @@ namespace PdfSharp.Drawing
         public InternalGraphicsState(XGraphics gfx, XGraphicsContainer container)
         {
             _gfx = gfx;
-            //State = null!; // BUG
             container.InternalState = this;
         }
 

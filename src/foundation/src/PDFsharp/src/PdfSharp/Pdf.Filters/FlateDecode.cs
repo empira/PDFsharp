@@ -31,7 +31,7 @@ namespace PdfSharp.Pdf.Filters
             switch (mode)
             {
                 case PdfFlateEncodeMode.BestCompression:
-#if NET472 || NETSTANDARD2_0
+#if NET462 || NETSTANDARD2_0
                     level = CompressionLevel.Optimal;
 #else
                     level = CompressionLevel.SmallestSize;
@@ -112,8 +112,8 @@ namespace PdfSharp.Pdf.Filters
             using var zip = new DeflateStream(ms, level, true);
             zip.Write(data, 0, data.Length);
             // Flush has no effect on DeflateStream.
-            // Must call Close to ensure all bytes are written with .NET 4.7.2.
-            // Works with .NET 6 even without Close. But when adding support for .NET 4.7.2, we searched a while until we found that only the Close was needed.
+            // Must call Close to ensure all bytes are written with .NET 4.6.2.
+            // Works with .NET 6 even without Close. But when adding support for .NET 4.6.2, we searched a while until we found that only the Close was needed.
             zip.Close();
 
             ms.Capacity = (int)ms.Length;

@@ -10,7 +10,7 @@ namespace PdfSharp.Quality
 {
     /// <summary>
     /// Static helper functions for file IO.
-    /// These function are intended for unit test und sample in a solution code only.
+    /// These functions are intended for unit tests and samples in solution code only.
     /// </summary>
     public static class PdfFileUtility
     {

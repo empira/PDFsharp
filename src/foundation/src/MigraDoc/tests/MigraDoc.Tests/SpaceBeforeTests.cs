@@ -5,16 +5,32 @@ using PdfSharp.TestHelper;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Rendering;
+using PdfSharp.Diagnostics;
 using PdfSharp.Fonts;
 using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
+#if CORE
+#endif
 using Xunit;
 
 namespace MigraDoc.Tests
 {
     [Collection("PDFsharp")]
-    public class SpaceBeforeTests
+    public class SpaceBeforeTests : IDisposable
     {
+        public SpaceBeforeTests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void Tests_for_SpaceBefore()
         {
@@ -91,9 +107,9 @@ namespace MigraDoc.Tests
             paragraph.Add(new DateField { Format = "yyyy/MM/dd HH:mm:ss" });
             paragraph.Format.Alignment = ParagraphAlignment.Center;
 
-            for (int i = 1; i <= 10; ++i)
+            for (int idx = 1; idx <= 10; idx++)
             {
-                paragraph = header.AddParagraph("Paragraph " + i);
+                paragraph = header.AddParagraph("Paragraph " + idx);
                 paragraph.Format.Alignment = ParagraphAlignment.Center;
             }
 

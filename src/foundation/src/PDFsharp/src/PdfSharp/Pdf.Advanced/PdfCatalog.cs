@@ -19,8 +19,6 @@ namespace PdfSharp.Pdf.Advanced
             : base(document)
         {
             Elements.SetName(Keys.Type, "/Catalog");
-
-            //_version = "1.4";  // HACK in PdfCatalog
         }
 
         internal PdfCatalog(PdfDictionary dictionary)
@@ -69,7 +67,11 @@ namespace PdfSharp.Pdf.Advanced
                 {
                     _pages = (PdfPages?)Elements.GetValue(Keys.Pages, VCF.CreateIndirect) ?? NRT.ThrowOnNull<PdfPages>();
                     if (Owner.IsImported)
+                    {
                         _pages.FlattenPageTree();
+                        //foreach (var page in _pages)
+                        //    page.InitPageSize();
+                    }
                 }
                 return _pages;
             }
@@ -139,15 +141,45 @@ namespace PdfSharp.Pdf.Advanced
             {
                 if (_names == null)
                 {
-                    _names = new PdfNameDictionary(Owner);
-                    Owner.Internals.AddObject(_names);
-                    Elements.SetReference(Keys.Names, _names.Reference);
-
+                    var dict = Elements.GetDictionary(Keys.Names);
+                    if (dict != null)
+                        _names = new PdfNameDictionary(dict);
+                    else
+                    {
+                        _names = new PdfNameDictionary(Owner);
+                        Owner.Internals.AddObject(_names);
+                        Elements.SetReference(Keys.Names, _names.Reference ?? throw TH.InvalidOperationException_ReferenceMustNotBeNull());
+                    }
                 }
                 return _names;
             }
         }
         PdfNameDictionary? _names;
+
+        /// <summary>
+        /// Gets the named destinations defined in the Catalog
+        /// </summary>
+        public PdfNamedDestinations Destinations
+        {
+            get
+            {
+                if (_dests == null)
+                {
+                    var dict = Elements.GetDictionary(Keys.Dests);
+                    if (dict != null)
+                        _dests = new PdfNamedDestinations(dict);
+                    else
+                    {
+                        _dests = new PdfNamedDestinations();
+                        _dests = new PdfNamedDestinations();
+                        Owner.Internals.AddObject(_dests);
+                        Elements.SetReference(Keys.Dests, _dests.Reference ?? throw TH.InvalidOperationException_ReferenceMustNotBeNull());
+                    }
+                }
+                return _dests;
+            }
+        }
+        PdfNamedDestinations? _dests;
 
         /// <summary>
         /// Gets the AcroForm dictionary of this document.
@@ -157,7 +189,7 @@ namespace PdfSharp.Pdf.Advanced
             get
             {
                 if (_acroForm == null)
-                    _acroForm = (PdfAcroForm?)Elements.GetValue(Keys.AcroForm)??NRT.ThrowOnNull<PdfAcroForm>();
+                    _acroForm = (PdfAcroForm?)Elements.GetValue(Keys.AcroForm) ?? NRT.ThrowOnNull<PdfAcroForm>();
                 return _acroForm;
             }
         }
@@ -189,7 +221,8 @@ namespace PdfSharp.Pdf.Advanced
                 _pages.PrepareForSave();
 
             // Create outline objects.
-            if (_outline != null && _outline.Outlines.Count > 0)
+            //if (_outline != null && _outline.Outlines.Count > 0)
+            if (_outline is { Outlines.Count: > 0 })
             {
                 if (Elements[Keys.PageMode] == null)
                     PageMode = PdfPageMode.UseOutlines;
@@ -343,7 +376,7 @@ namespace PdfSharp.Pdf.Advanced
 
             /// <summary>
             /// (Optional; PDF 1.4; must be an indirect reference) A metadata stream 
-            /// containing metadata  for the document.
+            /// containing metadata for the document.
             /// </summary>
             [KeyInfo("1.4", KeyType.Dictionary | KeyType.Optional | KeyType.MustBeIndirect)]
             public const string Metadata = "/Metadata";

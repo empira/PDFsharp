@@ -1,12 +1,10 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Logging;
-using MigraDoc.RtfRendering.Resources;
 
 namespace MigraDoc.RtfRendering
 {
@@ -48,7 +46,7 @@ namespace MigraDoc.RtfRendering
                     break;
 
                 default:
-                    MigraDocLogHost.RtfRenderingLogger.LogError(Messages2.InvalidNumericFieldFormat(_numericField.Format));
+                    MigraDocLogHost.RtfRenderingLogger.LogError(MdRtfMsgs.InvalidNumericFieldFormat(_numericField.Format).Message);
                     //Debug.WriteLine(Messages2.InvalidNumericFieldFormat(_numericField.Format), "warning");
                     break;
             }

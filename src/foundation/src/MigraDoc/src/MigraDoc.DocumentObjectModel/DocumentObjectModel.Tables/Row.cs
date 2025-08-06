@@ -39,7 +39,6 @@ namespace MigraDoc.DocumentObjectModel.Tables
         protected override object DeepCopy()
         {
             var row = (Row)base.DeepCopy();
-            row.ResetCachedValues();
             if (row.Values.Format != null)
             {
                 row.Values.Format = row.Values.Format.Clone();
@@ -60,6 +59,17 @@ namespace MigraDoc.DocumentObjectModel.Tables
                 row.Values.Cells = row.Values.Cells.Clone();
                 row.Values.Cells.Parent = row;
             }
+
+            // Now reset cached values.
+
+            row.ResetCachedValues();
+            row.Cells.ResetCachedValues();
+            for (var columnIndex = 0; columnIndex < row.Cells.Count; columnIndex++)
+            {
+                var cell = row.Cells[columnIndex];
+                cell.ResetCachedValues();
+            }
+
             return row;
         }
 
@@ -85,7 +95,16 @@ namespace MigraDoc.DocumentObjectModel.Tables
 
             if (Parent is Rows rws)
             {
+                // All children must update their ancestors.
+                // Now reset cached values.
+                Cells.ResetCachedValues();
+                // Assign _table before resetting children that may depend on Table of their parent.
                 _table = rws.Table;
+                for (var columnIndex = 0; columnIndex < Cells.Count; columnIndex++)
+                {
+                    var cell = Cells[columnIndex];
+                    cell.ResetCachedValues();
+                }
             }
         }
 
@@ -138,7 +157,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
             get => Values.Format ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Format = value;
             }
         }
@@ -205,7 +224,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
             get => Values.Borders ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Borders = value;
             }
         }
@@ -218,7 +237,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
             get => Values.Shading ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Shading = value;
             }
         }
@@ -241,7 +260,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
             get => Values.Cells ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Cells = value;
             }
         }
@@ -324,7 +343,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

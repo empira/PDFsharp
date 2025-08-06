@@ -11,6 +11,7 @@ using MigraDoc.Rendering;
 using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
+using PdfSharp.Pdf.Internal;
 using PdfSharp.Pdf.IO;
 
 namespace GdiGrammarByExample
@@ -79,13 +80,13 @@ namespace GdiGrammarByExample
 #endif
 #else
 #if CORE
-            document.Info.Author += "[.NET 4.7.2+ Core build]";
+            document.Info.Author += "[.NET 4.6.2+ Core build]";
 #elif GDI
-            document.Info.Author += "[.NET 4.7.2+ GDI build]";
+            document.Info.Author += "[.NET 4.6.2+ GDI build]";
 #elif WPF
-            document.Info.Author += "[.NET 4.7.2+ WPF build]";
+            document.Info.Author += "[.NET 4.6.2+ WPF build]";
 #else
-            document.Info.Author += "[.NET 4.7.2+ ??? build]";
+            document.Info.Author += "[.NET 4.6.2+ ??? build]";
 #endif
 #endif
 
@@ -101,11 +102,13 @@ namespace GdiGrammarByExample
 
         Document DdlReaderDocumentFromFile(string file)
         {
-#if NET6_0_OR_GREATER
-            var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
-#else
-            var ansiEncoding = Encoding.GetEncoding(1252);
-#endif
+            //#if NET6_0_OR_GREATER
+            //            var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
+            //#else
+            //            var ansiEncoding = Encoding.GetEncoding(1252);
+            //#endif
+            var ansiEncoding = PdfEncoders.WinAnsiEncoding;
+
             //Console.WriteLine($"DdlReaderDocumentFromFile(string {file})");
             Document document;
             DdlReader? reader = null;
@@ -217,9 +220,9 @@ namespace GdiGrammarByExample
                 string resultFileNameSideBySide = testContext.AddResultFileEx("!!TestResult_side_by_side.pdf");
                 var pdfResultDocumentSideBySide = CreateOrOpenResultFile(resultFileNameSideBySide);
 
-                for (int i = 0; i < total; ++i)
+                for (int idx = 0; idx < total; idx++)
                 {
-                    bool landscape = ((1 << i) & bitmapLandscape) != 0;
+                    bool landscape = ((1 << idx) & bitmapLandscape) != 0;
                     var page = pdfResultDocumentSideBySide.AddPage();
                     page.Orientation = landscape ? PageOrientation.Portrait : PageOrientation.Landscape;
                     var gfx = XGraphics.FromPdfPage(page);
@@ -232,20 +235,20 @@ namespace GdiGrammarByExample
                         var box = new XRect(0, 0, width, height / 2);
 
                         // Copy page.
-                        CopyPdfPage(inputDocument1, gfx, i + 1, box);
+                        CopyPdfPage(inputDocument1, gfx, idx + 1, box);
 
                         // Write document file name and page number on each page.
                         box.Inflate(0, -10);
-                        gfx.DrawString(FormattableString.Invariant($"- {testName} - {i + 1} of {pages1} -"),
+                        gfx.DrawString(FormattableString.Invariant($"- {testName} - {idx + 1} of {pages1} -"),
                                        font, XBrushes.Red, box, format);
 
                         box = new XRect(0, height / 2, width, height / 2);
                         // Copy page.
-                        CopyPdfPage(inputDocument2, gfx, i + 1, box);
+                        CopyPdfPage(inputDocument2, gfx, idx + 1, box);
 
                         // Write document file name and page number on each page.
                         box.Inflate(0, -10);
-                        gfx.DrawString(FormattableString.Invariant($"- {i + 1} of {pages2} -"),
+                        gfx.DrawString(FormattableString.Invariant($"- {idx + 1} of {pages2} -"),
                                        font, XBrushes.Red, box, format);
                     }
                     else
@@ -254,21 +257,21 @@ namespace GdiGrammarByExample
                         var box = new XRect(0, 0, width / 2, height);
 
                         // Copy page.
-                        CopyPdfPage(inputDocument1, gfx, i + 1, box);
+                        CopyPdfPage(inputDocument1, gfx, idx + 1, box);
 
                         // Write document file name and page number on each page.
                         box.Inflate(0, -10);
-                        gfx.DrawString(FormattableString.Invariant($"- {testName} - {i + 1} of {pages1} -"),
+                        gfx.DrawString(FormattableString.Invariant($"- {testName} - {idx + 1} of {pages1} -"),
                                        font, XBrushes.Red, box, format);
 
                         box = new XRect(width / 2, 0, width / 2, height);
 
                         // Copy page.
-                        CopyPdfPage(inputDocument2, gfx, i + 1, box);
+                        CopyPdfPage(inputDocument2, gfx, idx + 1, box);
 
                         // Write document file name and page number on each page.
                         box.Inflate(0, -10);
-                        gfx.DrawString(FormattableString.Invariant($"- {i + 1} of {pages2} -"),
+                        gfx.DrawString(FormattableString.Invariant($"- {idx + 1} of {pages2} -"),
                                        font, XBrushes.Red, box, format);
                     }
                 }

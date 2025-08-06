@@ -1,12 +1,10 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-
 namespace PdfSharp
 {
     /// <summary>
-    /// Base class of all exceptions in the PDFsharp frame work.
+    /// Base class of all exceptions in the PDFsharp library.
     /// </summary>
     public class PdfSharpException : Exception
     {

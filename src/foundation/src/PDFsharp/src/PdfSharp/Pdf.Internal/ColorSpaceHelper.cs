@@ -25,10 +25,10 @@ namespace PdfSharp.Pdf.Internal
             return color;
 #else
       if (colorMode == PdfColorMode.Rgb && color.ColorSpace != XColorSpace.Rgb)
-        throw new InvalidOperationException(PSSR.InappropriateColorSpace(colorMode, color.ColorSpace));
+        throw new InvalidOperationException(PsMgs.InappropriateColorSpace(colorMode, color.ColorSpace));
 
       if (colorMode == PdfColorMode.Cmyk && color.ColorSpace != XColorSpace.Cmyk)
-        throw new InvalidOperationException(PSSR.InappropriateColorSpace(colorMode, color.ColorSpace));
+        throw new InvalidOperationException(PsMgs.InappropriateColorSpace(colorMode, color.ColorSpace));
 #endif
         }
 

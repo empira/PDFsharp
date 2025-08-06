@@ -75,9 +75,9 @@ namespace PdfSharp.Features.IO
                 }
                 stopwatch.Stop();
                 var x = stopwatch.ElapsedMilliseconds;
-#if DEBUG
-                Console.WriteLine($"Time: {x}ms");
-                Console.WriteLine($"Try: {LexerHelper.TryCheckReferenceCount}, success: {LexerHelper.TryCheckReferenceSuccessCount}");
+#if DEBUG_
+                Console.W/riteLine($"Time: {x}ms");
+                Console.W/riteLine($"Try: {LexerHelper.TryCheckReferenceCount}, success: {LexerHelper.TryCheckReferenceSuccessCount}");
 #endif
 
                 //document.Info.Author = "empira";

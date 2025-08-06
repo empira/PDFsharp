@@ -8,9 +8,34 @@ using PdfSharp.Pdf;
 namespace PdfSharp.Events
 {
     /// <summary>
+    /// EventArgs for PrepareTextEvent.
+    /// </summary>
+    public class PrepareTextEventArgs(PdfObject source, XFont font, string text) : PdfSharpEventArgs(source)
+    {
+        /// <summary>
+        /// Gets the font used to draw the text.
+        /// The font cannot be changed in an event handler.
+        /// </summary>
+        public XFont Font { get; init; } = font;
+
+        /// <summary>
+        /// Gets or sets the text to be processed.
+        /// </summary>
+        public string Text { get; set; } = text;
+    }
+
+    /// <summary>
+    /// EventHandler for DrawString and MeasureString.
+    /// Gives a document the opportunity to inspect or modify the string before it is used for drawing or measuring text.
+    /// </summary>
+    /// <param name="sender">The sender of the event.</param>
+    /// <param name="e">The RenderTextEventHandler of the event.</param>
+    public delegate void PrepareTextEventHandler(object sender, PrepareTextEventArgs e);
+
+    /// <summary>
     /// EventArgs for RenderTextEvent.
     /// </summary>
-    public class RenderTextEventArgs(PdfObject source) : PdfSharpEventArgs(source)
+    public class RenderTextEventArgs(PdfObject source, XFont font, CodePointGlyphIndexPair[] codePointGlyphIndexPair) : PdfSharpEventArgs(source)
     {
         /// <summary>
         /// Gets or sets a value indicating whether the determination of the glyph identifiers must be reevaluated.
@@ -23,19 +48,19 @@ namespace PdfSharp.Events
         /// Gets the font used to draw the text.
         /// The font cannot be changed in an event handler.
         /// </summary>
-        public XFont Font { get; init; } = default!;
+        public XFont Font { get; init; } = font;
 
         /// <summary>
         /// Gets or sets the array containing the code points and glyph indices.
         /// An event handler can modify or replace this array.
         /// </summary>
-        public CodePointGlyphIndexPair[] CodePointGlyphIndexPairs { get; set; } = default!;
+        public CodePointGlyphIndexPair[] CodePointGlyphIndexPairs { get; set; } = codePointGlyphIndexPair;
     }
 
     /// <summary>
     /// EventHandler for DrawString and MeasureString.
     /// Gives a document the opportunity to inspect or modify the UTF-32 code points with their corresponding
-    /// glyph identifiers before used for drawing or measuring text.
+    /// glyph identifiers before they are used for drawing or measuring text.
     /// </summary>
     /// <param name="sender">The sender of the event.</param>
     /// <param name="e">The RenderTextEventHandler of the event.</param>
@@ -46,6 +71,21 @@ namespace PdfSharp.Events
     /// </summary>
     public class RenderEvents
     {
+        /// <summary>
+        /// An event raised whenever text is about to be drawn or measured in a PDF document.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="args">The PrepareTextEventArgs of the event.</param>
+        public void OnPrepareTextEvent(object sender, PrepareTextEventArgs args)
+        {
+            PrepareTextEvent?.Invoke(sender, args);
+        }
+
+        /// <summary>
+        /// EventHandler for PrepareTextEvent.
+        /// </summary>
+        public event PrepareTextEventHandler? PrepareTextEvent;
+
         /// <summary>
         /// An event raised whenever text is drawn or measured in a PDF document.
         /// </summary>
