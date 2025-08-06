@@ -3,6 +3,8 @@
 
 // ReSharper disable ConvertToAutoProperty
 
+using PdfSharp.Pdf.IO;
+
 namespace PdfSharp.Pdf
 {
     /// <summary>
@@ -81,6 +83,20 @@ namespace PdfSharp.Pdf
             set => _useFlateDecoderForJpegImages = value;
         }
         PdfUseFlateDecoderForJpegImages _useFlateDecoderForJpegImages = PdfUseFlateDecoderForJpegImages.Never;
+
+        /// <summary>
+        /// Gets or sets a value used for the PdfWriterLayout in PdfWriter.
+        /// </summary>
+        public PdfWriterLayout Layout
+        {
+            get => _writerLayout;
+            set => _writerLayout = value;
+        }
+#if DEBUG
+        PdfWriterLayout _writerLayout = PdfWriterLayout.Verbose;
+#else
+        PdfWriterLayout _writerLayout = PdfWriterLayout.Compact;
+#endif
 
         /// <summary>
         /// Gets or sets a value indicating whether XMP metadata will be generated manually.

@@ -159,7 +159,7 @@ namespace PdfSharp.Features.Drawing
         public void MeasureString_Test()
         {
             var doc = new PdfDocument();
-            doc.Info.Subject = "s xxxöäüß \U00029C9Cあ";  // BUG in encoding UTF-16
+            doc.Info.Subject = "s xxxöäüß \U00029C9Cあ";  // BUG_OLD in encoding UTF-16
             doc.PageLayout = PdfPageLayout.SinglePage;
 
             var page = doc.AddPage();

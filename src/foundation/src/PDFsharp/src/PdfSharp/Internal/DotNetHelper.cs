@@ -8,18 +8,17 @@ using System.Numerics;
 namespace PdfSharp.Internal
 {
     /// <summary>
-    /// Class containing replacements for net 6 methods missing in net framework 4.7.2.
+    /// Class containing replacements for net 6 methods missing in net framework 4.6.2.
     /// </summary>
     static class DotNetHelper
     {
         /// <summary>
-        /// Implements the net 6 BigInteger constructor missing in net framework 4.7.2.
+        /// Implements the net 6 BigInteger constructor missing in net framework 4.6.2.
         /// Initializes a new instance of the BigInteger structure using the values in a read-only span of bytes, and optionally indicating the signing encoding and the endianness byte order.
         /// </summary>
         /// <param name="value"></param>
         /// <param name="isUnsigned"></param>
         /// <param name="isBigEndian"></param>
-        /// <returns></returns>
         public static BigInteger CreateBigInteger(ReadOnlySpan<byte> value, bool isUnsigned = false, bool isBigEndian = false)
         {
             var bytes = value.ToArray();
@@ -31,7 +30,17 @@ namespace PdfSharp.Internal
             // A leading bit of 1 defines a negative number. If the input should be interpreted as unsigned, prepend a new zero byte, if there’s a leading 1.
             // As bytes is in little endian order, check the most significant bit of the last byte. If it is 1, append the zero byte.
             if (isUnsigned && bytes.Length > 0 && (bytes.Last() & 0x80) > 0)
+            {
+#if NET462
+                var len = bytes.Length;
+                var bytes2 = new byte[len + 1];
+                bytes.CopyTo(bytes2, 0);
+                bytes2[len] = 0;
+                bytes = bytes2;
+#else
                 bytes = bytes.Append((byte)0).ToArray();
+#endif
+            }
 
             return new BigInteger(bytes);
         }

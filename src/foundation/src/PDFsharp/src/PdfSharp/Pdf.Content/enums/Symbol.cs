@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 namespace PdfSharp.Pdf.Content
@@ -22,7 +22,10 @@ namespace PdfSharp.Pdf.Content
         Operator,
         BeginArray,
         EndArray,
-        Dictionary,  // HACK: << ... >> is scanned as string literal.
+        // IMPROVE
+        // Content dictionary << … >> is scanned as string literal.
+        // Scan as an object tree.
+        Dictionary,
         Eof,
         Error = -1,
     }

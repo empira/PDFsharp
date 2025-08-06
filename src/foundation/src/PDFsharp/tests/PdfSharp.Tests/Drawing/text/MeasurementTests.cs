@@ -2,20 +2,37 @@
 // See the LICENSE file in the solution root for more information.
 
 using FluentAssertions;
+using PdfSharp.Diagnostics;
 using PdfSharp.Drawing;
 using PdfSharp.Events;
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 using PdfSharp.Snippets.Font;
+#if CORE
+using PdfSharp.Quality;
+#endif
 using Xunit;
 
 namespace PdfSharp.Tests.Drawing
 {
     [Collection("PDFsharp")]
-    public class MeasurementTests
+    public class MeasurementTests : IDisposable
     {
+        public MeasurementTests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
-        public static void MeasureContextTest()
+        public void MeasureContextTest()
         {
             // Create a new PDF document.
             var document = new PdfDocument();

@@ -19,7 +19,7 @@ namespace PdfSharp.Drawing.Internal
                     // Note: TestBitmapFileHeader updates stream.CurrentOffset on success.
 
                     ImagePrivateDataBitmap ipd = new ImagePrivateDataBitmap(stream.Data, stream.Length);
-                    ImportedImage ii = new ImportedImageBitmap(this, ipd);
+                    ImportedImage ii = new ImportedImageBitmap(ipd);
                     ii.Information.DefaultDPI = 96; // Assume 96 DPI if information not provided in the file.
 
                     if (TestBitmapInfoHeader(stream, ii, offsetImageData))
@@ -31,6 +31,8 @@ namespace PdfSharp.Drawing.Internal
             // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception)
             {
+                // Eat exceptions to have this image importer skipped.
+                // We try to find an image importer that can handle the image.
             }
             return null;
         }
@@ -57,7 +59,7 @@ namespace PdfSharp.Drawing.Internal
         bool TestBitmapInfoHeader(StreamReaderHelper stream, ImportedImage ii, int offset)
         {
             int size = (int)stream.GetDWord(0, false);
-            if (size == 40 || size == 108 || size == 124) // sizeof BITMAPINFOHEADER == 40, sizeof BITMAPV4HEADER == 108, sizeof BITMAPV5HEADER == 124
+            if (size is 40 or 108 or 124) // sizeof BITMAPINFOHEADER == 40, sizeof BITMAPV4HEADER == 108, sizeof BITMAPV5HEADER == 124
             {
                 uint width = stream.GetDWord(4, false);
                 int height = (int)stream.GetDWord(8, false);
@@ -69,7 +71,7 @@ namespace PdfSharp.Drawing.Internal
                 int yPelsPerMeter = (int)stream.GetDWord(28, false);
                 uint colorsUsed = stream.GetDWord(32, false);
                 uint colorsImportant = stream.GetDWord(36, false);
-                // TODO Integrity and plausibility checks.
+                // TODO_OLD Integrity and plausibility checks.
                 if (sizeImage != 0 && sizeImage + offset > stream.Length)
                     return false;
 
@@ -96,7 +98,7 @@ namespace PdfSharp.Drawing.Internal
                         // RGB24
                         ii.Information.ImageFormat = ImageInformation.ImageFormats.RGB24;
 
-                        // TODO: Verify Mask if size >= 108 && compression == 3.
+                        // TODO_OLD: Verify Mask if size >= 108 && compression == 3.
                         return true;
                     }
                     if (planes == 1 && bitCount == 32)
@@ -107,7 +109,7 @@ namespace PdfSharp.Drawing.Internal
                             ImageInformation.ImageFormats.RGB24 :
                             ImageInformation.ImageFormats.ARGB32;
 
-                        // TODO: tell RGB from ARGB. Idea: assume RGB if alpha is always 0.
+                        // TODO_OLD: tell RGB from ARGB. Idea: assume RGB if alpha is always 0.
 
                         // Verify Mask if size >= 108 && compression == 3.
                         if (size >= 108 && compression == 3)
@@ -152,7 +154,7 @@ namespace PdfSharp.Drawing.Internal
 
                         return true;
                     }
-                    // TODO Implement more formats!
+                    // TODO_OLD Implement more formats!
                 }
             }
             return false;
@@ -172,8 +174,8 @@ namespace PdfSharp.Drawing.Internal
         /// <summary>
         /// Initializes a new instance of the <see cref="ImportedImageBitmap"/> class.
         /// </summary>
-        public ImportedImageBitmap(IImageImporter importer, ImagePrivateDataBitmap data)
-            : base(importer, data)
+        public ImportedImageBitmap(ImagePrivateDataBitmap data)
+            : base(data)
         { }
 
         internal override ImageData PrepareImageData(PdfDocumentOptions options)
@@ -206,7 +208,7 @@ namespace PdfSharp.Drawing.Internal
             Length = Data.Length;
             AlphaMask = mask;
             AlphaMaskLength = AlphaMask?.Length ?? 0;
-            // TODO Bitmap mask?
+            // TODO_OLD Bitmap mask?
         }
 
         /// <summary>
@@ -357,7 +359,7 @@ namespace PdfSharp.Drawing.Internal
             {
                 if (hasAlpha)
                 {
-                    // $THHO TODO: Get byte order for V5 bitmaps from bitmap header.
+                    // Improvement: Get byte order for V5 bitmaps from bitmap header.
                     // https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapv5header
                     // "If the bV5Compression member of the BITMAPV5HEADER is BI_BITFIELDS, the bmiColors member contains three DWORD color masks that specify the red, green, and blue components of each pixel. Each DWORD in the bitmap array represents a single pixel."
 
@@ -367,7 +369,7 @@ namespace PdfSharp.Drawing.Internal
 
                 for (int y = 0; y < height; ++y)
                 {
-                    // TODO Handle Flipped.
+                    // TODO_OLD Handle Flipped.
                     int nOffsetWrite = 3 * (height - 1 - y) * width;
                     int nOffsetWriteAlpha = 0;
                     if (hasAlpha)
@@ -502,7 +504,7 @@ namespace PdfSharp.Drawing.Internal
 
             if (bits == 1 && options.EnableCcittCompressionForBilevelImages)
             {
-                // TODO: flag/option?
+                // TODO_OLD: flag/option?
                 // We try Group 3 1D and Group 4 (2D) encoding here and keep the smaller byte array.
                 //byte[] temp = new byte[imageData.Length];
                 //int ccittSize = DoFaxEncoding(ref temp, imageBits, (uint)bytesFileOffset, (uint)width, (uint)height);
@@ -566,12 +568,12 @@ namespace PdfSharp.Drawing.Internal
                                 int n = Data[bytesFileOffset + bytesOffsetRead];
                                 if (bits == 8)
                                 {
-                                    // TODO???: segmentedColorMask == true => bad mask NYI
+                                    // TODO_OLD???: segmentedColorMask == true => bad mask NYI
                                     mask?.AddPel((n >= firstMaskColor) && (n <= lastMaskColor));
                                 }
                                 else if (bits == 4)
                                 {
-                                    // TODO???: segmentedColorMask == true => bad mask NYI
+                                    // TODO_OLD???: segmentedColorMask == true => bad mask NYI
                                     int n1 = (n & 0xf0) / 16;
                                     int n2 = (n & 0x0f);
                                     mask?.AddPel((n1 >= firstMaskColor) && (n1 <= lastMaskColor));
@@ -579,7 +581,7 @@ namespace PdfSharp.Drawing.Internal
                                 }
                                 else if (bits == 1)
                                 {
-                                    // TODO???: segmentedColorMask == true => bad mask NYI
+                                    // TODO_OLD???: segmentedColorMask == true => bad mask NYI
                                     for (int bit = 1; bit <= 8; ++bit)
                                     {
                                         int n1 = (n & 0x80) / 128;

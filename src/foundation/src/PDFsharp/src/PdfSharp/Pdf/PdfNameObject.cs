@@ -32,7 +32,7 @@ namespace PdfSharp.Pdf
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
             if (value.Length == 0 || value[0] != '/')
-                throw new ArgumentException(PSSR.NameMustStartWithSlash);
+                throw new ArgumentException(PsMsgs.NameMustStartWithSlash);
 
             Value = value;
         }
@@ -59,7 +59,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public override string ToString()
         {
-            // TODO: Encode characters.
+            // TODO_OLD: Encode characters.
             return Value;
         }
 

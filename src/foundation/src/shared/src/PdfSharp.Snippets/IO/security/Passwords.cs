@@ -7,7 +7,7 @@
 
 //namespace PdfSharp.Snippets.Security
 //{
-//    // $THHO TODO Which baseclass if any? => TODO Remove code???
+//    // TODO_OLD Remove code???
 //    public class Passwords : SnippetBase
 //    {
 //        public Passwords()

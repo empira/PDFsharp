@@ -20,8 +20,8 @@ namespace PdfSharp.Drawing
 
         public CoreGraphicsPath(CoreGraphicsPath path)
         {
-            _points = new(path._points);
-            _types = new(path._types);
+            _points = [..path._points];
+            _types = [..path._types];
         }
 
         public void MoveOrLineTo(double x, double y)

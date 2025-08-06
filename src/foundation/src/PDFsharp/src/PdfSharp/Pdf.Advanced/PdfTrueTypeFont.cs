@@ -127,7 +127,7 @@ namespace PdfSharp.Pdf.Advanced
 
             FontDescriptor.PrepareForSave();
 
-            // #NFM TODO use only used characters
+            // #NFM TODO_OLD use only used characters
             var min = CMapInfo.MinCodePoint;
             var max = CMapInfo.MaxCodePoint;
             if (min > 32 || max < 255)

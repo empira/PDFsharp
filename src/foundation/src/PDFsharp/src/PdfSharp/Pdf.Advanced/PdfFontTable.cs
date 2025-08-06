@@ -37,7 +37,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public PdfFont GetOrCreateFont(XGlyphTypeface glyphTypeface, FontType fontType)
         {
-            // TODO: The selector should be the glyph typeface key plus the font type key.
+            // TODO_OLD: The selector should be the glyph typeface key plus the font type key.
             var selector = ComputePdfFontKey(glyphTypeface, fontType);
             if (!_fonts.TryGetValue(selector, out var pdfFont))
             {
@@ -101,7 +101,7 @@ namespace PdfSharp.Pdf.Advanced
             // fontType must be defined to compute the key.
             Debug.Assert(fontType is FontType.TrueTypeWinAnsi or FontType.Type0Unicode);
 
-            // TODO Check if StringBuilder is more efficient here.
+            // TODO_OLD Check if StringBuilder is more efficient here.
             //var glyphTypeface = font.GlyphTypeface;
 
             // #NFM Use gtk here. But the gtk without simulation flags.

@@ -4,12 +4,15 @@
 
 .DESCRIPTION
     The script builds the solution located in the script’s root parent folder and runs 'dotnet test' for all libraries to test, that are found via its projects.
-    These tests are run in the following environment, as far as available: Windows with net6, Windows with net472 and Linux/WSL (net6).
-    For each environment libraries not to be run (like WPF in Linux or Linux-targeting DLLs in Windows) are excluded from testing.
+    These tests are run in the following environment, as far as available: Windows with NET8 or NET6, Windows with NET462 and Linux/WSL (NET8 or NET6).
+    For each environment, libraries not to be run (like WPF in Linux or Linux-targeting DLLs in Windows) are excluded from testing.
     The test results are displayed in tables per library / code base comparing the test results in the different environments.
 
 .PARAMETER Config
     Specifies the configuration to build and test the solution ("Debug" or "Release"). "Debug" is the default.
+
+.PARAMETER Net6
+    Specifies whether NET6 shall be tested instead of NET8. $False is the default.
 
 .PARAMETER SkipBuild
     Specifies whether the build of the solution shall be skipped. $False is the default.
@@ -17,6 +20,7 @@
 .PARAMETER RunAllTests
     Specifies whether to run even the slow tests, whose execution can be managed via PDFsharpTests environment variable. $False is the default.
 
+.NOTES
     Possible test results are:
     --------------------------
 
@@ -28,7 +32,7 @@
 
     Not implemented:  The test result was only found for other environments. Maybe the project is not targeting or the test is not implemented for this environment.
 
-    Not Applicable:   The test library was not expected to be executed, as it is not intended to be run in this environment or as this environment is not available.
+    Not applicable:   The test library was not expected to be executed, as it is not intended to be run in this environment or as this environment is not available.
 
     No trx file:      The test library was expected to be executed, but no trx file was found. Maybe an error occurred in this script or in the 'dotnet test' call.
 
@@ -37,15 +41,15 @@
 
     If started in Windows, tests are executed in Windows and WSL:
 
-      > .\dev\run-tests.ps1
+        > .\dev\run-tests.ps1
 
     If started from Windows in WSL, tests are executed in WSL only:
 
-      > wsl -e pwsh -c .\dev\run-tests.ps1
+        > wsl -e pwsh -c .\dev\run-tests.ps1
 
     If started in Linux / WSL, tests are executed in Linux / WSL only:
 
-      > pwsh -c ./dev/run-tests.ps1
+        > pwsh -c ./dev/run-tests.ps1
 
     Changing the script:
     --------------------
@@ -64,6 +68,7 @@ BUG: Allow to run all tests, including GBE.
 
 param (
     [Parameter(Mandatory = $false)] [string]$Config = 'Debug',
+    [Parameter(Mandatory = $false)] [bool]$Net6 = $false,
     [Parameter(Mandatory = $false)] [bool]$SkipBuild = $false,
     [Parameter(Mandatory = $false)] [bool]$RunAllTests = $false
 )
@@ -71,8 +76,9 @@ param (
 $script:SystemNameWindows = "Windows"
 $script:SystemNameLinux = "Linux"
 $script:SystemNameWsl = "WSL"
-$script:NetName472 = "net472"
+$script:NetName462 = "net462"
 $script:NetName6 = "net6"
+$script:NetName8 = "net8"
 
 
 $script:Solution
@@ -173,6 +179,12 @@ function InitializeScript()
     }
     Write-Host
 
+    if ($script:Net6)
+    {
+        Write-Host "NET6 Tests will be run instead of NET8."
+        Write-Host
+    }
+
     if ($script:SkipBuild)
     {
         Write-Host "Building solution in $script:Config build will be skipped."
@@ -192,6 +204,47 @@ function InitializeScript()
         Write-Host "Skipping slow tests of solution."
     }
     Write-Host
+
+    CheckNetRuntimes
+}
+
+# Checks the net runtimes for all available environments.
+function CheckNetRuntimes() {
+    # Check net runtime for local machine.
+    CheckNetRuntime $false
+
+    # Check net runtime for hosted WSL, if needed.
+    if ($script:RunOnHostedWsl) {
+        CheckNetRuntime $true
+    }
+}
+
+# Checks the net runtime for the local machine or WSL.
+function CheckNetRuntime($isWsl)
+{
+    if ($isWsl) {
+        $runtimes = (wsl -e dotnet --list-runtimes | Out-String) -split "`n"
+        $wslOrLocal = "WSL"
+    }
+    else {
+        $runtimes = (dotnet --list-runtimes | Out-String) -split "`n"
+        $wslOrLocal = "the local machine"
+    }
+
+    if ($script:Net6) {
+        $netMajorVersion = 6;
+    }
+    else {
+        $netMajorVersion = 8;
+    }
+
+    $hasRequiredVersion = ($runtimes | Where-Object { $_.StartsWith("Microsoft.NETCore.App $netMajorVersion.") } | Measure-Object | Select-Object -ExpandProperty Count) -gt 0
+
+    if ($hasRequiredVersion -eq $false)
+    {
+        Write-Error "The script is configured to run tests for net$netMajorVersion, but the net$netMajorVersion runtime is not installed on $wslOrLocal."
+        exit
+    }
 }
 
 # Gets the first solution in the current folder. There should be only one.
@@ -232,6 +285,23 @@ function LoadTestDllInfos()
 
     $testDllInfos = $dllInfos | Where-Object { $_.IsTestDll }
 
+    # If Net6 parameter is true, remove net8 DLLs.
+    if ($script:Net6)
+    {
+        $testDllInfos = $testDllInfos | Where-Object `
+        {
+            $_.TargetFramework.Contains("net8") -eq $false
+        }
+    }
+    # If Net6 parameter is false, remove net6 DLLs.
+    else
+    {
+        $testDllInfos = $testDllInfos | Where-Object `
+        {
+            $_.TargetFramework.Contains("net6") -eq $false
+        }
+    }
+
     # Test-HACK: Only include explicit projects.
     #$testDllInfos = $testDllInfos | Where-Object {$_.DllFileName.EndsWith("PdfSharp.Tests.dll", "OrdinalIgnoreCase") -or $_.DllFileName.EndsWith("Shared.Tests.dll", "OrdinalIgnoreCase")}
 
@@ -252,12 +322,12 @@ function LoadTestDllInfos()
     # Set $script:TestDllInfosLinux list if running on Linux host or if tests will run in hosted WSL.
     if ($script:RunOnLinuxHost -or $script:RunOnHostedWsl)
     {
-        # Exclude WPF and GDI projects and net472 and Windows target frameworks for Linux.
+        # Exclude WPF and GDI projects and net462 and Windows target frameworks for Linux.
         $script:TestDllInfosLinux = $testDllInfos | Where-Object `
         {
             $_.DllFileName.EndsWith("-gdi.dll", "OrdinalIgnoreCase") -eq $false -and `
             $_.DllFileName.EndsWith("-wpf.dll", "OrdinalIgnoreCase") -eq $false -and `
-            $_.TargetFramework.Contains("net472") -eq $false -and `
+            $_.TargetFramework.Contains("net462") -eq $false -and `
             $_.TargetFramework.Contains("windows") -eq $false
         } | ForEach-Object { $_.PSObject.Copy() }
 
@@ -527,14 +597,17 @@ function RunTestsForSystem($testDllInfos, $systemName, $isHostedWsl)
 # Gets the name of the environment for the given system and framework.
 function GetEnvironmentName($systemName, $targetFramework)
 {
-    # HACK: Some projects use net7.0 instead of net6.0, but we don’t want to differentiate this in the environment names which define the test result columns.
-    if ($targetFramework.Contains("net6") -or $targetFramework.Contains("net7"))
+    if ($script:Net6 -and $targetFramework.Contains("net6"))
     {
         $frameworkName = $script:NetName6
     }
-    elseif ($targetFramework.Contains("net472"))
+    elseif ($script:Net6 -eq $false -and $targetFramework.Contains("net8"))
     {
-        $frameworkName = $script:NetName472
+        $frameworkName = $script:NetName8
+    }
+    elseif ($targetFramework.Contains("net462"))
+    {
+        $frameworkName = $script:NetName462
     }
     else
     {
@@ -544,9 +617,13 @@ function GetEnvironmentName($systemName, $targetFramework)
     # HACK: For Linux the frameworkName shall not be shown.
     if ($systemName -eq $script:SystemNameCurrentLinux)
     {
-        if ($frameworkName -ne "net6")
+        if ($script:Net6 -and $frameworkName -ne "net6")
         {
-            Write-Error ("For Linux there’s only one column supported for net6 by test script.")
+            Write-Error ("For Linux there’s only one column supported (net6) by test script with Net6 parameter set to true.")
+        }
+        elseif ($script:Net6 -eq $false -and $frameworkName -ne "net8")
+        {
+            Write-Error ("For Linux there’s only one column supported (net8) by test script with Net6 parameter set to false.")
         }
         return "$systemName"
     }
@@ -590,12 +667,21 @@ function LoadAndShowTestResults()
     Write-Host "TestResults" -ForegroundColor Green # Green color is used to make it the same conspicuity like the given green Format-Table header output.
     Write-Host "==================================================" -ForegroundColor Green
 
-    # Environment names to be displayed in separate columns.
-    $environmentNameWindowsNet6 = GetEnvironmentName $script:SystemNameWindows $script:NetName6
-    $environmentNameWindowsNet472 = GetEnvironmentName $script:SystemNameWindows $script:NetName472
-    $environmentNameLinuxNet6 = GetEnvironmentName $script:SystemNameCurrentLinux $script:NetName6
+    if ($script:Net6)
+    {
+        $netNameX = $script:NetName6
+    }
+    else
+    {
+        $netNameX = $script:NetName8
+    }
 
-    $environmentNames = @($environmentNameWindowsNet6, $environmentNameWindowsNet472, $environmentNameLinuxNet6)
+    # Environment names to be displayed in separate columns.
+    $environmentNameWindowsNetX = GetEnvironmentName $script:SystemNameWindows $netNameX
+    $environmentNameWindowsNet462 = GetEnvironmentName $script:SystemNameWindows $script:NetName462
+    $environmentNameLinuxNetX = GetEnvironmentName $script:SystemNameCurrentLinux $netNameX
+
+    $environmentNames = @($environmentNameWindowsNetX, $environmentNameWindowsNet462, $environmentNameLinuxNetX)
 
     # Get unique GenericCodeBaseinformation for all Windows and Linux test DLLs.
     $genericCodeBaseInfos = ($script:TestDllInfosWindows + $script:TestDllInfosLinux) | Select-Object -Property GenericCodeBase, GenericCodeBaseExtension, ProjectFolder -Unique
@@ -621,18 +707,18 @@ function LoadAndShowTestResults()
             Width = $testColumnWidth
             },
         @{
-            Label = $firstResultColumnLeftPaddingStr + "$environmentNameWindowsNet6"
-            Expression = { ColorizedCellFormatExpressionResult($firstResultColumnLeftPaddingStr + $_.($environmentNameWindowsNet6)) }
+            Label = $firstResultColumnLeftPaddingStr + "$environmentNameWindowsNetX"
+            Expression = { ColorizedCellFormatExpressionResult($firstResultColumnLeftPaddingStr + $_.($environmentNameWindowsNetX)) }
             Width = $firstResultColumnLeftPadding + $resultColumnWidth
         },
         @{
-            Label = "$environmentNameWindowsNet472"
-            Expression = { ColorizedCellFormatExpressionResult($_.($environmentNameWindowsNet472)) }
+            Label = "$environmentNameWindowsNet462"
+            Expression = { ColorizedCellFormatExpressionResult($_.($environmentNameWindowsNet462)) }
             Width = $resultColumnWidth
         },
         @{
-            Label = "$environmentNameLinuxNet6"
-            Expression = { ColorizedCellFormatExpressionResult($_.($environmentNameLinuxNet6)) }
+            Label = "$environmentNameLinuxNetX"
+            Expression = { ColorizedCellFormatExpressionResult($_.($environmentNameLinuxNetX)) }
             Width = $resultColumnWidth
         }
     )

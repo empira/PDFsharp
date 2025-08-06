@@ -90,7 +90,7 @@ namespace PdfSharp.Charting
             set
             {
                 if (!Enum.IsDefined(typeof(TickMarkType), value))
-                    throw new InvalidEnumArgumentException("value", (int)value, typeof(TickMarkType));
+                    throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(TickMarkType));
                 _majorTickMark = value;
                 _majorTickMarkInitialized = true;
             }
@@ -109,7 +109,7 @@ namespace PdfSharp.Charting
             set
             {
                 if (!Enum.IsDefined(typeof(TickMarkType), value))
-                    throw new InvalidEnumArgumentException("value", (int)value, typeof(TickMarkType));
+                    throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(TickMarkType));
                 _minorTickMark = value;
                 _minorTickMarkInitialized = true;
             }

@@ -101,13 +101,13 @@ namespace MigraDoc.DocumentObjectModel.Shapes
             get => Values.PictureFormat ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.PictureFormat = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets a user defined resolution for the image in dots per inch.
+        /// Gets or sets a user-defined resolution for the image in dots per inch.
         /// </summary>
         public double Resolution
         {
@@ -166,13 +166,13 @@ namespace MigraDoc.DocumentObjectModel.Shapes
             if (!String.IsNullOrEmpty(workingDir))
                 filePath = workingDir;
             else
-                filePath = Directory.GetCurrentDirectory() + "\\";
+                filePath = Directory.GetCurrentDirectory() + "/";
 
             if (!Document.Values.ImagePath.IsValueNullOrEmpty())
             {
-                string? foundfile = ImageHelper.GetImageName(filePath, Name, Document.ImagePath);
-                if (foundfile != null)
-                    filePath = foundfile;
+                string? foundFile = ImageHelper.GetImageName(filePath, Name, Document.ImagePath);
+                if (foundFile != null)
+                    filePath = foundFile;
                 else
                     filePath = Path.Combine(filePath, Name);
             }
@@ -183,7 +183,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

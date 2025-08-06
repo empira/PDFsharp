@@ -5,7 +5,7 @@ using PdfSharp.Pdf.IO;
 using PdfSharp.Quality;
 
 #pragma warning disable 1591
-namespace PdfSharp.Features.Annotations
+namespace PdfSharp.Features.Pdf
 {
     public class LinkAnnotations
     {

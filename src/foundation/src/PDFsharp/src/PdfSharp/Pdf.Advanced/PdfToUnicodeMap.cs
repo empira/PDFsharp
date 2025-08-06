@@ -54,7 +54,7 @@ namespace PdfSharp.Pdf.Advanced
                 lowIndex = Math.Min(lowIndex, index);
                 hiIndex = Math.Max(hiIndex, index);
                 //glyphIndexToCharacter.Add(index, entry.Key);
-                glyphIndexToCharacter[index] = entry.Key;  // BUG - Key may be a surrogate pair. Should it be the code point?
+                glyphIndexToCharacter[index] = entry.Key;  // BUG_OLD - Key may be a surrogate pair. Should it be the code point?
             }
 
             using var ms = new MemoryStream();
@@ -84,7 +84,7 @@ namespace PdfSharp.Pdf.Advanced
                 //wrt.WriteLine(String.Format(CultureInfo.InvariantCulture, "<{0:X4}><{0:X4}><{1:X4}>", item.Key, (int)item.Value));
                 if ((value & 0xFFFF_0000) == 0)
                 {
-                    // TODO: handle surrogate pairs here.
+                    // TODO_OLD: handle surrogate pairs here.
                 }
                 wrt.WriteLine(Invariant($"<{key:X4}><{key:X4}><{(uint)value:X4}>"));
             }

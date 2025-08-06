@@ -118,7 +118,7 @@ namespace PdfSharp.Charting.Renderers
 
             var seriesColl = cri.Chart.SeriesCollection;
             cri.SeriesRendererInfos = new SeriesRendererInfo[seriesColl.Count];
-            for (int idx = 0; idx < seriesColl.Count; ++idx)
+            for (int idx = 0; idx < seriesColl.Count; idx++)
             {
                 var sri = new SeriesRendererInfo();
                 sri.Series = seriesColl[idx];

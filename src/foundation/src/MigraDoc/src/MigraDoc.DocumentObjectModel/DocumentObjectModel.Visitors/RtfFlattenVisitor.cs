@@ -18,12 +18,12 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             if (style != null)
                 format = style.Values.ParagraphFormat;
             else if (!String.IsNullOrEmpty(formattedText.Values.Style))
-                format = document.Styles[StyleNames.InvalidStyleName]!.Values.ParagraphFormat; // BUG: Clone here?
+                format = document.Styles[StyleNames.InvalidStyleName]!.Values.ParagraphFormat; // BUG_OLD: Clone here?
 
             if (format != null)
             {
                 if (formattedText.Values.Font is null)
-                    formattedText.Font = format.Values.Font?.Clone() ?? NRT.ThrowOnNull<Font>(); // BUG Throwing if format.Values.Font is null
+                    formattedText.Font = format.Values.Font?.Clone() ?? NRT.ThrowOnNull<Font>(); // BUG_OLD Throwing if format.Values.Font is null
                 else if (format.Values.Font is not null)
                     VisitorBase.FlattenFont(formattedText.Values.Font, format.Values.Font);
             }

@@ -19,7 +19,7 @@ namespace PdfSharp.Pdf.Filters
         /// <returns>The decoded data as a byte-array</returns>
         /// <exception cref="PdfReaderException"></exception>
         /// <exception cref="NotImplementedException"></exception>
-        public static byte[] Decode(byte[] data, PdfDictionary decodeParms)
+        public static byte[] Decode(byte[] data, PdfDictionary? decodeParms)
         {
             if (decodeParms == null)
                 return data;
@@ -42,12 +42,12 @@ namespace PdfSharp.Pdf.Filters
             if (predictor == 1)     // no prediction, return data as is
                 return data;
 
-            // TIFF predictor. TODO: implement
+            // TIFF predictor. TODO_OLD: implement
             if (predictor == 2)
                 throw new NotImplementedException("TIFF predictor is not implemented");
 
             // PNG predictors
-            if (predictor >= 10 && predictor <= 15)
+            if (predictor is >= 10 and <= 15)
             {
                 if (bpc != 1 && bpc != 2 && bpc != 4 && bpc != 8 && bpc != 16)
                     throw new PdfReaderException("Invalid number of bits per component");

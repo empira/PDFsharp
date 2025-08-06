@@ -1,11 +1,9 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Extensions.Logging;
 using MigraDoc.Logging;
-using MigraDoc.Rendering.Resources;
 
 namespace MigraDoc.Rendering
 {
@@ -30,7 +28,7 @@ namespace MigraDoc.Rendering
         {
             if (Math.Abs(number) > 32768)
             {
-                MigraDocLogHost.PdfRenderingLogger.LogWarning(Messages2.NumberTooLargeForRoman(number));
+                MigraDocLogHost.PdfRenderingLogger.LogWarning(MdPdfMsgs.NumberTooLargeForRoman(number).Message);
                 //Debug.WriteLine(Messages2.NumberTooLargeForRoman(number), "warning");
                 return number.ToString(CultureInfo.InvariantCulture);
             }
@@ -45,18 +43,18 @@ namespace MigraDoc.Rendering
 
             string[] roman;
             if (lowercase)
-                roman = new[] { "m", "cm", "d", "cd", "c", "xc", "l", "xl", "x", "ix", "v", "iv", "i" };
+                roman = ["m", "cm", "d", "cd", "c", "xc", "l", "xl", "x", "ix", "v", "iv", "i"];
             else
-                roman = new[] { "M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I" };
+                roman = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"];
 
-            int[] numberValues = new int[] { 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 };
+            int[] numberValues = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
 
-            for (int i = 0; i < numberValues.Length; ++i)
+            for (int idx = 0; idx < numberValues.Length; idx++)
             {
-                while (number >= numberValues[i])
+                while (number >= numberValues[idx])
                 {
-                    res += roman[i];
-                    number -= numberValues[i];
+                    res += roman[idx];
+                    number -= numberValues[idx];
                 }
             }
             return res;
@@ -66,7 +64,7 @@ namespace MigraDoc.Rendering
         {
             if (Math.Abs(number) > 32768)
             {
-                MigraDocLogHost.PdfRenderingLogger.LogWarning(Messages2.NumberTooLargeForLetters(number));
+                MigraDocLogHost.PdfRenderingLogger.LogWarning(MdPdfMsgs.NumberTooLargeForLetters(number).Message);
                 //Debug.WriteLine(Messages2.NumberTooLargeForLetters(number));
                 return number.ToString();
             }

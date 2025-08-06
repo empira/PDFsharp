@@ -60,7 +60,7 @@ namespace PdfSharp.Snippets.Drawing
             // Text Styles (not resulting own Type Faces).
             BeginBox(gfx, 3, BoxOptions.Tile);
             {
-                // TODO: Include bold for FontResolver without own Type Face for.
+                // TODO_OLD: Include bold for FontResolver without own Type Face for.
 
                 var options = new XPdfFontOptions(PdfFontEncoding.Unicode);
 

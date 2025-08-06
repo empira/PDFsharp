@@ -1,4 +1,10 @@
-﻿; PDFsharp string resources (German)
+﻿; ==========================
+; === NOT IN USE ANYMORE ===
+; ==========================
+
+-- create a syntax error if accidentally compiled --
+
+; PDFsharp string resources (German)
 ;
 ; Must be saved as Unicode (UTF-8 with signature) to force resgen.exe to process German umlauts.
 

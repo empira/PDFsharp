@@ -18,7 +18,7 @@ namespace MigraDoc.DocumentObjectModel
         public Footnote()
         {
             BaseValues = new FootnoteValues(this);
-            //NYI: Nested footnote check!
+            // NYI: Nested footnote check!
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Elements ??= new DocumentElements(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Elements = value;
             }
         }
@@ -143,7 +143,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Format ??= new ParagraphFormat(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Format = value;
             }
         }
@@ -184,7 +184,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

@@ -172,7 +172,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Gets the user defined shape height.
+        /// Gets the user-defined shape height.
         /// </summary>
         protected virtual Unit GetShapeHeight()
         {
@@ -180,7 +180,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Gets the user defined shape width.
+        /// Gets the user-defined shape width.
         /// </summary>
         protected virtual Unit GetShapeWidth()
         {

@@ -113,7 +113,7 @@ namespace PdfSharp.Charting.Renderers
         {
             var seriesColl = rendererInfo.Chart.SeriesCollection;
             rendererInfo.SeriesRendererInfos = new SeriesRendererInfo[seriesColl.Count];
-            for (int idx = 0; idx < seriesColl.Count; ++idx)
+            for (int idx = 0; idx < seriesColl.Count; idx++)
             {
                 SeriesRendererInfo sri = new SeriesRendererInfo();
                 rendererInfo.SeriesRendererInfos[idx] = sri;

@@ -126,8 +126,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             }
             finally
             {
-                if (reader != null)
-                    reader.Close();
+                reader?.Close();
             }
             return document;
         }
@@ -164,7 +163,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             DocumentObject? domObj;
             try
             {
-                reader = new DdlReader(documentFileName, errors);
+                reader = new(documentFileName, errors);
                 domObj = reader.ReadObject();
             }
             finally
@@ -177,14 +176,15 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Reads and returns a domain object from the specified file.
         /// </summary>
-        public static DocumentObject? ObjectFromFile(string documentFileName) 
+        public static DocumentObject? ObjectFromFile(string documentFileName)
             => ObjectFromFile(documentFileName, null);
 
         /// <summary>
         /// Reads and returns a domain object from the specified DDL string.
         /// </summary>
-        public static DocumentObject? ObjectFromString(string ddl, DdlReaderErrors? errors)
+        public static DocumentObject? ObjectFromString(string ddl, DdlReaderErrors? errors = null)
         {
+            _ = errors;
             StringReader? stringReader = null;
             DocumentObject? domObj;
             DdlReader? reader = null;
@@ -198,17 +198,10 @@ namespace MigraDoc.DocumentObjectModel.IO
             finally
             {
                 stringReader?.Close();
-
                 reader?.Close();
             }
             return domObj;
         }
-
-        /// <summary>
-        /// Reads and returns a domain object from the specified DDL string.
-        /// </summary>
-        public static DocumentObject? ObjectFromString(string ddl) 
-            => ObjectFromString(ddl, null);
 
         readonly bool _doClose = true;
         TextReader? _reader;

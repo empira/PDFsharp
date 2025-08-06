@@ -6,12 +6,12 @@ using System.Reflection;
 namespace MigraDoc.DocumentObjectModel.Internals
 {
     /// <summary>
-    /// Meta class for document objects.
+    /// Metaclass for document objects.
     /// </summary>
     public sealed class Meta
     {
         /// <summary>
-        /// Initializes a new instance of the DomMeta class.
+        /// Initializes a new instance of the Meta class.
         /// </summary>
         public Meta(Type documentObjectType)
         {
@@ -19,7 +19,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
         }
 
         /// <summary>
-        /// Gets the meta object of the specified document object.
+        /// Gets the metaobject of the specified document object.
         /// </summary>
         /// <param name="documentObject">The document object the meta is returned for.</param>
         public static Meta GetMeta(DocumentObject documentObject) => documentObject.Meta;
@@ -29,46 +29,30 @@ namespace MigraDoc.DocumentObjectModel.Internals
         /// </summary>
         public object? GetValue(DocumentObject dom, string name, GV flags)
         {
-#if NET6_0_OR_GREATER
-            int dot = name.IndexOf('.', StringComparison.Ordinal);
-#else
-            int dot = name.IndexOf(".", StringComparison.Ordinal);
-#endif
-#if NET6_0_OR_GREATER || true
+            int dot = name.IndexOf('.');
             if (dot == 0)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
             string? trail = null;
             if (dot > 0)
             {
                 trail = name[(dot + 1)..];
                 name = name[..dot];
             }
-#else
-            if (dot == 0)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
-            string? trail = null;
-            if (dot > 0)
-            {
-                trail = name.Substring(dot + 1);
-                name = name.Substring(0, dot);
-            }
-#endif
 
             var vd = ValueDescriptors[name];
             if (vd == null)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
 
             var value = vd.GetValue(dom, flags);
             if (value == null && flags == GV.GetNull)  //??? also for GV.ReadOnly?
                 return null;
 
-            //REVIEW DaSt: Create object in case of GV.ReadWrite?
             if (trail != null)
             {
                 if (value == null || trail == "")
-                    throw new ArgumentException(DomSR.InvalidValueName(name));
+                    throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
                 if (value is not DocumentObject doc)
-                    throw new ArgumentException(DomSR.InvalidValueName(name));
+                    throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
                 value = doc.GetValue(trail, flags);
             }
             return value;
@@ -80,32 +64,23 @@ namespace MigraDoc.DocumentObjectModel.Internals
         /// </summary>
         public void SetValue(DocumentObject dom, string name, object? val)
         {
-#if NET6_0_OR_GREATER
-            int dot = name.IndexOf('.', StringComparison.Ordinal);
-#else
-            int dot = name.IndexOf(".", StringComparison.Ordinal);
-#endif
+            int dot = name.IndexOf('.');
             if (dot == 0)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
             string? trail = null;
             if (dot > 0)
             {
-#if NET6_0_OR_GREATER || true
                 trail = name[(dot + 1)..];
                 name = name[..dot];
-#else
-                trail = name.Substring(dot + 1);
-                name = name.Substring(0, dot);
-#endif
             }
             var vd = ValueDescriptors[name];
             if (vd == null)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
 
             if (trail != null)
             {
-                //REVIEW DaSt: dom.GetValue(name) and call SetValue recursively,
-                //             or dom.GetValue(name.BisVorletzteElement) and then call SetValue?
+                // REVIEW DaSt: dom.GetValue(name) and call SetValue recursively,
+                //              or dom.GetValue(name.BisVorletzteElement) and then call SetValue?
                 var doc = (DocumentObject?)dom.GetValue(name);
                 if (doc == null)
                     throw new InvalidOperationException($"No value named '{name}' exists.");
@@ -120,7 +95,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
         /// </summary>
         public bool HasValue(string name)
         {
-            // BUG: HasValue("a.b") not handled
+            // BUG_OLD: HasValue("a.b") not handled
             if (name.Contains('.'))
                 throw new NotImplementedException($"'{name}' contains a dot.");
 
@@ -138,7 +113,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
 
             var vd = ValueDescriptors[name];
             if (vd == null)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
 
             vd.SetNull(dom);
         }
@@ -152,29 +127,19 @@ namespace MigraDoc.DocumentObjectModel.Internals
             if (String.IsNullOrEmpty(name) /*|| name == "this"*/)
                 return IsNull(dom);
 
-            //bool isNull = false;
-#if NET6_0_OR_GREATER
-            int dot = name.IndexOf('.', StringComparison.Ordinal);
-#else
-            int dot = name.IndexOf(".", StringComparison.Ordinal);
-#endif
+            int dot = name.IndexOf('.');
             if (dot == 0)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
             string? trail = null;
             if (dot > 0)
             {
-#if NET6_0_OR_GREATER || true
                 trail = name[(dot + 1)..];
                 name = name[..dot];
-#else
-                trail = name.Substring(dot + 1);
-                name = name.Substring(0, dot);
-#endif
             }
 
             var vd = ValueDescriptors[name];
             if (vd == null)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
 
 #if true
             if (trail == null)
@@ -185,9 +150,9 @@ namespace MigraDoc.DocumentObjectModel.Internals
                 return true;
 
             if (/*value == null || */trail == "")
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
             if (value is not DocumentObject doc)
-                throw new ArgumentException(DomSR.InvalidValueName(name));
+                throw new ArgumentException(MdDomMsgs.InvalidValueName(name).Message);
 
             return doc.IsNull(trail);
 #else
@@ -257,7 +222,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
         public ValueDescriptor this[string name] => ValueDescriptors[name];
 
         /// <summary>
-        /// Determines whether this meta object contains a value descriptor with the specified name.
+        /// Determines whether this metaobject contains a value descriptor with the specified name.
         /// </summary>
         public bool HasName(string name)
             => ValueDescriptors.HasName(name);

@@ -252,7 +252,7 @@ namespace PdfSharp.UniversalAccessibility.Drawing
 
         static XRect GetBoundingBox(XImage image, double x, double y, double width, double height)
         {
-            // TODO: Transformations are not yet considered.
+            // TODO_OLD: Transformations are not yet considered.
             return new XRect(x, y, width, height);
         }
 
@@ -348,7 +348,7 @@ namespace PdfSharp.UniversalAccessibility.Drawing
             if (page == null)
                 throw new InvalidOperationException("Graphics object must belong to a PDF document page.");
 
-            var uaManager = page.Owner._uaManager;  // HACK: Should be a property 
+            var uaManager = page.Owner._uaManager;  // HACK_OLD: Should be a property 
             if (uaManager == null)
                 throw new InvalidOperationException("Document is not a PDF/UA document.");
             return uaManager;

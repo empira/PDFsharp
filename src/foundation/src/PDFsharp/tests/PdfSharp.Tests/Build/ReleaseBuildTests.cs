@@ -9,6 +9,7 @@ using System.Text;
 using FluentAssertions;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
+using PdfSharp.Internal;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Internal;
 using PdfSharp.Quality;
@@ -28,23 +29,29 @@ namespace PdfSharp.Tests.Build
             // Check to undo some temporary renames.
             const string automatic = nameof(PdfFontEmbedding.TryComputeSubset);
             (!automatic.EndsWith("_")).Should().BeTrue("some identifiers must be re-renamed before release.");
-        _ = automatic;
+            _ = automatic;
         }
 #endif
 
         [Fact(Skip = "Do not run this test always.")]
+        //[Fact]
         public void Check_CS_files_for_non_ASCII_characters()
         {
-#if NET6_0_OR_GREATER || CORE
+            // Tests runs only under .NET Framework and GDI.
+#if NET6_0_OR_GREATER || CORE || WPF
+            // Exit here if not GDI under .NET Framework.
             return;
 #else
+#if DEBUG
+            _ = BuildInformation.BuildVersionNumber;
+#endif
             var folder = IOUtility.GetAssetsPath();
             folder.Should().NotBeNull();
             Debug.Assert(folder != null);
 
             folder = Path.Combine(folder, "../src/");
 
-#if true
+#if true_
             folder = @"D:\repos\emp\PDFsharp-COPY\";
 #endif
 
@@ -64,6 +71,19 @@ namespace PdfSharp.Tests.Build
             bool utf8Bom = bytes is [0xEF, 0xBB, 0xBF, ..];
 
             bool utf16Bom = bytes is [0xFF, 0xFE, ..] or [0xFE, 0xFF, ..];
+
+            bool hasCommentAnsi = bytes is [0x2F, 0x2F, ..];
+            bool hasCommentUtf8 = bytes is [0xEF, 0xBB, 0xBF, 0x2F, 0x2F, ..];
+            bool hasCommentUtf16Be = bytes is [0xFE, 0xFF, 0x00, 0x2F, 0x00, 0x2F, ..];
+            bool hasCommentUtf16Le = bytes is [0xFF, 0xFE, 0x2F, 0x00, 0x2F, 0x00, ..];
+
+            bool hasComment = hasCommentAnsi || hasCommentUtf8 || hasCommentUtf16Be || hasCommentUtf16Le;
+
+            if (!hasComment)
+            {
+                _ = typeof(int);
+                throw new InvalidOperationException($"File '{file}' does not start with a comment.");
+            }
 
             int idx = 0;
             bool ascii = true;
@@ -195,9 +215,15 @@ namespace PdfSharp.Tests.Build
             }
         }
 
+        /// <summary>
+        /// Writes the file.
+        /// Must be called only if the file requires an update (add a non-existing BOM or remove an existing BOM).
+        /// </summary>
         static void WriteFile(String fileName, Byte[] bytes, Boolean addBom)
         {
             bool utf8Bom = bytes is [0xEF, 0xBB, 0xBF, ..];
+
+            (addBom == utf8Bom).Should().BeFalse("Should not come here.");
 
             using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
             {
@@ -205,18 +231,14 @@ namespace PdfSharp.Tests.Build
                 {
                     // Write new BOM.
                     fs.Write([0xEF, 0xBB, 0xBF], 0, 3);
-                }
 
-                if (!addBom && utf8Bom)
-                {
-                    // Write bytes without existing BOM.
-                    fs.Write(bytes, 3, bytes.Length - 3);
+                    // Write bytes as they are.
+                    fs.Write(bytes, 0, bytes.Length);
                 }
                 else
                 {
-                    Debug.Assert(addBom && !utf8Bom, "Should not come here for other cases.");
-                    // Write bytes as they are.
-                    fs.Write(bytes, 0, bytes.Length);
+                    // Write bytes without existing BOM.
+                    fs.Write(bytes, 3, bytes.Length - 3);
                 }
             }
         }

@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using MigraDoc.DocumentObjectModel;
@@ -98,7 +98,7 @@ namespace MigraDoc.Rendering
         /// Returns the next iterator in the tree pointing to a leaf.
         /// </summary>
         /// <remarks>This function is intended to receive the renderable objects of a paragraph.
-        /// Thus, empty ParagraphElement objects (which are collections) don�t count as leafs.</remarks>
+        /// Thus, empty ParagraphElement objects (which are collections) don’t count as leafs.</remarks>
         internal ParagraphIterator? GetNextLeaf()
         {
             // Move up to appropriate parent element.
@@ -173,14 +173,15 @@ namespace MigraDoc.Rendering
             if (newIndex < 0)
                 return null;
 
-            List<int> indices = new(parIterator._positionIndices) { newIndex };//(Array_List)parIterator.positionIndices.Clone();
+            //List<int> indices = new(parIterator._positionIndices) { newIndex };
+            List<int> indices = [..parIterator._positionIndices, newIndex];
 
             var obj = GetNodeObject(parEls[newIndex] ?? NRT.ThrowOnNull<DocumentObject>());
             var iterator = new ParagraphIterator(_rootNode, obj, indices);
             return iterator.SeekLastLeaf();
         }
 
-        ParagraphIterator SeekLastLeaf()  // TODO NOTE ReSharper has a bug here (use original code). Introducing pattern variable breaks the code. Should report that to JetBrains.
+        ParagraphIterator SeekLastLeaf()  // TODO_OLD NOTE ReSharper has a bug here (use original code). Introducing pattern variable breaks the code. Should report that to JetBrains.
         {
 #if true
             var obj = Current;
@@ -223,7 +224,7 @@ namespace MigraDoc.Rendering
         /// Gets the leftmost leaf within the hierarchy.
         /// </summary>
         /// <returns>The searched leaf.</returns>
-        ParagraphIterator SeekFirstLeaf() // TODO NOTE ReSharper has a bug here (see above).
+        ParagraphIterator SeekFirstLeaf() // TODO_OLD NOTE ReSharper has a bug here (see above).
         {
 #if true
             var obj = Current;
@@ -275,13 +276,8 @@ namespace MigraDoc.Rendering
         {
             get
             {
-#if NET6_0_OR_GREATER || true
                 if (_positionIndices.Count != 0)
                     return _positionIndices[^1];
-#else
-                if (_positionIndices.Count != 0)
-                    return _positionIndices[_positionIndices.Count - 1];
-#endif
                 return -1;
             }
         }

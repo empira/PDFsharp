@@ -49,12 +49,10 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="vector1">The first vector to compare.</param>
         /// <param name="vector2">The second vector to compare.</param>
-        public static bool operator !=(XVector vector1, XVector vector2)
-        {
-            // ReSharper disable CompareOfFloatsByEqualityOperator
-            return vector1._x != vector2._x || vector1._y != vector2._y;
-            // ReSharper restore CompareOfFloatsByEqualityOperator
-        }
+        // ReSharper disable CompareOfFloatsByEqualityOperator
+        public static bool operator !=(XVector vector1, XVector vector2) =>
+            vector1._x != vector2._x || vector1._y != vector2._y;
+        // ReSharper restore CompareOfFloatsByEqualityOperator
 
         /// <summary>
         /// Compares two vectors for equality.
@@ -84,20 +82,15 @@ namespace PdfSharp.Drawing
         /// Compares two vectors for equality.
         /// </summary>
         /// <param name="value">The vector to compare with this vector.</param>
-        public bool Equals(XVector value)
-        {
-            return Equals(this, value);
-        }
+        public bool Equals(XVector value) => Equals(this, value);
 
         /// <summary>
         /// Returns the hash code for this instance.
         /// </summary>
-        public override int GetHashCode()
-        {
             // ReSharper disable NonReadonlyFieldInGetHashCode
-            return _x.GetHashCode() ^ _y.GetHashCode();
-            // ReSharper restore NonReadonlyFieldInGetHashCode
-        }
+        public override int GetHashCode() =>
+            _x.GetHashCode() ^ _y.GetHashCode();
+        // ReSharper restore NonReadonlyFieldInGetHashCode
 
         /// <summary>
         /// Converts a string representation of a vector into the equivalent Vector structure.
@@ -135,19 +128,16 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Returns the string representation of this Vector structure.
         /// </summary>
-        public override string ToString()
-        {
-            return ConvertToString(null, null);
-        }
+        public override string ToString() => ConvertToString(null, null);
 
         /// <summary>
         /// Returns the string representation of this Vector structure with the specified formatting information.
         /// </summary>
         /// <param name="provider">The culture-specific formatting information.</param>
-        public string ToString(IFormatProvider provider) 
+        public string ToString(IFormatProvider provider)
             => ConvertToString(null, provider);
 
-        string IFormattable.ToString(string? format, IFormatProvider? provider) 
+        string IFormattable.ToString(string? format, IFormatProvider? provider)
             => ConvertToString(format, provider);
 
         internal string ConvertToString(string? format, IFormatProvider? provider)
@@ -163,22 +153,20 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Gets the length of this vector.
         /// </summary>
-        public double Length
-            => Math.Sqrt(_x * _x + _y * _y);
+        public double Length => Math.Sqrt(_x * _x + _y * _y);
 
         /// <summary>
         /// Gets the square of the length of this vector.
         /// </summary>
-        public double LengthSquared
-            => _x * _x + _y * _y;
+        public double LengthSquared => _x * _x + _y * _y;
 
         /// <summary>
         /// Normalizes this vector.
         /// </summary>
         public void Normalize()
         {
-            this = this / Math.Max(Math.Abs(_x), Math.Abs(_y));
-            this = this / Length;
+            this /= Math.Max(Math.Abs(_x), Math.Abs(_y));
+            this /= Length;
         }
 
         /// <summary>
@@ -238,7 +226,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="vector1">The vector from which vector2 is subtracted.</param>
         /// <param name="vector2">The vector to subtract from vector1.</param>
-        public static XVector operator -(XVector vector1, XVector vector2) 
+        public static XVector operator -(XVector vector1, XVector vector2)
             => new(vector1._x - vector2._x, vector1._y - vector2._y);
 
         /// <summary>
@@ -246,7 +234,6 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="vector1">The vector from which vector2 is subtracted.</param>
         /// <param name="vector2">The vector to subtract from vector1.</param>
-        /// <returns></returns>
         public static XVector Subtract(XVector vector1, XVector vector2)
             => new(vector1._x - vector2._x, vector1._y - vector2._y);
 
@@ -255,7 +242,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="vector">The vector used to translate point.</param>
         /// <param name="point">The point to translate.</param>
-        public static XPoint operator +(XVector vector, XPoint point) 
+        public static XPoint operator +(XVector vector, XPoint point)
             => new(point.X + vector._x, point.Y + vector._y);
 
         /// <summary>
@@ -263,7 +250,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="vector">The vector used to translate point.</param>
         /// <param name="point">The point to translate.</param>
-        public static XPoint Add(XVector vector, XPoint point) 
+        public static XPoint Add(XVector vector, XPoint point)
             => new(point.X + vector._x, point.Y + vector._y);
 
         /// <summary>
@@ -271,7 +258,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="vector">The vector to multiply.</param>
         /// <param name="scalar">The scalar to multiply.</param>
-        public static XVector operator *(XVector vector, double scalar) 
+        public static XVector operator *(XVector vector, double scalar)
             => new(vector._x * scalar, vector._y * scalar);
 
         /// <summary>
@@ -279,7 +266,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="vector">The vector to multiply.</param>
         /// <param name="scalar">The scalar to multiply.</param>
-        public static XVector Multiply(XVector vector, double scalar) 
+        public static XVector Multiply(XVector vector, double scalar)
             => new(vector._x * scalar, vector._y * scalar);
 
         /// <summary>
@@ -287,7 +274,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="scalar">The scalar to multiply.</param>
         /// <param name="vector">The vector to multiply.</param>
-        public static XVector operator *(double scalar, XVector vector) 
+        public static XVector operator *(double scalar, XVector vector)
             => new(vector._x * scalar, vector._y * scalar);
 
         /// <summary>
@@ -295,7 +282,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="scalar">The scalar to multiply.</param>
         /// <param name="vector">The vector to multiply.</param>
-        public static XVector Multiply(double scalar, XVector vector) 
+        public static XVector Multiply(double scalar, XVector vector)
             => new(vector._x * scalar, vector._y * scalar);
 
         /// <summary>
@@ -303,7 +290,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="vector">The vector to divide.</param>
         /// <param name="scalar">The scalar by which vector will be divided.</param>
-        public static XVector operator /(XVector vector, double scalar) 
+        public static XVector operator /(XVector vector, double scalar)
             => vector * (1.0 / scalar);
 
         /// <summary>
@@ -311,7 +298,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="vector">The vector structure to divide.</param>
         /// <param name="scalar">The amount by which vector is divided.</param>
-        public static XVector Divide(XVector vector, double scalar) 
+        public static XVector Divide(XVector vector, double scalar)
             => vector * (1.0 / scalar);
 
         /// <summary>
@@ -319,7 +306,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="vector">The vector to transform.</param>
         /// <param name="matrix">The transformation to apply to vector.</param>
-        public static XVector operator *(XVector vector, XMatrix matrix) 
+        public static XVector operator *(XVector vector, XMatrix matrix)
             => matrix.Transform(vector);
 
         /// <summary>
@@ -327,7 +314,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="vector">The vector to transform.</param>
         /// <param name="matrix">The transformation to apply to vector.</param>
-        public static XVector Multiply(XVector vector, XMatrix matrix) 
+        public static XVector Multiply(XVector vector, XMatrix matrix)
             => matrix.Transform(vector);
 
         /// <summary>
@@ -335,7 +322,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="vector1">The first vector to multiply.</param>
         /// <param name="vector2">The second vector to multiply.</param>
-        public static double operator *(XVector vector1, XVector vector2) 
+        public static double operator *(XVector vector1, XVector vector2)
             => vector1._x * vector2._x + vector1._y * vector2._y;
 
         /// <summary>
@@ -343,7 +330,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="vector1">The first vector to multiply.</param>
         /// <param name="vector2">The second vector structure to multiply.</param>
-        public static double Multiply(XVector vector1, XVector vector2) 
+        public static double Multiply(XVector vector1, XVector vector2)
             => vector1._x * vector2._x + vector1._y * vector2._y;
 
         /// <summary>
@@ -351,21 +338,21 @@ namespace PdfSharp.Drawing
         /// </summary>
         /// <param name="vector1">The first vector to evaluate.</param>
         /// <param name="vector2">The second vector to evaluate.</param>
-        public static double Determinant(XVector vector1, XVector vector2) 
+        public static double Determinant(XVector vector1, XVector vector2)
             => vector1._x * vector2._y - vector1._y * vector2._x;
 
         /// <summary>
         /// Creates a Size from the offsets of this vector.
         /// </summary>
         /// <param name="vector">The vector to convert.</param>
-        public static explicit operator XSize(XVector vector) 
+        public static explicit operator XSize(XVector vector)
             => new(Math.Abs(vector._x), Math.Abs(vector._y));
 
         /// <summary>
         /// Creates a Point with the X and Y values of this vector.
         /// </summary>
         /// <param name="vector">The vector to convert.</param>
-        public static explicit operator XPoint(XVector vector) 
+        public static explicit operator XPoint(XVector vector)
             => new(vector._x, vector._y);
 
         /// <summary>

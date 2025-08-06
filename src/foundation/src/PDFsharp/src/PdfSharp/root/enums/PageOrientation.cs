@@ -10,12 +10,14 @@ namespace PdfSharp
     {
         /// <summary>
         /// The default page orientation.
+        /// The top and bottom width is less than or equal to the
+        /// left and right side.
         /// </summary>
-        Portrait,
+        Portrait = 0,
 
         /// <summary>
         /// The width and height of the page are reversed.
         /// </summary>
-        Landscape,
+        Landscape = 1
     }
 }

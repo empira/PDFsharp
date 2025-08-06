@@ -59,7 +59,7 @@ namespace PdfSharp.Pdf
             if (outline.DestinationPage != null && !ReferenceEquals(Owner, outline.DestinationPage.Owner))
                 throw new ArgumentException("Destination page must belong to this document.");
 
-            //// TODO check the parent problems...
+            //// TODO_OLD check the parent problems...
             ////outline.Document = Owner;
             ////outline.Parent = _parent;
             ////Owner._irefTable.Add(outline);
@@ -179,7 +179,7 @@ namespace PdfSharp.Pdf
             if (outline == null)
                 throw new ArgumentNullException(nameof(outline));
             if (index < 0 || index >= _outlines.Count)
-                throw new ArgumentOutOfRangeException(nameof(index), index, PSSR.OutlineIndexOutOfRange);
+                throw new ArgumentOutOfRangeException(nameof(index), index, PsMsgs.OutlineIndexOutOfRange);
 
             AddToOutlinesTree(outline);
             _outlines.Insert(index, outline);
@@ -203,15 +203,15 @@ namespace PdfSharp.Pdf
             get
             {
                 if (index < 0 || index >= _outlines.Count)
-                    throw new ArgumentOutOfRangeException(nameof(index), index, PSSR.OutlineIndexOutOfRange);
+                    throw new ArgumentOutOfRangeException(nameof(index), index, PsMsgs.OutlineIndexOutOfRange);
                 return _outlines[index];
             }
             set
             {
                 if (index < 0 || index >= _outlines.Count)
-                    throw new ArgumentOutOfRangeException(nameof(index), index, PSSR.OutlineIndexOutOfRange);
+                    throw new ArgumentOutOfRangeException(nameof(index), index, PsMsgs.OutlineIndexOutOfRange);
                 if (value == null)
-                    throw new ArgumentOutOfRangeException(nameof(value), null, PSSR.SetValueMustNotBeNull);
+                    throw new ArgumentOutOfRangeException(nameof(value), null, PsMsgs.SetValueMustNotBeNull);
 
                 AddToOutlinesTree(value);
                 _outlines[index] = value;
@@ -248,7 +248,7 @@ namespace PdfSharp.Pdf
             if (outline.DestinationPage != null && !ReferenceEquals(Owner, outline.DestinationPage.Owner))
                 throw new ArgumentException("Destination page must belong to this document.");
 
-            // TODO check the parent problems...
+            // TODO_OLD check the parent problems...
             outline.Document = Owner;
             outline.Parent = _parent;
 
@@ -281,7 +281,7 @@ namespace PdfSharp.Pdf
             if (outline.Reference == null)
                 throw new ArgumentNullException(nameof(outline));
 
-            // TODO check the parent problems...
+            // TODO_OLD check the parent problems...
             //outline.Document = Owner;
             outline.Parent = null!;
 

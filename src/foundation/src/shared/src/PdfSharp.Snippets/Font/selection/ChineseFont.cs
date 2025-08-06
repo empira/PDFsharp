@@ -32,7 +32,7 @@
 //            document.Outlines.Add("456 你好!", page);
 
 //            // Save and show the document.
-//            string filename = await SaveAndShowDocumentAsync(document, "ChineseFont");
+//            string filename = await SaveAndShowDocumentAsync(document, "ChineseFont").ConfigureAwait(false);
 //        }
 //    }
 //}

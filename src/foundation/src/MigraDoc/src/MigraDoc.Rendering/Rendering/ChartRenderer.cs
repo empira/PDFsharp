@@ -51,7 +51,7 @@ namespace MigraDoc.Rendering
 
         void GetLeftRightVerticalPosition(out XUnitPt top, out XUnitPt bottom)
         {
-            //REM: Line width is still ignored while layouting charts.
+            // REM: Line width is still ignored while layouting charts.
             Area contentArea = _renderInfo.LayoutInfo.ContentArea;
             ChartFormatInfo formatInfo = (ChartFormatInfo)_renderInfo.FormatInfo;
             top = contentArea.Y;
@@ -318,7 +318,7 @@ namespace MigraDoc.Rendering
 
         void RenderPlotArea(PlotArea area, Rectangle rect)
         {
-            var chartFrame = ((ChartFormatInfo)_renderInfo.FormatInfo).ChartFrame ?? NRT.ThrowOnNull<ChartFrame>("BUG");
+            var chartFrame = ((ChartFormatInfo)_renderInfo.FormatInfo).ChartFrame ?? NRT.ThrowOnNull<ChartFrame>("BUG_OLD");
 
             XUnitPt top = rect.Y;
             top += area.TopPadding.Point;

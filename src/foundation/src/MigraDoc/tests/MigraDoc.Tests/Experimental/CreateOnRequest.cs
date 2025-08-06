@@ -7,16 +7,15 @@ using System.Linq;
 using System.Text;
 using Xunit;
 
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
 namespace MigraDoc.Tests.Experimental.CreateOnRequest
 {
     public class Paragraph
     {
         public string Text { get; set; } = "";
         public Paragraph()
-        {
+        { }
 
-        }
         public Paragraph AddText(string text)
         {
             Text += text;
@@ -233,8 +232,7 @@ namespace MigraDoc.Tests.Experimental.CreateOnRequest
 
         public Document() :
             this("Document")
-        {
-        }
+        { }
 
         public Document(string name)
         {
@@ -281,7 +279,7 @@ namespace MigraDoc.Tests.Experimental.CreateOnRequest
 
     public class DocumentApp
     {
-        [Fact]
+        //[Fact]
         static void TestMain()
         {
             Document doc = new Document();
@@ -315,16 +313,16 @@ namespace MigraDoc.Tests.Experimental.CreateOnRequest
             doc.LastSection.AddParagraph(new Paragraph())  // <=======
                 .AddText("Edwin")
                 .AddNewLine()
-                .AddText("Hoholzstr. 72")
+                .AddText("Kirchstr. 19")
                 .AddNewLine()
-                .AddText("53229 Bonn");
+                .AddText("53840 Troisdorf");
 
             doc.LastSection.AddParagraph(new Paragraph())
                 .AddText("Henry")
                 .AddNewLine()
-                .AddText("Hoholzstr. 72")
+                .AddText("Kirchstr. 19")
                 .AddNewLine()
-                .AddText("53229 Bonn");
+                .AddText("53840 Troisdorf");
 
             Console.WriteLine(doc.ToString());
         }

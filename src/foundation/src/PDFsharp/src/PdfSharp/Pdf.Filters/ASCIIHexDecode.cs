@@ -63,7 +63,7 @@ namespace PdfSharp.Pdf.Filters
                     hi -= 32;
                 if (lo >= 'a' && lo <= 'f')
                     lo -= 32;
-                // TODO Throw on invalid characters. Stop when encountering EOD. Add one more byte if EOD is the lo byte.
+                // TODO_OLD Throw on invalid characters. Stop when encountering EOD. Add one more byte if EOD is the lo byte.
                 bytes[i] = (byte)((hi > '9' ? hi - '7'/*'A' + 10*/: hi - '0') * 16 + (lo > '9' ? lo - '7'/*'A' + 10*/: lo - '0'));
             }
             return bytes;

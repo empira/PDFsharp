@@ -8,6 +8,9 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 #endif
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.GrammarByExample;
+#if CORE
+using PdfSharp.Diagnostics;
+#endif
 using PdfSharp.Fonts;
 using PdfSharp.Quality;
 #if CORE
@@ -39,7 +42,11 @@ namespace GdiGrammarByExample
         }
 
         public virtual void CleanupTest()
-        { }
+        {
+#if CORE
+            GlobalFontSettings.ResetFontManagement();
+#endif
+        }
 
         /// <summary>
         /// Implemented in test files to invoke InitializeTest with the correct parameters.
@@ -99,7 +106,7 @@ namespace GdiGrammarByExample
             style!.Font.Name = "Verdana";
 #endif
 #if CORE
-            // Note: CORE uses SnippetsFontResolver and all required fonts should be available.
+            // Note: Core uses SnippetsFontResolver and all required fonts should be available.
             var style = document.Styles[Style.DefaultParagraphName];
             Debug.Assert(style != null, nameof(style) + " != null");
             // Since all reference documents created with PDFsharp 1.40 or earlier use Verdana, we change the default to Verdana here for all DLL snippets.
@@ -110,7 +117,7 @@ namespace GdiGrammarByExample
         internal static string WslPathHack(string path)
         {
 #if !NET6_0_OR_GREATER
-            // .NET 4.7.2 or .NETStandard 2.0, for Windows only.
+            // .NET 4.6.2 or .NETStandard 2.0, for Windows only.
             return path;
 #else
             if (OperatingSystem.IsWindows())
@@ -119,7 +126,7 @@ namespace GdiGrammarByExample
             }
             if (OperatingSystem.IsLinux())
             {
-                // Hack: Assume WSL and use drive C:\ instead of D:\.
+                // Assume WSL and use drive C:\ instead of D:\.
                 return path.Replace(@"D:\", "/mnt/c/").Replace('\\', '/');
             }
 

@@ -24,7 +24,7 @@ namespace PdfSharp.Features.Drawing
             if (gfx == null)
                 return;
 
-            // TODO: Save state in bitmap and fail here
+            // TODO_OLD: Save state in bitmap and fail here
             //var gfx2 = XGraphics.FromImage(image);
 
             gfx.DrawLine(XPens.DarkBlue, XUnit.FromMillimeter(0).Point, XUnit.FromMillimeter(150).Point, XUnit.FromMillimeter(210).Point, XUnit.FromMillimeter(150).Point);

@@ -72,7 +72,7 @@ namespace PdfSharp.Charting
             set
             {
                 if (!Enum.IsDefined(typeof(DockingType), value))
-                    throw new InvalidEnumArgumentException("value", (int)value, typeof(DockingType));
+                    throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(DockingType));
                 _docking = value;
             }
         }

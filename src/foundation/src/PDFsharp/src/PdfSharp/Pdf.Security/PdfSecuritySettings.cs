@@ -64,7 +64,7 @@ namespace PdfSharp.Pdf.Security
             {
                 if (String.IsNullOrEmpty(effectiveSecurityHandler.UserPassword) && String.IsNullOrEmpty(effectiveSecurityHandler.OwnerPassword))
                 {
-                    message = PSSR.UserOrOwnerPasswordRequired;
+                    message = PsMsgs.UserOrOwnerPasswordRequired;
                     return false;
                 }
             }
@@ -72,7 +72,6 @@ namespace PdfSharp.Pdf.Security
         }
 
         #region Permissions
-        //TODO: Use documentation from our English Acrobat 6.0 version.
 
         /// <summary>
         /// Permits printing the document. Should be used in conjunction with PermitFullQualityPrint.

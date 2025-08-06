@@ -29,7 +29,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Gets a section by its index. First section has index 0.
         /// </summary>
-        public new Section this[int index] => (base[index] as Section)!; // HACK // BUG: May return null TODO: Section? Exception?
+        public new Section this[int index] => (base[index] as Section) ?? throw new InvalidOperationException("DocumentObject is not a Section.");
 
         /// <summary>
         /// Creates a deep copy of this object.
@@ -53,7 +53,7 @@ namespace MigraDoc.DocumentObjectModel
         internal override void Serialize(Serializer serializer)
         {
             int count = Count;
-            for (int index = 0; index < count; ++index)
+            for (int index = 0; index < count; index++)
             {
                 var section = this[index];
                 section.Serialize(serializer);
@@ -66,12 +66,12 @@ namespace MigraDoc.DocumentObjectModel
         void IVisitable.AcceptVisitor(DocumentObjectVisitor visitor, bool visitChildren)
         {
             visitor.VisitSections(this);
-            foreach (var section in this.Cast<Section>()) // BUG: Uses DocumentObjectCollection.GetEnumerator() returning DocumentObject?. Override with new GetEnumerator() returning Section or Section? like this[int index]?
+            foreach (var section in this.Cast<Section>()) // BUG_OLD: Uses DocumentObjectCollection.GetEnumerator() returning DocumentObject?. Override with new GetEnumerator() returning Section or Section? like this[int index]?
                 ((IVisitable)section).AcceptVisitor(visitor, visitChildren);
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

@@ -89,7 +89,7 @@ namespace PdfSharp.Pdf
             set => Elements.SetDateTime(Keys.ModDate, value);
         }
 
-        // TODO CustomProperties and meta data
+        // TODO_OLD CustomProperties and metadata
 
         /// <summary>
         /// Predefined keys of this dictionary.

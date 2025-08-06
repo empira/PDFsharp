@@ -14,30 +14,30 @@ namespace MigraDoc.DocumentObjectModel.Tests
     [Collection("PDFsharp")]
     public class BasicTests2
     {
-        [Fact]
-        public void ResourceTests()
-        {
-            DomSR.TestResourceMessages();
-            //var r1 = typeof(int);
-            //var r2 = typeof(int?).IsValueType;
-            //var r3 = typeof(BorderStyle).IsValueType;
-            //var r4 = typeof(BorderStyle?).IsValueType;
-            //var r5 = typeof(Paragraph).IsValueType;
-            //var r6 = typeof(int?);
-            //var r7 = typeof(int?);
-            //var r8 = typeof(int?);
+        //[Fact]
+        //public void ResourceTests()
+        //{
+        //    DomSR.TestResourceMessages();
+        //    //var r1 = typeof(int);
+        //    //var r2 = typeof(int?).IsValueType;
+        //    //var r3 = typeof(BorderStyle).IsValueType;
+        //    //var r4 = typeof(BorderStyle?).IsValueType;
+        //    //var r5 = typeof(Paragraph).IsValueType;
+        //    //var r6 = typeof(int?);
+        //    //var r7 = typeof(int?);
+        //    //var r8 = typeof(int?);
 
-            //var value = new Test1Object();
-            //var meta = value.Meta;
+        //    //var value = new Test1Object();
+        //    //var meta = value.Meta;
 
-            ////_ = typeof(int);
+        //    ////_ = typeof(int);
 
-            //var p = new Border();
-            //var m = p.Meta;
+        //    //var p = new Border();
+        //    //var m = p.Meta;
 
-            //var s = m.GetValue(p, "Style", GV.ReadWrite);
+        //    //var s = m.GetValue(p, "Style", GV.ReadWrite);
 
-            //m.SetValue(p, "Color", Color.Empty);
-        }
+        //    //m.SetValue(p, "Color", Color.Empty);
+        //}
     }
 }

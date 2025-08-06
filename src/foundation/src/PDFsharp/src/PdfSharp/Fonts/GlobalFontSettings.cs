@@ -18,7 +18,7 @@ namespace PdfSharp.Fonts
         /// <summary>
         /// The name of the default font. This name is obsolete and must not be used anymore.
         /// </summary>
-        [Obsolete("DefaultFontName is deprecated. Do not use it anymore. Use Arial instead.")]
+        [Obsolete("DefaultFontName is deprecated. Do not use it anymore.")]
         public const string DefaultFontName_ = "PlatformDefault";
 
         /// <summary>
@@ -142,6 +142,8 @@ namespace PdfSharp.Fonts
 
             Globals.Global.Fonts.FontResolver = null;
             Globals.Global.Fonts.FallbackFontResolver = null;
+            Globals.Global.Fonts.UseWindowsFontsUnderWindows = null;
+            Globals.Global.Fonts.UseWindowsFontsUnderWsl2 = null;
             GlyphTypefaceCache.Reset();
             FontDescriptorCache.Reset();
             FontFactory.Reset();
@@ -174,7 +176,7 @@ namespace PdfSharp.Fonts
                         // Ignore multiple setting e.g. in a web application.
                         if (Globals.Global.Fonts.FontEncoding == value)
                             return;
-                        throw new InvalidOperationException("Must not change DefaultFontEncoding after is was set once.");
+                        throw new InvalidOperationException("Must not change DefaultFontEncoding after it was set once.");
                     }
 
                     Globals.Global.Fonts.FontEncoding = value;
@@ -184,6 +186,104 @@ namespace PdfSharp.Fonts
             }
         }
 
+#if CORE
+        /// <summary>
+        /// Gets or sets a value that defines what to do if the Core build of PDFsharp runs under Windows.
+        /// If true, PDFsharp uses the build-in WindowsPlatformFontResolver to resolve some standards fonts like Arial or Times New Roman if
+        /// the code runs under Windows. If false, which is default, you must provide your own custom font resolver.
+        /// We recommend to use always a custom font resolver for a PDFsharp Core build.
+        /// </summary>
+        public static bool UseWindowsFontsUnderWindows
+        {
+            get
+            {
+                // If not opted-in we do not use Windows fonts anymore.
+                if (Globals.Global.Fonts.UseWindowsFontsUnderWindows == null)
+                    UseWindowsFontsUnderWindows = false;
+                return Globals.Global.Fonts.UseWindowsFontsUnderWindows ?? false;
+            }
+            set
+            {
+                try
+                {
+                    Lock.EnterFontFactory();
+                    if (Globals.Global.Fonts.UseWindowsFontsUnderWindows.HasValue)
+                    {
+                        // Ignore multiple setting e.g. in a web application.
+                        if (Globals.Global.Fonts.UseWindowsFontsUnderWindows == value)
+                            return;
+                        throw new InvalidOperationException("Must not change UseWindowsFontsUnderWindows after it was once set or got.");
+                    }
+
+                    Globals.Global.Fonts.UseWindowsFontsUnderWindows = value;
+                }
+                finally { Lock.ExitFontFactory(); }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value that defines what to do if the Core build of PDFsharp runs under WSL2.
+        /// If true, PDFsharp uses the build-in WindowsPlatformFontResolver to resolve some standards fonts like Arial or Times New Roman if
+        /// the code runs under WSL2. If false, which is default, you must provide your own custom font resolver.
+        /// We recommend to use always a custom font resolver for a PDFsharp Core build.
+        /// </summary>
+        public static bool UseWindowsFontsUnderWsl2
+        {
+            get
+            {
+                // If not opted-in we do not use Windows fonts anymore.
+                if (Globals.Global.Fonts.UseWindowsFontsUnderWsl2 == null)
+                    UseWindowsFontsUnderWsl2 = false;
+                return Globals.Global.Fonts.UseWindowsFontsUnderWsl2 ?? false;
+            }
+            set
+            {
+                try
+                {
+                    Lock.EnterFontFactory();
+                    if (Globals.Global.Fonts.UseWindowsFontsUnderWsl2.HasValue)
+                    {
+                        // Ignore multiple setting e.g. in a web application.
+                        if (Globals.Global.Fonts.UseWindowsFontsUnderWsl2 == value)
+                            return;
+                        throw new InvalidOperationException("Must not change UseWindowsFontsUnderWsl2 after it was once set or got.");
+                    }
+
+                    Globals.Global.Fonts.UseWindowsFontsUnderWsl2 = value;
+                }
+                finally { Lock.ExitFontFactory(); }
+            }
+        }
+#elif GDI || WPF
+        /// <summary>
+        /// This property has no effect under a GDI or WPF build of PDFsharp.
+        /// </summary>
+        public static bool UseWindowsFontsUnderWindows
+        {
+            get => true;
+            set
+            {
+                if (value == false)
+                    PdfSharpLogHost.Logger.LogWarning("Setting UseWindowsFontsUnderWindows to false makes no sense and is ignored.");
+            }
+        }
+
+        /// <summary>
+        /// This property has no effect under a GDI or WPF build of PDFsharp.
+        /// </summary>
+        public static bool UseWindowsFontsUnderWsl2
+        {
+            get => false; // We are always under Windows.
+            set
+            {
+                if (value)
+                    PdfSharpLogHost.Logger.LogWarning("Setting UseWindowsFontsUnderWsl2 to true makes no sense under Windows and is ignored.");
+            }
+        }
+#else
+#error Should not come here
+#endif
+
         /// <summary>
         /// Shortcut for PdfSharpCore.ResetFontManagement.
         /// </summary>
@@ -191,8 +291,13 @@ namespace PdfSharp.Fonts
 
         internal static void Reset()
         {
+            // Reset font resolvers.
             Globals.Global.Fonts.FontResolver = null;
             Globals.Global.Fonts.FallbackFontResolver = null;
+
+            // Reset mode of PlatformFontResolver.
+            Globals.Global.Fonts.UseWindowsFontsUnderWindows = null;
+            Globals.Global.Fonts.UseWindowsFontsUnderWsl2 = null;
         }
     }
 }
@@ -222,6 +327,18 @@ namespace PdfSharp.Internal
             /// Is true if FontEncoding was set by user code.
             /// </summary>
             public bool FontEncodingInitialized;
+
+            /// <summary>
+            /// If true PDFsharp uses some Windows fonts like Arial, Times New Roman from
+            /// C:\Windows\Fonts if the code runs under Windows.
+            /// </summary>
+            public bool? UseWindowsFontsUnderWindows;
+
+            /// <summary>
+            /// If true PDFsharp uses some Windows fonts like Arial, Times New Roman from
+            /// /mnt/c/Windows/Fonts if the code runs under WSL2.
+            /// </summary>
+            public bool? UseWindowsFontsUnderWsl2;
         }
     }
 }

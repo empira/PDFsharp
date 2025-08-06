@@ -135,7 +135,7 @@ namespace PdfSharp.Pdf
         {
             // Get keys and sort.
             PdfName[] keys = Elements.KeyNames;
-            List<PdfName> list = new List<PdfName>(keys);
+            List<PdfName> list = [.. keys];
             list.Sort(PdfName.Comparer);
             list.CopyTo(keys, 0);
 
@@ -155,11 +155,10 @@ namespace PdfSharp.Pdf
             PdfName[] keys = Elements.KeyNames;
 
 #if DEBUG
-            // TODO: automatically set length
+            // TODO_OLD: automatically set length
             if (Stream != null)
                 Debug.Assert(Elements.ContainsKey("/Length"), "Dictionary has a stream but no length is set.");
 #endif
-
             if (_stream is not null && writer.EffectiveSecurityHandler != null)
             {
                 // Encryption could change the size of the stream.
@@ -170,16 +169,14 @@ namespace PdfSharp.Pdf
                 Elements[PdfStream.Keys.Length] = new PdfInteger(_stream?.Length ?? 0);
             }
 
-#if DEBUG
             // Sort keys for debugging purposes. Comparing PDF files with for example programs like
             // Araxis Merge is easier with sorted keys.
-            if (writer.Layout == PdfWriterLayout.Verbose)
+            if (writer.IsVerboseLayout)
             {
                 var list = new List<PdfName>(keys);
                 list.Sort(PdfName.Comparer);
                 list.CopyTo(keys, 0);
             }
-#endif
 
             foreach (var key in keys)
                 WriteDictionaryElement(writer, key);
@@ -194,22 +191,17 @@ namespace PdfSharp.Pdf
         /// </summary>
         internal virtual void WriteDictionaryElement(PdfWriter writer, PdfName key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-            var item = Elements[key];
+            Debug.Assert(key != null);
 #if DEBUG
-            // TODO: simplify PDFsharp
-            if (item is PdfObject { IsIndirect: true } pdfObject)
-            {
-                // Replace an indirect object by its Reference.
-                item = pdfObject.Reference;
-                Debug.Assert(false, "Check when we come here.");
-            }
+            if (key == "/Kids")
+                _ = typeof(int);
 #endif
+            var item = Elements[key]!;
             key.WriteObject(writer);
-            item?.WriteObject(writer);
-            writer.NewLine();
-        }
+            item.WriteObject(writer);
+            if (writer.Layout == PdfWriterLayout.Verbose)
+                writer.NewLine();
+}
 
         /// <summary>
         /// Writes the stream of this dictionary. This function is intended to be overridden
@@ -378,6 +370,44 @@ namespace PdfSharp.Pdf
                 => GetInteger(key, false);
 
             /// <summary>
+            /// Converts the specified value to unsigned integer.
+            /// If the value does not exist, the function returns 0.
+            /// If the value is not convertible, the function throws an InvalidCastException.
+            /// </summary>
+            public uint GetUnsignedInteger(string key, bool create)
+            {
+                object? obj = this[key];
+                if (obj == null)
+                {
+                    if (create)
+                        this[key] = new PdfInteger();
+                    return 0;
+                }
+
+                if (obj is PdfNull)
+                    return 0;
+
+                if (obj is PdfReference reference)
+                    obj = reference.Value;
+
+                return obj switch
+                {
+                    PdfInteger integer => (uint)integer.Value,
+                    PdfIntegerObject integerObject => (uint)integerObject.Value,
+                    PdfLongInteger longInteger => longInteger.Value is >= 0 and <= uint.MaxValue ? (uint)longInteger.Value : throw new InvalidCastException("GetUnsignedInteger: Long integer object is not an integer."),
+                    _ => throw new InvalidCastException("GetUnsignedInteger: Object is not an integer.")
+                };
+            }
+
+            /// <summary>
+            /// Converts the specified value to integer.
+            /// If the value does not exist, the function returns 0.
+            /// If the value is not convertible, the function throws an InvalidCastException.
+            /// </summary>
+            public uint GetUnsignedInteger(string key)
+                => GetUnsignedInteger(key, false);
+
+            /// <summary>
             /// Sets the entry to a direct integer value.
             /// </summary>
             public void SetInteger(string key, int value)
@@ -460,7 +490,7 @@ namespace PdfSharp.Pdf
                 => GetString(key, false);
 
             /// <summary>
-            /// Tries to get the string. TODO: more TryGet...
+            /// Tries to get the string. TODO_OLD: more TryGet...
             /// </summary>
             public bool TryGetString(string key, [MaybeNullWhen(false)] out string value)
             {
@@ -544,26 +574,27 @@ namespace PdfSharp.Pdf
             /// </summary>
             public PdfRectangle GetRectangle(string key, bool create)
             {
-                var value = new PdfRectangle();
                 var obj = this[key];
                 if (obj == null)
                 {
                     if (create)
-                        this[key] = value = new PdfRectangle();
-                    return value;
+                        return (PdfRectangle)(this[key] = new PdfRectangle());
+                    return new();
                 }
                 if (obj is PdfReference reference)
                     obj = reference.Value;
 
                 if (obj is PdfArray { Elements.Count: 4 } array)
                 {
-                    value = new PdfRectangle(array.Elements.GetReal(0), array.Elements.GetReal(1),
-                      array.Elements.GetReal(2), array.Elements.GetReal(3));
-                    this[key] = value;
+                    return (PdfRectangle)(this[key] =
+                        new PdfRectangle(array.Elements.GetReal(0), array.Elements.GetReal(1),
+                                         array.Elements.GetReal(2), array.Elements.GetReal(3)));
                 }
-                else
-                    value = (PdfRectangle)obj;
-                return value;
+
+                if (obj is PdfRectangle rectangle)
+                    return rectangle;
+
+                throw new InvalidOperationException($"PDF item is '{obj.GetType().FullName}', but PdfRectangle expected.");
             }
 
             /// <summary>
@@ -585,28 +616,26 @@ namespace PdfSharp.Pdf
             /// If the value is not convertible, the function throws an InvalidCastException.
             public XMatrix GetMatrix(string key, bool create)
             {
-                var value = new XMatrix();
                 var obj = this[key];
                 if (obj == null)
                 {
                     if (create)
-                        this[key] = new PdfLiteral("[1 0 0 1 0 0]");  // cannot be parsed, implement a PdfMatrix...
-                    return value;
+                        this[key] = new PdfLiteral("[1 0 0 1 0 0]"); // cannot be parsed, implement a PdfMatrix...
+                    return XMatrix.Identity;
                 }
 
                 if (obj is PdfReference reference)
                     obj = reference.Value;
 
-                value = obj switch
+                return obj switch
                 {
-                    PdfArray { Elements.Count: 6 } array
-                        => new XMatrix(array.Elements.GetReal(0),
-                        array.Elements.GetReal(1), array.Elements.GetReal(2), array.Elements.GetReal(3),
-                        array.Elements.GetReal(4), array.Elements.GetReal(5)),
+                    PdfArray { Elements.Count: 6 } array =>
+                        new(array.Elements.GetReal(0), array.Elements.GetReal(1), 
+                            array.Elements.GetReal(2), array.Elements.GetReal(3),
+                            array.Elements.GetReal(4), array.Elements.GetReal(5)),
                     PdfLiteral => throw new NotImplementedException("Parsing matrix from literal."),
                     _ => throw new InvalidCastException("Element is not an array with 6 values.")
                 };
-                return value;
             }
 
             /// Converts the specified value to XMatrix.
@@ -632,7 +661,7 @@ namespace PdfSharp.Pdf
                 if (obj == null)
                     return defaultValue;
 
-                // TODO obj = PdfReference.GetValueIfReference(obj)
+                //PdfReference.Dereference(ref obj);
                 if (obj is PdfReference reference)
                     obj = reference.Value;
 
@@ -683,7 +712,6 @@ namespace PdfSharp.Pdf
                     // ReSharper disable once PossibleInvalidCastException because Enum objects can always be cast to int.
                     return (int)defaultValue;
                 }
-                //Debug.Assert(obj is Enum);  // BUG This always fails.
                 return (int)Enum.Parse(defaultValue.GetType(), obj.ToString()?.Substring(1) ?? "", false);
             }
 
@@ -702,12 +730,7 @@ namespace PdfSharp.Pdf
             /// </summary>
             public PdfItem? GetValue(string key, VCF options)
             {
-                // PdfDictionary? dict;
-                // PdfArray? array;
                 var value = this[key];
-                //if (value == null ||
-                //    value is PdfNull ||
-                //    value is PdfReference && ((PdfReference)value).Value is PdfNullObject)
                 if (value is null or PdfNull or PdfReference { Value: PdfNullObject })
                 {
                     if (options != VCF.None)
@@ -741,7 +764,19 @@ namespace PdfSharp.Pdf
                                 this[key] = obj;
                         }
                         else
-                            throw new NotImplementedException("Cannot create value for key: " + key);
+                        {
+                            if (key == "/Info")
+                            {
+                                // We come here if PDFsharp was fully trimmed and meta-data could not be found by reflection.
+                                // Note: Should not occur since we added attributes that prevent trimming of certain parts.
+                                throw new InvalidOperationException($"PDFsharp relies on reflection and does not work when a fully-trimmed self-contained file is used.\r\n" +
+                                                                    $"See {UrlLiterals.LinkToRoot} for further information.");
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException("Cannot create value for key: " + key);
+                            }
+                        }
                     }
                 }
                 else
@@ -825,7 +860,8 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Returns the type of the object to be created as value of the specified key.
             /// </summary>
-            Type? GetValueType(string key)  // TODO: move to PdfObject
+            [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            Type? GetValueType(string key)  // TODO_OLD: move to PdfObject
             {
                 Type? type = null;
                 var meta = _ownerDictionary.Meta;
@@ -835,35 +871,37 @@ namespace PdfSharp.Pdf
                     if (kd != null)
                         type = kd.GetValueType();
                     //else
-                    //  Deb/ug.WriteLine("Warning: Key not descriptor table: " + key);  // TODO: check what this means...
+                    //  Deb/ug.WriteLine("Warning: Key not descriptor table: " + key);  // TODO_OLD: check what this means...
                 }
                 //else
-                //  Deb/ug.WriteLine("Warning: No meta provided for type: " + _owner.GetType().Name);  // TODO: check what this means...
+                //  Deb/ug.WriteLine("Warning: No meta provided for type: " + _owner.GetType().Name);  // TODO_OLD: check what this means...
                 return type;
             }
 
-            PdfArray CreateArray(Type type, PdfArray? oldArray)
+            PdfArray CreateArray(
+                [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+                Type type,
+                PdfArray? oldArray)
             {
 #if true
-                //ConstructorInfo ctorInfo;
                 PdfArray? array;
                 if (oldArray == null)
                 {
                     // Use constructor with signature 'Ctor(PdfDocument owner)'.
                     var ctorInfo = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-                          null, new[] { typeof(PdfDocument) }, null);
+                          null, [typeof(PdfDocument)], null);
                     Debug.Assert(ctorInfo != null, "No appropriate constructor found for type: " + type.Name);
                     //array = ctorInfo.Invoke(new object[] { _ownerDictionary.Owner }) as PdfArray;
-                    array = ctorInfo.Invoke(new object[] { _ownerDictionary.Owner }) as PdfArray;
+                    array = ctorInfo.Invoke([_ownerDictionary.Owner]) as PdfArray;
                 }
                 else
                 {
                     // Use constructor with signature 'Ctor(PdfDictionary dict)'.
                     var ctorInfo = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-                                null, new[] { typeof(PdfArray) }, null);
-                    Debug.Assert(ctorInfo != null, "No appropriate constructor found for type: " + type.Name);
+                                null, types: [typeof(PdfArray)], null);
+                    Debug.Assert(ctorInfo != null, $"No appropriate constructor found for type: {type.Name}.");
                     //array = ctorInfo.Invoke(new object[] { oldArray }) as PdfArray;
-                    array = ctorInfo.Invoke(new object[] { oldArray }) as PdfArray;
+                    array = ctorInfo.Invoke([oldArray]) as PdfArray;
                 }
                 return array ?? NRT.ThrowOnNull<PdfArray>();
 #else
@@ -905,7 +943,10 @@ namespace PdfSharp.Pdf
 #endif
             }
 
-            PdfDictionary CreateDictionary(Type type, PdfDictionary? oldDictionary)
+            PdfDictionary CreateDictionary(
+                [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+                Type type,
+                PdfDictionary? oldDictionary)
             {
 #if true
                 ConstructorInfo? ctorInfo;
@@ -914,17 +955,17 @@ namespace PdfSharp.Pdf
                 {
                     // Use constructor with signature 'Ctor(PdfDocument owner)'.
                     ctorInfo = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-                        null, new[] { typeof(PdfDocument) }, null);
+                        null, [typeof(PdfDocument)], null);
                     Debug.Assert(ctorInfo != null, "No appropriate constructor found for type: " + type.Name);
-                    dict = ctorInfo.Invoke(new object[] { _ownerDictionary.Owner }) as PdfDictionary;
+                    dict = ctorInfo.Invoke([_ownerDictionary.Owner]) as PdfDictionary;
                 }
                 else
                 {
                     // Use constructor with signature 'Ctor(PdfDictionary dict)'.
                     ctorInfo = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-                      null, new[] { typeof(PdfDictionary) }, null);
+                      null, [typeof(PdfDictionary)], null);
                     Debug.Assert(ctorInfo != null, "No appropriate constructor found for type: " + type.Name);
-                    dict = ctorInfo.Invoke(new object[] { oldDictionary }) as PdfDictionary;
+                    dict = ctorInfo.Invoke([oldDictionary]) as PdfDictionary;
                 }
                 return dict ?? NRT.ThrowOnNull<PdfDictionary>();
 #else
@@ -964,12 +1005,15 @@ namespace PdfSharp.Pdf
 #endif
             }
 
-            PdfItem CreateValue(Type type, PdfDictionary? oldValue)
+            PdfItem CreateValue(
+                [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+                Type type,
+                PdfDictionary? oldValue)
             {
 #if true
                 var ctorInfo = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-                    null, new Type[] { typeof(PdfDocument) }, null);
-                var obj = ctorInfo!.Invoke(new object[] { _ownerDictionary.Owner }) as PdfObject;
+                    null, [typeof(PdfDocument)], null);
+                var obj = ctorInfo!.Invoke([_ownerDictionary.Owner]) as PdfObject;
                 if (oldValue != null)
                 {
                     obj!.Reference = oldValue.Reference;
@@ -1018,7 +1062,7 @@ namespace PdfSharp.Pdf
                 Debug.Assert(value is PdfObject { Reference: null } or not PdfObject,
                 "You try to set an indirect object directly into a dictionary.");
 
-                // HACK?
+                // Hammer the value in without further checks.
                 _elements[key] = value;
             }
 
@@ -1052,10 +1096,7 @@ namespace PdfSharp.Pdf
             /// Gets the PdfReference with the specified key, or null if no such object exists.
             /// </summary>
             public PdfReference? GetReference(string key)
-            {
-                var item = this[key];
-                return item as PdfReference;
-            }
+                => this[key] as PdfReference;
 
             /// <summary>
             /// Sets the entry to the specified object. The object must not be an indirect object,
@@ -1063,7 +1104,8 @@ namespace PdfSharp.Pdf
             /// </summary>
             public void SetObject(string key, PdfObject obj)
             {
-                if (obj.Reference is not null)
+                //if (obj.Reference is not null)
+                if (obj.IsIndirect)
                     throw new ArgumentException("PdfObject must not be an indirect object.", nameof(obj));
                 this[key] = obj;
             }
@@ -1074,7 +1116,8 @@ namespace PdfSharp.Pdf
             /// </summary>
             public void SetReference(string key, PdfObject obj)
             {
-                if (obj.Reference is null)
+                //if (obj.Reference is null)
+                if (obj.IsIndirect is false)
                     throw new ArgumentException("PdfObject must be an indirect object.", nameof(obj));
                 this[key] = obj.Reference;
             }
@@ -1082,7 +1125,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Sets the entry as a reference to the specified iref.
             /// </summary>
-            public void SetReference(string key, PdfReference? iref)
+            public void SetReference(string key, PdfReference iref)
             {
                 if (iref is null)
                     throw new ArgumentNullException(nameof(iref));
@@ -1177,51 +1220,29 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Removes the value with the specified key.
             /// </summary>
-            public bool Remove(string key)
-            {
-                return _elements.Remove(key);
-            }
+            public bool Remove(string key) => _elements.Remove(key);
 
             /// <summary>
             /// Removes the value with the specified key.
             /// </summary>
             public bool Remove(KeyValuePair<string, PdfItem?> item)
-            {
-                throw new NotImplementedException();
-            }
-
-            ///// <summary>
-            ///// Determines whether the dictionary contains the specified name.
-            ///// </summary>
-            //[Obsolete("Use ContainsKey.")]
-            //public bool Contains(string key)
-            //{
-            //    return _elements.ContainsKey(key);
-            //}
+                => throw new NotImplementedException();
 
             /// <summary>
             /// Determines whether the dictionary contains the specified name.
             /// </summary>
-            public bool ContainsKey(string key)
-            {
-                return _elements.ContainsKey(key);
-            }
+            public bool ContainsKey(string key) => _elements.ContainsKey(key);
 
             /// <summary>
             /// Determines whether the dictionary contains a specific value.
             /// </summary>
             public bool Contains(KeyValuePair<string, PdfItem?> item)
-            {
-                throw new NotImplementedException();
-            }
+                => throw new NotImplementedException();
 
             /// <summary>
             /// Removes all elements from the dictionary.
             /// </summary>
-            public void Clear()
-            {
-                _elements.Clear();
-            }
+            public void Clear() => _elements.Clear();
 
             /// <summary>
             /// Adds the specified value to the dictionary.
@@ -1244,10 +1265,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Adds an item to the dictionary.
             /// </summary>
-            public void Add(KeyValuePair<string, PdfItem?> item)
-            {
-                Add(item.Key, item.Value);
-            }
+            public void Add(KeyValuePair<string, PdfItem?> item) => Add(item.Key, item.Value);
 
             /// <summary>
             /// Gets all keys currently in use in this dictionary as an array of PdfName objects.
@@ -1286,10 +1304,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Gets the value associated with the specified key.
             /// </summary>
-            public bool TryGetValue(string key, out PdfItem? value)
-            {
-                return _elements.TryGetValue(key, out value);
-            }
+            public bool TryGetValue(string key, out PdfItem? value) => _elements.TryGetValue(key, out value);
 
             /// <summary>
             /// Gets all values currently in use in this dictionary as an array of PdfItem objects.
@@ -1344,7 +1359,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Access a key that may contain an array or a single item for working with its value(s).
             /// </summary>
-            public ArrayOrSingleItemHelper ArrayOrSingleItem => new(this); // TODO PDFsharp6: Naming.
+            public ArrayOrSingleItemHelper ArrayOrSingleItem => new(this); // TODO_OLD PDFsharp6: Naming.
 
             /// <summary>
             /// Gets the DebuggerDisplayAttribute text.
@@ -1450,7 +1465,7 @@ namespace PdfSharp.Pdf
             /// </summary>
             public byte[] Value
             {
-                get => _value ??= Array.Empty<byte>();
+                get => _value ??= [];
                 set
                 {
                     if (value == null!)
@@ -1488,7 +1503,7 @@ namespace PdfSharp.Pdf
                             _value.CopyTo(bytes, 0);
                         }
                     }
-                    return bytes ?? Array.Empty<byte>();
+                    return bytes ?? [];
                 }
             }
 
@@ -1498,8 +1513,10 @@ namespace PdfSharp.Pdf
             /// Otherwise, the content remains untouched and the function returns false.
             /// The function is useful for analyzing existing PDF files.
             /// </summary>
+            [Obsolete("Not correctly implemented. Use the function TryUncompress.")]
             public bool TryUnfilter()
             {
+                // Keep old code for not break existing code.
                 if (_value != null)
                 {
                     var filter = _ownerDictionary.Elements["/Filter"];
@@ -1508,7 +1525,7 @@ namespace PdfSharp.Pdf
                         // PDFsharp can only uncompress streams that are compressed with the ZIP or LZH algorithm.
                         var decodeParms = _ownerDictionary.Elements[Keys.DecodeParms];
                         var bytes = Filtering.Decode(_value, filter, decodeParms);
-                        if (bytes != null)
+                        if (bytes != null!)
                         {
                             _ownerDictionary.Elements.Remove("/Filter");
                             _ownerDictionary.Elements.Remove(Keys.DecodeParms);
@@ -1522,6 +1539,58 @@ namespace PdfSharp.Pdf
             }
 
             /// <summary>
+            /// Tries to uncompress the bytes of the stream. If the stream is filtered with the LZWDecode or FlateDecode filter,
+            /// the stream content is replaced by its uncompressed value and the function returns true.
+            /// Otherwise, the content remains untouched and the function returns false.
+            /// The function is useful for analyzing existing PDF files.
+            /// </summary>
+            public bool TryUncompress()
+            {
+                if (_value != null)
+                {
+                    var filter = _ownerDictionary.Elements["/Filter"];
+                    if (filter == null)
+                        return false;
+
+                    // filter can be an array. We only try to unzip a single filter name.
+                    var filterName = filter.ToString()!.TrimStart('/');
+
+                    // PDF 1.7 specs say that the abbreviations are also allowed as filter values.
+                    if (filterName is PdfFilterNames.LzwDecode or PdfFilterNames.LzwDecodeAbbreviation
+                        or PdfFilterNames.FlateDecode or PdfFilterNames.FlateDecodeAbbreviation)
+                    {
+                        // PDFsharp can only uncompress streams that are compressed with the ZIP or LZH algorithm.
+                        var decodeParms = _ownerDictionary.Elements[Keys.DecodeParms];
+                        var bytes = Filtering.Decode(_value, filter, decodeParms);
+
+                        // Remove the filter and optional decode parameters.
+                        _ownerDictionary.Elements.Remove(Keys.Filter);
+                        _ownerDictionary.Elements.Remove(Keys.DecodeParms);
+
+                        // Replace original bytes with unzipped version.
+                        Value = bytes;
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            /// <summary>
+            /// Returns true if the dictionary contains the key '/Filter',
+            /// false otherwise.
+            /// </summary>
+            public bool IsFiltered()
+            {
+                if (_value != null)
+                {
+                    var filter = _ownerDictionary.Elements[Keys.Filter];
+                    if (filter != null)
+                        return true;
+                }
+                return false;
+            }
+
+            /// <summary>
             /// Compresses the stream with the FlateDecode filter.
             /// If a filter is already defined, the function has no effect.
             /// </summary>
@@ -1530,7 +1599,7 @@ namespace PdfSharp.Pdf
                 if (_value == null)
                     return;
 
-                if (!_ownerDictionary.Elements.ContainsKey("/Filter"))
+                if (!_ownerDictionary.Elements.ContainsKey(Keys.Filter))
                 {
                     _value = Filtering.FlateDecode.Encode(_value, _ownerDictionary._document.Options.FlateEncodeMode);
                     _ownerDictionary.Elements["/Filter"] = new PdfName("/FlateDecode");
@@ -1550,18 +1619,10 @@ namespace PdfSharp.Pdf
                 var filter = _ownerDictionary.Elements["/Filter"];
                 if (filter != null)
                 {
-#if true
                     var decodeParms = _ownerDictionary.Elements[Keys.DecodeParms];
                     var bytes = Filtering.Decode(_value, filter, decodeParms);
-                    if (bytes != null)
+                    if (bytes != null!)
                         stream = PdfEncoders.RawEncoding.GetString(bytes, 0, bytes.Length);
-#else
-
-                    if (_owner.Elements.GetString("/Filter") == "/FlateDecode")
-                    {
-                        stream = Filtering.FlateDecode.DecodeToString(_value);
-                    }
-#endif
                     else
                         throw new NotImplementedException("Unknown filter");
                 }
@@ -1570,20 +1631,6 @@ namespace PdfSharp.Pdf
 
                 return stream;
             }
-
-            //internal void WriteObject_(Stream stream)
-            //{
-            //    if (_value != null)
-            //        stream.Write(_value, 0, value.Length);
-            //}
-
-            ///// <summary>
-            ///// Converts a raw encoded string into a byte array.
-            ///// </summary>
-            //public static byte[] RawEncode(string content)
-            //{
-            //    return PdfEncoders.RawEncoding.GetBytes(content);
-            //}
 
             /// <summary>
             /// Common keys for all streams.

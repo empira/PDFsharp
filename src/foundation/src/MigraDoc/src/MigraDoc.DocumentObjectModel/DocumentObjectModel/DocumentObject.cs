@@ -2,6 +2,8 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
+using MigraDoc.Logging;
 
 namespace MigraDoc.DocumentObjectModel
 {
@@ -37,7 +39,6 @@ namespace MigraDoc.DocumentObjectModel
         protected virtual object DeepCopy()
         {
             var value = (DocumentObject)MemberwiseClone();
-            // value.ResetCachedValues();
             value.Parent = null; // Calls ResetCachedValues().
             value.BaseValues = (Values)BaseValues.Clone();
             value.BaseValues.Owner = value;
@@ -62,7 +63,6 @@ namespace MigraDoc.DocumentObjectModel
             // Calculate some properties when the Parent changes to avoid calculations in property getters.
             set { _parent = value; ResetCachedValues(); }
         }
-
         DocumentObject? _parent;
 
         /// <summary>
@@ -70,10 +70,10 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public Document Document
         {
-            // Note: Parent cannot change once it was set.
             [return: MaybeNull]
             get
             {
+                // Parent cannot change once it was set.
                 if (_document != null)
                     return _document;
                 var parent = Parent;
@@ -91,10 +91,11 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public Section? Section
         {
-            // Note: Parent cannot change once it was set.
+
             [return: MaybeNull]
             get
             {
+                // Parent cannot change once it was set.
                 if (_section != null)
                     return _section;
                 var parent = Parent;
@@ -121,7 +122,7 @@ namespace MigraDoc.DocumentObjectModel
             => Meta.GetValue(this, name, flags);
 
         /// <summary>
-        /// Sets the given value and sets its parent afterwards.
+        /// Sets the given value and sets its parent afterward.
         /// </summary>
         public virtual void SetValue(string name, object? val)
         {
@@ -143,7 +144,7 @@ namespace MigraDoc.DocumentObjectModel
             => Meta.IsNull(this, name);
 
         /// <summary>
-        /// Resets the value of the given name, i.e. IsNull(name) will return true afterwards.
+        /// Resets the value of the given name, i.e. IsNull(name) will return true afterward.
         /// </summary>
         public virtual void SetNull(string name)
             => Meta.SetNull(this, name);
@@ -155,7 +156,7 @@ namespace MigraDoc.DocumentObjectModel
             => Meta.IsNull(this);
 
         /// <summary>
-        /// Resets this instance, i.e. IsNull() will return true afterwards.
+        /// Resets this instance, i.e. IsNull() will return true afterward.
         /// </summary>
         public virtual void SetNull()
             => Meta.SetNull(this);
@@ -166,7 +167,7 @@ namespace MigraDoc.DocumentObjectModel
         public object? Tag { get; set; }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal abstract Meta Meta { get; }
 
@@ -174,17 +175,18 @@ namespace MigraDoc.DocumentObjectModel
         /// Sets the parent of the specified value.
         /// If a parent is already set, an ArgumentException will be thrown.
         /// </summary>
-        protected void SetParent(DocumentObject? val)
+        protected void SetParentOf(DocumentObject? value)
         {
-            if (val != null)
-            {
-                if (val.Parent != null)
-                    throw new ArgumentException(DomSR.ParentAlreadySet(val, this));
+            // Cannot set parent of null object.
+            if (value == null)
+                return;
 
-                val.Parent = this;
-                val._document = null;
-                val._section = null;
-            }
+            if (value.Parent != null)
+                throw new ArgumentException(MdDomMsgs.ParentAlreadySet(value, this).Message);
+
+            value.Parent = this;
+            value._document = null;
+            value._section = null;
         }
 
         /// <summary>
@@ -197,6 +199,6 @@ namespace MigraDoc.DocumentObjectModel
             _section = null;
         }
 
-        internal Values BaseValues = default!; // Is set on the constructors of derived classes.
+        internal Values BaseValues = default!;  // Is set on the constructors of derived classes.
     }
 }

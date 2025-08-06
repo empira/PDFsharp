@@ -1,19 +1,19 @@
 ﻿<Project>
-	<PropertyGroup>
-		<NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
-	</PropertyGroup>
-	<!-- these are the global nuget packages which should be used for every unit testing project, add a Directory.Builds.props file which imports this file-->
-	<ItemGroup>
-		<PackageReference Include="FluentAssertions" />
-		<PackageReference Include="Xunit.Core" />
-		<PackageReference Include="Xunit.Priority" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" >
-			<PrivateAssets>all</PrivateAssets>
-		</PackageReference>
-		<PackageReference Include="xunit.runner.visualstudio" >
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="XunitXml.TestLogger" />
-	</ItemGroup>
+   <PropertyGroup>
+     <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+   </PropertyGroup>
+   <!-- these are the global nuget packages which should be used for every unit testing project, add a Directory.Builds.props file which imports this file-->
+   <ItemGroup>
+     <PackageReference Include="FluentAssertions" />
+     <PackageReference Include="Xunit.Core" />
+     <PackageReference Include="Xunit.Priority" />
+     <PackageReference Include="Microsoft.NET.Test.Sdk" >
+       <PrivateAssets>all</PrivateAssets>
+     </PackageReference>
+     <PackageReference Include="xunit.runner.visualstudio" >
+       <PrivateAssets>all</PrivateAssets>
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+     </PackageReference>
+     <PackageReference Include="XunitXml.TestLogger" />
+   </ItemGroup>
 </Project>

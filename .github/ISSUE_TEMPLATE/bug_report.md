@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 If you think there is a bug in PDFsharp then please use the IssueSubmissionTemplate to make the issue replicable.  
-https://docs.pdfsharp.net/General/IssueReporting.html
+https://docs.pdfsharp.net/General/Issue-Reporting.html
 
 Thanks.
 
@@ -27,4 +27,4 @@ http://forum.pdfsharp.net/
 
 ## Steps to Reproduce the Behavior
 We strongly recommend using the IssueSubmissionTemplate to make sure we can replicate the issue.  
-https://docs.pdfsharp.net/General/IssueReporting.html
+https://docs.pdfsharp.net/General/Issue-Reporting.html

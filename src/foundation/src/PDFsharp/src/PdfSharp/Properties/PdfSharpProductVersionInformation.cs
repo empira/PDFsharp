@@ -1,12 +1,14 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+//#pragma warning disable 0436
+
 namespace PdfSharp
 {
     /// <summary>
     /// Version information for all PDFsharp related assemblies.
     /// </summary>
-    // TODO: These literals are not in sync with the NuGet metadata. Should be fixed.
+    // TODO_OLD: These literals are not in sync with the NuGet metadata. Should be fixed.
     public static class PdfSharpProductVersionInformation
     {
         // Cannot use const string anymore because GitVersionInformation used static string.
@@ -25,43 +27,43 @@ namespace PdfSharp
         /// <summary>
         /// The major version number of the product.
         /// </summary>
-        public static readonly string VersionMajor = GitVersionInformation.Major;
+        public static readonly string VersionMajor = PdfSharpGitVersionInformation.Major;
 
         /// <summary>
         /// The minor version number of the product.
         /// </summary>
-        public static readonly string VersionMinor = GitVersionInformation.Minor;
+        public static readonly string VersionMinor = PdfSharpGitVersionInformation.Minor;
 
         /// <summary>
         /// The patch number of the product.
         /// </summary>
-        public static readonly string VersionPatch = GitVersionInformation.Patch;
+        public static readonly string VersionPatch = PdfSharpGitVersionInformation.Patch;
 
         /// <summary>
         /// The Version PreRelease string for NuGet.
         /// </summary>
-        public static readonly string VersionPreRelease = GitVersionInformation.NuGetPreReleaseTagV2;
-
+        public static readonly string VersionPreRelease = PdfSharpGitVersionInformation.PreReleaseLabel;
+        
         /// <summary>
         /// The PDF creator application information string.
         /// </summary>
-        public static readonly string Creator = $"{Title} {GitVersionInformation.NuGetVersion}{Technology}";
+        public static readonly string Creator = $"{Title} {PdfSharpGitVersionInformation.InformationalVersion}{Technology}";
 
         /// <summary>
         /// The PDF producer (created by) information string.
-        /// TODO: Called Creator in MigraDoc???
+        /// TODO_OLD: Called Creator in MigraDoc???
         /// </summary>
-        public static readonly string Producer = $"{Title} {GitVersionInformation.NuGetVersion} ({Url})";
+        public static readonly string Producer = $"{Title} {PdfSharpGitVersionInformation.InformationalVersion} ({Url})";
 
         /// <summary>
         /// The full version number.
         /// </summary>
-        public static readonly string Version = GitVersionInformation.MajorMinorPatch;
+        public static readonly string Version = PdfSharpGitVersionInformation.MajorMinorPatch;
 
         /// <summary>
         /// The full semantic version number created by GitVersion.
         /// </summary>
-        public static readonly string SemanticVersion = GitVersionInformation.SemVer;
+        public static readonly string SemanticVersion = PdfSharpGitVersionInformation.SemVer;
 
         /// <summary>
         /// The home page of this product.
@@ -86,7 +88,7 @@ namespace PdfSharp
         /// <summary>
         /// The copyright information.
         /// </summary>
-        public const string Copyright = "Copyright © 2005-2024 empira Software GmbH.";
+        public const string Copyright = "Copyright © 2005-2025 empira Software GmbH.";
 
         /// <summary>
         /// The trademark of the product.
@@ -221,8 +223,8 @@ namespace PdfSharp
         // Hybrid - for testing only
         public const string Technology = "-h";
 #error Should not come here anymore. May be revived in the future.
-#elif UWP
-        // UWP - Universal Windows Platform
+#elif WUI
+        // WUI - Universal Windows Platform
         public const string Technology = "-uwp";
 #endif
     }
