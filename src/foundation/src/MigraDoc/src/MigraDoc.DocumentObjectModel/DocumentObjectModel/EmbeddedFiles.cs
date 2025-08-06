@@ -19,7 +19,8 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Gets an embedded file by its index. First embedded file has index 0.
         /// </summary>
-        public new EmbeddedFile this[int index] => (base[index] as EmbeddedFile)!; // BUG??? Exception?
+        public new EmbeddedFile this[int index] => base[index] as EmbeddedFile ??
+                                                   throw new InvalidOperationException("Object is not an 'EmbeddedFile'.");
 
         /// <summary>
         /// Adds a new EmbeddedFile.
@@ -39,7 +40,7 @@ namespace MigraDoc.DocumentObjectModel
         internal override void Serialize(Serializer serializer)
         {
             var count = Count;
-            for (var index = 0; index < count; ++index)
+            for (var index = 0; index < count; index++)
             {
                 var embeddedFile = this[index];
                 embeddedFile.Serialize(serializer);
@@ -47,7 +48,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

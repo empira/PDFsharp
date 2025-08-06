@@ -84,9 +84,8 @@ namespace MigraDoc.DocumentObjectModel.Tables
             // Lazy execution makes properties slow. Calculate frequently required property values in advance.
             if (Parent is Cells cells)
             {
-                _table = cells.Table;
-
                 _row = cells.Row;
+                _table = cells.Table;
             }
         }
 
@@ -176,7 +175,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
                     return _clm;
                 if (/*_clm == null &&*/ Parent is Cells cells)
                 {
-                    for (int index = 0; index < cells.Count; ++index)
+                    for (int index = 0; index < cells.Count; index++)
                     {
                         //if (cells[index] == this)
                         //    _clm = Table.Columns[index];
@@ -219,7 +218,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
             get => Values.Format ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Format = value;
             }
         }
@@ -241,7 +240,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
             get => Values.Borders ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Borders = value;
             }
         }
@@ -254,7 +253,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
             get => Values.Shading ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Shading = value;
             }
         }
@@ -294,7 +293,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
             get => Values.Elements ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Elements = value;
             }
         }
@@ -359,7 +358,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

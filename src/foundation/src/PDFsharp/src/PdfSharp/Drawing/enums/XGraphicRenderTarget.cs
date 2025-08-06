@@ -31,6 +31,6 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Universal Windows Platform.
         /// </summary>
-        UWP = 10,
+        WUI = 10,
     }
 }

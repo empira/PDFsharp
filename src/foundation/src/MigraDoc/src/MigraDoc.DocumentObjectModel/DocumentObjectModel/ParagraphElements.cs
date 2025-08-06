@@ -241,7 +241,7 @@ namespace MigraDoc.DocumentObjectModel
                                                 "Please use AddHyperlink(string filename, string bookmarkName, bool? newWindow) " +
                                                 "or one of the AddHyperlinkToEmbeddedDocument() functions.");
 
-            // HyperlinkTypes File and Web/Url:
+            // HyperlinkTypes File and Web/Url.
             var hyperlink = new Hyperlink
             {
                 Filename = name,
@@ -483,7 +483,7 @@ namespace MigraDoc.DocumentObjectModel
         internal override void Serialize(Serializer serializer)
         {
             int count = Count;
-            for (int index = 0; index < count; ++index)
+            for (int index = 0; index < count; index++)
             {
                 DocumentObject element = this[index]!;
                 element.Serialize(serializer);
@@ -491,7 +491,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

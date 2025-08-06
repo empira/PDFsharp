@@ -217,8 +217,8 @@ namespace PdfSharp.Charting.Renderers
             {
                 rendererInfo.XValues = new XValues();
                 XSeries xs = rendererInfo.XValues.AddXSeries();
-                for (double i = rendererInfo.MinimumScale + 1; i <= rendererInfo.MaximumScale; ++i)
-                    xs.Add(i.ToString(CultureInfo.InvariantCulture));
+                for (double idx = rendererInfo.MinimumScale + 1; idx <= rendererInfo.MaximumScale; idx++)
+                    xs.Add(idx.ToString(CultureInfo.InvariantCulture));
             }
         }
 

@@ -6,11 +6,11 @@
 namespace PdfSharp.Fonts.OpenType
 {
     /// <summary>
-    /// TrueType font table names.
+    /// Case-sensitive TrueType font table names.
     /// </summary>
     static class TableTagNames
     {
-        // --- Required Tables ---
+        // --- Required tables ---
 
         /// <summary>
         /// Character to glyph mapping.
@@ -52,7 +52,7 @@ namespace PdfSharp.Fonts.OpenType
         /// </summary>
         public const string Post = "post";
 
-        // --- Tables Related to TrueType Outlines ---
+        // --- Tables related to TrueType outlines ---
 
         /// <summary>
         /// Control Value Table.
@@ -79,7 +79,7 @@ namespace PdfSharp.Fonts.OpenType
         /// </summary>
         public const string Prep = "prep";
 
-        // --- Tables Related to PostScript Outlines ---
+        // --- Tables related to PostScript outlines ---
 
         /// <summary>
         /// PostScript font program (compact font format).
@@ -91,7 +91,7 @@ namespace PdfSharp.Fonts.OpenType
         /// </summary>
         public const string VOrg = "VORG";
 
-        // --- Tables Related to Bitmap Glyphs ---
+        // --- Tables related to bitmap glyphs ---
 
         /// <summary>
         /// Embedded bitmap data.
@@ -108,7 +108,7 @@ namespace PdfSharp.Fonts.OpenType
         /// </summary>
         public const string EBSC = "EBSC";
 
-        // --- Advanced Typographic Tables ---
+        // --- Advanced typographic tables ---
 
         /// <summary>
         /// Baseline data.
@@ -135,7 +135,19 @@ namespace PdfSharp.Fonts.OpenType
         /// </summary>
         public const string JSTF = "JSTF";
 
-        // --- Other OpenType Tables ---
+        // --- Tables related to glyph color ---
+
+        /// <summary>
+        /// Color table.
+        /// </summary>
+        public const string COLR = "COLR";
+
+        /// <summary>
+        /// Color pallet table.
+        /// </summary>
+        public const string CPAL = "CPAL";
+
+        // --- Other OpenType tables ---
 
         /// <summary>
         /// Digital signature.

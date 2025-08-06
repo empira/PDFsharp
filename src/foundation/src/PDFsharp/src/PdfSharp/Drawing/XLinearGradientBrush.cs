@@ -18,7 +18,7 @@ using SysRect = System.Windows.Rect;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfLinearGradientBrush = System.Windows.Media.LinearGradientBrush;
 #endif
-#if UWP
+#if WUI
 using Windows.UI;
 using Windows.UI.Xaml.Media;
 using Microsoft.Graphics.Canvas;
@@ -101,7 +101,7 @@ namespace PdfSharp.Drawing
         public XLinearGradientBrush(XRect rect, XColor color1, XColor color2, XLinearGradientMode linearGradientMode)
         {
             if (!Enum.IsDefined(typeof(XLinearGradientMode), linearGradientMode))
-                throw new InvalidEnumArgumentException("linearGradientMode", (int)linearGradientMode, typeof(XLinearGradientMode));
+                throw new InvalidEnumArgumentException(nameof(linearGradientMode), (int)linearGradientMode, typeof(XLinearGradientMode));
 
             if (rect.Width == 0 || rect.Height == 0)
                 throw new ArgumentException("Invalid rectangle.", nameof(rect));
@@ -113,7 +113,7 @@ namespace PdfSharp.Drawing
             _linearGradientMode = linearGradientMode;
         }
 
-        // TODO: 
+        // TODO_OLD: 
         //public XLinearGradientBrush(Rectangle rect, XColor color1, XColor color2, double angle);
         //public XLinearGradientBrush(RectangleF rect, XColor color1, XColor color2, double angle);
         //public XLinearGradientBrush(Rectangle rect, XColor color1, XColor color2, double angle, bool isAngleScaleable);
@@ -234,7 +234,7 @@ namespace PdfSharp.Drawing
             //  dirty = false;
             //}
 
-            // TODO: use dirty to optimize code
+            // TODO_OLD: use dirty to optimize code
             GdiLinearGradientBrush brush;
             try
             {
@@ -337,7 +337,7 @@ namespace PdfSharp.Drawing
         }
 #endif
 
-#if UWP
+#if WUI
         internal override ICanvasBrush RealizeCanvasBrush()
         {
             ICanvasBrush brush;

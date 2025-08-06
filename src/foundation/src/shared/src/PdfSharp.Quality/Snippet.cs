@@ -429,7 +429,6 @@ namespace PdfSharp.Quality
         /// </summary>
         /// <param name="size">The scaling factor of the pentagram.</param>
         /// <param name="center">The center of the pentagram.</param>
-        /// <returns></returns>
         protected static XPoint[] GetPentagram(double size, XPoint center)
         {
             var points = Pentagram;

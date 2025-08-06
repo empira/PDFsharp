@@ -83,7 +83,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.Elements ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Elements = value;
             }
         }
@@ -105,7 +105,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.LineFormat ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.LineFormat = value;
             }
         }
@@ -118,7 +118,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.FillFormat ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.FillFormat = value;
             }
         }
@@ -176,7 +176,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
             get => Values.DataLabel ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.DataLabel = value;
             }
         }
@@ -248,7 +248,7 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

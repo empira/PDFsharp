@@ -127,6 +127,7 @@ namespace PdfSharp.Pdf.Actions
         /// Separator for splitting destination path segments ans destination name.
         /// </summary>
         public const char Separator = '\\';
+        
         /// <summary>
         /// Path segment string used to move to the parent document.
         /// </summary>

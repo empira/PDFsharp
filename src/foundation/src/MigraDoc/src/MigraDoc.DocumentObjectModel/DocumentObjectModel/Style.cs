@@ -69,7 +69,7 @@ namespace MigraDoc.DocumentObjectModel
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
             if (name == "")
-                throw new ArgumentException("name");
+                throw new ArgumentException(nameof(name));
 
             if (name.ToLower().StartsWith("font", StringComparison.Ordinal))
                 return ParagraphFormat.GetValue(name);
@@ -91,7 +91,7 @@ namespace MigraDoc.DocumentObjectModel
         /// Gets the font of ParagraphFormat.
         /// Calling style.Font is just a shortcut to style.ParagraphFormat.Font.
         /// </summary>
-        public Font Font // TODO: Move to Values?
+        public Font Font // TODO_OLD: Move to Values?
         {
             get => ParagraphFormat.Font;
             // SetParent will be called inside ParagraphFormat.
@@ -113,12 +113,12 @@ namespace MigraDoc.DocumentObjectModel
             {
                 Values.ParagraphFormat ??= new ParagraphFormat(this);
                 if (_readOnly)
-                    return Values.ParagraphFormat.Clone();  // BUG: ??? 
+                    return Values.ParagraphFormat.Clone();  // BUG_OLD: ??? 
                 return Values.ParagraphFormat;
             }
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.ParagraphFormat = value;
             }
         }
@@ -132,10 +132,10 @@ namespace MigraDoc.DocumentObjectModel
             set
             {
                 if (value == null || value == "" && !String.IsNullOrEmpty(Values.BaseStyle))
-                    throw new ArgumentException(DomSR.EmptyBaseStyle);
+                    throw new ArgumentException(MdDomMsgs.EmptyBaseStyle.Message);
 
                 // Self assignment is allowed. Treat null like "".
-                if (value == "" && String.IsNullOrEmpty(Values.BaseStyle)) // BUG???
+                if (value == "" && String.IsNullOrEmpty(Values.BaseStyle)) // BUG_OLD???
                     return;
 
                 // Self assignment is allowed.
@@ -161,7 +161,7 @@ namespace MigraDoc.DocumentObjectModel
                     throw new ArgumentException(msg);
                 }
 
-                if (idxBaseStyle >= 0) // BUG THHO4STLA Was "idxBaseStyle > 1".
+                if (idxBaseStyle >= 0) // BUG_OLD THHO4STLA Was "idxBaseStyle > 1".
                 {
                     // styles cannot be null if idxBaseStyle >= 0.
                     Debug.Assert(styles != null, nameof(styles) + " != null");
@@ -201,7 +201,7 @@ namespace MigraDoc.DocumentObjectModel
                     {
                         var baseStyle = GetBaseStyle();
                         if (baseStyle == null)
-                            throw new InvalidOperationException("User defined style has no valid base Style.");
+                            throw new InvalidOperationException("User-defined style has no valid base Style.");
 
                         Values.StyleType = baseStyle.Type;
                     }
@@ -230,9 +230,9 @@ namespace MigraDoc.DocumentObjectModel
             if (styles == null)
                 throw new InvalidOperationException("A parent object is required for this operation; access failed");
             if (Values.BaseStyle == "")
-                throw new ArgumentException("User defined Style defined without a BaseStyle");
+                throw new ArgumentException("User-defined Style defined without a BaseStyle");
 
-            //REVIEW KlPo4StLa Special treatment for DefaultParagraphFont faulty (DefaultParagraphFont not returned via styles["name"]).
+            // REVIEW KlPo4StLa Special treatment for DefaultParagraphFont faulty (DefaultParagraphFont not returned via styles["name"]).
             if (Values.BaseStyle == DefaultParagraphFontName)
                 return styles[0];
 
@@ -311,13 +311,13 @@ namespace MigraDoc.DocumentObjectModel
                         // ...the base style may have been modified or may even have a modified base style.
                         // Methinks it’s wrong to compare with the built-in style, so let’s compare with the
                         // real base style:
-                        refStyle = Document.Styles[Document.Styles.GetIndex(Values.BaseStyle!)];  // BUG: Base style can be null
+                        refStyle = Document.Styles[Document.Styles.GetIndex(Values.BaseStyle!)];  // BUG_OLD: Base style can be null
                         refFormat = refStyle.ParagraphFormat;
                         //refFont = refFormat.Font;
                         // Note: we must write "Underline = none" if the base style has "Underline = single" - we cannot
                         // detect this if we compare with the built-in style that has no underline.
                         // Known problem: Default values like "OutlineLevel = Level1" will now be serialized.
-                        // TODO: Optimize DDL output, remove redundant default values.
+                        // TODO_OLD: Optimize DDL output, remove redundant default values.
                     }
                     else
                     {
@@ -325,7 +325,7 @@ namespace MigraDoc.DocumentObjectModel
                         string name = DdlEncoder.QuoteIfNameContainsBlanks(Name);
                         string baseName = DdlEncoder.QuoteIfNameContainsBlanks(BaseStyle);
                         serializer.WriteLine(name + " : " + baseName);
-                        refStyle = Document.Styles[Document.Styles.GetIndex(Values.BaseStyle!)];// BUG: Base style can be null
+                        refStyle = Document.Styles[Document.Styles.GetIndex(Values.BaseStyle!)];// BUG_OLD: Base style can be null
                         refFormat = refStyle.ParagraphFormat;
                         //refFont = refFormat.Font;
                     }
@@ -339,8 +339,8 @@ namespace MigraDoc.DocumentObjectModel
                 serializer.WriteLine(name + " : " + baseName);
 
 #if true
-                //var refStyle0 = Document.Styles[Document.Styles.GetIndex(Values.BaseStyle!)];  // BUG: Base style can be null
-                refStyle = Document.Styles[Values.BaseStyle!];  // BUG: Base style can be null
+                //var refStyle0 = Document.Styles[Document.Styles.GetIndex(Values.BaseStyle!)];  // BUG_OLD: Base style can be null
+                refStyle = Document.Styles[Values.BaseStyle!];  // BUG_OLD: Base style can be null
                 refFormat = refStyle?.ParagraphFormat;
 #else
                 refFormat = null;
@@ -378,7 +378,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

@@ -173,7 +173,6 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         /// </summary>
         /// <typeparam name="T">The type to be filtered.</typeparam>
         /// <param name="elements">The document objects.</param>
-        /// <returns></returns>
         public static IEnumerable<T> Filter<T>(this IEnumerable<DocumentObject?> elements) 
             where T : DocumentObject
         {

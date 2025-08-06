@@ -174,7 +174,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             Symbol symbol;
             if (!NameToEnum.TryGetValue(name, out symbol))
             {
-                // Check for case sensitive keywords. Allow first character upper case only.
+                // Check for case-sensitive keywords. Allow first character upper case only.
                 if (string.Compare(name, "True", StringComparison.OrdinalIgnoreCase) == 0)
                     symbol = Symbol.True;
                 else if (string.Compare(name, "False", StringComparison.OrdinalIgnoreCase) == 0)
@@ -190,12 +190,9 @@ namespace MigraDoc.DocumentObjectModel.IO
         /// <summary>
         /// Returns string from Symbol value.
         /// </summary>
-        internal static string NameFromSymbol(Symbol symbol)
-        {
-            return EnumToName[symbol];
-        }
+        internal static string NameFromSymbol(Symbol symbol) => EnumToName[symbol];
 
-        static readonly Dictionary<Symbol, string> EnumToName = new();
-        static readonly Dictionary<string, Symbol> NameToEnum = new();
+        static readonly Dictionary<Symbol, string> EnumToName = [];
+        static readonly Dictionary<string, Symbol> NameToEnum = [];
     }
 }

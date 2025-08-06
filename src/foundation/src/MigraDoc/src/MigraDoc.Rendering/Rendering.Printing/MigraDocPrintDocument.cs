@@ -12,6 +12,8 @@ using MigraDoc.DocumentObjectModel.Internals;
 using MigraDoc.DocumentObjectModel.Visitors;
 using MigraDoc.DocumentObjectModel.IO;
 
+#error Not in use anymore
+
 namespace MigraDoc.Rendering.Printing
 {
     /// <summary>
@@ -134,7 +136,7 @@ namespace MigraDoc.Rendering.Printing
                     int yOffset = GetDeviceCaps(hdc, PHYSICALOFFSETY);
                     graphics.ReleaseHdc(hdc);
                     graphics.TranslateTransform(-xOffset * 100 / graphics.DpiX, -yOffset * 100 / graphics.DpiY);
-                    // Recall: Width and Height are exchanged when settings.Landscape is true.
+                    // Recall: Width and Height are interchanged when settings.Landscape is true.
                     XSize size = new XSize(e.PageSettings.Bounds.Width / 100.0 * 72, e.PageSettings.Bounds.Height / 100.0 * 72);
                     const float scale = 100f / 72f;
                     graphics.ScaleTransform(scale, scale);

@@ -11,15 +11,31 @@ using PdfSharp.Fonts;
 using PdfSharp.Logging;
 using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
+#if CORE
+#endif
 using PdfSharp.TestHelper;
 using Xunit;
 using FluentAssertions;
+using PdfSharp.Diagnostics;
 
 namespace MigraDoc.Tests
 {
     [Collection("PDFsharp")]
-    public class TextTests
+    public class TextTests : IDisposable
     {
+        public TextTests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void Surrogate_Pairs_Test()
         {
@@ -181,7 +197,7 @@ namespace MigraDoc.Tests
         }
 
         [Fact]
-        public static void Document_with_No_Break_Hyphen_before_Tabs()
+        public void Document_with_No_Break_Hyphen_before_Tabs()
         {
             LogHost.Factory = LoggerFactory.Create(builder => builder.AddConsole());
 
@@ -263,7 +279,7 @@ namespace MigraDoc.Tests
         }
 
         [Fact]
-        public static void DecimalTabulatorTest()
+        public void DecimalTabulatorTest()
         {
             var cultureInfos = new[] { null, CultureInfo.GetCultureInfo("en-us"), CultureInfo.GetCultureInfo("de-de") };
 
@@ -405,19 +421,19 @@ namespace MigraDoc.Tests
         }
 
         [Fact]
-        static void FooterLayoutTest()
+        public void FooterLayoutTest()
         {
             var document = new Document();
-            var Section = document.AddSection();
-            Section.PageSetup.PageWidth = "210mm";
-            Section.PageSetup.PageHeight = "297mm";
-            Section.PageSetup.TopMargin = 0;
-            Section.PageSetup.BottomMargin = Unit.FromCentimeter(3);
-            Section.PageSetup.FooterDistance = 0;
-            Section.PageSetup.HeaderDistance = 0;
+            var section = document.AddSection();
+            section.PageSetup.PageWidth = "210mm";
+            section.PageSetup.PageHeight = "297mm";
+            section.PageSetup.TopMargin = 0;
+            section.PageSetup.BottomMargin = Unit.FromCentimeter(3);
+            section.PageSetup.FooterDistance = 0;
+            section.PageSetup.HeaderDistance = 0;
             //for (int i = 0; i < 77; i++)
             //    Section.AddParagraph("paragraph " + i);
-            var par1 = Section.Footers.Primary.AddParagraph("Unexpected blank space after footer text 1");
+            var par1 = section.Footers.Primary.AddParagraph("Unexpected blank space after footer text 1");
             par1.Format.SpaceBefore = Unit.FromCentimeter(2);
             par1.Format.SpaceAfter = 0;
             //par1 = Section.Footers.Primary.AddParagraph("Unexpected blank space after footer text 2");

@@ -8,18 +8,31 @@ using PdfSharp.TestHelper;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Rendering;
 using PdfSharp.Quality;
+#if CORE
+#endif
 using Xunit;
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
     [Collection("PDFsharp")]
-    public class Bullets
+    public class Bullets : IDisposable
     {
+        public Bullets()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void Create_Bullets()
         {
-            PdfSharpCore.ResetAll();
-
             // Create a MigraDoc document.
             var document = CreateDocument();
 
@@ -107,7 +120,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         }
 
         [Fact]
-        public static void BulletLineSpacingTest()
+        public void BulletLineSpacingTest()
         {
             // Ensures that, without any spacial formatting, each bullet list line and each line caused by a line break in a list item has the same offset to the previous line.
             // The descent of the bullet itself shall be ignored in calculating the line spacing.

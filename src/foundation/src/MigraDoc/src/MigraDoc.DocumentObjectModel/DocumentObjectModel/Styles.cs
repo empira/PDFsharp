@@ -47,7 +47,7 @@ namespace MigraDoc.DocumentObjectModel
                 {
                     int count = Count;
                     // index starts from 1; DefaultParagraphFont cannot be modified.
-                    for (int index = 1; index < count; ++index)
+                    for (int index = 1; index < count; index++)
                     {
                         var style = this[index];
                         if (String.Compare(style.Name, styleName, StringComparison.OrdinalIgnoreCase) == 0)
@@ -75,7 +75,7 @@ namespace MigraDoc.DocumentObjectModel
                 throw new ArgumentNullException(nameof(styleName));
 
             int count = Count;
-            for (int index = 0; index < count; ++index)
+            for (int index = 0; index < count; index++)
             {
                 var style = this[index];
                 if (String.Compare(style.Name, styleName, StringComparison.OrdinalIgnoreCase) == 0)
@@ -114,14 +114,12 @@ namespace MigraDoc.DocumentObjectModel
                 throw new ArgumentNullException(nameof(value));
 
             if (value is not Style style)
-                //throw new InvalidOperationException(DomSR.StyleExpected);
                 throw TH.ArgumentException_StyleExpected(value.GetType());
 
             bool isRootStyle = style.IsRootStyle;
 
             if (style.BaseStyle == "" && !isRootStyle)
-                //throw new ArgumentException(DomSR.UndefinedBaseStyle(style.BaseStyle));
-                throw TH.ArgumentException_UndefinedBaseStyle(style.BaseStyle);
+                throw TH.ArgumentException_UndefinedBaseStyle(style.Name);
 
             Style? baseStyle = null;
             int styleIndex = GetIndex(style.BaseStyle);
@@ -129,8 +127,7 @@ namespace MigraDoc.DocumentObjectModel
             if (styleIndex != -1)
                 baseStyle = this[styleIndex];
             else if (!isRootStyle)
-                //throw new ArgumentException(DomSR.UndefinedBaseStyle(style.BaseStyle));
-                throw TH.ArgumentException_UndefinedBaseStyle(style.BaseStyle);
+                throw TH.ArgumentException_UndefinedBaseStyle(style.Name);
 
             if (baseStyle != null)
                 style.Values.StyleType = baseStyle.Type;
@@ -189,7 +186,7 @@ namespace MigraDoc.DocumentObjectModel
                 },
                 Font =
                 {
-                    Name = "Arial", // Not "Verdana" anymore.
+                    Name = "Arial",
                     Size = 10,
                     Bold = false,
                     Italic = false,
@@ -431,7 +428,7 @@ namespace MigraDoc.DocumentObjectModel
                 fSerialized[0] = true;                       // consider DefaultParagraphFont as serialized
                 bool[] fSerializePending = new bool[count];  // currently serializing
                 bool newLine = false;  // gets true if at least one style was written
-                                       //Start from 1 and do not serialize DefaultParagraphFont
+                                       // Start from 1 and do not serialize DefaultParagraphFont
                 for (int index = 1; index < count; index++)
                 {
                     if (!fSerialized[index])
@@ -496,7 +493,7 @@ namespace MigraDoc.DocumentObjectModel
 
             var visitedStyles = new Dictionary<Style, object>();
             foreach (var style in this)
-                VisitStyle(visitedStyles, (Style)style!, visitor, visitChildren); // BUG style may be null and not of appropriate type
+                VisitStyle(visitedStyles, (Style)style!, visitor, visitChildren); // BUG_OLD style may be null and not of appropriate type
         }
 
         /// <summary>
@@ -521,7 +518,7 @@ namespace MigraDoc.DocumentObjectModel
         public static Styles BuiltInStyles { get; } = [];
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

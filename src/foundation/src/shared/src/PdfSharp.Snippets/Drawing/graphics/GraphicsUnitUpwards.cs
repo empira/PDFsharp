@@ -5,7 +5,6 @@ using PdfSharp.Drawing;
 
 namespace PdfSharp.Snippets.Drawing
 {
-
     /// <summary>
     /// 
     /// </summary>

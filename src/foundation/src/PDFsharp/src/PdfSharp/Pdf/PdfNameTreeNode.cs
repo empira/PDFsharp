@@ -1,6 +1,7 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Pdf
@@ -22,21 +23,24 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfNameTreeNode"/> class.
         /// </summary>
-        public PdfNameTreeNode(bool isRoot)  //??? 
+        public PdfNameTreeNode(PdfDictionary dict)
+            : base(dict)
         {
-            IsRoot = isRoot;
+            Initialize();
         }
+
+        /// <summary>
+        /// Gets the parent of this node or null if this is the root-node
+        /// </summary>
+        public PdfNameTreeNode? Parent { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether this instance is a root node.
         /// </summary>
         public bool IsRoot
         {
-            get => _isRoot;
-            private set => _isRoot = value;
+            get => Parent == null;
         }
-
-        bool _isRoot;
 
         /// <summary>
         /// Gets the number of Kids elements.
@@ -64,6 +68,122 @@ namespace PdfSharp.Pdf
         }
 
         /// <summary>
+        /// Get the number of names in this node including all children
+        /// </summary>
+        public int NamesCountTotal => GetNames(true).Count;
+
+        /// <summary>
+        /// Gets the kids of this item.
+        /// </summary>
+        public IEnumerable<PdfNameTreeNode> Kids => _kids;
+
+        private readonly List<PdfNameTreeNode> _kids = new();
+
+        private void Initialize()
+        {
+            var kids = Elements.GetArray(Keys.Kids);
+            if (kids != null)
+            {
+                for (var i = 0; i < kids.Elements.Count; i++)
+                {
+                    var kidDict = kids.Elements.GetDictionary(i);
+                    if (kidDict != null)
+                    {
+                        var kid = new PdfNameTreeNode(kidDict) { Parent = this };
+                        _kids.Add(kid);
+                    }
+                }
+            }
+            _updateRequired = true;
+            UpdateLimits();
+        }
+        /// <summary>
+        /// Gets the list of names this node contains
+        /// </summary>
+        /// <param name="includeKids">Specifies whether the names of the kids should also be returned</param>
+        /// <returns>The list of names this node contains</returns>
+        /// <remarks>Note: When kids are included, the names are not guaranteed to be sorted</remarks>
+        public IReadOnlyList<string> GetNames(bool includeKids = false)
+        {
+            var result = new List<string>();
+            var names = Elements.GetArray(Keys.Names);
+            if (names != null)
+            {
+                for (var i = 0; i < names.Elements.Count; i += 2)
+                {
+                    result.Add(names.Elements.GetString(i));
+                }
+            }
+            if (includeKids)
+            {
+                foreach (var kid in _kids)
+                {
+                    result.AddRange(kid.GetNames(true));
+                }
+            }
+            return result;
+        }
+        /// <summary>
+        /// Determines whether this node contains the specified <paramref name="name"/>
+        /// </summary>
+        /// <param name="name">The name to search for</param>
+        /// <param name="includeKids">Specifies whether the kids should also be searched</param>
+        /// <returns>true, if this node contains <paramref name="name"/>, false otherwise</returns>
+        public bool ContainsName(string name, bool includeKids = false)
+        {
+            var names = Elements.GetArray(Keys.Names);
+            if (names != null)
+            {
+                for (var i = 0; i < names.Elements.Count; i += 2)
+                {
+                    if (string.CompareOrdinal(name, names.Elements.GetString(i)) == 0)
+                        return true;
+                }
+            }
+            if (includeKids)
+            {
+                foreach (var kid in _kids)
+                {
+                    if (!kid.ContainsName(name, true))
+                        return true;
+                }
+            }
+            return false;
+        }
+        /// <summary>
+        /// Get the value of the item with the specified <paramref name="name"/>.<br></br>
+        /// If the value represents a reference, the referenced value is returned.
+        /// </summary>
+        /// <param name="name">The name whose value should be retrieved</param>
+        /// <param name="includeKids">Specifies whether the kids should also be searched</param>
+        /// <returns>The value for <paramref name="name"/> when found, otwerwise null</returns>
+        public PdfItem? GetValue(string name, bool includeKids = false)
+        {
+            var names = Elements.GetArray(Keys.Names);
+            if (names != null)
+            {
+                for (var i = 0; i < names.Elements.Count; i += 2)
+                {
+                    if (string.CompareOrdinal(name, names.Elements.GetString(i)) == 0)
+                    {
+                        var item = names.Elements[i + 1];
+                        return item is PdfReference itRef ? itRef.Value : item;
+                    }
+                }
+            }
+            if (includeKids)
+            {
+                foreach (var kid in _kids)
+                {
+                    var value = kid.GetValue(name, true);
+                    if (value != null)
+                        return value;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Adds a child node to this node.
         /// </summary>
         public void AddKid(PdfNameTreeNode kidNode)
@@ -74,6 +194,7 @@ namespace PdfSharp.Pdf
                 kids = new PdfArray();
                 Elements.SetObject(Keys.Kids, kids);
             }
+            kidNode.Parent = this;
             kids.Elements.Add(kidNode);
             _updateRequired = true;
         }
@@ -104,12 +225,28 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Gets the least key.
         /// </summary>
-        public string LeastKey => "todo";
+        public string LeastKey
+        {
+            get
+            {
+                UpdateLimits();
+                return _leastKey;
+            }
+        }
+        private string _leastKey = "?";
 
         /// <summary>
         /// Gets the greatest key.
         /// </summary>
-        public string GreatestKey => "todo";
+        public string GreatestKey
+        {
+            get
+            {
+                UpdateLimits();
+                return _greatestKey;
+            }
+        }
+        private string _greatestKey = "?";
 
         /// <summary>
         /// Updates the limits by inspecting Kids and Names.
@@ -118,7 +255,15 @@ namespace PdfSharp.Pdf
         {
             if (_updateRequired)
             {
-                //todo Recalc Limits
+                var names = GetNames(true).ToList();
+                names.Sort(StringComparer.Ordinal);
+                if (names.Count > 0)
+                {
+                    _leastKey = names[0];
+                    _greatestKey = names[^1];
+                    Elements[Keys.Limits] = new PdfArray(Owner,
+                        new PdfString(_leastKey), new PdfString(_greatestKey));
+                }
                 _updateRequired = false;
             }
         }
@@ -206,6 +351,6 @@ namespace PdfSharp.Pdf
         string DebuggerDisplay
         // ReSharper restore UnusedMember.Local
             =>
-                String.Format("root:{0}", _isRoot);
+                String.Format("root:{0}", IsRoot);
     }
 }

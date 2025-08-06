@@ -12,19 +12,6 @@ namespace PdfSharp.Pdf
     [DebuggerDisplay("(Left={Left.Millimeter}mm, Right={Right.Millimeter}mm, Top={Top.Millimeter}mm, Bottom={Bottom.Millimeter}mm)")]
     public sealed class TrimMargins
     {
-        ///// <summary>
-        ///// Clones this instance.
-        ///// </summary>
-        //public TrimMargins Clone()
-        //{
-        //  TrimMargins trimMargins = new TrimMargins();
-        //  trimMargins.left = left;
-        //  trimMargins.top = top;
-        //  trimMargins.right = right;
-        //  trimMargins.bottom = bottom;
-        //  return trimMargins;
-        //}
-
         /// <summary>
         /// Sets all four crop margins simultaneously.
         /// </summary>

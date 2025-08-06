@@ -98,8 +98,8 @@ namespace PdfSharp.Pdf.Annotations
         //  get 
         //  {
         //      //DMH 6/7/06
-        //      //Broke this out to simplfy debugging
-        //      //Use a generic annotation to access the Meta data
+        //      //Broke this out to simplify debugging
+        //      //Use a generic annotation to access the metadata
         //      //Assign this as the parent of the annotation
         //      PdfReference r = Elements[index] as PdfReference;
         //      PdfDictionary d = r.Value as PdfDictionary;

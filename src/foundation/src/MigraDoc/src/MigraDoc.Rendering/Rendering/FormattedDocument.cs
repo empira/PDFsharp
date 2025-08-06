@@ -186,12 +186,12 @@ namespace MigraDoc.Rendering
         Rectangle CalcContentRect(int page)
         {
             var pageSetup = _currentSection.PageSetup;
-            XUnitPt width = pageSetup.EffectivePageWidth.Point;
+            XUnitPt width = pageSetup.PageWidth.Point;
 
             width -= pageSetup.RightMargin.Point;
             width -= pageSetup.LeftMargin.Point;
             
-            XUnitPt height = pageSetup.EffectivePageHeight.Point;
+            XUnitPt height = pageSetup.PageHeight.Point;
 
             height -= pageSetup.TopMargin.Point;
             height -= pageSetup.BottomMargin.Point;
@@ -290,7 +290,7 @@ namespace MigraDoc.Rendering
             else
                 xPos = pageSetup.LeftMargin.Point;
 
-            XUnitPt width = pageSetup.EffectivePageWidth.Point;
+            XUnitPt width = pageSetup.PageWidth.Point;
             width -= (pageSetup.LeftMargin + pageSetup.RightMargin).Point;
 
             XUnitPt yPos = pageSetup.HeaderDistance.Point;
@@ -321,9 +321,9 @@ namespace MigraDoc.Rendering
             else
                 xPos = pageSetup.LeftMargin.Point;
 
-            XUnitPt width = pageSetup.EffectivePageWidth.Point;
+            XUnitPt width = pageSetup.PageWidth.Point;
             width -= (pageSetup.LeftMargin + pageSetup.RightMargin).Point;
-            XUnitPt yPos = pageSetup.EffectivePageHeight.Point;
+            XUnitPt yPos = pageSetup.PageHeight.Point;
 
             yPos -= pageSetup.BottomMargin.Point;
             XUnitPt height = (pageSetup.BottomMargin - pageSetup.FooterDistance).Point;
@@ -502,9 +502,8 @@ namespace MigraDoc.Rendering
                     // Attempt to make it compatible with MigraDoc CPP.
                     // Ignore layoutInfo.Left if absolute position is specified in layoutInfo.MarginLeft.
                     // Use layoutInfo.Left if layoutInfo.MarginLeft is 0.
-                    // TODO We would need HasValue for XUnitPt to determine whether a value was assigned.
-                    if (layoutInfo.HorizontalReference == HorizontalReference.Page ||
-                      layoutInfo.HorizontalReference == HorizontalReference.PageMargin)
+                    // TODO_OLD We would need HasValue for XUnitPt to determine whether a value was assigned.
+                    if (layoutInfo.HorizontalReference is HorizontalReference.Page or HorizontalReference.PageMargin)
                         xPos = layoutInfo.MarginLeft != 0 ? layoutInfo.MarginLeft : layoutInfo.Left;
                     else
                         xPos = Math.Max(layoutInfo.MarginLeft, layoutInfo.Left);
@@ -519,14 +518,14 @@ namespace MigraDoc.Rendering
                     break;
 
                 case ElementAlignment.Far:
-                    xPos = _currentSection.PageSetup.EffectivePageWidth.Point;
+                    xPos = _currentSection.PageSetup.PageWidth.Point;
                     xPos -= layoutInfo.ContentArea.Width;
                     xPos -= layoutInfo.MarginRight;
                     layoutInfo.ContentArea.X = xPos;
                     break;
 
                 case ElementAlignment.Center:
-                    xPos = _currentSection.PageSetup.EffectivePageWidth.Point;
+                    xPos = _currentSection.PageSetup.PageWidth.Point;
                     xPos -= layoutInfo.ContentArea.Width;
                     xPos /= 2;
                     layoutInfo.ContentArea.X = xPos;
@@ -605,14 +604,14 @@ namespace MigraDoc.Rendering
                     break;
 
                 case ElementAlignment.Far:
-                    yPos = _currentSection.PageSetup.EffectivePageHeight.Point;
+                    yPos = _currentSection.PageSetup.PageHeight.Point;
                     yPos -= layoutInfo.ContentArea.Height;
                     yPos -= layoutInfo.MarginBottom;
                     layoutInfo.ContentArea.Y = yPos;
                     break;
 
                 case ElementAlignment.Center:
-                    yPos = _currentSection.PageSetup.EffectivePageHeight.Point;
+                    yPos = _currentSection.PageSetup.PageHeight.Point;
                     yPos -= layoutInfo.ContentArea.Height;
                     yPos /= 2;
                     layoutInfo.ContentArea.Y = yPos;
@@ -652,13 +651,13 @@ namespace MigraDoc.Rendering
         Section _currentSection = null!;  // Set in foreach loop.
         bool _isNewSection;
         FieldInfos _currentFieldInfos = null!;  // Set in InitFieldInfos.
-        readonly Dictionary<string, FieldInfos.BookmarkInfo> _bookmarks = new();
-        readonly Dictionary<int, FieldInfos> _pageFieldInfos = new();
-        readonly Dictionary<HeaderFooterPosition, FormattedHeaderFooter> _formattedHeaders = new();
-        readonly Dictionary<HeaderFooterPosition, FormattedHeaderFooter> _formattedFooters = new();
+        readonly Dictionary<string, FieldInfos.BookmarkInfo> _bookmarks = [];
+        readonly Dictionary<int, FieldInfos> _pageFieldInfos = [];
+        readonly Dictionary<HeaderFooterPosition, FormattedHeaderFooter> _formattedHeaders = [];
+        readonly Dictionary<HeaderFooterPosition, FormattedHeaderFooter> _formattedFooters = [];
         readonly DocumentRenderer _documentRenderer;
-        readonly Dictionary<int, PageInfo> _pageInfos = new();
-        readonly Dictionary<int, object?> _emptyPages = new();
+        readonly Dictionary<int, PageInfo> _pageInfos = [];
+        readonly Dictionary<int, object?> _emptyPages = [];
         readonly Document _document;
         XGraphics _gfx = null!;  // Set in Format
     }

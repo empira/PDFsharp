@@ -40,7 +40,7 @@ namespace PdfSharp.Internal
             return Math.Abs(value1 - value2) < decs[decimalPlace];
         }
 
-        static readonly double[] decs = { 1, 1E-1, 1E-2, 1E-3, 1E-4, 1E-5, 1E-6, 1E-7, 1E-8, 1E-9, 1E-10, 1E-11, 1E-12, 1E-13, 1E-14, 1E-15, 1E-16 };
+        static readonly double[] decs = [1, 1E-1, 1E-2, 1E-3, 1E-4, 1E-5, 1E-6, 1E-7, 1E-8, 1E-9, 1E-10, 1E-11, 1E-12, 1E-13, 1E-14, 1E-15, 1E-16];
 
         /// <summary>
         /// Indicates whether the values are so close that they can be considered as equal.

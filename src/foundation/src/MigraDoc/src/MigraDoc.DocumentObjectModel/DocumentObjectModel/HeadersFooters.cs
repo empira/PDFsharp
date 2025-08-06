@@ -85,15 +85,6 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Determines whether a particular header or footer exists.
         /// </summary>
-        [Obsolete("Uses IsNull and should be avoided.")] // BUG???
-        public bool HasHeaderFooter(HeaderFooterIndex index)
-        {
-            return !IsNull(index.ToString());
-        }
-
-        /// <summary>
-        /// Determines whether a particular header or footer exists.
-        /// </summary>
         public bool HasHeaderFooter(HeaderFooter? item)
             => item is not null && !item.IsNull();
 
@@ -105,7 +96,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.EvenPage ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.EvenPage = value;
             }
         }
@@ -118,7 +109,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.FirstPage ??= new(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.FirstPage = value;
             }
         }
@@ -131,7 +122,7 @@ namespace MigraDoc.DocumentObjectModel
             get => Values.Primary ??= new HeaderFooter(this);
             set
             {
-                SetParent(value);
+                SetParentOf(value);
                 Values.Primary = value;
             }
         }
@@ -177,7 +168,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

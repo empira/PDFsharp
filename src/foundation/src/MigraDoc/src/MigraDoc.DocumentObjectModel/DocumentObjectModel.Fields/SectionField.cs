@@ -40,13 +40,13 @@ namespace MigraDoc.DocumentObjectModel.Fields
             if (!String.IsNullOrEmpty(Values.Format))
                 str += "[Format = \"" + Format + "\"]";
             else
-                str += "[]"; //Has to be appended to avoid confusion with '[' in directly following text.
+                str += "[]"; // Has to be appended to avoid confusion with '[' in directly following text.
 
             serializer.Write(str);
         }
 
         /// <summary>
-        /// Returns the meta object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

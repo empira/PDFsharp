@@ -10,12 +10,27 @@ using PdfSharp.TestHelper;
 using MigraDoc.Rendering;
 using Xunit;
 using FluentAssertions;
+#if CORE
+#endif
 
 namespace MigraDoc.DocumentObjectModel.Tests
 {
     [Collection("PDFsharp")]
-    public class TableTests
+    public class TableTests : IDisposable
     {
+        public TableTests()
+        {
+            PdfSharpCore.ResetAll();
+#if CORE
+            GlobalFontSettings.FontResolver = new UnitTestFontResolver();
+#endif
+        }
+
+        public void Dispose()
+        {
+            PdfSharpCore.ResetAll();
+        }
+
         [Fact]
         public void Create_Hello_World_TableTests()
         {

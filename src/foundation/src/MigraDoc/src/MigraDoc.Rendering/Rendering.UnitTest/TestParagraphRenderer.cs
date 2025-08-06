@@ -18,7 +18,7 @@ namespace MigraDoc.Rendering.UnitTest
             var document = new Document();
             var section = document.AddSection();
             var par = section.AddParagraph("Dies");
-            for (int idx = 0; idx <= 40; ++idx)
+            for (int idx = 0; idx <= 40; idx++)
             {
                 par.AddCharacter(SymbolName.Blank);
                 par.AddText(idx.ToString());
@@ -48,7 +48,7 @@ namespace MigraDoc.Rendering.UnitTest
 
         internal static void FillFormattedParagraph(Paragraph par)
         {
-            for (int idx = 0; idx <= 140; ++idx)
+            for (int idx = 0; idx <= 140; idx++)
             {
                 if (idx < 60)
                 {

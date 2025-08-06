@@ -1,4 +1,5 @@
 // PDFsharp - A .NET library for processing PDF
+// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc
@@ -9,7 +10,7 @@ namespace MigraDoc
     /// </summary>
     public static class Capabilities
     {
-        // Duplicated from PDFsharp. TODO Unify.
+        // Duplicated from PDFsharp.
         /// <summary>
         /// Defines the action to be taken if a requested feature is not available
         /// in the current build.
@@ -81,7 +82,7 @@ namespace MigraDoc
             /// </summary>
             public static bool DoNotCreateLastSection { get; set; } = false;
 
-            // TODO Space before on new page
+            // TODO_OLD Space before on new page
 
             /// <summary>
             /// In RTF a single decimal tabstop in a table is a special case.
@@ -116,11 +117,11 @@ namespace MigraDoc
         {
             /// <summary>
             /// Gets or sets a flag that specifies if the renderer should silently ignore charts if they are not supported.
-            /// Otherwise an exception will be thrown.
+            /// Otherwise, an exception will be thrown.
             /// </summary>
             public static FeatureNotAvailableAction ChartsCannotBeRendered { get; set; } = FeatureNotAvailableAction.DoNothing;
 
-            // TODO Barcodes etc.
+            // Barcodes etc.
         }
     }
 }

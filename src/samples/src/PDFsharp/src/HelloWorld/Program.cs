@@ -4,12 +4,17 @@
 using Microsoft.Extensions.Logging;
 using PdfSharp;
 using PdfSharp.Drawing;
+using PdfSharp.Fonts;
 using PdfSharp.Logging;
 using PdfSharp.Pdf;
 using PdfSharp.Quality;
 
 namespace HelloWorld
 {
+    /// <summary>
+    /// This sample is just a copy and used as a smoke test for PDFsharp development.
+    /// For the original sample check the PDFsharp.Samples repository.
+    /// </summary>
     class Program
     {
         static void Main(string[] _)
@@ -24,6 +29,8 @@ namespace HelloWorld
                     .AddConsole();
             });
             LogHost.Factory = loggerFactory;
+
+            GlobalFontSettings.UseWindowsFontsUnderWindows = true;
 
             // Create a new PDF document.
             var document = new PdfDocument();
@@ -53,7 +60,7 @@ namespace HelloWorld
             // Draw the text.
             gfx.DrawString("Hello, PDFsharp!", font, XBrushes.Black,
                 new XRect(0, 0, width, height), XStringFormats.Center);
-    
+
             // Save the document...
             var fullName = PdfFileUtility.GetTempPdfFullFileName("PdfSharpSamples/HelloWorld/HelloWorld" + Capabilities.Build.BuildTag);
             document.Save(fullName);

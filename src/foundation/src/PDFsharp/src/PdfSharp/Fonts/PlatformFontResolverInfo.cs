@@ -71,7 +71,7 @@ namespace PdfSharp.Fonts
         /// </summary>
         public WpfGlyphTypeface WpfGlyphTypeface { get; }
 #endif
-#if UWP
+#if WUI
         public PlatformFontResolverInfo(string faceName, bool mustSimulateBold, bool mustSimulateItalic)
             : base(faceName, mustSimulateBold, mustSimulateItalic)
         {

@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System.Diagnostics.CodeAnalysis;
@@ -92,7 +92,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         }
 
         /// <summary>
-        /// Resizes these cells� list if necessary.
+        /// Resizes these cells¹ list if necessary.
         /// </summary>
         void Resize(int index)
         {
@@ -111,7 +111,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         }
 
         /// <summary>
-        /// Returns the meta-object of this instance.
+        /// Returns the metaobject of this instance.
         /// </summary>
         internal override Meta Meta => TheMeta;
 

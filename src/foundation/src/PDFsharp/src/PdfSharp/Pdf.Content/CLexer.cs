@@ -3,23 +3,23 @@
 
 using System.Text;
 using Microsoft.Extensions.Logging;
-using PdfSharp.Internal;
 using PdfSharp.Logging;
 
 namespace PdfSharp.Pdf.Content
 {
     /// <summary>
-    /// Lexical analyzer for PDF content files. Adobe specifies no grammar, but it seems that it
+    /// Lexical analyzer for PDF content streams. Adobe specifies no grammar, but it seems that it
     /// is a simple post-fix notation.
     /// </summary>
     public class CLexer
     {
         /// <summary>
-        /// Initializes a new instance of the Lexer class.
+        /// Initializes a new instance of the CLexer class.
         /// </summary>
         public CLexer(byte[] content)
         {
             _content = content;
+            ContLength = _content.Length;
             _charIndex = 0;
         }
 
@@ -28,7 +28,18 @@ namespace PdfSharp.Pdf.Content
         /// </summary>
         public CLexer(MemoryStream content)
         {
-            _content = content.ToArray();
+            if (content.TryGetBuffer(out var buffer))
+            {
+                _content = buffer.Array ?? throw new InvalidOperationException("Array must not be null.");
+                // Memory streams are 32-bit byte arrays.
+                ContLength = (int)content.Length;
+            }
+            else
+            {
+                _content = content.ToArray();
+                ContLength = _content.Length;
+            }
+
             _charIndex = 0;
         }
 
@@ -49,11 +60,11 @@ namespace PdfSharp.Pdf.Content
                     goto Again;
 
                 case '/':
-                    return Symbol = ScanName();
+                    return ScanName();
 
                 case '+':
                 case '-':
-                    return Symbol = ScanNumber();
+                    return ScanNumber();
 
                 case '[':
                     ScanNextChar();
@@ -64,25 +75,25 @@ namespace PdfSharp.Pdf.Content
                     return Symbol = CSymbol.EndArray;
 
                 case '(':
-                    return Symbol = ScanLiteralString();
+                    return ScanLiteralString();
 
                 case '<':
                     if (_nextChar == '<')
-                        return Symbol = ScanDictionary();
-                    return Symbol = ScanHexadecimalString();
+                        return ScanDictionary();
+                    return ScanHexadecimalString();
 
                 case '.':
-                    return Symbol = ScanNumber();
+                    return ScanNumber();
 
                 case '"':
                 case '\'':
-                    return Symbol = ScanOperator();
+                    return ScanOperator();
             }
             if (Char.IsDigit(ch))
-                return Symbol = ScanNumber();
+                return ScanNumber();
 
             if (Char.IsLetter(ch))
-                return Symbol = ScanOperator();
+                return ScanOperator();
 
             if (ch == Chars.EOF)
                 return Symbol = CSymbol.Eof;
@@ -110,7 +121,7 @@ namespace PdfSharp.Pdf.Content
         /// </summary>
         public CSymbol ScanInlineImage()
         {
-            // TODO: Implement inline images.
+            // TODO_OLD: Implement inline images.
             // Skip this:
             // BI
             // … Key-value pairs …
@@ -122,7 +133,7 @@ namespace PdfSharp.Pdf.Content
             do
             {
                 ScanNextToken();
-                // HACK: Is image ASCII85 decoded?
+                // HACK_OLD: Is image ASCII85 decoded?
                 if (!ascii85 && Symbol == CSymbol.Name && Token is "/ASCII85Decode" or "/A85")
                     ascii85 = true;
             } while (Symbol != CSymbol.Operator || Token != "ID");
@@ -173,7 +184,7 @@ namespace PdfSharp.Pdf.Content
                 if (ch == '#')
                 {
                     ScanNextChar();
-#if true
+
                     var newChar = (_currChar switch
                     {
                         >= '0' and <= '9' => _currChar - '0',
@@ -195,21 +206,12 @@ namespace PdfSharp.Pdf.Content
                         PdfSharpLogHost.Logger.LogError("Illegal character {char} in hex string.", ch);
                         return '\0';
                     }
-#else
-                    char[] hex = new char[2];
-                    hex[0] = _currChar;
-                    hex[1] = _nextChar;
-                    ScanNextChar();
-                    // TODO Check syntax
-                    ch = (char)(ushort)Int32.Parse(new string(hex), NumberStyles.AllowHexSpecifier);
-                    _currChar = ch;
-#endif
                 }
             }
 
             var name = Token;
             // Check token for UTF-8 encoding.
-            for (int idx = 0; idx < name.Length; ++idx)
+            for (int idx = 0; idx < name.Length; idx++)
             {
                 // If the two top most significant bits are set this identifies a 2, 3, or 4
                 // byte UTF-8 encoding sequence.
@@ -218,7 +220,7 @@ namespace PdfSharp.Pdf.Content
                     // Special characters in Name objects use UTF-8 encoding.
                     var length = name.Length;
                     var bytes = new byte[length];
-                    for (int idx2 = 0; idx2 < length; ++idx2)
+                    for (int idx2 = 0; idx2 < length; idx2++)
                         bytes[idx2] = (byte)name[idx2];
 
                     var decodedName = Encoding.UTF8.GetString(bytes);
@@ -235,7 +237,7 @@ namespace PdfSharp.Pdf.Content
         /// </summary>
         protected CSymbol ScanDictionary()
         {
-            // TODO Do an actual recursive parse instead of this simple scan.
+            // TODO_OLD Do an actual recursive parse instead of this simple scan.
 
             ClearToken();
             _token.Append(_currChar);      // '<'
@@ -288,11 +290,7 @@ namespace PdfSharp.Pdf.Content
                         else
                         {
                             ScanNextChar();
-#if true
-                            return CSymbol.Dictionary;
-#else
-                            return CSymbol.String;
-#endif
+                            return Symbol = CSymbol.Dictionary;
                         }
                     }
                 }
@@ -307,86 +305,173 @@ namespace PdfSharp.Pdf.Content
         public CSymbol ScanNumber()
         {
             // Note: This is a copy of Lexer.ScanNumber with minimal changes. Keep both versions in sync as far as possible.
-            const int maxDigitsForLong = 18;
-            const int maxDecimalDigits = 10;
-            long value = 0;
-            int totalDigits = 0;
-            int decimalDigits = 0;
-            bool period = false;
-            bool negative = false;
+
+            // Parsing Strategy:
+            // Most real life numbers in PDF files have less than 19 digits. So we try to parse all digits as 64-bit integers
+            // in the first place. All leading zeros are skipped and not counted.
+            // If we found a decimal point we later divide the result by the appropriate power of 10 and covert is to Double.
+            // For edge cases, which are numbers with 19 digits, the token is parsed again with 'Int64.TryParse()' and
+            // if this fails with 'Double.TryParse'.
+            // If 'testForObjectReference' is 'true' and the value has up to 7 digits, no decimal point and no sign,
+            // we look ahead whether it is an object reference having the form '{object-number} {generation-number} R'.
+
+            const int maxDigitsForLong = 18;             // Up to 18 digits values can safely fit into 64-bit integer.
+            const int maxDecimalDigits = 10;             // Maximum number of decimal digits we process.
+            var value = 0L;                              // The 64-bit value we have parsed.
+            var canBeLeadingZero = true;                 // True if a '0' is a leading zero and gets skipped.
+            var leadingZeros = 0;                        // The number of scanned leading zeros. Used for optional warning.
+            var totalDigits = 0;                         // The total number of digits scanned. E.g. is 7 for '123.4567'.
+            var decimalDigits = 0;                       // The total number of decimal digits scanned. E.g. is 4 for '123.4567'.
+            //var allDecimalDigitsAreZero = true;        // Not used anymore, because '123.000' is always treated as double, never as integer.
+            var period = false;                          // The decimal point '.' was scanned.
+            var negative = false;                        // The value is negative and the scanned value is negated.
+
+            var ch = _currChar;
+            Debug.Assert(ch is '+' or '-' or '.' or (>= '0' and <= '9'));
 
             ClearToken();
-            char ch = _currChar;
             if (ch is '+' or '-')
             {
                 if (ch == '-')
                     negative = true;
                 _token.Append(ch);
                 ch = ScanNextChar();
+
+                // Never saw this in any PDF file.
+                if (ch is not ('.' or >= '0' and <= '9'))
+                {
+                    PdfSharpLogHost.Logger.LogError("+/- not followed by a number or decimal point.");
+                }
             }
+
+            // Scan the number.
             while (true)
             {
-                if (Char.IsDigit(ch))
+                if (ch is >= '0' and <= '9')
                 {
                     _token.Append(ch);
-                    ++totalDigits;
+
+                    if (canBeLeadingZero)
+                    {
+                        if (ch == '0')
+                        {
+                            leadingZeros++;
+                        }
+                        else
+                        {
+                            canBeLeadingZero = false;
+                            ++totalDigits;
+                        }
+                    }
+                    else
+                    {
+                        ++totalDigits;
+                    }
+
                     if (decimalDigits < maxDecimalDigits)
                     {
                         // Calculate the value if it still fits into long.
+                        // Lexer only: The value gets later parsed again by .NET if the total number of digits exceeds 18 digits.
                         if (totalDigits <= maxDigitsForLong)
                             value = 10 * value + ch - '0';
                     }
+
                     if (period)
+                    {
                         ++decimalDigits;
+                        // A number with a decimal point is always considered as Symbol.Real,
+                        // even if it fits in Symbol.Integer or Symbol.LongInteger.
+                        // KEEP for documental purposes.
+                        //// E.g. '123.0000' is real, but fits in an integer.
+                        //if (ch is not '0')
+                        //    allDecimalDigitsAreZero = false;
+                    }
                 }
                 else if (ch == '.')
                 {
+                    _token.Append(ch);
+
+                    // More than one period?
                     if (period)
-                        ContentReaderDiagnostics.ThrowContentReaderException("More than one period in number.");
+                        ContentReaderDiagnostics.ThrowContentReaderException("More than one decimal point in number.");
 
                     period = true;
-                    _token.Append(ch);
+                    canBeLeadingZero = false;
                 }
                 else
                     break;
                 ch = ScanNextChar();
             }
 
-            if (totalDigits > maxDigitsForLong ||
-                decimalDigits > maxDecimalDigits)
+            if (leadingZeros > 1)
+#pragma warning disable CA2254 // This is a rare case. Therefor we use string interpolation.
+                PdfSharpLogHost.PdfReadingLogger.LogWarning($"Token '{_token}' has more than one leading zero.");
+#pragma warning restore CA2254
+
+            // CLexer does not support LongInteger.
+            if (totalDigits > maxDigitsForLong || decimalDigits > maxDecimalDigits)
             {
-                // The number is too big for long or has too many decimal digits for our own code, so we provide it as real only.
-                // Number will be parsed here.
+                //// Case: It is not guarantied that the number fits in a 64-bit integer.
+                //// It is not integer if there is a period.
+                //if (period is false && totalDigits == maxDigitsForLong + 1)
+                //{
+                //    // Case: We have exactly 19 digits and no decimal point, which might fit in a 64-bit integer,
+                //    // depending on the value.
+                //    // If the 19-digit numbers is
+                //    // in the range [1,000,000,000,000,000,000 .. 9,223,372,036,854,775,807]
+                //    // or 
+                //    // in the range [-9,223,372,036,854,775,808 .. -1,000,000,000,000,000,000]
+                //    // it is a 64-bit integer. Otherwise, it is not.
+                //    // Because this is a super rare case we make life easy and parse the scanned token again by .NET.
+                //    if (Int64.TryParse(_token.ToString(), out var result))
+                //    {
+                //        _tokenAsLong = result;
+                //        _tokenAsReal = result;
+                //        return Symbol = Symbol.LongInteger;
+                //    }
+                //}
+
+                // Case: The number is too big for long or has too many decimal digits for our own code,
+                // so we provide it as real only.
+                // Number will be parsed by .NET.
                 _tokenAsReal = Double.Parse(_token.ToString(), CultureInfo.InvariantCulture);
-                return CSymbol.Real;
+
+                return Symbol = CSymbol.Real;
             }
 
+            // Case: The number is in range [0 .. 999,999,999,999,999,999] and fits into a 64-bit integer.
             if (negative)
-                value = -value;
+                value = -value;  // Flipping 64-bit integer sign is safe here.
 
             if (period)
             {
+                // Case: A number with a period is always considered to be real value.
                 if (decimalDigits > 0)
                 {
                     _tokenAsReal = value / PowersOf10[decimalDigits];
-                    //_tokenAsLong = value / PowersOf10[decimalDigits];
+                    // KEEP for documental purposes.
+                    //// It is not integer if there is a period.
+                    //if (allDecimalDigitsAreZero)
+                    //    _tokenAsLong = (long)_tokenAsReal;
                 }
                 else
                 {
                     _tokenAsReal = value;
-                    _tokenAsLong = value;
+                    // KEEP for documental purposes.
+                    //// It is not integer if there is a period.
+                    // _tokenAsLong = value;
                 }
-                return CSymbol.Real;
+                return Symbol = CSymbol.Real;
             }
             _tokenAsLong = value;
             _tokenAsReal = Convert.ToDouble(value);
 
             Debug.Assert(Int64.Parse(_token.ToString(), CultureInfo.InvariantCulture) == value);
 
-            if (value is >= Int32.MinValue and < Int32.MaxValue)
-                return CSymbol.Integer;
+            if (value is >= Int32.MinValue and <= Int32.MaxValue)
+                return Symbol = CSymbol.Integer;
 
-            return CSymbol.Real;
+            return Symbol = CSymbol.Real; // CLexer returns "Real" because there is no "LongInteger".
         }
 
         static readonly double[] PowersOf10 = [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000, 100_000_000, 1_000_000_000, 10_000_000_000];
@@ -405,7 +490,6 @@ namespace PdfSharp.Pdf.Content
             return Symbol = CSymbol.Operator;
         }
 
-        // TODO        
         /// <summary>
         /// Scans a literal string.
         /// </summary>
@@ -452,7 +536,7 @@ namespace PdfSharp.Pdf.Content
 
                         case '\\':
                             {
-                                // TODO: not sure that this is correct...
+                                // TODO_OLD: not sure that this is correct...
                                 ch = ScanNextChar();
                                 switch (ch)
                                 {
@@ -532,7 +616,7 @@ namespace PdfSharp.Pdf.Content
             else if (ch == '\xFF' && _nextChar == '\xFE')  // Little endian?
             {
                 // Is this possible?
-                Debug.Assert(false, "Found UTF-16 LE string. Please send us the PDF file and we will fix it (issues (at) pdfsharp.net).");
+                Debug.Assert(false, "Found UTF-16LE string. Please send us the PDF file and we will fix it (issues (at) pdfsharp.net).");
                 return Symbol = CSymbol.None;
             }
             else
@@ -598,6 +682,7 @@ namespace PdfSharp.Pdf.Content
                                         goto SkipChar;
 
                                     default:
+                                        // Sync with ScanStringLiteral.
                                         if (Char.IsDigit(ch))
                                         {
                                             // Octal character code.
@@ -699,7 +784,7 @@ namespace PdfSharp.Pdf.Content
         /// </summary>
         char ScanNextChar()
         {
-            if (ContLength <= _charIndex)
+            if (_charIndex >= ContLength)
             {
                 _currChar = _nextChar; // The last character we are now dealing with.
                 _nextChar = Chars.EOF; // Next character is EOF.
@@ -712,7 +797,7 @@ namespace PdfSharp.Pdf.Content
                 {
                     if (_nextChar == Chars.LF)
                     {
-                        // Treat CR LF as LF
+                        // Treat CR LF as LF.
                         _currChar = _nextChar;
                         if (ContLength <= _charIndex)
                             _nextChar = Chars.EOF;
@@ -743,7 +828,8 @@ namespace PdfSharp.Pdf.Content
         /// Appends current character to the token and
         /// reads next byte as a character.
         /// </summary>
-        internal char AppendAndScanNextChar()
+        /*internal*/
+        char AppendAndScanNextChar()
         {
             _token.Append(_currChar);
             return ScanNextChar();
@@ -866,7 +952,7 @@ namespace PdfSharp.Pdf.Content
         /// <summary>
         /// Gets the length of the content.
         /// </summary>
-        public int ContLength => _content.Length;
+        public int ContLength { get; }
 
         /// <summary>
         /// Gets or sets the position in the content.
@@ -876,9 +962,10 @@ namespace PdfSharp.Pdf.Content
             get => _charIndex;
             set
             {
+                Debug.Assert(value >= 0);
                 _charIndex = value;
-                _currChar = (char)_content[_charIndex - 1];
-                _nextChar = (char)_content[_charIndex - 1];
+                _currChar = _charIndex < ContLength ? (char)_content[_charIndex] : Chars.EOF;
+                _nextChar = _charIndex + 1 < ContLength ? (char)_content[_charIndex + 1] : Chars.EOF;
             }
         }
 

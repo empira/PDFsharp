@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <!-- Found no other way to resolve the following warning than disable it -->
     <NoWarn>NU1507</NoWarn>
+    <WriteVersionInfoToBuildLog>false</WriteVersionInfoToBuildLog>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -26,7 +27,7 @@
 
     <Product>PDFsharp</Product>
     <Company>empira Software</Company>
-    <Copyright>© 2024 empira</Copyright>
+    <Copyright>© 2025 empira</Copyright>
     <Authors>PDFsharp Team</Authors>
     <Owners>empira Software GmbH</Owners>
   </PropertyGroup>

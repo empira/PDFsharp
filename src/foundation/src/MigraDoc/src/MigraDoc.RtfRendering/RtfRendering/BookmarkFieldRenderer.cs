@@ -42,14 +42,14 @@ namespace MigraDoc.RtfRendering
         internal static string MakeValidBookmarkName(string originalName)
         {
             //Bookmarks (at least in Word) have the following limitations:
-            //1. First character must be a letter (umlauts und ß are allowed)
-            //2. All further characters must be letters, numbers or underscores. 
+            //1. First character must be a letter (umlauts and ß are allowed).
+            //2. All further characters must be letters, numbers or underscores.
             //   For example, '-' is NOT allowed).
             StringBuilder strBuilder = new StringBuilder(originalName.Length);
             if (!Char.IsLetter(originalName[0]))
                 strBuilder.Append("BM__");
 
-            for (int idx = 0; idx < originalName.Length; ++idx)
+            for (int idx = 0; idx < originalName.Length; idx++)
             {
                 char ch = originalName[idx];
                 strBuilder.Append(Char.IsLetterOrDigit(ch) ? ch : '_');

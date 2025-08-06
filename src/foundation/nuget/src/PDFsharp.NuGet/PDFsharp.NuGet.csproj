@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0;netstandard2.0</TargetFrameworks>
     <NoBuild>true</NoBuild>
+    <!--<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>-->
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
@@ -20,8 +21,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\PDFsharp\src\PdfSharp.Charting\PdfSharp.Charting.csproj" />
     <ProjectReference Include="..\..\..\src\PDFsharp\src\PdfSharp\PdfSharp.csproj" />
+    <ProjectReference Include="..\..\..\src\PDFsharp\src\PdfSharp.BarCodes\PdfSharp.BarCodes.csproj" />
+    <ProjectReference Include="..\..\..\src\PDFsharp\src\PdfSharp.Charting\PdfSharp.Charting.csproj" />
+    <ProjectReference Include="..\..\..\src\PDFsharp\src\PdfSharp.Cryptography\PdfSharp.Cryptography.csproj" />
     <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.Quality\PdfSharp.Quality.csproj" />
     <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.Snippets\PdfSharp.Snippets.csproj" />
     <ProjectReference Include="..\..\..\src\shared\src\PdfSharp.System\PdfSharp.System.csproj" />

@@ -1,14 +1,8 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
-using System.Resources;
-using System.Text;
 using PdfSharp.Drawing;
-using PdfSharp.Fonts;
 using PdfSharp.Quality;
 #if GDI
 using System.Drawing;
@@ -38,25 +32,14 @@ namespace PdfSharp.Snippets.Font
 
             var fontAnsi = new XFont("Arial", 10, XFontStyleEx.Regular, XPdfFontOptions.WinAnsiDefault);
 
-            int x, y;
             const int top = 90;
             const int left = 50;
             const int dx = 140;
             const int dy = 15;
 
-            //var encoder = Encoding.GetEncoding(1252);
-            //var encoder = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
-            _ = typeof(int);
-
-            //PdfSharp.Pdf.Internal.AnsiEncoding.ProofImplementation();
-
-#if NET6_0_OR_GREATER_
-            var encoder = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
-#else
             var encoder = new PdfSharp.Pdf.Internal.AnsiEncoding();
-#endif
 
-            byte[] ansi = new byte[1];
+            var ansi = new byte[1];
 
             for (int idx = 0; idx <= 255; idx++)
             {
@@ -68,8 +51,8 @@ namespace PdfSharp.Snippets.Font
                 //GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
                 var sss = encoder.GetString(ansi);
 
-                x = left + (idx >> 6) * dx + (idx >= 192 ? 50 : 0);
-                y = top + (idx % 64) * dy;
+                var x = left + (idx >> 6) * dx + (idx >= 192 ? 50 : 0);
+                var y = top + (idx % 64) * dy;
                 var item = Table[idx];
                 gfx.DrawString($"{idx,-3:0}  {idx:X2}   {item.Char} {sss}", fontAnsi, XBrushes.DarkBlue, x, y);
                 //gfx.DrawString($"{item.Description}", font2, XBrushes.DarkBlue, x + 60, y);

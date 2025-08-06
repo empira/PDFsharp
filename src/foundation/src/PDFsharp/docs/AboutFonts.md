@@ -1,4 +1,4 @@
-# Fonts
+ï»¿# Fonts
 
 **This document is under construction**
 
@@ -65,7 +65,7 @@ The **XFont** exists independently of a PDF docuemnt.
 You can think of an XFont as a moniker to a specific font face plus a specific font size.
 It is a fascade to XGlyphTypeface.
 Holds a reference to **OpenTypeDescriptor** to get all information about a the font face.
-This is possible because once loaded font faces persists in memory.
+This is possible because once loaded font faces persist in memory.
 Holds a reference to **XGlyphTypeface**. That keeps the reference to the font face.
 In contrast to an **XGlyphTypeface** a font holds the following additional information.
 * The font em-size used for rendering the font.
@@ -112,7 +112,7 @@ The class **XGlyphTypeface** specifies a physical font face that corresponds to 
 While a **XFont** or a **XTypeface** specifiy what you want to get from the font resolver, a **XGlypeTypeface** identifies
 what you actually get. For instance, when you specify you want to get an italic typeface of a particular font family, you may
 actually get a font face of a non-italic physical font, but the **XGlyphTypeface** specifies that the italic style is simulated
-by skewing characters from the font face by 20°.
+by skewing characters from the font face by 20ï¿½.
 The concept was taken from WPF.
 
 
@@ -123,7 +123,7 @@ PDFsharp only supports TrueType font files. TrueType font collections and OpenTy
 
 ### XStyleSimulations
 The class **XStyleSimulation** describes the simulation style of a font.
-Bold, Italic, or both can be simulated for a font that doesn’t have these faces physically.
+Bold, Italic, or both can be simulated for a font that doesnï¿½t have these faces physically.
 The concept was taken from WPF.
 PDFsharp only simules the italic face by sloping the font 20 degrees to the right.
 
@@ -152,7 +152,7 @@ Holds a reference ...
 
 The class **PdfCIDFont** represents character encoded PDF fonts.
 It is used together with **PdfType0Font** to represent text in a content by a sequence of the 
-glyph ids of the Unicode code points of the original UTF-32 encoded text.
+glyph IDs of the Unicode code points of the original UTF-32 encoded text.
 
 ### PdfTrueTypeFont : PdfFont
 
@@ -165,7 +165,7 @@ but the character set is limited to (roughly) ANSI characters (codepage 1252).
 
 The class **PdfType0Font** represents a PDF font dictionary derived from **PdfCIDFont**.
 Together with **PdfCIDFont** t is used to represent text in a content stream by a sequende of 
-glyph ids of the Unicode code points of the original text. This class hold the reference to the
+glyph IDs of the Unicode code points of the original text. This class hold the reference to the
 ToUnicode map.
 
 ### sealed PdfFontDescriptor : PdfDictionary

@@ -3,11 +3,10 @@
 
 using System.Diagnostics;
 using System.Reflection;
-using MigraDoc.DocumentObjectModel;
-using MigraDoc.Rendering.Internals;
-using MigraDoc.Rendering.Resources;
 using PdfSharp.Pdf;
 using PdfSharp.Drawing;
+using MigraDoc.DocumentObjectModel;
+using MigraDoc.Rendering.Internals;
 
 namespace MigraDoc.Rendering
 {
@@ -26,19 +25,19 @@ namespace MigraDoc.Rendering
         /// Initializes a new instance of the <see cref="PdfDocumentRenderer"/> class.
         /// </summary>
         /// <param name="unicode">If true Unicode encoding is used for all text. If false, WinAnsi encoding is used.</param>
-        [Obsolete("Code is always unicode.")]
+        [Obsolete("Code is always Unicode.")]
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         public PdfDocumentRenderer(bool unicode)
         {
             if (unicode is false)
-                throw new ArgumentException("Text is always rendered as unicode.");
+                throw new ArgumentException("Text is always rendered as Unicode.");
         }
 
         /// <summary>
         /// Gets a value indicating whether the text is rendered as Unicode.
         /// Returns true because text is rendered always in unicode.
         /// </summary>
-        [Obsolete("Code is always unicode.")]
+        [Obsolete("Code is always Unicode.")]
         public bool Unicode => true;
 
         /// <summary>
@@ -94,17 +93,23 @@ namespace MigraDoc.Rendering
         void PrepareDocumentRenderer(bool prepareCompletely)
         {
             if (_document == null)
-                throw new InvalidOperationException(Messages2.PropertyNotSetBefore("DocumentRenderer", MethodBase.GetCurrentMethod()!.Name));
+                throw new InvalidOperationException(MdPdfMsgs.PropertyNotSetBefore(nameof(Document), MethodBase.GetCurrentMethod()!.Name).Message);
 
             _documentRenderer ??= new(_document)
             {
-                WorkingDirectory = _workingDirectory! // BUG  ?? NRT.ThrowOnNull<string>()
+                WorkingDirectory = _workingDirectory! // BUG_OLD  ?? NRT.ThrowOnNull<string>()
             };
 
-            if (prepareCompletely && _documentRenderer.FormattedDocument == null!)
-                _documentRenderer.PrepareDocument(PdfDocument.RenderEvents);
-        }
+            if (prepareCompletely)
+            {
+                // Create all fixed predefined fonts initially for early failing if not available.
+                // Bullet fonts are not created for early failing as their style and therefore the fontface depends on the format of the lists in the document.
+                _documentRenderer.FontsAndChars.CreateAllFixedFonts();
 
+                if (_documentRenderer.FormattedDocument == null!)
+                    _documentRenderer.PrepareDocument(PdfDocument.RenderEvents);
+            }
+        }
         /// <summary>
         /// Renders the document into a PdfDocument containing all pages of the document.
         /// </summary>
@@ -242,7 +247,7 @@ namespace MigraDoc.Rendering
         PdfDocument? _pdfDocument;
 
         /// <summary>
-        /// Returns true, if the PdfDocument of this renderer is not yet set.
+        /// Returns true, if the PdfDocument of this renderer is set.
         /// </summary>
         public bool HasPdfDocument()
         {

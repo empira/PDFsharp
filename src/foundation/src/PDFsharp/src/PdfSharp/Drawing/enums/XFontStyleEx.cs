@@ -41,9 +41,5 @@ namespace PdfSharp.Drawing
         /// Text with a line through the middle.
         /// </summary>
         Strikeout = 8,
-
-        // Possible additional flags:
-        // BoldSimulation
-        // ItalicSimulation
     }
 }

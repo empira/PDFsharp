@@ -29,7 +29,7 @@ namespace PdfSharp.Pdf.Advanced
             var embeddedFileDictionary = new PdfDictionary(Owner);
 
             Owner.Internals.AddObject(_embeddedFileStream);
-            embeddedFileDictionary.Elements.SetReference(Keys.F, _embeddedFileStream.Reference);
+            embeddedFileDictionary.Elements.SetReference(Keys.F, _embeddedFileStream.Reference ?? throw TH.InvalidOperationException_ReferenceMustNotBeNull());
             embeddedFileDictionary.Elements.SetReference(Keys.UF, _embeddedFileStream.Reference);
 
             Elements.SetObject(Keys.EF, embeddedFileDictionary);

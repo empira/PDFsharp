@@ -22,16 +22,14 @@ namespace PdfSharp.Windows
         /// </summary>
         public VisualPresenter()
         {
-            _children = new VisualCollection(this);
+            _children = new(this);
         }
 
         /// <summary>
         /// Gets the number of visual child elements within this element.
         /// </summary>
         protected override int VisualChildrenCount
-        {
-            get { return _children.Count; }
-        }
+            => _children.Count;
 
         /// <summary>
         /// Overrides <see cref="M:System.Windows.Media.Visual.GetVisualChild(System.Int32)"/>, and returns a child at the specified index from a collection of child elements.
@@ -39,7 +37,7 @@ namespace PdfSharp.Windows
         protected override Visual GetVisualChild(int index)
         {
             if (index < 0 || index >= _children.Count)
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
 
             return _children[index];
         }
@@ -48,9 +46,7 @@ namespace PdfSharp.Windows
         /// Gets the children collection.
         /// </summary>
         public VisualCollection Children
-        {
-            get { return _children; }
-        }
+            => _children;
         readonly VisualCollection _children;
     }
 }

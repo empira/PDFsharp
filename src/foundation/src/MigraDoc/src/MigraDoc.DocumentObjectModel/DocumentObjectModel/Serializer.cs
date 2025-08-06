@@ -372,7 +372,7 @@ namespace MigraDoc.DocumentObjectModel
 
             if (value is Unit unit)
             {
-                string strUnit = unit.ToString(); // BUG Can anything actually return null here? If so, how to write null?
+                string strUnit = unit.ToString(); // BUG_OLD Can anything actually return null here? If so, how to write null?
                 if (unit.Type == UnitType.Point)
                     WriteLine(valueName + " = " + strUnit);
                 else

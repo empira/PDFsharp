@@ -576,7 +576,7 @@ namespace MigraDoc.Rendering
             if (_lastHeaderColumn >= 0)
                 _lastHeaderRow = CalcLastConnectedColumn(_lastHeaderColumn);
 
-            // Ignore heading format if all the table is heading:
+            // Ignore heading format if all the table is heading.
             if (_lastHeaderRow == _table.Rows.Count - 1)
                 _lastHeaderRow = -1;
         }
@@ -594,7 +594,7 @@ namespace MigraDoc.Rendering
             if (_lastHeaderRow >= 0)
                 _lastHeaderRow = CalcLastConnectedRowDirect(_lastHeaderRow);
 
-            // Ignore heading format if all the table is heading:
+            // Ignore heading format if all the table is heading.
             if (_lastHeaderRow == _table.Rows.Count - 1)
                 _lastHeaderRow = -1;
         }
@@ -782,7 +782,7 @@ namespace MigraDoc.Rendering
                 first = false;
 
             int cells = _mergedCells.Count;
-            for (int idx = skipIndex; idx < cells; ++idx)
+            for (int idx = skipIndex; idx < cells; idx++)
             {
                 var cell = _mergedCells[idx];
 
@@ -884,7 +884,7 @@ namespace MigraDoc.Rendering
             var resultRowIndex = row;
             var resultRow = _table.Rows[resultRowIndex];
             int clsCount = _table.Columns.Count;
-            for (int idx = 0; idx < clsCount; ++idx)
+            for (int idx = 0; idx < clsCount; idx++)
             {
                 var cell = resultRow[idx];
                 if (resultRowIndex + cell.MergeDown == row)

@@ -28,7 +28,7 @@ namespace MigraDoc.RtfRendering
         internal override void Render()
         {
             // Special handling in RTF, if DoNotUnifyTabStopHandling backward compatibility capability setting is not enabled:
-            // For single decimal tabstops inside of tables add an additional left aligned tabstop at position 0.
+            // For single decimal tabstops inside of tables add a left aligned tabstop at position 0.
             // Without this, in that special case no tab is required to reach this tabstop in RTF.
             // With this special handling, a consistent behavior is achieved through PDF and RTF generation and all tabstop usages.
             if (!Capabilities.BackwardCompatibility.DoNotUnifyTabStopHandling)

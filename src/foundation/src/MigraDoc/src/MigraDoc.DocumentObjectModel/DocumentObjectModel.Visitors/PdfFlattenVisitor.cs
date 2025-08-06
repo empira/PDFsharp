@@ -21,7 +21,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 #if true
             // New version without sorted list.
             int count = elements.Count;
-            for (int idx = 0; idx < count; ++idx)
+            for (int idx = 0; idx < count; idx++)
             {
                 if (elements[idx] is Paragraph paragraph)
                 {
@@ -41,7 +41,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 #else
             SortedList splitParaList = new SortedList();
 
-            for (int idx = 0; idx < elements.Count; ++idx)
+            for (int idx = 0; idx < elements.Count; idx++)
             {
                 Paragraph paragraph = elements[idx] as Paragraph;
                 if (paragraph != null)
@@ -53,7 +53,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             }
 
             int insertedObjects = 0;
-            for (int idx = 0; idx < splitParaList.Count; ++idx)
+            for (int idx = 0; idx < splitParaList.Count; idx++)
             {
                 int insertPosition = (int)splitParaList.GetKey(idx);
                 Paragraph[] paragraphs = (Paragraph[])splitParaList.GetByIndex(idx);
@@ -78,7 +78,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             List<int> textIndices = new List<int>();
             if (elements is ParagraphElements)
             {
-                for (int idx = 0; idx < elements.Count; ++idx)
+                for (int idx = 0; idx < elements.Count; idx++)
                 {
                     if (elements[idx] is Text)
                         textIndices.Add(idx);
@@ -97,7 +97,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 for (var chIdx = 0; chIdx < content.Length; chIdx++)
                 {
                     var ch = content[chIdx];
-                    // TODO Add support for other breaking spaces (en space, em space, &c.).
+                    // TODO_OLD Add support for other breaking spaces (en space, em space, &c.).
                     switch (ch)
                     {
                         case ' ':
@@ -190,10 +190,10 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             var document = formattedText.Document;
             ParagraphFormat? format = null;
 
-            var style = document.Styles[formattedText.Values.Style]; // BUG??? We get "null" for "null".
+            var style = document.Styles[formattedText.Values.Style]; // BUG_OLD??? We get "null" for "null".
             if (style != null)
                 format = style.Values.ParagraphFormat;
-            else if (!String.IsNullOrEmpty(formattedText.Values.Style) /*!= ""*/) // BUG??? Treat "null" like empty string.
+            else if (!String.IsNullOrEmpty(formattedText.Values.Style) /*!= ""*/) // BUG_OLD??? Treat "null" like empty string.
                 format = document.Styles[StyleNames.InvalidStyleName]?.Values.ParagraphFormat ?? throw new InvalidOperationException("Style does not exist.");
 
             if (format != null)
@@ -218,7 +218,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
             // May be used for text references, e.g. in tables, which shall not be rendered as links.
             if (!hyperlink.NoHyperlinkStyle)
             {
-                var styleFont = hyperlink.Document.Styles[StyleNames.Hyperlink]!.Font; // BUG ??? "!"
+                var styleFont = hyperlink.Document.Styles[StyleNames.Hyperlink]!.Font; // BUG_OLD ??? "!"
                 if (hyperlink.Values.Font is null)
                     hyperlink.Font = styleFont.Clone();
                 else
@@ -236,11 +236,10 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         /// Get the font for the parent of a given object.
         /// </summary>
         /// <param name="obj">The object to start with.</param>
-        /// <returns></returns>
         /// <exception cref="InvalidOperationException">Exception that is thrown of the parent object is neither Paragraph nor Hyperlink or FormattedText.</exception>
         protected Font? GetParentFont(DocumentObject obj)
         {
-            DocumentObject parentElements = DocumentRelations.GetParent(obj) ?? NRT.ThrowOnNull<Font, DocumentObject>(); // BUG Throwing on null;
+            DocumentObject parentElements = DocumentRelations.GetParent(obj) ?? NRT.ThrowOnNull<Font, DocumentObject>(); // BUG_OLD Throwing on null;
             DocumentObject? parentObject = DocumentRelations.GetParent(parentElements);
             Font? parentFont;
             if (parentObject is Paragraph paragraph)

@@ -19,7 +19,7 @@ namespace PdfSharp.Fonts.Internal
         internal const char LowSurrogateStart = '\uDC00';
         internal const char LowSurrogateEnd = '\uDFFF';
         internal const int HighSurrogateRange = 0x3FF;
-        internal const int UnicodePlane01Start = 0x10000;
+        internal const int UnicodePlane01Start = 0x1_0000;
 
         /// <summary>
         /// Converts a UTF-16 string into an array of Unicode code points.
