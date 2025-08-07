@@ -43,8 +43,9 @@ namespace MigraDoc.DocumentObjectModel
         /// The function returns the last text object that was created.
         /// </summary>
         /// <param name="text">Contents of the new Text objects.</param>
+        /// <param name="textRenderOption">RenderOption for the new Text objects.</param>
         /// <returns>Returns a new Text object with the last element of text that was added.</returns>
-        public Text AddText(string text)
+        public Text AddText(string text, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
@@ -59,13 +60,13 @@ namespace MigraDoc.DocumentObjectModel
                 {
                     if (tabParts[idx].Length != 0)
                     {
-                        Add(result = new(tabParts[idx]));
+                        Add(result = new(tabParts[idx], textRenderOption));
                     }
                     if (idx < count - 1)
-                        AddTab();
+                        AddTab(textRenderOption);
                 }
                 if (line < lineCount - 1)
-                    AddLineBreak();
+                    AddLineBreak(textRenderOption);
             }
             return result;
         }
@@ -73,27 +74,27 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a single character repeated the specified number of times to the paragraph.
         /// </summary>
-        public Text AddChar(char ch, int count)
-            => AddText(new string(ch, count));
+        public Text AddChar(char ch, int count, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => AddText(new string(ch, count), textRenderOption);
 
         /// <summary>
         /// Adds a single character to the paragraph.
         /// </summary>
-        public Text AddChar(char ch) 
-            => AddText(new string(ch, 1));
+        public Text AddChar(char ch, TextRenderOption textRenderOption = TextRenderOption.Default) 
+            => AddText(new string(ch, 1), textRenderOption);
 
         /// <summary>
         /// Adds a Character object.
         /// </summary>
-        public Character AddCharacter(SymbolName symbolType) 
-            => AddCharacter(symbolType, 1);
+        public Character AddCharacter(SymbolName symbolType, TextRenderOption textRenderOption = TextRenderOption.Default) 
+            => AddCharacter(symbolType, 1, textRenderOption);
 
         /// <summary>
         /// Adds one or more Character objects.
         /// </summary>
-        public Character AddCharacter(SymbolName symbolType, int count)
+        public Character AddCharacter(SymbolName symbolType, int count, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var character = new Character();
+            var character = new Character(textRenderOption);
             Add(character);
             character.SymbolName = symbolType;
             character.Count = count;
@@ -103,39 +104,39 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a Character object defined by a character.
         /// </summary>
-        public Character AddCharacter(char ch) 
-            => AddCharacter((SymbolName)ch, 1);
+        public Character AddCharacter(char ch, TextRenderOption textRenderOption = TextRenderOption.Default) 
+            => AddCharacter((SymbolName)ch, 1, textRenderOption);
 
         /// <summary>
         /// Adds one or more Character objects defined by a character.
         /// </summary>
-        public Character AddCharacter(char ch, int count) 
-            => AddCharacter((SymbolName)ch, count);
+        public Character AddCharacter(char ch, int count, TextRenderOption textRenderOption = TextRenderOption.Default) 
+            => AddCharacter((SymbolName)ch, count, textRenderOption);
 
         /// <summary>
         /// Adds a space character as many as count.
         /// </summary>
-        public Character AddSpace(int count) 
-            => AddCharacter(SymbolName.Blank, count);
+        public Character AddSpace(int count, TextRenderOption textRenderOption = TextRenderOption.Default) 
+            => AddCharacter(SymbolName.Blank, count, textRenderOption);
 
         /// <summary>
         /// Adds a horizontal tab.
         /// </summary>
-        public Character AddTab() 
-            => AddCharacter(SymbolName.Tab, 1);
+        public Character AddTab(TextRenderOption textRenderOption = TextRenderOption.Default) 
+            => AddCharacter(SymbolName.Tab, 1, textRenderOption);
 
         /// <summary>
         /// Adds a line break.
         /// </summary>
-        public Character AddLineBreak() 
-            => AddCharacter(SymbolName.LineBreak, 1);
+        public Character AddLineBreak(TextRenderOption textRenderOption = TextRenderOption.Default) 
+            => AddCharacter(SymbolName.LineBreak, 1, textRenderOption);
 
         /// <summary>
         /// Adds a new FormattedText.
         /// </summary>
-        public FormattedText AddFormattedText()
+        public FormattedText AddFormattedText(TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var formattedText = new FormattedText();
+            var formattedText = new FormattedText(textRenderOption);
             Add(formattedText);
             return formattedText;
         }
@@ -143,9 +144,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new FormattedText object with the given format.
         /// </summary>
-        public FormattedText AddFormattedText(TextFormat textFormat)
+        public FormattedText AddFormattedText(TextFormat textFormat, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var formattedText = AddFormattedText();
+            var formattedText = AddFormattedText(textRenderOption);
 
             if ((textFormat & TextFormat.Bold) == TextFormat.Bold)
                 formattedText.Bold = true;
@@ -166,9 +167,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new FormattedText with the given Font.
         /// </summary>
-        public FormattedText AddFormattedText(Font font)
+        public FormattedText AddFormattedText(Font font, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var formattedText = new FormattedText();
+            var formattedText = new FormattedText(textRenderOption);
             formattedText.Font.ApplyFont(font);
             Add(formattedText);
             return formattedText;
@@ -177,9 +178,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new FormattedText with the given text.
         /// </summary>
-        public FormattedText AddFormattedText(string text)
+        public FormattedText AddFormattedText(string text, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var formattedText = new FormattedText();
+            var formattedText = new FormattedText(textRenderOption);
             formattedText.AddText(text);
             Add(formattedText);
             return formattedText;
@@ -188,9 +189,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new FormattedText object with the given text and format.
         /// </summary>
-        public FormattedText AddFormattedText(string text, TextFormat textFormat)
+        public FormattedText AddFormattedText(string text, TextFormat textFormat, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var formattedText = AddFormattedText(textFormat);
+            var formattedText = AddFormattedText(textFormat, textRenderOption);
             formattedText.AddText(text);
             return formattedText;
         }
@@ -198,9 +199,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new FormattedText object with the given text and font.
         /// </summary>
-        public FormattedText AddFormattedText(string text, Font font)
+        public FormattedText AddFormattedText(string text, Font font, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var formattedText = AddFormattedText(font);
+            var formattedText = AddFormattedText(font, textRenderOption);
             formattedText.AddText(text);
             return formattedText;
         }
@@ -208,9 +209,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new FormattedText object with the given text and style.
         /// </summary>
-        public FormattedText AddFormattedText(string text, string style)
+        public FormattedText AddFormattedText(string text, string style, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var formattedText = AddFormattedText(text);
+            var formattedText = AddFormattedText(text, textRenderOption);
             formattedText.Style = style;
             return formattedText;
         }
@@ -349,9 +350,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new PageField.
         /// </summary>
-        public PageField AddPageField()
+        public PageField AddPageField(TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var fieldPage = new PageField();
+            var fieldPage = new PageField(textRenderOption);
             Add(fieldPage);
             return fieldPage;
         }
@@ -359,9 +360,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new RefFieldPage.
         /// </summary>
-        public PageRefField AddPageRefField(string name)
+        public PageRefField AddPageRefField(string name, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var fieldPageRef = new PageRefField
+            var fieldPageRef = new PageRefField(textRenderOption)
             {
                 Name = name
             };
@@ -372,9 +373,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new NumPagesField.
         /// </summary>
-        public NumPagesField AddNumPagesField()
+        public NumPagesField AddNumPagesField(TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var fieldNumPages = new NumPagesField();
+            var fieldNumPages = new NumPagesField(textRenderOption);
             Add(fieldNumPages);
             return fieldNumPages;
         }
@@ -382,9 +383,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new SectionField.
         /// </summary>
-        public SectionField AddSectionField()
+        public SectionField AddSectionField(TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var fieldSection = new SectionField();
+            var fieldSection = new SectionField(textRenderOption);
             Add(fieldSection);
             return fieldSection;
         }
@@ -392,9 +393,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new SectionPagesField.
         /// </summary>
-        public SectionPagesField AddSectionPagesField()
+        public SectionPagesField AddSectionPagesField(TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var fieldSectionPages = new SectionPagesField();
+            var fieldSectionPages = new SectionPagesField(textRenderOption);
             Add(fieldSectionPages);
             return fieldSectionPages;
         }
@@ -403,9 +404,9 @@ namespace MigraDoc.DocumentObjectModel
         /// Adds a new DateField.
         /// </summary>
         /// 
-        public DateField AddDateField()
+        public DateField AddDateField(TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var fieldDate = new DateField();
+            var fieldDate = new DateField(textRenderOption);
             Add(fieldDate);
             return fieldDate;
         }
@@ -413,9 +414,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new DateField with the given format.
         /// </summary>
-        public DateField AddDateField(string format)
+        public DateField AddDateField(string format, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var fieldDate = new DateField
+            var fieldDate = new DateField(textRenderOption)
             {
                 Format = format
             };
@@ -426,9 +427,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new InfoField with the given type.
         /// </summary>
-        public InfoField AddInfoField(InfoFieldType iType)
+        public InfoField AddInfoField(InfoFieldType iType, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var fieldInfo = new InfoField
+            var fieldInfo = new InfoField(textRenderOption)
             {
                 Name = iType.ToString()
             };
@@ -439,11 +440,11 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new Footnote with the specified Text.
         /// </summary>
-        public Footnote AddFootnote(string text)
+        public Footnote AddFootnote(string text, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var footnote = new Footnote();
+            var footnote = new Footnote(textRenderOption);
             var par = footnote.Elements.AddParagraph();
-            par.AddText(text);
+            par.AddText(text, textRenderOption);
             Add(footnote);
             return footnote;
         }
@@ -451,9 +452,9 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new Footnote.
         /// </summary>
-        public Footnote AddFootnote()
+        public Footnote AddFootnote(TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            var footnote = new Footnote();
+            var footnote = new Footnote(textRenderOption);
             Add(footnote);
             return footnote;
         }
