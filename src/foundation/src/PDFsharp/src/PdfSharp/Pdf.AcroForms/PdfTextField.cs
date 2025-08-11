@@ -5,6 +5,7 @@ using PdfSharp.Drawing;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Annotations;
 using PdfSharp.Pdf.Internal;
+using System.Text.RegularExpressions;
 
 namespace PdfSharp.Pdf.AcroForms
 {
@@ -36,7 +37,13 @@ namespace PdfSharp.Pdf.AcroForms
         /// <summary>
         /// Gets or sets the font used to draw the text of the field.
         /// </summary>
-        public XFont Font { get; set; } = new XFont("Courier New", 10);
+        public XFont Font
+        {
+            get {                
+                return GetFontFromDAKeyString(Elements.GetString(PdfAcroField.Keys.DA));
+            }
+            set { Elements.SetString(PdfAcroField.Keys.DA, value.ToString()); RenderAppearance(); } //HACK in PdfTextField
+        }
 
         /// <summary>
         /// Gets or sets the foreground color of the field.
@@ -57,6 +64,11 @@ namespace PdfSharp.Pdf.AcroForms
             get => Elements.GetInteger(Keys.MaxLen);
             set => Elements.SetInteger(Keys.MaxLen, value);
         }
+
+        /// <summary>
+        /// Defines TextAnchor inside TextField e.g. Centering
+        /// </summary>
+        public XStringFormat TextAchor { get; set; } = XStringFormats.CenterLeft;
 
         /// <summary>
         /// Gets or sets a value indicating whether the field has multiple lines.
@@ -196,7 +208,7 @@ namespace PdfSharp.Pdf.AcroForms
             string text = Text;
             if (text.Length > 0)
                 gfx.DrawString(Text, Font, new XSolidBrush(ForeColor),
-                  rect.ToXRect() - rect.Location + new XPoint(2, 0), XStringFormats.TopLeft);
+                  rect.ToXRect() - rect.Location + new XPoint(2, 0), this.TextAchor);
 
             form.DrawingFinished();
             form.PdfForm.Elements.Add("/FormType", new PdfLiteral("1"));
@@ -221,6 +233,25 @@ namespace PdfSharp.Pdf.AcroForms
             if (xobj.Stream != null)
                 xobj.Stream.Value = new RawEncoding().GetBytes(s);
 #endif
+        }
+
+        /// <summary>
+        /// Parses <see cref="XFont"/> from a PODF Dictionary DA Key String
+        /// </summary>
+        /// <param name="DAValue">String Value of Dictionary Key</param>
+        /// <returns>XFont corresponding to DA Key string</returns>
+        public static XFont GetFontFromDAKeyString(string DAValue)
+        {
+            string fontRegexPattern = "^\\/(?<FontName>[^\\s]*)\\s(?<FontSize>[.?\\d]+]*)"; // REgex to match a /DA Key string e.g. /Arial 10 Tf 0.0 g
+            Regex fontRegex = new Regex(fontRegexPattern);
+            Match fontMatch = fontRegex.Match(DAValue);
+
+            if (!fontMatch.Success) throw new ArgumentException($"The Font string '{DAValue}' is not matched by font regex '{fontRegexPattern}'. Check if the string is correct.");
+
+            string fontName = fontMatch.Groups["FontName"].Value;
+            string fontSize = fontMatch.Groups["FontSize"].Value;
+
+            return new XFont(fontName, double.Parse(fontSize));
         }
 
         internal override void PrepareForSave()
