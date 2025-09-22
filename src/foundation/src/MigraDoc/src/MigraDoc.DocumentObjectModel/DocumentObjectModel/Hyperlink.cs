@@ -457,14 +457,14 @@ namespace MigraDoc.DocumentObjectModel
         public bool NoHyperlinkStyle
         {
             // This Property is not part of Word’s Automation Model. With this property Hyperlinks can be used without implicitly setting the Hyperlink style.
-            // This way they occur like linked cross references in Word, which are not implemented as an own DocumentObject type in MigraDoc.
+            // This way they occur like linked cross-references in Word, which are not implemented as an own DocumentObject type in MigraDoc.
             get => Values.NoHyperlinkStyle ?? false;
             set => Values.NoHyperlinkStyle = value;
         }
 
         /// <summary>
         /// For HyperlinkType Local/Bookmark: Gets or sets the target bookmark name of the Hyperlink.
-        /// For HyperlinkTypes File and Url/Web: Gets or sets the target filename of the Hyperlink, e.g. a path to a file or an URL.
+        /// For HyperlinkTypes File and Url/Web: Gets or sets the target filename of the Hyperlink, e.g. a path to a file or a URL.
         /// For HyperlinkType ExternalBookmark: Not valid - throws Exception.
         /// This property is retained due to compatibility reasons.
         /// </summary>
@@ -503,7 +503,7 @@ namespace MigraDoc.DocumentObjectModel
         }
 
         /// <summary>
-        /// Gets or sets the target filename of the Hyperlink, e.g. a path to a file or an URL.
+        /// Gets or sets the target filename of the Hyperlink, e.g. a path to a file or a URL.
         /// Used for HyperlinkTypes ExternalBookmark, File and Url/Web.
         /// </summary>
         public string Filename

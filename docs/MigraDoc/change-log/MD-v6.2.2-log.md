@@ -1,0 +1,17 @@
+﻿# MigraDoc 6.2.2 change log
+
+A copy of the text below this line is added to `docs.pdfsharp.net` **MigraDoc** `History.md`.
+
+## What’s new in version 6.2.2
+
+### Breaking changes
+
+*(none)*
+
+### Features
+
+*(none)*
+
+### Issues
+
+The bug fixes of PDFsharp are also useful when generating PDF files from MigraDoc.

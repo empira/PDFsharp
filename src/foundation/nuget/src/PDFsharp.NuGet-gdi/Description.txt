@@ -1,5 +1,9 @@
-PDFsharp is the Open Source library for creating and modifying PDF documents using .NET. It has an easy-to-use API that allows developers to generate or modify PDF files programmatically. PDFsharp can be used for various applications, including creating reports, invoices, and other types of documents.
+﻿PDFsharp is the Open Source library for creating and modifying PDF documents using .NET. It has an easy-to-use API that allows developers to generate or modify PDF files programmatically. PDFsharp can be used for various applications, including creating reports, invoices, and other types of documents.
 
 This package relies on Windows Forms (GDI+) and can be used under Windows only.
 
 See https://docs.pdfsharp.net for details.
+   
+See https://www.pdfsharp.com for professional support offers, premium technical advice, and contract work options.
+Choose a support plan that suits your needs. We offer a variety of options, from small projects to large teams, with flexible response times.
+Our team provides PDFsharp expert assistance, including implementation, optimization, and tailored solutions. 

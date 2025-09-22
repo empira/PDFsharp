@@ -313,7 +313,7 @@
     <Compile Include="..\PdfSharp\Pdf.Security.Encryption\SASLprep.cs" Link="Pdf.Security.Encryption\SASLprep.cs" />
     <Compile Include="..\PdfSharp\Pdf.Signatures\DefaultSignatureAppearanceHandler.cs" Link="Pdf.Signatures\DefaultSignatureAppearanceHandler.cs" />
     <Compile Include="..\PdfSharp\Pdf.Signatures\DigitalSignatureOptions.cs" Link="Pdf.Signatures\DigitalSignatureOptions.cs" />
-    <Compile Include="..\PdfSharp\Pdf.Signatures\PdfArrayWithPadding.cs" Link="Pdf.Signatures\PdfArrayWithPadding.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Signatures\PdfPlaceholderObject.cs" Link="Pdf.Signatures\PdfPlaceholderObject.cs" />
     <Compile Include="..\PdfSharp\Pdf.Signatures\PdfSignature.cs" Link="Pdf.Signatures\PdfSignature.cs" />
     <Compile Include="..\PdfSharp\Pdf.Signatures\PdfSignatureHandler.cs" Link="Pdf.Signatures\PdfSignatureHandler.cs" />
     <Compile Include="..\PdfSharp\Pdf.Signatures\PdfSignaturePlaceholderItem.cs" Link="Pdf.Signatures\PdfSignaturePlaceholderItem.cs" />

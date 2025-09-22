@@ -19,10 +19,10 @@ namespace PdfSharp.Pdf.Signatures
     public class DigitalSignatureHandler
     {
         /// <summary>
-        /// Space ... big enough reserved space to replace ByteRange placeholder [0 0 0 0] with the actual computed value of the byte range to sign
+        /// Big enough space reserved by PdfPlaceholderObject to be replaced by the actual computed value of the byte range to sign
         /// Worst case: signature dictionary is near the end of an 10 GB PDF file.
         /// </summary>
-        const int ByteRangePaddingLength = 36; // = "[0 9999999999 9999999999 9999999999]".Length
+        const int ByteRangePlaceholderLength = 36; // = "[0 9999999999 9999999999 9999999999]".Length
 
         DigitalSignatureHandler(PdfDocument document, IDigitalSigner signer, DigitalSignatureOptions options)
         {
@@ -64,9 +64,8 @@ namespace PdfSharp.Pdf.Signatures
         {
             var (rangedStreamToSign, byteRangeArray) = GetRangeToSignAndByteRangeArray(writer.Stream);
 
-            Debug.Assert(_signatureFieldByteRangePdfArray != null);
-            writer.Stream.Position = _signatureFieldByteRangePdfArray.StartPosition;
-            byteRangeArray.WriteObject(writer);
+            Debug.Assert(_signatureFieldByteRangePlaceholder != null);
+            _signatureFieldByteRangePlaceholder.WriteActualObject(byteRangeArray, writer);
 
             // Computing signature from document’s digest.
             var signature = await Signer.GetSignatureAsync(rangedStreamToSign).ConfigureAwait(false);
@@ -146,9 +145,9 @@ namespace PdfSharp.Pdf.Signatures
 
             var signatureSize = await Signer.GetSignatureSizeAsync().ConfigureAwait(false);
             _placeholderItem = new(signatureSize);
-            _signatureFieldByteRangePdfArray = new PdfArrayWithPadding(Document, ByteRangePaddingLength, new PdfLongInteger(0), new PdfLongInteger(0), new PdfLongInteger(0), new PdfLongInteger(0));
+            _signatureFieldByteRangePlaceholder = new PdfPlaceholderObject(ByteRangePlaceholderLength);
 
-            var signatureDictionary = GetSignatureDictionary(_placeholderItem, _signatureFieldByteRangePdfArray);
+            var signatureDictionary = GetSignatureDictionary(_placeholderItem, _signatureFieldByteRangePlaceholder);
             var signatureField = GetSignatureField(signatureDictionary);
 
             var annotations = Document.Pages[Options.PageIndex].Elements.GetArray(PdfPage.Keys.Annots);
@@ -209,7 +208,7 @@ namespace PdfSharp.Pdf.Signatures
             return signatureField;
         }
 
-        PdfSignature2 GetSignatureDictionary(PdfSignaturePlaceholderItem contents, PdfArray byteRange)
+        PdfSignature2 GetSignatureDictionary(PdfSignaturePlaceholderItem contents, PdfPlaceholderObject byteRange)
         {
             PdfSignature2 signatureDic = new(Document);
 
@@ -238,6 +237,6 @@ namespace PdfSharp.Pdf.Signatures
         }
 
         PdfSignaturePlaceholderItem? _placeholderItem;
-        PdfArrayWithPadding? _signatureFieldByteRangePdfArray;
+        PdfPlaceholderObject? _signatureFieldByteRangePlaceholder;
     }
 }

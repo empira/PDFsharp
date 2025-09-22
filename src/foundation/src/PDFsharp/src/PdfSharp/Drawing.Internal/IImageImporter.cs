@@ -47,6 +47,13 @@ namespace PdfSharp.Drawing
                     // Buffer is accessible - use it.
                     Data = buffer.Array ?? throw new ArgumentNullException(nameof(stream), "Stream has no content byte array.");
                     Length = (int)ms.Length;
+                    // If buffer is larger than needed, create a new buffer with required size.
+                    if (Data.Length > Length)
+                    {
+                        var tmp = new Byte[Length];
+                        Buffer.BlockCopy(Data, 0, tmp, 0, Length);
+                        Data = tmp;
+                    }
                 }
                 else
                 {

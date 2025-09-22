@@ -17,8 +17,8 @@ assembly-file-versioning-format: '{Major}.{Minor}.{Patch}.{env:PDFSHARP_BUILD_VE
 ### Update and sync used NuGet packages
 
 Update version numbers of NuGet packages used in PDFsharp code (like `MicroSoft.Extensions.Logging`) and
-build tools (xunit, gitversion, ...).
-Do this with `"Manage NuGet Packages for Solution..."` to see what’s new and update the version numbers
+build tools (xunit, gitversion, …).
+Do this with `"Manage NuGet Packages for Solution…"` to see what’s new and update the version numbers
 manually in `Directory.Packages.props`.
 
 Sync `Directory.Packages.props` with all other solutions, like `PDFsharp.Samples` etc.

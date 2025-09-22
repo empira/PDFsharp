@@ -722,6 +722,106 @@ namespace PdfSharp.Pdf.IO
             return Symbol = Symbol.String;
         }
 
+#if true
+        /// <summary>
+        /// Scans a hex encoded literal byte string, contained between "&lt;" and "&gt;".
+        ///  </summary>
+        public Symbol ScanHexadecimalString()
+        {
+            Debug.Assert(_currChar == Chars.Less);
+
+            // 25-09-16/StL
+            // Now we can handle Panose style codes that may look like this:
+            //   < 0 0 2 b 6 6 3 8 4 2 2 4>
+            // This is technically an illegal format, but found by a user.
+
+            ClearToken();
+            ScanNextChar(true);
+            bool tryUsePanoseHack = false;
+            while (true)
+            {
+                MoveToNonWhiteSpace();
+
+                if (_currChar == '>')
+                {
+                    ScanNextChar(true);
+                    break;
+                }
+
+                // TODO Handle EOF correctly. Check if other methods must also handle EOF.
+
+                var hex = _currChar switch
+                {
+                    >= '0' and <= '9' => _currChar - '0',
+                    >= 'A' and <= 'F' => _currChar - ('A' - 10),  // Not optimized in IL without parenthesis.
+                    >= 'a' and <= 'f' => _currChar - ('a' - 10),
+                    _ => LogError(_currChar)
+                };
+
+                ScanNextChar(true);
+
+                // Does the string ends before the 2nd hex value?
+                if (_currChar == '>')
+                {
+                    if (tryUsePanoseHack)
+                    {
+                        // Consider this:
+                        // "< 0 0 2 b 6 6 3 8 4 2 2 4>"
+                        // Ensure that the last "4" does not become a "40" but a "04".
+
+                        // Is it presumably a 12 byte Panose style code?
+                        if (_token.Length == 11)
+                        {
+                            _token.Append((char)hex);
+                            goto ScanNextChar;
+                        }
+                    }
+                    // Second char is assumed to be '0' if not exists according to the PDF specs.
+                    _token.Append((char)(hex << 4));
+
+                ScanNextChar:
+                    ScanNextChar(true);
+                    break;
+                }
+
+                if (_currChar == ' ')  // Explicitly not: "if (Lexer.IsDelimiter(_currChar))"
+                {
+                    // Obviously a single hex character.
+                    // Can occur for Panose style codes.
+                    tryUsePanoseHack = true;
+
+                    _token.Append((char)hex);
+
+                    // Go on with next byte.
+                    MoveToNonWhiteSpace();
+                    continue;
+                }
+
+                // Some fool may add a line-break between the hex digits.
+                MoveToNonWhiteSpace();
+
+                // TODO Handle EOF correctly.
+
+                hex = (hex << 4) + _currChar switch
+                {
+                    >= '0' and <= '9' => _currChar - '0',
+                    >= 'A' and <= 'F' => _currChar - ('A' - 10),
+                    >= 'a' and <= 'f' => _currChar - ('a' - 10),
+                    _ => LogError(_currChar)
+                };
+                _token.Append((char)hex);
+                ScanNextChar(true);
+            }
+            return Symbol = Symbol.HexString;
+
+            char LogError(char ch)
+            {
+                PdfSharpLogHost.Logger.LogError("Illegal character {char} in hex string.", ch);
+                DumpNeighborhoodOfPosition( /*SizeType position = -1, bool hex = false, int range = 25*/);
+                return '\0';
+            }
+        }
+#else
         /// <summary>
         /// Scans a hex encoded literal string, contained between "&lt;" and "&gt;".
         /// </summary>
@@ -776,6 +876,7 @@ namespace PdfSharp.Pdf.IO
                 return '\0';
             }
         }
+#endif
 
         /// <summary>
         /// Tries to scan the specified literal from the current stream position.

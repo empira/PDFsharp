@@ -1055,10 +1055,6 @@ namespace PdfSharp.Pdf.IO
             {
                 if (pdfReference.Value == null!)
                 {
-#if DEBUG_
-                    if (pdfReference.ObjectNumber == 25)
-                        _ = typeof(int);
-#endif
                     var pdfObject = ReadIndirectObject(pdfReference, null);
 
                     Debug.Assert(pdfObject.Reference == pdfReference);
@@ -1163,8 +1159,8 @@ namespace PdfSharp.Pdf.IO
                     // Create the parser for the object stream.
                     var objectStreamParser = new Parser(_document, new MemoryStream(objectStream.Stream.UnfilteredValue), _documentParser);
 
-                    // Read and add all References to objects residing in the object stream and get all ObjectIDs and offsets .
-                    var objectIDsWithOffset = objectStream.ReadReferencesAndOffsets(_document.IrefTable);
+                    // Get all ObjectIDs and offsets of objects residing in the object stream.
+                    var objectIDsWithOffset = objectStream.ReadObjectIDsWithOffsets();
 
                     // Save all ObjectIDs with the parser of its ObjectStream and its offset.
                     foreach (var objectIDWithOffset in objectIDsWithOffset)
@@ -1179,6 +1175,15 @@ namespace PdfSharp.Pdf.IO
                         {
                             // Add object with new objectID.
                             _objectStreamObjectSources.Add(objectID, (objectStreamParser, offset));
+
+                            // Create and add reference to the object if not existing yet.
+                            if (!_document.IrefTable.Contains(objectID))
+                            {
+                                // -1 indicates compressed object.
+                                var iref = PdfReference.CreateForObjectID(objectID, -1);
+
+                                _document.IrefTable.Add(iref);
+                            }
                         }
                         else
                         {

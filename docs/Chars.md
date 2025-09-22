@@ -4,6 +4,9 @@
  · × ² ³ ½ € † …
  ✔ ✘ ↯ ± − × ÷ ⋅ √ ≠ ≤ ≥ ≡
  ® © ← ↑ → ↓ ↔ ↕ ∅
+ ✔⇒
+
+ Shaker´'´`’ás
 
 # Use of typographic quotation marks
 
