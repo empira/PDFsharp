@@ -304,7 +304,8 @@ namespace PdfSharp.Drawing.Internal
                     return false;
 
                 // Check for standalone markers.
-                if (headerType == 0x01 || headerType >= 0xd0 && headerType <= 0xd7)
+                // Also check for zero-byte stuff in entropy-coded data segments.
+                if (headerType == 0x00 || headerType == 0x01 || headerType >= 0xd0 && headerType <= 0xd7)
                 {
                     stream.CurrentOffset += 2;
                     return true;
