@@ -2,6 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.Advanced;
+using System.Collections;
 
 namespace PdfSharp.Pdf.AcroForms
 {
@@ -261,10 +262,10 @@ namespace PdfSharp.Pdf.AcroForms
         }
         PdfAcroFieldCollection? _fields;
 
-        /// <summary>
-        /// Holds a collection of interactive fields.
-        /// </summary>
-        public sealed class PdfAcroFieldCollection : PdfArray
+		/// <summary>
+		/// Holds a collection of interactive fields.
+		/// </summary>
+		public sealed class PdfAcroFieldCollection : PdfArray, IEnumerable<PdfAcroField>
         {
             internal PdfAcroFieldCollection(PdfArray array)
                 : base(array)
@@ -366,12 +367,12 @@ namespace PdfSharp.Pdf.AcroForms
                 return null;
             }
 
-            /// <summary>
-            /// Create a derived type like PdfTextField or PdfCheckBox if possible.
-            /// If the actual cannot be guessed by PDFsharp the function returns an instance
-            /// of PdfGenericField.
-            /// </summary>
-            PdfAcroField CreateAcroField(PdfDictionary dict)
+			/// <summary>
+			/// Create a derived type like PdfTextField or PdfCheckBox if possible.
+			/// If the actual cannot be guessed by PDFsharp the function returns an instance
+			/// of PdfGenericField.
+			/// </summary>
+			PdfAcroField CreateAcroField(PdfDictionary dict)
             {
                 string ft = dict.Elements.GetName(Keys.FT);
                 PdfAcroFieldFlags flags = (PdfAcroFieldFlags)dict.Elements.GetInteger(Keys.Ff);
@@ -402,7 +403,65 @@ namespace PdfSharp.Pdf.AcroForms
                         return new PdfGenericField(dict);
                 }
             }
-        }
+
+            public new PdfAcroFieldEnumerator GetEnumerator()
+			{
+				return new PdfAcroFieldEnumerator(this);
+			}
+			
+            IEnumerator<PdfAcroField> IEnumerable<PdfAcroField>.GetEnumerator()
+			{
+				return GetEnumerator();
+			}
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return new PdfAcroFieldEnumerator(this);
+            }
+
+            /// <summary>
+            /// Enumerates the elements of a <see cref="PdfAcroFieldCollection"/>.
+            /// </summary>
+			public struct PdfAcroFieldEnumerator : IEnumerator<PdfAcroField>, IEnumerator, IDisposable
+			{
+				private readonly PdfAcroFieldCollection _collection;
+				private int _currentIndex;
+				private PdfAcroField? _currentItem;
+
+				internal PdfAcroFieldEnumerator(PdfAcroFieldCollection fieldCollection)
+				{
+					_collection = fieldCollection;
+					_currentIndex = -1;
+					_currentItem = default;
+				}
+
+				public readonly PdfAcroField Current => _currentItem!;
+
+				readonly Object IEnumerator.Current => Current;
+
+				public readonly void Dispose() { }
+
+				public Boolean MoveNext()
+				{
+					if (++_currentIndex >= _collection.Count)
+					{
+						return false;
+					}
+					else
+					{
+                        // Gettig the current item using the index will convert
+                        // the PdfItem to PdfAcroField for us
+						_currentItem = _collection[_currentIndex];
+					}
+					return true;
+				}
+
+				public void Reset()
+				{
+					_currentIndex = -1;
+				}
+			}
+		}
 
         /// <summary>
         /// Predefined keys of this dictionary. 
