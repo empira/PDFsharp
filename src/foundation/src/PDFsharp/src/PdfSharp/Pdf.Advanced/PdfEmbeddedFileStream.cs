@@ -1,4 +1,4 @@
-﻿// PDFsharp - A .NET library for processing PDF
+// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 namespace PdfSharp.Pdf.Advanced
@@ -12,13 +12,16 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Initializes a new instance of PdfEmbeddedFileStream from a stream.
         /// </summary>
-        public PdfEmbeddedFileStream(PdfDocument document, Stream stream) : base(document)
+        /// <param name="checksum">A 16-byte string which is a MD5 checksum of the bytes of the file</param>
+        public PdfEmbeddedFileStream(PdfDocument document, Stream stream, string? checksum = null) : base(document)
         {
             _data = new byte[stream.Length];
             using (stream)
             {
                 stream.Read(_data, 0, (int)stream.Length);
             }
+            _checksum = checksum;
+
             Initialize();
         }
 
@@ -32,6 +35,8 @@ namespace PdfSharp.Pdf.Advanced
             var now = DateTime.Now;
             objParams.Elements.SetDateTime("/CreationDate", now);
             objParams.Elements.SetDateTime("/ModDate", now);
+            if (!string.IsNullOrEmpty(_checksum))
+                objParams.Elements.SetString("/CheckSum", _checksum);
             Elements.SetObject(Keys.Params, objParams);
 
             Stream = new PdfStream(_data, this);
@@ -46,6 +51,7 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         readonly byte[] _data;
+        readonly string? _checksum;
 
         const string TypeValue = "/EmbeddedFile";
 

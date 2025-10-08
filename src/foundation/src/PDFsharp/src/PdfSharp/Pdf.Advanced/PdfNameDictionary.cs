@@ -62,7 +62,7 @@ namespace PdfSharp.Pdf.Advanced
 
         PdfNameTreeNode? _dests;
 
-        internal void AddEmbeddedFile(string name, Stream stream)
+        internal void AddEmbeddedFile(string name, Stream stream, string? checksum = null)
         {
             if (_embeddedFiles == null)
             {
@@ -71,7 +71,7 @@ namespace PdfSharp.Pdf.Advanced
                 Elements.SetReference(Keys.EmbeddedFiles, _embeddedFiles.Reference ?? throw TH.InvalidOperationException_ReferenceMustNotBeNull());
             }
 
-            var embeddedFileStream = new PdfEmbeddedFileStream(Owner, stream);
+            var embeddedFileStream = new PdfEmbeddedFileStream(Owner, stream, checksum);
             var fileSpecification = new PdfFileSpecification(Owner, embeddedFileStream, name);
             Owner.Internals.AddObject(fileSpecification);
 
