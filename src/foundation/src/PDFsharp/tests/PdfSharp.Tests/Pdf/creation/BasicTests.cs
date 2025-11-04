@@ -372,5 +372,81 @@ namespace PdfSharp.Tests
             // ...and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
+
+        [Fact]
+        public void Create_gradient_brushes()
+        {
+            // Create a new PDF document.
+            var document = new PdfDocument();
+            document.Info.Title = "Created with PDFsharp";
+
+            // Create an empty page in this document.
+            var page = document.AddPage();
+            var gfx = XGraphics.FromPdfPage(page);
+
+            gfx.Save();
+            gfx.TranslateTransform(50, 50);
+            gfx.DrawRectangle(null, new XLinearGradientBrush(new XPoint(50, 50), new XPoint(150, 150), XColors.Red, XColors.Green)
+            {
+                ExtendLeft = false,
+                ExtendRight = false
+            }, new XRect(0, 0, 200, 200));
+            
+            gfx.Restore();
+            gfx.Save();
+            gfx.TranslateTransform(300, 50);
+            
+            gfx.DrawRectangle(null, new XLinearGradientBrush(new XPoint(50, 50), new XPoint(150, 150), XColors.Red, XColors.Green)
+            {
+                ExtendLeft = true,
+                ExtendRight = true
+            }, new XRect(0, 0, 200, 200));
+            
+            gfx.Restore();
+            gfx.Save();
+            gfx.TranslateTransform(50, 300);
+            
+            gfx.DrawRectangle(null, new XRadialGradientBrush(new XPoint(100, 100), new XPoint(100, 100), 50, 100, XColors.Red, XColors.Green)
+            {
+                ExtendLeft = false,
+                ExtendRight = false
+            }, new XRect(0, 0, 200, 200));
+            
+            gfx.Restore();
+            gfx.Save();
+            gfx.TranslateTransform(300, 300);
+            
+            gfx.DrawRectangle(null, new XRadialGradientBrush(new XPoint(100, 100), new XPoint(100, 100), 50, 100, XColors.Red, XColors.Green)
+            {
+                ExtendLeft = true,
+                ExtendRight = true
+            }, new XRect(0, 0, 200, 200));
+            
+            gfx.Restore();
+            gfx.Save();
+            gfx.TranslateTransform(50, 550);
+            
+            gfx.DrawRectangle(null, new XRadialGradientBrush(new XPoint(50, 50), new XPoint(150, 150), 50, 100, XColors.Red, XColors.Green)
+            {
+                ExtendLeft = false,
+                ExtendRight = false
+            }, new XRect(0, 0, 200, 200));
+            
+            gfx.Restore();
+            gfx.Save();
+            gfx.TranslateTransform(300, 550);
+            
+            gfx.DrawRectangle(null, new XRadialGradientBrush(new XPoint(50, 50), new XPoint(150, 150), 50, 100, XColors.Red, XColors.Green)
+            {
+                ExtendLeft = true,
+                ExtendRight = true
+            }, new XRect(0, 0, 200, 200));
+
+            // Save the document...
+            string filename = PdfFileUtility.GetTempPdfFileName("GradientTest");
+            document.Save(filename);
+            // ...and start a viewer.
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
+        }
     }
 }

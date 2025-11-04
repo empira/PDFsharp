@@ -229,21 +229,28 @@ namespace PdfSharp.Drawing.Pdf
             {
                 if (renderingMode != 0)
                     throw new InvalidOperationException("Rendering modes other than 0 can only be used with solid color brushes.");
-
-                if (brush is XLinearGradientBrush gradientBrush)
+                
+                Debug.Assert(UnrealizedCtm.IsIdentity, "Must realize ctm first.");
+                var matrix = renderer.DefaultViewMatrix;
+                matrix.Prepend(EffectiveCtm);
+                var pattern = new PdfShadingPattern(renderer.Owner);
+                
+                switch (brush)
                 {
-                    Debug.Assert(UnrealizedCtm.IsIdentity, "Must realize ctm first.");
-                    XMatrix matrix = renderer.DefaultViewMatrix;
-                    matrix.Prepend(EffectiveCtm);
-                    PdfShadingPattern pattern = new PdfShadingPattern(renderer.Owner);
-                    pattern.SetupFromBrush(gradientBrush, matrix, renderer);
-                    string name = renderer.Resources.AddPattern(pattern);
-                    renderer.AppendFormatString("/Pattern cs\n", name);
-                    renderer.AppendFormatString("{0} scn\n", name);
-
-                    // Invalidate fill color.
-                    _realizedFillColor = XColor.Empty;
+                    case XLinearGradientBrush gradientBrush:
+                        pattern.SetupFromBrush(gradientBrush, matrix, renderer);
+                        break;
+                    case XRadialGradientBrush radialGradient:
+                        pattern.SetupFromBrush(radialGradient, matrix, renderer);
+                        break;
                 }
+                
+                var name = renderer.Resources.AddPattern(pattern);
+                renderer.AppendFormatString("/Pattern cs\n", name);
+                renderer.AppendFormatString("{0} scn\n", name);
+
+                // Invalidate fill color.
+                _realizedFillColor = XColor.Empty;
             }
         }
 

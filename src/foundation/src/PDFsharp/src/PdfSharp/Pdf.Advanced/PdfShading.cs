@@ -38,8 +38,6 @@ namespace PdfSharp.Pdf.Advanced
             XColor color1 = ColorSpaceHelper.EnsureColorMode(colorMode, brush._color1);
             XColor color2 = ColorSpaceHelper.EnsureColorMode(colorMode, brush._color2);
 
-            PdfDictionary function = new PdfDictionary();
-
             Elements[Keys.ShadingType] = new PdfInteger(2);
             if (colorMode != PdfColorMode.Cmyk)
                 Elements[Keys.ColorSpace] = new PdfName("/DeviceRGB");
@@ -95,21 +93,77 @@ namespace PdfSharp.Pdf.Advanced
             }
 
             const string format = Config.SignificantDecimalPlaces3;
-            Elements[Keys.Coords] = new PdfLiteral("[{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "}]", x1, y1, x2, y2);
+            Elements[Keys.Coords] =
+                new PdfLiteral("[{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "}]", x1, y1,
+                    x2, y2);
 
             //Elements[Keys.Background] = new PdfRawItem("[0 1 1]");
             //Elements[Keys.Domain] = 
-            Elements[Keys.Function] = function;
-            //Elements[Keys.Extend] = new PdfRawItem("[true true]");
+            Elements[Keys.Function] = SetupGradient(color1, color2);
+            Elements[Keys.Extend] = new PdfLiteral("[{0} {1}]",
+                brush.ExtendLeft ? "true" : "false",
+                brush.ExtendRight ? "true" : "false");
+        }
 
-            string clr1 = "[" + PdfEncoders.ToString(color1, colorMode) + "]";
-            string clr2 = "[" + PdfEncoders.ToString(color2, colorMode) + "]";
+        /// <summary>
+        /// Setups the shading from the specified brush.
+        /// </summary>
+        internal void SetupFromBrush(XRadialGradientBrush brush, XGraphicsPdfRenderer renderer)
+        {
+            if (brush == null)
+                throw new ArgumentNullException(nameof(brush));
+
+            var colorMode = _document.Options.ColorMode;
+            var color1 = ColorSpaceHelper.EnsureColorMode(colorMode, brush._color1);
+            var color2 = ColorSpaceHelper.EnsureColorMode(colorMode, brush._color2);
+
+            Elements[Keys.ShadingType] = new PdfInteger(3);
+            if (colorMode != PdfColorMode.Cmyk)
+                Elements[Keys.ColorSpace] = new PdfName("/DeviceRGB");
+            else
+                Elements[Keys.ColorSpace] = new PdfName("/DeviceCMYK");
+
+            double x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+
+            XPoint pt1 = renderer.WorldToView(brush._point1);
+            XPoint pt2 = renderer.WorldToView(brush._point2);
+
+            x1 = pt1.X;
+            y1 = pt1.Y;
+            x2 = pt2.X;
+            y2 = pt2.Y;
+
+            const string format = Config.SignificantDecimalPlaces3;
+            Elements[Keys.Coords] =
+                new PdfLiteral(
+                    "[{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format +
+                    "} {5:" + format + "}]", x1, y1, brush.InnerRadius,
+                    x2, y2, brush.OuterRadius);
+
+            //Elements[Keys.Background] = new PdfRawItem("[0 1 1]");
+            //Elements[Keys.Domain] = 
+
+            Elements[Keys.Function] = SetupGradient(color1, color2);
+            Elements[Keys.Extend] = new PdfLiteral("[{0} {1}]",
+                brush.ExtendLeft ? "true" : "false",
+                brush.ExtendRight ? "true" : "false");
+        }
+
+        private PdfDictionary SetupGradient(XColor color1, XColor color2)
+        {
+            var colorMode = _document.Options.ColorMode;
+            var function = new PdfDictionary();
+
+            var clr1 = "[" + PdfEncoders.ToString(color1, colorMode) + "]";
+            var clr2 = "[" + PdfEncoders.ToString(color2, colorMode) + "]";
 
             function.Elements["/FunctionType"] = new PdfInteger(2);
             function.Elements["/C0"] = new PdfLiteral(clr1);
             function.Elements["/C1"] = new PdfLiteral(clr2);
             function.Elements["/Domain"] = new PdfLiteral("[0 1]");
             function.Elements["/N"] = new PdfInteger(1);
+
+            return function;
         }
 
         /// <summary>
