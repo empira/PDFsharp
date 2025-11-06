@@ -23,6 +23,14 @@ namespace PdfSharp.Pdf.IO
             Layout = document.Options.Layout;
         }
 
+        /// <summary>
+        /// When a PdfWriter was created for saving to a file path, this
+        /// contains the full path. The constructor currently accepts only
+        /// a Stream, so the owner (PdfDocument.SaveAsync(path)) will set this.
+        /// This is used as metadata for possible incremental append operations.
+        /// </summary>
+        internal string? FullPath { get; set; }
+
         public void Close(bool closeUnderlyingStream)
         {
             if (closeUnderlyingStream)
