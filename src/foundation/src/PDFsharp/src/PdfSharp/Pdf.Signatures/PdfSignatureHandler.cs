@@ -292,17 +292,25 @@ namespace PdfSharp.Pdf.Signatures
 
             signatureField.Elements.Add("/Rect", new PdfRectangle(Options.Rectangle));
 
-            signatureField.CustomAppearanceHandler = Options.AppearanceHandler ?? new DefaultSignatureAppearanceHandler()
+            // Se vazio, define para imprimir (requisito PDF/A para SigField)
+            signatureField.Elements.SetInteger("/F", 4);
+
+            // Evita agrupamento transparente proibido pelo PDF/A
+            if (Document.Pages.Count > 0)
             {
-                Location = Options.Location,
-                Reason = Options.Reason,
-                Signer = Signer.CertificateName
-            };
-            // TODO_OLD Call RenderCustomAppearance(); here.
-            signatureField.PrepareForSave(); // TODO_OLD PdfSignatureField.PrepareForSave() is not triggered automatically so let's call it manually from here, but it would be better to be called automatically.
+                var page = Document.Pages[Options.PageIndex];
+                if (page?.Elements?.ContainsKey("/Group") == true)
+                {
+                    var group = page.Elements.GetDictionary("/Group");
+                    if (group.Elements.GetName("/S") == "/Transparency")
+                    {
+                        // Remove transparência para compatibilidade com PDF/A
+                        group.Elements.Remove("/S");
+                    }
+                }
+            }
 
             Document.Internals.AddObject(signatureField);
-
             return signatureField;
         }
 
