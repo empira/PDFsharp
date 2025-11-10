@@ -805,8 +805,23 @@ namespace PdfSharp.Pdf
 
         internal override void WriteObject(PdfWriter writer)
         {
-            // #PDF-A
+            // NOVO TRECHO (CORREÇÃO DE TRANSPARÊNCIA PROIBIDA PELO PDF/A)
+            // Se o documento é PDF/A, removemos a entrada "/Group" antes de escrevermos o objeto.
+            if (_document.IsPdfA)
+            {
+                // Se a página contém uma chave de grupo, removemos para garantir PDF/A-1A/1B.
+                // O valor do XMP (Objeto 17) deve ser o que define a conformidade, e o WriteObject não deve 
+                // escrever nada que contradiga essa conformidade.
+                if (Elements.ContainsKey(Keys.Group))
+                {
+                    Elements.Remove(Keys.Group);
+                }
+            }
+
+            // #PDF-A (Lógica original do PDFSharp)
             // Suppress transparency group if PDF-A is required.
+            // **NOTA:** O bloco "if (!_document.IsPdfA)" abaixo só adiciona a transparência se não for PDF/A.
+            // No entanto, se o PDF for lido com o grupo já existente, ele precisa ser limpo acima.
             if (!_document.IsPdfA)
             {
                 // Add transparency group to prevent rendering problems of Adobe viewer.
@@ -823,10 +838,8 @@ namespace PdfSharp.Pdf
                         group.Elements.SetName("/CS", "/DeviceRGB");
                     else
                         group.Elements.SetName("/CS", "/DeviceCMYK");
-
                     // #PDF-A
                     group.Elements.SetName("/S", "/Transparency");
-
                     //False is default: group.Elements["/I"] = new PdfBoolean(false);
                     //False is default: group.Elements["/K"] = new PdfBoolean(false);
                 }

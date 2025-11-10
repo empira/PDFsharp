@@ -63,7 +63,10 @@ namespace PdfSharp.Pdf
                 => value.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(value, DateTimeKind.Local) : value;
 
             var creationDate = SpecifyLocalDateTimeKindIfUnspecified(_document.Info.CreationDate).ToString("yyyy-MM-ddTHH:mm:ssK");
-            var modificationDate = creationDate;
+            
+            // CORREÇÃO: Usar a ModDate do documento, que deve ser atualizada no PrepareForSave
+            var modificationDate = SpecifyLocalDateTimeKindIfUnspecified(_document.Info.ModificationDate).ToString("yyyy-MM-ddTHH:mm:ssK");
+
 
             var author = _document.Info.Author;
             var creator = _document.Info.Creator;
