@@ -71,7 +71,7 @@ namespace PdfSharp.Pdf.Signatures
             (RangedStream rangedStreamToSign, PdfArray byteRangeArray) = GetRangeToSignAndByteRangeArray(writer.Stream);
 
             Debug.Assert(_signatureFieldByteRangePlaceholder != null);
-            _signatureFieldByteRangePlaceholder!.WriteActualObject(byteRangeArray, writer);
+            _signatureFieldByteRangePlaceholder.WriteActualObject(byteRangeArray, writer);
 
             // Computing signature from document’s digest.
             byte[] signature = await Signer.GetSignatureAsync(rangedStreamToSign).ConfigureAwait(false);
@@ -313,7 +313,6 @@ namespace PdfSharp.Pdf.Signatures
                 Reason = Options.Reason,
                 Signer = Signer.CertificateName
             };
-
             // TODO_OLD Call RenderCustomAppearance(); here.
             signatureField.PrepareForSave(); // TODO_OLD PdfSignatureField.PrepareForSave() is not triggered automatically so let's call it manually from here, but it would be better to be called automatically
 

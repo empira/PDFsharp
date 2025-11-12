@@ -304,8 +304,7 @@ namespace PdfSharp.Pdf
                 throw new PdfSharpException(message);
 
             // Get security handler if document gets encrypted.
-            Debug.Assert(SecuritySettings.EffectiveSecurityHandler != null);
-            PdfStandardSecurityHandler effectiveSecurityHandler = SecuritySettings.EffectiveSecurityHandler;
+            var effectiveSecurityHandler = SecuritySettings.EffectiveSecurityHandler;
             
             PdfWriter? writer = null;
             try
@@ -388,8 +387,8 @@ namespace PdfSharp.Pdf
                     if (iref.ObjectNumber == 378)
                         _ = typeof(int);
 #endif
-                    iref.Position = writer.Position;                    
-                    
+                    iref.Position = writer.Position;
+
                     PdfObject obj = iref.Value;
 
                     // Enter indirect object in SecurityHandler to allow object encryption key generation for this object.
@@ -574,6 +573,7 @@ namespace PdfSharp.Pdf
 
             info.Elements.SetString(PdfDocumentInformation.Keys.Producer, producer);
 
+            // Prepare used fonts.
             _fontTable?.PrepareForSave();
 
             // Let catalog do the rest.
