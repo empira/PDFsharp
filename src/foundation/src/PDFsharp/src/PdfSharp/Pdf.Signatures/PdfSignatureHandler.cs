@@ -8,8 +8,6 @@ using PdfSharp.Pdf.AcroForms;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Internal;
 using PdfSharp.Pdf.IO;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace PdfSharp.Pdf.Signatures
 {
@@ -69,72 +67,81 @@ namespace PdfSharp.Pdf.Signatures
                 await ComputeIncrementalSignatureAsync(writer.Stream).ConfigureAwait(continueOnCapturedContext: false);
                 return;
             }
-            var (stream, obj) = GetRangeToSignAndByteRangeArray(writer.Stream);
-            _signatureFieldByteRangePlaceholder.WriteActualObject(obj, writer);
-            byte[] array = await Signer.GetSignatureAsync(stream).ConfigureAwait(continueOnCapturedContext: false);
-            int size = _placeholderItem.Size;
-            if (array.Length > size)
-            {
-                throw new Exception($"The actual digest length {array.Length} is larger than the approximation made {size}. Not enough room in the placeholder to fit the signature.");
-            }
+
+            (RangedStream rangedStreamToSign, PdfArray byteRangeArray) = GetRangeToSignAndByteRangeArray(writer.Stream);
+
+            Debug.Assert(_signatureFieldByteRangePlaceholder != null);
+            _signatureFieldByteRangePlaceholder!.WriteActualObject(byteRangeArray, writer);
+
+            // Computing signature from document’s digest.
+            byte[] signature = await Signer.GetSignatureAsync(rangedStreamToSign).ConfigureAwait(false);
+
+            Debug.Assert(_placeholderItem != null);
+            int expectedLength = _placeholderItem.Size;
+            if (signature.Length > expectedLength)
+                throw new Exception($"The actual digest length {signature.Length} is larger than the approximation made {expectedLength}. Not enough room in the placeholder to fit the signature.");
+
+            // Write the signature at the space reserved by placeholder item.
             writer.Stream.Position = _placeholderItem.StartPosition;
+
+            // When the signature includes a timestamp, the exact length is unknown until the signature is definitely calculated.
+            // Therefore, we write the angle brackets here and override the placeholder white spaces.
             writer.WriteRaw('<');
-            writer.Write(PdfEncoders.RawEncoding.GetBytes(FormatHex(array)));
-            for (int i = array.Length; i < size; i++)
-            {
+            writer.Write(PdfEncoders.RawEncoding.GetBytes(FormatHex(signature)));
+
+            // Fill up the allocated placeholder. Signature is sometimes considered invalid if there are spaces after '>'.
+            for (int i = signature.Length; i < expectedLength; i++)
                 writer.WriteRaw("00");
-            }
+
             writer.WriteRaw('>');
         }
 
         /// <summary>
-        /// Minimal placeholder for incremental-sign attempt.
-        /// This function is intentionally conservative: it tries to update the file
-        /// in-place only if the placeholder offsets appear valid. A robust incremental
-        /// implementation requires writing incremental xref & trailer; we'll extend
-        /// this later. For now this helper tries to write the signature bytes at the
-        /// reserved placeholder offset in the existing file (works when offsets align).
+        /// Writes the computed digital signature into the existing PDF stream during an incremental signing operation.
         /// </summary>
-        // Antes (exemplo):
-        // internal async Task ComputeIncrementalSignatureAsync(string path, Stream ignored) { ... }
-
-        // Depois: novo método que usa o stream já aberto.
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="Exception"></exception>
         internal async Task ComputeIncrementalSignatureAsync(Stream targetStream)
         {
             if (targetStream == null)
-            {
                 throw new ArgumentNullException("targetStream");
-            }
+            
             if (!targetStream.CanRead || !targetStream.CanSeek || !targetStream.CanWrite)
-            {
                 throw new InvalidOperationException("Target stream must be readable, seekable and writable for incremental signature.");
-            }
-            (RangedStream rangedStream, PdfArray byteRangeArray) rangeToSignAndByteRangeArray = GetRangeToSignAndByteRangeArray(targetStream);
-            RangedStream item = rangeToSignAndByteRangeArray.rangedStream;
-            PdfArray item2 = rangeToSignAndByteRangeArray.byteRangeArray;
+
+            (RangedStream rangedStreamToSign, PdfArray byteRangeArray) = GetRangeToSignAndByteRangeArray(targetStream);
+
             PdfWriter writer = new PdfWriter(targetStream, Document, null)
             {
                 Layout = PdfWriterLayout.Compact
             };
-            _signatureFieldByteRangePlaceholder.WriteActualObject(item2, writer);
-            byte[] array = await Signer.GetSignatureAsync(item).ConfigureAwait(continueOnCapturedContext: false);
-            int size = _placeholderItem.Size;
-            if (array.Length > size)
-            {
-                throw new Exception($"Actual signature length {array.Length} exceeds placeholder {size}.");
-            }
+
+            Debug.Assert(_signatureFieldByteRangePlaceholder != null);
+            _signatureFieldByteRangePlaceholder.WriteActualObject(byteRangeArray, writer);
+
+            byte[] signature = await Signer.GetSignatureAsync(rangedStreamToSign).ConfigureAwait(false);
+
+            Debug.Assert(_placeholderItem != null);
+            int expectedLength = _placeholderItem.Size;
+            if (signature.Length > expectedLength)
+                throw new Exception($"The actual digest length {signature.Length} is larger than the approximation made {expectedLength}. Not enough room in the placeholder to fit the signature.");
+
             targetStream.Position = _placeholderItem.StartPosition;
             targetStream.WriteByte(60);
-            string text = PdfEncoders.ToHexStringLiteral(array, unicode: false, prefix: false, null);
+
+            string text = PdfEncoders.ToHexStringLiteral(signature, unicode: false, prefix: false, null);
             int num = text.Length - 2;
             byte[] array2 = new byte[num];
             PdfEncoders.RawEncoding.GetBytes(text, 1, num, array2, 0);
+
             targetStream.Write(array2, 0, array2.Length);
-            for (int i = array.Length; i < size; i++)
+
+            for (int i = signature.Length; i < expectedLength; i++)
             {
                 byte[] bytes = PdfEncoders.RawEncoding.GetBytes("00");
                 targetStream.Write(bytes, 0, bytes.Length);
             }
+
             targetStream.WriteByte(62);
             targetStream.Flush();
         }
@@ -190,89 +197,97 @@ namespace PdfSharp.Pdf.Signatures
         internal async Task AddSignatureComponentsAsync()
         {
             if (Options.PageIndex >= Document.PageCount)
-            {
                 throw new ArgumentOutOfRangeException($"Signature page doesn't exist, specified page was {Options.PageIndex + 1} but document has only {Document.PageCount} page(s).");
-            }
-            _placeholderItem = new PdfSignaturePlaceholderItem(await Signer.GetSignatureSizeAsync().ConfigureAwait(continueOnCapturedContext: false));
-            _signatureFieldByteRangePlaceholder = new PdfPlaceholderObject(36);
+
+            int signatureSize = await Signer.GetSignatureSizeAsync().ConfigureAwait(false);
+            _placeholderItem = new PdfSignaturePlaceholderItem(signatureSize);
+            _signatureFieldByteRangePlaceholder = new PdfPlaceholderObject(ByteRangePlaceholderLength);
+
             PdfSignature2 signatureDictionary = GetSignatureDictionary(_placeholderItem, _signatureFieldByteRangePlaceholder);
             if (Options.AppendSignature)
             {
-                PdfCatalog catalog = Document.Catalog;
-                if (catalog.Elements.GetObject("/AcroForm") == null)
-                {
-                    catalog.Elements.Add("/AcroForm", new PdfAcroForm(Document));
-                }
-                PdfAcroForm acroForm = catalog.AcroForm;
-                if (!acroForm.Elements.ContainsKey("/SigFlags"))
-                {
-                    acroForm.Elements.Add("/SigFlags", new PdfInteger(3));
-                }
-                else if (acroForm.Elements.GetInteger("/SigFlags") < 3)
-                {
-                    acroForm.Elements.SetInteger("/SigFlags", 3);
-                }
-                int valueOrDefault = (acroForm.Fields?.Elements?.Count).GetValueOrDefault();
-                PdfDictionary pdfDictionary = new PdfDictionary(Document);
-                pdfDictionary.Elements["/FT"] = new PdfName("/Sig");
-                pdfDictionary.Elements["/T"] = new PdfString($"Signature{valueOrDefault + 1}");
-                pdfDictionary.Elements["/V"] = signatureDictionary;
-                pdfDictionary.Elements["/Ff"] = new PdfInteger(4);
-                pdfDictionary.Elements["/Type"] = new PdfName("/Annot");
-                pdfDictionary.Elements["/Subtype"] = new PdfName("/Widget");
-                pdfDictionary.Elements["/Rect"] = new PdfRectangle(Options.Rectangle);
-                pdfDictionary.Elements["/P"] = Document.Pages[Options.PageIndex].Reference;
-                Document.Internals.AddObject(pdfDictionary);
-                if (acroForm.Elements["/Fields"] is PdfArray pdfArray)
-                {
-                    pdfArray.Elements.Add(pdfDictionary.Reference);
-                }
-                else
-                {
-                    PdfArray pdfArray2 = new PdfArray(Document);
-                    pdfArray2.Elements.Add(pdfDictionary.Reference);
-                    acroForm.Elements["/Fields"] = pdfArray2;
-                }
-                if (!acroForm.Elements.ContainsKey("/DR"))
-                {
-                    acroForm.Elements.Add("/DR", new PdfDictionary(Document));
-                }
-                if (!acroForm.Elements.ContainsKey("/DA"))
-                {
-                    acroForm.Elements.Add("/DA", new PdfString("/Helv 0 Tf 0 g"));
-                }
+                AddIncrementalSignatureComponents(signatureDictionary);
+                return;
             }
             else
             {
                 PdfSignatureField signatureField = GetSignatureField(signatureDictionary);
-                PdfArray array = Document.Pages[Options.PageIndex].Elements.GetArray("/Annots");
-                if (array == null)
-                {
-                    Document.Pages[Options.PageIndex].Elements.Add("/Annots", new PdfArray(Document, signatureField));
-                }
+
+                PdfArray? annotations = Document.Pages[Options.PageIndex].Elements.GetArray(PdfPage.Keys.Annots);
+                if (annotations == null)
+                    Document.Pages[Options.PageIndex].Elements.Add(PdfPage.Keys.Annots, new PdfArray(Document, signatureField));
                 else
-                {
-                    array.Elements.Add(signatureField);
-                }
-                PdfCatalog catalog2 = Document.Catalog;
-                if (catalog2.Elements.GetObject("/AcroForm") == null)
-                {
-                    catalog2.Elements.Add("/AcroForm", new PdfAcroForm(Document));
-                }
-                if (!catalog2.AcroForm.Elements.ContainsKey("/SigFlags"))
-                {
-                    catalog2.AcroForm.Elements.Add("/SigFlags", new PdfInteger(3));
-                }
-                else if (catalog2.AcroForm.Elements.GetInteger("/SigFlags") < 3)
-                {
-                    catalog2.AcroForm.Elements.SetInteger("/SigFlags", 3);
-                }
-                if (catalog2.AcroForm.Elements.GetValue("/Fields") == null)
-                {
-                    catalog2.AcroForm.Elements.SetValue("/Fields", new PdfAcroField.PdfAcroFieldCollection(new PdfArray()));
-                }
-                catalog2.AcroForm.Fields.Elements.Add(signatureField);
+                    annotations.Elements.Add(signatureField);
+
+                PdfCatalog catalog = Document.Catalog;
+
+                SetAcroFormsAndSixFlagsOnCatalog(catalog);
+
+                if (catalog.AcroForm.Elements.GetValue(PdfAcroForm.Keys.Fields) == null)
+                    catalog.AcroForm.Elements.SetValue(PdfAcroForm.Keys.Fields, new PdfAcroField.PdfAcroFieldCollection(new PdfArray()));
+                catalog.AcroForm.Fields.Elements.Add(signatureField);
             }
+        }
+
+        /// <summary>
+        /// Adds the required AcroForm and annotation entries for an incremental digital signature.
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        internal void AddIncrementalSignatureComponents(PdfSignature2 signatureDictionary)
+        {
+            PdfCatalog catalog = Document.Catalog;
+            SetAcroFormsAndSixFlagsOnCatalog(catalog);
+
+            PdfAcroForm acroForm = catalog.AcroForm;
+            int valueOrDefault = (acroForm.Fields?.Elements?.Count).GetValueOrDefault();
+            PdfDictionary pdfDictionary = GetDocumentDictionary(signatureDictionary, valueOrDefault);
+
+            Document.Internals.AddObject(pdfDictionary);
+
+            Debug.Assert(pdfDictionary.Reference != null);
+            if (acroForm.Elements.GetValue(PdfAcroForm.Keys.Fields) is PdfArray pdfArray)
+                pdfArray.Elements.Add(pdfDictionary.Reference);
+            else
+            {
+                PdfArray pdfArray2 = new PdfArray(Document);
+                pdfArray2.Elements.Add(pdfDictionary.Reference);
+                acroForm.Elements.SetValue(PdfAcroForm.Keys.Fields, pdfArray2);
+            }
+
+            if (!acroForm.Elements.ContainsKey(PdfAcroForm.Keys.DR))
+                acroForm.Elements.Add(PdfAcroForm.Keys.DR, new PdfDictionary(Document));
+
+            if (!acroForm.Elements.ContainsKey(PdfAcroForm.Keys.DA))
+                acroForm.Elements.Add(PdfAcroForm.Keys.DA, new PdfString("/Helv 0 Tf 0 g"));
+
+        }
+
+        PdfDictionary GetDocumentDictionary(PdfSignature2 signatureDictionary, int valueOrDefault) 
+        {
+            PdfDictionary pdfDictionary = new PdfDictionary(Document);
+
+            pdfDictionary.Elements.Add(PdfAcroField.Keys.FT, new PdfName("/Sig"));
+            pdfDictionary.Elements.Add(PdfAcroField.Keys.T, new PdfString($"Signature{valueOrDefault + 1}"));
+            pdfDictionary.Elements.Add(PdfAcroField.Keys.V, signatureDictionary);
+            pdfDictionary.Elements.Add(PdfAcroField.Keys.Ff, new PdfInteger(4));
+            pdfDictionary.Elements.Add(PdfSignatureField.Keys.Type, new PdfName("/Annot"));
+            pdfDictionary.Elements.Add("/Subtype", new PdfName("/Widget"));
+            pdfDictionary.Elements.Add("/P", Document.Pages[Options.PageIndex].Reference);
+            pdfDictionary.Elements.Add("/Rect", new PdfRectangle(Options.Rectangle));
+
+            return pdfDictionary;
+        }
+
+        PdfCatalog SetAcroFormsAndSixFlagsOnCatalog(PdfCatalog catalog)
+        {
+            if (catalog.Elements.GetObject(PdfCatalog.Keys.AcroForm) == null)
+                catalog.Elements.Add(PdfCatalog.Keys.AcroForm, new PdfAcroForm(Document));
+            PdfAcroForm acroForm = catalog.AcroForm;
+            if (!acroForm.Elements.ContainsKey(PdfAcroForm.Keys.SigFlags))
+                acroForm.Elements.Add(PdfAcroForm.Keys.SigFlags, new PdfInteger(3));
+            else if (acroForm.Elements.GetInteger(PdfAcroForm.Keys.SigFlags) < 3)
+                acroForm.Elements.SetInteger(PdfAcroForm.Keys.SigFlags, 3);
+            return catalog;
         }
 
         PdfSignatureField GetSignatureField(PdfSignature2 signatureDic)
@@ -291,7 +306,7 @@ namespace PdfSharp.Pdf.Signatures
             signatureField.Elements.Add("/P", Document.Pages[Options.PageIndex]);
 
             signatureField.Elements.Add("/Rect", new PdfRectangle(Options.Rectangle));
-            
+
             signatureField.CustomAppearanceHandler = Options.AppearanceHandler ?? new DefaultSignatureAppearanceHandler()
             {
                 Location = Options.Location,
@@ -301,14 +316,16 @@ namespace PdfSharp.Pdf.Signatures
 
             // TODO_OLD Call RenderCustomAppearance(); here.
             signatureField.PrepareForSave(); // TODO_OLD PdfSignatureField.PrepareForSave() is not triggered automatically so let's call it manually from here, but it would be better to be called automatically
-           
+
             // Se vazio, define para imprimir (requisito PDF/A para SigField)
-            signatureField.Elements.SetInteger("/F", 4);            
+            signatureField.Elements.SetInteger("/F", 4);
 
             Document.Internals.AddObject(signatureField);
 
             return signatureField;
         }
+
+
 
         PdfSignature2 GetSignatureDictionary(PdfSignaturePlaceholderItem contents, PdfPlaceholderObject byteRange)
         {
