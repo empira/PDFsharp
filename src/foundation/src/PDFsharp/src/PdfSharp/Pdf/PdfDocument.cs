@@ -17,8 +17,6 @@ using PdfSharp.Pdf.Structure;
 using PdfSharp.UniversalAccessibility;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable ConvertPropertyToExpressionBody
