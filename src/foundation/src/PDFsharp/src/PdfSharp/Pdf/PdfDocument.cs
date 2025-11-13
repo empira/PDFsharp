@@ -424,10 +424,47 @@ namespace PdfSharp.Pdf
             }
         }
 
-        void PrepareForPdfA()  // Just a first hack.
+        void PrepareForPdfA()
         {
             var internals = Internals;
 
+            InitializePdfAComponents();
+
+            // If catalog already has OutputIntents, assume PDF/A intent already set -> skip adding.
+            if (Catalog.Elements.GetObject(PdfCatalog.Keys.OutputIntents) != null)
+            {
+                if (PdfSharpLogHost.Logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                    PdfSharpLogHost.Logger.LogDebug("PrepareForPdfA: OutputIntents already present -> skip.");
+                return;
+            }
+
+            PdfArray outputIntentsArray = new PdfArray(this);
+            var outputIntent = new PdfDictionary(this);
+            outputIntentsArray.Elements.Add(outputIntent);
+
+            outputIntent.Elements.SetName("/Type", "/OutputIntent");
+            outputIntent.Elements.SetName("/S", "/GTS_PDFA1");
+            outputIntent.Elements.SetString("/OutputConditionIdentifier", "sRGB");
+            outputIntent.Elements.SetString("/RegistryName", "http://www.color.org");
+            outputIntent.Elements.SetString("/Info", "Creator: ColorOrg     Manufacturer:IEC    Model:sRGB");
+
+            PdfDictionary? profileObject = BuildOrReuseColorProfile(internals);
+
+            if (profileObject?.Reference != null)
+                outputIntent.Elements.SetReference("/DestOutputProfile", profileObject.Reference);
+
+            // Finally set OutputIntents in catalog safely — use SetValue/SetReference not Add to avoid duplicate key
+            if (internals.Catalog.Elements.ContainsKey(PdfCatalog.Keys.OutputIntents))
+                internals.Catalog.Elements.SetValue(PdfCatalog.Keys.OutputIntents, outputIntentsArray);
+            else
+                internals.Catalog.Elements.Add(PdfCatalog.Keys.OutputIntents, outputIntentsArray);
+        }
+
+        /// <summary>
+        /// Ensures UA manager initialization and logs debug warnings if setup fails.
+        /// </summary>
+        void InitializePdfAComponents()
+        {
             try
             {
                 if (_uaManager == null)
@@ -438,79 +475,47 @@ namespace PdfSharp.Pdf
                 if (PdfSharpLogHost.Logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
                     PdfSharpLogHost.Logger.LogDebug($"PrepareForPdfA: UAManager.ForDocument() failed: {ex.Message}");
             }
+        }
 
-            // If catalog already has OutputIntents, assume PDF/A intent already set -> skip adding.
-            if (Catalog.Elements.GetObject(PdfCatalog.Keys.OutputIntents) != null)
-            {
-                if (PdfSharpLogHost.Logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
-                    PdfSharpLogHost.Logger.LogDebug("PrepareForPdfA: OutputIntents already present -> skip.");
-                return;
-            }
-
-            // Create OutputIntents array (do not call Elements.Add blindly)
-            PdfArray outputIntentsArray = new PdfArray(this);
-
-            // Create outputIntent dictionary
-            var outputIntent = new PdfDictionary(this);
-            outputIntentsArray.Elements.Add(outputIntent);
-
-            outputIntent.Elements.SetName("/Type", "/OutputIntent");
-            outputIntent.Elements.SetName("/S", "/GTS_PDFA1");
-            outputIntent.Elements.SetString("/OutputConditionIdentifier", "sRGB");
-            outputIntent.Elements.SetString("/RegistryName", "http://www.color.org");
-            outputIntent.Elements.SetString("/Info", "Creator: ColorOrg     Manufacturer:IEC    Model:sRGB");
-
-            // Build ICC profile stream object only if not already present
-            PdfDictionary? profileObject = null;
+        /// <summary>
+        /// Attempts to reuse an existing ICC color profile or embeds a new sRGB profile if needed.
+        /// </summary>
+        PdfDictionary? BuildOrReuseColorProfile(PdfInternals internals)
+        {
             try
             {
-                // Try to reuse existing profile in document if present
                 var existing = FindExistingOutputProfile(internals);
                 if (existing != null)
-                {
-                    profileObject = existing;
-                }
-                else
-                {
-                    // Load resource
-                    var profileStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PdfSharp.Resources.sRGB2014.icc")
-                        ?? throw new InvalidOperationException("Embedded color profile was not found.");
+                    return existing;
 
-                    var profile = new byte[profileStream.Length];
-                    var read = profileStream.Read(profile, 0, (int)profileStream.Length);
-                    if (read != profileStream.Length)
-                        throw new InvalidOperationException("Embedded color profile was not read.");
+                using var profileStream = Assembly.GetExecutingAssembly()
+                    .GetManifestResourceStream("PdfSharp.Resources.sRGB2014.icc")
+                    ?? throw new InvalidOperationException("Embedded color profile was not found.");
 
-                    var fd = new FlateDecode();
-                    byte[] profileCompressed = fd.Encode(profile, Options.FlateEncodeMode);
+                var profile = new byte[profileStream.Length];
+                var read = profileStream.Read(profile, 0, (int)profileStream.Length);
+                if (read != profileStream.Length)
+                    throw new InvalidOperationException("Embedded color profile was not read.");
 
-                    profileObject = new PdfDictionary(this);
-                    IrefTable.Add(profileObject);
+                var fd = new FlateDecode();
+                byte[] profileCompressed = fd.Encode(profile, Options.FlateEncodeMode);
 
-                    // Set stream value safely (use Set operations to avoid duplicate-key)
-                    profileObject.Stream = new PdfDictionary.PdfStream(profileCompressed, profileObject);
-                    profileObject.Elements.SetInteger("/N", 3);
-                    profileObject.Elements.SetInteger("/Length", profileCompressed.Length);
-                    profileObject.Elements.SetName("/Filter", "/FlateDecode");
-                }
+                var profileObject = new PdfDictionary(this);
+                IrefTable.Add(profileObject);
 
-                // Link dest output profile (use SetReference to avoid duplicate Adds)
-                Debug.Assert(profileObject.Reference != null);
-                outputIntent.Elements.SetReference("/DestOutputProfile", profileObject.Reference);
+                profileObject.Stream = new PdfDictionary.PdfStream(profileCompressed, profileObject);
+                profileObject.Elements.SetInteger("/N", 3);
+                profileObject.Elements.SetInteger("/Length", profileCompressed.Length);
+                profileObject.Elements.SetName("/Filter", "/FlateDecode");
+
+                return profileObject;
             }
             catch (Exception ex)
             {
-                // If something goes wrong with ICC embedding, log and continue without failing save.
                 if (PdfSharpLogHost.Logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Warning))
                     PdfSharpLogHost.Logger.LogWarning($"PrepareForPdfA: ICC embedding failed: {ex.Message}");
+                return null;
             }
-
-            // Finally set OutputIntents in catalog safely — use SetValue/SetReference not Add to avoid duplicate key
-            // If there is already a value for /OutputIntents (race), replace it.
-            if (internals.Catalog.Elements.ContainsKey(PdfCatalog.Keys.OutputIntents))
-                internals.Catalog.Elements.SetValue(PdfCatalog.Keys.OutputIntents, outputIntentsArray);
-            else
-                internals.Catalog.Elements.Add(PdfCatalog.Keys.OutputIntents, outputIntentsArray);
         }
 
         PdfDictionary? FindExistingOutputProfile(PdfInternals internals)
