@@ -419,5 +419,58 @@ namespace PdfSharp.Tests.Drawing
             }
         }
 #endif
+
+        [Fact]
+        public void Create_brush_by_image()
+        {
+            // Create a new PDF document.
+            var document = new PdfDocument();
+            document.Info.Title = "Created with PDFsharp";
+
+            document.Options.EnableCcittCompressionForBilevelImages = true;
+            document.Options.FlateEncodeMode = PdfFlateEncodeMode.BestCompression; // Makes CCITT compression obsolete.
+            //document.Options.FlateEncodeMode = PdfFlateEncodeMode.BestSpeed; // Some images will use CCITT compression, e.g. BlackwhiteTXT.bmp.
+            document.Options.UseFlateDecoderForJpegImages = PdfUseFlateDecoderForJpegImages.Automatic;
+
+            // Create an empty page in this document.
+            var page = document.AddPage();
+
+            // Get an XGraphics object for drawing on this page.
+            var gfx = XGraphics.FromPdfPage(page);
+
+            var imagePath = IOUtility.GetAssetsPath("pdfsharp/images/PDFsharp-80x80.png")!;
+            XBrush xBrush = XImageBrush.FromFile(imagePath);
+            XPen xPen = XPens.Black;
+
+            gfx.DrawEllipse(xPen, xBrush, new XRect(10, 10, 200, 190));
+            gfx.DrawRectangle(xPen, xBrush, new XRect(250, 10, 200, 190));
+            gfx.DrawRoundedRectangle(xPen, xBrush, new XRect(10, 250, 200, 190), new XSize(30, 30));
+
+            XGraphicsPath path = new XGraphicsPath();
+            path.AddLines(new XPoint[] { new XPoint(350, 250), new XPoint(250, 450), new XPoint(450, 330), new XPoint(250, 330), new XPoint(450, 450), new XPoint(350, 250) });
+            gfx.DrawPath(xPen, xBrush, path);
+
+            gfx.DrawPie(xPen, xBrush, 10, 500, 190, 190, 50, 50);
+            gfx.DrawPolygon(xPen, xBrush, new XPoint[] { new XPoint(300, 500), new XPoint(400, 500), new XPoint(450, 550), new XPoint(450, 650), new XPoint(400, 700), new XPoint(300, 700), new XPoint(250, 650), new XPoint(250, 550), new XPoint(300, 500) }, XFillMode.Alternate);
+
+            // Create an second empty page in this document.
+            page = document.AddPage();
+
+            // Get an XGraphics object for drawing on this page.
+            gfx = XGraphics.FromPdfPage(page);
+
+            gfx.DrawClosedCurve(xPen, xBrush, new XPoint[] { new XPoint(110, 10), new XPoint(190, 190), new XPoint(10, 190) });
+            gfx.DrawRectangle(xPen, xBrush, new XRect(250, 10, 200, 190));
+
+            // Create a font.
+            var font = new XFont("Arial", 20, XFontStyleEx.BoldItalic);
+            gfx.DrawString("Hello, dotnet 6.0!", font, xBrush, new XRect(250, 10, 200, 200), XStringFormats.Center); // Idk what we're gonna do
+
+            // Save the document...
+            string filename = PdfFileUtility.GetTempPdfFileName("HelloImageWorld");
+            document.Save(filename);
+            // ...and start a viewer.
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
+        }
     }
 }

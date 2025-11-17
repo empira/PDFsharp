@@ -106,6 +106,7 @@
     <Compile Include="..\PdfSharp\Drawing\XGraphicsPathItem.cs" Link="Drawing\XGraphicsPathItem.cs" />
     <Compile Include="..\PdfSharp\Drawing\XGraphicsState.cs" Link="Drawing\XGraphicsState.cs" />
     <Compile Include="..\PdfSharp\Drawing\XImage.cs" Link="Drawing\XImage.cs" />
+    <Compile Include="..\PdfSharp\Drawing\XImageBrush.cs" Link="Drawing\XImageBrush.cs" />
     <Compile Include="..\PdfSharp\Drawing\XImageFormat.cs" Link="Drawing\XImageFormat.cs" />
     <Compile Include="..\PdfSharp\Drawing\XKnownColorTable.cs" Link="Drawing\XKnownColorTable.cs" />
     <Compile Include="..\PdfSharp\Drawing\XLinearGradientBrush.cs" Link="Drawing\XLinearGradientBrush.cs" />
