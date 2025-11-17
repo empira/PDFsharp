@@ -23,11 +23,11 @@ namespace PdfSharp.Fonts.OpenType
         {
             try
             {
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 var result = Globals.Global.Fonts.FontFaceCache.TryGetValue(key, out fontFace);
                 return result;
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 
         /// <summary>
@@ -39,18 +39,18 @@ namespace PdfSharp.Fonts.OpenType
         {
             try
             {
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 var result = Globals.Global.Fonts.FontFacesByCheckSum.TryGetValue(checkSum, out fontFace);
                 return result;
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 
         public static OpenTypeFontFace AddFontFace(OpenTypeFontFace fontFace)
         {
             try
             {
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 if (TryGetFontFace(fontFace.FullFaceName, out var fontFaceCheck))
                 {
                     if (fontFaceCheck.CheckSum != fontFace.CheckSum)
@@ -61,7 +61,7 @@ namespace PdfSharp.Fonts.OpenType
                 Globals.Global.Fonts.FontFacesByCheckSum.Add(fontFace.CheckSum, fontFace);
                 return fontFace;
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 
         internal static void Reset()

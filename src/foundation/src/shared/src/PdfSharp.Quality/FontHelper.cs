@@ -60,7 +60,7 @@ namespace PdfSharp.Quality
             {
                 int count = (int)stream.Length;
                 byte[] data = new byte[count];
-                stream.Read(data, 0, count);
+                _ = stream.Read(data, 0, count);
                 return data;
             }
         }

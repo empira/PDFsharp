@@ -50,7 +50,7 @@ namespace PdfSharp.Pdf
             {
                 // We do not break existing code.
                 // We found an iText document with generation numbers with a value of 65536... 
-                PdfSharpLogHost.PdfReadingLogger.LogError("Generation number '{GenerationNumber}' is out of range [0..65535}.", generationNumber);
+                PdfSharpLogHost.PdfReadingLogger.LogError("Generation number '{GenerationNumber}' is out of range [0..65535].", generationNumber);
                 // No high-performance logging because it is a rare case.
             }
 

@@ -1104,12 +1104,18 @@ namespace MigraDoc.Tests
                 var rawData = File.ReadAllBytes(pfxFile);
 
                 // Do not use password literals for real certificates in source code.
-                var certificatePassword = "Seecrit1243";  //@@@???
+                var certificatePassword = "Seecrit1243";  // Used in certificate.
 
+#if NET9_0_OR_GREATER
+                // New API introduced with .NET 9.
+                var certificate = X509CertificateLoader.LoadPkcs12(rawData, certificatePassword,
+                    X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+#else
+                // Old API, obsolete since .NET 9.
                 var certificate = new X509Certificate2(rawData,
                     certificatePassword,
-                    X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
-
+                    /*X509KeyStorageFlags.MachineKeySet |*/ X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+#endif
                 return certificate;
             }
         }

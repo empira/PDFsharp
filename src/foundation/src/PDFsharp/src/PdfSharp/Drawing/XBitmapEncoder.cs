@@ -68,10 +68,10 @@ namespace PdfSharp.Drawing
             }
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 Source._gdiImage.Save(stream, ImageFormat.Png);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
             DiagnosticsHelper.ThrowNotImplementedException("Save...");

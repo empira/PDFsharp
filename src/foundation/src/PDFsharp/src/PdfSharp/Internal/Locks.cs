@@ -10,7 +10,7 @@ namespace PdfSharp.Internal
     /// Static locking functions to make PDFsharp thread save.
     /// POSSIBLE BUG_OLD: Having more than one lock can lead to a deadlock.
     /// </summary>
-    static class Lock
+    static class Locks
     {
         public static void EnterGdiPlus()
         {

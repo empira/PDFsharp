@@ -374,7 +374,7 @@ namespace PdfSharp.Drawing
         {
             try
             {
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 if (GdiFontFamily != null!)
                 {
                     // Create font based on its family.
@@ -401,7 +401,7 @@ namespace PdfSharp.Drawing
 
                 CreateDescriptorAndInitializeFontMetrics();
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 #endif
 

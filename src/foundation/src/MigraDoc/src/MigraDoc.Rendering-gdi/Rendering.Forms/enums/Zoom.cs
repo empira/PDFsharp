@@ -69,7 +69,7 @@ namespace MigraDoc.Rendering.Forms
         /// <summary>
         /// The smallest possible zoom factor.
         /// </summary>
-        Mininum = PdfSharp.Forms.Zoom.Mininum,
+        Minimum = PdfSharp.Forms.Zoom.Minimum,
         /// <summary>
         /// The largest possible zoom factor.
         /// </summary>
@@ -136,7 +136,7 @@ namespace MigraDoc.Rendering.Forms
     /// <summary>
     /// The smallest possible zoom factor.
     /// </summary>
-    Mininum = PdfSharp.Windows.Zoom.Mininum,
+    Minimum = PdfSharp.Windows.Zoom.Minimum,
     /// <summary>
     /// The largest possible zoom factor.
     /// </summary>

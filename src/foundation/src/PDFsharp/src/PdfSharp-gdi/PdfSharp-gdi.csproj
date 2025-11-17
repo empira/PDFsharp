@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>library</OutputType>
-    <TargetFrameworks>net6.0-windows;net8.0-windows;net462</TargetFrameworks>
+    <TargetFrameworks>net8.0-windows;net9.0-windows;net10.0-windows;net462</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <RootNamespace>PdfSharp</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
@@ -172,7 +172,7 @@
     <Compile Include="..\PdfSharp\Internal\DoubleUtil.cs" Link="Internal\DoubleUtil.cs" />
     <Compile Include="..\PdfSharp\Internal\ErrorHelpers.cs" Link="Internal\ErrorHelpers.cs" />
     <Compile Include="..\PdfSharp\Internal\Globals.cs" Link="Internal\Globals.cs" />
-    <Compile Include="..\PdfSharp\Internal\Lock.cs" Link="Internal\Lock.cs" />
+    <Compile Include="..\PdfSharp\Internal\Locks.cs" Link="Internal\Locks.cs" />
     <Compile Include="..\PdfSharp\Internal\NativeMethods.cs" Link="Internal\NativeMethods.cs" />
     <Compile Include="..\PdfSharp\Internal\PsMsgs.cs" Link="Internal\PsMsgs.cs" />
     <Compile Include="..\PdfSharp\Internal\PsMsg.cs" Link="Internal\PsMsg.cs" />

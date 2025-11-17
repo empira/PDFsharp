@@ -17,22 +17,22 @@ namespace PdfSharp.Fonts.OpenType
         {
             try
             {
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 bool result = Globals.Global.Fonts.GlyphTypefacesByKey.TryGetValue(key, out glyphTypeface);
                 return result;
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 
         public static void AddGlyphTypeface(XGlyphTypeface glyphTypeface)
         {
             try
             {
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 Debug.Assert(!Globals.Global.Fonts.GlyphTypefacesByKey.ContainsKey(glyphTypeface.Key));
                 Globals.Global.Fonts.GlyphTypefacesByKey.Add(glyphTypeface.Key, glyphTypeface);
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 
         internal static void Reset()

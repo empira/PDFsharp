@@ -66,12 +66,12 @@ namespace PdfSharp.Forms
             //OnLayout();
 
             _zoom = Zoom.FullPage;
-            _printableArea = new RectangleF();
+            //_printableArea = new RectangleF();
             //virtPageSize = new Size();
             //showNonPrintableArea = false;
             //virtualPrintableArea = new Rectangle();
 
-            _printableArea.GetType();
+            //_printableArea.GetType();
             //showNonPrintableArea.GetType();
             //virtualPrintableArea.GetType();
 
@@ -150,22 +150,20 @@ namespace PdfSharp.Forms
         /// Gets or sets the XGraphicsUnit of the page.
         /// The default value is XGraphicsUnit.Point.
         /// </summary>
-        public XGraphicsUnit PageGraphicsUnit
-        {
-            get { return _pageGraphicsUnit; }
-            set { _pageGraphicsUnit = value; }
-        }
-        XGraphicsUnit _pageGraphicsUnit = XGraphicsUnit.Point;
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        public XGraphicsUnit PageGraphicsUnit { get; set; } = XGraphicsUnit.Point;
 
+#if !NET9_0_OR_GREATER
         /// <summary>
         /// This property was renamed. Use new property PageGraphicsUnit.
         /// </summary>
         [Obsolete("Property renamed, use PageGraphicsUnit")]
         public XGraphicsUnit PageUnit
         {
-            get { return _pageGraphicsUnit; }
-            set { _pageGraphicsUnit = value; }
+            get => PageGraphicsUnit;
+            set => PageGraphicsUnit = value;
         }
+#endif
 
         /// <summary>
         /// Gets or sets a predefined zoom factor.
@@ -176,7 +174,7 @@ namespace PdfSharp.Forms
             get { return _zoom; }
             set
             {
-                if ((int)value < (int)Zoom.Mininum || (int)value > (int)Zoom.Maximum)
+                if ((int)value < (int)Zoom.Minimum || (int)value > (int)Zoom.Maximum)
                 {
                     if (!Enum.IsDefined(typeof(Zoom), value))
                         throw new InvalidEnumArgumentException("value", (int)value, typeof(Zoom));
@@ -196,14 +194,15 @@ namespace PdfSharp.Forms
         /// Gets or sets an arbitrary zoom factor. The range is from 10 to 800.
         /// </summary>
         //[DefaultValue((int)Zoom.FullPage), Description("Determines the zoom of the page."), Category("Preview Properties")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public int ZoomPercent
         {
             get { return _zoomPercent; }
             set
             {
-                if (value < (int)Zoom.Mininum || value > (int)Zoom.Maximum)
+                if (value < (int)Zoom.Minimum || value > (int)Zoom.Maximum)
                     throw new ArgumentOutOfRangeException("value", value,
-                      String.Format("Value must between {0} and {1}.", (int)Zoom.Mininum, (int)Zoom.Maximum));
+                      String.Format("Value must between {0} and {1}.", (int)Zoom.Minimum, (int)Zoom.Maximum));
 
                 if (value != _zoomPercent)
                 {
@@ -221,6 +220,7 @@ namespace PdfSharp.Forms
         /// Gets or sets the color of the page.
         /// </summary>
         [Description("The background color of the page."), Category("Preview Properties")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public Color PageColor
         {
             get { return _pageColor; }
@@ -239,6 +239,7 @@ namespace PdfSharp.Forms
         /// Gets or sets the color of the desktop.
         /// </summary>
         [Description("The color of the desktop."), Category("Preview Properties")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public Color DesktopColor
         {
             get { return _desktopColor; }
@@ -295,6 +296,7 @@ namespace PdfSharp.Forms
         /// Gets or sets the page size in point.
         /// </summary>
         [Description("Determines the size (in points) of the page."), Category("Preview Properties")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public XSize PageSize
         {
             get { return new XSize((int)_pageSize.Width, (int)_pageSize.Height); }
@@ -310,6 +312,7 @@ namespace PdfSharp.Forms
         /// This is a hack for Visual Studio 2008. The designer uses reflection for setting the PageSize property.
         /// This fails, even an implicit operator that converts Size to XSize exits.
         /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public Size PageSizeF
         {
             get { return new Size(Convert.ToInt32(_pageSize.Width), Convert.ToInt32(_pageSize.Height)); }
@@ -554,7 +557,7 @@ namespace PdfSharp.Forms
             }
 
             // Bound to zoom limits
-            _zoomPercent = Math.Max(Math.Min(_zoomPercent, (int)Zoom.Maximum), (int)Zoom.Mininum);
+            _zoomPercent = Math.Max(Math.Min(_zoomPercent, (int)Zoom.Maximum), (int)Zoom.Minimum);
             if ((int)_zoom > 0)
                 _zoom = (Zoom)_zoomPercent;
 
@@ -587,13 +590,12 @@ namespace PdfSharp.Forms
 
             zoomChanged = zoomOld != _zoom || zoomPercentOld != _zoomPercent;
             if (zoomChanged)
-                OnZoomChanged(new EventArgs());
+                OnZoomChanged(EventArgs.Empty);
         }
 
         internal void CalculatePreviewDimension()
         {
-            bool zoomChanged;
-            CalculatePreviewDimension(out zoomChanged);
+            CalculatePreviewDimension(out _);
         }
 
         internal bool RenderPage(Graphics gfx)
@@ -1043,9 +1045,9 @@ namespace PdfSharp.Forms
         /// </summary>
         Size _virtualCanvas;
 
-        /// <summary>
-        /// Printable area in point.
-        /// </summary>
-        readonly RectangleF _printableArea;
+        ///// <summary>
+        ///// Printable area in point.
+        ///// </summary>
+        //readonly RectangleF _printableArea;
     }
 }

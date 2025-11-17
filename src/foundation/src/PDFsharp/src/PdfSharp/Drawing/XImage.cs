@@ -163,10 +163,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 _gdiImage = Image.FromFile(path);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
             _wpfImage = BitmapFromUri(new Uri(path));
@@ -195,10 +195,10 @@ namespace PdfSharp.Drawing
             // Create a GDI+ image.
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 _gdiImage = Image.FromStream(stream);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
             // Create a WPF BitmapImage.
@@ -487,10 +487,10 @@ namespace PdfSharp.Drawing
                 string guid;
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     guid = _gdiImage.RawFormat.Guid.ToString("B").ToUpper();
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
 
                 switch (guid)
                 {
@@ -804,11 +804,11 @@ namespace PdfSharp.Drawing
             {
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     _gdiImage.Dispose();
                     _gdiImage = null!;
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
             }
 #endif
 #if WPF
@@ -836,10 +836,10 @@ namespace PdfSharp.Drawing
 #if GDI && !WPF
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     return _gdiImage.Width;
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
 #endif
 #if GDI && WPF
                 double gdiWidth = _gdiImage.Width;
@@ -878,10 +878,10 @@ namespace PdfSharp.Drawing
 #if GDI && !WPF
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     return _gdiImage.Height;
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
 #endif
 #if GDI && WPF
                 double gdiHeight = _gdiImage.Height;
@@ -939,10 +939,10 @@ namespace PdfSharp.Drawing
 #if GDI && !WPF
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     return _gdiImage.Width * 72 / _gdiImage.HorizontalResolution;
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
 #endif
 #if GDI && WPF
                 double gdiWidth = _gdiImage.Width * 72 / _gdiImage.HorizontalResolution;
@@ -990,10 +990,10 @@ namespace PdfSharp.Drawing
 #if GDI && !WPF
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     return _gdiImage.Height * 72 / _gdiImage.HorizontalResolution;
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
 #endif
 #if GDI && WPF
                 double gdiHeight = _gdiImage.Height * 72 / _gdiImage.HorizontalResolution;
@@ -1031,10 +1031,10 @@ namespace PdfSharp.Drawing
 #if GDI && !WPF
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     return _gdiImage.Width;
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
 #endif
 #if GDI && WPF
                 int gdiWidth = _gdiImage.Width;
@@ -1071,10 +1071,10 @@ namespace PdfSharp.Drawing
 #if GDI && !WPF
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     return _gdiImage.Height;
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
 #endif
 #if GDI && WPF
                 int gdiHeight = _gdiImage.Height;
@@ -1124,10 +1124,10 @@ namespace PdfSharp.Drawing
 #if GDI && !WPF
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     return _gdiImage.HorizontalResolution;
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
 #endif
 #if GDI && WPF
                 double gdiResolution = _gdiImage.HorizontalResolution;
@@ -1172,10 +1172,10 @@ namespace PdfSharp.Drawing
 #if GDI && !WPF
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     return _gdiImage.VerticalResolution;
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
 #endif
 #if GDI && WPF
                 double gdiResolution = _gdiImage.VerticalResolution;

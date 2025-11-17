@@ -55,9 +55,13 @@ namespace PdfSharp.Tests
             // Create a font.
             var font = new XFont("Times New Roman", 20, XFontStyleEx.BoldItalic);
 
-            // Draw the text.
-            gfx.DrawString("Hello, dotnet 6.0!", font, XBrushes.Black,
+#if NET6_0_OR_GREATER
+            gfx.DrawString($"Hello, dotnet {Environment.Version.Major}.{Environment.Version.Minor}!", font, XBrushes.Black,
                 new XRect(0, 0, width, height), XStringFormats.Center);
+#else
+            gfx.DrawString("Hello, World!", font, XBrushes.Black,
+                new XRect(0, 0, width, height), XStringFormats.Center);
+#endif
 
             // Save the document...
             string filename = PdfFileUtility.GetTempPdfFileName("HelloWorld");

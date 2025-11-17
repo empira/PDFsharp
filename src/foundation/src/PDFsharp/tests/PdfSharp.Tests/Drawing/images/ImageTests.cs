@@ -71,7 +71,7 @@ namespace PdfSharp.Tests.Drawing
             var font = new XFont("Arial", 20, XFontStyleEx.BoldItalic);
 
             // Draw the text.
-            gfx.DrawString("Hello, dotnet 6.0!", font, XBrushes.Black,
+            gfx.DrawString("Hello, World!", font, XBrushes.Black,
                 new XRect(0, 0, width, height), XStringFormats.Center);
 
             //var imagePath = "PDFsharp/images/samples/jpeg/windows7problem.jpg"; // OK
@@ -164,7 +164,7 @@ namespace PdfSharp.Tests.Drawing
             var font = new XFont("Arial", 20, XFontStyleEx.BoldItalic);
 
             // Draw the text.
-            gfx.DrawString("Hello, dotnet 6.0!", font, XBrushes.Black,
+            gfx.DrawString("Hello, World!", font, XBrushes.Black,
                 new XRect(0, 0, width, height), XStringFormats.Center);
 
             var imagePaths = new[]
@@ -343,6 +343,47 @@ namespace PdfSharp.Tests.Drawing
             GC.Collect();
             GC.WaitForFullGCComplete();
         }
+
+#if GDI
+        [Fact]
+        public void PDF_with_image_from_GDI()
+        {
+            // Create a new PDF document.
+            var document = new PdfDocument();
+
+#if DEBUG
+            // Create PDF files that are somewhat human-readable.
+            document.Options.Layout = PdfWriterLayout.Verbose;
+#endif
+
+            // Create an empty page in this document.
+            var page = document.AddPage();
+
+            // Get an XGraphics object for drawing on this page.
+            var gfx = XGraphics.FromPdfPage(page);
+
+            var imageFolder = IOUtility.GetAssetsPath("pdfsharp/images/samples/jpeg");
+            var imageFile = Path.Combine(imageFolder ?? throw new InvalidOperationException("Call Download-Assets.ps1 before running the tests."), "truecolorA.jpg");
+
+            var gdiImage = Image.FromFile(imageFile);
+            var xImage = XImage.FromGdiPlusImage(gdiImage);
+            gfx.DrawImage(xImage, new RectangleF(0f, 0f, 128f, 128f));
+
+            imageFolder = IOUtility.GetAssetsPath("pdfsharp/images/samples/png");
+            imageFile = Path.Combine(imageFolder ?? throw new InvalidOperationException("Call Download-Assets.ps1 before running the tests."), "truecolorA.png");
+
+            gdiImage = Image.FromFile(imageFile);
+            xImage = XImage.FromGdiPlusImage(gdiImage);
+            gfx.DrawImage(xImage, new RectangleF(0f, 144f, 128f, 128f));
+
+            // Save the document...
+            var filename = PdfFileUtility.GetTempPdfFileName("ImageFromStream");
+            document.Save(filename);
+            // ...and start a viewer.
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
+        }
+
+#endif
 
 #if NET6_0_OR_GREATER
         [Fact]

@@ -100,11 +100,11 @@ namespace PdfSharp.Fonts.OpenType
             // see https://forum.pdfsharp.net/viewtopic.php?f=2&t=2248#p10378
             try
             {
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 for (int idx = 0; idx < count; idx++)
                     AddCompositeGlyphs(glyphs, glyphArray[idx]);
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 
         /// <summary>

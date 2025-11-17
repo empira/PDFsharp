@@ -34,8 +34,6 @@ namespace Shared.TestApp
             LogHost.Factory = loggerFactory;
 
             ILogger logger = loggerFactory.CreateLogger<Program>();
-            
-
 
             //LogHost.Logger.LogError("Something went wrong.");
             //LogHost.Logger.TestMessage(LogLevel.Critical, "blah");

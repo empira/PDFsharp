@@ -52,7 +52,7 @@ namespace PdfSharp.Fonts
                 var fontResolverInfosByName = Globals.Global.Fonts.FontResolverInfosByName;
                 var fontSourcesByName = Globals.Global.Fonts.FontSourcesByName;
 
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 // Was this typeface requested before?
                 if (fontResolverInfosByName.TryGetValue(typefaceKey, out var fontResolverInfo))
                     return fontResolverInfo;
@@ -111,7 +111,7 @@ namespace PdfSharp.Fonts
             finally
             {
                 _fallbackFontResolverInvoked = false;
-                Lock.ExitFontFactory();
+                Locks.ExitFontFactory();
             }
         }
         static bool _fallbackFontResolverInvoked;
@@ -141,7 +141,7 @@ namespace PdfSharp.Fonts
                 var fontResolverInfosByName = Globals.Global.Fonts.FontResolverInfosByName;
                 var fontSourcesByName = Globals.Global.Fonts.FontSourcesByName;
 
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
 
                 // OverrideStyleSimulations is true only for internal quality tests.
                 // With this code we can simulate bold and/or italic for a font face even if
@@ -217,7 +217,7 @@ namespace PdfSharp.Fonts
                     }
                 }
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 #if GDI
         /// <summary>
@@ -231,7 +231,7 @@ namespace PdfSharp.Fonts
                 var fontSourcesByName = Globals.Global.Fonts.FontSourcesByName;
                 var fontSourcesByKey = Globals.Global.Fonts.FontSourcesByKey;
 
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 ulong key = FontHelper.CalcChecksum(fontBytes);
                 if (fontSourcesByKey.TryGetValue(key, out var fontSource))
                 {
@@ -250,7 +250,7 @@ namespace PdfSharp.Fonts
                 GlyphTypefaceCache.AddGlyphTypeface(glyphTypeface);
                 return fontSource;
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 #endif
 
@@ -329,7 +329,7 @@ namespace PdfSharp.Fonts
         {
             try
             {
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 // Check whether an identical font source with a different face name already exists.
                 if (Globals.Global.Fonts.FontSourcesByKey.TryGetValue(fontSource.Key, out var existingFontSource))
                 {
@@ -366,7 +366,7 @@ namespace PdfSharp.Fonts
                 Globals.Global.Fonts.FontSourcesByName.Add(fontSource.FontName, fontSource);
                 return fontSource;
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 
         /// <summary>
@@ -420,15 +420,15 @@ namespace PdfSharp.Fonts
         {
             try
             {
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 Globals.Global.Fonts.FontSourcesByName.Add(typefaceKey, fontSource);
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 
         public static void CheckInvocationOfPlatformFontResolver()
         {
-            if (!Lock.IsFontFactoryLookTaken())
+            if (!Locks.IsFontFactoryLookTaken())
                 throw new InvalidOperationException("You must not call PlatformFontResolver.ResolveTypeface if you are not calling from within a font resolver.");
 
             if (_fallbackFontResolverInvoked)

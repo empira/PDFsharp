@@ -432,7 +432,7 @@ namespace PdfSharp.Quality
         {
             int length = (int)stream.Length;
             var bytes = new byte[length];
-            stream.Read(bytes, 0, length);
+            _ = stream.Read(bytes, 0, length);
 
             using var fs = new FileStream(path, FileMode.Create);
             fs.Write(bytes, 0, length);

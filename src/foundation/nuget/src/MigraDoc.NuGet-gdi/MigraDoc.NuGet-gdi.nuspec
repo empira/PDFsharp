@@ -18,12 +18,17 @@
         <repository type="git" url="https://github.com/empira/PDFsharp" branch="master" commit="" />
         <title>$title$</title>
         <dependencies>
-            <group targetFramework="net6.0-windows7.0">
+            <group targetFramework="net8.0-windows7.0">
                 <dependency id="Microsoft.Extensions.Logging" version="$Logging_PackageVersion$" />
                 <dependency id="System.Security.Cryptography.Pkcs" version="$Cryptography_PackageVersion$" />
                 <dependency id="PDFsharp-GDI" version="$version$" />
             </group>
-            <group targetFramework="net8.0-windows7.0">
+            <group targetFramework="net9.0-windows7.0">
+                <dependency id="Microsoft.Extensions.Logging" version="$Logging_PackageVersion$" />
+                <dependency id="System.Security.Cryptography.Pkcs" version="$Cryptography_PackageVersion$" />
+                <dependency id="PDFsharp-GDI" version="$version$" />
+            </group>
+            <group targetFramework="net10.0-windows7.0">
                 <dependency id="Microsoft.Extensions.Logging" version="$Logging_PackageVersion$" />
                 <dependency id="System.Security.Cryptography.Pkcs" version="$Cryptography_PackageVersion$" />
                 <dependency id="PDFsharp-GDI" version="$version$" />
@@ -35,10 +40,13 @@
             </group>
         </dependencies>
         <frameworkReferences>
-            <group targetFramework="net6.0-windows7.0">
+            <group targetFramework="net8.0-windows7.0">
                 <frameworkReference name="Microsoft.WindowsDesktop.App.WindowsForms" />
             </group>
-            <group targetFramework="net8.0-windows7.0">
+            <group targetFramework="net9.0-windows7.0">
+                <frameworkReference name="Microsoft.WindowsDesktop.App.WindowsForms" />
+            </group>
+            <group targetFramework="net10.0-windows7.0">
                 <frameworkReference name="Microsoft.WindowsDesktop.App.WindowsForms" />
             </group>
             <group targetFramework="net462">
@@ -47,8 +55,9 @@
         </frameworkReferences>
     </metadata>
     <files>
-        <file src="bin\$config$\net6.0-windows\**\MigraDoc*.*" target="lib\net6.0-windows7.0\" exclude="**\*NuGet*"/>
         <file src="bin\$config$\net8.0-windows\**\MigraDoc*.*" target="lib\net8.0-windows7.0\" exclude="**\*NuGet*"/>
+        <file src="bin\$config$\net9.0-windows\**\MigraDoc*.*" target="lib\net9.0-windows7.0\" exclude="**\*NuGet*"/>
+        <file src="bin\$config$\net10.0-windows\**\MigraDoc*.*" target="lib\net10.0-windows7.0\" exclude="**\*NuGet*"/>
         <file src="bin\$config$\net462\**\MigraDoc*.*" target="lib\net462\" exclude="**\*NuGet*"/>
         <file src="README.md" />
         <file src="..\..\..\..\..\assets\migradoc\images\MigraDoc-128x128.png" target="images\" />

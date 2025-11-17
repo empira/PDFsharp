@@ -111,6 +111,7 @@ namespace MigraDoc.Rendering.Forms
         /// <summary>
         /// Gets or sets a DDL string or file.
         /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Ddl
         {
             get { return _ddl; }
@@ -125,6 +126,7 @@ namespace MigraDoc.Rendering.Forms
         /// <summary>
         /// Gets or sets the current page.
         /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public int Page
         {
             get { return _page; }
@@ -270,6 +272,7 @@ namespace MigraDoc.Rendering.Forms
         /// <summary>
         /// Gets or sets the MigraDoc document that is previewed in this control.
         /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public MigraDoc.DocumentObjectModel.Document Document
         {
             get { return _document; }
@@ -376,6 +379,7 @@ namespace MigraDoc.Rendering.Forms
         /// </summary>
         /// <value>The color of the page.</value>
         [Description("The background color of the page."), Category("Preview Properties")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public Color PageColor
         {
             get { return _preview.PageColor; }
@@ -388,6 +392,7 @@ namespace MigraDoc.Rendering.Forms
         /// </summary>
         /// <value>The color of the desktop.</value>
         [Description("The color of the desktop."), Category("Preview Properties")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public Color DesktopColor
         {
             get { return _preview.DesktopColor; }
@@ -423,6 +428,7 @@ namespace MigraDoc.Rendering.Forms
         /// Gets or sets the page size in point.
         /// </summary>
         [Description("Determines the size (in points) of the page."), Category("Preview Properties")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public Size PageSize
         {
             get { return new Size((int)_preview.PageSize.Width, (int)_preview.PageSize.Height); }

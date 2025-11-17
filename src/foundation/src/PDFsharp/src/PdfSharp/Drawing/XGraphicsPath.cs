@@ -39,10 +39,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath = new GraphicsPath();
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
             PathGeometry = new PathGeometry();
@@ -58,10 +58,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath = new GraphicsPath(points, types, (FillMode)fillMode);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF  // Is true only in Hybrid build.
             _pathGeometry = new PathGeometry();
@@ -143,10 +143,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 path.GdipPath = (GraphicsPath)GdipPath.Clone();
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
             path.PathGeometry = PathGeometry.Clone();
@@ -224,10 +224,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddLine((float)x1, (float)y1, (float)x2, (float)y2);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
             PathFigure figure = CurrentPathFigure;
@@ -307,10 +307,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddLines(XGraphics.MakePointFArray(points));
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
             PathFigure figure = CurrentPathFigure;
@@ -397,10 +397,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddBezier((float)x1, (float)y1, (float)x2, (float)y2, (float)x3, (float)y3, (float)x4, (float)y4);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
             PathFigure figure = CurrentPathFigure;
@@ -495,10 +495,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddBeziers(XGraphics.MakePointFArray(points));
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
             PathFigure figure = CurrentPathFigure;
@@ -621,10 +621,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddCurve(XGraphics.MakePointFArray(points), (float)tension);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
             tension /= 3;
@@ -699,10 +699,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddCurve(XGraphics.MakePointFArray(points), offset, numberOfSegments, (float)tension);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
             throw new NotImplementedException("AddCurve not yet implemented.");
@@ -750,10 +750,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddArc((float)x, (float)y, (float)width, (float)height, (float)startAngle, (float)sweepAngle);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
             PathFigure figure = CurrentPathFigure;
@@ -866,7 +866,7 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 // If rect is empty GDI+ removes the rect from the path.
                 // This is not intended if the path is used for clipping.
                 // See http://forum.pdfsharp.net/viewtopic.php?p=9433#p9433
@@ -877,7 +877,7 @@ namespace PdfSharp.Drawing
                 GdipPath.AddLines([rect.TopLeft.ToPointF(), rect.TopRight.ToPointF(), rect.BottomRight.ToPointF(), rect.BottomLeft.ToPointF()]);
                 GdipPath.CloseFigure();
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
             StartFigure();
@@ -928,10 +928,10 @@ namespace PdfSharp.Drawing
 
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddRectangles(rects);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
         }
 #endif
 
@@ -947,10 +947,10 @@ namespace PdfSharp.Drawing
 
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddRectangles(rects);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
         }
 #endif
 
@@ -968,10 +968,10 @@ namespace PdfSharp.Drawing
 #if GDI
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     GdipPath.AddRectangle(rects[idx].ToRectangleF());
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
                 StartFigure();
@@ -1095,7 +1095,7 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.StartFigure();
                 GdipPath.AddArc((float)(x + width - ellipseWidth), (float)y, (float)ellipseWidth, (float)ellipseHeight, -90, 90);
                 GdipPath.AddArc((float)(x + width - ellipseWidth), (float)(y + height - ellipseHeight), (float)ellipseWidth, (float)ellipseHeight, 0, 90);
@@ -1103,7 +1103,7 @@ namespace PdfSharp.Drawing
                 GdipPath.AddArc((float)x, (float)y, (float)ellipseWidth, (float)ellipseHeight, 180, 90);
                 GdipPath.CloseFigure();
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
             double ex = ellipseWidth / 2;
@@ -1253,10 +1253,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddEllipse((float)x, (float)y, (float)width, (float)height);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
 #if true
@@ -1300,10 +1300,10 @@ namespace PdfSharp.Drawing
         {
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddPolygon(points);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
         }
 #endif
 
@@ -1331,10 +1331,10 @@ namespace PdfSharp.Drawing
         {
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddPolygon(points);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
         }
 #endif
 
@@ -1357,10 +1357,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddPolygon(XGraphics.MakePointFArray(points));
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
 #if true
@@ -1394,10 +1394,10 @@ namespace PdfSharp.Drawing
         {
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddPie(rect, (float)startAngle, (float)sweepAngle);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
         }
 #endif
 
@@ -1431,10 +1431,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddPie((float)x, (float)y, (float)width, (float)height, (float)startAngle, (float)sweepAngle);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
             const string message = "AddPie: This operation is not yet implemented in WPF build.";
@@ -1532,10 +1532,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddClosedCurve(XGraphics.MakePointFArray(points), (float)tension);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
             tension /= 3;
@@ -1573,10 +1573,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddPath(path.GdipPath, connect);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
             PathGeometry.AddGeometry(path.PathGeometry);
@@ -1646,10 +1646,10 @@ namespace PdfSharp.Drawing
 
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     GdipPath.AddString(s, family.GdiFamily, (int)style, (float)emSize, p, format.RealizeGdiStringFormat());
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
                 if (family.WpfFamily == null)
@@ -1726,10 +1726,10 @@ namespace PdfSharp.Drawing
 
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddString(s, family.GdiFamily, (int)style, (float)emSize, rect, format.RealizeGdiStringFormat());
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
         }
 
         /// <summary>
@@ -1745,10 +1745,10 @@ namespace PdfSharp.Drawing
 
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddString(s, family.GdiFamily, (int)style, (float)emSize, layoutRect, format.RealizeGdiStringFormat());
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
         }
 
         /// <summary>
@@ -1828,10 +1828,10 @@ namespace PdfSharp.Drawing
 
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.AddString(s, family.GdiFamily, (int)style, (float)emSize, rect, format.RealizeGdiStringFormat());
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF && !GDI
             if (family.WpfFamily == null)
@@ -1972,10 +1972,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.CloseFigure();
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
             PathFigure figure = PeekCurrentFigure;
@@ -1995,10 +1995,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.StartFigure();
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
             PathFigure figure = CurrentPathFigure;
@@ -2027,10 +2027,10 @@ namespace PdfSharp.Drawing
 #if GDI
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     GdipPath.FillMode = (FillMode)value;
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
                 PathGeometry.FillRule = value == XFillMode.Winding ? FillRule.Nonzero : FillRule.EvenOdd;
@@ -2054,10 +2054,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.Flatten();
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
             PathGeometry = PathGeometry.GetFlattenedPathGeometry();
@@ -2076,10 +2076,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.Flatten(matrix.ToGdiMatrix());
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
             PathGeometry = PathGeometry.GetFlattenedPathGeometry();
@@ -2099,10 +2099,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.Flatten(matrix.ToGdiMatrix(), (float)flatness);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
             PathGeometry = PathGeometry.GetFlattenedPathGeometry();
@@ -2127,10 +2127,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.Widen(pen.RealizeGdiPen());
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
             PathGeometry = PathGeometry.GetWidenedPathGeometry(pen.RealizeWpfPen());
@@ -2152,10 +2152,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.Widen(pen.RealizeGdiPen(), matrix.ToGdiMatrix());
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
             PathGeometry = PathGeometry.GetWidenedPathGeometry(pen.RealizeWpfPen());
@@ -2174,10 +2174,10 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 GdipPath.Widen(pen.RealizeGdiPen(), matrix.ToGdiMatrix(), (float)flatness);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF || WUI
             PathGeometry = PathGeometry.GetWidenedPathGeometry(pen.RealizeWpfPen());

@@ -25,7 +25,7 @@ namespace PdfSharp.Internal
 
             // Convert to little endian, which is expected by BigInteger constructor.
             if (isBigEndian)
-                bytes = bytes.Reverse().ToArray();
+                bytes = ((IEnumerable<byte>)bytes).Reverse().ToArray();
 
             // A leading bit of 1 defines a negative number. If the input should be interpreted as unsigned, prepend a new zero byte, if there’s a leading 1.
             // As bytes is in little endian order, check the most significant bit of the last byte. If it is 1, append the zero byte.

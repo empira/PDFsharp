@@ -93,7 +93,7 @@ namespace PdfSharp.Fonts
         {
             try
             {
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 var family = FontFamilyCache.GetFamilyByName(familyName);
                 if (family == null)
                 {
@@ -102,7 +102,7 @@ namespace PdfSharp.Fonts
                 }
                 return family;
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 
 #if GDI
@@ -110,12 +110,12 @@ namespace PdfSharp.Fonts
         {
             try
             {
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 FontFamilyInternal fontFamily = new FontFamilyInternal(gdiFontFamily);
                 fontFamily = FontFamilyCache.CacheOrGetFontFamily(fontFamily);
                 return fontFamily;
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 #endif
 

@@ -116,12 +116,24 @@ namespace PdfSharp.Tests.Pdf
             // Do not use password literals for real certificates in source code.
             var certificatePassword = "Seecrit1243";
 
+#if NET9_0_OR_GREATER
+            // New API introduced with .NET 9.
+            // Breaking change in .NET 9: X509KeyStorageFlags.MachineKeySet is treated differently.
+            // We do not use X509KeyStorageFlags.MachineKeySet with .NET 9.
+            var certificate = X509CertificateLoader.LoadPkcs12(rawData, certificatePassword,
+                X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+
+            var collection = X509CertificateLoader.LoadPkcs12Collection(rawData, certificatePassword,
+                X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+#else
+            // Old API, obsolete since .NET 9.
             var certificate = new X509Certificate2(rawData,
                 certificatePassword,
-                X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+                /*X509KeyStorageFlags.MachineKeySet |*/ X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
 
             var collection = new X509Certificate2Collection();
-            collection.Import(rawData, certificatePassword, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+            collection.Import(rawData, certificatePassword, /*X509KeyStorageFlags.MachineKeySet |*/ X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+#endif
 
             return (certificate, collection);
         }

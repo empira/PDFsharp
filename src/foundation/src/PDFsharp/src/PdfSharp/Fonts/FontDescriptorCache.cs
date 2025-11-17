@@ -28,7 +28,7 @@ namespace PdfSharp.Fonts
             try
             {
                 var cache = Globals.Global.Fonts.FontDescriptorCache;
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 if (cache.TryGetValue(fontDescriptorKey, out var descriptor))
                     return descriptor;
 
@@ -36,7 +36,7 @@ namespace PdfSharp.Fonts
                 cache.Add(fontDescriptorKey, descriptor);
                 return descriptor;
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 
         public static FontDescriptor GetOrCreateDescriptorFor(XGlyphTypeface glyphTypeface)
@@ -47,7 +47,7 @@ namespace PdfSharp.Fonts
             try
             {
                 var cache = Globals.Global.Fonts.FontDescriptorCache;
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 if (cache.TryGetValue(fontDescriptorKey, out var descriptor))
                     return descriptor;
 
@@ -55,7 +55,7 @@ namespace PdfSharp.Fonts
                 cache.Add(fontDescriptorKey, descriptor);
                 return descriptor;
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace PdfSharp.Fonts
             try
             {
                 var cache = Globals.Global.Fonts.FontDescriptorCache;
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 if (!cache.TryGetValue(fontDescriptorKey, out var descriptor))
                 {
                     var font = new XFont(fontFamilyName, 10, style);
@@ -85,7 +85,7 @@ namespace PdfSharp.Fonts
                 }
                 return descriptor;
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 
         internal static void Reset()

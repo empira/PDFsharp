@@ -141,7 +141,7 @@ namespace PdfSharp.Drawing
             try
             {
                 // Lock around TryGetGlyphTypeface and AddGlyphTypeface.
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 if (GlyphTypefaceCache.TryGetGlyphTypeface(typefaceKey, out glyphTypeface))
                 {
                     // Just return existing one.
@@ -262,7 +262,7 @@ namespace PdfSharp.Drawing
 #endif
                 GlyphTypefaceCache.AddGlyphTypeface(glyphTypeface);
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
             return glyphTypeface;
         }
 
@@ -277,7 +277,7 @@ namespace PdfSharp.Drawing
             try
             {
                 // Lock around TryGetGlyphTypeface and AddGlyphTypeface.
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 string typefaceKey = ComputeGtfKey(gdiFont);
                 if (GlyphTypefaceCache.TryGetGlyphTypeface(typefaceKey, out glyphTypeface))
                 {
@@ -300,7 +300,7 @@ namespace PdfSharp.Drawing
                 glyphTypeface = new XGlyphTypeface(typefaceKey, fontFamily, fontSource, styleSimulations, gdiFont);
                 GlyphTypefaceCache.AddGlyphTypeface(glyphTypeface);
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
 
             return glyphTypeface;
         }
@@ -324,7 +324,7 @@ namespace PdfSharp.Drawing
             // Lock around TryGetGlyphTypeface and AddGlyphTypeface.
             try
             {
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
 
                 // Create WPF glyph typeface.
                 if (!wpfTypeface.TryGetGlyphTypeface(out var wpfGlyphTypeface))
@@ -359,7 +359,7 @@ namespace PdfSharp.Drawing
 
                 return glyphTypeface;
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 #endif
 

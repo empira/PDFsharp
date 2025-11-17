@@ -3,7 +3,7 @@
   <!-- This is a dummy project used to group the MD files as a tree in Visual Studio.
        It does not contain any code. -->
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0</TargetFrameworks>
   </PropertyGroup>
 
 </Project>

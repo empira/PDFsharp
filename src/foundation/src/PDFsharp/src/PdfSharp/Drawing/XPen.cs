@@ -241,7 +241,7 @@ namespace PdfSharp.Drawing
             XPen xpen;
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 xpen = pen.PenType switch
                 {
                     PenType.SolidColor => new(pen.Color, pen.Width)
@@ -263,7 +263,7 @@ namespace PdfSharp.Drawing
                     xpen._dashOffset = pen.DashOffset;
                 }
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
             return xpen;
         }
 

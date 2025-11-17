@@ -36,10 +36,10 @@ namespace PdfSharp.Drawing
 #if GDI && !WPF
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     return _gdiImage.Width;
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
 #endif
 #if GDI && WPF
                 int gdiWidth = _gdiImage.Width;
@@ -71,10 +71,10 @@ namespace PdfSharp.Drawing
 #if GDI && !WPF
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     return _gdiImage.Height;
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
 #endif
 #if GDI && WPF
                 int gdiHeight = _gdiImage.Height;

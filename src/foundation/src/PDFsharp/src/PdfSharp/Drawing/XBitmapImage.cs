@@ -29,11 +29,11 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 // Create a default 24-bit ARGB bitmap.
                 _gdiImage = new Bitmap(width, height);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
             DiagnosticsHelper.ThrowNotImplementedException("CreateBitmap");

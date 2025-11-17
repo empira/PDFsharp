@@ -258,7 +258,7 @@ namespace PdfSharp.Pdf.Advanced
                 else
                 {
                     // If we have a stream, copy data from the stream.
-                    if (_image._stream != null && _image._stream.CanSeek)
+                    if (_image._stream != null! && _image._stream.CanSeek)
                     {
                         memory = new MemoryStream();
                         ownMemory = true;
@@ -273,18 +273,20 @@ namespace PdfSharp.Pdf.Advanced
                     }
                     else
                     {
-                        // TODO_OLD Anything we can do here?
-                        //#if CORE _WITH _GDI
-                        //                        // No stream, no filename, get image data.
-                        //                        // Save the image to a memory stream.
-                        //                        _image._gdiImage.Save(memory, ImageFormat.Jpeg);
-                        //#endif
+#if GDI
+                        // No stream, no filename, get image data from GDI image.
+                        // Save the image to a memory stream.
+                        memory = new MemoryStream();
+                        ownMemory = true;
+                        _image._gdiImage.Save(memory, ImageFormat.Jpeg);
+#endif
                     }
                 }
 
                 if (memory is null || (int)memory.Length == 0)
                 {
                     Debug.Assert(false, "Internal error? JPEG image, but file not found!");
+                    throw new InvalidOperationException("JPEG image used, but cannot access image data!");
                 }
 
 #if GDI
@@ -532,9 +534,9 @@ namespace PdfSharp.Pdf.Advanced
                     break;
 
                 default:
-//#if DEBUGxxx
-//          image.image.Save("$$$.bmp", ImageFormat.Bmp);
-//#endif
+                    //#if DEBUGxxx
+                    //          image.image.Save("$$$.bmp", ImageFormat.Bmp);
+                    //#endif
                     throw new NotImplementedException("Image format not supported.");
             }
 #endif
@@ -842,7 +844,7 @@ namespace PdfSharp.Pdf.Advanced
             // Anything needed for CMYK? Do we have sample images?
             Elements[Keys.ColorSpace] = new PdfName(components == 1 ? "/DeviceGray" : "/DeviceRGB");
             if (_image.Interpolate)
-            {  
+            {
                 // #PDF-A
                 if (_document.IsPdfA)
                 {
@@ -1059,7 +1061,7 @@ namespace PdfSharp.Pdf.Advanced
                 // Anything needed for CMYK? Do we have sample images?
                 Elements[Keys.ColorSpace] = new PdfName("/DeviceRGB");
                 if (_image.Interpolate)
-                {    
+                {
                     // #PDF-A
                     if (_document.IsPdfA)
                     {

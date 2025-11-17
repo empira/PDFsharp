@@ -92,10 +92,10 @@ namespace PdfSharp.Drawing
                 // MigraDoc comes here when creating a MeasureContext.
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     gfx = Graphics.FromHwnd(IntPtr.Zero);  // BUG_OLD: Use measure image
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
             }
 
             _gsStack = new GraphicsStateStack(this);
@@ -434,7 +434,7 @@ namespace PdfSharp.Drawing
 #if GDI && !WPF
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 TargetContext = XGraphicTargetContext.GDI;
                 // If form.Owner is null create a meta file.
                 if (form.Owner == null!)
@@ -505,7 +505,7 @@ namespace PdfSharp.Drawing
                     _renderer = new PdfSharp.Drawing.Pdf.XGraphicsPdfRenderer(form, this);
                 _pageSize = form.Size;
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
             Initialize();
 #endif
 #if WPF && !GDI
@@ -854,7 +854,7 @@ namespace PdfSharp.Drawing
             {
                 try
                 {
-                    Lock.EnterFontFactory();
+                    Locks.EnterFontFactory();
                     if (_gfx != null)
                         matrix = _gfx.Transform;
 
@@ -882,7 +882,7 @@ namespace PdfSharp.Drawing
                             _gfx.Transform = (GdiMatrix)matrix;
                     }
                 }
-                finally { Lock.ExitFontFactory(); }
+                finally { Locks.ExitFontFactory(); }
             }
 #endif
 #if WPF
@@ -953,14 +953,14 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         // GDI+ requires this to disassociate it from metafiles.
                         if (_gfx != default!)
                             _gfx.Dispose();
                         _gfx = null!;
                         Metafile = null;
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -1115,10 +1115,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.DrawLine(pen.RealizeGdiPen(), (float)x1, (float)y1, (float)x2, (float)y2);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -1170,10 +1170,10 @@ namespace PdfSharp.Drawing
             {
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     _gfx.DrawLines(pen.RealizeGdiPen(), points);
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
             }
 
             _renderer?.DrawLines(pen, MakeXPointArray(points, 0, points.Length));
@@ -1199,10 +1199,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.DrawLines(pen.RealizeGdiPen(), XGraphics.MakePointFArray(points));
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -1323,10 +1323,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.DrawBezier(pen.RealizeGdiPen(), (float)x1, (float)y1, (float)x2, (float)y2, (float)x3, (float)y3, (float)x4, (float)y4);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -1403,10 +1403,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.DrawBeziers(pen.RealizeGdiPen(), MakePointFArray(points)!);  // points is checked.
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -1588,10 +1588,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.DrawCurve(pen.RealizeGdiPen(), MakePointFArray(points)!, (float)tension);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -1674,10 +1674,10 @@ namespace PdfSharp.Drawing
                     {
                         try
                         {
-                            Lock.EnterGdiPlus();
+                            Locks.EnterGdiPlus();
                             _gfx.DrawArc(pen.RealizeGdiPen(), (float)x, (float)y, (float)width, (float)height, (float)startAngle, (float)sweepAngle);
                         }
-                        finally { Lock.ExitGdiPlus(); }
+                        finally { Locks.ExitGdiPlus(); }
                     }
 #endif
 #if WPF
@@ -1747,10 +1747,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.DrawRectangle(pen.RealizeGdiPen(), (float)x, (float)y, (float)width, (float)height);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -1816,10 +1816,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.FillRectangle(brush.RealizeGdiBrush(), (float)x, (float)y, (float)width, (float)height);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -1886,13 +1886,13 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         if (brush != null)
                             _gfx.FillRectangle(brush.RealizeGdiBrush(), (float)x, (float)y, (float)width, (float)height);
                         if (pen != null)
                             _gfx.DrawRectangle(pen.RealizeGdiPen(), (float)x, (float)y, (float)width, (float)height);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -2016,13 +2016,13 @@ namespace PdfSharp.Drawing
             {
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     if (brush != null)
                         _gfx.FillRectangles(brush.RealizeGdiBrush(), rectangles);
                     if (pen != null)
                         _gfx.DrawRectangles(pen.RealizeGdiPen(), rectangles);
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
             }
             if (_renderer != null)
             {
@@ -2051,13 +2051,13 @@ namespace PdfSharp.Drawing
             {
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     if (brush != null)
                         _gfx.FillRectangles(brush.RealizeGdiBrush(), rectangles);
                     if (pen != null)
                         _gfx.DrawRectangles(pen.RealizeGdiPen(), rectangles);
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
             }
             if (_renderer != null)
             {
@@ -2093,13 +2093,13 @@ namespace PdfSharp.Drawing
                     GdiRectF[] rects = MakeRectangleFArray(rectangles, 0, rectangles.Length);
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         if (brush != null)
                             _gfx.FillRectangles(brush.RealizeGdiBrush(), rects);
                         if (pen != null)
                             _gfx.DrawRectangles(pen.RealizeGdiPen(), rects);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -2292,12 +2292,12 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         XGraphicsPath path = new XGraphicsPath();
                         path.AddRoundedRectangle(x, y, width, height, ellipseWidth, ellipseHeight);
                         DrawPath(pen, brush, path);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -2362,10 +2362,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.DrawArc(pen.RealizeGdiPen(), (float)x, (float)y, (float)width, (float)height, 0, 360);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -2426,10 +2426,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.FillEllipse(brush.RealizeGdiBrush(), (float)x, (float)y, (float)width, (float)height);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -2493,13 +2493,13 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         if (brush != null)
                             _gfx.FillEllipse(brush.RealizeGdiBrush(), (float)x, (float)y, (float)width, (float)height);
                         if (pen != null)
                             _gfx.DrawArc(pen.RealizeGdiPen(), (float)x, (float)y, (float)width, (float)height, 0, 360);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -2588,10 +2588,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.DrawPolygon(pen.RealizeGdiPen(), MakePointFArray(points)!);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -2656,10 +2656,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.FillPolygon(brush.RealizeGdiBrush(), MakePointFArray(points), (FillMode)fillMode);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -2727,13 +2727,13 @@ namespace PdfSharp.Drawing
                     GdiPointF[] pts = MakePointFArray(points)!;
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         if (brush != null)
                             _gfx.FillPolygon(brush.RealizeGdiBrush(), pts, (FillMode)fillMode);
                         if (pen != null)
                             _gfx.DrawPolygon(pen.RealizeGdiPen(), pts);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -2800,10 +2800,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.DrawPie(pen.RealizeGdiPen(), (float)x, (float)y, (float)width, (float)height, (float)startAngle, (float)sweepAngle);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -2861,10 +2861,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.FillPie(brush.RealizeGdiBrush(), (float)x, (float)y, (float)width, (float)height, (float)startAngle, (float)sweepAngle);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -2921,13 +2921,13 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         if (brush != null)
                             _gfx.FillPie(brush.RealizeGdiBrush(), (float)x, (float)y, (float)width, (float)height, (float)startAngle, (float)sweepAngle);
                         if (pen != null)
                             _gfx.DrawPie(pen.RealizeGdiPen(), (float)x, (float)y, (float)width, (float)height, (float)startAngle, (float)sweepAngle);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -3287,7 +3287,7 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         if (brush != null)
                             _gfx.FillClosedCurve(brush.RealizeGdiBrush(), MakePointFArray(points)!, (FillMode)fillMode, (float)tension);
                         if (pen != null)
@@ -3296,7 +3296,7 @@ namespace PdfSharp.Drawing
                             _gfx.DrawClosedCurve(pen.RealizeGdiPen(), MakePointFArray(points)!, (float)tension, (FillMode)fillMode);
                         }
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -3353,10 +3353,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.DrawPath(pen.RealizeGdiPen(), path.GdipPath);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -3387,10 +3387,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.FillPath(brush.RealizeGdiBrush(), path.GdipPath);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -3424,13 +3424,13 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         if (brush != null)
                             _gfx.FillPath(brush.RealizeGdiBrush(), path.GdipPath);
                         if (pen != null)
                             _gfx.DrawPath(pen.RealizeGdiPen(), path.GdipPath);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -3561,7 +3561,7 @@ namespace PdfSharp.Drawing
 
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         GdiRectF rect = layoutRectangle.ToRectangleF();
                         if (format.LineAlignment == XLineAlignment.BaseLine)
                         {
@@ -3578,7 +3578,7 @@ namespace PdfSharp.Drawing
                         _gfx.DrawString(text, font.GdiFont, brush.RealizeGdiBrush(), rect,
                             format.RealizeGdiStringFormat());
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -3943,7 +3943,7 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         if (image._gdiImage != null)
                         {
                             InterpolationMode interpolationMode = InterpolationMode.Invalid;
@@ -3966,7 +3966,7 @@ namespace PdfSharp.Drawing
                             //_gfx.DrawLine(Pens.Red, (float)(x + width), (float)y, (float)x, (float)(y + height));
                         }
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -4036,7 +4036,7 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         if (image._gdiImage != null)
                         {
                             InterpolationMode interpolationMode = InterpolationMode.Invalid;
@@ -4069,7 +4069,7 @@ namespace PdfSharp.Drawing
                             }
                         }
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -4154,7 +4154,7 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         if (image._gdiImage != null!)
                         {
                             InterpolationMode interpolationMode = InterpolationMode.Invalid;
@@ -4178,7 +4178,7 @@ namespace PdfSharp.Drawing
                             DrawMissingImageRect(new XRect(destRect.X, destRect.Y, destRect.Width, destRect.Height));
                         }
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -4223,7 +4223,7 @@ namespace PdfSharp.Drawing
             {
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     float x = (float)rect.X;
                     float y = (float)rect.Y;
                     float width = (float)rect.Width;
@@ -4232,7 +4232,7 @@ namespace PdfSharp.Drawing
                     _gfx.DrawLine(Pens.Red, x, y, x + width, y + height);
                     _gfx.DrawLine(Pens.Red, x + width, y, x, y + height);
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
             }
 #endif
 #if WPF
@@ -4358,13 +4358,13 @@ namespace PdfSharp.Drawing
             {
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     xState = new XGraphicsState(_gfx != null! ? _gfx.Save() : null);
                     InternalGraphicsState iState = new InternalGraphicsState(this, xState);
                     iState.Transform = _transform;
                     _gsStack.Push(iState);
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
             }
 #endif
 #if WPF
@@ -4402,13 +4402,13 @@ namespace PdfSharp.Drawing
             {
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     _gsStack.Restore(state.InternalState);
                     if (_gfx != null!)
                         _gfx.Restore(state.GdiState!);  // BUG_OLD NRT
                     _transform = state.InternalState.Transform;
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
             }
 #endif
 #if WPF
@@ -4494,13 +4494,13 @@ namespace PdfSharp.Drawing
             {
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     GraphicsState? graphicsState = null;
                     if (_gfx != null!)
                         graphicsState = _gfx.Save();
                     xContainer = new XGraphicsContainer(graphicsState);
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
             }
 #endif
 #if WPF
@@ -4549,11 +4549,11 @@ namespace PdfSharp.Drawing
             {
                 try
                 {
-                    Lock.EnterGdiPlus();
+                    Locks.EnterGdiPlus();
                     // GdiState cannot be null if _gfx is not null.
                     _gfx.Restore(container.GdiState!);
                 }
-                finally { Lock.ExitGdiPlus(); }
+                finally { Locks.ExitGdiPlus(); }
             }
 #endif
 #if WPF
@@ -4596,10 +4596,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         return (XSmoothingMode)_gfx.SmoothingMode;
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -4619,10 +4619,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.SmoothingMode = (SmoothingMode)value;
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF
@@ -4870,10 +4870,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.Transform = (GdiMatrix)matrix;
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
             }
 #endif
@@ -4961,10 +4961,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.SetClip(path.GdipPath, CombineMode.Intersect);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
 #endif
 #if WPF && !GDI
@@ -4976,10 +4976,10 @@ namespace PdfSharp.Drawing
                 {
                     try
                     {
-                        Lock.EnterGdiPlus();
+                        Locks.EnterGdiPlus();
                         _gfx.SetClip(path._gdipPath, CombineMode.Intersect);
                     }
-                    finally { Lock.ExitGdiPlus(); }
+                    finally { Locks.ExitGdiPlus(); }
                 }
                 else
                 {

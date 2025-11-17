@@ -12,7 +12,7 @@ namespace PdfSharp.Forms
         /// <summary>
         /// The smallest possible zoom factor.
         /// </summary>
-        Mininum = 10,
+        Minimum = 10,
 
         /// <summary>
         /// The largest possible zoom factor.

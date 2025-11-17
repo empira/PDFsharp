@@ -24,11 +24,11 @@ namespace PdfSharp.Fonts
         {
             try
             {
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 Globals.Global.Fonts.FontFamiliesByName.TryGetValue(familyName, out var family);
                 return family;
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace PdfSharp.Fonts
         {
             try
             {
-                Lock.EnterFontFactory();
+                Locks.EnterFontFactory();
                 // Recall that a font family is uniquely identified by its case-insensitive name.
                 if (Globals.Global.Fonts.FontFamiliesByName.TryGetValue(fontFamily.Name, out var existingFontFamily))
                 {
@@ -51,7 +51,7 @@ namespace PdfSharp.Fonts
                 Globals.Global.Fonts.FontFamiliesByName.Add(fontFamily.Name, fontFamily);
                 return fontFamily;
             }
-            finally { Lock.ExitFontFactory(); }
+            finally { Locks.ExitFontFactory(); }
         }
 
         internal static void Reset()

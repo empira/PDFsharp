@@ -39,10 +39,10 @@ namespace PdfSharp.Fonts
                 ref var fontResolver = ref Globals.Global.Fonts.FontResolver;
                 try
                 {
-                    Lock.EnterFontFactory();
+                    Locks.EnterFontFactory();
                     SetFontResolver(value, ref fontResolver);
                 }
-                finally { Lock.ExitFontFactory(); }
+                finally { Locks.ExitFontFactory(); }
             }
         }
 
@@ -64,10 +64,10 @@ namespace PdfSharp.Fonts
                 ref var fontResolver = ref Globals.Global.Fonts.FallbackFontResolver;
                 try
                 {
-                    Lock.EnterFontFactory();
+                    Locks.EnterFontFactory();
                     SetFontResolver(value, ref fontResolver);
                 }
-                finally { Lock.ExitFontFactory(); }
+                finally { Locks.ExitFontFactory(); }
             }
         }
 
@@ -170,7 +170,7 @@ namespace PdfSharp.Fonts
             {
                 try
                 {
-                    Lock.EnterFontFactory();
+                    Locks.EnterFontFactory();
                     if (Globals.Global.Fonts.FontEncodingInitialized)
                     {
                         // Ignore multiple setting e.g. in a web application.
@@ -182,7 +182,7 @@ namespace PdfSharp.Fonts
                     Globals.Global.Fonts.FontEncoding = value;
                     Globals.Global.Fonts.FontEncodingInitialized = true;
                 }
-                finally { Lock.ExitFontFactory(); }
+                finally { Locks.ExitFontFactory(); }
             }
         }
 
@@ -206,7 +206,7 @@ namespace PdfSharp.Fonts
             {
                 try
                 {
-                    Lock.EnterFontFactory();
+                    Locks.EnterFontFactory();
                     if (Globals.Global.Fonts.UseWindowsFontsUnderWindows.HasValue)
                     {
                         // Ignore multiple setting e.g. in a web application.
@@ -217,7 +217,7 @@ namespace PdfSharp.Fonts
 
                     Globals.Global.Fonts.UseWindowsFontsUnderWindows = value;
                 }
-                finally { Lock.ExitFontFactory(); }
+                finally { Locks.ExitFontFactory(); }
             }
         }
 
@@ -240,7 +240,7 @@ namespace PdfSharp.Fonts
             {
                 try
                 {
-                    Lock.EnterFontFactory();
+                    Locks.EnterFontFactory();
                     if (Globals.Global.Fonts.UseWindowsFontsUnderWsl2.HasValue)
                     {
                         // Ignore multiple setting e.g. in a web application.
@@ -251,7 +251,7 @@ namespace PdfSharp.Fonts
 
                     Globals.Global.Fonts.UseWindowsFontsUnderWsl2 = value;
                 }
-                finally { Lock.ExitFontFactory(); }
+                finally { Locks.ExitFontFactory(); }
             }
         }
 #elif GDI || WPF
