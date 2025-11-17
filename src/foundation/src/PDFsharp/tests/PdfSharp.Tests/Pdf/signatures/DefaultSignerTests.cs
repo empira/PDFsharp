@@ -360,8 +360,7 @@ namespace PdfSharp.Tests.Pdf
             if (cers.Count > 0)
             {
                 certificate = cers[0];
-            }
-            ;
+            };
 
             for (int idx = 0; idx < cers.Count; idx++)
             {
