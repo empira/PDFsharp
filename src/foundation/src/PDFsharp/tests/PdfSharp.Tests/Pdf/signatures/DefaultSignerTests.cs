@@ -276,6 +276,77 @@ namespace PdfSharp.Tests.Pdf
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
+        [Fact]
+        public void Sign_existing_pdf_incrementally_and_preserve_pdfa()
+        {
+
+            IOUtility.EnsureAssetsVersion(RequiredAssets);
+
+            var pdfFolder = IOUtility.GetAssetsPath("archives/samples-1.5/PDFs");
+            var pdfFile = Path.Combine(pdfFolder ?? throw new InvalidOperationException("Call Download-Assets.ps1 before running the tests."), "SomeLayout.pdf");
+            var certificate = DefaultSignerTests.GetCertificate("test-cert_rsa_1024");
+
+            string signedFile = PdfFileUtility.GetTempPdfFullFileName("PDFsharp/UnitTest/incremental/signed");
+
+            // Act - First signature
+            using (PdfDocument document = PdfReader.Open(pdfFile, PdfDocumentOpenMode.Modify))
+            {
+                document.SetPdfA();
+                var options = new DigitalSignatureOptions
+                {
+                    ContactInfo = "John Doe",
+                    Location = "Seattle",
+                    Reason = "License Agreement",
+                    Rectangle = new XRect(100, 100, 200, 50),
+                    AppearanceHandler = new SignatureAppearanceHandler()
+                };
+
+                var signer = new PdfSharpDefaultSigner(certificate, PdfMessageDigestType.SHA512);
+                var handler = DigitalSignatureHandler.ForDocument(document, signer, options);
+                handler.Document.Save(signedFile);
+            }
+
+            // Start first viewer.
+            PdfFileUtility.ShowDocumentIfDebugging(signedFile);
+
+            // Act - Second signature (incremental)
+            using (var documentSecondSignature = PdfReader.Open(signedFile, PdfDocumentOpenMode.Modify))
+            {
+                documentSecondSignature.SetPdfA();
+                var optionsSecondSignature = new DigitalSignatureOptions
+                {
+                    AppendSignature = true,
+                    ContactInfo = "John Doe",
+                    Location = "Seattle",
+                    Reason = "License Agreement",
+                    Rectangle = new XRect(100, 200, 200, 50),
+                    AppearanceHandler = new SignatureAppearanceHandler()
+                };
+
+                var signerSecondSignature = new PdfSharpDefaultSigner(certificate, PdfMessageDigestType.SHA512);
+                var handlersignerSecondSignature = DigitalSignatureHandler.ForDocument(documentSecondSignature, signerSecondSignature, optionsSecondSignature);
+                handlersignerSecondSignature.Document.Save(signedFile);
+            }
+
+            // Start secondS viewer.
+            PdfFileUtility.ShowDocumentIfDebugging(signedFile);
+
+            var exists = File.Exists(signedFile);
+            if (!exists)
+                throw new PdfSharpException("Signed file not created.");
+            var finalBytes = File.ReadAllBytes(signedFile);
+            var finalBytesLength = finalBytes.Length;
+            if (finalBytesLength == 0)
+                throw new PdfSharpException("Signed file is empty.");
+
+            // Quick check: incremental signature should not break PDF/A
+            // (simple heuristic: OutputIntents must still exist)
+            using var finalDoc = PdfReader.Open(signedFile);
+            var outputIntentsExists = finalDoc.Catalog.Elements.ContainsKey("/OutputIntents");
+            if (!outputIntentsExists)
+                throw new PdfSharpException("Signed file is not PDF/A compliant anymore.");
+        }
+
         [SkippableFact]
         public void Sign_with_Certificate_from_Store()
         {
@@ -289,7 +360,8 @@ namespace PdfSharp.Tests.Pdf
             if (cers.Count > 0)
             {
                 certificate = cers[0];
-            };
+            }
+            ;
 
             for (int idx = 0; idx < cers.Count; idx++)
             {
