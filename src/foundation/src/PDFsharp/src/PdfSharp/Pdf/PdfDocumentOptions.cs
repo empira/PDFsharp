@@ -97,5 +97,17 @@ namespace PdfSharp.Pdf
 #else
         PdfWriterLayout _writerLayout = PdfWriterLayout.Compact;
 #endif
+
+        /// <summary>
+        /// Gets or sets a value indicating whether XMP metadata will be generated manually.
+        /// true (manual): XMP metadata has to be built and attached manually via <see cref="PdfMetadata"/> class.
+        /// false (auto): XMP metadata will be built and attached automatically.
+        /// </summary>
+        public bool ManualXmpGeneration
+        {
+            get => _manualXmpGeneration;
+            set => _manualXmpGeneration = value;
+        }
+        bool _manualXmpGeneration = false;
     }
 }
