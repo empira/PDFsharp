@@ -288,6 +288,7 @@ namespace PdfSharp.Pdf.IO
                 _document.Options.EnableOwnBinaryHeader = _options.EnableOwnBinaryHeader;
                 _document.Options.EnableLineBreakInArrayObjects = _options.EnableLineBreakInArrayObjects;
                 _document.Options.DisablePagesAndCatalogAtEnd = _options.DisablePagesAndCatalogAtEnd;
+                _document.Options.EnableOwnerPasswordSecurityChecks = _options.EnableOwnerPasswordSecurityChecks;
 
                 _document._state |= DocumentState.Imported;
                 _document._openMode = openMode;
@@ -380,7 +381,11 @@ namespace PdfSharp.Pdf.IO
                             goto TryAgain;
                         }
                         else
-                            throw new PdfReaderException(PsMsgs.OwnerPasswordRequired);
+                        {
+                            if(_document.Options.EnableOwnerPasswordSecurityChecks)
+                                throw new PdfReaderException(PsMsgs.OwnerPasswordRequired);
+                            _document.SecuritySettings.HasOwnerPermissions = true;
+                        }
                     }
                     // ReSharper restore RedundantIfElseBlock
                 }

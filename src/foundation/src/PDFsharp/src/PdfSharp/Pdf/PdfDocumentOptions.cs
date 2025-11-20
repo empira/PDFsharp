@@ -126,6 +126,8 @@ namespace PdfSharp.Pdf
 
         public bool DisablePagesAndCatalogAtEnd { get; set; } = true;
 
+        public bool EnableOwnerPasswordSecurityChecks { get; set; } = true;
+
         public string LineEnding => EnableLfLineEndings ? "\n" : "\r\n";
 
         public byte[] LineEndingBytes => Encoding.ASCII.GetBytes(LineEnding);

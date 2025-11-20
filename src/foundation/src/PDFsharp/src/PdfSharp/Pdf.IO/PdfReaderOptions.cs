@@ -141,6 +141,8 @@ namespace PdfSharp.Pdf.IO
 
         public bool DisablePagesAndCatalogAtEnd { get; set; } = true;
 
+        public bool EnableOwnerPasswordSecurityChecks { get; set; } = true;
+
         // Testing only
 
         //public bool UseOldCode { get; set; } = false;
