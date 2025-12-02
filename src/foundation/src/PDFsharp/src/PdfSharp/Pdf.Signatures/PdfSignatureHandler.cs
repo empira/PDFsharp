@@ -152,7 +152,7 @@ namespace PdfSharp.Pdf.Signatures
 
             var annotations = Document.Pages[Options.PageIndex].Elements.GetArray(PdfPage.Keys.Annots);
             if (annotations == null)
-                Document.Pages[Options.PageIndex].Elements.Add(PdfPage.Keys.Annots, new PdfArray(Document, signatureField));
+                Document.Pages[Options.PageIndex].Elements[PdfPage.Keys.Annots] = new PdfArray(Document, signatureField);
             else
                 annotations.Elements.Add(signatureField);
 
