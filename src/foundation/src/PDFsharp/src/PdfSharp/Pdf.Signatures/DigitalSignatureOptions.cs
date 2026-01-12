@@ -45,5 +45,11 @@ namespace PdfSharp.Pdf.Signatures
         /// The page index, zero-based, of the page showing the signature.
         /// </summary>
         public int PageIndex { get; init; }
+
+        /// <summary>
+        /// When true, the PDF will be signed incrementally instead of re-saving the whole file.
+        /// This preserves existing signatures.
+        /// </summary>
+        public bool AppendSignature { get; set; } = false;
     }
 }

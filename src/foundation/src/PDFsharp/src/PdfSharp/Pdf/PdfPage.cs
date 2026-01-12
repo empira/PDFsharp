@@ -805,7 +805,19 @@ namespace PdfSharp.Pdf
 
         internal override void WriteObject(PdfWriter writer)
         {
-            // #PDF-A
+            // NEW SECTION (FIX FOR PDF/A PROHIBITED TRANSPARENCY)
+            // If the document is PDF/A, remove the "/Group" entry before writing the object.
+            if (_document.IsPdfA)
+            {
+                // If the page contains a group key, remove it to ensure PDF/A-1A/1B compliance.
+                // The XMP value (Object 17) should define the compliance, and WriteObject 
+                // must not write anything that contradicts that compliance.
+                if (Elements.ContainsKey(Keys.Group))
+                {
+                    Elements.Remove(Keys.Group);
+                }
+            }
+
             // Suppress transparency group if PDF-A is required.
             if (!_document.IsPdfA)
             {

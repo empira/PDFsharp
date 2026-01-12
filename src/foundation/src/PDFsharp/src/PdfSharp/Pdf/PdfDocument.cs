@@ -1,22 +1,22 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.Reflection;
-using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 using PdfSharp.Drawing;
 using PdfSharp.Events;
 using PdfSharp.Fonts.Internal;
 using PdfSharp.Logging;
+using PdfSharp.Pdf.AcroForms;
 using PdfSharp.Pdf.Advanced;
+using PdfSharp.Pdf.Filters;
 using PdfSharp.Pdf.Internal;
 using PdfSharp.Pdf.IO;
-using PdfSharp.Pdf.AcroForms;
-using PdfSharp.Pdf.Filters;
 using PdfSharp.Pdf.Security;
 using PdfSharp.Pdf.Signatures;
 using PdfSharp.Pdf.Structure;
 using PdfSharp.UniversalAccessibility;
+using System.Reflection;
+using System.Runtime.InteropServices;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable ConvertPropertyToExpressionBody
@@ -148,10 +148,19 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Temporary hack to set a value that tells PDFsharp to create a PDF/A conform document.
         /// </summary>
-        public void SetPdfA()  // HACK_OLD
+        public void SetPdfA() // HACK_OLD
         {
             _isPdfA = true;
-            _ = UAManager.ForDocument(this);
+
+            try
+            {
+                _ = UAManager.ForDocument(this);
+            }
+            catch (Exception ex)
+            {
+                if (PdfSharpLogHost.Logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Warning))
+                    PdfSharpLogHost.Logger.LogWarning($"SetPdfA: UAManager.ForDocument failed: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -240,15 +249,22 @@ namespace PdfSharp.Pdf
         public async Task SaveAsync(string path)
         {
             EnsureNotYetSaved();
-
             if (!CanModify)
                 throw new InvalidOperationException(PsMsgs.CannotModify);
+            
+            bool isIncremental = _digitalSignatureHandler?.Options.AppendSignature ?? false;
+            
+            FileAccess access = (isIncremental ? FileAccess.ReadWrite : ((_digitalSignatureHandler == null) ? FileAccess.Write : FileAccess.ReadWrite));
+            FileMode mode = (isIncremental ? FileMode.Open : FileMode.Create);
+            
+            using FileStream stream = new FileStream(path, mode, access, FileShare.None);
+            
+            if (isIncremental)
+            {
+                stream.Seek(0L, SeekOrigin.End);
+                _incrementalSave = true;
+            }
 
-            // We need ReadWrite when adding a signature. Write is sufficient if not adding a signature.
-            var fileAccess = _digitalSignatureHandler == null ? FileAccess.Write : FileAccess.ReadWrite;
-
-            // ReSharper disable once UseAwaitUsing because we need no DisposeAsync for a simple FileStream.
-            using var stream = new FileStream(path, FileMode.Create, fileAccess, FileShare.None);
             await SaveAsync(stream).ConfigureAwait(false);
         }
 
@@ -272,14 +288,14 @@ namespace PdfSharp.Pdf
 
             if (!stream.CanWrite)
                 throw new InvalidOperationException(PsMsgs.StreamMustBeWritable);
-
+            
             if (!CanModify)
                 throw new InvalidOperationException(PsMsgs.CannotModify);
 
             // #PDF-A
             if (IsPdfA)
                 PrepareForPdfA();
-
+            
             // TODO_OLD: more diagnostic checks
             string message = "";
             if (!CanSave(ref message))
@@ -287,27 +303,26 @@ namespace PdfSharp.Pdf
 
             // Get security handler if document gets encrypted.
             var effectiveSecurityHandler = SecuritySettings.EffectiveSecurityHandler;
-
+            
             PdfWriter? writer = null;
             try
             {
                 Debug.Assert(ReferenceEquals(_document, this));
-                writer = new(stream, _document, effectiveSecurityHandler);
+                writer = new (stream, _document, effectiveSecurityHandler);
+                if (stream is FileStream { Name: not null } fileStream)
+                    writer.FullPath = fileStream.Name;
+                
                 await DoSaveAsync(writer).ConfigureAwait(false);
             }
             finally
             {
-                if (stream != null!)
+                if (stream != null)
                 {
                     if (closeStream)
-                    {
                         stream.Close();
-                    }
-                    else
-                    {
-                        if (stream is { CanRead: true, CanSeek: true })
-                            stream.Position = 0; // Reset the stream position if the stream is kept open.
-                    }
+                    else if (stream != null && stream.CanRead && stream.CanSeek)
+                        stream.Position = 0L;
+
                 }
                 writer?.Close(closeStream);
             }
@@ -338,9 +353,7 @@ namespace PdfSharp.Pdf
 
                 // Remove XRefTrailer
                 if (Trailer is PdfCrossReferenceStream crossReferenceStream)
-                {
                     Trailer = new PdfTrailer(crossReferenceStream);
-                }
 
                 var effectiveSecurityHandler = _securitySettings?.EffectiveSecurityHandler;
                 if (effectiveSecurityHandler != null)
@@ -353,28 +366,32 @@ namespace PdfSharp.Pdf
                 }
                 else
                     Trailer.Elements.Remove(PdfTrailer.Keys.Encrypt);
-
+                
                 PrepareForSave();
-
+                
                 effectiveSecurityHandler?.PrepareForWriting();
 
-                writer.WriteFileHeader(this);
-                var irefs = IrefTable.AllReferences;
+                if (_incrementalSave)
+                    writer.Stream.Seek(0L, SeekOrigin.End);
+                else
+                    writer.WriteFileHeader(this);
+                
+                PdfReference[] irefs = IrefTable.AllReferences;
                 int count = irefs.Length;
-                for (int idx = 0; idx < count; idx++)
+                for (int i = 0; i < count; i++)
                 {
-                    PdfReference iref = irefs[idx];
+                    PdfReference iref = irefs[i];
 #if DEBUG_
                     if (iref.ObjectNumber == 378)
                         _ = typeof(int);
 #endif
                     iref.Position = writer.Position;
 
-                    var obj = iref.Value;
+                    PdfObject obj = iref.Value;
 
                     // Enter indirect object in SecurityHandler to allow object encryption key generation for this object.
                     effectiveSecurityHandler?.EnterObject(obj.ObjectID);
-
+                    
                     obj.WriteObject(writer);
                 }
 
@@ -382,7 +399,7 @@ namespace PdfSharp.Pdf
                 effectiveSecurityHandler?.LeaveObject();
 
                 // ReSharper disable once RedundantCast. Redundant only if 64 bit.
-                var startXRef = (SizeType)writer.Position;
+                long startXRef = (SizeType)writer.Position;
                 IrefTable.WriteObject(writer);
                 writer.WriteRaw("trailer\n");
                 Trailer.Elements.SetInteger("/Size", count + 1);
@@ -393,71 +410,141 @@ namespace PdfSharp.Pdf
                 // Prepare for signing.
                 if (_digitalSignatureHandler != null)
                     await _digitalSignatureHandler.ComputeSignatureAndRange(writer).ConfigureAwait(false);
-
-                //if (encrypt)
-                //{
-                //  state &= ~DocumentState.SavingEncrypted;
-                //  //_securitySettings.SecurityHandler.EncryptDocument();
-                //}
+                
+                if (_incrementalSave)
+                {
+                    writer.Stream.Flush();
+                    writer.Stream.Position = writer.Stream.Length;
+                }
             }
             finally
             {
-                //await writer.Stream.FlushAsync().ConfigureAwait(false);
                 writer.Stream.Flush();
-                // Do not close the stream writer here.
                 _state |= DocumentState.Saved;
             }
         }
 
-        void PrepareForPdfA()  // Just a first hack.
+        void PrepareForPdfA()
         {
             var internals = Internals;
 
-            Debug.Assert(_uaManager != null);
-            // UAManager sets MarkInformation.
-            if (_uaManager == null)
-            {
-                // Marked must be true in MarkInfo.
-                var markInfo = new PdfMarkInformation();
-                //internals.AddObject(markInfo);
+            InitializePdfAComponents();
 
-                markInfo.Elements.SetBoolean(PdfMarkInformation.Keys.Marked, true);
-                //internals.Catalog.Elements.SetReference(PdfCatalog.Keys.MarkInfo, markInfo);
-                internals.Catalog.Elements.Add(PdfCatalog.Keys.MarkInfo, markInfo);
+            // If catalog already has OutputIntents, assume PDF/A intent already set -> skip adding.
+            if (Catalog.Elements.GetObject(PdfCatalog.Keys.OutputIntents) != null)
+            {
+                if (PdfSharpLogHost.Logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                    PdfSharpLogHost.Logger.LogDebug("PrepareForPdfA: OutputIntents already present -> skip.");
+                return;
             }
 
-            var outputIntentsArray = new PdfArray(this);
-            //internals.AddObject(outputIntentsArray);
-            var outputIntents = new PdfDictionary(this);
-            outputIntentsArray.Elements.Add(outputIntents);
+            PdfArray outputIntentsArray = new PdfArray(this);
+            var outputIntent = new PdfDictionary(this);
+            outputIntentsArray.Elements.Add(outputIntent);
 
-            outputIntents.Elements.Add("/Type", new PdfName("/OutputIntent"));
-            outputIntents.Elements.Add("/S", new PdfName("/GTS_PDFA1"));
-            outputIntents.Elements.Add("/OutputConditionIdentifier", new PdfString("sRGB"));
-            outputIntents.Elements.Add("/RegistryName", new PdfString("http://www.color.org"));
-            outputIntents.Elements.Add("/Info", new PdfString("Creator: ColorOrg     Manufacturer:IEC    Model:sRGB"));
+            outputIntent.Elements.SetName("/Type", "/OutputIntent");
+            outputIntent.Elements.SetName("/S", "/GTS_PDFA1");
+            outputIntent.Elements.SetString("/OutputConditionIdentifier", "sRGB");
+            outputIntent.Elements.SetString("/RegistryName", "http://www.color.org");
+            outputIntent.Elements.SetString("/Info", "Creator: ColorOrg     Manufacturer:IEC    Model:sRGB");
 
-            var profileStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PdfSharp.Resources.sRGB2014.icc")
-                ?? throw new InvalidOperationException("Embedded color profile was not found.");
+            PdfDictionary? profileObject = BuildOrReuseColorProfile(internals);
 
-            var profile = new byte[profileStream.Length];
-            var read = profileStream.Read(profile, 0, (int)profileStream.Length);
-            if (read != profileStream.Length)
-                throw new InvalidOperationException("Embedded color profile was not read.");
+            if (profileObject?.Reference != null)
+                outputIntent.Elements.SetReference("/DestOutputProfile", profileObject.Reference);
 
-            var fd = new FlateDecode();
-            byte[] profileCompressed = fd.Encode(profile, Options.FlateEncodeMode);
+            // Finally set OutputIntents in catalog safely — use SetValue/SetReference not Add to avoid duplicate key
+            if (internals.Catalog.Elements.ContainsKey(PdfCatalog.Keys.OutputIntents))
+                internals.Catalog.Elements.SetValue(PdfCatalog.Keys.OutputIntents, outputIntentsArray);
+            else
+                internals.Catalog.Elements.Add(PdfCatalog.Keys.OutputIntents, outputIntentsArray);
+        }
 
-            var profileObject = new PdfDictionary(this);
-            IrefTable.Add(profileObject);
-            profileObject.Stream = new PdfDictionary.PdfStream(profileCompressed, profileObject);
-            profileObject.Elements["/N"] = new PdfInteger(3);
-            profileObject.Elements["/Length"] = new PdfInteger(profileCompressed.Length);
-            profileObject.Elements["/Filter"] = new PdfName("/FlateDecode");
+        /// <summary>
+        /// Ensures UA manager initialization and logs debug warnings if setup fails.
+        /// </summary>
+        void InitializePdfAComponents()
+        {
+            try
+            {
+                if (_uaManager == null)
+                    _ = UAManager.ForDocument(this);
+            }
+            catch (Exception ex)
+            {
+                if (PdfSharpLogHost.Logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug))
+                    PdfSharpLogHost.Logger.LogDebug($"PrepareForPdfA: UAManager.ForDocument() failed: {ex.Message}");
+            }
+        }
 
-            outputIntents.Elements.Add("/DestOutputProfile", profileObject.Reference);
-            //internals.Catalog.Elements.SetReference(PdfCatalog.Keys.OutputIntents, outputIntentsArray);
-            internals.Catalog.Elements.Add(PdfCatalog.Keys.OutputIntents, outputIntentsArray);
+        /// <summary>
+        /// Attempts to reuse an existing ICC color profile or embeds a new sRGB profile if needed.
+        /// </summary>
+        PdfDictionary? BuildOrReuseColorProfile(PdfInternals internals)
+        {
+            try
+            {
+                var existing = FindExistingOutputProfile(internals);
+                if (existing != null)
+                    return existing;
+
+                using var profileStream = Assembly.GetExecutingAssembly()
+                    .GetManifestResourceStream("PdfSharp.Resources.sRGB2014.icc")
+                    ?? throw new InvalidOperationException("Embedded color profile was not found.");
+
+                var profile = new byte[profileStream.Length];
+                var read = profileStream.Read(profile, 0, (int)profileStream.Length);
+                if (read != profileStream.Length)
+                    throw new InvalidOperationException("Embedded color profile was not read.");
+
+                var fd = new FlateDecode();
+                byte[] profileCompressed = fd.Encode(profile, Options.FlateEncodeMode);
+
+                var profileObject = new PdfDictionary(this);
+                IrefTable.Add(profileObject);
+
+                profileObject.Stream = new PdfDictionary.PdfStream(profileCompressed, profileObject);
+                profileObject.Elements.SetInteger("/N", 3);
+                profileObject.Elements.SetInteger("/Length", profileCompressed.Length);
+                profileObject.Elements.SetName("/Filter", "/FlateDecode");
+
+                return profileObject;
+            }
+            catch (Exception ex)
+            {
+                if (PdfSharpLogHost.Logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Warning))
+                    PdfSharpLogHost.Logger.LogWarning($"PrepareForPdfA: ICC embedding failed: {ex.Message}");
+                return null;
+            }
+        }
+
+        PdfDictionary? FindExistingOutputProfile(PdfInternals internals)
+        {
+            try
+            {
+                var oi = internals.Catalog.Elements.GetObject(PdfCatalog.Keys.OutputIntents);
+                if (oi is PdfArray arr && arr.Elements.Count > 0)
+                {
+                    var first = arr.Elements[0];
+                    if (first is PdfReference r && r.Value is PdfDictionary d)
+                    {
+                        var dest = d.Elements.GetReference("/DestOutputProfile");
+                        if (dest != null && dest.Value is PdfDictionary profileDict)
+                            return profileDict;
+                    }
+                    else if (first is PdfDictionary d2)
+                    {
+                        var dest = d2.Elements.GetReference("/DestOutputProfile");
+                        if (dest != null && dest.Value is PdfDictionary profileDict)
+                            return profileDict;
+                    }
+                }
+            }
+            catch
+            {
+                // ignore - fallback to null
+            }
+            return null;
         }
 
         /// <summary>
@@ -475,7 +562,7 @@ namespace PdfSharp.Pdf
                 info.Creator = PdfSharpProductVersionInformation.Producer;
 
             // We set Producer if it is not yet set.
-            var pdfProducer = PdfSharpProductVersionInformation.Creator;
+            string pdfProducer = PdfSharpProductVersionInformation.Creator;
 #if DEBUG
             // Add OS suffix only in DEBUG build.
             pdfProducer += $" under {RuntimeInformation.OSDescription}";
@@ -483,15 +570,10 @@ namespace PdfSharp.Pdf
             // Keep original producer if file was imported. This is 'PDF created by' in Adobe Reader.
             string producer = info.Producer;
             if (producer.Length == 0)
-            {
                 producer = pdfProducer;
-            }
-            else
-            {
-                // Prevent endless concatenation if file is edited with PDFsharp more than once.
-                if (!producer.StartsWith(PdfSharpProductVersionInformation.Title, StringComparison.Ordinal))
-                    producer = $"{pdfProducer} (Original: {producer})";
-            }
+            else if (!producer.StartsWith(PdfSharpProductVersionInformation.Title, StringComparison.Ordinal))
+                producer = $"{pdfProducer} (Original: {producer})";
+
             info.Elements.SetString(PdfDocumentInformation.Keys.Producer, producer);
 
             // Prepare used fonts.
@@ -500,15 +582,12 @@ namespace PdfSharp.Pdf
             // Let catalog do the rest.
             Catalog.PrepareForSave();
 
-#if true
             // Remove all unreachable objects (e.g. from deleted pages).
             int removed = IrefTable.Compact();
             if (removed != 0 && PdfSharpLogHost.Logger.IsEnabled(LogLevel.Information))
-            {
                 PdfSharpLogHost.Logger.LogInformation($"PrepareForSave: Number of deleted unreachable objects: {removed}");
-            }
+            
             IrefTable.Renumber();
-#endif
 
             // #PDF-UA
             // Create PdfMetadata now to include the final document information in XMP generation.
@@ -998,6 +1077,11 @@ namespace PdfSharp.Pdf
         internal PdfDocumentOpenMode _openMode;
         internal UAManager? _uaManager;
         internal DigitalSignatureHandler? _digitalSignatureHandler;
+        /// <summary>
+        /// When true, the document will be saved incrementally instead of being rewritten entirely.
+        /// Used for appending signatures without breaking previous ones.
+        /// </summary>
+        internal bool _incrementalSave;
     }
 
 #if true_
