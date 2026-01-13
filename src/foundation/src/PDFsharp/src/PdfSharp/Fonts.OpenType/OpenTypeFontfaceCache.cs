@@ -1,6 +1,7 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using System.Collections.Concurrent;
 using System.Text;
 using PdfSharp.Internal;
 using System.Diagnostics.CodeAnalysis;
@@ -21,13 +22,7 @@ namespace PdfSharp.Fonts.OpenType
             [MaybeNullWhen(false)]
             out OpenTypeFontFace fontFace)
         {
-            try
-            {
-                Locks.EnterFontFactory();
-                var result = Globals.Global.Fonts.FontFaceCache.TryGetValue(key, out fontFace);
-                return result;
-            }
-            finally { Locks.ExitFontFactory(); }
+            return Globals.Global.Fonts.FontFaceCache.TryGetValue(key, out fontFace);
         }
 
         /// <summary>
@@ -37,31 +32,21 @@ namespace PdfSharp.Fonts.OpenType
             [MaybeNullWhen(false)]
             out OpenTypeFontFace fontFace)
         {
-            try
-            {
-                Locks.EnterFontFactory();
-                var result = Globals.Global.Fonts.FontFacesByCheckSum.TryGetValue(checkSum, out fontFace);
-                return result;
-            }
-            finally { Locks.ExitFontFactory(); }
+            return Globals.Global.Fonts.FontFacesByCheckSum.TryGetValue(checkSum, out fontFace);
         }
 
         public static OpenTypeFontFace AddFontFace(OpenTypeFontFace fontFace)
         {
-            try
+            if (TryGetFontFace(fontFace.FullFaceName, out var fontFaceCheck))
             {
-                Locks.EnterFontFactory();
-                if (TryGetFontFace(fontFace.FullFaceName, out var fontFaceCheck))
-                {
-                    if (fontFaceCheck.CheckSum != fontFace.CheckSum)
-                        throw new InvalidOperationException("OpenTypeFontFace with same signature but different bytes.");
-                    return fontFaceCheck;
-                }
-                Globals.Global.Fonts.FontFaceCache.Add(fontFace.FullFaceName, fontFace);
-                Globals.Global.Fonts.FontFacesByCheckSum.Add(fontFace.CheckSum, fontFace);
-                return fontFace;
+                if (fontFaceCheck.CheckSum != fontFace.CheckSum)
+                    throw new InvalidOperationException("OpenTypeFontFace with same signature but different bytes.");
+                return fontFaceCheck;
             }
-            finally { Locks.ExitFontFactory(); }
+
+            Globals.Global.Fonts.FontFaceCache.TryAdd(fontFace.FullFaceName, fontFace);
+            Globals.Global.Fonts.FontFacesByCheckSum.TryAdd(fontFace.CheckSum, fontFace);
+            return fontFace;
         }
 
         internal static void Reset()
@@ -75,7 +60,7 @@ namespace PdfSharp.Fonts.OpenType
             StringBuilder state = new StringBuilder();
             state.Append("====================\n");
             state.Append("OpenType font faces by name\n");
-            Dictionary<string, OpenTypeFontFace>.KeyCollection familyKeys = Globals.Global.Fonts.FontFaceCache.Keys;
+            var familyKeys = Globals.Global.Fonts.FontFaceCache.Keys;
             int count = familyKeys.Count;
             string[] keys = new string[count];
             familyKeys.CopyTo(keys, 0);
@@ -105,12 +90,12 @@ namespace PdfSharp.Internal
             /// <summary>
             /// Maps face name to OpenType font face.
             /// </summary>
-            public readonly Dictionary<string, OpenTypeFontFace> FontFaceCache = [];
+            public readonly ConcurrentDictionary<string, OpenTypeFontFace> FontFaceCache = [];
 
             /// <summary>
             /// Maps font source key to OpenType font face.
             /// </summary>
-            public readonly Dictionary<ulong, OpenTypeFontFace> FontFacesByCheckSum = [];
+            public readonly ConcurrentDictionary<ulong, OpenTypeFontFace> FontFacesByCheckSum = [];
         }
     }
 }

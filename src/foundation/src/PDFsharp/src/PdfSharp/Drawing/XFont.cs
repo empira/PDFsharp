@@ -372,36 +372,31 @@ namespace PdfSharp.Drawing
         /// </summary>
         void InitializeFromGdi()
         {
-            try
+            if (GdiFontFamily != null!)
             {
-                Locks.EnterFontFactory();
-                if (GdiFontFamily != null!)
-                {
-                    // Create font based on its family.
-                    GdiFont = new Font(GdiFontFamily, (float)_emSize, (GdiFontStyle)_style, GraphicsUnit.World);
-                }
-
-                if (GdiFont != null!)
-                {
-#if DEBUG_
-                    string name1 = _gdiFont.Name;
-                    string name2 = _gdiFont.OriginalFontName;
-                    string name3 = _gdiFont.SystemFontName;
-#endif
-                    _familyName = GdiFont.FontFamily.Name;
-                    // TODO_OLD: _glyphTypeface = XGlyphTypeface.GetOrCreateFrom(_gdiFont);
-                }
-                else
-                {
-                    Debug.Assert(false);
-                }
-
-                if (GlyphTypeface == null!)
-                    GlyphTypeface = XGlyphTypeface.GetOrCreateFromGdi(GdiFont);
-
-                CreateDescriptorAndInitializeFontMetrics();
+                // Create font based on its family.
+                GdiFont = new Font(GdiFontFamily, (float)_emSize, (GdiFontStyle)_style, GraphicsUnit.World);
             }
-            finally { Locks.ExitFontFactory(); }
+
+            if (GdiFont != null!)
+            {
+#if DEBUG_
+                string name1 = _gdiFont.Name;
+                string name2 = _gdiFont.OriginalFontName;
+                string name3 = _gdiFont.SystemFontName;
+#endif
+                _familyName = GdiFont.FontFamily.Name;
+                // TODO_OLD: _glyphTypeface = XGlyphTypeface.GetOrCreateFrom(_gdiFont);
+            }
+            else
+            {
+                Debug.Assert(false);
+            }
+
+            if (GlyphTypeface == null!)
+                GlyphTypeface = XGlyphTypeface.GetOrCreateFromGdi(GdiFont);
+
+            CreateDescriptorAndInitializeFontMetrics();
         }
 #endif
 

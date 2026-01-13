@@ -1,6 +1,7 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using System.Collections.Concurrent;
 using System.Text;
 #if GDI
 using GdiFontFamily = System.Drawing.FontFamily;
@@ -10,7 +11,6 @@ using PdfSharp.Drawing;
 #if WPF
 using WpfFontFamily = System.Windows.Media.FontFamily;
 #endif
-using PdfSharp.Internal;
 using PdfSharp.Fonts;
 
 namespace PdfSharp.Fonts
@@ -22,13 +22,8 @@ namespace PdfSharp.Fonts
     {
         public static FontFamilyInternal? GetFamilyByName(string familyName)
         {
-            try
-            {
-                Locks.EnterFontFactory();
-                Globals.Global.Fonts.FontFamiliesByName.TryGetValue(familyName, out var family);
-                return family;
-            }
-            finally { Locks.ExitFontFactory(); }
+            Globals.Global.Fonts.FontFamiliesByName.TryGetValue(familyName, out var family);
+            return family;
         }
 
         /// <summary>
@@ -36,22 +31,18 @@ namespace PdfSharp.Fonts
         /// </summary>
         public static FontFamilyInternal CacheOrGetFontFamily(FontFamilyInternal fontFamily)
         {
-            try
+            // Recall that a font family is uniquely identified by its case-insensitive name.
+            if (Globals.Global.Fonts.FontFamiliesByName.TryGetValue(fontFamily.Name, out var existingFontFamily))
             {
-                Locks.EnterFontFactory();
-                // Recall that a font family is uniquely identified by its case-insensitive name.
-                if (Globals.Global.Fonts.FontFamiliesByName.TryGetValue(fontFamily.Name, out var existingFontFamily))
-                {
 #if DEBUG
                     if (fontFamily.Name == "xxx")
                         _ = typeof(int);
 #endif
-                    return existingFontFamily;
-                }
-                Globals.Global.Fonts.FontFamiliesByName.Add(fontFamily.Name, fontFamily);
-                return fontFamily;
+                return existingFontFamily;
             }
-            finally { Locks.ExitFontFactory(); }
+
+            Globals.Global.Fonts.FontFamiliesByName.TryAdd(fontFamily.Name, fontFamily);
+            return fontFamily;
         }
 
         internal static void Reset()
@@ -64,7 +55,7 @@ namespace PdfSharp.Fonts
             var state = new StringBuilder();
             state.Append("====================\n");
             state.Append("Font families by name\n");
-            Dictionary<string, FontFamilyInternal>.KeyCollection familyKeys = Globals.Global.Fonts.FontFamiliesByName.Keys;
+            var familyKeys = Globals.Global.Fonts.FontFamiliesByName.Keys;
             int count = familyKeys.Count;
             string[] keys = new string[count];
             familyKeys.CopyTo(keys, 0);
@@ -86,7 +77,7 @@ namespace PdfSharp.Internal
             /// <summary>
             /// Maps family name to internal font family.
             /// </summary>
-            public readonly Dictionary<string, FontFamilyInternal> FontFamiliesByName = [];
+            public readonly ConcurrentDictionary<string, FontFamilyInternal> FontFamiliesByName = [];
         }
     }
 }

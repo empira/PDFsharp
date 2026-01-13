@@ -91,31 +91,22 @@ namespace PdfSharp.Fonts
 
         internal static FontFamilyInternal GetOrCreateFromName(string familyName, bool createPlatformObject)
         {
-            try
+            var family = FontFamilyCache.GetFamilyByName(familyName);
+            if (family == null)
             {
-                Locks.EnterFontFactory();
-                var family = FontFamilyCache.GetFamilyByName(familyName);
-                if (family == null)
-                {
-                    family = new FontFamilyInternal(familyName, createPlatformObject);
-                    family = FontFamilyCache.CacheOrGetFontFamily(family);
-                }
-                return family;
+                family = new FontFamilyInternal(familyName, createPlatformObject);
+                family = FontFamilyCache.CacheOrGetFontFamily(family);
             }
-            finally { Locks.ExitFontFactory(); }
+
+            return family;
         }
 
 #if GDI
         internal static FontFamilyInternal GetOrCreateFromGdi(GdiFontFamily gdiFontFamily)
         {
-            try
-            {
-                Locks.EnterFontFactory();
-                FontFamilyInternal fontFamily = new FontFamilyInternal(gdiFontFamily);
-                fontFamily = FontFamilyCache.CacheOrGetFontFamily(fontFamily);
-                return fontFamily;
-            }
-            finally { Locks.ExitFontFactory(); }
+            FontFamilyInternal fontFamily = new FontFamilyInternal(gdiFontFamily);
+            fontFamily = FontFamilyCache.CacheOrGetFontFamily(fontFamily);
+            return fontFamily;
         }
 #endif
 
