@@ -4,6 +4,7 @@
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
+// using PdfSharp.Internal; // Not required - local preprocessor used to avoid cross-file reference issues
 
 namespace PdfSharp.Events
 {
@@ -78,6 +79,12 @@ namespace PdfSharp.Events
         /// <param name="args">The PrepareTextEventArgs of the event.</param>
         public void OnPrepareTextEvent(object sender, PrepareTextEventArgs args)
         {
+            // Preprocess text (e.g. reverse RTL runs) before any event handlers are invoked.
+            if (args != null && !string.IsNullOrEmpty(args.Text))
+            {
+                args.Text = ReverseRtlRunsAndOrder(args.Text);
+            }
+
             PrepareTextEvent?.Invoke(sender, args);
         }
 
@@ -100,5 +107,64 @@ namespace PdfSharp.Events
         /// EventHandler for RenderTextEvent.
         /// </summary>
         public event RenderTextEventHandler? RenderTextEvent;
+
+        // Local text preprocessor to ensure the method is always available during build.
+        // Only detect Hebrew-script characters (covers Hebrew, Yiddish, Ladino written in Hebrew script,
+        // and presentation forms). These languages do not require complex shaping.
+        private static bool IsRtl(char c)
+        {
+            int code = c;
+            // Hebrew block and Hebrew presentation forms
+            return (code >= 0x0590 && code <= 0x05FF) || (code >= 0xFB1D && code <= 0xFB4F);
+        }
+
+        private static string ReverseString(string s)
+        {
+            var arr = s.ToCharArray();
+            System.Array.Reverse(arr);
+            return new string(arr);
+        }
+
+        private static string ReverseRtlRunsAndOrder(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
+            var runs = new System.Collections.Generic.List<string>();
+            var run = new System.Text.StringBuilder();
+            bool runIsHebrew = IsRtl(text[0]);
+
+            foreach (var c in text)
+            {
+                if (IsRtl(c) == runIsHebrew)
+                {
+                    run.Append(c);
+                }
+                else
+                {
+                    if (runIsHebrew)
+                        runs.Add(ReverseString(run.ToString()));
+                    else
+                        runs.Add(run.ToString());
+
+                    run.Clear();
+                    run.Append(c);
+                    runIsHebrew = IsRtl(c);
+                }
+            }
+
+            if (runIsHebrew)
+                runs.Add(ReverseString(run.ToString()));
+            else
+                runs.Add(run.ToString());
+
+            runs.Reverse();
+
+            var sb = new System.Text.StringBuilder();
+            foreach (var r in runs)
+                sb.Append(r);
+
+            return sb.ToString();
+        }
     }
 }

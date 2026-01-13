@@ -13,8 +13,14 @@
     <IsPackable>true</IsPackable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NuspecFile>$(MSBuildThisFileDirectory)$(MSBuildProjectName).nuspec</NuspecFile>
-    <NuGetId>PDFsharp</NuGetId>
-    <NuGetTitle>PDFsharp for Windows and Linux</NuGetTitle>
+    <!-- Override package identity for a custom package build -->
+    <PackageId>PdfSharpWithHebrewSupport</PackageId>
+    <Version>6.2.3-hebrew2</Version>
+    <Authors>ronenfe</Authors>
+    <Owners>ronenfe</Owners>
+    <RepositoryUrl>https://github.com/ronenfe/PDFsharp</RepositoryUrl>
+    <NuGetId>PdfSharpWithHebrewSupport</NuGetId>
+    <NuGetTitle>PDFsharp for Windows and Linux (custom Hebrew-support build)</NuGetTitle>
     <NuGetDescription Condition=" '$(Configuration)'=='Debug' ">$(DebugBuildMessage)%0D$(NuGetDescription)</NuGetDescription>
     <NuGetSummary>A .NET library for processing PDF.</NuGetSummary>
     <NuGetTags>$(NuGetTags_PdfSharp)</NuGetTags>

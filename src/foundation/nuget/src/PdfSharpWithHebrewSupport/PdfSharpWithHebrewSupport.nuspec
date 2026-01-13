@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>PdfSharpWithHebrewSupport</id>
+    <version>6.2.3-hebrew3</version>
+    <description>PDFsharp with added Hebrew-script RTL preprocessor for simple RTL languages (Hebrew, Yiddish). Built from PDFsharp sources with limited RTL preprocessing applied.</description>
+    <summary>PDFsharp customized build with Hebrew-script RTL run reordering.</summary>
+    <authors>ronenfe</authors>
+    <owners>ronenfe</owners>
+    <projectUrl>https://github.com/ronenfe/PDFsharp</projectUrl>
+    <license type="expression">MIT</license>
+    <icon>images\PDFsharp-128x128.png</icon>
+    <readme>README.md</readme>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <releaseNotes>Added Hebrew-script RTL preprocessing and unit tests (ReverseRtlTests).</releaseNotes>
+    <copyright>Copyright (c) 2005-2025 empira Software GmbH; modifications by ronenfe</copyright>
+    <tags>pdf pdfsharp hebrew rtl</tags>
+    <repository type="git" url="https://github.com/ronenfe/PDFsharp" branch="master" commit="" />
+    <title>PdfSharpWithHebrewSupport</title>
+    <dependencies>
+      <group targetFramework="net8.0">
+        <dependency id="Microsoft.Extensions.Logging" version="8.0.1" />
+        <dependency id="System.Security.Cryptography.Pkcs" version="8.0.1" />
+      </group>
+      <group targetFramework="net9.0">
+        <dependency id="Microsoft.Extensions.Logging" version="8.0.1" />
+        <dependency id="System.Security.Cryptography.Pkcs" version="8.0.1" />
+      </group>
+      <group targetFramework="net10.0">
+        <dependency id="Microsoft.Extensions.Logging" version="8.0.1" />
+        <dependency id="System.Security.Cryptography.Pkcs" version="8.0.1" />
+      </group>
+      <group targetFramework="netstandard2.0">
+        <dependency id="Microsoft.Extensions.Logging" version="8.0.1" />
+        <dependency id="System.Security.Cryptography.Pkcs" version="8.0.1" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\$config$\net8.0\**\*.*" target="lib\net8.0\" exclude="**\*NuGet*"/>
+    <file src="bin\$config$\net9.0\**\*.*" target="lib\net9.0\" exclude="**\*NuGet*"/>
+    <file src="bin\$config$\net10.0\**\*.*" target="lib\net10.0\" exclude="**\*NuGet*"/>
+    <file src="bin\$config$\netstandard2.0\**\PDFsharp*.*" target="lib\netstandard2.0\" exclude="**\*NuGet*"/>
+    <file src="README.md" />
+    <file src="..\..\..\..\assets\pdfsharp\images\PDFsharp-128x128.png" target="images\" />
+  </files>
+</package>
