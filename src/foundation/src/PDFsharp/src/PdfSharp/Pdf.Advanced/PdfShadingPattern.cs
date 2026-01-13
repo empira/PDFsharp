@@ -43,6 +43,21 @@ namespace PdfSharp.Pdf.Advanced
             //Elements[Keys.Matrix] = new PdfLiteral("[" + PdfEncoders.ToString(matrix) + "]");
             Elements.SetMatrix(Keys.Matrix, matrix);
         }
+        
+        /// <summary>
+        /// Setups the shading pattern from the specified brush.
+        /// </summary>
+        internal void SetupFromBrush(XRadialGradientBrush brush, XMatrix matrix, XGraphicsPdfRenderer renderer)
+        {
+            if (brush == null)
+                throw new ArgumentNullException(nameof(brush));
+
+            PdfShading shading = new PdfShading(_document);
+            shading.SetupFromBrush(brush, renderer);
+            Elements[Keys.Shading] = shading;
+            //Elements[Keys.Matrix] = new PdfLiteral("[" + PdfEncoders.ToString(matrix) + "]");
+            Elements.SetMatrix(Keys.Matrix, matrix);
+        }
 
         /// <summary>
         /// Common keys for all streams.
