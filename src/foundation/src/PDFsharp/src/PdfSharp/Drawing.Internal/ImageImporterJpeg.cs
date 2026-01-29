@@ -28,24 +28,23 @@ namespace PdfSharp.Drawing.Internal
                     var ipd = new ImagePrivateDataDct(stream.Data, stream.Length);
                     var ii = new ImportedImageJpeg(ipd);
                     ii.Information.DefaultDPI = 72; // Assume 72 DPI if information not provided in the file.
-                    if (TestJfifHeader(stream, ii))
-                    {
-                        bool colorHeader = false, infoHeader = false;
+                    TestJfifHeader(stream, ii); // App headers are optional
 
-                        while (MoveToNextHeader(stream))
+                    bool colorHeader = false, infoHeader = false;
+
+                    while (MoveToNextHeader(stream))
+                    {
+                        if (TestColorFormatHeader(stream, ii))
                         {
-                            if (TestColorFormatHeader(stream, ii))
-                            {
-                                colorHeader = true;
-                            }
-                            else if (TestInfoHeader(stream, ii))
-                            {
-                                infoHeader = true;
-                            }
+                            colorHeader = true;
                         }
-                        if (colorHeader && infoHeader)
-                            return ii;
+                        else if (TestInfoHeader(stream, ii))
+                        {
+                            infoHeader = true;
+                        }
                     }
+                    if (colorHeader && infoHeader)
+                        return ii;
                 }
             }
             // ReSharper disable once EmptyGeneralCatchClause
