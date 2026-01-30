@@ -170,6 +170,8 @@ namespace PdfSharp.Pdf.Filters
 
                 
                 case PdfFilterNames.RunLengthDecode:
+                    return _runLengthDecode ??= new RunLengthDecode();
+
                 case PdfFilterNames.CcittFaxDecode:
                 case PdfFilterNames.Jbig2Decode:
                 case PdfFilterNames.JpxDecode:
@@ -219,6 +221,8 @@ namespace PdfSharp.Pdf.Filters
         public static DctDecode DctDecode => _dctDecode ??= new();
 
         static DctDecode? _dctDecode;
+
+        static RunLengthDecode? _runLengthDecode;
 
         //jpxDecode
         //crypt
