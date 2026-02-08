@@ -35,7 +35,7 @@
     <!--<PackageVersion Include="GitVersion.MsBuild" Version="6.1.0" />-->
 
     <!-- Other packages -->
-    <PackageVersion Include="System.Resources.Extensions" Version="8.0.0" />
+    <PackageVersion Include="System.Resources.Extensions" Version="10.0.2" />
   </ItemGroup>
 
 </Project>
