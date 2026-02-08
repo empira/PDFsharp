@@ -1,9 +1,9 @@
 <Project>
   <!--<Import Condition="Exists('Local.Packages.props')" Project="$([MSBuild]::GetPathOfFileAbove('Local.Packages.props', '$(MSBuildThisFileDirectory)'))" />-->
   <PropertyGroup>
-    <Logging_Abstractions_PackageVersion>8.0.3</Logging_Abstractions_PackageVersion>
-    <Logging_PackageVersion>8.0.1</Logging_PackageVersion>
-    <Cryptography_PackageVersion>8.0.1</Cryptography_PackageVersion>
+    <Logging_Abstractions_PackageVersion>10.0.2</Logging_Abstractions_PackageVersion>
+    <Logging_PackageVersion>10.0.2</Logging_PackageVersion>
+    <Cryptography_PackageVersion>10.0.2</Cryptography_PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,7 +35,7 @@
     <!--<PackageVersion Include="GitVersion.MsBuild" Version="6.1.0" />-->
 
     <!-- Other packages -->
-    <PackageVersion Include="System.Resources.Extensions" Version="8.0.0" />
+    <PackageVersion Include="System.Resources.Extensions" Version="10.0.2" />
   </ItemGroup>
 
 </Project>
