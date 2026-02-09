@@ -5,22 +5,18 @@
     <Logging_PackageVersion>8.0.1</Logging_PackageVersion>
     <Cryptography_PackageVersion>8.0.1</Cryptography_PackageVersion>
   </PropertyGroup>
-
   <ItemGroup>
-
     <!-- Logging packages used by all PDFsharp projects -->
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(Logging_Abstractions_PackageVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
     <!-- Logging packages only used by PDFsharp sample projects and tests -->
     <!--<PackageVersion Include="Microsoft.Extensions.Logging" Version="$(Logging_PackageVersion)" />-->
     <PackageVersion Include="Microsoft.Extensions.Logging.Configuration" Version="$(Logging_PackageVersion)" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(Logging_PackageVersion)" />
-
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.2" />
     <!-- Digital signature packages used by PdfSharp.Cryptography and for testing -->
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="$(Cryptography_PackageVersion)" />
-    <PackageVersion Include="BouncyCastle.Cryptography" Version="2.5.0" />
-
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.2" />
+    <PackageVersion Include="BouncyCastle.Cryptography" Version="2.6.2" />
     <!-- Unit test packages used for testing only-->
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="xunit.core" Version="2.9.3" />
     <PackageVersion Include="xunit.assert" Version="2.4.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
@@ -28,14 +24,11 @@
     <PackageVersion Include="Xunit.SkippableFact" Version="1.5.23" />
     <PackageVersion Include="XunitXml.TestLogger" Version="4.1.0" />
     <PackageVersion Include="FluentAssertions" Version="6.12.2" />
-
     <!-- GitVersion used for Semantic Versioning -->
     <PackageVersion Include="GitVersion.MsBuild" Version="5.12.0" />
     <!-- GitVersion 6 does not work in VS because of .NET Framework -->
     <!--<PackageVersion Include="GitVersion.MsBuild" Version="6.1.0" />-->
-
     <!-- Other packages -->
-    <PackageVersion Include="System.Resources.Extensions" Version="8.0.0" />
+    <PackageVersion Include="System.Resources.Extensions" Version="10.0.2" />
   </ItemGroup>
-
 </Project>
