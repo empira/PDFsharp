@@ -1990,7 +1990,7 @@ namespace PdfSharp.Drawing
         public void StartFigure()
         {
 #if CORE
-            // Nothing to do.
+            CorePath.StartSubpath();
 #endif
 #if GDI
             try
