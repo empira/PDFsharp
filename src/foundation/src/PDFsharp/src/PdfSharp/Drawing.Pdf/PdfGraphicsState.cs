@@ -295,6 +295,25 @@ namespace PdfSharp.Drawing.Pdf
 
         #endregion
 
+        #region Blending
+
+        string _realizedBlendMode = "Normal";
+        public void RealizeBlendMode(string blendMode)
+        {
+            if (renderer.Owner.Version >= 14 && _realizedBlendMode != blendMode) {
+                PdfExtGState extGState = renderer.Owner.ExtGStateTable.GetExtGStateBlendMode(blendMode);
+                string gs = renderer.Resources.AddExtGState(extGState);
+                renderer.AppendFormatString("{0} gs\n", gs);
+
+                // Must create transparency group
+                if (renderer._page != null)
+                    renderer._page.TransparencyUsed = true;
+            }
+            _realizedBlendMode = blendMode;
+        }
+
+        #endregion
+
         #region Text
 
         internal PdfFont? RealizedFont => _realizedFont;

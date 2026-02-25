@@ -2206,6 +2206,15 @@ namespace PdfSharp.Drawing.Pdf
         }
 
         /// <summary>
+        /// Sets the current blend mode.
+        /// </summary>
+        /// <param name="blendMode">The blend mode to set.</param>
+        public void SetBlendMode(XBlendMode blendMode)
+        {
+            _gfxState.RealizeBlendMode(blendMode.ToString());
+        }
+
+        /// <summary>
         /// Converts a point from Windows world space to PDF world space.
         /// </summary>
         internal XPoint WorldToView(XPoint point)

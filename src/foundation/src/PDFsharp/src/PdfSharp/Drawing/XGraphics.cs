@@ -4651,6 +4651,22 @@ namespace PdfSharp.Drawing
         //public Matrix Transform { get; set; }
         //public GdiRectF VisibleClipBounds { get; }
 
+        /// <summary>
+        /// Gets or sets the blending mode.
+        /// </summary>
+        /// <value>The blending mode. "Normal" is the default mode. </value>
+        public XBlendMode BlendMode {
+            get { return _blendMode; }
+            set {
+                if (value != _blendMode) {
+                    _blendMode = value;
+                    _renderer?.SetBlendMode(value);
+                }
+            }
+        }
+
+        XBlendMode _blendMode = XBlendMode.Normal;
+
         #endregion
 
         // --------------------------------------------------------------------------------------------
