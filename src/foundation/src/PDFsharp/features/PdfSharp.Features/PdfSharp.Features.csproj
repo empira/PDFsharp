@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_Library)</TargetFrameworks>
     <DefineConstants>CORE</DefineConstants>
   </PropertyGroup>
 
@@ -31,5 +31,4 @@
     <Folder Include="assets\fonts\" />
     <Folder Include="assets\PDFs\" />
   </ItemGroup>
-
 </Project>

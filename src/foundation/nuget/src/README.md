@@ -4,6 +4,9 @@ This folder contains dummy C# projects for the generation of the PDFsharp and Mi
 
 ## Developer notes
 
+* Add dependencies for newly referenced NuGet packages to the nuspec files. 
+  Also libraries, that are part of the shared framework, have to be added for all frameworks.
+  Otherwise, exceptions may occur at runtime when trying to load the respective library.
 * The description and release notes are single text files read by MSBUILD and put to the nuspec files.
   This is done because putting the text directly in XML is very cumbersome.
 * The description and release notes should be worded such that it is not necessary to revise them on every new release.

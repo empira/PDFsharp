@@ -26,8 +26,8 @@ namespace PdfSharp.Charting.Renderers
             var leri = (LegendEntryRendererInfo)_rendererParms.RendererInfo;
 
             // Initialize
-            leri.MarkerArea.Width = MaxLegendMarkerWidth;
-            leri.MarkerArea.Height = MaxLegendMarkerHeight;
+            leri.MarkerArea.Width = (float_)MaxLegendMarkerWidth;
+            leri.MarkerArea.Height = (float_)MaxLegendMarkerHeight;
             leri.MarkerSize = new XSize();
             leri.MarkerSize.Width = leri.MarkerArea.Width;
             leri.MarkerSize.Height = leri.MarkerArea.Height;
@@ -41,7 +41,7 @@ namespace PdfSharp.Charting.Renderers
                 leri.TextSize = gfx.MeasureString(leri.EntryText, leri.LegendRendererInfo.Font);
                 if (leri.SeriesRendererInfo.Series._chartType == ChartType.Line)
                 {
-                    leri.MarkerSize.Width = leri.SeriesRendererInfo.MarkerRendererInfo.MarkerSize.Value;
+                    leri.MarkerSize.Width = (float_)leri.SeriesRendererInfo.MarkerRendererInfo.MarkerSize.Value;
                     leri.MarkerArea.Width = Math.Max(3 * leri.MarkerSize.Width, leri.MarkerArea.Width);
                 }
 
@@ -64,20 +64,20 @@ namespace PdfSharp.Charting.Renderers
             if (leri.SeriesRendererInfo.Series._chartType == ChartType.Line)
             {
                 // Draw line.
-                XPoint posLineStart = new XPoint(leri.X, leri.Y + leri.Height / 2);
-                XPoint posLineEnd = new XPoint(leri.X + leri.MarkerArea.Width, leri.Y + leri.Height / 2);
+                XPoint posLineStart = new XPoint((float_)leri.X, (float_)(leri.Y + leri.Height / 2));
+                XPoint posLineEnd = new XPoint((float_)(leri.X + leri.MarkerArea.Width), (float_)(leri.Y + leri.Height / 2));
                 gfx.DrawLine(new XPen(((XSolidBrush)leri.MarkerBrush).Color), posLineStart, posLineEnd);
 
                 // Draw marker.
                 double x = leri.X + leri.MarkerArea.Width / 2;
-                XPoint posMarker = new XPoint(x, leri.Y + leri.Height / 2);
+                XPoint posMarker = new XPoint((float_)x, (float_)(leri.Y + leri.Height / 2));
                 MarkerRenderer.Draw(gfx, posMarker, leri.SeriesRendererInfo.MarkerRendererInfo);
             }
             else
             {
                 // Draw series rectangle for column, bar or pie charts.
-                rect = new XRect(leri.X, leri.Y, leri.MarkerArea.Width, leri.MarkerArea.Height);
-                rect.Y += (leri.Height - leri.MarkerArea.Height) / 2;
+                rect = new XRect((float_)leri.X, (float_)leri.Y, leri.MarkerArea.Width, leri.MarkerArea.Height);
+                rect.Y += (float_)((leri.Height - leri.MarkerArea.Height) / 2);
                 gfx.DrawRectangle(leri.MarkerPen, leri.MarkerBrush, rect);
             }
 
@@ -85,7 +85,7 @@ namespace PdfSharp.Charting.Renderers
             if (leri.EntryText.Length > 0)
             {
                 rect = leri.Rect;
-                rect.X += leri.MarkerArea.Width + LegendEntryRenderer.SpacingBetweenMarkerAndText;
+                rect.X += (float_)(leri.MarkerArea.Width + LegendEntryRenderer.SpacingBetweenMarkerAndText);
                 XStringFormat format = new XStringFormat();
                 format.LineAlignment = XLineAlignment.Near;
                 gfx.DrawString(leri.EntryText, leri.LegendRendererInfo.Font,

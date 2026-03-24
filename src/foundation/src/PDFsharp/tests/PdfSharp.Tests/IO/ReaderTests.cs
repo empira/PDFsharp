@@ -12,11 +12,15 @@ using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Quality;
 #if CORE
+using PdfSharp.Fonts;
 #endif
 using Xunit;
 using FluentAssertions;
 using PdfSharp.Diagnostics;
-using PdfSharp.Fonts;
+
+#if PDFSHARP_DEBUG
+using static PdfSharp.Diagnostics.DebugBreakHelper;
+#endif
 
 namespace PdfSharp.Tests.IO
 {
@@ -106,7 +110,6 @@ namespace PdfSharp.Tests.IO
             // Now add many different numbers for testing.
             var dict = new PdfDictionary(doc);
             var array = new PdfArray(doc);
-            dict.Elements["/empiraPlayground"] = array;
             array.Elements.Add(new PdfLiteral("-32768"));
             array.Elements.Add(new PdfLiteral("-2147483648")); // Int32
             array.Elements.Add(new PdfLiteral("-2147483649")); // Int64
@@ -123,24 +126,16 @@ namespace PdfSharp.Tests.IO
             // This line causes an error message in Adobe Reader. array.Elements.Add(new PdfLiteral("12345678901234567890.12345678901234567890"));
             array.Elements.Add(new PdfLiteral("-9223372036854775808")); // Int64
             doc.Internals.AddObject(dict);
-            doc.Internals.Catalog.Elements["/empiraPlayground"] = PdfInternals.GetReference(dict);
 
             page.Resources.Elements["/NumberTest"] = array;
 
-            //array = new PdfArray(doc);
-            //array.Elements.Add(new PdfInteger(-32768));
-            //array.Elements.Add(new PdfIntegerObject(-32768));
-            //array.Elements.Add(new PdfReal(17));
-            //array.Elements.Add(new PdfRealObject(17));
-            //array.Elements.Add(new PdfReal(17.7));
-            //array.Elements.Add(new PdfRealObject(17.7));
-            //array.Elements.Add(new PdfString("Foo"));
-            //array.Elements.Add(new PdfStringObject("Foo_äöüß", PdfStringEncoding.PDFDocEncoding));
-            //array.Elements.Add(new PdfStringObject("Foo_äöüß", PdfStringEncoding.WinAnsiEncoding));
-            //array.Elements.Add(new PdfStringObject("Foo_äöüß", PdfStringEncoding.Unicode));
-            //page.Resources.Elements["/ReferenceTest"] = array;
-
+#if true_
+            // Create a file for debugging.
+            using var stream = new FileStream("$temp$$$.pdf", FileMode.Create);
+#else
+            // Use a memory stream for speed.
             using var stream = new MemoryStream();
+#endif
             doc.Save(stream, false);
             stream.Position = 0;
             stream.Length.Should().BeGreaterThan(0);
@@ -237,7 +232,7 @@ namespace PdfSharp.Tests.IO
             doc3.Info.Title.Should().Be("Test");
 
             var doc4 = PdfReader.Open(stream3, PdfDocumentOpenMode.Modify);
-            var filename = PdfFileUtility.GetTempPdfFileName("Custom_properties");
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/IO/Custom_properties");
             doc4.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
@@ -269,7 +264,7 @@ namespace PdfSharp.Tests.IO
                     $"Page {i + 1} - Rotate {page.Rotate} - Orientation {page.Orientation}");
             }
 
-            // Save the document...
+            // Save the document…
             string filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationTestStep1");
             document.Save(filename);
 
@@ -285,7 +280,7 @@ namespace PdfSharp.Tests.IO
                 DrawPageFrame(page, XColors.Yellow, 10);
             }
 
-            // Save the document...
+            // Save the document…
             filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationTestStep2");
             document.Save(filename);
 
@@ -297,7 +292,7 @@ namespace PdfSharp.Tests.IO
                 DrawPageFrame(page, XColors.Green, 5);
             }
 
-            // Save the document...
+            // Save the document…
             filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationTestStep3");
             document.Save(filename);
 
@@ -348,7 +343,7 @@ namespace PdfSharp.Tests.IO
                 DrawFooter(page, XBrushes.Red, box, "After creation " + i);
             }
 
-            // Save the document...
+            // Save the document…
             string filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationCustomTestStep1");
             document.Save(filename);
 
@@ -370,10 +365,11 @@ namespace PdfSharp.Tests.IO
                 DrawFooter(page, XBrushes.Yellow, box, "After import " + i);
             }
 
-            // Save the document...
+            // Save the document…
             filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationCustomTestStep2");
             document.Save(filename);
 
+            //ShouldBreak1 = true;
             // Read the document from step 2.
             document = PdfReader.Open(filename, PdfDocumentOpenMode.Modify);
             for (int i = 0; i < 8; ++i)
@@ -386,9 +382,10 @@ namespace PdfSharp.Tests.IO
                 DrawFooter(page, XBrushes.Green, box, "After second import " + i);
             }
 
-            // Save the document...
+            // Save the document…
             filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationCustomTestStep3");
             document.Save(filename);
+            //ShouldBreak1 = false;
 
             // Read the document from step 3.
             document = PdfReader.Open(filename, PdfDocumentOpenMode.Import);
@@ -411,8 +408,141 @@ namespace PdfSharp.Tests.IO
                 DrawFooter(page, XBrushes.LimeGreen, box, "After page import " + i);
             }
 
-            // Save the document...
+            // Save the document…
             filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationCustomTestStep4");
+            doc2.Save(filename);
+            static void DrawPageFrame(PdfPage page, XColor color, Int32 width, string? label = null)
+            {
+                // Draw a frame around the page. Add an optional label.
+                using var gfx = XGraphics.FromPdfPage(page);
+                var pen = new XPen(XColors.OrangeRed, 10) { LineCap = XLineCap.Round };
+                gfx.DrawLine(pen, 0, 0, 200, 200);
+                gfx.DrawRectangle(new XPen(color, width), new XRect(0, 0, page.Width.Point, page.Height.Point));
+                if (!String.IsNullOrWhiteSpace(label))
+                {
+                    var font = new XFont("Verdana", 10, XFontStyleEx.Regular);
+                    gfx.DrawString(label ?? "", font, XBrushes.Firebrick, 20, 20);
+                }
+            }
+
+            static void DrawFooter(PdfPage page, XBrush color, XRect box, string footer)
+            {
+                // Draw a frame around the page. Add an optional label.
+                using var gfx = XGraphics.FromPdfPage(page);
+                var font = new XFont("Verdana", 10, XFontStyleEx.Regular);
+                var format = XStringFormats.BottomCenter;
+                gfx.DrawString(footer, font, color, box, format);
+            }
+        }
+
+        [Fact]  // Merge with test above
+        public void Read_and_modify_PDF_file_CustomPageSize_PageOrientation_test_NT()  // PDFsharp/NT
+        {
+            // Simplified version of the test above to find dead object exception.
+            // StL / 25-02-02
+            // This test creates all 8 possible variations of 14 cm by 16 cm pages.
+            // Step 1 draws a red frame around the page.
+            // Step 2 draws a narrower, yellow frame around the page.
+            // Step 3 draws a narrow, green frame around the page.
+            // All frames should be visible after step 3 and should be around the edges of the pages.
+            var document = new PdfDocument();
+
+            // There are 4 possible values for rotation and 2 options for orientation.
+            // We create 8 pages to cover all cases.
+            const int pageCount = 2;
+            for (int i = 0; i < pageCount; ++i)
+            {
+                var page = document.AddPage();
+                page.Width = XUnit.FromCentimeter(14);
+                page.Height = XUnit.FromCentimeter(16);
+                page.Rotate = i % 4 * 90;
+                page.Orientation = (i / 4) switch
+                {
+                    0 => PageOrientation.Portrait,
+                    1 => PageOrientation.Landscape,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+                DrawPageFrame(page, XColors.Red, 20,
+                    $"Page {i + 1} - Rotate {page.Rotate} - Orientation {page.Orientation}");
+
+                var box = new XRect(0, 0, page.Width.Point, page.Height.Point);
+                box.Inflate(0, -20);
+                DrawFooter(page, XBrushes.Red, box, "After creation " + i);
+            }
+
+            // Save the document…
+            string filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationCustomTestNTStep1");
+            document.Save(filename);
+
+            // Read the document from step 1.
+            document = PdfReader.Open(filename, PdfDocumentOpenMode.Modify);
+            var a1 = document.Catalog.Elements["/Pages"];
+            var a2 = a1.As<PdfReference>().Value;
+            var a3 = a2.As<PdfDictionary>().Elements["/Kids"];
+
+            //ShouldBreak5 = false;
+            for (int i = 0; i < pageCount; ++i)
+            {
+                var page = document.Pages[i];
+                var width = page.MediaBox.Width;
+                var height = page.MediaBox.Height;
+
+                width.Should().BeApproximately(page.Width.Point, 2);
+                height.Should().BeApproximately(page.Height.Point, 2);
+
+                DrawPageFrame(page, XColors.Yellow, 10);
+
+                var box = new XRect(0, 0, page.Width.Point, page.Height.Point);
+                box.Inflate(0, -30);
+                DrawFooter(page, XBrushes.Yellow, box, "After import " + i);
+            }
+            //ShouldBreak5 = false;
+
+            // Save the document…
+            filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationCustomTestNTStep2");
+            document.Save(filename);
+
+            //ShouldBreak1 = false;
+            // Read the document from step 2.
+            document = PdfReader.Open(filename, PdfDocumentOpenMode.Modify);
+            for (int i = 0; i < pageCount; ++i)
+            {
+                var page = document.Pages[i];
+                DrawPageFrame(page, XColors.Green, 5);
+
+                var box = new XRect(0, 0, page.Width.Point, page.Height.Point);
+                box.Inflate(0, -40);
+                DrawFooter(page, XBrushes.Green, box, "After second import " + i);
+            }
+
+            // Save the document…
+            filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationCustomTestNTStep3");
+            document.Save(filename);
+            //ShouldBreak1 = false;
+
+            // Read the document from step 3.
+            document = PdfReader.Open(filename, PdfDocumentOpenMode.Import);
+            var doc2 = new PdfDocument();
+            for (int i = 0; i < pageCount; ++i)
+            {
+                var page0 = document.Pages[i];
+                var page = doc2.AddPage(page0);
+
+                var width = page.MediaBox.Width;
+                var height = page.MediaBox.Height;
+
+                width.Should().BeApproximately(page.Width.Point, 2);
+                height.Should().BeApproximately(page.Height.Point, 2);
+
+                DrawPageFrame(page, XColors.LimeGreen, 2);
+
+                var box = new XRect(0, 0, page.Width.Point, page.Height.Point);
+                box.Inflate(0, -50);
+                DrawFooter(page, XBrushes.LimeGreen, box, "After page import " + i);
+            }
+
+            // Save the document…
+            filename = PdfFileUtility.GetTempPdfFullFileName("unittests/IO/ReaderTests/OrientationCustomTestNTStep4");
             doc2.Save(filename);
             static void DrawPageFrame(PdfPage page, XColor color, Int32 width, string? label = null)
             {

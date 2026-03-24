@@ -28,6 +28,16 @@ namespace PdfSharp.Pdf.Structure
             Elements.SetName(Keys.Type, "/StructElem");
         }
 
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfStructureElement(PdfDictionary dict)
+            : base(dict)
+        {
+            Elements.SetName(Keys.Type, "/StructElem");
+        }
+
         internal override void PrepareForSave()
         {
             SimplifyKidsArray();
@@ -44,6 +54,7 @@ namespace PdfSharp.Pdf.Structure
         {
             if (elements != null)
             {
+                //TODO: #warning What is the expectation GetObject should return?
                 var k = elements.GetObject(Keys.K);
 
                 // If k is holding an array, return all elements.
@@ -80,7 +91,8 @@ namespace PdfSharp.Pdf.Structure
         /// </summary>
         void SimplifyKidsArray()
         {
-            if (Elements[Keys.K] is PdfArray k && k.Elements.Count == 1)
+            //if (Elements[Keys.K] is PdfArray k && k.Elements.Count == 1)
+            if (Elements.GetArray(Keys.K) is { Elements.Count: 1 } k) // #US373
             {
                 var item = k.Elements[0];
                 Elements[Keys.K] = item;
@@ -92,7 +104,8 @@ namespace PdfSharp.Pdf.Structure
         /// </summary>
         void SimplifyAttributes()
         {
-            var a = Elements[Keys.A];
+            //var a = Elements[Keys.A];
+            var a = Elements.GetValue(Keys.A); // #US373
 
             if (a is PdfArray array)
             {
@@ -145,7 +158,8 @@ namespace PdfSharp.Pdf.Structure
 
         T GetAttributes<T>() where T : PdfAttributesBase, new()
         {
-            var a = Elements[Keys.A];
+            //var a = Elements[Keys.A];
+            var a = Elements.GetValue(Keys.A); // #US373
             var array = a as PdfArray;
             if (array == null)
             {
@@ -165,7 +179,7 @@ namespace PdfSharp.Pdf.Structure
                     return item;
             }
 
-            // Create and add a new instance of T, if there’s no one.
+            // Create and add a new instance of T, if there’s none.
             var t = new T { Document = Owner };
             array.Elements.Add(t);
             return t;

@@ -89,7 +89,7 @@ namespace PdfSharp.Snippets.Pdf
 
             BeginBox(gfx, 5, BoxOptions.Box);
             {
-                var rsa = new PdfRubberStampAnnotation { Icon = PdfRubberStampAnnotationIcon.Approved, Flags = PdfAnnotationFlags.ReadOnly };
+                var rsa = new PdfStampAnnotation(page.Owner) { Icon = PdfStampAnnotationIcons.Approved, Flags = PdfAnnotationFlags.ReadOnly };
 
                 var rect = gfx.Transformer.WorldToDefaultPage(new XRect(new XPoint(20, 20), new XSize(160, 50)));
                 rsa.Rectangle = new PdfRectangle(rect);
@@ -101,9 +101,9 @@ namespace PdfSharp.Snippets.Pdf
 
             BeginBox(gfx, 6, BoxOptions.Box);
             {
-                var rsa = new PdfRubberStampAnnotation
+                var rsa = new PdfStampAnnotation(page.Owner)
                           {
-                              Icon = PdfRubberStampAnnotationIcon.TopSecret,
+                              Icon = PdfStampAnnotationIcons.TopSecret,
                               Flags = PdfAnnotationFlags.ReadOnly,
                               Title = "Annotation (title)",
                               Subject = "Annotation (subject)",
@@ -123,12 +123,12 @@ namespace PdfSharp.Snippets.Pdf
             BeginBox(gfx, 7, BoxOptions.Fill);
             {
                 // Create a PDF text annotation
-                var textAnnot = new PdfTextAnnotation
+                var textAnnot = new PdfTextAnnotation(page.Owner)
                                 {
                                     Title = "This is the title",
                                     Subject = "This is the subject",
                                     Contents = "This is the contents of the annotation.\rThis is the 2nd line.",
-                                    Icon = PdfTextAnnotationIcon.Note
+                                    Icon = PdfTextAnnotationIcons.Note
                                 };
 
                 gfx.DrawString("A text annotation.", font, XBrushes.Black, 20, 60, XStringFormats.Default);
@@ -146,12 +146,12 @@ namespace PdfSharp.Snippets.Pdf
             BeginBox(gfx, 8, BoxOptions.Fill);
             {
                 // Create another PDF text annotation which is open and transparent
-                var textAnnot = new PdfTextAnnotation
+                var textAnnot = new PdfTextAnnotation(page.Owner)
                                 {
                                     Title = "Annotation 2 (title)",
                                     Subject = "Annotation 2 (subject)",
                                     Contents = "This is the contents of the 2nd annotation.",
-                                    Icon = PdfTextAnnotationIcon.Help,
+                                    Icon = PdfTextAnnotationIcons.Help,
                                     Color = XColors.LimeGreen,
                                     Opacity = 0.5,
                                     Open = true

@@ -1,7 +1,7 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-// ReSharper disable InconsistentNaming
+// v7.0
 
 namespace PdfSharp.Pdf.Content
 {
@@ -10,6 +10,8 @@ namespace PdfSharp.Pdf.Content
     /// </summary>
     static class Chars
     {
+        // ReSharper disable InconsistentNaming
+
         public const char EOF =  '\uFFFF';  // EOF
         public const char NUL =  '\0';      // NUL
         public const char CR =   '\x0D';    // Carriage return, ignored by lexer.

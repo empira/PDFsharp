@@ -22,9 +22,20 @@ namespace PdfSharp.Pdf.Advanced
         public PdfResources(PdfDocument document)
             : base(document)
         {
-            Elements[Keys.ProcSet] = new PdfLiteral("[/PDF/Text/ImageB/ImageC/ImageI]");
+            //Elements[Keys.ProcSet] = new PdfLiteral("[/PDF/Text/ImageB/ImageC/ImageI]");
+            // #US373 begin Must be a PdfArray.
+            Elements[Keys.ProcSet] = new PdfArray(new PdfName("/PDF"),
+                                        new PdfName("/Text"),
+                                        new PdfName("/ImageB"),
+                                        new PdfName("/ImageC"),
+                                        new PdfName("/ImageI"));
+            // #US373 end
         }
 
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
         internal PdfResources(PdfDictionary dict)
             : base(dict)
         { }
@@ -40,7 +51,7 @@ namespace PdfSharp.Pdf.Advanced
                 _resources[font] = name;
                 if (font.Reference == null)
                     Owner.IrefTable.Add(font);
-                Fonts.Elements[name] = font.Reference;
+                Fonts.Elements[name] = font.RequiredReference;
             }
             return name;
         }
@@ -57,7 +68,7 @@ namespace PdfSharp.Pdf.Advanced
                 _resources[image] = name;
                 if (image.Reference == null)
                     Owner.IrefTable.Add(image);
-                XObjects.Elements[name] = image.Reference;
+                XObjects.Elements[name] = image.RequiredReference;
             }
             return name;
         }
@@ -74,7 +85,7 @@ namespace PdfSharp.Pdf.Advanced
                 _resources[form] = name;
                 if (form.Reference == null)
                     Owner.IrefTable.Add(form);
-                XObjects.Elements[name] = form.Reference;
+                XObjects.Elements[name] = form.RequiredReference;
             }
             return name;
         }
@@ -91,7 +102,7 @@ namespace PdfSharp.Pdf.Advanced
                 _resources[extGState] = name;
                 if (extGState.Reference == null)
                     Owner.IrefTable.Add(extGState);
-                ExtGStates.Elements[name] = extGState.Reference;
+                ExtGStates.Elements[name] = extGState.RequiredReference;
             }
             return name;
         }
@@ -108,7 +119,7 @@ namespace PdfSharp.Pdf.Advanced
                 _resources[pattern] = name;
                 if (pattern.Reference == null)
                     Owner.IrefTable.Add(pattern);
-                Patterns.Elements[name] = pattern.Reference;
+                Patterns.Elements[name] = pattern.RequiredReference;
             }
             return name;
         }
@@ -125,7 +136,7 @@ namespace PdfSharp.Pdf.Advanced
                 _resources[pattern] = name;
                 if (pattern.Reference == null)
                     Owner.IrefTable.Add(pattern);
-                Patterns.Elements[name] = pattern.Reference;
+                Patterns.Elements[name] = pattern.RequiredReference;
             }
             return name;
         }
@@ -142,7 +153,7 @@ namespace PdfSharp.Pdf.Advanced
                 _resources[shading] = name;
                 if (shading.Reference == null)
                     Owner.IrefTable.Add(shading);
-                Shadings.Elements[name] = shading.Reference;
+                Shadings.Elements[name] = shading.RequiredReference;
             }
             return name;
         }
@@ -293,25 +304,46 @@ namespace PdfSharp.Pdf.Advanced
             {
                 _importedResourceNames = new();
 
-                if (Elements[Keys.Font] != null)
+                //if (Elements[Keys.Font] != null) // TODO #US373 Just a null check.
+                //    Fonts.CollectResourceNames(_importedResourceNames);
+
+                //if (Elements[Keys.XObject] != null) // TODO #US373 Just a null check.
+                //    XObjects.CollectResourceNames(_importedResourceNames);
+
+                //if (Elements[Keys.ExtGState] != null) // TODO #US373 Just a null check.
+                //    ExtGStates.CollectResourceNames(_importedResourceNames);
+
+                //if (Elements[Keys.ColorSpace] != null) // TODO #US373 Just a null check.
+                //    ColorSpaces.CollectResourceNames(_importedResourceNames);
+
+                //if (Elements[Keys.Pattern] != null) // TODO #US373 Just a null check.
+                //    Patterns.CollectResourceNames(_importedResourceNames);
+
+                //if (Elements[Keys.Shading] != null) // TODO #US373 Just a null check.
+                //    Shadings.CollectResourceNames(_importedResourceNames);
+
+                //if (Elements[Keys.Properties] != null) // TODO #US373 Just a null check.
+                //    Properties.CollectResourceNames(_importedResourceNames);
+
+                if (Elements.HasValue(Keys.Font)) // #US373
                     Fonts.CollectResourceNames(_importedResourceNames);
 
-                if (Elements[Keys.XObject] != null)
+                if (Elements.HasValue(Keys.XObject)) // #US373
                     XObjects.CollectResourceNames(_importedResourceNames);
 
-                if (Elements[Keys.ExtGState] != null)
+                if (Elements.HasValue(Keys.ExtGState)) // #US373
                     ExtGStates.CollectResourceNames(_importedResourceNames);
 
-                if (Elements[Keys.ColorSpace] != null)
+                if (Elements.HasValue(Keys.ColorSpace)) // #US373
                     ColorSpaces.CollectResourceNames(_importedResourceNames);
 
-                if (Elements[Keys.Pattern] != null)
+                if (Elements.HasValue(Keys.Pattern)) // #US373
                     Patterns.CollectResourceNames(_importedResourceNames);
 
-                if (Elements[Keys.Shading] != null)
+                if (Elements.HasValue(Keys.Shading)) // #US373
                     Shadings.CollectResourceNames(_importedResourceNames);
 
-                if (Elements[Keys.Properties] != null)
+                if (Elements.HasValue(Keys.Properties)) // #US373
                     Properties.CollectResourceNames(_importedResourceNames);
             }
             return _importedResourceNames.ContainsKey(name);
@@ -390,7 +422,6 @@ namespace PdfSharp.Pdf.Advanced
             /// Gets the KeysMeta for these keys.
             /// </summary>
             internal static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
-
             static DictionaryMeta? _meta;
         }
 

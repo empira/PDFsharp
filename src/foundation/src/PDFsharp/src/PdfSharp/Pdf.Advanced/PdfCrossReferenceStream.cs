@@ -1,15 +1,14 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.Collections.Generic;
-using System.Diagnostics;
+#pragma warning disable CS1591 // TODO_DOC: Missing XML comment for publicly visible type or member
 
 namespace PdfSharp.Pdf.Advanced
 {
     /// <summary>
     /// Represents a PDF cross-reference stream.
     /// </summary>
-    sealed class PdfCrossReferenceStream : PdfTrailer  // Reference: 3.4.7  Cross-Reference Streams / Page 106
+    public sealed class PdfCrossReferenceStream : PdfTrailer  // Reference: 3.4.7  Cross-Reference Streams / Page 106
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfObjectStream"/> class.
@@ -24,6 +23,14 @@ namespace PdfSharp.Pdf.Advanced
             }
 #endif
         }
+
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfCrossReferenceStream(PdfDictionary dict)
+            : base(dict)
+        { }
 
         public readonly List<CrossReferenceStreamEntry> Entries = new List<CrossReferenceStreamEntry>();
 
@@ -114,7 +121,7 @@ namespace PdfSharp.Pdf.Advanced
             /// <summary>
             /// Gets the KeysMeta for these keys.
             /// </summary>
-            public new static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
+            internal new static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
 
             static DictionaryMeta? _meta;
         }

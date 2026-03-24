@@ -68,7 +68,7 @@ namespace GdiGrammarByExample
 
             var document = DdlReaderDocumentFromFile(file);
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 #if CORE
             document.Info.Author += "[.NET 6.0+ Core build]";
 #elif GDI
@@ -102,7 +102,7 @@ namespace GdiGrammarByExample
 
         Document DdlReaderDocumentFromFile(string file)
         {
-            //#if NET6_0_OR_GREATER
+            //#if NET8_0_OR_GREATER
             //            var ansiEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252)!;
             //#else
             //            var ansiEncoding = Encoding.GetEncoding(1252);

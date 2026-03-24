@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net8.0;net9.0;net10.0;net462</TargetFrameworks>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_Exe)</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
@@ -20,9 +20,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp\PdfSharp.csproj" />
+    <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
     <ProjectReference Include="..\..\..\PDFsharp\src\PdfSharp.Charting\PdfSharp.Charting.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Quality\PdfSharp.Quality.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Snippets\PdfSharp.Snippets.csproj" />
   </ItemGroup>
+
+  <!--<ItemGroup>
+    <Compile Include="..\..\src\PdfSharp.System\System\CodeAnalysis.cs" Link="root\CodeAnalysis.cs" />
+    <Compile Include="..\..\src\PdfSharp.System\System\CompilerServices.cs" Link="root\CompilerServices2.cs" />
+  </ItemGroup>-->
+
 
 </Project>

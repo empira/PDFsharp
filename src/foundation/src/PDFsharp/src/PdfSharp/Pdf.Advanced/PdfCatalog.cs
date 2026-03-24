@@ -2,16 +2,21 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.IO;
-using PdfSharp.Pdf.AcroForms;
+using PdfSharp.Pdf.Forms;
+using PdfSharp.Pdf.Metadata;
 using PdfSharp.Pdf.Structure;
+
+// v7.0.0 TODO review and cleanup
 
 namespace PdfSharp.Pdf.Advanced
 {
     /// <summary>
-    /// Represents the catalog dictionary.
+    /// Represents the PDF catalog dictionary.
     /// </summary>
     public sealed class PdfCatalog : PdfDictionary
     {
+        // Reference 2.0:  / Page 
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfCatalog"/> class.
         /// </summary>
@@ -21,6 +26,10 @@ namespace PdfSharp.Pdf.Advanced
             Elements.SetName(Keys.Type, "/Catalog");
         }
 
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
         internal PdfCatalog(PdfDictionary dictionary)
             : base(dictionary)
         { }
@@ -33,6 +42,7 @@ namespace PdfSharp.Pdf.Advanced
             get => _version;
             set
             {
+                // TODO Create: public enum PdfVersion { Pdf10, Pdf11, ..., Pdf20}
                 switch (value)
                 {
                     case "1.0":
@@ -49,33 +59,23 @@ namespace PdfSharp.Pdf.Advanced
                     case "1.6":
                         throw new InvalidOperationException("Unsupported PDF version.");
 
+                    case "1.7":
+                    case "2.0":
+                        _version = value;
+                        break;
+
                     default:
                         throw new ArgumentException("Invalid version.");
                 }
             }
         }
-        string _version = "1.4";
+        string _version = "1.7";
 
         /// <summary>
-        /// Gets the pages collection of this document.
+        /// Gets the page tree root of this document.  // TODO flat or not
         /// </summary>
         public PdfPages Pages
-        {
-            get
-            {
-                if (_pages == null)
-                {
-                    _pages = (PdfPages?)Elements.GetValue(Keys.Pages, VCF.CreateIndirect) ?? NRT.ThrowOnNull<PdfPages>();
-                    if (Owner.IsImported)
-                    {
-                        _pages.FlattenPageTree();
-                        //foreach (var page in _pages)
-                        //    page.InitPageSize();
-                    }
-                }
-                return _pages;
-            }
-        }
+            => _pages ??= Elements.GetRequiredDictionary<PdfPages>(Keys.Pages, VCF.CreateIndirect);
         PdfPages? _pages;
 
         /// <summary>
@@ -100,16 +100,13 @@ namespace PdfSharp.Pdf.Advanced
         /// Implementation of PdfDocument.ViewerPreferences.
         /// </summary>
         internal PdfViewerPreferences ViewerPreferences
-        {
-            get
-            {
-                if (_viewerPreferences == null)
-                    _viewerPreferences = (PdfViewerPreferences?)Elements.GetValue(Keys.ViewerPreferences, VCF.CreateIndirect) ??
-                                         NRT.ThrowOnNull<PdfViewerPreferences>();
-                return _viewerPreferences;
-            }
-        }
-        PdfViewerPreferences? _viewerPreferences;
+            => Elements.GetRequiredDictionary<PdfViewerPreferences>(Keys.ViewerPreferences, VCF.CreateIndirect);
+
+        internal bool HasOutline
+            => Elements.GetDictionary(Keys.Outlines, VCF.NoTransform) != null;
+
+        internal PdfOutline Outline
+            => Elements.GetRequiredDictionary<PdfOutline>(Keys.Outlines, VCF.CreateIndirect);
 
         /// <summary>
         /// Implementation of PdfDocument.Outlines.
@@ -118,82 +115,116 @@ namespace PdfSharp.Pdf.Advanced
         {
             get
             {
-                if (_outline == null)
-                {
-                    ////// Ensure that the page tree exists.
-                    ////// ReSharper disable once UnusedVariable because we need dummy to call the getter.
-                    ////PdfPages dummy = Pages;
-
-                    // Now create the outline item tree.
-                    _outline = (PdfOutline?)Elements.GetValue(Keys.Outlines, VCF.CreateIndirect) ?? NRT.ThrowOnNull<PdfOutline>();
-                }
-                return _outline.Outlines;
+                var outline = Elements.GetRequiredDictionary<PdfOutline>(Keys.Outlines, VCF.CreateIndirect);
+                return outline.Outlines;
             }
         }
-        PdfOutline? _outline;
 
         /// <summary>
-        /// Gets the name dictionary of this document.
+        /// Gets a value indicating whether the document has a /Metadata dictionary.
+        /// </summary>
+        public bool HasMetadata => Elements.GetDictionary<PdfMetadata>(Keys.Metadata) != null;
+
+        /// <summary>
+        /// Gets the metadata dictionary of this document.
+        /// An empty dictionary is created if it does not exist.
+        /// </summary>
+        [Obsolete("Use GetMetadata or GetRequiredMetadata.")]
+        public PdfMetadata Metadata
+            => Elements.GetRequiredDictionary<PdfMetadata>(Keys.Metadata, VCF.CreateIndirect);
+
+        /// <summary>
+        /// Gets the metadata dictionary of this document.
+        /// Returns null if it does not exist.
+        /// </summary>
+        public PdfMetadata? GetMetadata() 
+            => Elements.GetDictionary<PdfMetadata>(Keys.Metadata);
+
+        /// <summary>
+        /// Gets the metadata dictionary of this document.
+        /// It is created if it does not exist.
+        /// </summary>
+        public PdfMetadata GetOrCreateMetadata() 
+            => Elements.GetRequiredDictionary<PdfMetadata>(Keys.Metadata, VCF.CreateIndirect);
+
+        /// <summary>
+        /// Gets a value indicating whether the document has a /Names dictionary.
+        /// </summary>
+        public bool HasNames => Elements.GetDictionary<PdfNameDictionary>(Keys.Names) != null;
+
+        /// <summary>
+        /// Gets the /Names dictionary of this document.
+        /// An empty dictionary is created if it does not exist.
         /// </summary>
         public PdfNameDictionary Names
-        {
-            get
-            {
-                if (_names == null)
-                {
-                    var dict = Elements.GetDictionary(Keys.Names);
-                    if (dict != null)
-                        _names = new PdfNameDictionary(dict);
-                    else
-                    {
-                        _names = new PdfNameDictionary(Owner);
-                        Owner.Internals.AddObject(_names);
-                        Elements.SetReference(Keys.Names, _names.Reference ?? throw TH.InvalidOperationException_ReferenceMustNotBeNull());
-                    }
-                }
-                return _names;
-            }
-        }
-        PdfNameDictionary? _names;
+            => Elements.GetRequiredDictionary<PdfNameDictionary>(Keys.Names, VCF.CreateIndirect);
 
         /// <summary>
-        /// Gets the named destinations defined in the Catalog
+        /// Gets the /Names dictionary of this document.
+        /// Returns null if it does not exist.
         /// </summary>
+        public PdfNameDictionary? GetNames() 
+            => Elements.GetDictionary<PdfNameDictionary>(Keys.Metadata);
+
+        /// <summary>
+        /// Gets the /Names dictionary of this document.
+        /// It is created if it does not exist.
+        /// </summary>
+        public PdfNameDictionary GetOrCreateNames() 
+            => Elements.GetRequiredDictionary<PdfNameDictionary>(Keys.Metadata, VCF.CreateIndirect);
+
+        /// <summary>
+        /// Gets a value indicating whether the document has a /Dests dictionary.
+        /// </summary>
+        public bool HasDestinations
+            => Elements.GetDictionary<PdfNamedDestinations>(Keys.Dests) != null;
+
+        /// <summary>
+        /// Gets the named destinations defined in the Catalog.
+        /// </summary>
+        [Obsolete("Use GetDestinations or GetRequiredDestinations.")]
         public PdfNamedDestinations Destinations
-        {
-            get
-            {
-                if (_dests == null)
-                {
-                    var dict = Elements.GetDictionary(Keys.Dests);
-                    if (dict != null)
-                        _dests = new PdfNamedDestinations(dict);
-                    else
-                    {
-                        _dests = new PdfNamedDestinations();
-                        _dests = new PdfNamedDestinations();
-                        Owner.Internals.AddObject(_dests);
-                        Elements.SetReference(Keys.Dests, _dests.Reference ?? throw TH.InvalidOperationException_ReferenceMustNotBeNull());
-                    }
-                }
-                return _dests;
-            }
-        }
-        PdfNamedDestinations? _dests;
+            => Elements.GetRequiredDictionary<PdfNamedDestinations>(Keys.Dests, VCF.CreateIndirect);
 
         /// <summary>
-        /// Gets the AcroForm dictionary of this document.
+        /// Gets the named destinations dictionary of this document.
+        /// Returns null if it does not exist.
         /// </summary>
-        public PdfAcroForm AcroForm
-        {
-            get
-            {
-                if (_acroForm == null)
-                    _acroForm = (PdfAcroForm?)Elements.GetValue(Keys.AcroForm) ?? NRT.ThrowOnNull<PdfAcroForm>();
-                return _acroForm;
-            }
-        }
-        PdfAcroForm? _acroForm;
+        public PdfNamedDestinations? GetDestinations() 
+            => Elements.GetDictionary<PdfNamedDestinations>(Keys.Dests);
+
+        /// <summary>
+        /// Gets the named destinations dictionary of this document.
+        /// It is created if it does not exist.
+        /// </summary>
+        public PdfNamedDestinations GetRequiredDestinations() 
+            => Elements.GetRequiredDictionary<PdfNamedDestinations>(Keys.Dests, VCF.CreateIndirect);
+
+        /// <summary>
+        /// Gets a value indicating whether the document has a /AcroForm dictionary.
+        /// </summary>
+        public bool HasAcroForm => Elements.GetDictionary<PdfForm>(Keys.AcroForm) != null;
+
+        /// <summary>
+        /// Gets the interactive form (AcroForm) dictionary of this document.
+        /// </summary>
+        [Obsolete("Use GetAcroForm or GetOrCreateAcroForm.")]
+        public PdfForm AcroForm
+            => Elements.GetRequiredDictionary<PdfForm>(Keys.AcroForm, VCF.CreateIndirect);
+
+        /// <summary>
+        /// Gets the acro form dictionary of this document.
+        /// Returns null if it does not exist.
+        /// </summary>
+        public PdfForm? GetAcroForm() 
+            => Elements.GetDictionary<PdfForm>(Keys.AcroForm);
+
+        /// <summary>
+        /// Gets the acro form dictionary of this document.
+        /// It is created if it does not exist.
+        /// </summary>
+        public PdfForm GetOrCreateAcroForm() 
+            => Elements.GetRequiredDictionary<PdfForm>(Keys.AcroForm, VCF.CreateIndirect);
 
         /// <summary>
         /// Gets or sets the language identifier specifying the natural language for all text in the document.
@@ -217,28 +248,49 @@ namespace PdfSharp.Pdf.Advanced
         internal override void PrepareForSave()
         {
             // Prepare pages.
-            if (_pages != null)
-                _pages.PrepareForSave();
+            _pages?.PrepareForSave();
+
+            // Prepare metadata.
+            var metadataManager = Document.GetMetadataManager();
+            metadataManager.PrepareForSave();
+
+            var xxx = metadataManager.ToString();
+
+            // Prepare AcroForm objects.
+            var acroForm = GetAcroForm();
+            var fields = acroForm?.Elements.GetArray(PdfForm.Keys.Fields);
+            if (fields != null)
+            {
+                foreach (var formRef in fields.Elements)
+                {
+                    var form = (formRef as PdfReference)?.Value;
+                    if (form is PdfFormField field)
+                    {
+                        field.PrepareForSave();
+                    }
+                }
+            }
 
             // Create outline objects.
-            //if (_outline != null && _outline.Outlines.Count > 0)
-            if (_outline is { Outlines.Count: > 0 })
+            if (HasOutline && Outline is { Outlines.Count: > 0 } outline)
             {
-                if (Elements[Keys.PageMode] == null)
+                if (!Elements.HasValue(Keys.PageMode)) // #US373 GetValue() not needed, just checking existence.
                     PageMode = PdfPageMode.UseOutlines;
-                _outline.PrepareForSave();
+                outline.PrepareForSave();
             }
 
             // Clean up structure tree root.
-            if (Elements.GetObject(Keys.StructTreeRoot) is PdfStructureTreeRoot str)
-                str.PrepareForSave();
+            if (Elements.GetObject(Keys.StructTreeRoot) is PdfStructureTreeRoot structTree)
+                structTree.PrepareForSave();
         }
 
         internal override void WriteObject(PdfWriter writer)
         {
-            if (_outline != null && _outline.Outlines.Count > 0)
+            var state = Document.State;
+            //if (_outline != null && _outline.Outlines.Count > 0)
+            if (HasOutline && Outline is { Outlines.Count: > 0 })
             {
-                if (Elements[Keys.PageMode] == null)
+                if (!Elements.HasValue(Keys.PageMode)) // #US373 GetValue() not needed, just checking existence.
                     PageMode = PdfPageMode.UseOutlines;
             }
             base.WriteObject(writer);
@@ -247,7 +299,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
-        internal sealed class Keys : KeysBase
+        public sealed class Keys : KeysBase
         {
             // ReSharper disable InconsistentNaming
 
@@ -286,6 +338,8 @@ namespace PdfSharp.Pdf.Advanced
 
             /// <summary>
             /// (Optional; PDF 1.2) The document’s name dictionary.
+            /// (PDF 2.0) For unencrypted wrapper documents for an encrypted payload document
+            /// the Names dictionary is required and shall contain the EmbeddedFiles name tree.
             /// </summary>
             [KeyInfo("1.2", KeyType.Dictionary | KeyType.Optional)]
             public const string Names = "/Names";
@@ -371,7 +425,7 @@ namespace PdfSharp.Pdf.Advanced
             /// <summary>
             /// (Optional; PDF 1.2) The document’s interactive form (AcroForm) dictionary.
             /// </summary>
-            [KeyInfo("1.2", KeyType.Dictionary | KeyType.Optional, typeof(PdfAcroForm))]
+            [KeyInfo("1.2", KeyType.Dictionary | KeyType.Optional, typeof(PdfForm))]
             public const string AcroForm = "/AcroForm";
 
             /// <summary>
@@ -458,7 +512,7 @@ namespace PdfSharp.Pdf.Advanced
             public const string Collection = "/Collection";
 
             /// <summary>
-            /// (Optional; PDF 1.7) A flag used to expedite the display of PDF documents containing XFA forms.
+            /// Optional; deprecated in PDF 2.0) A flag used to expedite the display of PDF documents containing XFA forms.
             /// It specifies whether the document must be regenerated when the document is first opened.
             /// If true, the viewer application treats the document as a shell and regenerates the content
             /// when the document is opened, regardless of any dynamic forms settings that appear in the XFA
@@ -468,15 +522,30 @@ namespace PdfSharp.Pdf.Advanced
             /// See the XML Forms Architecture (XFA) Specification (Bibliography).
             /// Default value: false.
             /// </summary>
-            [KeyInfo("1.7", KeyType.Boolean | KeyType.Optional)]
+            [KeyInfo("1.7", KeyType.Boolean | KeyType.Optional | KeyType.DeprecatedIn20)]
             public const string NeedsRendering = "/NeedsRendering";
+
+            // ----- New PDF 2.0 entries -----
+
+            // DSS - nyi
+
+            /// <summary>
+            /// (Optional; PDF 2.0) An array of one or more file specification dictionaries which denote the associated
+            /// files for this PDF document. 
+            /// For unencrypted wrapper documents for an encrypted payload document the AF key is required and shall
+            /// include a reference to the file specification dictionary for the encrypted payload document.
+            /// </summary>
+            [KeyInfo("2.0", KeyType.ArrayOfDictionaries | KeyType.Optional, ObjectType = typeof(PdfArrayOfDictionaries))]
+            public const string AF = "/AF";
+
+            // DPartRoot - nyi
 
             // ReSharper restore InconsistentNaming
 
             /// <summary>
             /// Gets the KeysMeta for these keys.
             /// </summary>
-            public static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
+            internal static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
 
             static DictionaryMeta? _meta;
         }

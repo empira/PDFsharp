@@ -7,7 +7,7 @@ namespace PdfSharp.Pdf.Advanced
     /// Represents the imported objects of an external document. Used to cache objects that are
     /// already imported when a PdfFormXObject is added to a page.
     /// </summary>
-    sealed class PdfImportedObjectTable
+    sealed class PdfImportedObjectTable  // TODO review
     {
         /// <summary>
         /// Initializes a new instance of this class with the document the objects are imported from.

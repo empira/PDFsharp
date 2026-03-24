@@ -1,11 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using PdfSharp.Drawing;
-using PdfSharp.Fonts;
-using PdfSharp.Fonts.OpenType;
-using PdfSharp.Internal;
+using System.Collections.Concurrent;
+using PdfSharp.Internal.OpenType;
 
 namespace PdfSharp.Pdf.Advanced
 {
@@ -21,13 +18,13 @@ namespace PdfSharp.Pdf.Advanced
         /// Gets the FontDescriptor identified by the specified XFont. If no such object 
         /// exists, a new FontDescriptor is created and added to the cache.
         /// </summary>
-        public PdfFontDescriptor GetOrCreatePdfDescriptorFor(OpenTypeDescriptor otDescriptor, string baseName)
+        public PdfFontDescriptor GetOrCreatePdfDescriptorFor(OpenTypeFontDescriptor otDescriptor, string baseName)
         {
             if (!_cache.TryGetValue(otDescriptor.Key, out var pdfDescriptor))
             {
                 pdfDescriptor = new PdfFontDescriptor(Owner, otDescriptor);
                 pdfDescriptor.FontName = pdfDescriptor.CreateEmbeddedFontSubsetName(baseName);
-                _cache.Add(otDescriptor.Key, pdfDescriptor);
+                _cache.TryAdd(otDescriptor.Key, pdfDescriptor);
             }
             return pdfDescriptor;
         }
@@ -37,6 +34,6 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Maps OpenType descriptor to document specific PDF font descriptor.
         /// </summary>
-        readonly Dictionary<string, PdfFontDescriptor> _cache = [];
+        readonly ConcurrentDictionary<string, PdfFontDescriptor> _cache = [];
     }
 }

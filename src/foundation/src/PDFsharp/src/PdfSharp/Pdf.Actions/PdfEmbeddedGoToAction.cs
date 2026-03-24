@@ -1,9 +1,11 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Diagnostics;
 using PdfSharp.Pdf.IO;
+
+// v7.0.0 TODO
+
+#pragma warning disable CS1591 // TODO_DOC: Missing XML comment for publicly visible type or member
 
 namespace PdfSharp.Pdf.Actions
 {
@@ -26,6 +28,16 @@ namespace PdfSharp.Pdf.Actions
         /// <param name="document">The document that owns this object.</param>
         public PdfEmbeddedGoToAction(PdfDocument document)
             : base(document)
+        {
+            Inititalize();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfEmbeddedGoToAction(PdfDictionary dict)
+            : base(dict)
         {
             Inititalize();
         }
@@ -127,7 +139,7 @@ namespace PdfSharp.Pdf.Actions
         /// Separator for splitting destination path segments ans destination name.
         /// </summary>
         public const char Separator = '\\';
-        
+
         /// <summary>
         /// Path segment string used to move to the parent document.
         /// </summary>
@@ -155,7 +167,8 @@ namespace PdfSharp.Pdf.Actions
             /// <summary>
             /// (Required) The destination in the target to jump to (see Section 8.2.1, “Destinations”).
             /// </summary>
-            [KeyInfo(KeyType.Name | KeyType.ByteString | KeyType.Array | KeyType.Required)]
+            //[KeyInfo(KeyType.Name | KeyType.ByteString | KeyType.Array | KeyType.Required)]
+            [KeyInfo(KeyType.NameOrByteStringOrArray | KeyType.Required)] // #US373
             public const string D = "/D";
 
             /// <summary>
@@ -175,77 +188,85 @@ namespace PdfSharp.Pdf.Actions
             [KeyInfo(KeyType.Dictionary | KeyType.Optional)]
             public const string T = "/T";
         }
+    }
 
-        internal class TargetDictionary : PdfDictionary
+    public class TargetDictionary : PdfDictionary
+    {
+        TargetDictionary()
+        { }
+
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal TargetDictionary(PdfDictionary dict)
+            : base(dict)
+        { }
+
+        public static TargetDictionary CreateTargetChild(string name)
         {
-            TargetDictionary()
-            { }
+            var target = new TargetDictionary();
 
-            public static TargetDictionary CreateTargetChild(string name)
-            {
-                var target = new TargetDictionary();
+            target.Elements.SetName(Keys.R, "/C");
+            target.Elements.SetString(Keys.N, name);
 
-                target.Elements.SetName(Keys.R, "/C");
-                target.Elements.SetString(Keys.N, name);
+            return target;
+        }
 
-                return target;
-            }
+        public static TargetDictionary CreateTargetParent()
+        {
+            var target = new TargetDictionary();
 
-            public static TargetDictionary CreateTargetParent()
-            {
-                var target = new TargetDictionary();
+            target.Elements.SetName(Keys.R, "/P");
 
-                target.Elements.SetName(Keys.R, "/P");
+            return target;
+        }
 
-                return target;
-            }
+        /// <summary>
+        /// Predefined keys of this dictionary.
+        /// </summary>
+        internal class Keys : KeysBase
+        {
+            /// <summary>
+            /// (Required) Specifies the relationship between the current document and the target
+            /// (which may be an intermediate target). Valid values are P (the target is the parent
+            /// of the current document) and C (the target is a child of the current document).
+            /// </summary>
+            [KeyInfo(KeyType.Name | KeyType.Required)]
+            public const string R = "/R";
 
             /// <summary>
-            /// Predefined keys of this dictionary.
+            /// (Required if the value of R is C and the target is located in the EmbeddedFiles name tree;
+            /// otherwise, it must be absent) The name of the file in the EmbeddedFiles name tree.
             /// </summary>
-            internal class Keys : KeysBase
-            {
-                /// <summary>
-                /// (Required) Specifies the relationship between the current document and the target
-                /// (which may be an intermediate target). Valid values are P (the target is the parent
-                /// of the current document) and C (the target is a child of the current document).
-                /// </summary>
-                [KeyInfo(KeyType.Name | KeyType.Required)]
-                public const string R = "/R";
+            [KeyInfo(KeyType.ByteString | KeyType.Optional)]
+            public const string N = "/N";
 
-                /// <summary>
-                /// (Required if the value of R is C and the target is located in the EmbeddedFiles name tree;
-                /// otherwise, it must be absent) The name of the file in the EmbeddedFiles name tree.
-                /// </summary>
-                [KeyInfo(KeyType.ByteString | KeyType.Optional)]
-                public const string N = "/N";
+            ///// <summary>
+            ///// (Required if the value of R is C and the target is associated with a file attachment annotation;
+            ///// otherwise, it must be absent) If the value is an integer, it specifies the page number (zero-based)
+            ///// in the current document containing the file attachment annotation. If the value is a string,
+            ///// it specifies a named destination in the current document that provides the page number of the
+            ///// file attachment annotation.
+            ///// </summary>
+            //[KeyInfoBug(KeyType.Integer | KeyType.ByteString | KeyType.Optional)] // #US373 Cannot "|" types.
+            //public const string P = "/P";
 
-                ///// <summary>
-                ///// (Required if the value of R is C and the target is associated with a file attachment annotation;
-                ///// otherwise, it must be absent) If the value is an integer, it specifies the page number (zero-based)
-                ///// in the current document containing the file attachment annotation. If the value is a string,
-                ///// it specifies a named destination in the current document that provides the page number of the
-                ///// file attachment annotation.
-                ///// </summary>
-                //[KeyInfo(KeyType.Integer | KeyType.ByteString | KeyType.Optional)]
-                //public const string P = "/P";
+            ///// <summary>
+            ///// (Required if the value of R is C and the target is associated with a file attachment annotation;
+            ///// otherwise, it must be absent) If the value is an integer, it specifies the index (zero-based)
+            ///// of the annotation in the Annots array (see Table 3.27) of the page specified by P. If the value
+            ///// is a text string, it specifies the value of NM in the annotation dictionary (see Table 8.15).
+            ///// </summary>
+            //[KeyInfoBug(KeyType.Integer | KeyType.TextString | KeyType.Optional)] // #US373 Cannot "|" types.
+            //public const string A = "/A";
 
-                ///// <summary>
-                ///// (Required if the value of R is C and the target is associated with a file attachment annotation;
-                ///// otherwise, it must be absent) If the value is an integer, it specifies the index (zero-based)
-                ///// of the annotation in the Annots array (see Table 3.27) of the page specified by P. If the value
-                ///// is a text string, it specifies the value of NM in the annotation dictionary (see Table 8.15).
-                ///// </summary>
-                //[KeyInfo(KeyType.Integer | KeyType.TextString | KeyType.Optional)]
-                //public const string A = "/A";
-
-                /// <summary>
-                /// (Optional) A target dictionary specifying additional path information to the target document.
-                /// If this entry is absent, the current document is the target file containing the destination.
-                /// </summary>
-                [KeyInfo(KeyType.Dictionary | KeyType.Optional)]
-                public const string T = "/T";
-            }
+            /// <summary>
+            /// (Optional) A target dictionary specifying additional path information to the target document.
+            /// If this entry is absent, the current document is the target file containing the destination.
+            /// </summary>
+            [KeyInfo(KeyType.Dictionary | KeyType.Optional)]
+            public const string T = "/T";
         }
     }
 }

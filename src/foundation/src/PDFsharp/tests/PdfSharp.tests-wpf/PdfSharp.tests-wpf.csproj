@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0-windows;net9.0-windows;net10.0-windows;net462</TargetFrameworks>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_Tests_Windows)</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <UseWPF>true</UseWPF>
-    <DefineConstants>WPF</DefineConstants>    
+    <DefineConstants>$(DefineConstants);WPF</DefineConstants>    
     <!--
     PDFsharp internal class RuntimeHelpers is visible in this assembly because of InternalsVisibleTo.
     This conflics with mscorlib. -->
-    <NoWarn>CS1685,CS0436</NoWarn>
+    <NoWarn>$(NoWarn);1685;0436</NoWarn>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
@@ -28,8 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="Build\CompilerServices.cs" />
+    <!--<Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="Build\CompilerServices.cs" />-->
+    <Compile Include="..\..\..\shared\src\PdfSharp.Shared\dotnet\GetSubArray.cs" Link="Properties\GetSubArray(included).cs" />
+    <Compile Include="..\PdfSharp.Tests\Pdf.Annotations\AnnotationTestBase.cs" Link="Pdf.Annotations\AnnotationTestBase.cs" />
     <Compile Include="..\PdfSharp.Tests\Properties\GlobalDeclarations.cs" Link="Properties\GlobalDeclarations.cs" />
+    <Compile Include="..\PdfSharp.Tests\Basics\SmokeTests.cs" Link="Basics\SmokeTests.cs" />
+    <Compile Include="..\PdfSharp.Tests\Build\CheckPdfDictionaryClassesTests.cs" Link="Build\CheckPdfDictionaryClassesTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Build\CSharpFeaturesTests.cs" Link="Build\CSharpFeaturesTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Build\ReleaseBuildTests.cs" Link="Build\ReleaseBuildTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Core\GlobalsTests.cs" Link="Core\GlobalsTests.cs" />
@@ -49,14 +53,7 @@
     <Compile Include="..\PdfSharp.Tests\IO\LexerTests.cs" Link="IO\LexerTests.cs" />
     <Compile Include="..\PdfSharp.Tests\IO\ReaderTests.cs" Link="IO\ReaderTests.cs" />
     <Compile Include="..\PdfSharp.Tests\IO\WriterTests.cs" Link="IO\WriterTests.cs" />
-    <Compile Include="..\PdfSharp.Tests\Pdf\annotations\AnnotationTests.cs" Link="PDF\annotation\AnnotationTests.cs" />
-    <Compile Include="..\PdfSharp.Tests\Pdf\creation\BasicTests.cs" Link="PDF\creation\BasicTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Pdf\creation\CreationTests.cs" Link="PDF\creation\CreationTests.cs" />
-    <Compile Include="..\PdfSharp.Tests\Pdf\objectmodel\ArrayTests.cs" Link="PDF\objectmodel\ArrayTests.cs" />
-    <Compile Include="..\PdfSharp.Tests\Pdf\objectmodel\DictionaryTests.cs" Link="PDF\objectmodel\DictionaryTests.cs" />
-    <Compile Include="..\PdfSharp.Tests\Pdf\objectmodel\NameTests.cs" Link="PDF\objectmodel\NameTests.cs" />
-    <Compile Include="..\PdfSharp.Tests\Pdf\signatures\BouncyCastleSignerTests.cs" Link="PDF\signatures\BouncyCastleSignerTests.cs" />
-    <Compile Include="..\PdfSharp.Tests\Pdf\signatures\DefaultSignerTests.cs" Link="PDF\signatures\DefaultSignerTests.cs" />
     <Compile Include="..\PdfSharp.Tests\Structs\XUnitTests.cs" Link="Structs\XUnitTests.cs" />
   </ItemGroup>
 
@@ -76,8 +73,5 @@
     <ProjectReference Include="..\..\src\PdfSharp.Cryptography\PdfSharp.Cryptography.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Helper\" />
-  </ItemGroup>
 
 </Project>

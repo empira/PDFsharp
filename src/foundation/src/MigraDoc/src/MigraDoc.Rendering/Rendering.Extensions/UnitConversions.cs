@@ -3,6 +3,10 @@
 
 using MigraDoc.DocumentObjectModel;
 using PdfSharp.Drawing;
+#if PSGFX
+using PdfSharp.Graphics;
+#endif
+using Unit = MigraDoc.DocumentObjectModel.Unit;
 
 namespace MigraDoc.Rendering.Extensions
 {
@@ -18,9 +22,14 @@ namespace MigraDoc.Rendering.Extensions
         {
             var xGraphicsUnit = unit.Type.TryGetAsXGraphicsUnit();
             if (xGraphicsUnit != null)
-                return new XUnit(unit.Value, xGraphicsUnit.Value);
-            
-            return XUnit.FromPoint(unit.Point);
+            {
+#if PSGFX
+                return new XUnit((float_)unit.Value, (GraphicsUnit)xGraphicsUnit.Value);
+#else
+                return new XUnit((float_)unit.Value, xGraphicsUnit.Value);
+#endif
+            }
+            return XUnit.FromPoint((float_)unit.Point);
         }
 
         static XGraphicsUnit? TryGetAsXGraphicsUnit(this UnitType unitType)
@@ -41,10 +50,11 @@ namespace MigraDoc.Rendering.Extensions
         /// </summary>
         public static Unit ToUnit(this XUnit xUnit)
         {
+#if !PSGFX
             var unitType = xUnit.Type.TryGetAsUnitType();
             if (unitType != null)
                 return new Unit(xUnit.Value, unitType.Value);
-            
+#endif
             return Unit.FromPoint(xUnit.Point);
         }
 

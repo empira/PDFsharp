@@ -16,7 +16,7 @@ namespace PdfSharp.Snippets
     {
         public static string QuickBrownFox = "The quick brown fox jumps over the lazy dog. 1234567890 +-*/";
         public static string SphinxOfQuarz = "Sphinx of black quartz, judge my vow. 1234567890 +-*/";
-        public static string TwelveBoxer = "Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich. 1234567890 +-*/";
+        public static string TwelveBoxers = "Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich. 1234567890 +-*/";
     }
 
     public class LeftToRightText

@@ -60,7 +60,7 @@ namespace PdfSharp.Tests.Filters
             var filter = new Ascii85Decode();
             var bytes = new byte[4];
 
-            TestRange(0, 500);
+            //TestRange(0, 500);
             //TestRange(0, 0xffffffff);  // Takes long, but succeeds.
             TestRange(0, 700);
             TestRange(0xfffff000, 0xffffffff);

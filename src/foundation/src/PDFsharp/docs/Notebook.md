@@ -12,11 +12,11 @@
 
 ## New C# features
 
-PDFsharp uses should be compatible with .NET Framework 4.7x and .NET Standard 2.0.
-Therefore only C# features are used that are handled by the compiler, like primary constructors, newer pattern matching,
+PDFsharp should be compatible with .NET Framework 4.6x and .NET Standard 2.0.
+Therefore, only C# features are used that are handled by the compiler, like primary constructors, newer pattern matching,
 switch expressions, etc.
 However, there are some features that depend on the runtime.
-PDFsharp assemblies need some additional code to work with frameworks other aht .NET 6 or higher.
+PDFsharp assemblies need some additional code to work with frameworks other than .NET 8 or higher.
 PDFsharp currently uses the following:
 
 * **init-only setter**  

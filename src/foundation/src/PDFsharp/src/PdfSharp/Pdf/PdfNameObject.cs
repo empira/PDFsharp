@@ -1,24 +1,42 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Internal;
 using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Pdf
 {
     /// <summary>
     /// Represents an indirect name value. This type is not used by PDFsharp. If it is imported from
-    /// an external PDF file, the value is converted into a direct object. Acrobat sometime uses indirect
+    /// an external PDF file, the value is converted into a direct object. Acrobat sometimes uses indirect
     /// names to save space, because an indirect reference to a name may be shorter than a long name.
     /// </summary>
     [DebuggerDisplay("({" + nameof(Value) + "})")]
-    public sealed class PdfNameObject : PdfObject
+    public sealed class PdfNameObject : PdfPrimitiveObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfNameObject"/> class.
         /// </summary>
         public PdfNameObject()
         {
-            Value = "/";  // Empty name.
+            Name = Name.Empty;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PdfNameObject"/> class.
+        /// </summary>
+        public PdfNameObject(Name name)
+        {
+            Name = name;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PdfNameObject"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public PdfNameObject(string value)
+        {
+            Name = value;
         }
 
         /// <summary>
@@ -27,41 +45,54 @@ namespace PdfSharp.Pdf
         /// <param name="document">The document.</param>
         /// <param name="value">The value.</param>
         public PdfNameObject(PdfDocument document, string value)
-            : base(document)
+            : base(document, true)
         {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-            if (value.Length == 0 || value[0] != '/')
-                throw new ArgumentException(PsMsgs.NameMustStartWithSlash);
+            Name = value;
+        }
 
-            Value = value;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PdfNameObject"/> class
+        /// without making it indirect.
+        /// Used in PDF parser only.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <param name="name">The initial value.</param>
+        /// <param name="createIndirect">If true creates an indirect object.</param>
+        internal PdfNameObject(PdfDocument document, Name name, bool createIndirect)
+            : base(document, createIndirect)
+        {
+            Name = name;
         }
 
         /// <summary>
         /// Determines whether the specified object is equal to the current object.
         /// </summary>
-        public override bool Equals(object? obj) 
-            => Value.Equals(obj);
+        public override bool Equals(object? obj)
+        {
+            if (obj is PdfName pdfName)
+                return Name.Equals(pdfName.Name);
+            return Value.Equals(obj);
+        }
 
         /// <summary>
         /// Serves as a hash function for this type.
         /// </summary>
-        public override int GetHashCode() 
-            => Value.GetHashCode();
+        public override int GetHashCode() => Name.GetHashCode();
 
         /// <summary>
-        /// Gets or sets the name value.
+        /// Gets the name as a canonical name string.
         /// </summary>
-        public string Value { get; set; }
+        public string Value => Name.Value;
+
+        /// <summary>
+        /// Gets the underlying Name object.
+        /// </summary>
+        public Name Name { get; }
 
         /// <summary>
         /// Returns the name. The string always begins with a slash.
         /// </summary>
-        public override string ToString()
-        {
-            // TODO_OLD: Encode characters.
-            return Value;
-        }
+        public override string ToString() => Value;
 
         /// <summary>
         /// Determines whether a name is equal to a string.

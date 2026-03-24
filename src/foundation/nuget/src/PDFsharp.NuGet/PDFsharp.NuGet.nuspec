@@ -13,7 +13,7 @@
         <readme>README.md</readme>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <releaseNotes>$releaseNotes$</releaseNotes>
-        <copyright>$copyright$</copyright>
+        <copyright>$CopyrightPdfSharp$</copyright>
         <tags>$tags$</tags>
         <repository type="git" url="https://github.com/empira/PDFsharp" branch="master" commit="" />
         <title>$title$</title>

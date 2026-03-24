@@ -186,6 +186,6 @@ namespace PdfSharp.Drawing
             ColorTable[140] = 0xFF9ACD32;  // YellowGreen
         }
 
-        internal static uint[] ColorTable = new uint[141];
+        internal static readonly uint[] ColorTable = new uint[141];
     }
 }

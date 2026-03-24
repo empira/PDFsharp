@@ -1,9 +1,7 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using PdfSharp.Drawing;
-using PdfSharp.Pdf.Filters;
-using PdfSharp.Fonts.OpenType;
+#pragma warning disable CS1591 // TODO_DOC: Missing XML comment for publicly visible type or member
 
 namespace PdfSharp.Pdf.Advanced
 {
@@ -13,7 +11,7 @@ namespace PdfSharp.Pdf.Advanced
     /// PDFsharp only used CIDFontType2 which is a TrueType font program.
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    class PdfCIDFont : PdfFont
+    public class PdfCIDFont : PdfFont
     {
         public PdfCIDFont(PdfDocument document)
             : base(document)
@@ -31,12 +29,12 @@ namespace PdfSharp.Pdf.Advanced
             cid.Elements.SetInteger("/Supplement", 0);
             Elements.SetValue(Keys.CIDSystemInfo, cid);
             // #PDF-UA: 'Identity' or a stream must obviously be set for CIDFonts to satisfy PDF/UA requirements.
-            Elements.SetName(Keys.CIDToGIDMap, "Identity");
+            Elements.SetName(Keys.CIDToGIDMap, "/Identity");
 
             FontDescriptor = fontDescriptor;
             // ReSharper disable once DoNotCallOverridableMethodsInConstructor
             Owner.IrefTable.TryAdd(fontDescriptor);
-            Elements[Keys.FontDescriptor] = fontDescriptor.Reference;
+            Elements[Keys.FontDescriptor] = fontDescriptor.RequiredReference;
 
             //FontEncoding = font.PdfOptions.FontEncoding;
             FontEncoding = PdfFontEncoding.Unicode;
@@ -59,10 +57,18 @@ namespace PdfSharp.Pdf.Advanced
             // ReSharper disable once DoNotCallOverridableMethodsInConstructor
             //Owner.IrefTable.Add(fontDescriptor);
             Owner.IrefTable.TryAdd(fontDescriptor);
-            Elements[Keys.FontDescriptor] = fontDescriptor.Reference;
+            Elements[Keys.FontDescriptor] = fontDescriptor.RequiredReference;
 
             FontEncoding = PdfFontEncoding.Unicode;
         }
+
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfCIDFont(PdfDictionary dict)
+            : base(dict)
+        { }
 
         public string BaseFont
         {
@@ -175,7 +181,6 @@ namespace PdfSharp.Pdf.Advanced
             /// Gets the KeysMeta for these keys.
             /// </summary>
             internal static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
-
             static DictionaryMeta? _meta;
         }
 

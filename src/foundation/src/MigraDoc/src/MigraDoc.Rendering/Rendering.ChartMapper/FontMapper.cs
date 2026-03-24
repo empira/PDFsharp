@@ -16,8 +16,15 @@ namespace MigraDoc.Rendering.ChartMapper
         {
             font.Bold = domFont.Bold;
             if (domFont.Color.IsEmpty)
-                font.Color = XColor.Empty;
+            {
+#if PSGFX
+                font.Color = new XColor();
+#else
+                font.Color = PdfSharp.Drawing.XColor.Empty;
+#endif
+            }
             else
+
             {
 #if noCMYK
                 font.Color = XColor.FromArgb((int)domFont.Color.Argb);

@@ -17,7 +17,7 @@ namespace PdfSharp.Pdf.IO
 
         /// <summary>
         /// The PDF stream is opened for importing pages from it. A document opened in this mode cannot
-        /// be modified.
+        /// be modified, but you can extract pages from it.
         /// </summary>
         Import,
 

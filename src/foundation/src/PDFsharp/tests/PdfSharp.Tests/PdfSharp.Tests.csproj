@@ -1,45 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0;net10.0;net462</TargetFrameworks>
-    <DefineConstants>CORE</DefineConstants>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_Tests_Exe)</TargetFrameworks>
+    <DefineConstants>$(DefineConstants);CORE</DefineConstants>
     <!--
     PDFsharp internal class RuntimeHelpers is visible in this assembly because of InternalsVisibleTo.
     This conflics with mscorlib, and therefore it is disabled. -->
-    <NoWarn>CS1685,CS0436</NoWarn>
+    <NoWarn>$(NoWarn);1685;0436</NoWarn>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <!-- TODO ??? -->
     <DefineConstants>$(DefineConstants);TRACE;CORE</DefineConstants>
+    <Optimize>False</Optimize>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DefineConstants>$(DefineConstants);TRACE;CORE</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
-    <Optimize>False</Optimize>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net462|AnyCPU'">
-    <Optimize>False</Optimize>
-  </PropertyGroup>
-
+  <!-- TODO ??? -->
   <ItemGroup>
+    <Compile Remove="Pdf\objectmodel\**" />
     <Compile Remove="TestResults\**" />
+    <EmbeddedResource Remove="Pdf\objectmodel\**" />
     <EmbeddedResource Remove="TestResults\**" />
+    <None Remove="Pdf\objectmodel\**" />
     <None Remove="TestResults\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="System\CompilerServices.cs" />
+    <!--<Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="System\CompilerServices.cs" />-->
+    <Compile Include="..\..\..\shared\src\PdfSharp.Shared\dotnet\GetSubArray.cs" Link="Properties\GetSubArray(included).cs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" />
     <PackageReference Include="Xunit.SkippableFact" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,7 +54,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pdf\pdf-a\" />
+    <Folder Include="Parsers\content-streams\" />
+    <Folder Include="Pdf\acroforms\" />
   </ItemGroup>
 
 </Project>

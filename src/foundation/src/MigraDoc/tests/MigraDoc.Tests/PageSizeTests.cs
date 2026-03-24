@@ -50,14 +50,14 @@ namespace MigraDoc.Tests
             // Layout and render document to PDF.
             pdfRenderer.RenderDocument();
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("Page_Formats");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/pages/Page_Formats");
             pdfRenderer.PdfDocument.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
-        private Document CreateDocument()
+        Document CreateDocument()
         {
             var text = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore " +
                        "et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. " +
@@ -289,10 +289,10 @@ namespace MigraDoc.Tests
             // Layout and render document to PDF.
             pdfRenderer.RenderDocument();
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("Page_Formats_Inheritance");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/pages/Page_Formats_Inheritance");
             pdfRenderer.PdfDocument.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
     }

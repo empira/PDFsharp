@@ -247,7 +247,7 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         protected override string GetFieldResult()
         {
-            return DateTime.Now.ToString(GetEffectiveFormat(_dateField, out _));
+            return DateTimeOffset.Now.ToString(GetEffectiveFormat(_dateField, out _));
         }
 
         readonly DateField _dateField;

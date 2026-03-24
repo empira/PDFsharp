@@ -18,7 +18,7 @@ namespace PdfSharp.Pdf.Advanced
         /// Initializes a new instance of the <see cref="PdfContent"/> class.
         /// </summary>
         public PdfContent(PdfDocument document)
-            : base(document)
+            : base(document, true)
         { }
 
         /// <summary>
@@ -31,10 +31,10 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PdfContent"/> class.
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
         /// </summary>
-        /// <param name="dict">The dict.</param>
-        public PdfContent(PdfDictionary dict) // HACK_OLD PdfContent
+        internal PdfContent(PdfDictionary dict) // HACK_OLD PdfContent
             : base(dict)
         {
             // A PdfContent dictionary is always unfiltered.
@@ -50,13 +50,13 @@ namespace PdfSharp.Pdf.Advanced
             {
                 if (value)
                 {
-                    var filter = Elements["/Filter"];
+                    var filter = Elements.GetValue(PdfStream.Keys.Filter); // #US373
                     if (filter == null && Stream is not null)
                     {
-                        byte[] bytes = Filtering.FlateDecode.Encode(Stream.Value, _document.Options.FlateEncodeMode);
+                        byte[] bytes = Filtering.FlateDecode.Encode(Stream.Value, Document.Options.FlateEncodeMode);
                         Stream.Value = bytes;
-                        Elements.SetInteger("/Length", Stream.Length);
-                        Elements.SetName("/Filter", "/FlateDecode");
+                        Elements.SetName(PdfStream.Keys.Filter, "/FlateDecode");
+                        Elements.SetInteger(PdfStream.Keys.Length, Stream.Length);
                     }
                 }
             }
@@ -67,18 +67,18 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         void Decode()
         {
-            if (Stream is { Value: not null })
+            if (Stream is not null)
             {
-                var item = Elements["/Filter"];
-                if (item != null)
+                var filter = Elements.GetValue(PdfStream.Keys.Filter);
+                if (filter != null)
                 {
-                    var decodeParams = Elements[PdfStream.Keys.DecodeParms];
-                    var bytes = Filtering.Decode(Stream.Value, item, decodeParams);
+                    var decodeParams = Elements.GetValue(PdfStream.Keys.DecodeParms);
+                    var bytes = Filtering.Decode(Stream.Value, filter, decodeParams);
                     if (bytes != null!)
                     {
                         Stream.Value = bytes;
-                        Elements.Remove("/Filter");
-                        Elements.SetInteger("/Length", Stream.Length);
+                        Elements.Remove(PdfStream.Keys.Filter);
+                        Elements.SetInteger(PdfStream.Keys.Length, Stream.Length);
                     }
                 }
             }
@@ -121,36 +121,57 @@ namespace PdfSharp.Pdf.Advanced
             {
                 // GetContent also disposes the underlying XGraphics object, if one exists
                 //Stream = new PdfStream(PdfEncoders.RawEncoding.GetBytes(pdfRenderer.GetContent()), this);
-                _pdfRenderer.Close();
+                if (_pdfRenderer is XGraphicsPdfRenderer xgfxRenderer)
+                {
+                    xgfxRenderer.Close();
+                }
+                else
+                {
+                    // Case: Renderer is a PDFsharp Graphics DrawingContext for PDF.
+                    // No automatic close, throw.
+                    throw new InvalidOperationException(
+                        $"A renderer of type {_pdfRenderer.GetType().FullName} is still open for this content stream.");
+                }
                 Debug.Assert(_pdfRenderer == null);
             }
 
             if (Stream != null!)
             {
-                if (Owner.Options.CompressContentStreams && Elements.GetName("/Filter").Length == 0)
+                // Acrobat crashes if a PDF file contains an empty stream that is compressed and 
+                // therefore about 2 to 4 bytes long. So we do not compress very short streams
+                // at all.
+                const int streamLengthCompressionThreshold = 32;
+
+                // Compress the stream if it has a minimum length and has no filter set yet.
+                // Short streams are smaller without compression.
+                if (Owner.Options.CompressContentStreams && !Elements.HasValue(PdfStream.Keys.Filter) &&
+                    Stream.Value.Length > streamLengthCompressionThreshold)
                 {
-                    Stream.Value = Filtering.FlateDecode.Encode(Stream.Value, _document.Options.FlateEncodeMode);
-                    //Elements["/Filter"] = new PdfName("/FlateDecode");
-                    Elements.SetName("/Filter", "/FlateDecode");
+                    Stream.Value = Filtering.FlateDecode.Encode(Stream.Value, Document.Options.FlateEncodeMode);
+                    Elements.SetName(PdfStream.Keys.Filter, "/FlateDecode");
                 }
-                Elements.SetInteger("/Length", Stream.Length);
+                Elements.SetInteger(PdfStream.Keys.Length, Stream.Length);
             }
 
             base.WriteObject(writer);
         }
 
-        internal void SetRenderer(XGraphicsPdfRenderer? renderer) => _pdfRenderer = renderer;
-        XGraphicsPdfRenderer? _pdfRenderer;
+        // Sets the renderer that currently renders this content stream.
+        internal void SetRenderer(IPageContentRenderer? renderer) => _pdfRenderer = renderer;
+
+        internal IPageContentRenderer? Renderer => _pdfRenderer;
+
+        IPageContentRenderer? _pdfRenderer;
 
         /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
-        internal sealed class Keys : PdfStream.Keys
+        public sealed class Keys : PdfStream.Keys
         {
             /// <summary>
             /// Gets the KeysMeta for these keys.
             /// </summary>
-            public static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
+            internal static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
 
             static DictionaryMeta? _meta;
         }

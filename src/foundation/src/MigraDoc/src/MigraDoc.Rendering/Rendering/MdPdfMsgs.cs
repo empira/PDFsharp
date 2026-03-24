@@ -6,7 +6,7 @@ using PdfSharp.Internal;
 namespace MigraDoc.Rendering
 {
     /// <summary>
-    /// MigraDoc PDF renderer message id.
+    /// MigraDoc PDF renderer message ID.
     /// </summary>
     // ReSharper disable InconsistentNaming
     enum MdPdfMsgId
@@ -36,10 +36,10 @@ namespace MigraDoc.Rendering
     static class MdPdfMsgs
     {
         internal static MdPdfMsg NumberTooLargeForRoman(int number)
-            => new(MdPdfMsgId.NumberTooLargeForRoman, Invariant($"The number {number} is to large to be displayed as roman number."));
+            => new(MdPdfMsgId.NumberTooLargeForRoman, Invariant($"The number {number} is too large to be displayed as roman number."));
 
         internal static MdPdfMsg NumberTooLargeForLetters(int number)
-            => new(MdPdfMsgId.NumberTooLargeForLetters, $"The number {number} is to large to be displayed as letters.");
+            => new(MdPdfMsgId.NumberTooLargeForLetters, $"The number {number} is too large to be displayed as letters.");
 
         internal static MdPdfMsg DisplayEmptyImageSize
             => new(MdPdfMsgId.DisplayEmptyImageSize, "Image has empty size.");

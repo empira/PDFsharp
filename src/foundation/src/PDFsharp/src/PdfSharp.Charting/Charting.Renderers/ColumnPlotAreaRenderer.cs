@@ -2,6 +2,9 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
+#if PSGFX
+using PdfSharp.Graphics.Media.MatrixExtensions;
+#endif
 
 namespace PdfSharp.Charting.Renderers
 {
@@ -55,9 +58,9 @@ namespace PdfSharp.Charting.Renderers
                 if (yMin < 0 && yMax > 0)
                 {
                     var points = new XPoint[2];
-                    points[0].X = xMin;
+                    points[0].X = (float_)xMin;
                     points[0].Y = 0;
-                    points[1].X = xMax;
+                    points[1].X = (float_)xMax;
                     points[1].Y = 0;
                     cri.PlotAreaRendererInfo.Matrix.TransformPoints(points);
 

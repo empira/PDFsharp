@@ -7,27 +7,39 @@ using PdfSharp.Fonts;
 using PdfSharp.Logging;
 using PdfSharp.Pdf.Filters;
 
+#pragma warning disable CS1591 // TODO_DOC: Missing XML comment for publicly visible type or member
+
 namespace PdfSharp.Pdf.Advanced
 {
     /// <summary>
     /// Represents a ToUnicode map for composite font.
     /// </summary>
-    sealed class PdfToUnicodeMap : PdfDictionary
+    public sealed class PdfToUnicodeMap : PdfDictionary
     {
-        public PdfToUnicodeMap(PdfDocument document)
-            : base(document)
-        { }
+        //public PdfToUnicodeMap(PdfDocument document)
+        //    : base(document)
+        //{ }
 
-        public PdfToUnicodeMap(PdfDocument document, CMapInfo cmapInfo)
+        internal PdfToUnicodeMap(PdfDocument document, CMapInfo cmapInfo)
             : base(document)
         {
             CMapInfo = cmapInfo;
         }
 
         /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfToUnicodeMap(PdfDictionary dict)
+            : base(dict)
+        {
+            CMapInfo = null!;
+        }
+
+        /// <summary>
         /// Gets or sets the CMap info.
         /// </summary>
-        public CMapInfo CMapInfo { get; set; } = default!;
+        internal CMapInfo CMapInfo { get; set; }
 
         /// <summary>
         /// Creates the ToUnicode map from the CMapInfo.
@@ -41,7 +53,7 @@ namespace PdfSharp.Pdf.Advanced
               "/CIDInit /ProcSet findresource begin\n" +
               "12 dict begin\n" +
               "begincmap\n" +
-              "/CIDSystemInfo << /Registry (Adobe)/Ordering (UCS)/Supplement 0>> def\n" +
+              "/CIDSystemInfo <</Registry (Adobe)/Ordering (UCS)/Supplement 0>> def\n" +
               "/CMapName /Adobe-Identity-UCS def /CMapType 2 def\n";
             string suffix = "endcmap CMapName currentdict /CMap defineresource pop end end";
 
@@ -98,12 +110,13 @@ namespace PdfSharp.Pdf.Advanced
 
             if (Owner.Options.CompressContentStreams)
             {
-                Elements.SetName("/Filter", "/FlateDecode");
-                bytes = Filtering.FlateDecode.Encode(bytes, _document.Options.FlateEncodeMode);
+                Elements.SetName(PdfStream.Keys.Filter, "/FlateDecode");
+                Debug.Assert(ReferenceEquals(_document2, Document));
+                bytes = Filtering.FlateDecode.Encode(bytes, Document.Options.FlateEncodeMode);
             }
             else
             {
-                Elements.Remove("/Filter");
+                Elements.Remove(PdfStream.Keys.Filter);
             }
 
             if (Stream == null!)
@@ -111,7 +124,7 @@ namespace PdfSharp.Pdf.Advanced
             else
             {
                 Stream.Value = bytes;
-                Elements.SetInteger("/Length", Stream.Length);
+                Elements.SetInteger(PdfStream.Keys.Length, Stream.Length);
             }
         }
 

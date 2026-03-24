@@ -10,8 +10,6 @@ namespace PdfSharp.Drawing
     [Flags]
     public enum XFontStyleEx  // Same values as System.Drawing.FontStyle.
     {
-        // Will be renamed to XGdiFontStyle or XWinFontStyle.
-
         /// <summary>
         /// Normal text.
         /// </summary>

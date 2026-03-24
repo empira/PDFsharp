@@ -15,10 +15,8 @@ namespace PdfSharp.Drawing
     /// Represents a 3-by-3 matrix that represents an affine 2D transformation.
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
-    [Serializable,
-     StructLayout(LayoutKind
-         .Sequential)] //, TypeConverter(typeof(MatrixConverter)), ValueSerializer(typeof(MatrixValueSerializer))]
-    public struct XMatrix : IFormattable
+    [Serializable, StructLayout(LayoutKind.Sequential)] //, TypeConverter(typeof(MatrixConverter)), ValueSerializer(typeof(MatrixValueSerializer))]
+    public struct XMatrix : IFormattable, IEquatable<XMatrix>
     {
         [Flags]
         internal enum XMatrixTypes
@@ -315,7 +313,7 @@ namespace PdfSharp.Drawing
         [Obsolete("Use ScaleAppend or ScalePrepend explicitly, because in GDI+ and WPF the defaults are contrary.", true)]
         // ReSharper disable InconsistentNaming
         public void Scale(double scaleXY)
-            // ReSharper restore InconsistentNaming
+        // ReSharper restore InconsistentNaming
         {
             throw new InvalidOperationException("Temporarily out of order.");
             //Scale(scaleXY, scaleXY, XMatrixOrder.Prepend);
@@ -326,7 +324,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         // ReSharper disable InconsistentNaming
         public void ScaleAppend(double scaleXY)
-            // ReSharper restore InconsistentNaming
+        // ReSharper restore InconsistentNaming
         {
             Scale(scaleXY, scaleXY, XMatrixOrder.Append);
         }
@@ -336,7 +334,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         // ReSharper disable InconsistentNaming
         public void ScalePrepend(double scaleXY)
-            // ReSharper restore InconsistentNaming
+        // ReSharper restore InconsistentNaming
         {
             Scale(scaleXY, scaleXY, XMatrixOrder.Prepend);
         }
@@ -346,7 +344,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         // ReSharper disable InconsistentNaming
         public void Scale(double scaleXY, XMatrixOrder order)
-            // ReSharper restore InconsistentNaming
+        // ReSharper restore InconsistentNaming
         {
             Scale(scaleXY, scaleXY, order);
         }
@@ -492,7 +490,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public void RotateAtAppend(double angle, XPoint point)
         {
-            RotateAt(angle, point, XMatrixOrder.Append);
+            RotateAt(angle * Const.Deg2Rad, point, XMatrixOrder.Append);
         }
 
         /// <summary>
@@ -508,9 +506,9 @@ namespace PdfSharp.Drawing
         /// </summary>
         public void RotateAt(double angle, XPoint point, XMatrixOrder order)
         {
+            angle %= 360.0;
             if (order == XMatrixOrder.Append)
             {
-                angle %= 360.0;
                 this *= CreateRotationRadians(angle * Const.Deg2Rad, point.X, point.Y);
 
                 //Translate(point.X, point.Y, order);
@@ -519,7 +517,6 @@ namespace PdfSharp.Drawing
             }
             else
             {
-                angle %= 360.0;
                 this = CreateRotationRadians(angle * Const.Deg2Rad, point.X, point.Y) * this;
             }
 
@@ -803,9 +800,10 @@ namespace PdfSharp.Drawing
         {
             double determinant = Determinant;
             if (DoubleUtil.IsZero(determinant))
-                throw
-                    new InvalidOperationException(
-                        "NotInvertible"); //SR.Get(SRID.Transform_NotInvertible, new object[0]));
+            {
+                throw new InvalidOperationException(
+                    "NotInvertible"); //SR.Get(SRID.Transform_NotInvertible, new object[0]));
+            }
 
             switch (_type)
             {
@@ -830,13 +828,13 @@ namespace PdfSharp.Drawing
                     return;
 
                 default:
-                {
-                    double detInvers = 1.0 / determinant;
-                    SetMatrix(_m22 * detInvers, -_m12 * detInvers, -_m21 * detInvers, _m11 * detInvers,
-                        (_m21 * _offsetY - _offsetX * _m22) * detInvers,
-                        (_offsetX * _m12 - _m11 * _offsetY) * detInvers, XMatrixTypes.Unknown);
-                    break;
-                }
+                    {
+                        double detInvers = 1.0 / determinant;
+                        SetMatrix(_m22 * detInvers, -_m12 * detInvers, -_m21 * detInvers, _m11 * detInvers,
+                            (_m21 * _offsetY - _offsetX * _m22) * detInvers,
+                            (_offsetX * _m12 - _m11 * _offsetY) * detInvers, XMatrixTypes.Unknown);
+                        break;
+                    }
             }
         }
 
@@ -1225,7 +1223,7 @@ namespace PdfSharp.Drawing
                     y *= _m22;
                     return;
 
-                case (XMatrixTypes.Scaling | XMatrixTypes.Translation):
+                case XMatrixTypes.Scaling | XMatrixTypes.Translation:
                     x *= _m11;
                     x += _offsetX;
                     y *= _m22;
@@ -1305,8 +1303,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Sets the matrix.
         /// </summary>
-        void SetMatrix(double m11, double m12, double m21, double m22, double offsetX, double offsetY,
-            XMatrixTypes type)
+        void SetMatrix(double m11, double m12, double m21, double m22, double offsetX, double offsetY, XMatrixTypes type)
         {
             _m11 = m11;
             _m12 = m12;
@@ -1360,8 +1357,8 @@ namespace PdfSharp.Drawing
             // Fast multiplication taking matrix type into account. Reflectored from WPF.
             internal static void MultiplyMatrix(ref XMatrix matrix1, ref XMatrix matrix2)
             {
-                XMatrixTypes type1 = matrix1._type;
-                XMatrixTypes type2 = matrix2._type;
+                var type1 = matrix1._type;
+                var type2 = matrix2._type;
                 if (type2 != XMatrixTypes.Identity)
                 {
                     if (type1 == XMatrixTypes.Identity)
@@ -1389,13 +1386,11 @@ namespace PdfSharp.Drawing
                     {
                         switch (((int)type1 << 4) | (int)type2)
                         {
-                            //case 0x22:
                             case ((int)XMatrixTypes.Scaling << 4) | (int)XMatrixTypes.Scaling:
                                 matrix1._m11 *= matrix2._m11;
                                 matrix1._m22 *= matrix2._m22;
                                 return;
 
-                            //case 0x23:
                             case ((int)XMatrixTypes.Scaling << 4) | (int)XMatrixTypes.Translation |
                                  (int)XMatrixTypes.Scaling:
 
@@ -1406,7 +1401,6 @@ namespace PdfSharp.Drawing
                                 matrix1._type = XMatrixTypes.Scaling | XMatrixTypes.Translation;
                                 return;
 
-                            //case 0x32:
                             case (((int)XMatrixTypes.Translation | (int)XMatrixTypes.Scaling) << 4) |
                                  (int)XMatrixTypes.Scaling:
                                 matrix1._m11 *= matrix2._m11;
@@ -1415,7 +1409,6 @@ namespace PdfSharp.Drawing
                                 matrix1._offsetY *= matrix2._m22;
                                 return;
 
-                            //case 0x33:
                             case (((int)XMatrixTypes.Translation | (int)XMatrixTypes.Scaling) << 4) |
                                  (int)XMatrixTypes.Translation | (int)XMatrixTypes.Scaling:
                                 matrix1._m11 *= matrix2._m11;
@@ -1423,28 +1416,26 @@ namespace PdfSharp.Drawing
                                 matrix1._offsetX = matrix2._m11 * matrix1._offsetX + matrix2._offsetX;
                                 matrix1._offsetY = matrix2._m22 * matrix1._offsetY + matrix2._offsetY;
                                 return;
+                            
 
-                            //case 0x24:
                             case ((int)XMatrixTypes.Scaling << 4) | (int)XMatrixTypes.Unknown:
-                            //case 0x34:
+                            
                             case (((int)XMatrixTypes.Translation | (int)XMatrixTypes.Scaling) << 4) |
                                  (int)XMatrixTypes.Unknown:
-                            //case 0x42:
+                            
                             case ((int)XMatrixTypes.Unknown << 4) | (int)XMatrixTypes.Scaling:
-                            //case 0x43:
+                            
                             case ((int)XMatrixTypes.Unknown << 4) | (int)XMatrixTypes.Translation |
                                  (int)XMatrixTypes.Scaling:
-                            //case 0x44:
+                            
                             case ((int)XMatrixTypes.Unknown << 4) | (int)XMatrixTypes.Unknown:
                                 matrix1 = new XMatrix(
                                     matrix1._m11 * matrix2._m11 + matrix1._m12 * matrix2._m21,
                                     matrix1._m11 * matrix2._m12 + matrix1._m12 * matrix2._m22,
                                     matrix1._m21 * matrix2._m11 + matrix1._m22 * matrix2._m21,
                                     matrix1._m21 * matrix2._m12 + matrix1._m22 * matrix2._m22,
-                                    matrix1._offsetX * matrix2._m11 + matrix1._offsetY * matrix2._m21 +
-                                    matrix2._offsetX,
-                                    matrix1._offsetX * matrix2._m12 + matrix1._offsetY * matrix2._m22 +
-                                    matrix2._offsetY);
+                                    matrix1._offsetX * matrix2._m11 + matrix1._offsetY * matrix2._m21 + matrix2._offsetX,
+                                    matrix1._offsetX * matrix2._m12 + matrix1._offsetY * matrix2._m22 + matrix2._offsetY);
                                 return;
                         }
                     }
@@ -1460,8 +1451,8 @@ namespace PdfSharp.Drawing
                 }
                 else
                 {
-                    matrix._offsetX += (matrix._m11 * offsetX) + (matrix._m21 * offsetY);
-                    matrix._offsetY += (matrix._m12 * offsetX) + (matrix._m22 * offsetY);
+                    matrix._offsetX += matrix._m11 * offsetX + matrix._m21 * offsetY;
+                    matrix._offsetY += matrix._m12 * offsetX + matrix._m22 * offsetY;
                     if (matrix._type != XMatrixTypes.Unknown)
                         matrix._type |= XMatrixTypes.Translation;
                 }
@@ -1521,7 +1512,7 @@ namespace PdfSharp.Drawing
         /// <value>The debugger display.</value>
         // ReSharper disable UnusedMember.Local
         string DebuggerDisplay
-            // ReSharper restore UnusedMember.Local
+        // ReSharper restore UnusedMember.Local
         {
             get
             {

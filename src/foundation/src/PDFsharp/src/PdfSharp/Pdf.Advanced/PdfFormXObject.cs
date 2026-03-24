@@ -1,6 +1,9 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Internal;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf.IO;
 #if GDI
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -8,7 +11,10 @@ using System.Drawing.Imaging;
 #if WPF
 using System.Windows.Media;
 #endif
-using PdfSharp.Drawing;
+
+// v7.0.0 REVIEW
+
+#pragma warning disable CS1591 // TODO_DOC: Missing XML comment for publicly visible type or member
 
 namespace PdfSharp.Pdf.Advanced
 {
@@ -20,19 +26,29 @@ namespace PdfSharp.Pdf.Advanced
         internal PdfFormXObject(PdfDocument thisDocument)
             : base(thisDocument)
         {
-            Elements.SetName(Keys.Type, "/XObject");
-            Elements.SetName(Keys.Subtype, "/Form");
+            SetTypeKeys();
+            _form = null;
         }
 
         internal PdfFormXObject(PdfDocument thisDocument, XForm form)
             : base(thisDocument)
         {
             // BUG_OLD: form is not used - not implemented.
-            Elements.SetName(Keys.Type, "/XObject");
-            Elements.SetName(Keys.Subtype, "/Form");
+            SetTypeKeys();
+            _form = form;
 
             //if (form.IsTemplate)
             //{ }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfFormXObject(PdfDictionary dict)
+            : base(dict)
+        {
+            _form = null;
         }
 
         internal double DpiX { get; set; } = 72;
@@ -44,8 +60,7 @@ namespace PdfSharp.Pdf.Advanced
         {
             Debug.Assert(importedObjectTable != null);
             Debug.Assert(ReferenceEquals(thisDocument, importedObjectTable.Owner));
-            Elements.SetName(Keys.Type, "/XObject");
-            Elements.SetName(Keys.Subtype, "/Form");
+            SetTypeKeys();
 
             if (form.IsTemplate)
             {
@@ -62,16 +77,19 @@ namespace PdfSharp.Pdf.Advanced
             PdfPage importPage = importPages[pdfForm.PageNumber - 1];
 
             // Import resources
-            var res = importPage.Elements["/Resources"];
-            if (res != null) // unlikely but possible
+            //var res = importPage.Elements["/Resources"];
+            var res = importPage.Elements.GetValue("/Resources"); // #US373
+            if (res != null) // Unlikely but possible.
             {
 #if true
                 // Get root object.
+                // #US373 begin
                 PdfObject root;
-                if (res is PdfReference reference)
-                    root = reference.Value;
-                else
+                //if (res is PdfReference reference)
+                //    root = reference.Value;
+                //else
                     root = (PdfDictionary)res;
+                // #US373 end
 
                 root = ImportClosure(importedObjectTable, thisDocument, root);
                 // If the root was a direct object, make it indirect.
@@ -160,7 +178,7 @@ namespace PdfSharp.Pdf.Advanced
             }
 
             // Take /Rotate into account.
-            PdfRectangle rect = importPage.Elements.GetRectangle(PdfPage.InheritablePageKeys.MediaBox);
+            PdfRectangle rect = importPage.Elements.GetRequiredRectangle(PdfPage.InheritablePageKeys.MediaBox);
             // Reduce rotation to 0, 90, 180, or 270.
             int rotate = (importPage.Elements.GetInteger(PdfPage.InheritablePageKeys.Rotate) % 360 + 360) % 360;
             //rotate = 0;
@@ -209,13 +227,25 @@ namespace PdfSharp.Pdf.Advanced
 #if !DEBUG
             content.Compressed = true;
 #endif
-            var filter = content.Elements["/Filter"];
+            //var filter = content.Elements["/Filter"];
+            var filter = content.Elements.GetValue(PdfStream.Keys.Filter); // #US373
             if (filter != null)
-                Elements["/Filter"] = filter.Clone();
+                Elements[PdfStream.Keys.Filter] = filter.Clone(); // #US373: Should we expect references here?
 
             // (no cloning needed because the bytes keep untouched)
             Stream = content.Stream; // new PdfStream(bytes, this);
-            Elements.SetInteger("/Length", content.Stream.Value.Length);
+            Elements.SetInteger("/Length", content.Stream!.Value.Length);
+        }
+
+        public void SetTypeKeys()
+        {
+            Elements.SetName(Keys.Type, "/XObject");
+            Elements.SetName(Keys.Subtype, "/Form");
+        }
+
+        internal void SetForm(XForm form)
+        {
+            _form = form;
         }
 
         /// <summary>
@@ -236,13 +266,14 @@ namespace PdfSharp.Pdf.Advanced
 
         internal string GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont)
         {
-            pdfFont = _document.FontTable.GetOrCreateFont(glyphTypeface, fontType);
+            Debug.Assert(ReferenceEquals(_document2, Document));
+            pdfFont = Document.FontTable.GetOrCreateFont(glyphTypeface, fontType);
             Debug.Assert(pdfFont != null);
             string name = Resources.AddFont(pdfFont);
             return name;
         }
 
-        string IContentStream.GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont) 
+        string IContentStream.GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont)
             => GetFontName(glyphTypeface, fontType, out pdfFont);
 
         /// <summary>
@@ -250,7 +281,8 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         internal string GetFontName(string idName, byte[] fontData, out PdfFont pdfFont)
         {
-            pdfFont = _document.FontTable.GetFont(idName, fontData);
+            Debug.Assert(ReferenceEquals(_document2, Document));
+            pdfFont = Document.FontTable.GetFont(idName, fontData);
             Debug.Assert(pdfFont != null);
             string name = Resources.AddFont(pdfFont);
             return name;
@@ -363,6 +395,26 @@ namespace PdfSharp.Pdf.Advanced
             }
         }
 #endif
+        public static bool IsFormXObject(PdfDictionary dict)
+        {
+            // Subtype is required.
+            if (dict.Elements.GetName(Keys.Subtype) == "/Form")
+                return true;
+
+            // Type is optional.
+            if (dict.Elements.GetName(Keys.Type) == "/XObject")
+                return true;
+
+            return false;
+        }
+
+        internal override void WriteObject(PdfWriter writer)
+        {
+            _form?.DrawingFinished();
+            base.WriteObject(writer);
+        }
+
+        XForm? _form;
 
         /// <summary>
         /// Predefined keys of this dictionary.
@@ -441,7 +493,6 @@ namespace PdfSharp.Pdf.Advanced
             /// Gets the KeysMeta for these keys.
             /// </summary>
             internal static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
-
             static DictionaryMeta? _meta;
         }
 

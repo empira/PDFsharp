@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Fonts;
@@ -56,10 +56,10 @@ namespace MigraDoc.DocumentObjectModel.Tests
             // Layout and render document to PDF.
             pdfRenderer.RenderDocument();
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("Create_TextFrames");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/text/Create_TextFrames");
             pdfRenderer.PdfDocument.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 

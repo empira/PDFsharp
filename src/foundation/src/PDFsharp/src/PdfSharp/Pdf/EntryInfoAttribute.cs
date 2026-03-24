@@ -6,44 +6,54 @@ using System.Diagnostics.CodeAnalysis;
 namespace PdfSharp.Pdf
 {
     /// <summary>
-    /// Specifies the type of a key’s value in a dictionary.
+    /// Specifies the type of the key’s value in a dictionary.
     /// </summary>
     [Flags]
     enum KeyType
     {
-        Name = 0x00000001,
-        String = 0x00000002,
-        Boolean = 0x00000003,
-        Integer = 0x00000004,
-        Real = 0x00000005,
-        Date = 0x00000006,
-        Rectangle = 0x00000007,
-        Array = 0x00000008,
-        Dictionary = 0x00000009,
-        Stream = 0x0000000A,
-        NumberTree = 0x0000000B,
-        Function = 0x0000000C,
-        TextString = 0x0000000D,
-        ByteString = 0x0000000E,
-        NameTree = 0x0000000F,
-        FileSpecification = 0x00000010,
+        // @@@ Review Flags
+        Name = 0x000_00001,
+        String = 0x0000_0002,
+        Boolean = 0x0000_0003,
+        Integer = 0x0000_0004,
+        Real = 0x0000_0005,
+        Date = 0x0000_0006,
+        Rectangle = 0x0000_0007,  // IMPROVE: See #US291
+        Array = 0x0000_0008,
+        Dictionary = 0x0000_0009,
+        Stream = 0x0000_000A,
+        NumberTree = 0x0000_000B,
+        Function = 0x0000_000C,
+        TextString = 0x0000_000D,
+        ByteString = 0x0000_000E,
+        NameTree = 0x0000_000F,
+        FileSpecification = 0x0000_0010,
 
-        NameOrArray = 0x00000100,
-        NameOrDictionary = 0x00000200,
-        ArrayOrDictionary = 0x00000300,
-        StreamOrArray = 0x00000400,
-        StreamOrName = 0x00000500,
-        ArrayOrNameOrString = 0x00000600,
-        FunctionOrName = 0x000000700,
-        Various = 0x000000800,
+        NameOrArray = 0x0000_0100,
+        NameOrDictionary = 0x0000_0200,
+        ArrayOrDictionary = 0x0000_0300,
+        StreamOrArray = 0x0000_0400,
+        StreamOrName = 0x0000_0500,
+        StreamOrDictionary = 0x0000_0600,
+        ArrayOrNameOrString = 0x0000_0700,
+        FunctionOrName = 0x0000_0800,
+        Various = 0x00000_0900,
+        ArrayOfDictionaries = 0x00000_0A00,
+        NameOrByteStringOrArray = 0x0000_0B00, // #US373: TODO Check String, ByteString, TextString - check if we have duplicates.
+        StringOrDictionary = 0x0000_0C00,
+        TextStringOrStream = 0x0000_0D00,
+        TextStringOrTextStream = 0x0000_0E00,
+        BooleanOrDictionary = 0x00000_0F00,
 
-        TypeMask = 0x00000FFF,
+        TypeMask = 0x0000_0FFF,
 
-        Optional = 0x00001000,
-        Required = 0x00002000,
-        Inheritable = 0x00004000,
-        MustBeIndirect = 0x00010000,
-        MustNotBeIndirect = 0x00020000,
+        Optional = 0x0000_1000,
+        Required = 0x0000_2000,
+        Inheritable = 0x0000_4000,
+        MustBeIndirect = 0x0001_0000,
+        MustNotBeIndirect = 0x0002_0000,
+
+        DeprecatedIn20 = 0x000F_0000
     }
 
     /// <summary>
@@ -100,9 +110,10 @@ namespace PdfSharp.Pdf
         KeyType _entryType;
 
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
-        public Type ObjectType
+        // ReSharper disable once ConvertToAutoProperty
+        public Type? ObjectType
         {
-            get => _objectType!; // ?? NRT.ThrowOnNull<Type>(); Can be null.
+            get => _objectType!;
             set => _objectType = value;
         }
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
@@ -110,7 +121,7 @@ namespace PdfSharp.Pdf
 
         public string FixedValue
         {
-            get => _fixedValue!; // ?? NRT.ThrowOnNull<string>(); Can be null.
+            get => _fixedValue!;
             set => _fixedValue = value;
         }
         string? _fixedValue;

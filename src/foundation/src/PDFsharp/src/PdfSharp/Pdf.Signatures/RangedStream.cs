@@ -1,6 +1,10 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+// v7.0.0 TODO review
+
+#pragma warning disable CS1591 // TODO_DOC: Missing XML comment for publicly visible type or member
+
 namespace PdfSharp.Pdf.Signatures
 {
     /// <summary>
@@ -8,15 +12,8 @@ namespace PdfSharp.Pdf.Signatures
     /// It is based on a stream plus a collection of ranges that define the significant content of this stream.
     /// The ranges are used to exclude one or more areas of the original stream.
     /// </summary>
-    class RangedStream : Stream  // StL: Can I say 'RangedStream' in English? SlicedStream?
+    class RangedStream : Stream  // StL: Can I say 'RangedStream' in English? SlicedStream? TODO SlicesdStream
     {
-        internal class Range(SizeType offset, SizeType length)
-        {
-            public SizeType Offset { get; set; } = offset;
-
-            public SizeType Length { get; set; } = length;
-        }
-
         public RangedStream(Stream originalStream, List<Range> ranges)
         {
             if (originalStream.CanRead != true)
@@ -45,10 +42,10 @@ namespace PdfSharp.Pdf.Signatures
 
         public override long Length => _ranges.Sum(item => item.Length);
 
-        private IEnumerable<Range> GetPreviousRanges(long position)
+        IEnumerable<Range> GetPreviousRanges(long position)
             => _ranges.Where(item => item.Offset < position && item.Offset + item.Length < position);
 
-        private Range? GetCurrentRange(long position)
+        Range? GetCurrentRange(long position)
             => _ranges.FirstOrDefault(item => item.Offset <= position && item.Offset + item.Length > position);
 
         public override long Position
@@ -74,7 +71,8 @@ namespace PdfSharp.Pdf.Signatures
             }
         }
 
-        public override void Flush() => throw new NotImplementedException(nameof(Flush));
+        public override void Flush()
+            => throw new NotImplementedException(nameof(Flush));
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -104,9 +102,9 @@ namespace PdfSharp.Pdf.Signatures
             // We come here e.g. with Bouncy Castle signer.
 
             // We calculate the current range for each byte in the stream using LINQ.
-            // This works, but is very slow. If we get performance issues
+            // This works, but is very inefficient. If we get performance issues
             // it should be reimplemented by using the ranges here.
-            // But this works, so YAGNI.
+            // But this is correct and works, so YAGNI.
             for (int i = 0; i < count; i++)
             {
                 if (Stream.Position == length)
@@ -128,14 +126,87 @@ namespace PdfSharp.Pdf.Signatures
         Range GetNextRange()
             => _ranges.OrderBy(item => item.Offset).First(item => item.Offset > Stream.Position);
 
-        public override long Seek(long offset, SeekOrigin origin) => throw new NotImplementedException(nameof(Seek));
+        public override long Seek(long offset, SeekOrigin origin)
+            => throw new NotImplementedException(nameof(Seek));
 
-        public override void SetLength(long value) => throw new NotImplementedException(nameof(SetLength));
+        public override void SetLength(long value)
+            => throw new NotImplementedException(nameof(SetLength));
 
-        public override void Write(byte[] buffer, int offset, int count) => throw new NotImplementedException(nameof(Write));
+        public override void Write(byte[] buffer, int offset, int count)
+            => throw new NotImplementedException(nameof(Write));
 
         readonly Range[] _ranges;
 
         Stream Stream { get; }
+
+        internal class Range(SizeType offset, SizeType length)
+        {
+            public SizeType Offset { get; set; } = offset;
+
+            public SizeType Length { get; set; } = length;
+        }
+    }
+}
+
+namespace PdfSharp.Pdf.Internal
+{
+    public class ManagerBase
+    {
+        public ManagerBase(PdfDocument document)
+        {
+            if (document == null!)
+                throw new ArgumentNullException(nameof(document));
+            Document = document;
+        }
+
+        internal void Foo2() { }
+
+        internal bool IsInitialized;
+
+        internal PdfDocument Document { get; }
+    }
+}
+
+namespace PdfSharp.Pdf.Signatures
+{
+    using PdfSharp.Pdf.Internal;
+
+    /// <summary>
+    /// The PdfAManager bundles PDF/A specific functionality of a PDF document.
+    /// </summary>
+    public class SigningManager : ManagerBase // RENAME?
+    {
+        // TODOs:
+
+        /// <summary>
+        /// Initialized a new instance of this class for the specified document
+        /// </summary>
+        /// <param name="document"></param>
+        SigningManager(PdfDocument document) : base(document)
+        {
+            Initialize();
+        }
+
+        public string SignatureType { get; } = "(TODO)";  // TODO
+
+        /// <summary>
+        /// Gets or creates the PdfAManager for the specified document.
+        /// </summary>
+        public static SigningManager ForDocument(PdfDocument document)
+            => document.SigningManager ??= new(document);
+
+        void Initialize()
+        {
+            Document.EnsureNotDisposed();
+            if (!IsInitialized)
+            {
+                IsInitialized = true;
+                Document.EnsureNotYetSaved();
+                if (Document.IsImported)
+                {
+                    // TODO: Get PDF/A conformance
+                }
+            }
+        }
     }
 }

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0;net10.0;net462</TargetFrameworks>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_Tests_Exe)</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 

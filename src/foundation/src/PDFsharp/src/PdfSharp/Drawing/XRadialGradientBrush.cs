@@ -198,7 +198,7 @@ namespace PdfSharp.Drawing
             GdiLinearGradientBrush brush;
             try
             {
-                Locks.EnterGdiPlus();
+                Lock.EnterGdiPlus();
                 if (_useRect)
                 {
                     brush = new GdiLinearGradientBrush(_rect.ToRectangleF(),
@@ -214,7 +214,7 @@ namespace PdfSharp.Drawing
                     brush.Transform = _matrix.ToGdiMatrix();
                 //brush.WrapMode = WrapMode.Clamp;
             }
-            finally { Locks.ExitGdiPlus(); }
+            finally { Lock.ExitGdiPlus(); }
             return brush;
 #else
             return null!;

@@ -2,6 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.ComponentModel;
+using PdfSharp.Internal;
 #if GDI
 using System.Drawing;
 #endif
@@ -125,18 +126,15 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Creates an XColor structure from a 32-bit ARGB value.
         /// </summary>
-        public static XColor FromArgb(int argb)
-        {
-            return new XColor((byte)(argb >> 24), (byte)(argb >> 16), (byte)(argb >> 8), (byte)(argb));
-        }
+        [Obsolete("Use FromArgb(uint argb).")]
+        public static XColor FromArgb(int argb) 
+            => new((byte)(argb >> 24), (byte)(argb >> 16), (byte)(argb >> 8), (byte)(argb));
 
         /// <summary>
         /// Creates an XColor structure from a 32-bit ARGB value.
         /// </summary>
-        public static XColor FromArgb(uint argb)
-        {
-            return new XColor((byte)(argb >> 24), (byte)(argb >> 16), (byte)(argb >> 8), (byte)(argb));
-        }
+        public static XColor FromArgb(uint argb) 
+            => new((byte)(argb >> 24), (byte)(argb >> 16), (byte)(argb >> 8), (byte)(argb));
 
         // from System.Drawing.Color
         //public static XColor FromArgb(int alpha, Color baseColor);
@@ -731,27 +729,6 @@ namespace PdfSharp.Drawing
         /// Represents the empty color.
         /// </summary>
         public static readonly XColor Empty = new();
-
-        ///<summary>
-        /// Special property for XmlSerializer only.
-        /// </summary>
-        public string RgbCmykG
-        {
-            get => Invariant($"{_r};{_g};{_b};{_c:0.###};{_m:0.###};{_y:0.###};{_k:0.###};{_gs:0.###};{_a:0.###}");
-            set
-            {
-                string[] values = value.Split(';');
-                _r = byte.Parse(values[0], CultureInfo.InvariantCulture);
-                _g = byte.Parse(values[1], CultureInfo.InvariantCulture);
-                _b = byte.Parse(values[2], CultureInfo.InvariantCulture);
-                _c = float.Parse(values[3], CultureInfo.InvariantCulture);
-                _m = float.Parse(values[4], CultureInfo.InvariantCulture);
-                _y = float.Parse(values[5], CultureInfo.InvariantCulture);
-                _k = float.Parse(values[6], CultureInfo.InvariantCulture);
-                _gs = float.Parse(values[7], CultureInfo.InvariantCulture);
-                _a = float.Parse(values[8], CultureInfo.InvariantCulture);
-            }
-        }
 
         static void CheckByte(int val, string name)
         {

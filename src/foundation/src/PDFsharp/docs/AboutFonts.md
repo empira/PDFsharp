@@ -158,7 +158,7 @@ glyph IDs of the Unicode code points of the original UTF-32 encoded text.
 
 The class **PdPdfTrueTypeFontfFont** is used by PDFsharp to represent TrueType fonts in a PDF
 document that use the WinAnsiEncoding string representation.
-It uses lesser space for text in PDF file than the CID (character id) glyph encoded text representation,
+It uses lesser space for text in PDF file than the CID (character ID) glyph encoded text representation,
 but the character set is limited to (roughly) ANSI characters (codepage 1252).
 
 ### PdfType0Font : PdfFont

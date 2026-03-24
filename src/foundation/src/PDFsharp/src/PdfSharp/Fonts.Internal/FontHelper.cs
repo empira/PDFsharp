@@ -1,6 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Internal.OpenType;
+using PdfSharp.Drawing;
 #if GDI
 using PdfSharp.Logging;
 using GdiFontFamily = System.Drawing.FontFamily;
@@ -22,15 +24,6 @@ using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
 using Windows.UI.Text;
 using Windows.UI.Xaml.Media;
 #endif
-//using System.Drawing;
-//using Microsoft.Extensions.Logging;
-//using PdfSharp.Events;
-//using PdfSharp.Fonts;
-using Microsoft.Extensions.Logging;
-using PdfSharp.Drawing;
-using PdfSharp.Fonts;
-//using PdfSharp.Fonts.OpenType;
-//using PdfSharp.Logging;
 
 namespace PdfSharp.Fonts.Internal
 {
@@ -39,109 +32,6 @@ namespace PdfSharp.Fonts.Internal
     /// </summary>
     static class FontHelper
     {
-#if true_ // #DELETE 25-12-31
-        /// <summary>
-        /// Measure string directly from font data.
-        /// </summary>
-        public static XSize MeasureString(string text, XFont font)
-        {
-            Debug.Assert(false, "Use the new version with code run parameter.");
-            
-            if (String.IsNullOrEmpty(text))
-                return new(); // not XSize.Empty !
-
-            var cp = UnicodeHelper.Utf32FromString2(text);
-            var codePoints = font.OpenTypeDescriptor.GlyphIndicessFromCodepoints(cp);
-            //var codeRun = new CharacterCodeRun(codePoints);
-
-            //// Invoke RenderEvent.
-            //var args = new RenderCodeRunEventArgs(Owner)
-            //{
-            //    Font = font,
-            //    CodeRun = codeRun
-            //};
-            //Owner.RenderEvents.OnRenderCodeRun(this, args);
-            //codeRun = args.CodeRun;
-            //codePoints = codeRun.Items;
-
-            return MeasureString(codePoints, font);
-#if true_  // Keep until 2025-12-31 for reference
-            var size = new XSize();
-            var descriptor = FontDescriptorCache.GetOrCreateDescriptorFor(font) as OpenTypeDescriptor;
-            if (descriptor != null)
-            {
-                // Height is the sum of ascender and descender.
-                size.Height = (descriptor.Ascender + descriptor.Descender) * font.Size / font.UnitsPerEm;
-                Debug.Assert(descriptor.Ascender > 0, "Ascender must be greater than 0.");
-
-                bool isSymbolFont = descriptor.IsSymbolFont;
-                int length = text.Length;
-                int width = 0;
-                for (int idx = 0; idx < length; idx++)
-                {
-                    char ch = text[idx];
-                    // H/A/C/K: Unclear what to do here.
-                    if (ch < 32)
-                        continue;
-
-                    if (Char.IsLowSurrogate(ch))
-                    {
-                        // We only come here when the text contains a low surrogate not preceded by a high surrogate.
-                        // This is an error in the UTF-32 text and therefore ignored.
-                        PdfSharpLogHost.FontManagementLogger.LogWarning("Unexpected low surrogate found: 0x{Char:X2}", ch);
-                        continue;
-                    }
-
-                    int glyphIndex;
-                    if (isSymbolFont)
-                    {
-                        ch = descriptor.RemapSymbolChar(ch);
-                        glyphIndex = descriptor.BmpCodepointToGlyphIndex(ch);
-                    }
-                    else if (Char.IsHighSurrogate(ch))
-                    {
-                        // UTF16 surrogate pair expected.
-                        if (++idx < length)
-                        {
-                            var ch2 = text[idx];
-                            if (Char.IsLowSurrogate(ch2) is false)
-                            {
-                                PdfSharpLogHost.FontManagementLogger.LogWarning("High surrogate 0x{Char:X2} not followed by low surrogate.", ch);
-                                continue;
-                            }
-                            glyphIndex = descriptor.SurrogatePairToGlyphIndex(ch, ch2);
-                        }
-                        else
-                        {
-                            PdfSharpLogHost.FontManagementLogger.LogWarning("High surrogate 0x{Char:X2} found at end of string.", ch);
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        // BMP character.
-                        glyphIndex = descriptor.BmpCodepointToGlyphIndex(ch);
-                    }
-                    width += descriptor.GlyphIDToWidth(glyphIndex);
-                }
-                size.Width = width * font.Size / descriptor.UnitsPerEm;
-
-                // Adjust bold simulation.
-                if ((font.GlyphTypeface.StyleSimulations & XStyleSimulations.BoldSimulation) == XStyleSimulations.BoldSimulation)
-                {
-                    // Add 2% of the em-size for each character.
-                    // Unsure how to deal with white space. Currently count as regular character.
-                    size.Width += length * font.Size * Const.BoldEmphasis;
-                }
-            }
-            // BUG_OLD: Is it correct to return an empty size if we have no descriptor?
-            Debug.Assert(descriptor != null, "No OpenTypeDescriptor.");
-
-            return size;
-#endif
-        }
-#endif
-
         /// <summary>
         /// Measure string directly from font data.
         /// This function expects that the code run is ready to be measured.
@@ -174,7 +64,7 @@ namespace PdfSharp.Fonts.Internal
             if ((font.GlyphTypeface.StyleSimulations & XStyleSimulations.BoldSimulation) == XStyleSimulations.BoldSimulation)
             {
                 // Add 2% of the em-size for each character.
-                // Unsure how to deal with white space. Currently count as regular character.
+                // Unsure how to deal with white-space. Currently count as regular character.
                 size.Width += length * font.Size * Const.BoldEmphasis;
             }
             return size;
@@ -338,42 +228,6 @@ namespace PdfSharp.Fonts.Internal
             return false;
         }
 #endif
-
-            /// <summary>
-            /// Calculates an Adler32 checksum combined with the buffer length
-            /// in a 64-bit unsigned integer.
-            /// </summary>
-            public static ulong CalcChecksum(byte[] buffer)
-        {
-            if (buffer == null)
-                throw new ArgumentNullException(nameof(buffer));
-
-            const uint prime = 65521; // largest prime smaller than 65536
-            uint s1 = 0;
-            uint s2 = 0;
-            int length = buffer.Length;
-            int offset = 0;
-            while (length > 0)
-            {
-                int n = 3800;
-                if (n > length)
-                    n = length;
-                length -= n;
-                while (--n >= 0)
-                {
-                    s1 += buffer[offset++];
-                    s2 += s1;
-                }
-                s1 %= prime;
-                s2 %= prime;
-            }
-            //return ((ulong)((ulong)(((ulong)s2 << 16) | (ulong)s1)) << 32) | (ulong)buffer.Length;
-            ulong ul1 = ((ulong)s2 << 16) | s1;
-            //ul1 |= s1;
-            uint ui2 = (uint)buffer.Length;
-            return (ul1 << 32) | ui2;
-        }
-
         public static XFontStyleEx CreateStyle(bool isBold, bool isItalic)
             => (isBold ? XFontStyleEx.Bold : 0) | (isItalic ? XFontStyleEx.Italic : 0);
 

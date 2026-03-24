@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0;net10.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_Library)</TargetFrameworks>
     <RootNamespace>PdfSharp.Snippets</RootNamespace>
     <AssemblyName>PdfSharp.Snippets</AssemblyName>
     <DefineConstants>TRACE;CORE</DefineConstants>
@@ -28,12 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Image\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="BouncyCastle.Cryptography" />
   </ItemGroup>
-
 </Project>

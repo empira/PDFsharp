@@ -19,7 +19,7 @@ namespace PdfSharp.Drawing
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    public struct XVector : IFormattable
+    public struct XVector : IFormattable, IEquatable<XVector>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="XVector"/> struct.

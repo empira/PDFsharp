@@ -4,6 +4,7 @@
 using System.Text;
 using Microsoft.Extensions.Logging;
 using PdfSharp.Logging;
+using PdfSharp.Internal;
 using PdfSharp.Pdf.Internal;
 
 namespace PdfSharp.Pdf.IO
@@ -44,7 +45,16 @@ namespace PdfSharp.Pdf.IO
         {
             get
             {
-                Debug.Assert(_pdfStream.Position == _charIndex + 2);
+#if DEBUG
+                // The following assertion may not be true in some rare cases,
+                // e.g. if the PDF document is invalid and the lexer reached
+                // unexpectedly EOF.
+                // See PDFsharp.Tests file "Unexpected_Token_EmptyChar(PageCount).pdf".
+                // This file ends with "startxref‹LF›" not followed by an offset.
+                // In this case _charIndex is identical with stream position.
+                if (_pdfLength > _pdfStream.Position)
+                    Debug.Assert(_pdfStream.Position == _charIndex + 2);
+#endif
                 return _charIndex;
             }
             set
@@ -134,21 +144,19 @@ namespace PdfSharp.Pdf.IO
                 case >= 'a' and <= 'z':
                     return ScanKeyword();
 
-#if DEBUG
-                case 'R':
-                    Debug.Assert(false, "'R' should not be parsed anymore.");
-                    // Note: "case 'R':" is not scanned, because it is only used in an object reference.
+                case 'R':  // Came here only in invalid PDF files.
+                    // Note that "case 'R':" is not scanned, because it is only used in an object reference.
                     // And object references are now parsed the 'compound symbol' ObjRef.
+                    // However, invalid PDF files may have entries in the xref table that points randomly
+                    // at a position in the file (e.g. timing.pdf in our test files on our NAS).
+                    // In this case we still scan it and crash later.
                     ScanNextChar(true);
-                    // The next line only exists for the 'UseOldCode' case in PdfReader.
                     return Symbol = Symbol.R;
-#endif
 
                 case Chars.EOF:
                     return Symbol = Symbol.Eof;
 
                 default:
-                    Debug.Assert(!Char.IsLetter(ch), "PDFsharp did something wrong. See code below.");
                     ParserDiagnostics.HandleUnexpectedCharacter(ch, DumpNeighborhoodOfPosition());
                     return Symbol = Symbol.None;
             }
@@ -199,12 +207,20 @@ namespace PdfSharp.Pdf.IO
             ClearToken();
             while (true)
             {
+#if PRESERVE_PARSED_VALUES
+                _parsedValue.Append(_currChar);
+#endif
                 var ch = AppendAndScanNextChar();
                 if (IsWhiteSpace(ch) || IsDelimiter(ch) || ch == Chars.EOF)
                     break;
 
                 if (ch == '#')
                 {
+#if PRESERVE_PARSED_VALUES
+                    _parsedValue.Append('#');
+                    _parsedValue.Append(_currChar);
+                    _parsedValue.Append(_nextChar);
+#endif
                     ScanNextChar(true);
                     var newChar = (_currChar switch
                     {
@@ -272,7 +288,7 @@ namespace PdfSharp.Pdf.IO
             //
             // So we introduced a LongInteger.
 
-            // Note: This is a copy of CLexer.ScanNumber with minimal changes. Keep both versions in sync as far as possible.
+            // Note that this is a copy of CLexer.ScanNumber with minimal changes. Keep both versions in sync as far as possible.
             // Update StL: Function is revised for object reference look ahead.
 
             // Parsing Strategy:
@@ -593,6 +609,9 @@ namespace PdfSharp.Pdf.IO
 
             Debug.Assert(_currChar == Chars.ParenLeft);
             ClearToken();
+#if PRESERVE_PARSED_VALUES
+            _parsedValue.Append('(');
+#endif
             int parenLevel = 0;
             //RetryAfterSkipIllegalCharacter:
             char ch = ScanNextChar(true); // Inside of a string \r, \n and \r\n without preceding \\ shall be treated as \n.
@@ -603,10 +622,16 @@ namespace PdfSharp.Pdf.IO
                 switch (ch)
                 {
                     case '(':
+#if PRESERVE_PARSED_VALUES
+                        _parsedValue.Append('(');
+#endif
                         parenLevel++;
                         break;
 
                     case ')':
+#if PRESERVE_PARSED_VALUES
+                        _parsedValue.Append(')');
+#endif
                         if (parenLevel == 0)
                         {
                             ScanNextChar(false); // The string ended, so ignore \r, \n and \r\n again.
@@ -617,49 +642,82 @@ namespace PdfSharp.Pdf.IO
 
                     case '\\':
                         {
+#if PRESERVE_PARSED_VALUES
+                            _parsedValue.Append('\\');
+#endif
                             ch = ScanNextChar(true); // Inside of a string \r, \n and \r\n without preceding \\ shall be treated as \n.
                             switch (ch)
                             {
                                 case 'n':
+#if PRESERVE_PARSED_VALUES
+                                    _parsedValue.Append('n');
+#endif
                                     ch = Chars.LF;
                                     break;
 
                                 case 'r':
+#if PRESERVE_PARSED_VALUES
+                                    _parsedValue.Append('r');
+#endif
                                     ch = Chars.CR;
                                     break;
 
                                 case 't':
+#if PRESERVE_PARSED_VALUES
+                                    _parsedValue.Append('t');
+#endif
                                     ch = Chars.HT;
                                     break;
 
                                 case 'b':
+#if PRESERVE_PARSED_VALUES
+                                    _parsedValue.Append('b');
+#endif
                                     ch = Chars.BS;
                                     break;
 
                                 case 'f':
+#if PRESERVE_PARSED_VALUES
+                                    _parsedValue.Append('f');
+#endif
                                     ch = Chars.FF;
                                     break;
 
                                 case '(':
+#if PRESERVE_PARSED_VALUES
+                                    _parsedValue.Append('(');
+#endif
                                     ch = Chars.ParenLeft;
                                     break;
 
                                 case ')':
+#if PRESERVE_PARSED_VALUES
+                                    _parsedValue.Append(')');
+#endif
                                     ch = Chars.ParenRight;
                                     break;
 
                                 case '\\':
+#if PRESERVE_PARSED_VALUES
+                                    _parsedValue.Append('\\');
+#endif
                                     ch = Chars.BackSlash;
                                     break;
 
                                 // AutoCAD PDFs may contain such strings: (\ ) 
                                 case ' ':
+#if PRESERVE_PARSED_VALUES
+                                    _parsedValue.Append(' ');
+#endif
                                     // #PRD Notify about a string with an escaped blank.
                                     ch = ' ';
                                     break;
 
                                 case Chars.CR:
                                 case Chars.LF:
+#if PRESERVE_PARSED_VALUES
+                                    _parsedValue.Append(ch);
+#endif
                                     ch = ScanNextChar(true); // Inside of a string \r, \n and \r\n without preceding \\ shall be treated as \n.
                                     continue;
 
@@ -669,6 +727,9 @@ namespace PdfSharp.Pdf.IO
                                     //if (Char.IsDigit(ch) && ch is not '8' and not '9')  // First octal character.
                                     if (ch is >= '0' and <= '7')  // First octal character.
                                     {
+#if PRESERVE_PARSED_VALUES
+                                        _parsedValue.Append(ch);
+#endif
                                         //// Octal character code.
                                         //if (ch >= '8')
                                         //    ParserDiagnostics.HandleUnexpectedCharacter(ch);
@@ -677,6 +738,9 @@ namespace PdfSharp.Pdf.IO
                                         //if (Char.IsDigit(_nextChar) && _nextChar is not '8' and not '9')  // Second octal character.
                                         if (_nextChar is >= '0' and <= '7')  // Second octal character.
                                         {
+#if PRESERVE_PARSED_VALUES
+                                            _parsedValue.Append(_nextChar);
+#endif
                                             ch = ScanNextChar(true); // Inside of a string \r, \n and \r\n without preceding \\ shall be treated as \n.
                                             //if (ch >= '8')
                                             //    ParserDiagnostics.HandleUnexpectedCharacter(ch);
@@ -685,6 +749,9 @@ namespace PdfSharp.Pdf.IO
                                             //if (Char.IsDigit(_nextChar) && _nextChar is not '8' and not '9')  // Third octal character.
                                             if (_nextChar is >= '0' and <= '7')  // Third octal character.
                                             {
+#if PRESERVE_PARSED_VALUES
+                                                _parsedValue.Append(_nextChar);
+#endif
                                                 ch = ScanNextChar(true); // Inside of a string \r, \n and \r\n without preceding \\ shall be treated as \n.
                                                 //if (ch >= '8')
                                                 //    ParserDiagnostics.HandleUnexpectedCharacter(ch);
@@ -701,8 +768,10 @@ namespace PdfSharp.Pdf.IO
                                     }
                                     else
                                     {
+#if PRESERVE_PARSED_VALUES
+                                        _parsedValue.Append(ch);
+#endif
                                         // PDF 32000: "If the character following the REVERSE SOLIDUS is not one of those shown in Table 3, the REVERSE SOLIDUS shall be ignored."
-                                        // fyi: REVERSE SOLIDUS is a backslash
                                         // What does that mean: "abc\qxyz" is "abcxyz" oder "abcqxyz"?
                                         // Adobe Reader ignores '\', but keeps 'q'. We do the same.
                                         // #PRD Notify about unknown escape character.
@@ -718,11 +787,11 @@ namespace PdfSharp.Pdf.IO
                 _token.Append(ch);
                 ch = ScanNextChar(true); // Inside of a string \r, \n and \r\n without preceding \\ shall be treated as \n.
             }
+            // (dummy comment to suppress incorrect warning about label indentation)
         End:
             return Symbol = Symbol.String;
         }
 
-#if true
         /// <summary>
         /// Scans a hex encoded literal byte string, contained between "&lt;" and "&gt;".
         ///  </summary>
@@ -733,22 +802,28 @@ namespace PdfSharp.Pdf.IO
             // 25-09-16/StL
             // Now we can handle Panose style codes that may look like this:
             //   < 0 0 2 b 6 6 3 8 4 2 2 4>
-            // This is technically an illegal format, but found by a user.
+            // This is technically an illegal format, but found by a user in a real PDF file.
 
             ClearToken();
+#if PRESERVE_PARSED_VALUES
+            _parsedValue.Append('<');
+#endif
             ScanNextChar(true);
             bool tryUsePanoseHack = false;
             while (true)
             {
                 MoveToNonWhiteSpace();
-
+#if DEBUG
+                if (_currChar == '4' && _nextChar == '1')
+                    _ = typeof(int);
+#endif
                 if (_currChar == '>')
                 {
                     ScanNextChar(true);
                     break;
                 }
 
-                // TODO Handle EOF correctly. Check if other methods must also handle EOF.
+                // IMPROVE Handle EOF correctly. Check if other methods must also handle EOF.
 
                 var hex = _currChar switch
                 {
@@ -776,7 +851,7 @@ namespace PdfSharp.Pdf.IO
                             goto ScanNextChar;
                         }
                     }
-                    // Second char is assumed to be '0' if not exists according to the PDF specs.
+                    // Second char is assumed to be '0' if it does not exist according to the PDF specs.
                     _token.Append((char)(hex << 4));
 
                 ScanNextChar:
@@ -800,7 +875,7 @@ namespace PdfSharp.Pdf.IO
                 // Some fool may add a line-break between the hex digits.
                 MoveToNonWhiteSpace();
 
-                // TODO Handle EOF correctly.
+                // IMPROVE Handle EOF correctly.
 
                 hex = (hex << 4) + _currChar switch
                 {
@@ -821,62 +896,6 @@ namespace PdfSharp.Pdf.IO
                 return '\0';
             }
         }
-#else
-        /// <summary>
-        /// Scans a hex encoded literal string, contained between "&lt;" and "&gt;".
-        /// </summary>
-        public Symbol ScanHexadecimalString()
-        {
-            Debug.Assert(_currChar == Chars.Less);
-
-            ClearToken();
-            ScanNextChar(true);
-            while (true)
-            {
-                MoveToNonWhiteSpace();
-                if (_currChar == '>')
-                {
-                    ScanNextChar(true);
-                    break;
-                }
-
-                var hex = _currChar switch
-                {
-                    >= '0' and <= '9' => _currChar - '0',
-                    >= 'A' and <= 'F' => _currChar - ('A' - 10),  // Not optimized in IL without parenthesis.
-                    >= 'a' and <= 'f' => _currChar - ('a' - 10),
-                    _ => LogError(_currChar)
-                };
-
-                ScanNextChar(true);
-                if (_currChar == '>')
-                {
-                    // Second char is optional in PDF spec.
-                    _token.Append((char)(hex << 4));
-                    ScanNextChar(true);
-                    break;
-                }
-
-                hex = (hex << 4) + _currChar switch
-                {
-                    >= '0' and <= '9' => _currChar - '0',
-                    >= 'A' and <= 'F' => _currChar - ('A' - 10),
-                    >= 'a' and <= 'f' => _currChar - ('a' - 10),
-                    _ => LogError(_currChar)
-                };
-                _token.Append((char)hex);
-                ScanNextChar(true);
-            }
-
-            return Symbol = Symbol.HexString;
-
-            static char LogError(char ch)
-            {
-                PdfSharpLogHost.Logger.LogError("Illegal character {char} in hex string.", ch);
-                return '\0';
-            }
-        }
-#endif
 
         /// <summary>
         /// Tries to scan the specified literal from the current stream position.
@@ -990,7 +1009,7 @@ namespace PdfSharp.Pdf.IO
                 return bytes;
             }
 
-            // Note: Position += length cannot be used here.
+            // Note that Position += length cannot be used here.
             Position = position + length;
             return bytes;
         }
@@ -1072,13 +1091,13 @@ namespace PdfSharp.Pdf.IO
             var rawString = RandomReadRawString(start, searchLength);
 
             // When we come here, we have either an invalid or no \Length entry.
-            // Best we can do is to consider all byte before 'endstream' are part of the stream content.
+            // Best we can do is to consider all bytes before 'endstream' are part of the stream content.
             // In case the stream is zipped, this is no problem. In case the stream is encrypted
             // it would be a serious problem. But we wait if this really happens.
             int idxEndStream = rawString.LastIndexOf("endstream", StringComparison.Ordinal);
             if (idxEndStream == -1)
             {
-                SuppressExceptions.HandleError(suppressObjectOrderExceptions, () => throw TH.ObjectNotAvailableException_CannotRetrieveStreamLength());
+                SuppressExceptions.HandleError(suppressObjectOrderExceptions, () => throw TH.ObjectNotAvailableException_CannotRetrieveStreamLength(start));
                 return -1;
             }
 
@@ -1155,7 +1174,13 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Resets the current token to the empty string.
         /// </summary>
-        void ClearToken() => _token.Clear();
+        void ClearToken()
+        {
+            _token.Clear();
+#if PRESERVE_PARSED_VALUES
+            _parsedValue.Clear();
+#endif
+        }
 
         /// <summary>
         /// Appends current character to the token and
@@ -1171,9 +1196,9 @@ namespace PdfSharp.Pdf.IO
         }
 
         /// <summary>
-        /// If the current character is not a white space, the function immediately returns it.
-        /// Otherwise, the PDF cursor is moved forward to the first non-white space or EOF.
-        /// White spaces are NUL, HT, LF, FF, CR, and SP.
+        /// If the current character is not a white-space, the function immediately returns it.
+        /// Otherwise, the PDF cursor is moved forward to the first non-white-space or EOF.
+        /// White-spaces are NUL, HT, LF, FF, CR, and SP.
         /// </summary>
         public char MoveToNonWhiteSpace()
         {
@@ -1215,7 +1240,7 @@ namespace PdfSharp.Pdf.IO
             //_pdfStream.Position =  5;  
             //_pdfStream.Position = _pdfLength - 5;
 
-            // Note: The _pdfStream Position is mostly two bytes/chars behind the Lexer Position,
+            // Note that the _pdfStream Position is mostly two bytes/chars behind the Lexer Position,
             // because the stream already has read the current and the next character.
             if (position < 0)
                 position = Position;
@@ -1313,6 +1338,7 @@ namespace PdfSharp.Pdf.IO
                 return _token[0] == 't';
             }
         }
+
 
         /// <summary>
         /// Interprets current token as integer literal.
@@ -1426,10 +1452,14 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public SizeType PdfLength => _pdfLength;
         readonly SizeType _pdfLength;
+
         SizeType _charIndex;
         char _currChar;
         char _nextChar;
         readonly StringBuilder _token = new();
+#if PRESERVE_PARSED_VALUES
+        readonly StringBuilder _parsedValue = new();
+#endif
         long _tokenAsLong;
         double _tokenAsReal;
         (int, int) _tokenAsObjectID;

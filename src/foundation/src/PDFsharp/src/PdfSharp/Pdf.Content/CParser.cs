@@ -5,6 +5,8 @@ using PdfSharp.Internal;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Content.Objects;
 
+// v7.0.0  REVIEW
+
 namespace PdfSharp.Pdf.Content
 {
     /// <summary>
@@ -63,6 +65,16 @@ namespace PdfSharp.Pdf.Content
         }
 
         /// <summary>
+        /// Parses whatever comes until the end of the array is reached.
+        /// </summary>
+        void ParseArray(CArray array)
+        {
+            var sequence = new CSequence();
+            ParseObject(sequence, CSymbol.EndArray);
+            array.Add(sequence);
+        }
+
+        /// <summary>
         /// Parses whatever comes until the specified stop symbol is reached.
         /// </summary>
         void ParseObject(CSequence sequence, CSymbol stop)
@@ -82,42 +94,29 @@ namespace PdfSharp.Pdf.Content
                         break;
 
                     case CSymbol.Integer:
-                        CInteger n = new()
-                        {
-                            Value = _lexer.TokenToInteger
-                        };
+                        CInteger n = new(_lexer.TokenToInteger);
                         _operands.Add(n);
                         break;
 
                     case CSymbol.Real:
-                        CReal r = new()
-                        {
-                            Value = _lexer.TokenToReal
-                        };
+                        CReal r = new(_lexer.TokenToReal);
                         _operands.Add(r);
                         break;
 
                     case CSymbol.String:
+                        s = new(_lexer.Token);
+                        _operands.Add(s);
+                        break;
+
                     case CSymbol.HexString:
-                    case CSymbol.UnicodeString:
-                    case CSymbol.UnicodeHexString:
-                        s = new()
-                        {
-                            Value = _lexer.Token,
-                            CStringType = CStringType.String // Must set string type. So far, only CStringType.String is supported in CString.ToString().
-                        };
+                        s = new(_lexer.Token, CStringType.HexString);
                         _operands.Add(s);
                         break;
 
                     case CSymbol.Dictionary:
-                        s = new()
-                        {
-                            Value = _lexer.Token,
-                            CStringType = CStringType.Dictionary
-                        };
+                        s = new(_lexer.Token, CStringType.Dictionary);
                         _operands.Add(s);
                         op = CreateOperator(OpCodeName.Dictionary);
-                        //_operands.Clear();
                         sequence.Add(op);
                         break;
 
@@ -131,7 +130,6 @@ namespace PdfSharp.Pdf.Content
 
                     case CSymbol.Operator:
                         op = CreateOperator();
-                        //_operands.Clear();
                         sequence.Add(op);
                         break;
 
@@ -140,10 +138,10 @@ namespace PdfSharp.Pdf.Content
                         if (_operands.Count != 0)
                             ContentReaderDiagnostics.ThrowContentReaderException("Array within array...");
 
-                        ParseObject(array, CSymbol.EndArray);
+                        ParseArray(array);
                         array.Add(_operands);
                         _operands.Clear();
-                        _operands.Add((CObject)array);
+                        _operands.Add(array);
                         break;
 
                     case CSymbol.EndArray:
@@ -174,9 +172,32 @@ namespace PdfSharp.Pdf.Content
 
         COperator CreateOperator(COperator op)
         {
-            if (op.OpCode.OpCodeName == OpCodeName.BI)
+            // Special handling for inline images.
+            if ((op.OpCode.Flags & OpCodeFlags.InlineImage) != 0)
             {
-                _lexer.ScanInlineImage();
+                string literal;
+                switch (op.OpCode.OpCodeName)
+                {
+                    case OpCodeName.BI:
+                        _lexer.ScanBeginImage();
+                        literal = _lexer.Token;
+                        _operands.Add(new CLiteral(literal));
+                        break;
+
+                    case OpCodeName.ID:
+                        _lexer.ScanImageData();
+                        literal = _lexer.Token;
+                        _operands.Add(new CLiteral(literal));
+                        break;
+
+                    case OpCodeName.EI:
+                        // Has no operands.
+                        break;
+
+                    default:
+                        Debug.Assert(false);
+                        break;
+                }
             }
 #if DEBUG
             if (op.OpCode.Operands != -1 && op.OpCode.Operands != _operands.Count)
@@ -188,8 +209,7 @@ namespace PdfSharp.Pdf.Content
                 }
             }
 #endif
-            //if (_operands.Count != 0)  // Do not create empty Operands sequence.
-                op.Operands.Add(_operands);
+            op.Operands.Add(_operands);
             _operands.Clear();
             return op;
         }
@@ -217,8 +237,8 @@ namespace PdfSharp.Pdf.Content
             return current;
         }
 
-        readonly CSequence _operands = new CSequence();
-        PdfPage _page = default!;
+        readonly CSequence _operands = new();
+        PdfPage _page = null!;
         readonly CLexer _lexer;
     }
 }

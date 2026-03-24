@@ -7,14 +7,23 @@ using System.Xml;
 
 namespace PdfSharp.Snippets.Drawing
 {
+    /// <summary>
+    /// Snippet that demonstrates graphics units.
+    /// </summary>
     public class GraphicsUnitDownwards : GraphicsUnitBase
     {
+        /// <summary>
+        /// Creates a new GraphicsUnitDownwards instance.
+        /// </summary>
         public GraphicsUnitDownwards()
         {
             Title = "Graphics Unit";
             PathName = "snippets/drawing/graphics/GraphicsUnit-Downwards";
         }
 
+        /// <summary>
+        /// Renders the snippet.
+        /// </summary>
         public override void RenderSnippet(XGraphics gfx)
         {
             // Page 1 - PU

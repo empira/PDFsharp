@@ -32,10 +32,10 @@ namespace PdfSharp.Charting.Renderers
                 lri.Legend = cri.Chart._legend;
 
                 lri.Font = Converter.ToXFont(lri.Legend._font, cri.DefaultFont);
-                lri.FontColor = new XSolidBrush(XColors.Black);
+                lri.FontColor = XBrushes.Black;
 
                 if (lri.Legend._lineFormat != null)
-                    lri.BorderPen = Converter.ToXPen(lri.Legend._lineFormat, XColors.Black, DefaultLineWidth, XDashStyle.Solid);
+                    lri.BorderPen = Converter.ToXPen(lri.Legend._lineFormat, XColors.Black, DefaultLineWidth/*, XDashStyle.Solid*/);
 
                 lri.Entries = new LegendEntryRendererInfo[cri.SeriesRendererInfos.Length];
                 int index = 0;
@@ -49,7 +49,7 @@ namespace PdfSharp.Charting.Renderers
                     };
                     if (sri.MarkerRendererInfo != null!)
                     {
-                        leri.MarkerSize.Width = leri.MarkerSize.Height = sri.MarkerRendererInfo.MarkerSize.Point;
+                        leri.MarkerSize.Width = leri.MarkerSize.Height =(float_) sri.MarkerRendererInfo.MarkerSize.Point;
                         leri.MarkerPen = new XPen(sri.MarkerRendererInfo.MarkerForegroundColor);
                         leri.MarkerBrush = new XSolidBrush(sri.MarkerRendererInfo.MarkerBackgroundColor);
                     }

@@ -102,7 +102,7 @@ namespace PdfSharp.Charting.Renderers
             // Draw tick labels. Each tick label will be aligned centered.
             int countTickLabels = (int)xMax;
             double tickLabelStep = xari.Height / countTickLabels;
-            XPoint startPos = new XPoint(xari.X + xari.Width - xari.MajorTickMarkWidth, xari.Y + tickLabelStep / 2);
+            XPoint startPos = new XPoint((float_)(xari.X + xari.Width - xari.MajorTickMarkWidth), (float_)(xari.Y + tickLabelStep / 2));
             if (xari.XValues != null)
             {
                 foreach (XSeries xs in xari.XValues)
@@ -113,7 +113,7 @@ namespace PdfSharp.Charting.Renderers
                         string tickLabel = xv.ValueField;
                         var size = gfx.MeasureString(tickLabel, xari.TickLabelsFont);
                         gfx.DrawString(tickLabel, xari.TickLabelsFont, xari.TickLabelsBrush, startPos.X - size.Width, startPos.Y + size.Height / 2);
-                        startPos.Y += tickLabelStep;
+                        startPos.Y += (float_)tickLabelStep;
                     }
                 }
             }
@@ -132,12 +132,12 @@ namespace PdfSharp.Charting.Renderers
             {
                 int countMinorTickMarks = (int)(xMax / xMinorTick);
                 double minorTickMarkStep = xari.Height / countMinorTickMarks;
-                startPos.Y = xari.Y;
+                startPos.Y = (float_)xari.Y;
                 for (int x = 0; x <= countMinorTickMarks; x++)
                 {
-                    points[0].X = minorTickMarkStart;
-                    points[0].Y = startPos.Y + minorTickMarkStep * x;
-                    points[1].X = minorTickMarkEnd;
+                    points[0].X = (float_)minorTickMarkStart;
+                    points[0].Y = (float_)(startPos.Y + minorTickMarkStep * x);
+                    points[1].X = (float_)minorTickMarkEnd;
                     points[1].Y = points[0].Y;
                     lineFormatRenderer.DrawLine(points[0], points[1]);
                 }
@@ -148,12 +148,12 @@ namespace PdfSharp.Charting.Renderers
             {
                 int countMajorTickMarks = (int)(xMax / xMajorTick);
                 double majorTickMarkStep = xari.Height / countMajorTickMarks;
-                startPos.Y = xari.Y;
+                startPos.Y = (float_)xari.Y;
                 for (int x = 0; x <= countMajorTickMarks; x++)
                 {
-                    points[0].X = majorTickMarkStart;
-                    points[0].Y = startPos.Y + majorTickMarkStep * x;
-                    points[1].X = majorTickMarkEnd;
+                    points[0].X = (float_)(majorTickMarkStart);
+                    points[0].Y = (float_)(startPos.Y + majorTickMarkStep * x);
+                    points[1].X = (float_)(majorTickMarkEnd);
                     points[1].Y = points[0].Y;
                     lineFormatRenderer.DrawLine(points[0], points[1]);
                 }
@@ -162,10 +162,10 @@ namespace PdfSharp.Charting.Renderers
             // Axis.
             if (xari.LineFormat != null)
             {
-                points[0].X = xari.X + xari.Width;
-                points[0].Y = xari.Y;
-                points[1].X = xari.X + xari.Width;
-                points[1].Y = xari.Y + xari.Height;
+                points[0].X = (float_)(xari.X + xari.Width);
+                points[0].Y = (float_)(xari.Y);
+                points[1].X = (float_)(xari.X + xari.Width);
+                points[1].Y = (float_)(xari.Y + xari.Height);
                 if (xari.MajorTickMark != TickMarkType.None)
                 {
                     points[0].Y -= xari.LineFormat.Width / 2;
@@ -178,7 +178,7 @@ namespace PdfSharp.Charting.Renderers
             var atri = xari.AxisTitleRendererInfo;
             if (atri != null && atri.AxisTitleText != null && atri.AxisTitleText.Length > 0)
             {
-                XRect rect = new XRect(xari.X, xari.Y + xari.Height / 2, atri.AxisTitleSize.Width, 0);
+                var rect = new XRect((float_)xari.X, (float_)(xari.Y + xari.Height / 2), atri.AxisTitleSize.Width, 0);
                 gfx.DrawString(atri.AxisTitleText, atri.AxisTitleFont, atri.AxisTitleBrush, rect);
             }
         }

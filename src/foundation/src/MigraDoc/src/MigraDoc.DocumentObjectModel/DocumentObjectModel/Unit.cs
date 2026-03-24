@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 namespace MigraDoc.DocumentObjectModel
@@ -58,7 +58,7 @@ namespace MigraDoc.DocumentObjectModel
 
         /// <summary>
         /// Resets this instance,
-        /// i.e. IsNull() will return true afterwards.
+        /// i.e. IsNull() will return true afterward.
         /// </summary>
         void INullableValue.SetNull()
         {
@@ -443,8 +443,8 @@ namespace MigraDoc.DocumentObjectModel
             var unit = Zero;
             value = value.Trim();
 
-            // For Germans...
-            value = value.Replace(',', '.');
+            // For Germans…
+            value = value.Replace(',', '.');  // TODO: Remove, but this is a breaking change.
 
             int count = value.Length;
             int valLen = 0;

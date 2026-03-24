@@ -119,7 +119,7 @@ namespace PdfSharp.Pdf.Advanced
             /// Appendix D) or an encoding dictionary that specifies differences from the font’s
             /// built-in encoding or from a specified predefined encoding.
             /// </summary>
-            [KeyInfo(KeyType.Name | KeyType.Dictionary)]
+            [KeyInfo(KeyType.NameOrDictionary | KeyType.Optional)]
             public const string Encoding = "/Encoding";
 
             /// <summary>

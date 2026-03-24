@@ -1,9 +1,11 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using PdfSharp.Drawing;
-using PdfSharp.Drawing.Internal;
 using System.Runtime.InteropServices;
+using PdfSharp.Drawing;
+#if CORE
+using PdfSharp.Internal.Imaging;
+#endif
 using System.Security.Cryptography;
 using System.Text;
 
@@ -43,6 +45,23 @@ namespace PdfSharp.Pdf.Advanced
             return pdfImage;
         }
 
+#if CORE
+        public PdfImage GetImage(ImportedImage importedImage)
+        {
+            byte[] bytes = importedImage.ImageData;
+
+            var selector = new ImageSelector(bytes);
+
+            if (!_images.TryGetValue(selector, out var pdfImage))
+            {
+                pdfImage = new(Owner, importedImage);
+                Debug.Assert(pdfImage.Owner == Owner);
+                _images[selector] = pdfImage;
+            }
+            return pdfImage;
+        }
+#endif
+
         /// <summary>
         /// Map from ImageSelector to PdfImage.
         /// </summary>
@@ -64,39 +83,14 @@ namespace PdfSharp.Pdf.Advanced
                 // 3. Otherwise, create a GUID.
                 // TODO_OLD: Create hashes also for other image sources.
                 var selector = image._path;
-#if true
                 if (image._path == null! || image._importedImage != null)
                 {
                     if (image._importedImage != null)
                     {
-                        var iid = image._importedImage.ImageData(options);
-                        if (iid is ImageDataDct jpeg)
-                        {
-                            var hashCreator = GetHashCreator();
-                            var hash = hashCreator.ComputeHash(jpeg.Data, 0, jpeg.Length);
-                            selector = GetHashSelectorPrefix(image) + HashToString(hash);
-                        }
-                        else if (iid is ImageDataBitmap bmp)
-                        {
-                            var hashCreator = GetHashCreator();
-                            var hash = hashCreator.ComputeHash(bmp.Data, 0, bmp.Length);
-                            if (bmp.AlphaMask != null! && bmp.AlphaMaskLength > 0)
-                            {
-                                var hash2 = hashCreator.ComputeHash(bmp.AlphaMask, 0, bmp.AlphaMaskLength);
-                                selector = GetHashSelectorPrefix(image) + HashToString(hash) + HashToString(hash2);
-                            }
-                            else if (bmp.BitmapMask != null! && bmp.BitmapMaskLength > 0)
-                            {
-                                var hash2 = hashCreator.ComputeHash(bmp.BitmapMask, 0, bmp.BitmapMaskLength);
-                                selector = GetHashSelectorPrefix(image) + HashToString(hash) + HashToString(hash2);
-                            }
-                            else
-                            {
-                                selector = GetHashSelectorPrefix(image) + HashToString(hash);
-                            }
-                        }
-                        else
-                            selector = "*" + Guid.NewGuid().ToString("B");
+                        var iid2 = image._importedImage.ImageData;
+                        var hashCreator = GetHashCreator();
+                        var hash = hashCreator.ComputeHash(iid2, 0, iid2.Length);
+                        selector = GetHashSelectorPrefix(image) + HashToString(hash);
                     }
                     else if (image._stream != null!)
                     {
@@ -156,19 +150,27 @@ namespace PdfSharp.Pdf.Advanced
                 // Path must be set. Leading '*' indicates pseudo-paths.
                 if (image._path == null!)
                     image._path = Path;
-#else
-                // HACK_OLD: implement a way to identify images when they are reused
-                if (image._path == null!)
-                        image._path = "*" + Guid.NewGuid().ToString("B");
-#endif
+
+            }
+
+            ///// <summary>
+            ///// Initializes a new instance of ImageSelector from an XImage.
+            ///// </summary>
+            public ImageSelector(byte[] bytes)
+            {
+                var hashCreator = GetHashCreator();
+                var hash = hashCreator.ComputeHash(bytes, 0, bytes.Length);
+                var selector = HashToString(hash);
+
+                Path = GetHashSelectorPrefix() + selector;
             }
 
             /// <summary>
-            /// Creates an instance of HashAlgorithm für use in ImageSelector.
+            /// Creates an instance of HashAlgorithm for use in ImageSelector.
             /// </summary>
-            private HashAlgorithm GetHashCreator()
+            HashAlgorithm GetHashCreator()
             {
-                // Note: Beginning with PDFsharp 6.2.0 Preview 2, we use SHA1 here.
+                // Note hat beginning with PDFsharp 6.2.0 Preview 2, we use SHA1 here.
                 // Earlier versions used MD5.
                 // MD5 is deprecated and not FIPS compliant, so we decided to avoid MD5 here.
                 // SHA1 is not deprecated and similarly efficient as MD5.
@@ -182,12 +184,21 @@ namespace PdfSharp.Pdf.Advanced
             /// Image selectors that are no path names start with an asterisk.
             /// We combine image dimensions with the hashcode of the image bits to reduce chance af ambiguity.
             /// </summary>
-            private string GetHashSelectorPrefix(XImage image)
+            string GetHashSelectorPrefix(XImage image)
             {
                 return "*hash:" + image.PixelWidth + ':' + image.PixelHeight + ':';
             }
 
-            private String HashToString(Byte[] hash)
+            /// <summary>
+            /// Image selectors that are no path names start with an asterisk.
+            /// We combine image dimensions with the hashcode of the image bits to reduce chance af ambiguity.
+            /// </summary>
+            string GetHashSelectorPrefix()
+            {
+                return "*hash:";
+            }
+
+            string HashToString(byte[] hash)
             {
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < hash.Length; i++)
@@ -197,7 +208,7 @@ namespace PdfSharp.Pdf.Advanced
                 return sb.ToString();
             }
 
-            public string Path { get; }
+            public string Path { get; }  // string Selection Key
 
             public override bool Equals(object? obj)
             {

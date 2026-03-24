@@ -1,6 +1,9 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Internal;
+using PdfSharp.Internal.Threading;
+using PdfSharp.Fonts.Internal;
 #if GDI
 using System.Drawing.Drawing2D;
 #endif
@@ -18,8 +21,6 @@ using SysPoint = Windows.Foundation.Point;
 using SysSize = Windows.Foundation.Size;
 using SysRect = Windows.Foundation.Rect;
 #endif
-using PdfSharp.Internal;
-using PdfSharp.Fonts.Internal;
 
 namespace PdfSharp.Drawing
 {

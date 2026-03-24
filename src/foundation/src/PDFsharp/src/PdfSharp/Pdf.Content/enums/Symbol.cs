@@ -1,6 +1,8 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+// v7.0.0 TODO
+
 namespace PdfSharp.Pdf.Content
 {
     /// <summary>
@@ -16,8 +18,8 @@ namespace PdfSharp.Pdf.Content
         /*Boolean?,*/
         String,
         HexString,
-        UnicodeString,
-        UnicodeHexString,
+        //UnicodeString,
+        //UnicodeHexString,
         Name,
         Operator,
         BeginArray,

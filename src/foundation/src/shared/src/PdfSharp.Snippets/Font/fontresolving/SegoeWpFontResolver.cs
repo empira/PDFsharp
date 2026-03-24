@@ -61,7 +61,7 @@ namespace PdfSharp.Snippets.Font
         /// </returns>
         public FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
         {
-            // Note: PDFsharp calls ResolveTypeface only once for each unique combination
+            // Note that PDFsharp calls ResolveTypeface only once for each unique combination
             // of familyName, isBold, and isItalic.
 
             string lowercaseFamilyName = familyName.ToLowerInvariant();
@@ -140,9 +140,9 @@ namespace PdfSharp.Snippets.Font
         /// </returns>
         public byte[]? GetFont(string faceName)
         {
-            // Note: PDFsharp never calls GetFont twice with the same face name.
-            // Note: If a typeface is resolved by the PlatformFontResolver.ResolveTypeface
-            //       you never come here.
+            // Note that PDFsharp never calls GetFont twice with the same face name.
+            // If a typeface is resolved by the PlatformFontResolver.ResolveTypeface
+            // you never come here.
 
             // Return the bytes of a font.
             return faceName switch

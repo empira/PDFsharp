@@ -13,7 +13,7 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Drawing
 {
-    public static class ImageHelper
+    internal static class ImageHelper
     {
         public enum BmpImages
         {

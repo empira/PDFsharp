@@ -53,7 +53,7 @@ namespace MigraDoc.Tests
             var germanMonths = new[] { "Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember" };
 
             // filenamePattern with placeholder for cultureInfo.
-            var filenamePattern = IOUtility.GetTempFileName("DateTime{0}", "pdf");
+            var filenamePattern = IOUtility.GetTempFullFileName("DateTime{0}", "pdf");
 
             // Create one result file per cultureInfo.
             var cultureInfos = new[] { null, CultureInfo.GetCultureInfo("en-us"), CultureInfo.GetCultureInfo("de-de") };
@@ -63,9 +63,9 @@ namespace MigraDoc.Tests
 
                 var section = document.AddSection();
 
-                section.AddParagraph($"123456: {new DateTime(1, 2, 3, 4, 5, 6).ToString(cultureInfo)}");
+                section.AddParagraph($"123456: {new DateTimeOffset(1, 2, 3, 4, 5, 6,TimeSpan.Zero).ToString(cultureInfo)}");
 
-                section.AddParagraph($"DateTime.Now: {DateTime.Now.ToString(cultureInfo)}");
+                section.AddParagraph($"DateTimeOffset.Now: {DateTimeOffset.Now.ToString(cultureInfo)}");
 
                 var p = section.AddParagraph("p.AddDateField(): ");
                 p.AddDateField();
@@ -86,7 +86,7 @@ namespace MigraDoc.Tests
                 // Check PDF file content.
                 var streamEnumerator = PdfFileHelper.GetPageContentStreamEnumerator(pdfDocument, 0);
 
-                // Get all text content split by whitespace.
+                // Get all text content split by white-space.
                 var texts = new List<string>();
                 while (streamEnumerator.Text.MoveAndGetNext(true, out var textInfo))
                     texts.AddRange(textInfo!.Text.Split(' '));
@@ -98,19 +98,21 @@ namespace MigraDoc.Tests
 
                 if (isEnUs)
                 {
-                    texts.Count.Should().Be(19);
+                    texts.Count.Should().Be(21);
 
-                    // 123456: 2/3/0001 4:05:06 AM
+                    // 123456: 2/3/0001 4:05:06 AM +00:00
                     texts[++idx].Should().Be("123456:");
                     Regex.IsMatch(texts[++idx], "[\\d]{1,2}/[\\d]{1,2}/[\\d]{4}").Should().BeTrue();
                     Regex.IsMatch(texts[++idx], "[\\d]{1,2}:[\\d]{2}:[\\d]{2}").Should().BeTrue();
                     amPm.Should().Contain(texts[++idx]);
+                    Regex.IsMatch(texts[++idx], "[+-][\\d]{2}:[\\d]{2}").Should().BeTrue();
 
-                    // DateTime.Now: 10/14/2024 10:40:50 AM
-                    texts[++idx].Should().Be("DateTime.Now:");
+                    // DateTimeOffset.Now: 10/14/2024 10:40:50 AM +02:00
+                    texts[++idx].Should().Be("DateTimeOffset.Now:");
                     Regex.IsMatch(texts[++idx], "[\\d]{1,2}/[\\d]{1,2}/[\\d]{4}").Should().BeTrue();
                     Regex.IsMatch(texts[++idx], "[\\d]{1,2}:[\\d]{2}:[\\d]{2}").Should().BeTrue();
                     amPm.Should().Contain(texts[++idx]);
+                    Regex.IsMatch(texts[++idx], "[+-][\\d]{2}:[\\d]{2}").Should().BeTrue();
 
                     // p.AddDateField(): 10/14/2024 10:40:50 AM
                     texts[++idx].Should().Be("p.AddDateField\\(\\):");
@@ -129,17 +131,19 @@ namespace MigraDoc.Tests
                 }
                 else if (isDeDe)
                 {
-                    texts.Count.Should().Be(15);
+                    texts.Count.Should().Be(17);
 
                     // 123456: 03.02.0001 04:05:06
                     texts[++idx].Should().Be("123456:");
                     Regex.IsMatch(texts[++idx], "[\\d]{2}.[\\d]{2}.[\\d]{4}").Should().BeTrue();
                     Regex.IsMatch(texts[++idx], "[\\d]{2}:[\\d]{2}:[\\d]{2}").Should().BeTrue();
+                    Regex.IsMatch(texts[++idx], "[+-][\\d]{2}:[\\d]{2}").Should().BeTrue();
 
-                    // DateTime.Now: 14.10.2024 10:40:50
-                    texts[++idx].Should().Be("DateTime.Now:");
+                    // DateTimeOffset.Now: 14.10.2024 10:40:50
+                    texts[++idx].Should().Be("DateTimeOffset.Now:");
                     Regex.IsMatch(texts[++idx], "[\\d]{2}.[\\d]{2}.[\\d]{4}").Should().BeTrue();
                     Regex.IsMatch(texts[++idx], "[\\d]{2}:[\\d]{2}:[\\d]{2}").Should().BeTrue();
+                    Regex.IsMatch(texts[++idx], "[+-][\\d]{2}:[\\d]{2}").Should().BeTrue();
 
                     // p.AddDateField(): 14.10.2024 10:40:50
                     texts[++idx].Should().Be("p.AddDateField\\(\\):");

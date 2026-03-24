@@ -20,7 +20,7 @@ using PdfSharp.Snippets.Font;
 #if WPF
 using System.IO;
 #endif
-#if !NET6_0_OR_GREATER
+#if !NET8_0_OR_GREATER
 using PdfSharp.TestHelper;
 #endif
 
@@ -68,8 +68,8 @@ namespace MigraDoc.Tests
             // Create a renderer for the MigraDoc document.
             var rtfRenderer = new RtfDocumentRenderer();
 
-            // Save the document...
-            var filename = IOUtility.GetTempFileName("HelloWorld", null);
+            // Save the document…
+            var filename = IOUtility.GetTempFullFileName("HelloWorld", null);
 
 #if DEBUG___
             MigraDoc.DocumentObjectModel.IO.DdlWriter dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_0.mdddl");
@@ -85,7 +85,7 @@ namespace MigraDoc.Tests
             dw.WriteDocument(document);
             dw.Close();
 #endif
-            //// ...and start a viewer.
+            //// … and start a viewer.
             //PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
@@ -150,9 +150,9 @@ namespace MigraDoc.Tests
 
             // Description:
             section.AddParagraph("This document contains several tabstop test cases. For each tabstop a tab is used to reach it.\n" +
-                                 $"By default the value \"{valueStr}\" is used for the content that should be aligned by the tabstops.\n" +
+                                 $"By default the value '{valueStr}' is used for the content that should be aligned by the tabstops.\n" +
                                  "For the special cases where an additional left aligned tabstop at position 0 is required for correct RTF generation, " +
-                                 $"the value \"{valueUnifyTabStopsStr}\" is used instead.\n" +
+                                 $"the value '{valueUnifyTabStopsStr}' is used instead.\n" +
                                  "This special case occurs, if a single decimal tabstop is used in a table rendered in RTF." +
                                  "In that case RTF requires no tab to reach the tabstop.");
 
@@ -160,7 +160,7 @@ namespace MigraDoc.Tests
             var paragraph = section.AddParagraph("Alignment order");
             paragraph.Style = StyleNames.Heading1;
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
                 section.AddParagraph(alignment.ToString());
 #else
@@ -173,7 +173,7 @@ namespace MigraDoc.Tests
             paragraph.Style = StyleNames.Heading1;
 
             TestHelper.DrawHorizontalPosition(section, position1);
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
 #else
             foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
@@ -193,7 +193,7 @@ namespace MigraDoc.Tests
             paragraph.Style = StyleNames.Heading1;
 
             TestHelper.DrawHorizontalPosition(section, position1, position2);
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
 #else
             foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
@@ -222,7 +222,7 @@ namespace MigraDoc.Tests
             var table = section.AddTable();
             table.AddColumn(Unit.FromCentimeter(16));
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
 #else
             foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
@@ -261,7 +261,7 @@ namespace MigraDoc.Tests
             table.AddColumn(Unit.FromCentimeter(2));
             table.AddColumn(Unit.FromCentimeter(14));
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
 #else
             foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
@@ -299,7 +299,7 @@ namespace MigraDoc.Tests
             table = section.AddTable();
             table.AddColumn(Unit.FromCentimeter(16));
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
 #else
             foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
@@ -331,7 +331,7 @@ namespace MigraDoc.Tests
             table = section.AddTable();
             table.AddColumn(Unit.FromCentimeter(16));
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
 #else
             foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
@@ -379,7 +379,7 @@ namespace MigraDoc.Tests
             table = section.AddTable();
             table.AddColumn(Unit.FromCentimeter(16));
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
 #else
             foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
@@ -417,7 +417,7 @@ namespace MigraDoc.Tests
             table = section.AddTable();
             table.AddColumn(Unit.FromCentimeter(16));
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             foreach (var alignment in Enum.GetValues<TabAlignment>())
 #else
             foreach (TabAlignment alignment in Enum.GetValues(typeof(TabAlignment)))
@@ -448,10 +448,10 @@ namespace MigraDoc.Tests
             TestHelper.DrawHorizontalPosition(section, position1);
 
             // Render PDF and RTF files.
-            var filename = "Test_Tabs_";
+            var filename = "unittests/migradoc/text/Test_Tabs_";
             filename += Capabilities.BackwardCompatibility.DoNotUnifyTabStopHandling ? "DoNotUnifyTabStopHandling" : "UnifyTabStopHandling";
 
-            var pdfFilename = PdfFileUtility.GetTempPdfFileName(filename);
+            var pdfFilename = PdfFileUtility.GetTempPdfFullFileName(filename);
             var rtfFilename = pdfFilename.Replace(".pdf", ".rtf");
 
             var rtfRenderer = new RtfDocumentRenderer();
@@ -482,11 +482,11 @@ namespace MigraDoc.Tests
             {
                 // Get a position of valueUnifyTabStopsStr.
                 valuePos = rtf.IndexOf(valueUnifyTabStopsStr, searchPos, StringComparison.Ordinal);
-                valuePos.Should().BeGreaterThan(0, $"\"{valueUnifyTabStopsStr}\" should occur 5 times in the RTF file after the description text.");
+                valuePos.Should().BeGreaterThan(0, $"'{valueUnifyTabStopsStr}' should occur 5 times in the RTF file after the description text.");
 
                 // Get the position of the cell containing the value.
                 var cellPos = rtf.LastIndexOf(cellStr, valuePos, StringComparison.Ordinal);
-                cellPos.Should().BeGreaterThan(0, $"\"{valueUnifyTabStopsStr}\" should occur inside of a cell.");
+                cellPos.Should().BeGreaterThan(0, $"'{valueUnifyTabStopsStr}' should occur inside of a cell.");
 
                 // Get the position of the decimal tabstop for this cell.
                 var decTabStopPos = rtf.LastIndexOf(decimalTabStopStr, valuePos, StringComparison.Ordinal);
@@ -532,7 +532,7 @@ namespace MigraDoc.Tests
                 searchPos = valuePos + valueUnifyTabStopsStr.Length;
             }
             valuePos = rtf.IndexOf(valueUnifyTabStopsStr, searchPos, StringComparison.Ordinal);
-            valuePos.Should().BeLessThan(0, $"\"{valueUnifyTabStopsStr}\" should occur only 5 times in a cell in the RTF file after the description text.");
+            valuePos.Should().BeLessThan(0, $"'{valueUnifyTabStopsStr}' should occur only 5 times in a cell in the RTF file after the description text.");
 
             // Search for valueStr - the occurrences for that no additional tabstop should be added.
             searchPos = startSearchPos;
@@ -540,13 +540,13 @@ namespace MigraDoc.Tests
             {
                 // Get a position of valueStr.
                 valuePos = rtf.IndexOf(valueStr, searchPos, StringComparison.Ordinal);
-                valuePos.Should().BeGreaterThan(0, $"\"{valueStr}\" should occur 35 times in the RTF file after the description text.");
+                valuePos.Should().BeGreaterThan(0, $"'{valueStr}' should occur 35 times in the RTF file after the description text.");
 
                 // Get the position of the cell or paragraph containing the value.
                 var cellPos = rtf.LastIndexOf(cellStr, valuePos, StringComparison.Ordinal);
                 var parPos = rtf.LastIndexOf(paragraphStr, valuePos, StringComparison.Ordinal);
                 var containerPos = Math.Max(cellPos, parPos);
-                containerPos.Should().BeGreaterThan(0, $"\"{valueStr}\" should occur inside of a cell or paragraph.");
+                containerPos.Should().BeGreaterThan(0, $"'{valueStr}' should occur inside of a cell or paragraph.");
 
                 // Check all tabstop’s position elements for this cell or paragraph.
                 var tabStopPositionSearchPos = containerPos;
@@ -587,8 +587,8 @@ namespace MigraDoc.Tests
             // Create a renderer for the MigraDoc document.
             var rtfRenderer = new RtfDocumentRenderer();
 
-            // Save the document...
-            var filename = IOUtility.GetTempFileName("HelloWorld", null);
+            // Save the document…
+            var filename = IOUtility.GetTempFullFileName("HelloWorld", null);
 
 #if DEBUG___
             MigraDoc.DocumentObjectModel.IO.DdlWriter dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_0.mdddl");
@@ -605,7 +605,7 @@ namespace MigraDoc.Tests
             dw.Close();
 #endif
 
-            //// ...and start a viewer.
+            //// … and start a viewer.
             //PdfFileUtility.ShowDocumentIfDebugging(filename);
 
         }
@@ -623,8 +623,8 @@ namespace MigraDoc.Tests
             // Create a renderer for the MigraDoc document.
             var rtfRenderer = new RtfDocumentRenderer();
 
-            // Save the document...
-            var filename = IOUtility.GetTempFileName("HelloWorldEmbeddedBase64", null);
+            // Save the document…
+            var filename = IOUtility.GetTempFullFileName("HelloWorldEmbeddedBase64", null);
 
 #if DEBUG___
             MigraDoc.DocumentObjectModel.IO.DdlWriter dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_0.mdddl");
@@ -641,7 +641,7 @@ namespace MigraDoc.Tests
             dw.Close();
 #endif
 
-            //// ...and start a viewer.
+            //// … and start a viewer.
             //PdfFileUtility.ShowDocumentIfDebugging(filename);
 
         }
@@ -748,8 +748,8 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
             // Create a renderer for the MigraDoc document.
             var rtfRenderer = new RtfDocumentRenderer();
 
-            // Save the document...
-            var filename = IOUtility.GetTempFileName("HelloWorldBase64", null);
+            // Save the document…
+            var filename = IOUtility.GetTempFullFileName("HelloWorldBase64", null);
 
 #if DEBUG___
             MigraDoc.DocumentObjectModel.IO.DdlWriter dw = new MigraDoc.DocumentObjectModel.IO.DdlWriter(filename + "_0.mdddl");
@@ -766,7 +766,7 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
             dw.Close();
 #endif
 
-            //// ...and start a viewer.
+            //// … and start a viewer.
             //PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
@@ -804,14 +804,14 @@ VeP/8gP+s//MzMQAAAAASUVORK5CYII=
                 row.Height = Unit.FromCentimeter(10);
             }
 
-            var rtfFilename = IOUtility.GetTempFileName("Test_Heading_Border", "rtf");
+            var rtfFilename = IOUtility.GetTempFullFileName("Test_Heading_Border", "rtf");
             var rtfRenderer = new RtfDocumentRenderer();
             rtfRenderer.Render(document, rtfFilename, Environment.CurrentDirectory);
 
             // Analyze rendered RTF.
             var rtf = File.ReadAllText(rtfFilename);
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             // Split by row identifier and skip the first part, which is no row.
             var splitByRows = rtf.Split("\\trowd").Skip(1).ToArray();
             splitByRows.Length.Should().Be(5, "as there are 5 rows");

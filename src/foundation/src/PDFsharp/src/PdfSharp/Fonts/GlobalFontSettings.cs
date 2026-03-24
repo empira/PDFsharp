@@ -2,8 +2,9 @@
 // See the LICENSE file in the solution root for more information.
 
 using Microsoft.Extensions.Logging;
+using PdfSharp.Internal.OpenType;
+using PdfSharp.Internal.Threading;
 using PdfSharp.Fonts;
-using PdfSharp.Fonts.OpenType;
 using PdfSharp.Internal;
 using PdfSharp.Logging;
 using PdfSharp.Pdf;
@@ -19,7 +20,7 @@ namespace PdfSharp.Fonts
         /// The name of the default font. This name is obsolete and must not be used anymore.
         /// </summary>
         [Obsolete("DefaultFontName is deprecated. Do not use it anymore.")]
-        public const string DefaultFontName_ = "PlatformDefault";
+        public const string DefaultFontName = "PlatformDefault";
 
         /// <summary>
         /// Gets or sets the custom font resolver for the current application.
@@ -29,20 +30,20 @@ namespace PdfSharp.Fonts
         /// </summary>
         public static IFontResolver? FontResolver
         {
-            get => Globals.Global.Fonts.FontResolver;
+            get => PsGlobals.Global.Fonts.FontResolver;
             set
             {
                 // Cannot remove font resolver.
                 if (value == null)
                     throw new ArgumentNullException(nameof(value), "You cannot remove the font resolver.");
 
-                ref var fontResolver = ref Globals.Global.Fonts.FontResolver;
+                ref var fontResolver = ref PsGlobals.Global.Fonts.FontResolver;
                 try
                 {
-                    Locks.EnterFontFactory();
+                    Locks.EnterFontManagement();
                     SetFontResolver(value, ref fontResolver);
                 }
-                finally { Locks.ExitFontFactory(); }
+                finally { Locks.ExitFontManagement(); }
             }
         }
 
@@ -54,20 +55,20 @@ namespace PdfSharp.Fonts
         /// </summary>
         public static IFontResolver? FallbackFontResolver
         {
-            get => Globals.Global.Fonts.FallbackFontResolver;
+            get => PsGlobals.Global.Fonts.FallbackFontResolver;
             set
             {
                 // Cannot remove font resolver.
                 if (value == null)
                     throw new ArgumentNullException(nameof(value), "You cannot remove the fallback font resolver.");
 
-                ref var fontResolver = ref Globals.Global.Fonts.FallbackFontResolver;
+                ref var fontResolver = ref PsGlobals.Global.Fonts.FallbackFontResolver;
                 try
                 {
-                    Locks.EnterFontFactory();
+                    Locks.EnterFontManagement();
                     SetFontResolver(value, ref fontResolver);
                 }
-                finally { Locks.ExitFontFactory(); }
+                finally { Locks.ExitFontManagement(); }
             }
         }
 
@@ -89,7 +90,8 @@ namespace PdfSharp.Fonts
                 return;
             }
 
-            if (FontFactory.HasFontSources)
+            var fontSourceCache = PsGlobals.Global.Fonts.FontSourceCache;
+            if (fontSourceCache.HasFontSources)
             {
 #if DEBUG
                 var config = Capabilities.Build.BuildName;
@@ -140,15 +142,12 @@ namespace PdfSharp.Fonts
             if (calledFromResetFontManagement)
                 PdfSharpLogHost.Logger.LogInformation("PDFsharp font management is about to be reset.");
 
-            Globals.Global.Fonts.FontResolver = null;
-            Globals.Global.Fonts.FallbackFontResolver = null;
-            Globals.Global.Fonts.UseWindowsFontsUnderWindows = null;
-            Globals.Global.Fonts.UseWindowsFontsUnderWsl2 = null;
-            GlyphTypefaceCache.Reset();
-            FontDescriptorCache.Reset();
+            PsGlobals.Global.Fonts.FontResolver = null;
+            PsGlobals.Global.Fonts.FallbackFontResolver = null;
+            PsGlobals.Global.Fonts.UseWindowsFontsUnderWindows = null;
+            PsGlobals.Global.Fonts.UseWindowsFontsUnderWsl2 = null;
             FontFactory.Reset();
-            FontFamilyCache.Reset();
-            OpenTypeFontFaceCache.Reset();
+            OtGlobals.RecreateOtGlobals();
         }
 
         /// <summary>
@@ -162,27 +161,27 @@ namespace PdfSharp.Fonts
         {
             get
             {
-                if (!Globals.Global.Fonts.FontEncodingInitialized)
+                if (!PsGlobals.Global.Fonts.FontEncodingInitialized)
                     DefaultFontEncoding = PdfFontEncoding.Automatic;
-                return Globals.Global.Fonts.FontEncoding;
+                return PsGlobals.Global.Fonts.FontEncoding;
             }
             set
             {
                 try
                 {
-                    Locks.EnterFontFactory();
-                    if (Globals.Global.Fonts.FontEncodingInitialized)
+                    Locks.EnterFontManagement();
+                    if (PsGlobals.Global.Fonts.FontEncodingInitialized)
                     {
                         // Ignore multiple setting e.g. in a web application.
-                        if (Globals.Global.Fonts.FontEncoding == value)
+                        if (PsGlobals.Global.Fonts.FontEncoding == value)
                             return;
                         throw new InvalidOperationException("Must not change DefaultFontEncoding after it was set once.");
                     }
 
-                    Globals.Global.Fonts.FontEncoding = value;
-                    Globals.Global.Fonts.FontEncodingInitialized = true;
+                    PsGlobals.Global.Fonts.FontEncoding = value;
+                    PsGlobals.Global.Fonts.FontEncodingInitialized = true;
                 }
-                finally { Locks.ExitFontFactory(); }
+                finally { Locks.ExitFontManagement(); }
             }
         }
 
@@ -198,26 +197,26 @@ namespace PdfSharp.Fonts
             get
             {
                 // If not opted-in we do not use Windows fonts anymore.
-                if (Globals.Global.Fonts.UseWindowsFontsUnderWindows == null)
+                if (PsGlobals.Global.Fonts.UseWindowsFontsUnderWindows == null)
                     UseWindowsFontsUnderWindows = false;
-                return Globals.Global.Fonts.UseWindowsFontsUnderWindows ?? false;
+                return PsGlobals.Global.Fonts.UseWindowsFontsUnderWindows ?? false;
             }
             set
             {
                 try
                 {
-                    Locks.EnterFontFactory();
-                    if (Globals.Global.Fonts.UseWindowsFontsUnderWindows.HasValue)
+                    Locks.EnterFontManagement();
+                    if (PsGlobals.Global.Fonts.UseWindowsFontsUnderWindows.HasValue)
                     {
                         // Ignore multiple setting e.g. in a web application.
-                        if (Globals.Global.Fonts.UseWindowsFontsUnderWindows == value)
+                        if (PsGlobals.Global.Fonts.UseWindowsFontsUnderWindows == value)
                             return;
                         throw new InvalidOperationException("Must not change UseWindowsFontsUnderWindows after it was once set or got.");
                     }
 
-                    Globals.Global.Fonts.UseWindowsFontsUnderWindows = value;
+                    PsGlobals.Global.Fonts.UseWindowsFontsUnderWindows = value;
                 }
-                finally { Locks.ExitFontFactory(); }
+                finally { Locks.ExitFontManagement(); }
             }
         }
 
@@ -232,28 +231,29 @@ namespace PdfSharp.Fonts
             get
             {
                 // If not opted-in we do not use Windows fonts anymore.
-                if (Globals.Global.Fonts.UseWindowsFontsUnderWsl2 == null)
+                if (PsGlobals.Global.Fonts.UseWindowsFontsUnderWsl2 == null)
                     UseWindowsFontsUnderWsl2 = false;
-                return Globals.Global.Fonts.UseWindowsFontsUnderWsl2 ?? false;
+                return PsGlobals.Global.Fonts.UseWindowsFontsUnderWsl2 ?? false;
             }
             set
             {
                 try
                 {
-                    Locks.EnterFontFactory();
-                    if (Globals.Global.Fonts.UseWindowsFontsUnderWsl2.HasValue)
+                    Locks.EnterFontManagement();
+                    if (PsGlobals.Global.Fonts.UseWindowsFontsUnderWsl2.HasValue)
                     {
                         // Ignore multiple setting e.g. in a web application.
-                        if (Globals.Global.Fonts.UseWindowsFontsUnderWsl2 == value)
+                        if (PsGlobals.Global.Fonts.UseWindowsFontsUnderWsl2 == value)
                             return;
                         throw new InvalidOperationException("Must not change UseWindowsFontsUnderWsl2 after it was once set or got.");
                     }
 
-                    Globals.Global.Fonts.UseWindowsFontsUnderWsl2 = value;
+                    PsGlobals.Global.Fonts.UseWindowsFontsUnderWsl2 = value;
                 }
-                finally { Locks.ExitFontFactory(); }
+                finally { Locks.ExitFontManagement(); }
             }
         }
+
 #elif GDI || WPF
         /// <summary>
         /// This property has no effect under a GDI or WPF build of PDFsharp.
@@ -292,21 +292,21 @@ namespace PdfSharp.Fonts
         internal static void Reset()
         {
             // Reset font resolvers.
-            Globals.Global.Fonts.FontResolver = null;
-            Globals.Global.Fonts.FallbackFontResolver = null;
+            PsGlobals.Global.Fonts.FontResolver = null;
+            PsGlobals.Global.Fonts.FallbackFontResolver = null;
 
             // Reset mode of PlatformFontResolver.
-            Globals.Global.Fonts.UseWindowsFontsUnderWindows = null;
-            Globals.Global.Fonts.UseWindowsFontsUnderWsl2 = null;
+            PsGlobals.Global.Fonts.UseWindowsFontsUnderWindows = null;
+            PsGlobals.Global.Fonts.UseWindowsFontsUnderWsl2 = null;
         }
     }
 }
 
 namespace PdfSharp.Internal
 {
-    partial class Globals
+    partial class PsGlobals
     {
-        partial class FontStorage
+        partial class PsFontStorage
         {
             /// <summary>
             /// The globally set custom font resolver.

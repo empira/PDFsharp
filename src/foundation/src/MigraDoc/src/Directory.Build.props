@@ -3,6 +3,7 @@
 
   <PropertyGroup>
     <Product>MigraDoc</Product>
+    <Copyright>$(CopyrightMigraDoc)</Copyright>
   </PropertyGroup>
 
 </Project>

@@ -1,12 +1,14 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Pdf.Advanced;
+
 namespace PdfSharp.Pdf
 {
     /// <summary>
     /// Provides methods to handle keys that may contain a PdfArray or a single PdfItem.
     /// </summary>
-    public class ArrayOrSingleItemHelper
+    public class ArrayOrSingleItemHelper  // #US373 StL: review
     {
         /// <summary>
         /// Initializes ArrayOrSingleItemHelper with PdfDictionary.DictionaryElements to work with.
@@ -14,7 +16,7 @@ namespace PdfSharp.Pdf
         public ArrayOrSingleItemHelper(PdfDictionary.DictionaryElements elements)
         {
             _elements = elements;
-            _dictionary = elements.Owner;
+            _dictionary = elements.OwningDictionary;
         }
 
         /// <summary>
@@ -26,21 +28,33 @@ namespace PdfSharp.Pdf
         /// <param name="prepend">True, if value shall be prepended instead of appended.</param>
         public void Add(string key, PdfItem value, bool prepend = false)
         {
-            var obj = _elements[key];
+            // #US373
+            if (value is PdfReference reference)
+            {
+                if (reference.Value != null!)
+                {
+                    value = reference.Value;
+                    // Error
+                }
+            }
 
-            var array = obj as PdfArray;
+            //var oldValue = _elements[key]; // #US373: Should we expect references here?
+            var oldValue = _elements.GetValue(key); // #US373
+            // oldValue can be null, a PDF item, or an array.
+            var array = oldValue as PdfArray;
 
             // If key is not yet set or key contains array without elements, assign value directly to key.
-            if (obj is null || array is not null && array.Elements.Count == 0)
+            if (oldValue is null || array is not null && array.Elements.Count == 0)
             {
                 _elements[key] = value;
                 return;
             }
 
-            // If not yet existing, create an array and assign the current directly assigned obj.
+            // If array is not yet existing, create one and assign the current directly assigned oldValue.
             if (array is null)
             {
-                array = new PdfArray(_dictionary._document, obj);
+                // oldValue is not null here.
+                array = new PdfArray(_dictionary.Document, oldValue);
                 _elements[key] = array;
             }
 
@@ -57,21 +71,26 @@ namespace PdfSharp.Pdf
         /// <param name="key">The key in the dictionary to work with.</param>
         public IEnumerable<PdfItem> GetAll(string key)
         {
-            var obj = _elements[key];
-
-            if (obj is PdfArray array)
+            var value = _elements.GetValue(key);
+            if (value is PdfArray array)
             {
                 foreach (var item in array.Elements)
                     yield return item;
             }
-            else if (obj is not null)
-                yield return obj;
+            else
+            {
+                if (value is not null)
+                    yield return value;
+                else
+                {
+                    // TODO: Breaking change. Empty enumeration instead of null item.
+                    yield break;
+                }
+            }
         }
 
         IEnumerable<PdfItem> Get(string key, Func<PdfItem, bool> predicate)
-        {
-            return GetAll(key).Where(predicate);
-        }
+            => GetAll(key).Where(predicate);
 
         /// <summary>
         /// Gets the PdfItem(s) of type T saved in the given key, that match a predicate.
@@ -79,9 +98,7 @@ namespace PdfSharp.Pdf
         /// <param name="key">The key in the dictionary to work with.</param>
         /// <param name="predicate">The predicate, that shall be true for the desired item(s).</param>
         public IEnumerable<T> Get<T>(string key, Func<T, bool> predicate) where T : PdfItem
-        {
-            return Get(key, x => x is T xT && predicate(xT)).Cast<T>();
-        }
+            => Get(key, x => x is T xT && predicate(xT)).Cast<T>();
 
         /// <summary>
         /// Gets the PdfItem(s) of type T saved in the given key, that are equal to value.
@@ -90,9 +107,7 @@ namespace PdfSharp.Pdf
         /// <param name="value">The value, the desired item(s) shall be equal to.</param>
         // Allows to call Equals with object.
         public IEnumerable<T> Get<T>(string key, object value) where T : PdfItem
-        {
-            return Get<T>(key, x => x.Equals(value));
-        }
+            => Get<T>(key, x => x.Equals(value));
 
         /// <summary>
         /// Gets the PdfItem(s) of type T saved in the given key, that are equal to value.
@@ -101,9 +116,7 @@ namespace PdfSharp.Pdf
         /// <param name="value">The value, the desired item(s) shall be equal to.</param>
         // Allows to omit the type parameter in the call.
         public IEnumerable<T> Get<T>(string key, T value) where T : PdfItem
-        {
-            return Get<T>(key, x => x.Equals(value));
-        }
+            => Get<T>(key, x => x.Equals(value));
 
         /// <summary>
         /// Returns true if the given key contains a PdfItem of type T matching a predicate.
@@ -111,9 +124,7 @@ namespace PdfSharp.Pdf
         /// <param name="key">The key in the dictionary to work with.</param>
         /// <param name="predicate">The predicate, that shall be true for the desired item(s).</param>
         public bool Contains<T>(string key, Func<T, bool> predicate) where T : PdfItem
-        {
-            return Get(key, x => x is T xT && predicate(xT)).Any();
-        }
+            => Get(key, x => x is T xT && predicate(xT)).Any();
 
         /// <summary>
         /// Returns true if the given key contains a PdfItem of type T, that is equal to value.
@@ -122,9 +133,7 @@ namespace PdfSharp.Pdf
         /// <param name="value">The value, the desired item(s) shall be equal to.</param>
         // Allows to call Equals with object.
         public bool Contains<T>(string key, object value) where T : PdfItem
-        {
-            return Contains<T>(key, x => x.Equals(value));
-        }
+            => Contains<T>(key, x => x.Equals(value));
 
         /// <summary>
         /// Returns true if the given key contains a PdfItem of type T, that is equal to value.
@@ -133,13 +142,12 @@ namespace PdfSharp.Pdf
         /// <param name="value">The value, the desired item(s) shall be equal to.</param>
         // Allows to omit the type parameter in the call.
         public bool Contains<T>(string key, T value) where T : PdfItem
-        {
-            return Contains<T>(key, x => x.Equals(value));
-        }
+            => Contains<T>(key, x => x.Equals(value));
 
         bool Remove(string key, Func<PdfItem, bool> predicate)
         {
-            var obj = _elements[key];
+            //var obj = _elements[key]; // #US373: Should we expect references here?
+            var obj = _elements.GetValue(key); // #US373
 
             if (obj is null)
                 return false;
@@ -186,9 +194,7 @@ namespace PdfSharp.Pdf
         /// <param name="key">The key in the dictionary to work with.</param>
         /// <param name="predicate">The predicate, that shall be true for the desired item(s).</param>
         public bool Remove<T>(string key, Func<T, bool> predicate) where T : PdfItem
-        {
-            return Remove(key, x => x is T xT && predicate(xT));
-        }
+            => Remove(key, x => x is T xT && predicate(xT));
 
         /// <summary>
         /// Removes the PdfItem(s) of type T saved in the given key, that are equal to value.
@@ -199,9 +205,7 @@ namespace PdfSharp.Pdf
         /// <param name="value">The value, the desired item(s) shall be equal to.</param>
         // Allows to call Equals with object.
         public bool Remove<T>(string key, object value) where T : PdfItem
-        {
-            return Remove<T>(key, x => x.Equals(value));
-        }
+            => Remove<T>(key, x => x.Equals(value));
 
         /// <summary>
         /// Removes the PdfItem(s) of type T saved in the given key, that are equal to value.
@@ -212,9 +216,7 @@ namespace PdfSharp.Pdf
         /// <param name="value">The value, the desired item(s) shall be equal to.</param>
         // Allows to omit the type parameter in the call.
         public bool Remove<T>(string key, T value) where T : PdfItem
-        {
-            return Remove<T>(key, x => x.Equals(value));
-        }
+            => Remove<T>(key, x => x.Equals(value));
 
         readonly PdfDictionary _dictionary;
         readonly PdfDictionary.DictionaryElements _elements;

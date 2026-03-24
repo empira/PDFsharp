@@ -3,6 +3,7 @@
 
   <PropertyGroup>
     <Product>PDFsharp</Product>
+    <Copyright>$(CopyrightPdfSharp)</Copyright>
   </PropertyGroup>
 
 </Project>

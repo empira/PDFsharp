@@ -2,6 +2,9 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
+using PdfSharp.Internal;
+using PdfSharp.Logging;
 using PdfSharp.Pdf.Internal;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
@@ -23,7 +26,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         {
             Initialize(1, 40);
             SecurityHandler.RemoveCryptFilters();
-            SecurityHandler._document.SetRequiredVersion(12);
+            SecurityHandler.Document.SetRequiredVersion(12);
         }
 
         /// <summary>
@@ -34,7 +37,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         {
             Initialize(2, length);
             SecurityHandler.RemoveCryptFilters();
-            SecurityHandler._document.SetRequiredVersion(14);
+            SecurityHandler.Document.SetRequiredVersion(14);
         }
 
         /// <summary>
@@ -46,7 +49,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         {
             Initialize(4, 128, encryptMetadata);
             SecurityHandler.GetOrAddStandardCryptFilter().SetEncryptionToRC4ForV4();
-            SecurityHandler._document.SetRequiredVersion(15);
+            SecurityHandler.Document.SetRequiredVersion(15);
         }
 
         /// <summary>
@@ -57,7 +60,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         {
             Initialize(4, 128, encryptMetadata);
             SecurityHandler.GetOrAddStandardCryptFilter().SetEncryptionToAESForV4();
-            SecurityHandler._document.SetRequiredVersion(16);
+            SecurityHandler.Document.SetRequiredVersion(16);
         }
 
         /// <summary>
@@ -69,13 +72,20 @@ namespace PdfSharp.Pdf.Security.Encryption
             RevisionValue = SecurityHandler.Elements.GetInteger(PdfStandardSecurityHandler.Keys.R);
             LengthValue = SecurityHandler.Elements.ContainsKey(PdfSecurityHandler.Keys.Length) ? SecurityHandler.Elements.GetInteger(PdfSecurityHandler.Keys.Length) : GetDefaultLength();
 
-            EncryptMetadata = (SecurityHandler.Elements[PdfStandardSecurityHandler.Keys.EncryptMetadata] as PdfBoolean)?.Value ?? true; // GetBoolean() returns false if not existing, but default is true.
+            // TODO GetBoolean(PdfStandardSecurityHandler.Keys.EncryptMetadata, true)
+            EncryptMetadata = (SecurityHandler.Elements[PdfStandardSecurityHandler.Keys.EncryptMetadata] as PdfBoolean)?.Value ?? true; // GetBoolean() returns false if not existing, but default is true. // #US373
 
             CheckVersionAndLength(VersionValue, LengthValue);
 
             var calculatedRevision = CalculateRevisionValue(VersionValue.Value, SecurityHandler.GetCorrectedPermissionsValue());
+
             if (calculatedRevision != RevisionValue)
-                Debug.Assert(calculatedRevision == RevisionValue);
+            {
+#pragma warning disable CA2254
+                PdfSharpLogHost.Logger.LogError($"Security Handler: Found revision {RevisionValue}, but expected revision {calculatedRevision}.");
+#pragma warning restore CA2254
+                // Don’t correct the revision value, as the wrong revision value was probably used to calculate the password hashes written in the file.
+            }
         }
 
         void Initialize(int versionValue, int lengthValue, bool encryptMetadata = true)
@@ -146,7 +156,7 @@ namespace PdfSharp.Pdf.Security.Encryption
                 {
                     SecurityHandler.Elements.SetBoolean(PdfStandardSecurityHandler.Keys.EncryptMetadata, EncryptMetadata);
 
-                    var metadata = SecurityHandler._document.Catalog.Elements.GetDictionary(PdfCatalog.Keys.Metadata);
+                    var metadata = SecurityHandler.Document.Catalog.Elements.GetDictionary(PdfCatalog.Keys.Metadata, VCF.Create);
                     if (metadata is null)
                         throw TH.InvalidOperationException_CouldNotFindMetadataDictionary();
 
@@ -160,7 +170,7 @@ namespace PdfSharp.Pdf.Security.Encryption
 
             Debug.Assert(ownerPassword.Length > 0, "Empty owner password.");
 
-            var documentId = PdfEncoders.RawEncoding.GetBytes(SecurityHandler._document.Internals.FirstDocumentID);
+            var documentId = PdfEncoders.RawEncoding.GetBytes(SecurityHandler.Document.Internals.FirstDocumentID);
 
             var (userValueArray, ownerValueArray) = ComputeOwnerAndUserValues(userPassword, ownerPassword, documentId, permissionsValue);
 
@@ -363,7 +373,7 @@ namespace PdfSharp.Pdf.Security.Encryption
                 // The encryption and MD5 hashing key length (in bytes) shall depend on the Length value (in bits).
                 keyLength = LengthValue / 8;
 
-#if !NET6_0_OR_GREATER
+#if !NET8_0_OR_GREATER
                 // We have to call Initialize here for .NET 4.6.2.
                 // .NET 6/8 include Initialize in "_md5.TransformFinalBlock()".
                 _md5.Initialize();
@@ -406,7 +416,7 @@ namespace PdfSharp.Pdf.Security.Encryption
             var userValue = PdfEncoders.RawEncoding.GetBytes(SecurityHandler.Elements.GetString(PdfStandardSecurityHandler.Keys.U));
             var ownerValue = PdfEncoders.RawEncoding.GetBytes(SecurityHandler.Elements.GetString(PdfStandardSecurityHandler.Keys.O));
             var permissionsValue = SecurityHandler.Elements.GetUnsignedInteger(PdfStandardSecurityHandler.Keys.P);
-            EncryptMetadata = (SecurityHandler.Elements[PdfStandardSecurityHandler.Keys.EncryptMetadata] as PdfBoolean)?.Value ?? true; // GetBoolean() returns false if not existing, but default is true.
+            EncryptMetadata = (SecurityHandler.Elements[PdfStandardSecurityHandler.Keys.EncryptMetadata] as PdfBoolean)?.Value ?? true; // GetBoolean() returns false if not existing, but default is true. // #US373
 
             var documentId = PdfEncoders.RawEncoding.GetBytes(SecurityHandler.Owner.Internals.FirstDocumentID);
 

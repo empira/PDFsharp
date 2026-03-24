@@ -19,7 +19,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
         }
 
         internal override void Serialize(Serializer serializer)
-            => throw new NotImplementedException();
+            => throw new NotSupportedException();
 
         internal override Meta Meta => TheMeta;
 

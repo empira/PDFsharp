@@ -111,7 +111,7 @@ namespace PdfSharp.TestHelper
                 public V4() : this(false)
                 { }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                 protected V4(bool getSkipped) : base(x => Enum.GetName(x)!.StartsWith("V4", StringComparison.OrdinalIgnoreCase), getSkipped)
                 { }
 #else
@@ -130,7 +130,7 @@ namespace PdfSharp.TestHelper
                 public V5() : this(false)
                 { }
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                 protected V5(bool getSkipped) : base(x => Enum.GetName(x)!.StartsWith("V5", StringComparison.OrdinalIgnoreCase), getSkipped)
                 { }
 #else
@@ -153,7 +153,7 @@ namespace PdfSharp.TestHelper
 
                 protected TestDataBase(Func<TestOptionsEnum, bool>? condition = null, bool getSkipped = false)
                 {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                     _data = Enum.GetValues<TestOptionsEnum>()
                         .Where(x =>
                             SkippedTestOptions.Contains(x) == getSkipped // Get Skipped or not skipped encryption configurations, like desired.
@@ -270,11 +270,10 @@ namespace PdfSharp.TestHelper
         /// Adds a prefix to the filename, depending on the options Encryption and EncryptMetadata properties.
         /// Other information must be added manually to the filename parameter (this applies also to the use of user and/or owner password).
         /// </summary>
-        public static string AddPrefixToFilename(string filename, TestOptions? options = null)
+        public static Stream AddPrefixToFilename(string filename, TestOptions? options = null)
         {
             var prefix = GetFilenamePrefix(options);
-
-            return $"{prefix} {filename}";
+            return CreateTempStream($"{prefix} {filename}");
         }
 
         /// <summary>
@@ -287,7 +286,7 @@ namespace PdfSharp.TestHelper
 
             var extension = Path.GetExtension(filename);
             var filenameWithoutExtension = Path.GetFileNameWithoutExtension(filename);
-            return $"{filenameWithoutExtension} {suffix}{extension}";
+            return PdfFileUtility.GetTempPdfFullFileName($"{filenameWithoutExtension} {suffix}{extension}");
         }
 
         static string GetFilenamePrefix(TestOptions? options)
@@ -301,7 +300,7 @@ namespace PdfSharp.TestHelper
             // Prefix for encrypted file.
             else
             {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                 prefixSuffix += $"{Enum.GetName(options.Encryption)}"
                     .Replace("Default", "Def")
                     .Replace("Using", "_")
@@ -358,5 +357,19 @@ namespace PdfSharp.TestHelper
 
             throw new InvalidOperationException("There are no test files to cache for this encryption configuration.");
         }
+
+        public static Stream CreateTempStream(string nameTag)
+        {
+#if true
+            // Create MemoryStream.
+            return new MemoryStream();
+#else
+            // Create FileStream for debugging.
+            string filename = PdfFileUtility.GetTempPdfFullFileName(nameTag);
+            var stream = new FileStream(filename, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+            return stream;
+#endif
+        }
+
     }
 }

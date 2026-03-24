@@ -9,7 +9,7 @@ namespace MigraDoc.DocumentObjectModel.IO
     enum TokenType
     {
         /// <summary>
-        /// White space or comment.
+        /// White-space or comment.
         /// </summary>
         None,
 

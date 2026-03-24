@@ -1,0 +1,4 @@
+﻿{ // PDFsharp build configuration
+  "PDFsharp_PackageName": "PDFsharp",
+  "PDFsharpMigraDoc_PackageName": "PDFsharp-MigraDoc"
+}

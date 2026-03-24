@@ -14,6 +14,10 @@ namespace PdfSharp.Pdf.Security
             : base(document)
         { }
 
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
         internal PdfSecurityHandler(PdfDictionary dict)
             : base(dict)
         { }

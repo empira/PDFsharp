@@ -10,7 +10,7 @@ namespace PdfSharp.Pdf.Signatures
     /// It is used e.g. for digital signatures to reserve space for the ByteRange Array.
     /// </summary>
     /// <param name="length">The length of the reserved space.</param>
-    sealed class PdfPlaceholderObject(int length) : PdfObject()
+    sealed class PdfPlaceholderObject_(int length) : PdfObject  // TODO: use PdfPlaceholder DELETE
     {
         public int Length { get; init; } = length;
 
@@ -45,9 +45,7 @@ namespace PdfSharp.Pdf.Signatures
             var endPosition = writer.Position;
             var actualLength = endPosition - StartPosition;
             if (actualLength > Length)
-            {
-                throw new Exception($"The actual length {actualLength} of this object is larger than the length {Length} of its placeholder.");
-            }
+                throw new InvalidOperationException($"The actual length {actualLength} of this object is larger than the length {Length} of its placeholder.");
 
             // Restore writer position.
             writer.Stream.Position = initialPosition;

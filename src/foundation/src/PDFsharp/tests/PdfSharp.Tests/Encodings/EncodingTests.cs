@@ -175,7 +175,7 @@ namespace PdfSharp.Tests.Encodings
         // Used test PDFsharp AnsiEncoding against Microsoft code page 1252.
         Encoding? GetDotNetAnsiEncoding()
         {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             return CodePagesEncodingProvider.Instance.GetEncoding(1252);
 #else
             return Encoding.GetEncoding(1252);

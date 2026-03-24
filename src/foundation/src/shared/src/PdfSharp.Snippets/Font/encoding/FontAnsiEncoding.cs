@@ -3,6 +3,7 @@
 
 using System.Globalization;
 using PdfSharp.Drawing;
+using PdfSharp.Internal;
 using PdfSharp.Quality;
 #if GDI
 using System.Drawing;
@@ -37,7 +38,7 @@ namespace PdfSharp.Snippets.Font
             const int dx = 140;
             const int dy = 15;
 
-            var encoder = new PdfSharp.Pdf.Internal.AnsiEncoding();
+            var encoder = new AnsiEncoding();
 
             var ansi = new byte[1];
 

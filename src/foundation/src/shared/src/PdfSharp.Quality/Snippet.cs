@@ -347,7 +347,7 @@ namespace PdfSharp.Quality
                 points.Add(new(x + width, yy - 2 * delta));
             }
             path.AddPolygon(points.ToArray());
-             gfx.DrawPath(Gray, path);
+            gfx.DrawPath(Gray, path);
         }
 
         /// <summary>

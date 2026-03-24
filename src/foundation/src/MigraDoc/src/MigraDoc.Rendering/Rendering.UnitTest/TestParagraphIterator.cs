@@ -3,7 +3,7 @@
 
 using MigraDoc.DocumentObjectModel;
 
-#pragma warning disable 1591
+#pragma warning disable CS1591 // Internal class
 
 namespace MigraDoc.Rendering.UnitTest
 {

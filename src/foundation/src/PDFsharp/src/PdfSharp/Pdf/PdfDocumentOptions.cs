@@ -92,10 +92,12 @@ namespace PdfSharp.Pdf
             get => _writerLayout;
             set => _writerLayout = value;
         }
+
+        PdfWriterLayout _writerLayout =
 #if DEBUG
-        PdfWriterLayout _writerLayout = PdfWriterLayout.Verbose;
+            PdfWriterLayout.Verbose;
 #else
-        PdfWriterLayout _writerLayout = PdfWriterLayout.Compact;
+            PdfWriterLayout.Compact;
 #endif
     }
 }

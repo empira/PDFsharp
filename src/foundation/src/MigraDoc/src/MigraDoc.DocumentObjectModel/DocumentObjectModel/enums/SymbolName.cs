@@ -8,7 +8,7 @@ namespace MigraDoc.DocumentObjectModel
     /// </summary>
     public enum SymbolName : uint
     {
-        // ===== \space(...) =====
+        // ===== \space(…) =====
         /// <summary>
         /// A regular blank.
         /// </summary>
@@ -52,7 +52,7 @@ namespace MigraDoc.DocumentObjectModel
         ParaBreak = 0xF4000007,
         //MarginBreak       = 0xF4000002,
 
-        // ===== \symbol(...) =====
+        // ===== \symbol(…) =====
         /// <summary>
         /// The Euro symbol €.
         /// </summary>

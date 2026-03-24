@@ -64,9 +64,9 @@ namespace MigraDoc.DocumentObjectModel.Internals
 
         //public static string InvalidEnumValue<T>(T value) where T : unmanaged // struct, Enum
         //{
-        //    // ... where T : enum
+        //    // … where T : enum
         //    //   -or-
-        //    // ... where T : Enum
+        //    // … where T : Enum
         //    // is not implemented in C# because nobody has done this.
         //    // See Eric Lippert on this topic: http://stackoverflow.com/questions/1331739/enum-type-constraints-in-c-sharp
         //    // UPDATE: Enum constraint comes with C# 7.3, see: https://devblogs.microsoft.com/premier-developer/dissecting-new-generics-constraints-in-c-7-3/

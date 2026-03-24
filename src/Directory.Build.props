@@ -1,49 +1,140 @@
 <Project>
+
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <!-- Found no other way to resolve the following warning than disable it -->
-    <NoWarn>NU1507</NoWarn>
+    <!--<NoWarn>NU1507</NoWarn> Fixed by Microsoft -->
+
+    <!-- Some warnings related to trimming.  -->
+    <NoWarn>$(NoWarn);0507;2070;2087</NoWarn>
     <WriteVersionInfoToBuildLog>false</WriteVersionInfoToBuildLog>
+
+    <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
+    <RunAnalyzers>false</RunAnalyzers>
   </PropertyGroup>
 
   <PropertyGroup>
     <!-- Enable Build Acceleration in Visual Studio. -->
+    <!-- StL: OK, by why does it exist in the first place? -->
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <!--
-    If you target a framework earlier than .NET 5 (including .NET Framework and .NET Standard),
-    you should set ProduceReferenceAssembly to true in order to speed incremental builds.
-    If you multi-target and any target is before .NET 5, you need this.
-    Even if you target .NET 5 or later, having this property is fine.
+      If you target a framework earlier than .NET 5 (including .NET Framework and .NET Standard),
+      you should set ProduceReferenceAssembly to true in order to speed incremental builds.
+      If you multi-target and any target is before .NET 5, you need this.
+      Even if you target .NET 5 or later, having this property is fine.
     -->
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-  </PropertyGroup>
+    <!--
+      Today SHA makes no sense in AssemblyInformationalVersionAttribute, because it refers to our
+      empira internal repository hosted on Azure DevOps. Maybe we change this in the future
+      and generate the NuGet packages based on the GitHub repository.
+    -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 
-  <PropertyGroup>
+    <!-- Building fewer frameworks during development speeds up build and test cycles. -->
+    <!-- This value can be and should be set in the Local.Build.props file to keep it out of the repo. -->
+    <PDFsharpBuildFewerFrameworks>false</PDFsharpBuildFewerFrameworks>
+
+    <!-- Build empira nuget packages (custom releases). -->
+    <!--<EmpiraIntranet>true</EmpiraIntranet>-->
+
     <LangVersion>latest</LangVersion>
     <DefaultItemExcludes>*.ncrunchproject;*.DotSettings</DefaultItemExcludes>
+    <!-- NuGetNuspecTag allows to choose between different NuSpec files. Leave empty for standard file. -->
+    <NuGetNuspecTag></NuGetNuspecTag>
+  </PropertyGroup>
 
-    <Product>PDFsharp</Product>
-    <Company>empira Software</Company>
-    <Copyright>© 2026 empira</Copyright>
-    <Authors>PDFsharp Team</Authors>
-    <Owners>empira Software GmbH</Owners>
+  <!-- Allow local settings to overwrite global settings. -->
+  <Import Condition="Exists('Local.Build.props')" Project="$([MSBuild]::GetPathOfFileAbove('Local.Build.props', '$(MSBuildThisFileDirectory)'))" />
+
+  <PropertyGroup>
+    <!-- Frameworks for DLLs and EXE -->
+    <!-- 8, 9, 10, 4.6.2 -->
+    <!-- We use .NET 4.6.2 here because it has all we need and is still supported.  -->
+    <PDFsharpTargetFrameworks_Library>net8.0;net9.0;net10.0;netstandard2.0</PDFsharpTargetFrameworks_Library>
+    <PDFsharpTargetFrameworks_NetOnly_Library>net8.0;net9.0;net10.0</PDFsharpTargetFrameworks_NetOnly_Library>
+    <PDFsharpTargetFrameworks_Exe>net8.0;net9.0;net10.0;net462</PDFsharpTargetFrameworks_Exe>
+    <PDFsharpTargetFrameworks_NetOnly_Exe>net8.0;net9.0;net10.0</PDFsharpTargetFrameworks_NetOnly_Exe>
+    <PDFsharpTargetFrameworks_Windows>net8.0-windows;net9.0-windows;net10.0-windows;net462</PDFsharpTargetFrameworks_Windows>
+    <PDFsharpTargetFrameworks_NetOnly_Windows>net8.0-windows;net9.0-windows;net10.0-windows</PDFsharpTargetFrameworks_NetOnly_Windows>
+
+    <!-- Frameworks for test projects and EXE -->
+    <!-- 8, 9, 10, 4.7.2 -->
+    <!-- We use .NET 4.7.2 here because XUnit.Runner requires this version.  -->
+    <PDFsharpTargetFrameworks_Tests_Exe>net8.0;net9.0;net10.0;net472</PDFsharpTargetFrameworks_Tests_Exe>
+    <PDFsharpTargetFrameworks_Tests_Windows>net8.0-windows;net9.0-windows;net10.0-windows;net472</PDFsharpTargetFrameworks_Tests_Windows>
+
+    <!-- Frameworks for NuGet -->
+    <PDFsharpTargetFrameworks_NuGet>net8.0;net9.0;net10.0;netstandard2.0</PDFsharpTargetFrameworks_NuGet>
+    <PDFsharpTargetFrameworks_NuGet_Window>net8.0-windows;net9.0-windows;net10.0-windows;net462</PDFsharpTargetFrameworks_NuGet_Window>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(PDFsharpBuildFewerFrameworks)'=='true'">
+    <DefineConstants>$(DefineConstants);FEWER_FRAMEWORKS</DefineConstants>
+
+    <!-- Not needed if targets are .NET 5 or newer only. -->
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+
+    <!-- NuGetNuspecTag allows to choose between different NuSpec files. Use ".Fewer" for small NuGet packages. -->
+    <NuGetNuspecTag Condition="'$(NuGetNuspecTag)' == ''">.Fewer</NuGetNuspecTag>
+
+    <!-- Frameworks for DLLs and EXE -->
+    <PDFsharpTargetFrameworks_Library>net10.0</PDFsharpTargetFrameworks_Library>
+    <PDFsharpTargetFrameworks_NetOnly_Library>net10.0</PDFsharpTargetFrameworks_NetOnly_Library>
+    <PDFsharpTargetFrameworks_Exe>net10.0</PDFsharpTargetFrameworks_Exe>
+    <PDFsharpTargetFrameworks_NetOnly_Exe>net10.0</PDFsharpTargetFrameworks_NetOnly_Exe>
+    <PDFsharpTargetFrameworks_Windows>net10.0-windows</PDFsharpTargetFrameworks_Windows>
+    <PDFsharpTargetFrameworks_NetOnly_Windows>net10.0-windows</PDFsharpTargetFrameworks_NetOnly_Windows>
+
+    <!-- Frameworks for test projects and EXE -->
+    <PDFsharpTargetFrameworks_Tests_Library>net10.0</PDFsharpTargetFrameworks_Tests_Library>
+    <PDFsharpTargetFrameworks_Tests_Exe>net10.0</PDFsharpTargetFrameworks_Tests_Exe>
+    <PDFsharpTargetFrameworks_Tests_Windows>net10.0-windows</PDFsharpTargetFrameworks_Tests_Windows>
+
+    <!-- Frameworks for NuGet -->
+    <PDFsharpTargetFrameworks_NuGet>net10.0</PDFsharpTargetFrameworks_NuGet>
+    <PDFsharpTargetFrameworks_NuGet_Window>net10.0-windows</PDFsharpTargetFrameworks_NuGet_Window>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(PDFsharpRunSlowTests)'=='true'">
+    <DefineConstants>$(DefineConstants);RUN_SLOW_TESTS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
+    <!-- Default values for assembly attributes and NuGet. -->
+    <Product>PDFsharp</Product>
+    <Company>empira Software</Company>
+    <Copyright>© 2026 empira Software GmbH</Copyright>
+    <CopyrightPdfSharp>© 2005-2026 empira Software GmbH</CopyrightPdfSharp>
+    <CopyrightMigraDoc>© 2001-2026 empira Software GmbH</CopyrightMigraDoc>
+    <!-- PDFsharp Team is a GitHub user. -->
+    <Authors>PDFsharp Team</Authors>
+    <Owners>empira Software GmbH</Owners>
+    <!-- Required assets version. Will be downloaded automatically on build if not already downloaded. -->
+    <RequiredAssetsVersion>1032</RequiredAssetsVersion>
+    <PDFsharpStronNamePublicKey>00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb</PDFsharpStronNamePublicKey>
+  </PropertyGroup>
+
+  <!-- Additional dynamic values for AssemblyXxxAttribute. -->
+  <!-- SemVersion.props is generated in each build of PdfSharp.GitVersion. -->
+  <!-- It may not exist in some situations, e.g. after git clone. -->
+  <Import Condition="Exists('SemVersion.props')" Project="SemVersion.props" />
+  <Import Condition="Exists('BuildConfig.props')" Project="BuildConfig.props" />
+
+  <PropertyGroup>
+    <!-- We no longer use GitVersion.MsBuild, so we have to update Version or PackageVersion to get the same value as before. -->
+    <!--<PackageVersion>$(SemVer)</PackageVersion>-->
+    <Version>$(SemVer)</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Why that? (I copied it from one of our BioNTech Directory.Build.props) TODO: investigate why it was required and if it still is. -->
     <UpdateAssemblyInfo>false</UpdateAssemblyInfo>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(NCrunch)' == '1'">
-    <DisableGitVersionTask>true</DisableGitVersionTask>
-  </PropertyGroup>
-
-  <ItemGroup>
-  <PackageReference Include="GitVersion.MsBuild">
-    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    <PrivateAssets>all</PrivateAssets>
-  </PackageReference>
-  </ItemGroup>
 </Project>

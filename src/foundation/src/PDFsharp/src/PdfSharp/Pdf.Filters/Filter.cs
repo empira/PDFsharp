@@ -78,7 +78,7 @@ namespace PdfSharp.Pdf.Filters
         }
 
         /// <summary>
-        /// Removes all white spaces from the data. The function assumes that the bytes are characters.
+        /// Removes all white-spaces from the data. The function assumes that the bytes are characters.
         /// </summary>
         protected byte[] RemoveWhiteSpace(byte[] data)
         {

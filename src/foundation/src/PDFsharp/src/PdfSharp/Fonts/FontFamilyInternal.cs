@@ -1,9 +1,11 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using PdfSharp.Drawing;
 using PdfSharp.Fonts.Internal;
+using PdfSharp.Internal.Threading;
+using PdfSharp.Internal.OpenType;
 using PdfSharp.Internal;
+
 #if GDI
 using GdiFontFamily = System.Drawing.FontFamily;
 #endif
@@ -20,7 +22,7 @@ namespace PdfSharp.Fonts
     /// Internal implementation class of XFontFamily.
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
-    public sealed class FontFamilyInternal
+    internal sealed class FontFamilyInternal
     {
         // Implementation Notes
         // FontFamilyInternal implements an XFontFamily.
@@ -33,7 +35,9 @@ namespace PdfSharp.Fonts
 
         FontFamilyInternal(string familyName, bool createPlatformObjects)
         {
-            _sourceName = _name = familyName;
+            _sourceName = familyName;
+            _otFontFamily = OpenTypeFontFamily.GetOrCreateFrom(familyName);
+            _name = _otFontFamily.FamilyName;
 #if GDI
             if (createPlatformObjects)
             {
@@ -69,6 +73,7 @@ namespace PdfSharp.Fonts
         {
             _sourceName = _name = gdiFontFamily.Name;
             _gdiFontFamily = gdiFontFamily;
+            _otFontFamily = OpenTypeFontFamily.GetOrCreateFrom(_name);
 #if WPF
             // Hybrid build only.
             _wpfFontFamily = new WpfFontFamily(gdiFontFamily.Name);
@@ -82,6 +87,8 @@ namespace PdfSharp.Fonts
             _sourceName = wpfFontFamily.Source;
             _name = wpfFontFamily.FamilyNames[FontHelper.XmlLanguageEnUs];
             _wpfFontFamily = wpfFontFamily;
+            _otFontFamily = OpenTypeFontFamily.GetOrCreateFrom(_name);
+
 #if GDI
             // Hybrid build only.
             _gdiFontFamily = new GdiFontFamily(_sourceName);
@@ -93,16 +100,17 @@ namespace PdfSharp.Fonts
         {
             try
             {
-                Locks.EnterFontFactory();
-                var family = FontFamilyCache.GetFamilyByName(familyName);
+                Locks.EnterFontManagement();
+                var fontFamilyCache = PsGlobals.Global.Fonts.FontFamilyCache;
+                var family = fontFamilyCache.GetFamilyByName(familyName);
                 if (family == null)
                 {
-                    family = new FontFamilyInternal(familyName, createPlatformObject);
-                    family = FontFamilyCache.CacheOrGetFontFamily(family);
+                    family = new(familyName, createPlatformObject);
+                    family = fontFamilyCache.CacheOrGetFontFamily(family);
                 }
                 return family;
             }
-            finally { Locks.ExitFontFactory(); }
+            finally { Locks.ExitFontManagement(); }
         }
 
 #if GDI
@@ -110,12 +118,13 @@ namespace PdfSharp.Fonts
         {
             try
             {
-                Locks.EnterFontFactory();
+                Locks.EnterFontManagement();
                 FontFamilyInternal fontFamily = new FontFamilyInternal(gdiFontFamily);
-                fontFamily = FontFamilyCache.CacheOrGetFontFamily(fontFamily);
+                var fontFamilyCache = PsGlobals.Global.Fonts.FontFamilyCache;
+                fontFamily = fontFamilyCache.CacheOrGetFontFamily(fontFamily);
                 return fontFamily;
             }
-            finally { Locks.ExitFontFactory(); }
+            finally { Locks.ExitFontManagement(); }
         }
 #endif
 
@@ -123,7 +132,8 @@ namespace PdfSharp.Fonts
         internal static FontFamilyInternal GetOrCreateFromWpf(WpfFontFamily wpfFontFamily)
         {
             FontFamilyInternal fontFamily = new FontFamilyInternal(wpfFontFamily);
-            fontFamily = FontFamilyCache.CacheOrGetFontFamily(fontFamily);
+            var fontFamilyCache = PsGlobals.Global.Fonts.FontFamilyCache;
+            fontFamily = fontFamilyCache.CacheOrGetFontFamily(fontFamily);
             return fontFamily;
         }
 #endif
@@ -132,16 +142,15 @@ namespace PdfSharp.Fonts
         /// Gets the family name this family was originally created with.
         /// </summary>
         public string SourceName => _sourceName;
-
         readonly string _sourceName;
 
         /// <summary>
         /// Gets the name that uniquely identifies this font family.
         /// </summary>
         public string Name => _name;
-
         readonly string _name;
 
+        readonly OpenTypeFontFamily _otFontFamily;
 #if GDI
         /// <summary>
         /// Gets the underlying GDI+ font family object.
@@ -166,6 +175,6 @@ namespace PdfSharp.Fonts
         /// Gets the DebuggerDisplayAttribute text.
         /// </summary>
         internal string DebuggerDisplay
-            => String.Format(CultureInfo.InvariantCulture, "FontFamily: '{0}'", Name);
+            => String.Format(CultureInfo.InvariantCulture, "FontFamily: '{0}'", _otFontFamily.FamilyName);
     }
 }

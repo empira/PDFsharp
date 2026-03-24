@@ -3,6 +3,8 @@
 
 using PdfSharp.Pdf.IO;
 
+// v7.0.0 TODO
+
 namespace PdfSharp.Pdf.Actions
 {
     /// <summary>
@@ -24,6 +26,16 @@ namespace PdfSharp.Pdf.Actions
         /// <param name="document">The document that owns this object.</param>
         public PdfRemoteGoToAction(PdfDocument document)
             : base(document)
+        {
+            Inititalize();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfRemoteGoToAction(PdfDictionary dict)
+            : base(dict)
         {
             Inititalize();
         }
@@ -90,7 +102,8 @@ namespace PdfSharp.Pdf.Actions
             /// <summary>
             /// (Required) The destination to jump to (see Section 8.5.3, “Action Types”).
             /// </summary>
-            [KeyInfo(KeyType.String | KeyType.Dictionary | KeyType.Required)]
+            //[KeyInfo(KeyType.String | KeyType.Dictionary | KeyType.Required)] // #US373 Cannot "|" types.
+            [KeyInfo(KeyType.StringOrDictionary | KeyType.Required)] // #US373 Cannot "|" types.
             //[KeyInfo(KeyType.FileSpecification | KeyType.Required)] // File Specifications are not yet implemented.
             public const string F = "/F";
 
@@ -100,7 +113,8 @@ namespace PdfSharp.Pdf.Actions
             /// its first element must be a page number within the remote document rather than an indirect reference to a page object
             /// in the current document. The first page is numbered 0.
             /// </summary>
-            [KeyInfo(KeyType.Name | KeyType.ByteString | KeyType.Array | KeyType.Required)]
+            //[KeyInfo(KeyType.Name | KeyType.ByteString | KeyType.Array | KeyType.Required)] // #US373 Cannot "|" types.
+            [KeyInfo(KeyType.NameOrByteStringOrArray | KeyType.Required)] // #US373 Cannot "|" types.
             public const string D = "/D";
 
             /// <summary>

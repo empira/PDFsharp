@@ -35,16 +35,8 @@ namespace Shared.TestApp
 
             ILogger logger = loggerFactory.CreateLogger<Program>();
 
-            //LogHost.Logger.LogError("Something went wrong.");
-            //LogHost.Logger.TestMessage(LogLevel.Critical, "blah");
-            //LogHost.Logger.TestMessage("di-blub");
             LogHost.Logger.TestMessage("------------------------------------------------------------------------------");
 
-
-
-            var tempFileName = PdfFileUtility.GetTempPdfFullFileName("tests");
-
-            //document.Save(tempFileName);
 
             // Call some developer specific test code from a file not in the repo.
             // Implement your code in ProgramEx.cs in partial class Program.
@@ -53,8 +45,6 @@ namespace Shared.TestApp
             {
                 test.Invoke(null, null);
             }
-
-            //PdfFileUtility.ShowDocumentIfDebugging(tempFileName);
         }
     }
 }

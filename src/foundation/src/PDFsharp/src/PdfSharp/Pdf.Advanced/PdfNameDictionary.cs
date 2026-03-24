@@ -1,10 +1,13 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Internal;
+using PdfSharp.Pdf.Attachments;
+
 namespace PdfSharp.Pdf.Advanced
 {
     /// <summary>
-    /// Represents the name dictionary.
+    /// Represents the name dictionary of the catalog.
     /// </summary>
     public sealed class PdfNameDictionary : PdfDictionary
     {
@@ -12,16 +15,25 @@ namespace PdfSharp.Pdf.Advanced
         /// Initializes a new instance of the <see cref="PdfNameDictionary"/> class.
         /// </summary>
         public PdfNameDictionary(PdfDocument document)
-            : base(document)
-        { }
+            : base(document, true)
+        {
+            // Is always an indirect object.
+            //document.Internals.AddObject(this);
+        }
 
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
         internal PdfNameDictionary(PdfDictionary dictionary)
             : base(dictionary)
         {
             var dests = Elements.GetDictionary(Keys.Dests);
             if (dests != null)
             {
-                _dests = new PdfNameTreeNode(dests);
+                if (dests is not PdfNameTreeNode dests2)
+                    dests2 = new PdfNameTreeNode(dests);
+                _dests = dests2;
             }
         }
 
@@ -59,31 +71,44 @@ namespace PdfSharp.Pdf.Advanced
             _dests.AddName(destinationName, destinationDict.Reference);
 #endif
         }
-
         PdfNameTreeNode? _dests;
 
-        internal void AddEmbeddedFile(string name, Stream stream)
+        //// TODO: Remove
+        //internal void AddEmbeddedFile(string name, Stream stream, out PdfFileSpecification fileSpecification, string? subType = null)
+        //{
+        //    var embeddedFiles = GetEmbeddedFiles();
+        //    if (embeddedFiles == null)
+        //    {
+        //        // Create a direct object.
+        //        embeddedFiles = new PdfEmbeddedFiles();
+        //        Elements.Add(Keys.EmbeddedFiles, embeddedFiles);
+        //    }
+
+        //    var embeddedFileStream = new PdfEmbeddedFileStream(Owner, stream, subType);
+        //    fileSpecification = new PdfFileSpecification(Owner, embeddedFileStream, name);
+        //    Owner.Internals.AddObject(fileSpecification);
+
+        //    embeddedFiles.AddName(name, fileSpecification.RequiredReference);
+        //}
+
+        internal bool HasEmbeddedFiles 
+            => Elements.TryGetValue(Keys.EmbeddedFiles, out _);
+
+        /// <summary>
+        /// Get or created... TODO
+        /// </summary>
+        [return: NotNullIfNotNull(nameof(create))]
+        internal PdfEmbeddedFiles? GetEmbeddedFiles(bool create = false)  // TODO: null or not null? => Use NotNullIfNotNullAttribute
         {
-            if (_embeddedFiles == null)
-            {
-                _embeddedFiles = new PdfNameTreeNode();
-                Owner.Internals.AddObject(_embeddedFiles);
-                Elements.SetReference(Keys.EmbeddedFiles, _embeddedFiles.Reference ?? throw TH.InvalidOperationException_ReferenceMustNotBeNull());
-            }
-
-            var embeddedFileStream = new PdfEmbeddedFileStream(Owner, stream);
-            var fileSpecification = new PdfFileSpecification(Owner, embeddedFileStream, name);
-            Owner.Internals.AddObject(fileSpecification);
-
-            _embeddedFiles.AddName(name, fileSpecification.ReferenceNotNull);
+            var ef = Elements.GetRequiredDictionary<PdfEmbeddedFiles>(Keys.EmbeddedFiles,
+                create ? VCF.Create : VCF.None);
+            return ef;
         }
-
-        PdfNameTreeNode? _embeddedFiles;
 
         /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
-        internal sealed class Keys : KeysBase
+        public sealed class Keys : KeysBase
         {
             // ReSharper disable InconsistentNaming
 
@@ -139,7 +164,7 @@ namespace PdfSharp.Pdf.Advanced
             /// (Optional; PDF 1.4) A name tree mapping name strings to file specifications for embedded file streams
             /// (see Section 3.10.3, “Embedded File Streams”).
             /// </summary>
-            [KeyInfo("1.4", KeyType.NameTree | KeyType.Optional)]
+            [KeyInfo("1.4", KeyType.NameTree | KeyType.Optional, typeof(PdfEmbeddedFiles))]
             public const string EmbeddedFiles = "/EmbeddedFiles";
 
             ///// <summary>
@@ -157,7 +182,19 @@ namespace PdfSharp.Pdf.Advanced
             //public const string Renditions = "/Renditions";
 
             // ReSharper restore InconsistentNaming
+
+            /// <summary>
+            /// Gets the KeysMeta for these keys.
+            /// </summary>
+            internal static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
+
+            static DictionaryMeta? _meta;
+
         }
 
+        /// <summary>
+        /// Gets the KeysMeta of this dictionary type.
+        /// </summary>
+        internal override DictionaryMeta Meta => Keys.Meta;
     }
 }

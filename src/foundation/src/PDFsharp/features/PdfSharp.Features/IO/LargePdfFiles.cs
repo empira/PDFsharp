@@ -15,7 +15,8 @@ using PdfSharp.Snippets;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
 
-#pragma warning disable 1591
+#pragma warning disable CS1591 // Internal class
+
 namespace PdfSharp.Features.IO
 {
     public class LargePdfFiles : Feature

@@ -17,6 +17,10 @@ namespace PdfSharp.Pdf
             : base(document)
         { }
 
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
         internal PdfCustomValues(PdfDictionary dict)
             : base(dict)
         { }
@@ -60,7 +64,7 @@ namespace PdfSharp.Pdf
                 else
                 {
                     Owner.Internals.AddObject(value);
-                    Elements.SetReference(key, value);
+                    Elements.SetObject(key, value);
                 }
             }
 #if old
@@ -108,13 +112,13 @@ namespace PdfSharp.Pdf
 
         internal static PdfCustomValues Get(DictionaryElements elem)
         {
-            string key = elem.Owner.Owner.Internals.CustomValueKey;
+            string key = elem.OwningContainer.Owner.Internals.CustomValueKey;
             PdfCustomValues? customValues;
             var dict = elem.GetDictionary(key);
             if (dict == null)
             {
                 customValues = new PdfCustomValues();
-                elem.Owner.Owner.Internals.AddObject(customValues);
+                elem.OwningContainer.Owner.Internals.AddObject(customValues);
                 elem.Add(key, customValues);
             }
             else
@@ -128,7 +132,7 @@ namespace PdfSharp.Pdf
 
         internal static void Remove(DictionaryElements elem)
         {
-            elem.Remove(elem.Owner.Owner.Internals.CustomValueKey);
+            elem.Remove(elem.OwningContainer.Owner.Internals.CustomValueKey);
         }
     }
 }

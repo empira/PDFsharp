@@ -24,15 +24,15 @@ namespace Shared.Tests.Quality
         [Fact]
         public void NormalizeDirectorySeparators_Test()
         {
-            string? path1 = null;
+            string path1 = null!;
             IOUtility.NormalizeDirectorySeparators(ref path1);
             path1.Should().BeNull();
 
-            string? path2 = "";
+            string path2 = "";
             IOUtility.NormalizeDirectorySeparators(ref path2);
             path2.Should().Be("");
 
-            string? path3 = @"Foo\bar\";
+            string path3 = @"Foo\bar\";
             IOUtility.NormalizeDirectorySeparators(ref path3);
             path3.Should().Be("Foo/bar/");
         }
@@ -48,29 +48,50 @@ namespace Shared.Tests.Quality
         }
 
         [Fact]
+        public void GetPathOfFileAbove_Test()
+        {
+            var result = IOUtility.GetPathOfFileAbove("SemVersion.props");
+            result.Should().NotBeNull();
+
+            var files = Directory.GetFiles(result!, "Directory.Build.targets"); // Case-sensitive under Linux.
+            files.Length.Should().Be(1);
+        }
+
+        [Fact]
+        public void GetPathOfDirectoryAbove_Test()
+        {
+            var result = IOUtility.GetPathOfDirectoryAbove("dev");
+            result.Should().NotBeNull();
+            //Debug.Assert(result != null);
+            result = Directory.GetParent(result!)?.FullName ?? "";
+            var files = Directory.GetFiles(result!, "PDFsharp.sln"); // Case-sensitive under Linux.
+            files.Length.Should().Be(1);
+        }
+
+        [Fact]
         public void GetAssetsPath_Test()
         {
             // The solution may not be in directory PDFsharp.
             var solutionRoot = IOUtility.GetSolutionRoot();
             if (IOUtility.IsDirectorySeparator(solutionRoot![solutionRoot.Length - 1]))
-                solutionRoot = solutionRoot.Substring(0, solutionRoot.Length - 1);
+                solutionRoot = solutionRoot[..^1];
             var solutionPath = Path.GetFileName(solutionRoot);
 
-            var path1 = IOUtility.GetAssetsPath();
+            var path1 = IOUtility.GetAssetsPath() ?? null!;
             path1.Should().NotBeNull();
-            IOUtility.NormalizeDirectorySeparators(ref path1);
+            IOUtility.NormalizeDirectorySeparators(ref path1!);
             path1.Should().EndWith($"{solutionPath}/assets/");
 
             // Get path to directory.
-            var path2 = IOUtility.GetAssetsPath("pdfsharp/");
+            var path2 = IOUtility.GetAssetsPath("pdfsharp/") ?? null!;
             path2.Should().NotBeNull();
-            IOUtility.NormalizeDirectorySeparators(ref path2);
+            IOUtility.NormalizeDirectorySeparators(ref path2!);
             path2.Should().EndWith($"{solutionPath}/assets/pdfsharp/");
 
             // Get path to file.
-            var path3 = IOUtility.GetAssetsPath("pdfsharp/LICENSE");
+            var path3 = IOUtility.GetAssetsPath("pdfsharp/LICENSE") ?? null!;
             path3.Should().NotBeNull();
-            IOUtility.NormalizeDirectorySeparators(ref path3);
+            IOUtility.NormalizeDirectorySeparators(ref path3!);
             path3.Should().EndWith($"{solutionPath}/assets/pdfsharp/LICENSE");
         }
 
@@ -145,7 +166,7 @@ namespace Shared.Tests.Quality
             var assetsPath2 = Path.Combine(root, "assets_");
             Directory.Move(assetsPath, assetsPath2);
             var action = IOHelper.EnsureAssetsAreDownloaded;
-            action.Should().Throw<IOException>();
+            action.Should().Throw<InvalidOperationException>();
             Directory.Move(assetsPath2, assetsPath);
 #endif
         }
@@ -160,7 +181,7 @@ namespace Shared.Tests.Quality
             action1.Should().NotThrow("Version 1 should always exist.");
 
             var action2 = () => IOUtility.EnsureAssetsVersion(Int32.MaxValue);
-            action2.Should().Throw<IOException>();
+            action2.Should().Throw<InvalidOperationException>();
         }
     }
 }

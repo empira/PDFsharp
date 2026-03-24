@@ -46,7 +46,7 @@ namespace MigraDoc.Rendering
 
         FormattedTextArea? GetFormattedTextArea(TextArea? area)
         {
-            return GetFormattedTextArea(area, Double.NaN);
+            return GetFormattedTextArea(area, FLOAT_.NaN);
         }
 
         void GetLeftRightVerticalPosition(out XUnitPt top, out XUnitPt bottom)
@@ -185,10 +185,10 @@ namespace MigraDoc.Rendering
             var formatInfo = (ChartFormatInfo)_renderInfo.FormatInfo;
 
             var textArea = _chart.Values.HeaderArea;
-            formatInfo.FormattedHeader = GetFormattedTextArea(textArea, _chart.Width.Point);
+            formatInfo.FormattedHeader = GetFormattedTextArea(textArea, (float)_chart.Width.Point);
 
             textArea = _chart.Values.FooterArea;
-            formatInfo.FormattedFooter = GetFormattedTextArea(textArea, _chart.Width.Point);
+            formatInfo.FormattedFooter = GetFormattedTextArea(textArea, (float)_chart.Width.Point);
 
             textArea = _chart.Values.LeftArea;
             formatInfo.FormattedLeft = GetFormattedTextArea(textArea);
@@ -232,7 +232,7 @@ namespace MigraDoc.Rendering
         XUnitPt GetTopBottomWidth()
         {
             ChartFormatInfo formatInfo = (ChartFormatInfo)_renderInfo.FormatInfo;
-            XUnitPt width = _chart.Width.Point;
+            XUnitPt width = (float)_chart.Width.Point;
             if (formatInfo.FormattedRight != null)
                 width -= formatInfo.FormattedRight.InnerWidth;
             if (formatInfo.FormattedLeft != null)
@@ -270,13 +270,13 @@ namespace MigraDoc.Rendering
             fillFormatRenderer.Render(rect.X, rect.Y, rect.Width, rect.Height);
 
             XUnitPt top = rect.Y;
-            top += textArea.TopPadding.Point;
+            top += (float)textArea.TopPadding.Point;
             XUnitPt bottom = rect.Y + rect.Height;
-            bottom -= textArea.BottomPadding.Point;
+            bottom -= (float)textArea.BottomPadding.Point;
             top = AlignVertically(textArea.VerticalAlignment, top, bottom, area.ContentHeight);
 
             XUnitPt left = rect.X;
-            left += textArea.LeftPadding.Point;
+            left += (float)textArea.LeftPadding.Point;
 
             RenderInfo[] renderInfos = area.GetRenderInfos();
             RenderByInfos(left, top, renderInfos);
@@ -321,16 +321,16 @@ namespace MigraDoc.Rendering
             var chartFrame = ((ChartFormatInfo)_renderInfo.FormatInfo).ChartFrame ?? NRT.ThrowOnNull<ChartFrame>("BUG_OLD");
 
             XUnitPt top = rect.Y;
-            top += area.TopPadding.Point;
+            top += (float)area.TopPadding.Point;
 
             XUnitPt bottom = rect.Y + rect.Height;
-            bottom -= area.BottomPadding.Point;
+            bottom -= (float)area.BottomPadding.Point;
 
             XUnitPt left = rect.X;
-            left += area.LeftPadding.Point;
+            left += (float)area.LeftPadding.Point;
 
             XUnitPt right = rect.X + rect.Width;
-            right -= area.RightPadding.Point;
+            right -= (float)area.RightPadding.Point;
 
             chartFrame.Location = new XPoint(left, top);
             chartFrame.Size = new XSize(right - left, bottom - top);

@@ -5,6 +5,8 @@ using PdfSharp.Drawing;
 using PdfSharp.Drawing.Layout;
 using PdfSharp.Pdf.Annotations;
 
+// v7.0.0 TODO review
+
 namespace PdfSharp.Pdf.Signatures
 {
     /// <summary>
@@ -21,7 +23,7 @@ namespace PdfSharp.Pdf.Signatures
 
         public void DrawAppearance(XGraphics gfx, XRect rect)
         {
-            var defaultText = $"Signed by: {Signer}\nLocation: {Location}\nReason: {Reason}\nDate: {DateTime.Now}";
+            var defaultText = $"Signed by: {Signer}\nLocation: {Location}\nReason: {Reason}\nDate: {DateTimeOffset.Now}";
 
             // You should write your own implementation of IAnnotationAppearanceHandler and ensure that the used font is available.
             var font = new XFont("Verdana", 7, XFontStyleEx.Regular);
@@ -34,8 +36,8 @@ namespace PdfSharp.Pdf.Signatures
 
             // Leave 5% space on each side.
             txtFormat.DrawString(defaultText, font,
-                new XSolidBrush(XColor.FromKnownColor(XKnownColor.Black)),
-                new XRect(currentPosition.X + width * .05, currentPosition.Y + height * .05, 
+                XBrushes.Black,
+                new XRect(currentPosition.X + width * .05, currentPosition.Y + height * .05,
                     width * .9, height * .9),
                 XStringFormats.TopLeft);
         }

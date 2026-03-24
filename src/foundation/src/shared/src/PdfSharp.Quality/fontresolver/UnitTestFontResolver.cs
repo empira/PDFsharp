@@ -1,7 +1,9 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+#if WPF
 using System.IO;
+#endif
 using PdfSharp.Fonts;
 
 namespace PdfSharp.Quality
@@ -9,6 +11,8 @@ namespace PdfSharp.Quality
     /// <summary>
     /// The font resolver that provides fonts needed by the unit tests on any platform.
     /// The typeface names are case-sensitive by design.
+    /// The font files are expected in the assets folder to ensure consistent test result
+    /// not only under Windows.
     /// </summary>
     public class UnitTestFontResolver : IFontResolver
     {
@@ -76,7 +80,7 @@ namespace PdfSharp.Quality
         const string VerdanaBI = "verdanaz";
 
         /// <summary>
-        /// Creates a new instance of UnitTestFontResolver.
+        /// Initializes a new instance of the <see cref="UnitTestFontResolver"/> class.
         /// </summary>
         public UnitTestFontResolver()
         {

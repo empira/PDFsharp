@@ -8,7 +8,8 @@ using PdfSharp.Pdf;
 using PdfSharp.Quality;
 using PdfSharp.UniversalAccessibility;
 
-#pragma warning disable 1591
+#pragma warning disable CS1591 // Internal class
+
 namespace PdfSharp.Features.Pdf
 {
     public class PdfA
@@ -68,11 +69,11 @@ namespace PdfSharp.Features.Pdf
             }
             sb.End();
             
-            // Save the document...
+            // Save the document…
             var fullName = PdfFileUtility.GetTempPdfFullFileName("Features/Pdf-A/Test1" + Capabilities.Build.BuildTag);
             document.Save(fullName);
 
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocument(fullName);
         }
     }

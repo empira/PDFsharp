@@ -2,27 +2,34 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Collections;
+using PdfSharp.Internal;
 using PdfSharp.Events;
 using PdfSharp.Logging;
-using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Annotations;
+using PdfSharp.Pdf.IO;
+
+// v7.0.0 TODO review, delete test code.
 
 namespace PdfSharp.Pdf
 {
     /// <summary>
-    /// Represents the pages of the document.
+    /// Represents the root of the page tree of the document.
     /// </summary>
-    [DebuggerDisplay("(PageCount={" + nameof(Count) + "})")]
-    public sealed class PdfPages : PdfDictionary, IEnumerable<PdfPage>
+    //[DebuggerDisplay("(PageCount={" + nameof(Count) + "})")]
+    public sealed class PdfPages : PdfPageTreeNode, IEnumerable<PdfPage>
     {
+        // Reference 2.0: 7.7.3.2  Page tree nodes / Page 102
+        // PdfPages is the root of the page tree.
+
         internal PdfPages(PdfDocument document)
             : base(document)
-        {
-            Elements.SetName(Keys.Type, "/Pages");
-            Elements[Keys.Count] = new PdfInteger(0);
-        }
+        { }
 
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
         internal PdfPages(PdfDictionary dictionary)
             : base(dictionary)
         { }
@@ -31,11 +38,24 @@ namespace PdfSharp.Pdf
         /// Gets the number of pages.
         /// </summary>
         //public int Count => PagesArray.Elements.Count; // This can be wrong in Import mode.
-        //public int Count => _document.PageCount; // Slower, but also works in Import mode.
-        public int Count =>
-            _document.CanModify ?
-                PagesArray.Elements.Count : // Only valid in Modify mode.
-                _document.PageCount; // Valid in Import mode.
+        //public int Count => Document.PageCount; // Slower, but also works in Import mode.
+        public new int Count // TODO Remove and use Count from base class.
+        {
+            get
+            {
+                // TODO Delete test code.
+                //var count1 = Document.CanModify
+                //    ? PagesArray.Elements.Count // Only valid in Modify mode.
+                //    : Document.PageCount; // Valid in Import mode.
+
+                var count2 = base.Count;
+
+
+                var result = PagesArray.Elements.Count;
+                Debug.Assert(count2 == result);
+                return result;
+            }
+        }
 
         /// <summary>
         /// Gets the page with the specified index.
@@ -47,10 +67,12 @@ namespace PdfSharp.Pdf
                 if (index < 0 || index >= Count)
                     throw new ArgumentOutOfRangeException(nameof(index), index, PsMsgs.PageIndexOutOfRange);
 
-                var dict = (PdfDictionary)((PdfReference)PagesArray.Elements[index]).Value;
-                if (dict is not PdfPage)
-                    dict = new PdfPage(dict);
-                return (PdfPage)dict;
+                // Is document modifiable and page tree flattened?
+                if (_flattenedPages == null)
+                    return PagesArray.Elements.GetRequiredDictionary<PdfPage>(index);
+
+                Debug.Assert(!Document.CanModify);
+                return _flattenedPages.Elements.GetRequiredDictionary<PdfPage>(index);
             }
         }
 
@@ -89,9 +111,7 @@ namespace PdfSharp.Pdf
         /// The value returned is a new object if the added page comes from a foreign document.
         /// </summary>
         public PdfPage Add(PdfPage page)
-        {
-            return Insert(Count, page);
-        }
+            => Insert(Count, page);
 
         /// <summary>
         /// Creates a new PdfPage, inserts it at the specified position into this document, and returns it.
@@ -116,6 +136,7 @@ namespace PdfSharp.Pdf
             if (page.Owner == Owner)
             {
                 // Case: Page is first removed and then inserted again, maybe at another position.
+
                 int count = Count;
                 // Check if page is not already part of the document.
                 for (int idx = 0; idx < count; idx++)
@@ -124,22 +145,23 @@ namespace PdfSharp.Pdf
                         throw new InvalidOperationException(PsMsgs.MultiplePageInsert);
                 }
 
-                // Because the owner of the inserted page is this document we assume that the page was former part of it,
-                // and is therefore well-defined.
+                // Because the owner of the inserted page is this document we assume that the page was
+                // former already a part of it, and is therefore well-defined.
                 Owner.IrefTable.Add(page);
                 Debug.Assert(page.Owner == Owner);
 
                 // Insert page in array.
-                PagesArray.Elements.Insert(index, page.ReferenceNotNull); // Page is always indirect.
+                //PagesArray.Elements.Insert(index, page.RequiredReference); // Page is always indirect.
+                PagesArray.Elements.Insert(index, page);
 
                 // Update page count.
                 Elements.SetInteger(Keys.Count, PagesArray.Elements.Count);
 
                 // #PDF-UA: Pages must not be moved.
-                if (_document._uaManager != null)
-                    _document.Events.OnPageAdded(_document, new PageEventArgs(_document) { Page = page, PageIndex = index, EventType = PageEventType.Moved });
+                if (Document.UAManager != null)
+                    Document.Events.OnPageAdded(Document, new PageEventArgs(Document) { Page = page, PageIndex = index, EventType = PageEventType.Moved });
 
-                PdfSharpLogHost.Logger.ExistingPdfPageAdded(_document?.Name);
+                PdfSharpLogHost.Logger.ExistingPdfPageAdded(Document?.Name);
 
                 return page;
             }
@@ -152,34 +174,34 @@ namespace PdfSharp.Pdf
 
                 Owner.IrefTable.Add(page);
                 Debug.Assert(page.Owner == Owner);
-                PagesArray.Elements.Insert(index, page.ReferenceNotNull);
+                PagesArray.Elements.Insert(index, page.RequiredReference);
                 Elements.SetInteger(Keys.Count, PagesArray.Elements.Count);
 
                 // #PDF-UA: Page was created.
-                if (_document._uaManager != null)
-                    _document.Events.OnPageAdded(_document, new PageEventArgs(_document) { Page = page, PageIndex = index, EventType = PageEventType.Created });
+                if (Document.UAManager != null)
+                    Document.Events.OnPageAdded(Document, new PageEventArgs(Document) { Page = page, PageIndex = index, EventType = PageEventType.Created });
             }
             else
             {
                 // Case: Page is from an external document -> import it.
                 PdfPage importPage = page;
                 page = ImportExternalPage(importPage);
-                Owner.IrefTable.Add(page);
+                //Owner.IrefTable.Add(page); // DELETE Pages are now always indirect
 
                 // Add page substitute to importedObjectTable.
                 PdfImportedObjectTable importedObjectTable = Owner.FormTable.GetImportedObjectTable(importPage);
-                importedObjectTable.Add(importPage.ObjectID, page.ReferenceNotNull);
+                importedObjectTable.Add(importPage.ObjectID, page.RequiredReference);
 
-                PagesArray.Elements.Insert(index, page.ReferenceNotNull);
+                PagesArray.Elements.Insert(index, page.RequiredReference);
                 Elements.SetInteger(Keys.Count, PagesArray.Elements.Count);
                 PdfAnnotations.FixImportedAnnotation(page);
 
                 // #PDF-UA: Page was imported.
-                if (_document._uaManager != null)
-                    _document.Events.OnPageAdded(_document, new PageEventArgs(_document) { Page = page, PageIndex = index, EventType = PageEventType.Imported });
+                if (Document.UAManager != null)
+                    Document.Events.OnPageAdded(Document, new PageEventArgs(Document) { Page = page, PageIndex = index, EventType = PageEventType.Imported });
             }
 
-            PdfSharpLogHost.Logger.NewPdfPageCreated(_document?.Name);
+            PdfSharpLogHost.Logger.NewPdfPageCreated(Document?.Name);
 
             if (Owner.Settings.TrimMargins.AreSet)
                 page.TrimMargins = Owner.Settings.TrimMargins;
@@ -211,26 +233,24 @@ namespace PdfSharp.Pdf
             if (pageCount > importDocumentPageCount)
                 throw new ArgumentOutOfRangeException(nameof(pageCount), "Argument 'pageCount' out of range.");
 
-            PdfPage[] insertPages = new PdfPage[pageCount];
-            PdfPage[] importPages = new PdfPage[pageCount];
+            var insertPages = new PdfPage[pageCount];
+            var importPages = new PdfPage[pageCount];
 
             // 1st create all new pages.
             for (int idx = 0, insertIndex = index, importIndex = startIndex;
                 importIndex < startIndex + pageCount;
                 idx++, insertIndex++, importIndex++)
             {
-                PdfPage importPage = document.Pages[importIndex];
-                PdfPage page = ImportExternalPage(importPage);
+                var importPage = document.Pages[importIndex];
+                var page = ImportExternalPage(importPage);
                 insertPages[idx] = page;
                 importPages[idx] = importPage;
 
-                Owner.IrefTable.Add(page);
-
                 // Add page substitute to importedObjectTable.
-                PdfImportedObjectTable importedObjectTable = Owner.FormTable.GetImportedObjectTable(importPage);
-                importedObjectTable.Add(importPage.ObjectID, page.ReferenceNotNull);
+                var importedObjectTable = Owner.FormTable.GetImportedObjectTable(importPage);
+                importedObjectTable.Add(importPage.ObjectID, page.RequiredReference);
 
-                PagesArray.Elements.Insert(insertIndex, page.ReferenceNotNull);
+                PagesArray.Elements.Insert(insertIndex, page/*.RequiredReference*/);
 
                 if (Owner.Settings.TrimMargins.AreSet)
                     page.TrimMargins = Owner.Settings.TrimMargins;
@@ -242,14 +262,14 @@ namespace PdfSharp.Pdf
                 importIndex < startIndex + pageCount;
                 idx++, importIndex++)
             {
-                PdfPage importPage = document.Pages[importIndex];
-                PdfPage page = insertPages[idx];
+                var importPage = document.Pages[importIndex];
+                var page = insertPages[idx];
 
                 // Get annotations.
-                PdfArray? annots = importPage.Elements.GetArray(PdfPage.Keys.Annots);
+                var annots = importPage.Elements.GetArray(PdfPage.Keys.Annots);
                 if (annots != null)
                 {
-                    PdfAnnotations annotations = new PdfAnnotations(Owner);
+                    var annotations = page.Annotations;
 
                     // Loop through annotations.
                     int count = annots.Elements.Count;
@@ -262,7 +282,7 @@ namespace PdfSharp.Pdf
                             if (subtype == "/Link")
                             {
                                 bool addAnnotation = false;
-                                PdfLinkAnnotation newAnnotation = new PdfLinkAnnotation(Owner);
+                                var newAnnotation = new PdfLinkAnnotation(Owner);
 
                                 PdfName[] importAnnotationKeyNames = annot.Elements.KeyNames;
                                 foreach (var pdfItem in importAnnotationKeyNames)
@@ -270,33 +290,33 @@ namespace PdfSharp.Pdf
                                     PdfItem? impItem;
                                     switch (pdfItem.Value)
                                     {
-                                        case "/BS":
-                                            newAnnotation.Elements.Add("/BS", new PdfLiteral("<</W 0>>"));
+                                        case PdfLinkAnnotation.Keys.BS:
+                                            newAnnotation.Elements.Add(PdfLinkAnnotation.Keys.BS, new PdfLiteral("<</W 0>>"));
                                             break;
 
-                                        case "/F":  // /F 4
-                                            impItem = annot.Elements.GetValue("/F");
+                                        case PdfAnnotation.Keys.F:  // /F 4
+                                            impItem = annot.Elements.GetValue(PdfAnnotation.Keys.F);
                                             Debug.Assert(impItem is PdfInteger);
-                                            newAnnotation.Elements.Add("/F", impItem.Clone());
+                                            newAnnotation.Elements.Add(PdfAnnotation.Keys.F, impItem.Clone());
                                             break;
 
-                                        case "/Rect":  // /Rect [68.6 681.08 145.71 702.53]
-                                            impItem = annot.Elements.GetValue("/Rect");
-                                            Debug.Assert(impItem is PdfArray);
-                                            newAnnotation.Elements.Add("/Rect", impItem.Clone());
+                                        case PdfAnnotation.Keys.Rect:  // /Rect [68.6 681.08 145.71 702.53]
+                                            impItem = annot.Elements.GetValue(PdfAnnotation.Keys.Rect);
+                                            Debug.Assert(impItem is PdfRectangle);
+                                            newAnnotation.Elements.Add(PdfAnnotation.Keys.Rect, impItem.Clone());
                                             break;
 
-                                        case "/StructParent":  // /StructParent 3
-                                            impItem = annot.Elements.GetValue("/StructParent");
+                                        case PdfAnnotation.Keys.StructParent:  // /StructParent 3
+                                            impItem = annot.Elements.GetValue(PdfAnnotation.Keys.StructParent);
                                             Debug.Assert(impItem is PdfInteger);
-                                            newAnnotation.Elements.Add("/StructParent", impItem.Clone());
+                                            newAnnotation.Elements.Add(PdfAnnotation.Keys.StructParent, impItem.Clone());
                                             break;
 
-                                        case "/Subtype":  // Already set.
+                                        case PdfAnnotation.Keys.Subtype:  // Already set.
                                             break;
 
-                                        case "/Dest":  // /Dest [30 0 R /XYZ 68 771 0]
-                                            impItem = annot.Elements.GetValue("/Dest");
+                                        case PdfLinkAnnotation.Keys.Dest:  // /Dest [30 0 R /XYZ 68 771 0]
+                                            impItem = annot.Elements.GetValue(PdfLinkAnnotation.Keys.Dest);
                                             impItem = impItem!.Clone(); // NRT
 
                                             // Is value an array with 5 elements where the first one is an iref?
@@ -353,8 +373,8 @@ namespace PdfSharp.Pdf
             }
 
             // #PDF-UA: Pages were imported.
-            if (_document._uaManager != null)
-                _document.Events.OnPageAdded(_document, new PageEventArgs(_document) { EventType = PageEventType.Imported });
+            if (Document.UAManager != null)
+                Document.Events.OnPageAdded(Document, new PageEventArgs(Document) { EventType = PageEventType.Imported });
         }
 
         /// <summary>
@@ -389,12 +409,12 @@ namespace PdfSharp.Pdf
         /// </summary>
         public void Remove(PdfPage page)
         {
-            PagesArray.Elements.Remove(page.ReferenceNotNull);
+            PagesArray.Elements.Remove(page/*.RequiredReference*/);
             Elements.SetInteger(Keys.Count, PagesArray.Elements.Count);
 
             // #PDF-UA: Page was removed.
-            if (_document._uaManager != null)
-                _document.Events.OnPageRemoved(_document, new PageEventArgs(_document) { Page = page, PageIndex = -1, EventType = PageEventType.Removed });
+            if (Document.UAManager != null)
+                Document.Events.OnPageRemoved(Document, new PageEventArgs(Document) { Page = page, PageIndex = -1, EventType = PageEventType.Removed });
         }
 
         /// <summary>
@@ -407,8 +427,8 @@ namespace PdfSharp.Pdf
             Elements.SetInteger(Keys.Count, PagesArray.Elements.Count);
 
             // #PDF-UA
-            if (_document._uaManager != null && page != null)
-                _document.Events.OnPageRemoved(_document, new PageEventArgs(_document) { Page = page, PageIndex = index });
+            if (Document.UAManager != null && page != null)
+                Document.Events.OnPageRemoved(Document, new PageEventArgs(Document) { Page = page, PageIndex = index });
         }
 
         /// <summary>
@@ -419,7 +439,7 @@ namespace PdfSharp.Pdf
         public void MovePage(int oldIndex, int newIndex)
         {
             // #PDF-UA: Not implemented.
-            if (_document._uaManager != null)
+            if (Document.UAManager != null)
                 throw new InvalidOperationException("Cannot move a page in a PDF/UA document.");
 
             if (oldIndex < 0 || oldIndex >= Count)
@@ -443,10 +463,10 @@ namespace PdfSharp.Pdf
         /// </summary>
         PdfPage ImportExternalPage(PdfPage importPage)
         {
-            if (importPage.Owner._openMode != PdfDocumentOpenMode.Import)
+            if (importPage.Owner.OpenMode != PdfDocumentOpenMode.Import)
                 throw new InvalidOperationException("A PDF document must be opened with PdfDocumentOpenMode.Import to import pages from it.");
 
-            var page = new PdfPage(_document);
+            var page = new PdfPage(Document);
 
             // ReSharper disable AccessToStaticMemberViaDerivedType for a better code readability.
             CloneElement(page, importPage, PdfPage.Keys.Resources, false);
@@ -457,13 +477,10 @@ namespace PdfSharp.Pdf
             CloneElement(page, importPage, PdfPage.Keys.BleedBox, true);
             CloneElement(page, importPage, PdfPage.Keys.TrimBox, true);
             CloneElement(page, importPage, PdfPage.Keys.ArtBox, true);
-#if true
+
             // Do not deep copy annotations.
             CloneElement(page, importPage, PdfPage.Keys.Annots, false);
-#else
-            // Deep copy annotations.
-            CloneElement(page, importPage, PdfPage.Keys.Annots, true);
-#endif
+
             page.Initialize(true);
 
             // ReSharper restore AccessToStaticMemberViaDerivedType
@@ -476,26 +493,31 @@ namespace PdfSharp.Pdf
         void CloneElement(PdfPage page, PdfPage importPage, string key, bool deepCopy)
         {
             Debug.Assert(page != null);
-            Debug.Assert(page.Owner == _document);
+            Debug.Assert(page.Owner == Document);
             Debug.Assert(importPage.Owner != null);
-            Debug.Assert(importPage.Owner != _document);
+            Debug.Assert(importPage.Owner != Document);
 
-            PdfItem? item = importPage.Elements[key];
+            //PdfItem? item = importPage.Elements[key];
+            PdfItem? item = importPage.Elements.GetValue(key); // #US373
             if (item != null)
             {
                 PdfImportedObjectTable? importedObjectTable = null;
                 if (!deepCopy)
                     importedObjectTable = Owner.FormTable.GetImportedObjectTable(importPage);
 
-                // The item can be indirect. If so, replace it by its value.
-                if (item is PdfReference reference)
-                    item = reference.Value;
+                // TODO #US373 begin
+                //// The item can be indirect. If so, replace it by its value.
+                ////if (item is PdfReference reference)
+                ////    item = reference.Value;
+                //PdfReference.Dereference(ref item);
+                // TODO #US373 end
+
                 if (item is PdfObject root)
                 {
                     if (deepCopy)
                     {
                         Debug.Assert(root.Owner != null, "See 'else' case for details");
-                        root = DeepCopyClosure(_document, root);
+                        root = DeepCopyClosure(Document, root);
                     }
                     else
                     {
@@ -518,7 +540,7 @@ namespace PdfSharp.Pdf
             }
         }
 
-        static PdfReference? RemapReference(PdfPage[] newPages, PdfPage[] impPages, PdfReference iref)
+        static PdfReference? RemapReference(PdfPage[] newPages, PdfPage[] impPages, PdfReference iref)  // TODO review
         {
             // Directs the iref to a one of the imported pages?
             for (int idx = 0; idx < newPages.Length; idx++)
@@ -532,9 +554,17 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Gets a PdfArray containing all pages of this document. The array must not be modified.
         /// </summary>
-        public PdfArray PagesArray
-            => _pagesArray ??= (PdfArray?)Elements.GetValue(Keys.Kids, VCF.Create) ?? NRT.ThrowOnNull<PdfArray>();
-        PdfArray? _pagesArray;
+        //public PdfArray PagesArray
+        public PdfPageTreeNodes PagesArray
+        {
+            get
+            {
+                //return _pagesArray ??= (PdfArray?)Elements.GetValue(Keys.Kids, VCF.Create) ?? NRT.ThrowOnNull<PdfArray>();
+                return _pageTreeNodes ??= _flattenedPages ?? Elements.GetRequiredArray<PdfPageTreeNodes>(Keys.Kids, VCF.Create);
+            }
+        }
+        //PdfArray? _pagesArray;
+        PdfPageTreeNodes? _pageTreeNodes;
 
         /// <summary>
         /// Replaces the page tree by a flat array of indirect references to the pages objects.
@@ -542,95 +572,239 @@ namespace PdfSharp.Pdf
         internal void FlattenPageTree()
         {
             // Acrobat creates a balanced tree if the number of pages is roughly more than ten. This is
-            // not difficult but obviously also not necessary. I created a document with 50000 pages with
+            // not difficult but obviously also not necessary. I created a document with 50,000 pages with
             // PDF4NET and Acrobat opened it in less than 2 seconds.
 
-            //PdfReference xrefRoot = Document.Catalog.Elements[PdfCatalog.Keys.Pages] as PdfReference;
-            //PdfDictionary[] pages = GetKids(xrefRoot, null);
+            // Promote inheritable values down the page tree to each single page.
+            var inheritedValues = new PdfPageTreeNode.InheritedValues();
+            // Get the root inheritable values.
+            GetInheritableValues(ref inheritedValues);
 
-            // Promote inheritable values down the page tree
-            PdfPage.InheritedValues values = new PdfPage.InheritedValues();
-            PdfPage.InheritValues(this, ref values);
-            PdfDictionary[] pages = GetKids(ReferenceNotNull, values, null);
+            // Flat list of pages.
+            // Used to replace the page tree (if one exists).
+            List<PdfPage> pages = [];
 
-            // Replace /Pages in catalog by this object.
-            // xrefRoot.Value = this;
+            // Iterate the page tree in pre-order.
+            TraversePageTree(pages, this, inheritedValues);
 
-            var array = new PdfArray(Owner);
+            // Put a flat list to the root node.
+            var array = Elements.GetRequiredArray(Keys.Kids);
+            array.Elements.Clear();
             foreach (var page in pages)
             {
                 // Fix the parent.
-                page.Elements[PdfPage.Keys.Parent] = Reference;
-                array.Elements.Add(page.ReferenceNotNull);
+                page.Elements[PdfPage.Keys.Parent] = this;
+                array.Elements.Add(page);
             }
 
-            Elements.SetName(Keys.Type, "/Pages");
-#if true
+            Debug.Assert(Elements.GetName(Keys.Type) == "/Pages");
+            Elements.SetName(Keys.Type, "/Pages");  // TODO DELETE
+
             // Direct array.
-            Elements.SetValue(Keys.Kids, array);
-#else
-            // Indirect array.
-            Document.xrefTable.Add(array);
-            Elements.SetValue(Keys.Kids, array.XRef);
-#endif
+            Debug.Assert(ReferenceEquals(Elements.GetRequiredObject(Keys.Kids).Reference, array.Reference));
+            Elements.SetValue(Keys.Kids, array);  // TODO DELETE
+
+            var count = Elements.GetInteger(Keys.Count);
+            Debug.Assert(count == array.Elements.Count);
             Elements.SetInteger(Keys.Count, array.Elements.Count);
+
+            return;
+
+            // DELETE
+            void CollectKids__(PdfDictionary treeNode, PdfPageTreeNode.InheritedValues values)
+            {
+                // TODO_OLD: inherit inheritable keys...
+                //var kid = (PdfDictionary)iref.Value;
+
+                //string type = dict.Elements.GetName(Keys.Type);
+                //if (type == "/Page")
+                //{
+                //    PdfPage.InheritValues(dict, values);
+                //    pages.Add(dict);
+                //    return;
+                //}
+                //Debug.Assert(type == "/Pages");
+
+                var kids = treeNode.Elements.GetArray(Keys.Kids);
+                if (kids != null)
+                {
+                    foreach (var item in kids)
+                    {
+                        if (((PdfReference)item).Value is PdfDictionary kid)
+                        {
+                            string type = kid.Elements.GetName(Keys.Type);
+                            if (type == "/Page")
+                            {
+                                var oldKid = kid;
+                                var oldRef = kid.RequiredReference;
+                                var page = (PdfPage)kid.Elements.CreateContainer(typeof(PdfPage), kid, true);
+
+                                Debug.Assert(oldKid.IsDead);
+                                Debug.Assert(ReferenceEquals(oldRef, page.RequiredReference));
+
+                                pages.Add(page);
+                            }
+                            else
+                            {
+                                Debug.Assert(type == "/Pages");
+
+                                //var oldKid = kid;
+                                //var oldRef = kid.RequiredReference;
+                                //var node = (PdfPageTreeNode)kid.Elements.CreateContainer(typeof(PdfPageTreeNode), kid, true);
+
+                                //Debug.Assert(oldKid.IsDead);
+                                //Debug.Assert(ReferenceEquals(oldRef, node.RequiredReference));
+
+                                CollectKids__(kid, values);
+                            }
+                        }
+                    }
+                    return;
+                }
+                // A page tree node with no kids?
+                Debug.Assert(false, $"Page tree node () has no /Kids entry.");
+            }
         }
 
         /// <summary>
+        /// Preserves the page tree of an imported document.
+        /// </summary>
+        internal void PreservePageTree()
+        {
+            // Although the page tree is not changed, we promote inheritable values down the page tree
+            // to each single page. This makes it much more simple to import a page because every page
+            // already knows it closure.
+            var inheritedValues = new PdfPageTreeNode.InheritedValues();
+            // Get the root inheritable values.
+            GetInheritableValues(ref inheritedValues);
+
+            // Flat list of pages.
+            List<PdfPage> pages = [];
+
+            TraversePageTree(pages, this, inheritedValues);
+
+            // Save the pages array.
+            _flattenedPages = new PdfPageTreeNodes(pages);
+
+            var count = Elements.GetInteger(Keys.Count);
+            Debug.Assert(count == pages.Count);
+            Elements.SetInteger(Keys.Count, pages.Count);
+
+            return;
+
+            // DELETE
+            void TraverseKids__(PdfPageTreeNode treeNode, PdfPageTreeNode.InheritedValues values)
+            {
+                // TODO_OLD: inherit inheritable keys...
+                //var kid = (PdfDictionary)iref.Value;
+
+                var kids = treeNode.Elements.GetArray<PdfPageTreeNodes>(Keys.Kids);
+                if (kids != null)
+                {
+                    foreach (var item in kids /*.Elements.AsEnumerable<PdfDictionary>()*/)
+                    {
+                        if (((PdfReference)item).Value is PdfDictionary kid)
+                        {
+                            string type = kid.Elements.GetName(Keys.Type);
+                            if (type == "/Page")
+                            {
+                                var oldKid = kid;
+                                var oldRef = kid.RequiredReference;
+                                var page = (PdfPage)kid.Elements.CreateContainer(typeof(PdfPage), kid, true);
+
+                                Debug.Assert(oldKid.IsDead);
+                                Debug.Assert(ReferenceEquals(oldRef, page.RequiredReference));
+
+                                pages.Add(page);
+                            }
+                            else
+                            {
+                                Debug.Assert(type == "/Pages");
+
+                                var oldKid = kid;
+                                var oldRef = kid.RequiredReference;
+                                var node = (PdfPageTreeNode)kid.Elements.CreateContainer(typeof(PdfPageTreeNode), kid, true);
+
+                                Debug.Assert(oldKid.IsDead);
+                                Debug.Assert(ReferenceEquals(oldRef, node.RequiredReference));
+
+                                TraverseKids__(node, values);
+                            }
+                        }
+                    }
+                    return;
+                }
+                // A page tree node with no kids?
+                Debug.Assert(false, $"Page tree node () has no /Kids entry.");
+            }
+        }
+
+        /// <summary>
+        /// TODO
+        /// Traverses the page tree in pre-order.
         /// Recursively converts the page tree into a flat array.
         /// </summary>
-        static PdfDictionary[] GetKids(PdfReference iref, PdfPage.InheritedValues values, PdfDictionary? parentNotUsed)
+        /// <param name="pages">The pages.</param>
+        /// <param name="treeNode">The tree node.</param>
+        /// <param name="inheritedValues">The values.</param>
+        void TraversePageTree(List<PdfPage> pages, PdfPageTreeNode treeNode, PdfPageTreeNode.InheritedValues inheritedValues)
         {
-            // TODO_OLD: inherit inheritable keys...
-            var kid = (PdfDictionary)iref.Value;
-
-#if true
-            string type = kid.Elements.GetName(Keys.Type);
-            if (type == "/Page")
+            // TODO inherit inheritable keys...
+            _ = typeof(int);
+            var kids = treeNode.Elements.GetArray<PdfPageTreeNodes>(Keys.Kids);
+            if (kids != null)
             {
-                PdfPage.InheritValues(kid, values);
-                return [kid];
-            }
-
-            // If it has kids, it’s logically not going to be type page.
-            if (String.IsNullOrEmpty(type) && !kid.Elements.ContainsKey("/Kids"))
-            {
-                // Type is required. If type is missing, assume it is "/Page" and hope it will work.
-                // TODO_OLD Implement a "Strict" mode in PDFsharp and don’t do this in "Strict" mode.
-                PdfPage.InheritValues(kid, values);
-                return [kid];
-            }
-
-#else
-            if (kid.Elements.GetName(Keys.Type) == "/Page")
-            {
-                PdfPage.InheritValues(kid, values);
-                return new PdfDictionary[] { kid };
-            }
+                foreach (var item in kids /*.Elements.AsEnumerable<PdfDictionary>()*/)
+                {
+                    if (((PdfReference)item).Value is PdfDictionary kid)
+                    {
+                        string type = kid.Elements.GetName(Keys.Type);
+                        if (type == "/Page")
+                        {
+#if DEBUG
+                            var oldKid = kid;
+                            var oldRef = kid.RequiredReference;
 #endif
+                            var page = (PdfPage)kid.Elements.CreateContainer(typeof(PdfPage), kid, true);
+                            page.ApplyInheritedValues(ref inheritedValues);
 
-            Debug.Assert(kid.Elements.GetName(Keys.Type) == "/Pages");
-            PdfPage.InheritValues(kid, ref values);
-            List<PdfDictionary> list = [];
-            var kids = kid.Elements["/Kids"] as PdfArray;
+                            pages.Add(page);
 
-            if (kids == null)
-            {
-                if (kid.Elements["/Kids"] is PdfReference xref3)
-                    kids = xref3.Value as PdfArray;
+#if DEBUG
+                            Debug.Assert(oldKid.IsDead);
+                            Debug.Assert(ReferenceEquals(oldRef, page.RequiredReference));
+#endif
+                        }
+                        else if (type == "/Pages")
+                        {
+                            //Debug.Assert(type == "/Pages");
+#if DEBUG
+                            var oldKid = kid;
+                            var oldRef = kid.RequiredReference;
+#endif
+                            var node = (PdfPageTreeNode)kid.Elements.CreateContainer(typeof(PdfPageTreeNode), kid, true);
+                            node.GetInheritableValues(ref inheritedValues);
+#if DEBUG
+                            Debug.Assert(oldKid.IsDead);
+                            Debug.Assert(ReferenceEquals(oldRef, node.RequiredReference));
+#endif
+                            // Note that inheritedValues are not changed by the recursive invocation
+                            // because it is a value type that it is passed by value.
+                            TraversePageTree(pages, node, inheritedValues);
+                        }
+                        else
+                        {
+                            // A page tree node with no valid /Type?
+                            Debug.Assert(false, $"Page tree node ({ObjectID.ToString()}) has the unknown /Type entry '{type}'.");
+                        }
+                    }
+                }
             }
-
-            Debug.Assert(kids != null, "kids should not be null here anymore. Check PDF file what happened.");
-
-            foreach (var pdfItem in kids!)
+            else
             {
-                var xref2 = (PdfReference)pdfItem;
-                list.AddRange(GetKids(xref2, values, kid));
+                // A page tree node with no kids?
+                Debug.Assert(false, $"Page tree node ({ObjectID.ToString()}) has no /Kids entry.");
             }
-
-            int count = list.Count;
-            Debug.Assert(count == kid.Elements.GetInteger("/Count"));
-            return list.ToArray();
         }
 
         /// <summary>
@@ -656,9 +830,7 @@ namespace PdfSharp.Pdf
         /// Gets the enumerator.
         /// </summary>
         public new IEnumerator<PdfPage> GetEnumerator()
-        {
-            return new PdfPagesEnumerator(this);
-        }
+            => new PdfPagesEnumerator(this);
 
         class PdfPagesEnumerator : IEnumerator<PdfPage>
         {
@@ -709,9 +881,20 @@ namespace PdfSharp.Pdf
         }
 
         /// <summary>
+        /// If the page tree is not flattened, it contains all pages of an imported document;
+        /// null otherwise.
+        /// </summary>
+        PdfPageTreeNodes? _flattenedPages;
+
+        void EnsureNotFrozen()
+        {
+            // TODO
+        }
+
+        /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
-        internal sealed class Keys : PdfPage.InheritablePageKeys
+        public new sealed class Keys : PdfPage.InheritablePageKeys
         {
             /// <summary>
             /// (Required) The type of PDF object that this dictionary describes; 
@@ -744,7 +927,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Gets the KeysMeta for these keys.
             /// </summary>
-            public static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
+            internal static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
 
             static DictionaryMeta? _meta;
         }

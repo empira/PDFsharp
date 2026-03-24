@@ -1,9 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using PdfSharp.Pdf.Advanced;
+using PdfSharp.Pdf.Attachments;
 
 namespace PdfSharp.Pdf
 {
@@ -24,6 +23,10 @@ namespace PdfSharp.Pdf
             FixedValue = attribute.FixedValue;
             ObjectType = attribute.ObjectType;
 
+            if (ObjectType != null!
+                && !typeof(PdfArray).IsAssignableFrom(ObjectType) && !typeof(PdfDictionary).IsAssignableFrom(ObjectType))
+                throw new InvalidOperationException($"The ObjectType '{ObjectType.FullName}' must be derived from PdfArray or PdfDictionary.");
+
             if (Version == "")
                 Version = "1.0";
         }
@@ -35,12 +38,12 @@ namespace PdfSharp.Pdf
 
         public KeyType KeyType { get; set; }
 
-        public string KeyValue { get; set; } = default!;
+        public string KeyValue { get; set; } = "";
 
         public string FixedValue { get; }
 
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
-        public Type ObjectType { get; set; }
+        public Type? ObjectType { get; set; }
 
         public bool CanBeIndirect => (KeyType & KeyType.MustNotBeIndirect) == 0;
 
@@ -48,7 +51,7 @@ namespace PdfSharp.Pdf
         /// Returns the type of the object to be created as value for the described key.
         /// </summary>
         [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
-        public Type GetValueType()
+        public Type? GetValueType()
         {
             var type = ObjectType;
             if (type == null!)
@@ -61,6 +64,7 @@ namespace PdfSharp.Pdf
                         break;
 
                     case KeyType.String:
+                    case KeyType.TextString: // #US373
                         type = typeof(PdfString);
                         break;
 
@@ -96,6 +100,10 @@ namespace PdfSharp.Pdf
                         type = typeof(PdfDictionary);
                         break;
 
+                    case KeyType.StreamOrDictionary:
+                        type = typeof(PdfDictionary);
+                        break;
+
                     case KeyType.NumberTree:
                         type = typeof(PdfNumberTreeNode);
                         break;
@@ -107,7 +115,18 @@ namespace PdfSharp.Pdf
                     case KeyType.FileSpecification:
                         type = typeof(PdfFileSpecification);
                         break;
-
+#if true
+                    case KeyType.NameOrArray:
+                    case KeyType.NameOrDictionary: // #US373
+                    case KeyType.ArrayOrDictionary:
+                    case KeyType.StreamOrArray:
+                    case KeyType.ArrayOrNameOrString:
+                    case KeyType.NameOrByteStringOrArray:
+                    case KeyType.StringOrDictionary:
+                    case KeyType.TextStringOrStream:
+                    case KeyType.TextStringOrTextStream:
+                        return null!;
+#else
                     // The following types are not yet used.
 
                     case KeyType.NameOrArray:
@@ -121,8 +140,8 @@ namespace PdfSharp.Pdf
 
                     case KeyType.ArrayOrNameOrString:
                         return null!; // HACK_OLD: Make PdfOutline work
-                                     //throw new NotImplementedException("KeyType.ArrayOrNameOrString");
-
+                                      //throw new NotImplementedException("KeyType.ArrayOrNameOrString");
+#endif
                     default:
                         Debug.Assert(false, "Invalid KeyType: " + KeyType);
                         break;
@@ -137,7 +156,9 @@ namespace PdfSharp.Pdf
     /// </summary>
     class DictionaryMeta
     {
-        public DictionaryMeta([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] Type type)
+        public DictionaryMeta(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
+            Type type)
         {
             var fields = type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
             foreach (var field in fields)
@@ -148,7 +169,7 @@ namespace PdfSharp.Pdf
                     var attribute = (KeyInfoAttribute)attributes[0];
                     var descriptor = new KeyDescriptor(attribute)
                     {
-                        KeyValue = (string)field.GetValue(null)!
+                        KeyValue = (string)(field.GetValue(null) ?? throw new InvalidOperationException("Key field has no key name value."))
                     };
                     _keyDescriptors[descriptor.KeyValue] = descriptor;
                 }
@@ -162,7 +183,9 @@ namespace PdfSharp.Pdf
         /// <param name="type">The type.</param>
         /// <param name="defaultContentKeyType">Default type of the content key.</param>
         /// <param name="defaultContentType">Default type of the content.</param>
-        public DictionaryMeta([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] Type type,
+        public DictionaryMeta(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
+            Type type,
             KeyType defaultContentKeyType,
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
             Type defaultContentType) : this(type)
@@ -181,7 +204,7 @@ namespace PdfSharp.Pdf
                 return keyDescriptor ?? _defaultContentKeyDescriptor;
             }
         }
-        readonly Dictionary<string, KeyDescriptor> _keyDescriptors = new();
+        readonly Dictionary<string, KeyDescriptor> _keyDescriptors = [];
 
         /// <summary>
         /// The default content key descriptor used if no descriptor exists for a given key.

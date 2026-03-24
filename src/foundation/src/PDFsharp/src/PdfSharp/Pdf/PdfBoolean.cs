@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.IO;
@@ -9,7 +9,7 @@ namespace PdfSharp.Pdf
     /// Represents a direct boolean value.
     /// </summary>
     [DebuggerDisplay("({" + nameof(Value) + "})")]
-    public sealed class PdfBoolean : PdfItem
+    public sealed class PdfBoolean : PdfPrimitive
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfBoolean"/> class.
@@ -47,7 +47,7 @@ namespace PdfSharp.Pdf
             => Value ? bool.TrueString : bool.FalseString;
 
         /// <summary>
-        /// Writes 'true' or 'false'.
+        /// Writes ‘true’ or ‘false’.
         /// </summary>
         internal override void WriteObject(PdfWriter writer) 
             => writer.Write(this);

@@ -3,6 +3,7 @@
 
 using PdfSharp.Internal;
 #if GDI
+using PdfSharp.Internal.Threading;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;

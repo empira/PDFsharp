@@ -1,12 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0;net10.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_Library)</TargetFrameworks>
     <RootNamespace>PdfSharp</RootNamespace>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
-    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
-    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+
+    <!-- Removed IsAotCompatible/IsTrimmable because it causes problems with C# 14 Extension Anything code. -->
+    <!--<IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>-->
+    <!--<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>-->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -14,45 +16,67 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- This file must be linked in all .NET Framework projects that use range expressions.
+         Here it must be excluded because of InternalsVisibleTo.
+    -->
+    <Compile Remove="dotnet\GetSubArray.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Condition="!Exists('Internal\SemVersionInformation-generated.cs')" Include="..\PdfSharp.BuildConfig\SemVersionInformation-substitute.cs" Link="SemVersionInformation-substitute.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Using just PublicKeyToken does not work, but I cannot find out why.
          If somebody can explain or fix it, please write me.
          For now we use the whole public key instead.
     <InternalsVisibleTo Include="$(AssemblyName).Tests, PublicKeyToken=f94615aa0424f9eb" />
     <InternalsVisibleTo Include="$(AssemblyName).TestHelper, PublicKeyToken=f94615aa0424f9eb" />-->
-    <InternalsVisibleTo Include="PdfSharp.System,              PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp,                     PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp-gdi,                 PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp-wpf,                 PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.Charting,            PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.Charting-gdi,        PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.Charting-wpf,        PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.Cryptography,        PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.BarCodes,            PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.BarCodes-gdi,        PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.BarCodes-wpf,        PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="MigraDoc.DocumentObjectModel, PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="MigraDoc.Rendering,           PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="MigraDoc.Rendering-gdi,       PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="MigraDoc.Rendering-wpf,       PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="MigraDoc.RtfRendering,        PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="MigraDoc.RtfRendering-gdi,    PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="MigraDoc.RtfRendering-wpf,    PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.Quality,             PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.Quality-gdi,         PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.Quality-wpf,         PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.Shared,              PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.Shared-gdi,          PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.Shared-wpf,          PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.TestHelper,          PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.TestHelper-gdi,      PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.TestHelper-wpf,      PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.Tests,               PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.Tests-gdi,           PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="PdfSharp.Tests-wpf,           PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="Shared.Tests,                 PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="MigraDoc.Tests,               PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="MigraDoc.Tests-gdi,           PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
-    <InternalsVisibleTo Include="MigraDoc.Tests-wpf,           PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
+    <InternalsVisibleTo Include="PdfSharp.System,              PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp,                     PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp-gdi,                 PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp-wpf,                 PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Imaging,             PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.OpenType,            PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Charting,            PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Charting.Graphics,   PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Charting-gdi,        PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Charting-wpf,        PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Cryptography,        PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.BarCodes,            PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.BarCodes-gdi,        PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.BarCodes-wpf,        PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="MigraDoc.DocumentObjectModel, PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="MigraDoc.Rendering,           PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="MigraDoc.Rendering-gdi,       PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="MigraDoc.Rendering-wpf,       PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="MigraDoc.RtfRendering,        PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="MigraDoc.RtfRendering-gdi,    PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="MigraDoc.RtfRendering-wpf,    PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Quality,             PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Quality-gdi,         PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Quality-wpf,         PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <!--<InternalsVisibleTo Include="PdfSharp.System,              PublicKey=$(PDFsharpStronNamePublicKey)" />-->
+    <InternalsVisibleTo Include="PdfSharp.Shared-gdi,          PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Shared-wpf,          PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.TestHelper,          PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.TestHelper-gdi,      PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.TestHelper-wpf,      PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Tests,               PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Tests-gdi,           PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Tests-wpf,           PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="Shared.Tests,                 PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="MigraDoc.Tests,               PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="MigraDoc.Tests-gdi,           PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="MigraDoc.Tests-wpf,           PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Forms,               PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Forms.Tests,         PublicKey=$(PDFsharpStronNamePublicKey)" />
+
+    <InternalsVisibleTo Include="PdfSharp.Graphics,            PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.PdfGraphics,         PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Graphics.Pdf,        PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Graphics.Wpf,        PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="MigraDoc.Rendering.Graphics,  PublicKey=$(PDFsharpStronNamePublicKey)" />
   </ItemGroup>
 
   <!--<ItemGroup>
@@ -61,10 +85,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="System\" />
   </ItemGroup>
 
 </Project>

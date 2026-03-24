@@ -3,8 +3,14 @@
 
 using PdfSharp.Pdf.Content.Objects;
 
+// v7.0.0 TODO
+
 namespace PdfSharp.Pdf.Content
 {
+    // TODO: FormsCleanUp: Remove Content and Content.Objects and replace with Content2 and Content2.Objects:
+    // Attention: Content(.Objects) classes ContentReader, ContentReaderException, ContentWriter, OpCodeName, CSequence, CName, CArray, COperator, OpCodes are still in use.
+    // Change the namespace in the using classes and test it before removal.
+
     /// <summary>
     /// Represents the functionality for reading PDF content streams.
     /// </summary>

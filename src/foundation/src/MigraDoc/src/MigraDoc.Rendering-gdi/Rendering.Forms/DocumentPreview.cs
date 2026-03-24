@@ -1,7 +1,6 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
@@ -19,9 +18,6 @@ namespace MigraDoc.Rendering.Forms
     /// </summary>
     public class DocumentPreview : UserControl
     {
-        private PdfSharp.Forms.PagePreview _preview;
-        private readonly Container _components = null!;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="DocumentPreview"/> class.
         /// </summary>
@@ -47,11 +43,11 @@ namespace MigraDoc.Rendering.Forms
 
         Zoom GetNewZoomFactor(int currentZoom, bool larger)
         {
-            int[] values = new int[]
-      {
-        10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 
-        250, 300, 350, 400, 450, 500, 600, 700, 800
-      };
+            int[] values =
+            [
+                10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 
+                250, 300, 350, 400, 450, 500, 600, 700, 800
+            ];
 
             if (currentZoom <= 10 && !larger)
                 return Zoom.Percent10;
@@ -513,9 +509,12 @@ namespace MigraDoc.Rendering.Forms
                 NextPage();
         }
 
-        private void PreviewZoomChanged(object? sender, EventArgs e)
+        void PreviewZoomChanged(object? sender, EventArgs e)
         {
             OnZoomChanged(e);
         }
+
+        PdfSharp.Forms.PagePreview _preview;
+        readonly Container _components = null!;
     }
 }

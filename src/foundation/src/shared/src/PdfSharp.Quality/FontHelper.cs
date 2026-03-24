@@ -60,7 +60,9 @@ namespace PdfSharp.Quality
             {
                 int count = (int)stream.Length;
                 byte[] data = new byte[count];
-                _ = stream.Read(data, 0, count);
+                var read = stream.Read(data, 0, count);
+                if (read != count)
+                    throw new InvalidOperationException($"Reading the font failed. Stream has {count} bytes, but only {read} bytes were returned.");
                 return data;
             }
         }

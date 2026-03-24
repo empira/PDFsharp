@@ -6,7 +6,8 @@ using PdfSharp.Pdf;
 using PdfSharp.Quality;
 using PdfSharp.Snippets.Drawing;
 
-#pragma warning disable 1591
+#pragma warning disable CS1591 // Internal class
+
 namespace PdfSharp.Features.Drawing
 {
     public class SurrogateChars : Feature

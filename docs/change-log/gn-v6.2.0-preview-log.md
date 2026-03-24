@@ -26,7 +26,7 @@ For better performance, set 'publiclyVisible' to true when creating the MemorySt
 #### PDFsharp issues
 
 **Lexer.ScanNumber and CLexer.ScanNumber**  
-Based on a bug that crashes PDFsharp if a number in a PDFfile has to much leading zeros, we revised the code of **Lexer.ScanNumber** and **CLexer.ScanNumber**.
+Based on a bug that crashes PDFsharp if a number in a PDFfile has too many leading zeros, we revised the code of **Lexer.ScanNumber** and **CLexer.ScanNumber**.
 
 **No more commas allowed in XUnit**  
 An old hack allows **XUnit** to be assigned from a string that uses a comma as decimal separator.

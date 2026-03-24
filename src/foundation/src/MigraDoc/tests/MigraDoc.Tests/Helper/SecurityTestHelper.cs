@@ -3,6 +3,8 @@
 
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.Rendering;
+using PdfSharp.Quality;
+using System.IO;
 using static PdfSharp.TestHelper.SecurityTestHelper;
 
 namespace MigraDoc.Tests.Helper
@@ -52,39 +54,41 @@ namespace MigraDoc.Tests.Helper
             return RenderSecuredDocument(CreateStandardTestDocument(), options);
         }
 
-        public static void WriteStandardTestDocument(string filename)
+        public static void WriteStandardTestDocument(Stream stream)
         {
             var pdfRenderer = RenderDocument(CreateStandardTestDocument());
-            pdfRenderer.Save(filename);
+            pdfRenderer.Save(stream, false);
         }
 
-        public static string GetStandardTestDocument()
+        public static Stream GetStandardTestDocument()
         {
-            const string filename = "temp.pdf";
-            WriteStandardTestDocument(filename);
-            return filename;
+            var stream = CreateTempStream("unittests/SecurityTests/StandardTestDocument");
+            WriteStandardTestDocument(stream);
+            return stream;
         }
 
-        public static void WriteSecuredStandardTestDocument(string filename, TestOptions options)
+        public static void WriteSecuredStandardTestDocument(Stream stream, TestOptions options)
         {
             var pdfRenderer = RenderSecuredStandardTestDocument(options);
-            pdfRenderer.Save(filename);
+            pdfRenderer.Save(stream, false);
         }
 
-        public static string GetSecuredStandardTestDocument(TestOptions options)
+        public static Stream GetSecuredStandardTestDocument(TestOptions options)
         {
-            string filename;
+            Stream stream;
             if (options.Encryption == TestEncryptions.V5R5ReadOnly)
             {
-                GetAssetsTestFile(options, out filename);
+                // Open file from Assets.
+                GetAssetsTestFile(options, out var filename);
+                stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
             }
             else
             {
                 // Render secured test document.
-                filename = "temp.pdf";
-                WriteSecuredStandardTestDocument(filename, options);
+                stream = CreateTempStream("unittests/SecurityTests/SecuredStandardTestDocument");
+                WriteSecuredStandardTestDocument(stream, options);
             }
-            return filename;
+            return stream;
         }
     }
 }

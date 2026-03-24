@@ -1,8 +1,9 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-#if GDI
 using PdfSharp.Internal;
+using PdfSharp.Internal.Threading;
+#if GDI
 using System.Drawing.Drawing2D;
 using GdiPen = System.Drawing.Pen;
 #endif
@@ -250,7 +251,7 @@ namespace PdfSharp.Drawing
                         DashStyle = (XDashStyle)pen.DashStyle,
                         _miterLimit = pen.MiterLimit
                     },
-                    _ => throw new NotImplementedException("Pen type not supported by PDFsharp.")
+                    _ => throw new NotSupportedException("Pen type not supported by PDFsharp.")
                 };
                 // Custom dash style, fix by drice2@ageone.de.
                 if (pen.DashStyle == System.Drawing.Drawing2D.DashStyle.Custom)

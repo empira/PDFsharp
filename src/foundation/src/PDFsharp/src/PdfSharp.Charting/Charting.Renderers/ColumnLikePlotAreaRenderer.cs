@@ -2,6 +2,9 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
+#if PSGFX
+using PdfSharp.Graphics.Media.MatrixExtensions;
+#endif
 
 namespace PdfSharp.Charting.Renderers
 {
@@ -32,10 +35,12 @@ namespace PdfSharp.Charting.Renderers
             XRect plotAreaBox = cri.PlotAreaRendererInfo.Rect;
 
             cri.PlotAreaRendererInfo.Matrix = new XMatrix();
-            cri.PlotAreaRendererInfo.Matrix.TranslatePrepend(-xMin, yMax);
-            cri.PlotAreaRendererInfo.Matrix.Scale(plotAreaBox.Width / xMax, plotAreaBox.Height / (yMax - yMin), XMatrixOrder.Append);
+            cri.PlotAreaRendererInfo.Matrix.TranslatePrepend((float_)(-xMin), (float_)yMax);
+            //cri.PlotAreaRendererInfo.Matrix.Scale(plotAreaBox.Width / xMax, plotAreaBox.Height / (yMax - yMin), XMatrixOrder.Append);
+            cri.PlotAreaRendererInfo.Matrix.ScaleAppend((float_)(plotAreaBox.Width / xMax), (float_)(plotAreaBox.Height / (yMax - yMin)));
             cri.PlotAreaRendererInfo.Matrix.ScalePrepend(1, -1);
-            cri.PlotAreaRendererInfo.Matrix.Translate(plotAreaBox.X, plotAreaBox.Y, XMatrixOrder.Append);
+            //cri.PlotAreaRendererInfo.Matrix.Translate(plotAreaBox.X, plotAreaBox.Y, XMatrixOrder.Append);
+            cri.PlotAreaRendererInfo.Matrix.TranslateAppend(plotAreaBox.X, plotAreaBox.Y);
         }
     }
 }

@@ -1,7 +1,6 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using PdfSharp.Drawing;
 using MigraDoc.DocumentObjectModel.Shapes;
@@ -187,9 +186,9 @@ namespace MigraDoc.Rendering
                         }
                         // ReSharper restore CompareOfFloatsByEqualityOperator
 
-                        XUnitPt inherentWidth = XUnitPt.FromInch(xPixels / horzRes);
+                        XUnitPt inherentWidth = XUnitPt.FromInch((float_)(xPixels / horzRes));
                         double yPixels = xImage.PixelHeight;
-                        XUnitPt inherentHeight = XUnitPt.FromInch(yPixels / vertRes);
+                        XUnitPt inherentHeight = XUnitPt.FromInch((float_)(yPixels / vertRes));
 
                         //bool lockRatio = _image.IsNull("LockAspectRatio") ? true : _image.LockAspectRatio;
                         bool lockRatio = _image.Values.LockAspectRatio is null || _image.LockAspectRatio;
@@ -274,8 +273,8 @@ namespace MigraDoc.Rendering
                         }
                         if (resultHeight <= 0 || resultWidth <= 0)
                         {
-                            formatInfo.Width = XUnitPt.FromCentimeter(2.5);
-                            formatInfo.Height = XUnitPt.FromCentimeter(2.5);
+                            formatInfo.Width = XUnitPt.FromCentimeter(2.5f);
+                            formatInfo.Height = XUnitPt.FromCentimeter(2.5f);
                             //Debug.WriteLine(Messages2.EmptyImageSize);
                             MigraDocLogHost.PdfRenderingLogger.LogError(MdPdfMsgs.EmptyImageSize.Message);
                             _failure = ImageFailure.EmptySize;
@@ -304,13 +303,13 @@ namespace MigraDoc.Rendering
                 if (!_image.Values.Width.IsValueNullOrEmpty())
                     formatInfo.Width = _image.Width.Point;
                 else
-                    formatInfo.Width = XUnitPt.FromCentimeter(2.5);
+                    formatInfo.Width = XUnitPt.FromCentimeter(2.5f);
 
                 //if (_image.Values.Height is not null)
                 if (!_image.Values.Height.IsValueNullOrEmpty())
                     formatInfo.Height = _image.Height.Point;
                 else
-                    formatInfo.Height = XUnitPt.FromCentimeter(2.5);
+                    formatInfo.Height = XUnitPt.FromCentimeter(2.5f);
             }
         }
 

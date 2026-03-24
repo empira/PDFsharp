@@ -348,7 +348,7 @@ namespace PdfSharp.UniversalAccessibility.Drawing
             if (page == null)
                 throw new InvalidOperationException("Graphics object must belong to a PDF document page.");
 
-            var uaManager = page.Owner._uaManager;  // HACK_OLD: Should be a property 
+            var uaManager = page.Owner.UAManager;  // HACK_OLD: Should be a property 
             if (uaManager == null)
                 throw new InvalidOperationException("Document is not a PDF/UA document.");
             return uaManager;

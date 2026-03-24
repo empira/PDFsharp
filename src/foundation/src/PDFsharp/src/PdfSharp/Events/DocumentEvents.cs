@@ -3,117 +3,64 @@
 
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
+using PdfSharp.Pdf.Metadata;
+
+// TODO REMOVE
+#pragma warning disable CS1591 // TODO_DOC: Missing XML comment for publicly visible type or member
 
 namespace PdfSharp.Events
 {
-    /// <summary>
-    /// The event type of PageEvent.
-    /// </summary>
-    public enum PageEventType
-    {
-        /// <summary>
-        /// A new page was created.
-        /// </summary>
-        Created,
-        
-        /// <summary>
-        /// A page was moved.
-        /// </summary>
-        Moved,
-        
-        /// <summary>
-        /// A page was imported from another document.
-        /// </summary>
-        Imported,
-        
-        /// <summary>
-        /// A page was removed.
-        /// </summary>
-        Removed
-    }
-
-    /// <summary>
+    /// <summary>  // TODO
     /// EventArgs for changes in the PdfPages of a document.
     /// </summary>
-    public class PageEventArgs(PdfObject source) : PdfSharpEventArgs(source)
+    public class DocumentMetadataEventArgs(PdfDocument source) : PdfSharpEventArgs(source)
     {
-        /// <summary>
-        /// Gets or sets the affected page.
-        /// </summary>
-        public PdfPage Page { get; set; } = default!;
+        public required PdfMetadata Metadata { get; init; }
 
-        /// <summary>
-        /// Gets or sets the page index of the affected page.
-        /// </summary>
-        public int PageIndex { get; set; }
-
-        /// <summary>
-        /// The event type of PageEvent.
-        /// </summary>
-        public PageEventType EventType { get; internal set; }
+        public required DocumentMetadataInfo Info { get; init; }
     }
 
-    /// <summary>
-    /// EventHandler for OnPageAdded and OnPageRemoved.
+    /// <summary>  // TODO
+    /// 
     /// </summary>
     /// <param name="sender">The sender of the event.</param>
-    /// <param name="e">The PageEventArgs of the event.</param>
-    public delegate void PageAddedOrRemovedEventHandler(object sender, PageEventArgs e);
+    /// <param name="e">The XmlMetadataEventArgs of the event.</param>
+    public delegate void DocumentMetadataEventHandler(object sender, DocumentMetadataEventArgs e);
+}
 
+namespace PdfSharp.Events // MaOs4StLa Review.
+{
     /// <summary>
-    /// The action type of PageGraphicsEvent.
+    /// EventArgs for a document.
     /// </summary>
-    public enum PageGraphicsActionType
-    {
-        /// <summary>
-        /// The XGraphics object for the page was created.
-        /// </summary>
-        GraphicsCreated = 1,
-        
-        /// <summary>
-        /// DrawString() was called on the page’s XGraphics object.
-        /// </summary>
-        DrawString,
-        
-        /// <summary>
-        /// Another method drawing content was called on the page’s XGraphics object.
-        /// </summary>
-        Draw
-    }
+    public class DocumentEventArgs(PdfDocument source) : PdfSharpEventArgs(source)
+    { }
 
-    /// <summary>
-    /// EventArgs for actions on a page’s XGraphics object.
-    /// </summary>
-    public class PageGraphicsEventArgs(PdfObject source) : PdfSharpEventArgs(source)
-    {
-        /// <summary>
-        /// Gets the page that causes the event.
-        /// </summary>
-        public PdfPage Page { get; internal set; } = default!;
+    public delegate void DocumentEventHandler(object sender, DocumentEventArgs e);
+}
 
-        /// <summary>
-        /// Gets the created XGraphics object.
-        /// </summary>
-        public XGraphics Graphics { get; internal set; } = default!;
-
-        /// <summary>
-        /// The action type of PageGraphicsEvent.
-        /// </summary>
-        public PageGraphicsActionType ActionType { get; internal set; }
-    }
-
-    /// <summary>
-    /// EventHandler for OnPageGraphicsAction.
-    /// </summary>
-    /// <param name="sender">The sender of the event.</param>
-    /// <param name="e">The PageGraphicsEventArgs of the event.</param>
-    public delegate void PageGraphicsEventHandler(object sender, PageGraphicsEventArgs e);
-
+namespace PdfSharp.Events
+{
     /// <summary>
     /// A class encapsulating all events of a PdfDocument.
     /// </summary>
     public class DocumentEvents
     {
+        /// <summary>
+        /// An event raised if a document gets disposed.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="args">The DocumentEventArgs of the event.</param>
+        public void OnDisposed(object sender, DocumentEventArgs args) // MaOs4StLa Review.
+        {
+            Disposed?.Invoke(sender, args);
+        }
+
+        /// <summary>
+        /// EventHandler for OnDisposed.
+        /// </summary>
+        public event DocumentEventHandler? Disposed; // MaOs4StLa Review.
+
         /// <summary>
         /// An event raised if a page was added.
         /// </summary>
@@ -173,5 +120,23 @@ namespace PdfSharp.Events
         /// EventHandler for OnPageGraphicsAction.
         /// </summary>
         public event PageGraphicsEventHandler? PageGraphicsAction;
+        /// <summary>
+        /// An event raised if something is drawn on a page’s XGraphics object. TODO
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="args">The PageGraphicsEventArgs of the event.</param>
+        public void OnCreateDocumentMetadata(object sender, DocumentMetadataEventArgs args)
+        {
+            if (CreateDocumentMetadata == null)
+                throw new InvalidOperationException("The document event CreateDocumentMetadata is not set and cannot be invoked. "+
+                                                    "You must provide a delegate that handle the CreateDocumentMetadata event.");
+
+            CreateDocumentMetadata.Invoke(sender, args);
+        }
+
+        /// <summary>
+        /// EventHandler for OnCreateDocumentMetadata.
+        /// </summary>
+        public event DocumentMetadataEventHandler? CreateDocumentMetadata;
     }
 }

@@ -1,10 +1,13 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using System.ComponentModel;
 using Microsoft.Extensions.Logging;
 using PdfSharp.Internal;
 using PdfSharp.Logging;
+using PdfSharp.Pdf.Forms;
 using PdfSharp.Pdf.Advanced;
+using PdfSharp.Pdf.Annotations;
 using PdfSharp.Pdf.Internal;
 
 namespace PdfSharp.Pdf.IO
@@ -114,7 +117,6 @@ namespace PdfSharp.Pdf.IO
                 {
                 }
             }
-
             return 0;
         }
 
@@ -211,6 +213,12 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Opens an existing PDF document.
         /// </summary>
+        public static PdfDocument Open(Stream stream, string password, PdfReaderOptions? options = null)
+            => Open(stream, password, PdfDocumentOpenMode.Modify, null, options);
+
+        /// <summary>
+        /// Opens an existing PDF document.
+        /// </summary>
         public static PdfDocument Open(Stream stream, PdfDocumentOpenMode openMode, PdfReaderOptions? options = null)
             => Open(stream, null, openMode, null, options);
 
@@ -258,7 +266,7 @@ namespace PdfSharp.Pdf.IO
             }
             catch (Exception ex)
             {
-                PdfSharpLogHost.Logger.LogError(ex, "Open a PDF document failed.");
+                PdfSharpLogHost.Logger.LogError(ex, "Opening a PDF document failed.");
                 throw;
             }
             return document!;
@@ -268,7 +276,7 @@ namespace PdfSharp.Pdf.IO
         /// Opens a PDF document from a stream.
         /// </summary>
         PdfDocument OpenFromStream(Stream stream, string? password, PdfDocumentOpenMode openMode,
-            PdfPasswordProvider? passwordProvider, PdfReaderOptions? options = null)
+            PdfPasswordProvider? passwordProvider) // MaOs4StLa Review: Removed options parameter. The parameter was not used and there is already an _options field.
         {
             try
             {
@@ -279,8 +287,8 @@ namespace PdfSharp.Pdf.IO
 
                 var lexer = new Lexer(stream, _logger);
                 _document = new PdfDocument(lexer);
-                _document._state |= DocumentState.Imported;
-                _document._openMode = openMode;
+                _document.State |= DocumentState.Imported;
+                _document.OpenMode = openMode;
 
                 try
                 {
@@ -301,8 +309,8 @@ namespace PdfSharp.Pdf.IO
                 byte[] header = new byte[1024];
                 stream.Position = 0;
                 var _ = stream.Read(header, 0, 1024);
-                _document._version = GetPdfFileVersion(header);
-                if (_document._version == 0)
+                _document.SetVersion(GetPdfFileVersion(header));
+                if (_document.Version == 0)
                     throw new InvalidOperationException(PsMsgs.InvalidPdf);
 
                 // Set IsUnderConstruction for IrefTable to true. This allows Parser.ParseObject() to insert placeholder references for objects not yet known.
@@ -310,19 +318,27 @@ namespace PdfSharp.Pdf.IO
                 // After reading all objects, all documents placeholder references get replaced by references knowing their objects in FinishReferences(),
                 // which finally sets IsUnderConstruction to false.
                 _document.IrefTable.IsUnderConstruction = true;
-                var parser = new Parser(_document, options ?? new PdfReaderOptions(), _logger);
+                var parser = new Parser(_document, _options, _logger);
 
                 // 1. Read all trailers or cross-reference streams, but no objects.
                 _document.Trailer = parser.ReadTrailer();
                 if (_document.Trailer == null!)
                     ParserDiagnostics.ThrowParserException(
                         "Invalid PDF file: no trailer found."); // TODO_OLD L10N using PsMsgs
-                // References available by now: All references to file-level objects.
-                // Reference.Values available by now: All trailers and cross-reference streams (which are not encrypted by definition). 
+                                                                // References available by now: All references to file-level objects.
+                                                                // Reference.Values available by now: All trailers and cross-reference streams (which are not encrypted by definition). 
 
                 // 2. Read the encryption dictionary, if existing.
-                if (_document.Trailer!.Elements[PdfTrailer.Keys.Encrypt] is PdfReference xrefEncrypt)
+                // #US373: Should we expect references here?
+                if (_document.Trailer!.Elements[PdfTrailer.Keys.Encrypt] is PdfReference xrefEncrypt) // #US373 Expect a reference here.
                 {
+#if DEBUG_
+                    if (xrefEncrypt.ObjectNumber == 96049)
+                    {
+                        bool contains = _document.IrefTable.Contains(xrefEncrypt.ObjectID);
+                        var xrefExisting = _document.IrefTable[xrefEncrypt.ObjectID];
+                    }
+#endif
                     var encrypt = parser.ReadIndirectObject(xrefEncrypt, null, true);
                     encrypt.Reference = xrefEncrypt;
                     xrefEncrypt.Value = encrypt;
@@ -336,6 +352,8 @@ namespace PdfSharp.Pdf.IO
                 var effectiveSecurityHandler = _document.EffectiveSecurityHandler;
                 if (effectiveSecurityHandler != null)
                 {
+                    effectiveSecurityHandler.DoNotResetEncryption = _options.DoNotResetEncryption;
+
                 TryAgain: // ... after the password provider provides a valid password.
                     // ReSharper disable RedundantIfElseBlock to keep code more readable.
                     PasswordValidity validity = effectiveSecurityHandler.ValidatePassword(password);
@@ -370,7 +388,15 @@ namespace PdfSharp.Pdf.IO
                             goto TryAgain;
                         }
                         else
-                            throw new PdfReaderException(PsMsgs.OwnerPasswordRequired);
+                        {
+#if PDFSHARP_DEBUG
+                            // Needed for testing and debugging of encrypted files.
+                            if (PdfSharpDebug.Instance.AllowOpenWithUserPasswordOnly)
+                                goto ContinueWithoutOwnerPassword;
+#endif
+                            if (!_options.AllowModifyWithoutOwnerPassword)
+                                throw new PdfReaderException(PsMsgs.OwnerPasswordRequired);
+                        }
                     }
                     // ReSharper restore RedundantIfElseBlock
                 }
@@ -383,6 +409,10 @@ namespace PdfSharp.Pdf.IO
                     }
                 }
 
+#if PDFSHARP_DEBUG
+            ContinueWithoutOwnerPassword:
+#endif
+
                 // 4. Read all Objects streams and the references to the objects saved in them.
                 parser.ReadAllObjectStreamsAndTheirReferences();
                 // References available by now: All references (to file-level objects and to objects residing in object streams).
@@ -394,7 +424,8 @@ namespace PdfSharp.Pdf.IO
                 // Reference.Values available by now: All objects.
 
                 // 6. Reset encryption so that it must be redefined to save the document encrypted.
-                effectiveSecurityHandler?.SetEncryptionToNoneAndResetPasswords();
+                if (!_options.DoNotResetEncryption)
+                    effectiveSecurityHandler?.SetEncryptionToNoneAndResetPasswords();
 
                 // 7. Replace all document’s placeholder references by references knowing their objects.
                 // Placeholder references are used, when reading indirect objects referring objects stored in object streams before reading and decoding them.
@@ -422,7 +453,7 @@ namespace PdfSharp.Pdf.IO
                     }
 
                     // Change modification date.
-                    _document.Info.ModificationDate = DateTime.Now;
+                    _document.Info.ModificationDate = DateTimeOffset.Now;
 
                     // Remove all unreachable objects.
                     int removed = _document.IrefTable.Compact();
@@ -433,13 +464,29 @@ namespace PdfSharp.Pdf.IO
                     }
 
                     // Force flattening of page tree.
-                    var pages = _document.Pages;
-                    Debug.Assert(pages != null);
+                    _document.Pages.FlattenPageTree();
 
                     _document.IrefTable.CheckConsistence();
                     _document.IrefTable.Renumber();
                     _document.IrefTable.CheckConsistence();
                 }
+                else if (openMode == PdfDocumentOpenMode.Import)
+                {
+                    // Keep the page tree and generate a flat array of all pages for simple access.
+                    _document.Pages.PreservePageTree();
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Open mode {openMode.ToString()} does not exist; use Import instead.");
+                }
+
+                // Create metadata.
+                PdfMetadata.MetadataPreparer.PrepareDocument(_document);
+                // Create Acro fields and widgets.
+                PdfFormFields.AcroFieldPreparer.PrepareDocument(_document);
+                // Create annotations.
+                PdfAnnotations.AnnotationPreparer.PrepareDocument(_document);
+
             }
             catch (Exception ex)
             {
@@ -456,12 +503,17 @@ namespace PdfSharp.Pdf.IO
         {
             Debug.Assert(_document.IrefTable.IsUnderConstruction);
 
+            // TODO: Can a direct container in a top-level object also contain references to be updated?
+
             foreach (var iref in _document.IrefTable.AllReferences)
             {
                 var pdfObject = iref.Value;
 
                 Debug.Assert(pdfObject != null,
                     "All references saved in IrefTable should have been created when their referred PdfObject has been accessible.");
+
+                if (pdfObject.IsDead)
+                    throw new InvalidOperationException("TODO: REPORT A BUG"); // TODO
 
                 // Update all references to PdfDictionary’s and PdfArray’s child objects.
                 switch (pdfObject)
@@ -472,13 +524,14 @@ namespace PdfSharp.Pdf.IO
                         // Instead, enumerate Keys and get value via Elements[key], which should be O(1).
                         foreach (var key in dictionary.Elements.Keys)
                         {
-                            var item = dictionary.Elements[key];
+                            var item = dictionary.Elements[key]; // #US373 ??? Do not use GetValue - see below.
 
                             // Replace each reference with its final item, if necessary.
                             if (item is PdfReference currentReference && ShouldUpdateReference(currentReference, out var finalItem))
                                 dictionary.Elements[key] = finalItem;
                         }
                         break;
+
                     case PdfArray array:
                         var elements = array.Elements;
                         for (var i = 0; i < elements.Count; i++)
@@ -516,7 +569,7 @@ namespace PdfSharp.Pdf.IO
             {
                 // Read the reference for the ObjectID of the placeholder reference from IrefTable, which should contain the value.
                 var newIref = _document.IrefTable[currentReference.ObjectID];
-                reference = newIref;
+                reference = newIref;  // New value can be null if no object with the specified ID exists.
                 isChanged = true;
                 // reference may be null. Don’t return yet.
             }
@@ -574,7 +627,7 @@ namespace PdfSharp.Pdf.IO
             }
         }
 
-        PdfReaderOptions _options;
+        readonly PdfReaderOptions _options;
         PdfDocument _document = default!;
         readonly ILogger _logger;
     }

@@ -38,7 +38,7 @@ namespace PdfSharp.Charting.Renderers
                     {
                         dlri.Format = "0";
                         dlri.Font = cri.DefaultDataLabelFont;
-                        dlri.FontColor = new XSolidBrush(XColors.Black);
+                        dlri.FontColor = XBrushes.Black;
                         dlri.Position = DataLabelPosition.InsideEnd;
                         if (cri.Chart._type == ChartType.Pie2D || cri.Chart._type == ChartType.PieExploded2D)
                             dlri.Type = DataLabelType.Percent;

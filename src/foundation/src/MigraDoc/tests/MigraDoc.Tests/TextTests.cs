@@ -7,16 +7,13 @@ using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Rendering;
 using MigraDoc.RtfRendering;
+using PdfSharp.Diagnostics;
 using PdfSharp.Fonts;
 using PdfSharp.Logging;
 using PdfSharp.Quality;
-using PdfSharp.Snippets.Font;
-#if CORE
-#endif
 using PdfSharp.TestHelper;
 using Xunit;
 using FluentAssertions;
-using PdfSharp.Diagnostics;
 
 namespace MigraDoc.Tests
 {
@@ -59,10 +56,10 @@ namespace MigraDoc.Tests
             // Layout and render document to PDF.
             pdfRenderer.RenderDocument();
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("HelloEmoji");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/text/HelloEmoji");
             pdfRenderer.PdfDocument.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
 #if DEBUG___
@@ -116,7 +113,7 @@ namespace MigraDoc.Tests
                                                  "No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test No\u2011break\u2011hyphen-Test 12345 ");
             paragraph.Format.Font.Bold = true;
 
-            var filename = IOUtility.GetTempFileName("DocumentWithNoBreakHyphen", null);
+            var filename = IOUtility.GetTempFullFileName("DocumentWithNoBreakHyphen", null);
 
             var pdfFilename = filename + ".pdf";
             var pdfRenderer = new PdfDocumentRenderer { Document = document };
@@ -234,7 +231,7 @@ namespace MigraDoc.Tests
             paragraph.AddText("Heading level 2 with no-break hyphen replaced by hyphen character");
             paragraph.Style = StyleNames.Heading2;
 
-            var filename = IOUtility.GetTempFileName("DocumentWithNoBreakHyphenBeforeTabs", null);
+            var filename = IOUtility.GetTempFullFileName("DocumentWithNoBreakHyphenBeforeTabs", null);
 
             var pdfFilename = filename + ".pdf";
             var pdfRenderer = new PdfDocumentRenderer { Document = document };
@@ -316,7 +313,7 @@ namespace MigraDoc.Tests
                 })
             };
 
-            var filenamePattern = IOUtility.GetTempFileName("DecimalTabulator{0}", "{1}");
+            var filenamePattern = IOUtility.GetTempFullFileName("DecimalTabulator{0}", "{1}");
 
             foreach (var cultureInfo in cultureInfos)
             {
@@ -337,6 +334,8 @@ namespace MigraDoc.Tests
 
                     foreach (var number in numbersByPage[pageIdx])
                     {
+                        // "#,###.##" is intended here to check if numbers with and without a digit before the decimal separator are aligned correctly at the decimal tabulator.
+                        // Only the numbers in numbersByPage are formatted here, so the result won’t be an empty string, as it would be if '0' would be formatted with it.
                         var numberStr = number.ToString("#,###.##", cultureInfo);
 
                         foreach (var unit in units)
@@ -450,10 +449,10 @@ namespace MigraDoc.Tests
             // Layout and render document to PDF.
             pdfRenderer.RenderDocument();
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("FooterTest");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/footer/FooterTest");
             pdfRenderer.PdfDocument.Save(filename);
-            //// ...and start a viewer.
+            //// … and start a viewer.
             //Process.Sta/rt(new ProcessStartInfo(filename) { UseShellExecute = true });
         }
     }

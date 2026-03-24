@@ -30,16 +30,28 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         /// <summary>
-        /// Initializes a new instance from an existing dictionary. Used for object type transformation.
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfObjectStream(PdfDictionary dict)
+            : base(dict)
+        { }
+
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
         /// </summary>
         internal PdfObjectStream(PdfDictionary dict, Parser documentParser)
             : base(dict)
         {
             int n = Elements.GetInteger(Keys.N);
             int first = Elements.GetInteger(Keys.First);
-            Stream.TryUncompress();
+            Stream?.TryUncompress();
 
-            var parser = new Parser(_document, new MemoryStream(Stream.UnfilteredValue), documentParser);
+            if (Stream == null)
+                throw new InvalidOperationException("PdfObjectStream has no stream. Unexpected error.");
+
+            var parser = new Parser(base.Document, new MemoryStream(Stream.UnfilteredValue), documentParser);
             _header = parser.ReadObjectStreamHeader(n, first);
 
 #if DEBUG_ && CORE

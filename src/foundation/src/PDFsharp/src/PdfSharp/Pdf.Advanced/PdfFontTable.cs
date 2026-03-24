@@ -11,11 +11,13 @@ namespace PdfSharp.Pdf.Advanced
 
         /// <summary>
         /// TrueType with WinAnsi encoding.
+        /// PDF subtype is TrueType.
         /// </summary>
         TrueTypeWinAnsi = 1,  // #RENAME better name
 
         /// <summary>
         /// TrueType with Identity-H or Identity-V encoding (Unicode).
+        /// PDF subtype is CIDFontType2.
         /// </summary>
         Type0Unicode = 2,  // #RENAME better name
     }
@@ -33,7 +35,7 @@ namespace PdfSharp.Pdf.Advanced
         { }
 
         /// <summary>
-        /// Gets a PdfFont from an XFont. If no PdfFont already exists, a new one is created.
+        /// Gets a PdfFont from an XGlyphTypeface. If no PdfFont already exists, a new one is created.
         /// </summary>
         public PdfFont GetOrCreateFont(XGlyphTypeface glyphTypeface, FontType fontType)
         {
@@ -106,7 +108,7 @@ namespace PdfSharp.Pdf.Advanced
 
             // #NFM Use gtk here. But the gtk without simulation flags.
 
-            var faceName = glyphTypeface.FontFace.FullFaceName.ToLowerInvariant();
+            var faceName = glyphTypeface.OTFontFace.FullFaceName.ToLowerInvariant();
             var bold = glyphTypeface.IsBold;
             var italic = glyphTypeface.IsItalic;
             var type = fontType == FontType.TrueTypeWinAnsi ? "+A" : "+U";

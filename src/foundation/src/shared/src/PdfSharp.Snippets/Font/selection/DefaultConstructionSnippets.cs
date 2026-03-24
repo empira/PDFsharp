@@ -746,7 +746,7 @@ namespace PdfSharp.Snippets.Font
         public override void RenderSnippet(XGraphics gfx)
         {
             var brush = new XSolidBrush(XColor.FromArgb(0x20, 0x20, 0x20));
-            var brushSimulation = new XSolidBrush(XColors.DarkOrange);
+            var brushSimulation = XBrushes.DarkOrange;
 
             //Typeface typeface = new Typeface("segoe ui semibold");
             var xfiles = new XFont("x-files", EmSize, XFontStyleEx.Regular, _fontOptions);
@@ -862,7 +862,7 @@ namespace PdfSharp.Snippets.Font
         public override void RenderSnippet(XGraphics gfx)
         {
             var brush = new XSolidBrush(XColor.FromArgb(0x20, 0x20, 0x20));
-            var brushSimulation = new XSolidBrush(XColors.DarkOrange);
+            var brushSimulation = XBrushes.DarkOrange;
 
             var frStd = new XFont("Frutiger", EmSize);
             Debug.WriteLine(PdfSharp.Internal.FontsDevHelper.GetFontCachesState());

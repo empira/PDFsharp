@@ -5,6 +5,7 @@ using System;
 
 namespace PdfSharp.Pdf.Advanced
 {
+#if true_
     /// <summary>
     /// Represents a PDF page object.
     /// </summary>
@@ -23,14 +24,14 @@ namespace PdfSharp.Pdf.Advanced
             get => _mediaBox;
             set => _mediaBox = value;
         }
-        PdfRectangle _mediaBox = default!;
+        PdfRectangle _mediaBox = null!;
 
         public PdfRectangle CropBox
         {
             get => _cropBox;
             set => _cropBox = value;
         }
-        PdfRectangle _cropBox = default!;
+        PdfRectangle _cropBox = null!;
 
         public int Rotate
         {
@@ -44,4 +45,5 @@ namespace PdfSharp.Pdf.Advanced
         }
         int _rotate;
     }
+#endif
 }

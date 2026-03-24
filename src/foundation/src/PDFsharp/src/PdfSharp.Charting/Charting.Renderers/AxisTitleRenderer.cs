@@ -2,6 +2,9 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
+#if PSGFX
+using PdfSharp.Graphics.Media.MatrixExtensions;
+#endif
 
 namespace PdfSharp.Charting.Renderers
 {
@@ -37,7 +40,7 @@ namespace PdfSharp.Charting.Renderers
                     points[1].Y = size.Height;
 
                     XMatrix matrix = new XMatrix();
-                    matrix.RotatePrepend(-atri.AxisTitleOrientation);
+                    matrix.RotatePrepend((float_)(-atri.AxisTitleOrientation));
                     matrix.TransformPoints(points);
 
                     size.Width = Math.Abs(points[1].X - points[0].X);

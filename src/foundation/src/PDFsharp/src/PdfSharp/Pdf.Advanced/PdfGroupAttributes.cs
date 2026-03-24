@@ -23,6 +23,16 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfGroupAttributes(PdfDictionary dict)
+            : base(dict)
+        {
+            Elements.SetName(Keys.Type, "/Group");
+        }
+
+        /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
         public class Keys : KeysBase
@@ -47,7 +57,6 @@ namespace PdfSharp.Pdf.Advanced
             /// Gets the KeysMeta for these keys.
             /// </summary>
             internal static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
-
             static DictionaryMeta? _meta;
         }
 

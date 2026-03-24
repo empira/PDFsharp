@@ -2,21 +2,32 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Text;
+using PdfSharp.Internal.OpenType;
 using PdfSharp.Fonts;
-using PdfSharp.Fonts.OpenType;
 using PdfSharp.Drawing;
+using PdfSharp.Internal;
+
+#pragma warning disable CS1591 // TODO_DOC: Missing XML comment for publicly visible type or member
 
 namespace PdfSharp.Pdf.Advanced
 {
     /// <summary>
     /// Represents a composite PDF font. Used for Unicode glyph encoding.
     /// </summary>
-    sealed class PdfType0Font : PdfFont
+    public sealed class PdfType0Font : PdfFont
     {
         public PdfType0Font(PdfDocument document)
             : base(document)
         { }
-       
+
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfType0Font(PdfDictionary dict)
+            : base(dict)
+        { }
+
         public PdfType0Font(PdfDocument document, XGlyphTypeface glyphTypeface, bool vertical)
             : base(document)
         {
@@ -24,34 +35,66 @@ namespace PdfSharp.Pdf.Advanced
             Elements.SetName(Keys.Subtype, "/Type0");
             Elements.SetName(Keys.Encoding, vertical ? "/Identity-V" : "/Identity-H");
 
-            var otDescriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptorFor(glyphTypeface);
+            var fontDescriptorCache = PsGlobals.Global.Fonts.FontDescriptorCache;
+            //var otDescriptor = (OpenTypeDescriptor)fontDescriptorCache.GetOrCreateDescriptorFor(glyphTypeface);
+            var otDescriptor = glyphTypeface.OTFontFace.OTDescriptor;
             FontDescriptor = document.PdfFontDescriptorCache.GetOrCreatePdfDescriptorFor(otDescriptor, glyphTypeface.GetBaseName());
 
-            //FontOptions = font.PdfOptions;
-            //Debug.Assert(FontOptions != null);
-
-            _cmapInfo = new CMapInfo(otDescriptor);
+            CMapInfo = new CMapInfo(otDescriptor.FontFace.GlyphCount);
             _descendantFont = new PdfCIDFont(document, FontDescriptor /*, font*/)
             {
                 // Base font uses the same cmap info.
-                CMapInfo = _cmapInfo
+                CMapInfo = CMapInfo
             };
 
-            // Create ToUnicode map
-            _toUnicodeMap = new PdfToUnicodeMap(document, _cmapInfo);
+            // Create ToUnicode map.
+            _toUnicodeMap = new PdfToUnicodeMap(document, CMapInfo);
             document.Internals.AddObject(_toUnicodeMap);
             Elements.Add(Keys.ToUnicode, _toUnicodeMap);
 
             BaseFont = glyphTypeface.GetBaseName();
-            // CID fonts are always embedded
+            // CID fonts are always embedded.
             BaseFont = FontDescriptor.FontName;
             _descendantFont.BaseFont = BaseFont;
 
             PdfArray descendantFonts = new PdfArray(document);
             Owner.IrefTable.Add(_descendantFont);
-            descendantFonts.Elements.Add(_descendantFont.Reference!); // Reference is set in Add(_descendantFont).
+            descendantFonts.Elements.Add(_descendantFont.RequiredReference); // Reference is set in Add(_descendantFont).
             Elements[Keys.DescendantFonts] = descendantFonts;
         }
+
+        //internal PdfType0Font(PdfDocument document, IFontProxy fontProxy, bool vertical) // #PSGFX
+        //    : base(document)
+        //{
+        //    Elements.SetName(Keys.Type, "/Font");
+        //    Elements.SetName(Keys.Subtype, "/Type0");
+        //    Elements.SetName(Keys.Encoding, vertical ? "/Identity-V" : "/Identity-H");
+
+        //    var otDescriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptorFor(fontProxy);
+        //    FontDescriptor = document.PdfFontDescriptorCache.GetOrCreatePdfDescriptorFor(otDescriptor, fontProxy.GetBaseName());
+
+        //    _cmapInfo = new CMapInfo(otDescriptor);
+        //    _descendantFont = new PdfCIDFont(document, FontDescriptor /*, font*/)
+        //    {
+        //        // Base font uses the same cmap info.
+        //        CMapInfo = _cmapInfo
+        //    };
+
+        //    // Create ToUnicode map.
+        //    _toUnicodeMap = new PdfToUnicodeMap(document, _cmapInfo);
+        //    document.Internals.AddObject(_toUnicodeMap);
+        //    Elements.Add(Keys.ToUnicode, _toUnicodeMap);
+
+        //    BaseFont = fontProxy.GetBaseName();
+        //    // CID fonts are always embedded.
+        //    BaseFont = FontDescriptor.FontName;
+        //    _descendantFont.BaseFont = BaseFont;
+
+        //    PdfArray descendantFonts = new PdfArray(document);
+        //    Owner.IrefTable.Add(_descendantFont);
+        //    descendantFonts.Elements.Add(_descendantFont.Reference!); // Reference is set in Add(_descendantFont).
+        //    Elements[Keys.DescendantFonts] = descendantFonts;
+        //}
 
 #if true_  // May be superfluous.
         public PdfType0Font(PdfDocument document, string idName, byte[] fontData, bool vertical)
@@ -99,7 +142,7 @@ namespace PdfSharp.Pdf.Advanced
         }
 #endif
 
-        XPdfFontOptions FontOptions { get; } = default!;
+        XPdfFontOptions FontOptions { get; } = null!;
 
         public string BaseFont
         {
@@ -107,9 +150,13 @@ namespace PdfSharp.Pdf.Advanced
             set => Elements.SetName(Keys.BaseFont, value);
         }
 
-        internal PdfCIDFont DescendantFont => _descendantFont;
+        internal PdfCIDFont DescendantFont
+        {
+            get => _descendantFont;
+            set => _descendantFont = value;
+        }
 
-        readonly PdfCIDFont _descendantFont = default!;
+        PdfCIDFont _descendantFont = null!;
 
         internal override void PrepareForSave()
         {
@@ -118,9 +165,9 @@ namespace PdfSharp.Pdf.Advanced
             // Use GetGlyphIndices to create the widths array.
             var descriptor = FontDescriptor.Descriptor;
             var w = new StringBuilder("[");
-            if (_cmapInfo != null!)
+            if (CMapInfo != null!)
             {
-                ushort[] glyphIndices = _cmapInfo.GetGlyphIndices();
+                ushort[] glyphIndices = CMapInfo.GetGlyphIndices();
                 int count = glyphIndices.Length;
                 int[] glyphWidths = new int[count];
 

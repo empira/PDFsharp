@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+    <metadata>
+        <id>$id$</id>
+        <version>$version$</version>
+        <description>$description$</description>
+        <summary>$summary$</summary>
+        <authors>$authors$</authors>
+        <owners>$owners$</owners>
+        <projectUrl>$projectUrl$</projectUrl>
+        <license type="expression">MIT</license>
+        <icon>images\PDFsharp-128x128.png</icon>
+        <readme>README.md</readme>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <releaseNotes>$releaseNotes$</releaseNotes>
+        <copyright>$CopyrightPdfSharp$</copyright>
+        <tags>$tags$</tags>
+        <repository type="git" url="https://github.com/empira/PDFsharp" branch="master" commit="" />
+        <title>$title$</title>
+        <dependencies>
+            <group targetFramework="net10.0-windows7.0">
+                <dependency id="Microsoft.Extensions.Logging.Abstractions" version="$Logging_Abstractions_PackageVersion$" />
+                <dependency id="System.Security.Cryptography.Pkcs" version="$Cryptography_PackageVersion$" />
+            </group>
+            <!--<group targetFramework="net462">
+                <dependency id="Microsoft.Extensions.Logging.Abstractions" version="$Logging_Abstractions_PackageVersion$" />
+                <dependency id="System.Security.Cryptography.Pkcs" version="$Cryptography_PackageVersion$" />
+            </group>-->
+        </dependencies>
+        <frameworkReferences>
+            <group targetFramework="net10.0-windows7.0">
+                <frameworkReference name="Microsoft.WindowsDesktop.App.WPF" />
+            </group>
+            <!--<group targetFramework="net462">
+            </group>-->
+        </frameworkReferences>
+    </metadata>
+    <files>
+        <file src="bin\$config$\net10.0-windows\**\*.*" target="lib\net10.0-windows7.0\" exclude="**\*NuGet*"/>
+        <!--<file src="bin\$config$\net462\**\PDFsharp*.*" target="lib\net462\" exclude="**\*NuGet*"/>-->
+        <file src="README.md" />
+        <file src="..\..\..\..\..\assets\pdfsharp\images\PDFsharp-128x128.png" target="images\" />
+    </files>
+</package>

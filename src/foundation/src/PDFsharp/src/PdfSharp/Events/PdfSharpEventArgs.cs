@@ -3,16 +3,18 @@
 
 using PdfSharp.Pdf;
 
+// v7.0.0 Ready
+
 namespace PdfSharp.Events
 {
     /// <summary>
     /// Base class for EventArgs in PDFsharp.
     /// </summary>
-    public abstract class PdfSharpEventArgs(PdfObject source) : EventArgs
+    public abstract class PdfSharpEventArgs(PdfDocument source) : EventArgs
     {
         /// <summary>
-        /// The source of the event.
+        /// The source PDF document of the event.
         /// </summary>
-        public PdfObject Source { get; set; } = source;
+        public PdfDocument Source { get; set; } = source;
     }
 }

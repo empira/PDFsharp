@@ -18,9 +18,13 @@ namespace PdfSharp.Pdf.Security
         public PdfCryptFilter(PdfStandardSecurityHandler? parentStandardSecurityHandler)
         {
             Initialize(parentStandardSecurityHandler);
-            _parentStandardSecurityHandler?._document.SetRequiredVersion(15);
+            _parentStandardSecurityHandler?.Document.SetRequiredVersion(15);
         }
 
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
         internal PdfCryptFilter(PdfDictionary dict) : base(dict)
         { }
 
@@ -58,7 +62,7 @@ namespace PdfSharp.Pdf.Security
         public void SetEncryptionToAESForV4()
         {
             Initialize(CryptFilterMethod.AESV2, 128);
-            _parentStandardSecurityHandler?._document.SetRequiredVersion(16);
+            _parentStandardSecurityHandler?.Document.SetRequiredVersion(16);
         }
 
         /// <summary>
@@ -68,7 +72,7 @@ namespace PdfSharp.Pdf.Security
         public void SetEncryptionToAESForV5()
         {
             Initialize(CryptFilterMethod.AESV3, 256);
-            _parentStandardSecurityHandler?._document.SetRequiredVersion(20);
+            _parentStandardSecurityHandler?.Document.SetRequiredVersion(20);
         }
 
         void Initialize(CryptFilterMethod method, int lengthValue = 40)
@@ -218,19 +222,19 @@ namespace PdfSharp.Pdf.Security
         void SetCryptFilterMethod(CryptFilterMethod cryptFilterMethod)
         {
             _cryptFilterMethod = cryptFilterMethod;
-#if NET6_0_OR_GREATER
-            Elements.SetName(Keys.CFM, Enum.GetName(cryptFilterMethod) ?? throw TH.InvalidOperationException_InvalidCryptFilterMethod());
+#if NET8_0_OR_GREATER
+            Elements.SetName(Keys.CFM, '/' + Enum.GetName(cryptFilterMethod) ?? throw TH.InvalidOperationException_InvalidCryptFilterMethod());
 #else
-            Elements.SetName(Keys.CFM, Enum.GetName(typeof(CryptFilterMethod), cryptFilterMethod) ?? throw TH.InvalidOperationException_InvalidCryptFilterMethod());
+            Elements.SetName(Keys.CFM, '/' + Enum.GetName(typeof(CryptFilterMethod), cryptFilterMethod) ?? throw TH.InvalidOperationException_InvalidCryptFilterMethod());
 #endif
         }
 
         CryptFilterMethod GetCryptFilterMethod()
         {
-#if NET6_0_OR_GREATER
-            _cryptFilterMethod ??= Enum.Parse<CryptFilterMethod>(PdfName.RemoveSlash(Elements.GetName(Keys.CFM)));
+#if NET8_0_OR_GREATER
+            _cryptFilterMethod ??= Enum.Parse<CryptFilterMethod>(Name.RemoveSlash(Elements.GetName(Keys.CFM)));
 #else
-            _cryptFilterMethod ??= (CryptFilterMethod?)Enum.Parse(typeof(CryptFilterMethod), PdfName.RemoveSlash(Elements.GetName(Keys.CFM)));
+            _cryptFilterMethod ??= (CryptFilterMethod?)Enum.Parse(typeof(CryptFilterMethod), Name.RemoveSlash(Elements.GetName(Keys.CFM)));
 #endif
             return _cryptFilterMethod ?? CryptFilterMethod.None;
         }

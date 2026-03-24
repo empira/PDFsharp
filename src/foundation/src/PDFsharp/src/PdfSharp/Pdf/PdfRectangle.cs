@@ -1,40 +1,42 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Internal;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf.Advanced;
+using PdfSharp.Pdf.IO;
+using PdfSharp.Pdf.Internal;
 #if GDI
 using System.Drawing;
 #endif
 #if WPF
 using System.Windows;
 #endif
-using System.CodeDom;
-using PdfSharp.Drawing;
-using PdfSharp.Pdf.Advanced;
-using PdfSharp.Pdf.IO;
-using PdfSharp.Pdf.Internal;
+
+// v7.0 Ready
 
 namespace PdfSharp.Pdf
 {
     /// <summary>
-    /// Represents an immutable PDF rectangle value.
+    /// Represents an immutable PDF rectangle object.
     /// In a PDF file it is represented by an array of four real values.
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
-    public sealed class PdfRectangle : PdfItem
+    public sealed class PdfRectangle : PdfPrimitive
     {
-        // This reference type must behave like a value type. Therefore, it cannot be changed (like System.String).
+        // Reference 2.0: 3.8.4  Rectangles / Page 161
 
         /// <summary>
-        /// Initializes a new instance of the PdfRectangle class with all values set to zero.
+        /// Initializes a new instance of the <see cref="PdfRectangle"/> class with all values set to zero.
         /// </summary>
         public PdfRectangle()
         { }
 
         /// <summary>
-        /// Initializes a new instance of the PdfRectangle class with two points specifying
-        /// two diagonally opposite corners. Notice that in contrast to GDI+ convention the 
-        /// 3rd and the 4th parameter specify a point and not a width. This is so much confusing
-        /// that this function is for internal use only.
+        /// Initializes a new instance of the <see cref="PdfRectangle"/> class with two points specifying
+        /// two diagonally opposite corners. Notice that in contrast to GDI+, WPF, WinUI etc. convention
+        /// the 3rd and the  4th parameter specify a point and not a width. This is so much confusing that
+        /// this function is for internal use only.
         /// </summary>
         internal PdfRectangle(double x1, double y1, double x2, double y2)
         {
@@ -46,7 +48,7 @@ namespace PdfSharp.Pdf
 
 #if GDI
         /// <summary>
-        /// Initializes a new instance of the PdfRectangle class with two points specifying
+        /// Initializes a new instance of the <see cref="PdfRectangle"/> class with two points specifying
         /// two diagonally opposite corners.
         /// </summary>
         public PdfRectangle(PointF pt1, PointF pt2)
@@ -60,7 +62,7 @@ namespace PdfSharp.Pdf
 
 #if WPF
         /// <summary>
-        /// Initializes a new instance of the PdfRectangle class with two points specifying
+        /// Initializes a new instance of the <see cref="PdfRectangle"/> class with two points specifying
         /// two diagonally opposite corners.
         /// </summary>
         public PdfRectangle(Point pt1, Point pt2)
@@ -73,7 +75,7 @@ namespace PdfSharp.Pdf
 #endif
 
         /// <summary>
-        /// Initializes a new instance of the PdfRectangle class with two points specifying
+        /// Initializes a new instance of the <see cref="PdfRectangle"/> class with two points specifying
         /// two diagonally opposite corners.
         /// </summary>
         public PdfRectangle(XPoint pt1, XPoint pt2)
@@ -86,7 +88,8 @@ namespace PdfSharp.Pdf
 
 #if GDI
         /// <summary>
-        /// Initializes a new instance of the PdfRectangle class with the specified location and size.
+        /// Initializes a new instance of the <see cref="PdfRectangle"/> class with the specified location
+        /// and size.
         /// </summary>
         public PdfRectangle(PointF pt, SizeF size)
         {
@@ -98,7 +101,8 @@ namespace PdfSharp.Pdf
 #endif
 
         /// <summary>
-        /// Initializes a new instance of the PdfRectangle class with the specified location and size.
+        /// Initializes a new instance of the <see cref="PdfRectangle"/> class with the specified location
+        /// and size.
         /// </summary>
         public PdfRectangle(XPoint pt, XSize size)
         {
@@ -114,7 +118,7 @@ namespace PdfSharp.Pdf
         public PdfRectangle(XRect rect)
         {
             if (rect.IsEmpty)
-                throw new InvalidOperationException("Cannot create PdfRectangle from an empty XRect.");
+                throw new InvalidOperationException("Cannot create a PdfRectangle from an empty XRect.");
 
             X1 = rect.X;
             Y1 = rect.Y;
@@ -123,19 +127,26 @@ namespace PdfSharp.Pdf
         }
 
         /// <summary>
-        /// Initializes a new instance of the PdfRectangle class with the specified PdfArray.
+        /// Initializes a new instance of the <see cref="PdfRectangle"/> class with the specified PdfArray.
         /// </summary>
         internal PdfRectangle(PdfItem item)
         {
             if (item is null or PdfNull)
                 return;
 
-            if (item is PdfReference reference)
-                item = reference.Value;
+            PdfReference.Dereference(ref item);
 
-            var array = item as PdfArray;
-            if (array == null)
-                throw new InvalidOperationException(PsMsgs.UnexpectedTokenInPdfFile);
+            if (item is not PdfArray { Elements.Count: 4 } array)
+            {
+                // Handle special case PDF rectangle.
+                if (item is not PdfRectangle rect)
+                    throw new InvalidOperationException(PsMsgs.UnexpectedTokenInPdfFile); // TODO Better message
+                X1 = rect.X1;
+                Y1 = rect.Y1;
+                X2 = rect.X2;
+                Y2 = rect.Y2;
+                return;
+            }
 
             X1 = array.Elements.GetReal(0);
             Y1 = array.Elements.GetReal(1);
@@ -179,50 +190,49 @@ namespace PdfSharp.Pdf
         {
             // This code is from System.Drawing...
             return (int)(((((uint)X1) ^ ((((uint)Y1) << 13) |
-              (((uint)Y1) >> 0x13))) ^ ((((uint)X2) << 0x1a) |
+              (((uint)Y1) >> 19))) ^ ((((uint)X2) << 26) |
               (((uint)X2) >> 6))) ^ ((((uint)Y2) << 7) |
-              (((uint)Y2) >> 0x19)));
+              (((uint)Y2) >> 25)));
         }
 
         /// <summary>
-        /// Tests whether two structures have equal coordinates.
+        /// Tests whether two instances have equal coordinates.
         /// </summary>
         public static bool operator ==(PdfRectangle? left, PdfRectangle? right)
         {
             // ReSharper disable CompareOfFloatsByEqualityOperator
-            // use: if (Object.ReferenceEquals(left, null))
-            if ((object?)left != null)
+            if (left is not null)
             {
-                if ((object?)right != null)
+                if (right is not null)
                     return left.X1 == right.X1 && left.Y1 == right.Y1 && left.X2 == right.X2 && left.Y2 == right.Y2;
                 return false;
             }
-            return (object?)right == null;
+            return right is null;
             // ReSharper restore CompareOfFloatsByEqualityOperator
         }
 
         /// <summary>
-        /// Tests whether two structures differ in one or more coordinates.
+        /// Tests whether two instances differ in one or more coordinates.
         /// </summary>
         public static bool operator !=(PdfRectangle? left, PdfRectangle? right) => !(left == right);
 
         /// <summary>
-        /// Gets or sets the x-coordinate of the first corner of this PdfRectangle.
+        /// Gets the x-coordinate of the first corner of this PdfRectangle.
         /// </summary>
         public double X1 { get; }
 
         /// <summary>
-        /// Gets or sets the y-coordinate of the first corner of this PdfRectangle.
+        /// Gets the y-coordinate of the first corner of this PdfRectangle.
         /// </summary>
         public double Y1 { get; }
 
         /// <summary>
-        /// Gets or sets the x-coordinate of the second corner of this PdfRectangle.
+        /// Gets the x-coordinate of the second corner of this PdfRectangle.
         /// </summary>
         public double X2 { get; }
 
         /// <summary>
-        /// Gets or sets the y-coordinate of the second corner of this PdfRectangle.
+        /// Gets the y-coordinate of the second corner of this PdfRectangle.
         /// </summary>
         public double Y2 { get; }
 
@@ -237,12 +247,12 @@ namespace PdfSharp.Pdf
         public double Height => Y2 - Y1;
 
         /// <summary>
-        /// Gets or sets the coordinates of the first point of this PdfRectangle.
+        /// Gets the coordinates of the first point of this PdfRectangle.
         /// </summary>
         public XPoint Location => new(X1, Y1);
 
         /// <summary>
-        /// Gets or sets the size of this PdfRectangle.
+        /// Gets the size of this PdfRectangle.
         /// </summary>
         public XSize Size => new(X2 - X1, Y2 - Y1);
 
@@ -302,15 +312,20 @@ namespace PdfSharp.Pdf
             return PdfEncoders.Format("[{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "}]", X1, Y1, X2, Y2);
         }
 
+        internal PdfArray GetAsArrayOfValues()
+            // Always create a new copy of PdfArray because the returned array is not immutable.
+            => new(new PdfReal(X1), new PdfReal(Y1), new PdfReal(X2), new PdfReal(Y2));
+
         /// <summary>
         /// Writes the rectangle.
         /// </summary>
-        internal override void WriteObject(PdfWriter writer) => writer.Write(this);
+        internal override void WriteObject(PdfWriter writer)
+            => writer.Write(this);
 
         /// <summary>
         /// Represents an empty PdfRectangle.
         /// </summary>
-        [Obsolete("A rectangle defined by two points cannot be meaningfully defined as empty. Do not use this property.")]
+        [Obsolete("A rectangle defined by two points cannot be well-defined as empty. Do not use this property.")]
         public static PdfRectangle Empty => throw new InvalidOperationException("Use 'new PdfRectangle()' instead of 'PdfRectangle.Empty'");
 
         /// <summary>

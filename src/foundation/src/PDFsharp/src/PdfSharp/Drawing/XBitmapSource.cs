@@ -1,8 +1,7 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-#if CORE
-#endif
+using PdfSharp.Internal.Threading;
 #if GDI
 using PdfSharp.Internal;
 #endif
@@ -29,8 +28,9 @@ namespace PdfSharp.Drawing
             get
             {
 #if CORE
-                if (_importedImage != null)
-                    return (int)_importedImage.Information.Width;
+                if (_importedImage!= null)
+                    return _importedImage.PixelWidth;
+
                 return 100;
 #endif
 #if GDI && !WPF
@@ -65,7 +65,8 @@ namespace PdfSharp.Drawing
             {
 #if CORE
                 if (_importedImage != null)
-                    return (int)_importedImage.Information.Height;
+                    return _importedImage.PixelHeight;
+
                 return 100;
 #endif
 #if GDI && !WPF

@@ -1,0 +1,17 @@
+<!-- Template for file LocalBuild.props
+
+     LocalBuild.props is used for configurations on the current developer machine.
+     It is included by Directory.Build.props if it exists.
+-->
+<Project>
+  <PropertyGroup>
+    <!-- Building fewer frameworks during development speeds up build and test cycles. -->
+    <!-- Restart Visual Studio if you change this value. -->
+    <PDFsharpBuildFewerFrameworks>true</PDFsharpBuildFewerFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Some slow unit tests are disabled by default, but can be activated through this setting. -->
+    <PDFsharpRunSlowTests>false</PDFsharpRunSlowTests>
+  </PropertyGroup>
+</Project>

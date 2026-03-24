@@ -1,8 +1,9 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using PdfSharp.Fonts;
 using PdfSharp.Internal;
+using PdfSharp.Fonts;
+using PdfSharp.Internal.OpenType;
 using PdfSharp.Logging;
 
 namespace PdfSharp.Diagnostics
@@ -15,26 +16,29 @@ namespace PdfSharp.Diagnostics
         /// <summary>
         /// Resets PDFsharp to a state equivalent to the state after
         /// the assemblies are loaded.
+        /// Intended for unit testing only.
         /// </summary>
         public static void ResetAll()
         {
             Capabilities.ResetAll();
             GlobalFontSettings.ResetAll();
             PdfSharpLogHost.ResetLogging();
-            Globals.Global.RecreateGlobals();
+            PsGlobals.RecreatePsGlobals();
+            OtGlobals.RecreateOtGlobals();
 
-            if (FontFactory.HasFontSources)
-                throw new InvalidOperationException("Internal error.");
+            //if (FontFactory.HasFontSources)
+            //    throw new InvalidOperationException("Internal error.");
         }
 
         /// <summary>
         /// Resets the font management equivalent to the state after
         /// the assemblies are loaded.
+        /// Intended for unit testing only.
         /// </summary>
         public static void ResetFontManagement()
         {
             GlobalFontSettings.ResetAll(true);
-            Globals.Global.IncrementVersion();
+            PsGlobals.Global.IncrementVersion();
         }
     }
 }

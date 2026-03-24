@@ -287,7 +287,7 @@ namespace MigraDoc.RtfRendering
         }
 
         /// <summary>
-        /// Translates a value named 'valueName' to a Rtf Control word that specifies a Boolean and divides in two control words.
+        /// Translates a value named 'valueName' to a Rtf Control word that specifies a boolean and divides in two control words.
         /// If the control word in false case is simply left away, you can also use the Translate function as well.
         /// </summary>
         protected void TranslateBool(string valueName, string rtfTrueCtrl, string rtfFalseCtrl, bool withStar)

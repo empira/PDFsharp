@@ -1,0 +1,5 @@
+﻿# Ignore generated props file
+SemVersion.props
+Local.Build.props
+PdfSharpBuildConfig.props
+PdfSharpBuildConfig.targets

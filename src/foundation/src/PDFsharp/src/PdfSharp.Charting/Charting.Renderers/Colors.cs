@@ -14,7 +14,7 @@ namespace PdfSharp.Charting.Renderers
         /// Gets the color for column/bar charts from the specified index.
         /// </summary>
         public static XColor Item(int index)
-            => XColor.FromArgb((int)SeriesColorValues[index]);
+            => XColor.FromArgb((uint)SeriesColorValues[index]);
 
         /// <summary>
         /// Colors for column/bar charts taken from Excel.
@@ -43,7 +43,7 @@ namespace PdfSharp.Charting.Renderers
         /// Gets the color for line charts from the specified index.
         /// </summary>
         public static XColor Item(int index)
-            => XColor.FromArgb((int)LineColorValues[index]);
+            => XColor.FromArgb((uint)LineColorValues[index]);
 
         /// <summary>
         /// Colors for line charts taken from Excel.
@@ -72,7 +72,7 @@ namespace PdfSharp.Charting.Renderers
         /// Gets the color for pie charts from the specified index.
         /// </summary>
         public static XColor Item(int index)
-            => XColor.FromArgb((int)SectorColorValues[index]);
+            => XColor.FromArgb((uint)SectorColorValues[index]);
 
         /// <summary>
         /// Colors for pie charts taken from Excel.

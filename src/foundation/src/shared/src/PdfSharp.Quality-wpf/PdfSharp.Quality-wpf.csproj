@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0-windows;net9.0-windows;net10.0-windows;net462</TargetFrameworks>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_Windows)</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <RootNamespace>PdfSharp.Quality</RootNamespace>
     <UseWPF>true</UseWPF>
@@ -30,16 +30,19 @@
     <Compile Include="..\PdfSharp.Quality\Feature.cs" Link="Feature.cs" />
     <Compile Include="..\PdfSharp.Quality\FontHelper.cs" Link="FontHelper.cs" />
     <Compile Include="..\PdfSharp.Quality\FontUtility.cs" Link="FontUtility.cs" />
-    <Compile Include="..\PdfSharp.Quality\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\PdfSharp.Quality\IOHelper.cs" Link="IOHelper.cs" />
     <Compile Include="..\PdfSharp.Quality\IOUtility.cs" Link="IOUtility.cs" />
     <Compile Include="..\PdfSharp.Quality\PathHelper.cs" Link="PathHelper.cs" />
     <Compile Include="..\PdfSharp.Quality\PdfDocUtility.cs" Link="PdfDocUtility.cs" />
     <Compile Include="..\PdfSharp.Quality\PdfFileFormatter.cs" Link="PdfFileFormatter.cs" />
     <Compile Include="..\PdfSharp.Quality\PdfFileUtility.cs" Link="PdfFileUtility.cs" />
+    <Compile Include="..\PdfSharp.Quality\Properties\GlobalUsings.cs" Link="Properties\GlobalUsings.cs" />
     <Compile Include="..\PdfSharp.Quality\Snippet.cs" Link="Snippet.cs" />
-    <Compile Include="..\PdfSharp.Quality\TestClassBase.cs" Link="TestClassBase.cs" />
-    <Compile Include="..\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
+    <Compile Include="..\PdfSharp.Quality\Testing\PdfSharpTestBase.cs" Link="Testing\PdfSharpTestBase.cs" />
+    <Compile Include="..\PdfSharp.Quality\Testing\TestClassBase.cs" Link="Testing\TestClassBase.cs" />
+    <Compile Include="..\PdfSharp.Quality\Testing\TrueOrFalse.cs" Link="Testing\TrueOrFalse.cs" />
+    <Compile Include="..\PdfSharp.Quality\WindowsFonts.cs" Link="WindowsFonts.cs" />
+    <Compile Include="..\..\..\shared\src\PdfSharp.Shared\dotnet\GetSubArray.cs" Link="Properties\GetSubArray(included).cs" />
   </ItemGroup>
 
   <ItemGroup>

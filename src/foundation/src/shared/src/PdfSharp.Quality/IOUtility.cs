@@ -9,6 +9,7 @@ using System.Net.Http;
 #endif
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using PdfSharp.Internal;
 
 namespace PdfSharp.Quality
@@ -17,6 +18,7 @@ namespace PdfSharp.Quality
     /// Static utility functions for file IO.
     /// These functions are intended for unit tests and samples in solution code only.
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     public static class IOUtility
     {
         internal const char DirectorySeparatorChar = '\\';
@@ -28,17 +30,15 @@ namespace PdfSharp.Quality
         /// True if the given character is a directory separator.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsDirectorySeparator(char ch) => ch is DirectorySeparatorChar or AltDirectorySeparatorChar;
+        public static bool IsDirectorySeparator(char ch)
+            => ch is DirectorySeparatorChar or AltDirectorySeparatorChar;
 
         /// <summary>
         /// Replaces all back-slashes with forward slashes in the specified path.
-        /// The resulting path works under Windows and Linux if no drive names are
-        /// included.
+        /// The resulting path works under Windows and Linux if no drive names are included.
         /// </summary>
-        public static void NormalizeDirectorySeparators(ref string? path)
-        {
-            path = path?.Replace(DirectorySeparatorChar, AltDirectorySeparatorChar);
-        }
+        public static void NormalizeDirectorySeparators(ref string path)
+            => path = path?.Replace(DirectorySeparatorChar, AltDirectorySeparatorChar) ?? null!;
 
         /// <summary>
         /// Gets the root path of the current solution, or null, if no parent
@@ -66,7 +66,53 @@ namespace PdfSharp.Quality
         }
         static string? _solutionRoot;
 
-        // R eShar per disable once GrammarMistakeInComment because assets is plural
+        /// <summary>
+        /// By searching from the startDirectory to the root
+        /// gets the full path of the first directory above the given directory that contains
+        /// the specified file, or null, if no such directory exists.
+        /// If no startDirectory is specified the parent directory of the current directory is taken.
+        /// </summary>
+        /// <param name="fileName">Name of the file to search for.</param>
+        /// <param name="startDirectory">The directory the search starts.</param>
+        public static string? GetPathOfFileAbove(string fileName, string? startDirectory = null)
+        {
+            var directory = startDirectory;
+            directory ??= Directory.GetParent(Directory.GetCurrentDirectory())?.FullName ?? null;
+
+            while (directory != null)
+            {
+                var trial = Path.Combine(directory, fileName);
+                if (File.Exists(trial))
+                    return directory;  // The path to the directory that contains fileName.
+                directory = Directory.GetParent(directory)?.FullName;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// By searching from the startDirectory to the root
+        /// gets the full path of the first directory above the given directory that matches
+        /// the specified name, or null, if no such directory exists.
+        /// If no startDirectory is specified the parent directory of the current directory is taken.
+        /// </summary>
+        /// <param name="directoryName">Name of the directory to search for</param>
+        /// <param name="startDirectory">The directory the search starts.</param>
+        /// <returns></returns>
+        public static string? GetPathOfDirectoryAbove(string directoryName, string? startDirectory = null)
+        {
+            var directory = startDirectory;
+            directory ??= Directory.GetParent(Directory.GetCurrentDirectory())?.FullName ?? null;
+
+            while (directory != null)
+            {
+                var trial = Path.Combine(directory, directoryName);
+                if (Directory.Exists(trial))
+                    return trial;  // The path to the directory directoryName.
+                directory = Directory.GetParent(directory)?.FullName;
+            }
+            return null;
+        }
+
         /// <summary>
         /// Gets the root path of the current assets directory if no parameter is specified,
         /// or null, if no assets directory exists in the solution root directory.
@@ -100,11 +146,10 @@ namespace PdfSharp.Quality
         /// The directory is created if it does not exist.
         /// If a valid path is returned it always ends with the current directory separator.
         /// </summary>
-        public static string? GetTempPath(string? relativeDirectoryInTemp = null)
+        public static string GetTempPath(string? relativeDirectoryInTemp = null)
         {
             if (_tempPath is null)
             {
-                // ??? // '/' is important to work correctly under Linux.
                 _tempPath = GetAssetsPath() + @"temp" + Path.DirectorySeparatorChar;
                 if (!Directory.Exists(_tempPath))
                     Directory.CreateDirectory(_tempPath);
@@ -203,7 +248,18 @@ namespace PdfSharp.Quality
             int length = namePrefix?.Length ?? 0;
             if (length > 0 && namePrefix != null)  // Interesting: System cannot deduce that namePrefix cannot be null if length is greater than 0.
             {
-                int idx = length - 1;
+                var sb = new StringBuilder();
+                int idx = 0;
+                for (; idx < length; idx++)
+                {
+                    var ch = namePrefix[idx];
+                    if (ch is <= (char)31 or '\"' or '<' or '>' or '|' or ':' or '*' or '?' /*or '\\' or '/'*/)
+                        ch = '_';
+                    sb.Append(ch);
+                }
+                namePrefix = sb.ToString();
+
+                idx = length - 1;
                 while (idx >= 0 && !IsDirectorySeparator(namePrefix[idx]))
                     idx--;
 
@@ -213,7 +269,7 @@ namespace PdfSharp.Quality
                     namePart = namePrefix[(idx + 1)..];
             }
 
-            var tempPath = GetTempPath() ?? throw new IOException("Cannot localize temp directory. Your current directory may not be part of a solution.");
+            var tempPath = GetTempPath() ?? throw new InvalidOperationException("Cannot localize temp directory. Your current directory may not be part of a solution.");
 
             if (pathPart != null)
             {
@@ -235,13 +291,14 @@ namespace PdfSharp.Quality
             }
             catch
             {
-                // Prevent endless loop in case of access violation.
+                // Prevent endless loop in case of a general access violation.
                 // Try sometimes is easier than tearing apart the seven possible exception types.
                 if (retryCount-- > 0)
                     goto Retry;
                 throw;
             }
-            return tempFile;
+            NormalizeDirectorySeparators(ref tempFile);
+            return tempFile!; // Cannot be null here.
         }
 
         /// <summary>
@@ -259,11 +316,11 @@ namespace PdfSharp.Quality
                 ? $"*_temp.{extension}"
                 : $"{namePrefix}*_temp.{extension}";
 
-            (String? FileName, DateTime? LastWrite) result = default;
+            (String? FileName, DateTimeOffset? LastWrite) result = default;
             FindFile(searchPattern, ref result, path, recursive);
             return result.FileName;
 
-            static void FindFile(string searchPattern, ref (string? FileName, DateTime? LastWrite) result,
+            static void FindFile(string searchPattern, ref (string? FileName, DateTimeOffset? LastWrite) result,
                 string directory, bool recursive)
             {
                 var files = Directory.GetFiles(directory, searchPattern);
@@ -326,14 +383,14 @@ namespace PdfSharp.Quality
                         pathType = "directory";
                         if (Directory.Exists(relativeFileOrDirectory))
                             return;
-                        throw new IOException(
+                        throw new InvalidOperationException(
                             $"The {pathType} '{relativeFileOrDirectory}' does not exist in the assets folder. " +
                             AssetsInfo);
                     }
                     else if (File.Exists(relativeFileOrDirectory))
                         return;
 
-                    throw new IOException(
+                    throw new InvalidOperationException(
                         $"The {pathType} '{relativeFileOrDirectory}' does not exist in the assets folder. " +
                         AssetsInfo);
                 }
@@ -342,11 +399,11 @@ namespace PdfSharp.Quality
                     var files = Directory.GetDirectories(assetsPath);
                     if (files.Length > 0 && File.Exists(assetsPath + AssetsVersionFileName))
                         return;
-                    throw new IOException("The assets folder is not yet downloaded. " + AssetsInfo);
+                    throw new InvalidOperationException("The assets folder is not yet downloaded. " + AssetsInfo);
                 }
             }
 
-            throw new IOException(@"The assets folder does not exist. " + AssetsInfo);
+            throw new InvalidOperationException(@"The assets folder does not exist. " + AssetsInfo);
         }
 
         /// <summary>
@@ -366,16 +423,16 @@ namespace PdfSharp.Quality
                     {
                         if (assetsVersion >= requiredAssetsVersion)
                             return;
-                        throw new IOException(
+                        throw new InvalidOperationException(
                             Invariant($"The required assets version is {requiredAssetsVersion}, but the current version is just {assetsVersion}. ") +
                             AssetsInfo);
                     }
                 }
 
-                throw new IOException($"The assets version file '{AssetsVersionFileName}' does not exist in the assets folder. " + AssetsInfo);
+                throw new InvalidOperationException($"The assets version file '{AssetsVersionFileName}' does not exist in the assets folder. " + AssetsInfo);
             }
 
-            throw new IOException(@"The assets folder does not exist. " + AssetsInfo);
+            throw new InvalidOperationException(@"The assets folder does not exist. " + AssetsInfo);
         }
 
         /// <summary>
@@ -405,34 +462,8 @@ namespace PdfSharp.Quality
                 inputStream.CopyTo(fs);
                 fs.Flush();
             }
-
             return fullAssetsFilename;
         }
-
         #endregion
-
-#if true_ // Not needed anymore.
-        // Path.Join does not exist in .NET Standard 2.0
-        static string Join(string path1, string path2)
-        {
-            if (path1.Length == 0)
-                return path2.ToString();
-            if (path2.Length == 0)
-                return path1.ToString();
-
-            return JoinInternal(path1, path2);
-
-            static string JoinInternal(string first, string second)
-            {
-                Debug.Assert(first.Length > 0 && second.Length > 0, "Should have dealt with empty paths.");
-
-                bool hasSeparator = IsDirectorySeparator(first[^1]) || IsDirectorySeparator(second[0]);
-
-                return hasSeparator
-                    ? String.Concat(first, second)
-                    : String.Concat(first, Path.DirectorySeparatorChar.ToString(), second);
-            }
-        }
-#endif
     }
 }

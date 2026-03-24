@@ -10,7 +10,9 @@
 
 using System.Collections;
 using Microsoft.Extensions.Logging;
+using PdfSharp.Internal;
 using PdfSharp.Logging;
+using PdfSharp.Pdf.Forms;
 using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Pdf.Advanced
@@ -48,6 +50,15 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public void Add(PdfReference iref)
         {
+#if DEBUG_
+            //if (this is PdfObject { ObjectNumber: 96049 })
+            //    _ = typeof(int);
+            if (iref.ObjectID.ObjectNumber == 96049)
+            {
+                _ = typeof(int);
+                var number = iref.ObjectNumber;
+            }
+#endif
             if (iref.ObjectID.IsEmpty)
             {
                 // When happens this?
@@ -69,6 +80,7 @@ namespace PdfSharp.Pdf.Advanced
                                                           $"This should not occur. If you think this is a bug in PDFsharp, please visit {UrlLiterals.LinkToCannotOpenPdfFile} for further information.", oldIref.ObjectID, oldIref.Position, iref.Position);
 
                 _objectTable.Remove(iref.ObjectID);
+                // TODO Set old object to dead.
             }
             _objectTable.Add(iref.ObjectID, iref);
 
@@ -78,51 +90,73 @@ namespace PdfSharp.Pdf.Advanced
 
         /// <summary>
         /// Adds a PdfObject to the table.
+        /// This makes a direct object an indirect one.
         /// </summary>
-        public void Add(PdfObject value)
+        public void Add(PdfObject obj)
         {
+#if DEBUG
+            if (obj.ObjectID.ObjectNumber == 96049)
+                _ = typeof(int);
+#endif
+            if (obj == null)
+                throw new ArgumentNullException(nameof(obj));
+
+            if (obj.ParentInfo != null)
+                throw new InvalidOperationException(
+                    "You cannot convert a PDF object to an indirect object when it was already used as a direct one.");
+
             // ReSharper disable once NullableWarningSuppressionIsUsed
-            if (value.Owner == null!)
+            if (obj.Owner == null!)
             {
                 PdfSharpLogHost.PdfReadingLogger.LogWarning("Object without owner gets owned by the document it was added to.");
-                value.Document = document;
+                obj.Document = document;
             }
             else
             {
-                Debug.Assert(value.Owner == document);
-                if (value.Owner != document)
+                Debug.Assert(obj.Owner == document);
+                if (obj.Owner != document)
                 {
                     PdfSharpLogHost.PdfReadingLogger.LogError("Object not owned by the document it was added to.");
+                    throw new InvalidOperationException("PDF object does not belong to this document.");
                 }
             }
 
-            if (value.ObjectID.IsEmpty)
+            if (obj.ObjectID.IsEmpty)
             {
-                // Create new object number.
-                value.SetObjectID(GetNewObjectNumber(), 0);
+                // TODO: Check when this happens.
+                // Create new object number and create reference.
+                obj.SetObjectID(GetNewObjectNumber(), 0);
+#if DEBUG_
+                if (obj.ObjectNumber == 5)
+                    _ = typeof(int);
+#endif
             }
 
-            if (_objectTable.ContainsKey(value.ObjectID))
+            if (_objectTable.ContainsKey(obj.ObjectID))
             {
                 // This must not happen.
                 throw new InvalidOperationException("Object already in table.");
             }
 
-            _objectTable.Add(value.ObjectID, value.ReferenceNotNull);
+            _objectTable.Add(obj.ObjectID, obj.RequiredReference);
 
             // Always adjust MaxObjectNumber when a new object is added.
-            MaxObjectNumber = Math.Max(MaxObjectNumber, value.ObjectNumber);
+            MaxObjectNumber = Math.Max(MaxObjectNumber, obj.ObjectNumber);
         }
 
         /// <summary>
         /// Adds a PdfObject to the table if it was not already in.
         /// Returns true if it was added, false otherwise.
         /// </summary>
-        public bool TryAdd(PdfObject value)
+        public bool TryAdd(PdfObject obj)
         {
-            if (value.ObjectID.IsEmpty || !_objectTable.ContainsKey(value.ObjectID))
+#if DEBUG
+            if (obj.ObjectID.ObjectNumber == 96049)
+                _ = typeof(int);
+#endif
+            if (obj.ObjectID.IsEmpty || !_objectTable.ContainsKey(obj.ObjectID))
             {
-                Add(value);
+                Add(obj);
                 return true;
             }
             return false;
@@ -324,6 +358,13 @@ namespace PdfSharp.Pdf.Advanced
                 iref.ObjectID = new PdfObjectID(idx + 1);
                 // Rehash with new number.
                 _objectTable.Add(iref.ObjectID, iref);
+
+                // Handle special case where a form field also is a widget annotation.
+                // We have to renumber the widget too.
+                if (iref.Value is PdfFormField { _widget: not null } formField)
+                {
+                    formField._widget.Reference!.ObjectID = iref.ObjectID;
+                }
             }
             MaxObjectNumber = count;
             //CheckConsistence();
@@ -581,6 +622,8 @@ namespace PdfSharp.Pdf.Advanced
                 //    _ = typeof(int);
                 //}
 #endif
+                if (pivot.IsDead)
+                    Debugger.Break();
                 FindReferencedItems(pivot);
             }
 #if TEST_CODE
@@ -606,6 +649,11 @@ namespace PdfSharp.Pdf.Advanced
             {
                 Debug.Assert(pdfObj is PdfDictionary or PdfArray, "Call with dictionary or array only.");
 
+#if DEBUG
+                if (pdfObj.ObjectNumber == 18)
+                    _ = typeof(int);
+#endif
+
                 IEnumerable? items = null;
                 PdfDictionary? dict;
                 PdfArray? array;
@@ -618,8 +666,15 @@ namespace PdfSharp.Pdf.Advanced
 
                 foreach (PdfItem item in items)
                 {
+                    if (item.IsDead)
+                        Debugger.Break();
+
                     if (item is PdfReference iref)
                     {
+#if DEBUG
+                        if (iref.ObjectNumber == 18)
+                            _ = typeof(int);
+#endif
                         // Case: The item is an indirect object.
 
                         // Check if the reference belongs to the current document.
@@ -641,6 +696,29 @@ namespace PdfSharp.Pdf.Advanced
                         }
 
                         var newObject = iref.Value;
+                        // Handle a rare case here. If an Acro field (interactive field) has only one
+                        // child (one entry in /Kids array) that is a widget annotation it can merge
+                        // the widget keys with its own keys.
+                        // In this case PDFsharp creates a PdfArcoFieldWidget and a PdfWidgetAnnotation
+                        // object that share the same elements container. Both have their own 
+                        // PdfReference, but only the reference of the PdfArcoFieldWidget is in the
+                        // IRefTable, while PdfWidgetAnnotation has a reference not owned by its document.
+
+                        // TODO: Fields with type (/FT) can also be widgets.
+
+                        // It works, because the object IDs are the same for both references.
+                        // So one PDF dictionary has two different .NET type. If you came from /Kits in
+                        // PdfFormField, it is of type PdfArcoFieldWidget; if you came from /Annots in
+                        // PdfPage, it is of type PdfWidgetAnnotation.
+                        // The following code ensures that always the PdfReference of the PdfArcoFieldWidget
+                        // is taken. This is the only use of the new internal virtual function ActualReference.
+                        var newIref = newObject?.ActualReference ?? null;  // TODO newObject can be null here.
+                        if (newIref != null && !ReferenceEquals(iref, newIref))
+                        {
+                            if (references.ContainsKey(newIref))
+                                continue;
+                            iref = newIref;
+                        }
 
                         // Ignore unreachable objects.
                         if (iref.Document != null)
@@ -657,15 +735,15 @@ namespace PdfSharp.Pdf.Advanced
                             Debug.Assert(ReferenceEquals(iref.Document, document));
                             if (newObject.ObjectID.ObjectNumber != 0)
                                 references.Add(iref, null);
-#if TEST_CODE__
-                            // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd because auf .NET Framework / Standard
+#if TEST_CODE_
+                            // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd because of .NET Framework / Standard
                             if (!doubleCheckReferences.ContainsKey(value))
                                 doubleCheckReferences.Add(value, null);
                             else
                                 _ = typeof(int);
 #endif
 
-                            if (newObject is PdfDictionary or PdfArray)
+                            if (newObject is PdfDictionary or PdfArray) // TODO PdfContainer
                             {
                                 stack.Push(newObject);
 #if TEST_CODE
@@ -682,7 +760,12 @@ namespace PdfSharp.Pdf.Advanced
                     else
                     {
                         // Case: The item is a direct object.
-
+#if DEBUG
+                        // TODO: Now we have PdfContainer.
+                        var f1 = item is PdfObject and (PdfDictionary or PdfArray);
+                        var f2 = item is PdfContainer;
+                        Debug.Assert(f1 == f2);
+#endif
                         if (item is PdfObject pdfDictionaryOrArray and (PdfDictionary or PdfArray))
                         {
 #if TEST_CODE_
@@ -714,7 +797,7 @@ namespace PdfSharp.Pdf.Advanced
                     Add(_deadObject);
                     _deadObject.Elements.Add("/DeadObjectCount", new PdfInteger());
                 }
-                return _deadObject.ReferenceNotNull;
+                return _deadObject.RequiredReference;
             }
         }
         PdfDictionary? _deadObject;

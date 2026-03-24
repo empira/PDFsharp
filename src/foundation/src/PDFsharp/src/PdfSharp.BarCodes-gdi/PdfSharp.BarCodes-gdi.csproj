@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>library</OutputType>
-    <TargetFrameworks>net8.0-windows;net9.0-windows;net10.0-windows;net462</TargetFrameworks>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_Windows)</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <RootNamespace>PdfSharp</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
@@ -17,7 +17,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="root\CompilerServices.cs" />
+    <!--<Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="root\CompilerServices.cs" />-->
+    <Compile Include="..\..\..\shared\src\PdfSharp.Shared\dotnet\GetSubArray.cs" Link="Properties\GetSubArray(included).cs" />
     <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\BarCode.cs" Link="Drawing.BarCodes\BarCode.cs" />
     <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\BarCodeRenderInfo.cs" Link="Drawing.BarCodes\BarCodeRenderInfo.cs" />
     <Compile Include="..\PdfSharp.BarCodes\Drawing.BarCodes\BcgSR.cs" Link="Drawing.BarCodes\BcgSR.cs" />

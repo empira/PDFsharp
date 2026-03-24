@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0-windows;net462</TargetFrameworks>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_Windows)</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <RootNamespace>PDFsharp.Features</RootNamespace>
     <UseWPF>true</UseWPF>
@@ -57,5 +57,4 @@
     <Folder Include="assets\images\" />
     <Folder Include="assets\PDFs\" />
   </ItemGroup>
-
 </Project>

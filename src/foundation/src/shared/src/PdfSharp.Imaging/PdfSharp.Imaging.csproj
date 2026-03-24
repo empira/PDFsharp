@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    
+  <PropertyGroup>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_Library)</TargetFrameworks>
+    <RootNamespace>PdfSharp.Internal.Imaging</RootNamespace>
+    <DefineConstants>CORE</DefineConstants>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\PDFsharp\src\PdfSharp\Properties\GlobalDeclarations.cs" Link="Properties\GlobalDeclarations.cs" />
+    <Compile Include="..\PdfSharp.System\Properties\FloatOrDouble.cs" Link="Properties\FloatOrDouble.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PdfSharp.System\PdfSharp.System.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="PdfSharp,     PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp-gdi, PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp-wpf, PublicKey=$(PDFsharpStronNamePublicKey)" />
+  </ItemGroup>
+</Project>

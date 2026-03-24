@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0-windows;net462</TargetFrameworks>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_NuGet_Window)</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
-    <!--<NoBuild>true</NoBuild>
-    <IncludeBuildOutput>false</IncludeBuildOutput>-->
+    <!--<NoBuild>true</NoBuild>-->
+	<IncludeBuildOutput>false</IncludeBuildOutput>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>

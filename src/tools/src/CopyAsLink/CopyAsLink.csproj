@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net8.0-windows</TargetFrameworks>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <RootNamespace>CopyAsLink</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>

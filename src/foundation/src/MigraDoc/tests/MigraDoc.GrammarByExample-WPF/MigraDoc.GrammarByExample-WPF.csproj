@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net8.0-windows;net9.0-windows;net10.0-windows;net462</TargetFrameworks>
+        <TargetFrameworks>$(PDFsharpTargetFrameworks_Tests_Windows)</TargetFrameworks>
         <RootNamespace>MigraDoc.GrammarByExample_WPF</RootNamespace>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <UseWPF>true</UseWPF>

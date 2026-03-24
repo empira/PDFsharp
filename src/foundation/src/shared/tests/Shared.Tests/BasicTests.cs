@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Diagnostics;
@@ -6,16 +6,15 @@ using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 using PdfSharp.Quality;
-using PdfSharp.Snippets.Font;
-using PdfSharp.TestHelper;
-#if CORE
-#endif
+using PdfSharp.Quality.Testing;
 using Xunit;
 
-namespace PdfSharp.Tests
+namespace Shared.Tests
 {
-    public class BasicTests : IDisposable
+    public class BasicTests : PdfSharpTestBase
     {
+        readonly string _tempRoot = GetTempRoot(typeof(BasicTests));
+
         public BasicTests()
         {
             PdfSharpCore.ResetAll();
@@ -24,7 +23,7 @@ namespace PdfSharp.Tests
 #endif
         }
 
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
             PdfSharpCore.ResetAll();
         }
@@ -55,7 +54,9 @@ namespace PdfSharp.Tests
             // Create a font.
             var font = new XFont("Times New Roman", 20, XFontStyleEx.BoldItalic);
 
-#if NET6_0_OR_GREATER
+            //var font2 = new XFont("Times New Roman", 20, XFontStyleEx.BoldItalic);
+
+#if NET8_0_OR_GREATER
             gfx.DrawString($"Hello, dotnet {Environment.Version.Major}.{Environment.Version.Minor}!", font, XBrushes.Black,
                 new XRect(0, 0, width, height), XStringFormats.Center);
 #else
@@ -63,10 +64,8 @@ namespace PdfSharp.Tests
                 new XRect(0, 0, width, height), XStringFormats.Center);
 #endif
 
-            // Save the document...
-            string filename = PdfFileUtility.GetTempPdfFileName("HelloWorld");
+            string filename = PdfFileUtility.GetTempPdfFullFileName(_tempRoot + nameof(Create_Hello_World_BasicTests));
             document.Save(filename);
-            // ...and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
     }

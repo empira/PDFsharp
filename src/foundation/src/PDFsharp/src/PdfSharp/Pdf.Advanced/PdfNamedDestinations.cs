@@ -2,7 +2,6 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.Actions;
-using System.Xml.Linq;
 
 namespace PdfSharp.Pdf.Advanced
 {
@@ -12,13 +11,15 @@ namespace PdfSharp.Pdf.Advanced
     public sealed class PdfNamedDestinations : PdfDictionary
     {
         internal PdfNamedDestinations()
-        {
-        }
+        { }
 
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
         internal PdfNamedDestinations(PdfDictionary dict)
             : base(dict)
-        {
-        }
+        { }
 
         /// <summary>
         /// Gets all the destination names.

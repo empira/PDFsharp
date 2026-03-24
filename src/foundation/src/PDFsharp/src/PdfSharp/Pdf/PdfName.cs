@@ -1,23 +1,34 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using PdfSharp.Internal;
 using PdfSharp.Pdf.IO;
+
+// v7.0.0 Ready
 
 namespace PdfSharp.Pdf
 {
     /// <summary>
-    /// Represents a PDF name value.
+    /// Represents a direct PDF name object.
     /// </summary>
     [DebuggerDisplay("({" + nameof(Value) + "})")]
-    public sealed class PdfName : PdfItem
+    public sealed class PdfName : PdfPrimitive
     {
+        // Reference 2.0: 7.3.5  Name objects / Page 27
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfName"/> class.
         /// </summary>
         public PdfName()
         {
-            Value = "/";  // Empty name.
+            Name = Name.Empty;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PdfName"/> class.
+        /// </summary>
+        public PdfName(Name name)
+        {
+            Name = name;
         }
 
         /// <summary>
@@ -26,12 +37,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfName(string value)
         {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-            if (value.Length == 0 || value[0] != '/')
-                throw new ArgumentException(PsMsgs.NameMustStartWithSlash);
-
-            Value = value;
+            Name = Name.FromCanonicalName(value);
         }
 
         /// <summary>
@@ -40,19 +46,24 @@ namespace PdfSharp.Pdf
         public override bool Equals(object? obj)
         {
             if (obj is PdfName pdfName)
-                return Value.Equals(pdfName.Value);
+                return Name.Equals(pdfName.Name);
             return Value.Equals(obj);
         }
 
         /// <summary>
         /// Returns the hash code for this instance.
         /// </summary>
-        public override int GetHashCode() => Value.GetHashCode();
+        public override int GetHashCode() => Name.GetHashCode();
 
         /// <summary>
-        /// Gets the name as a string.
+        /// Gets the name as a canonical name string.
         /// </summary>
-        public string Value { get; }
+        public string Value => Name.Value;
+
+        /// <summary>
+        /// Gets the underlying Name object.
+        /// </summary>
+        public Name Name { get; }
 
         /// <summary>
         /// Returns the name. The string always begins with a slash.
@@ -62,7 +73,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Determines whether the specified name and string are equal.
         /// </summary>
-        public static bool operator ==(PdfName? name, string? str)  // BUG_OLD TODO_OLD check all operator ==
+        public static bool operator ==(PdfName? name, string? str)
         {
             if (name is null)
                 return str is null;
@@ -79,32 +90,26 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Gets an empty name.
         /// </summary>
-        public static PdfName Empty => new("/");
+        public static PdfName Empty => _empty ??= new();
+
+        static PdfName? _empty;
 
         /// <summary>
-        /// Adds the slash to a string, that is needed at the beginning of a PDFName string.
+        /// Adds the slash that is needed at the beginning of a PDFName.
         /// </summary>
-        public static string AddSlash(string value) // TODO_OLD PDFsharp6: Naming. StL: WithSlash?
-        {
-            if (value.Length == 0)
-                return "/";
-
-            return value[0] != '/' ? $"/{value}" : value;
-        }
+        [Obsolete("Use Name.MakeName")]
+        public static string AddSlash(string value)
+            => Name.MakeName(value);
 
         /// <summary>
-        /// Removes the slash from a string, that is needed at the beginning of a PDFName string.
+        /// Removes the slash that is needed at the beginning of a PDFName.
         /// </summary>
-        public static string RemoveSlash(string value) // TODO_OLD PDFsharp6: Naming. StL: WithoutSlash?
-        {
-            if (value.Length == 0 || value[0] != '/')
-                return value;
-
-            return value[1..];
-        }
+        [Obsolete("Use Name.RemoveSlash")]
+        public static string RemoveSlash(string value) 
+            => Name.RemoveSlash(value);
 
         /// <summary>
-        /// Gets a PdfName form a string. The string must not start with a slash.
+        /// Gets a PdfName from a string. The string must not start with a slash.
         /// </summary>
         public static PdfName FromString(string value)
         {
@@ -120,26 +125,20 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Writes the name including the leading slash.
         /// </summary>
-        internal override void WriteObject(PdfWriter writer)
-        {
-            // TODO_OLD: what if Unicode character are part of the name?
-            // TODO_OLD: 7.3.5 Name objects: "In such situations, the sequence of bytes making up the name
-            //     object should be interpreted according to UTF-8, a variable-length byte-encoded
-            //     representation of Unicode in which the printable ASCII characters have the same
-            //     representations as in ASCII. This enables a name object to represent text virtually
-            //     in any natural language, subject to the implementation limit on the length of a name."
-            writer.Write(this);
-        }
+        internal override void WriteObject(PdfWriter writer) 
+            => writer.Write(this);
 
         /// <summary>
         /// Gets the comparer for this type.
         /// </summary>
-        public static PdfXNameComparer Comparer => new PdfXNameComparer();
+        public static PdfNameComparer Comparer => _nameComparer ??= new();
+
+        static PdfNameComparer? _nameComparer;
 
         /// <summary>
         /// Implements a comparer that compares PdfName objects.
         /// </summary>
-        public class PdfXNameComparer : IComparer<PdfName>
+        public class PdfNameComparer : IComparer<PdfName>
         {
             /// <summary>
             /// Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.

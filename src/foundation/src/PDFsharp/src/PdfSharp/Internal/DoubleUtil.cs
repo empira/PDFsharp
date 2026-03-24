@@ -124,10 +124,10 @@ namespace PdfSharp.Internal
         {
             var t = new NanUnion { DoubleValue = value };
 
-            ulong exp = t.UintValue & 0xfff0000000000000;
-            ulong man = t.UintValue & 0x000fffffffffffff;
+            ulong exp = t.UintValue & 0xfff0_0000_0000_0000;
+            ulong man = t.UintValue & 0x000f_ffff_ffff_ffff;
 
-            return exp is 0x7ff0000000000000 or 0xfff0000000000000 && man != 0;
+            return exp is 0x7ff0_0000_0000_0000 or 0xfff0_0000_0000_0000 && man != 0;
         }
 
         /// <summary>
@@ -166,10 +166,10 @@ namespace PdfSharp.Internal
         struct NanUnion
         {
             [FieldOffset(0)]
-            internal double DoubleValue;
+            public double DoubleValue;
 
             [FieldOffset(0)]
-            internal readonly ulong UintValue;
+            public readonly ulong UintValue;
         }
     }
 }

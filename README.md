@@ -1,9 +1,9 @@
-﻿# PDFsharp & MigraDoc 6
+﻿# PDFsharp & MigraDoc 7
 
-Version **6.2.4**  
-Published **2026-01-06**
+Version **7.0.0 Preview 1**  
+Published **2026-03-24**
 
-This is a final version of the **PDFsharp** project, the main project of PDFsharp & MigraDoc 6 with updates for C# 12 and .NET 8, .NET 9, and .NET 10.
+This is a preview version of the **PDFsharp** project, the main project of PDFsharp & MigraDoc 7 with updates for C# 12 and .NET 8, .NET 9, and .NET 10.
 
 PDFsharp: Copyright (c) 2005-2026 empira Software GmbH, Troisdorf (Cologne Area), Germany
 MigraDoc: Copyright (c) 2001-2026 empira Software GmbH, Troisdorf (Cologne Area), Germany
@@ -15,7 +15,7 @@ For more information see [docs.pdfsharp.net](https://docs.pdfsharp.net/)
 
 Project documentation can be found on our DOCS site: <https://docs.pdfsharp.net>.
 
-Note: PowerShell 7 is required to execute the PowerShell scripts that come with PDFsharp.
+Note that PowerShell 7 is required to execute the PowerShell scripts that come with PDFsharp.
 
 ### Download assets first
 
@@ -34,9 +34,10 @@ Execute
 `dotnet build` should build the solution without any warnings or errors.
 
 * You need the latest .NET SDK version installed
-* Please note that you need a git repository with at least one commit in order to build the PDFsharp solution.  
+* ~~Please note that you need a git repository with at least one commit in order to build the PDFsharp solution.  
   Without a git repository with at least one commit, you will get an error message from `GitVersion.MsBuild` while building the solution.
-  You can set a tag to define a valid version, e.g.: `git tag v6.2.0` to make it build with a specific version number. Without tag, version 0.1.0 will be used.
+  You can set a tag to define a valid version, e.g.: `git tag v6.2.0` to make it build with a specific version number. Without tag, version 0.1.0 will be used.~~  
+  (Is now done automatically by BuildConfig)
 
 ### Central package management
 

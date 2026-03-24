@@ -27,8 +27,8 @@ namespace PdfSharp.Pdf.IO
 
         /// <summary>
         /// The PDF stream is indented to reflect the nesting levels of the objects and contains additional
-        /// information about the PDFsharp objects. Furthermore, content streams are not deflated. This 
-        /// is useful for debugging purposes only and increases the size of the file significantly.
+        /// information about the type of PDFsharp objects. Furthermore, content streams are not deflated.
+        /// This is useful for debugging purposes only and increases the size of the file significantly.
         /// </summary>
         Verbose,
     }

@@ -1,10 +1,9 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
 using System.Text;
+using PdfSharp.Internal.OpenType;
 using PdfSharp.Fonts;
-using PdfSharp.Fonts.OpenType;
 
 namespace PdfSharp.Pdf.Advanced
 {
@@ -75,11 +74,11 @@ namespace PdfSharp.Pdf.Advanced
     /// </summary>
     public sealed class PdfFontDescriptor : PdfDictionary
     {
-        internal PdfFontDescriptor(PdfDocument document, OpenTypeDescriptor otDescriptor)
+        internal PdfFontDescriptor(PdfDocument document, OpenTypeFontDescriptor otDescriptor)
             : base(document)
         {
             Descriptor = otDescriptor;
-            _cmapInfo = new CMapInfo(otDescriptor);
+            _cmapInfo = new CMapInfo(otDescriptor.FontFace.GlyphCount);
 
             Elements.SetName(Keys.Type, "/FontDescriptor");
 
@@ -97,9 +96,26 @@ namespace PdfSharp.Pdf.Advanced
             Elements.SetReal(Keys.ItalicAngle, Descriptor.ItalicAngle);
             Elements.SetInteger(Keys.StemV, Descriptor.StemV);
             Elements.SetInteger(Keys.XHeight, Descriptor.DesignUnitsToPdf(Descriptor.XHeight));
+
+            //var x = Elements.GetValue(Keys.FontBBox);
+            //if (x is { IsDead: true })
+            //    Debugger.Break();
         }
 
-        internal OpenTypeDescriptor Descriptor { get; }
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfFontDescriptor(PdfDictionary dict)
+            : base(dict)
+        {
+            // Not implemented. Cannot create an OpenType descriptor from a font in a PDF file.
+            // Ctor exists only for type transformation.
+            Descriptor = null!;  // TO/DO Connect with OT descriptor.
+            _cmapInfo = null!;  // TO/DO Connect with OT descriptor.
+        }
+
+        internal OpenTypeFontDescriptor Descriptor { get; }
 
         /// <summary>
         /// Gets or sets the name of the font.
@@ -107,7 +123,7 @@ namespace PdfSharp.Pdf.Advanced
         public string FontName
         {
             get => Elements.GetName(Keys.FontName);
-            set => Elements.SetName(Keys.FontName, value);
+            set => Elements.SetName(Keys.FontName, Name.MakeName(value));
         }
 
         /// <summary>
@@ -115,7 +131,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public bool IsSymbolFont { get; private set; }
 
-        PdfFontDescriptorFlags FlagsFromDescriptor(OpenTypeDescriptor descriptor)
+        PdfFontDescriptorFlags FlagsFromDescriptor(OpenTypeFontDescriptor descriptor)
         {
             PdfFontDescriptorFlags flags = 0;
             IsSymbolFont = descriptor.IsSymbolFont;
@@ -128,17 +144,13 @@ namespace PdfSharp.Pdf.Advanced
         /// font subset.
         /// </summary>
         internal bool AddCmapTable { get; set; }
-        
+
         /// <summary>
         /// Gets the CMapInfo for PDF font descriptor.
         /// It contains all characters, ANSI and Unicode.
         /// </summary>
-        internal CMapInfo CMapInfo
-        {
-            get => _cmapInfo ?? NRT.ThrowOnNull<CMapInfo>();
-            //set => _cmapInfo2 = value;
-        }
-        CMapInfo _cmapInfo;
+        internal CMapInfo CMapInfo => _cmapInfo;
+        readonly CMapInfo _cmapInfo;
 
         internal override void PrepareForSave()
         {
@@ -146,7 +158,7 @@ namespace PdfSharp.Pdf.Advanced
             if (_prepared)
                 return;
             _prepared = true;
-            
+
             var pdfFontFile = new PdfFontProgram(Owner);
             pdfFontFile.CreateFontFileAndAddToDescriptor(this, _cmapInfo, !AddCmapTable);
         }

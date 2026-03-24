@@ -267,7 +267,6 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Gets the DebuggerDisplayAttribute text.
         /// </summary>
-        /// <value>The debugger display.</value>
         // ReSharper disable UnusedMember.Local
         string DebuggerDisplay
         // ReSharper restore UnusedMember.Local

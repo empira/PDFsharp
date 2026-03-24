@@ -1,9 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.Text;
+using PdfSharp.Internal.OpenType;
 using PdfSharp.Fonts;
-using PdfSharp.Fonts.OpenType;
 using PdfSharp.Pdf.Filters;
 
 namespace PdfSharp.Pdf.Advanced
@@ -20,23 +19,32 @@ namespace PdfSharp.Pdf.Advanced
             : base(document)
         { }
 
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfFontProgram(PdfDictionary dict)
+            : base(dict)
+        { }
+
         internal void CreateFontFileAndAddToDescriptor(PdfFontDescriptor pdfFontDescriptor, CMapInfo cmapInfo, bool cidFont)
         {
-            var x = pdfFontDescriptor.Elements[PdfFontDescriptor.Keys.FontFile2];
+            //var x = pdfFontDescriptor.Elements[PdfFontDescriptor.Keys.FontFile2];
+            var x = pdfFontDescriptor.Elements.GetValue(PdfFontDescriptor.Keys.FontFile2); // #US373
 
             OpenTypeFontFace subSet = pdfFontDescriptor.Descriptor.FontFace.CreateFontSubset(cmapInfo.GlyphIndices, cidFont);
-            byte[] fontData = subSet.FontSource.Bytes;
+            byte[] fontData = subSet.OTFontSource.Bytes;
 
             Owner.Internals.AddObject(this);
-            pdfFontDescriptor.Elements[PdfFontDescriptor.Keys.FontFile2] = Reference;
+            pdfFontDescriptor.Elements[PdfFontDescriptor.Keys.FontFile2] = RequiredReference;
 
             Elements["/Length1"] = new PdfInteger(fontData.Length);
             if (!Owner.Options.NoCompression)
             {
-                fontData = Filtering.FlateDecode.Encode(fontData, _document.Options.FlateEncodeMode);
-                Elements["/Filter"] = new PdfName("/FlateDecode");
+                fontData = Filtering.FlateDecode.Encode(fontData, Document.Options.FlateEncodeMode);
+                Elements.SetName(PdfStream.Keys.Filter, "/FlateDecode");
             }
-            Elements["/Length"] = new PdfInteger(fontData.Length);
+            Elements.SetInteger(PdfStream.Keys.Length, fontData.Length);
             CreateStream(fontData);
         }
     }

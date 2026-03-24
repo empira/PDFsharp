@@ -1,8 +1,9 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Internal.OpenType;
 using PdfSharp.Fonts;
-using PdfSharp.Fonts.Internal;
+using CodePointGlyphIndexPair = PdfSharp.Internal.OpenType.CodePointGlyphIndexPair;
 
 namespace PdfSharp.Pdf.Advanced
 {
@@ -16,7 +17,19 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         protected PdfFont(PdfDocument document)
             : base(document)
-        { }
+        {
+            CMapInfo = null!;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfFont(PdfDictionary dict)
+            : base(dict)
+        {
+            CMapInfo = null!;
+        }
 
         internal PdfFontDescriptor FontDescriptor
         {
@@ -25,9 +38,9 @@ namespace PdfSharp.Pdf.Advanced
                 Debug.Assert(_fontDescriptor != null);
                 return _fontDescriptor ?? NRT.ThrowOnNull<PdfFontDescriptor>();
             }
-            set => _fontDescriptor = value;
+            init => _fontDescriptor = value;
         }
-        PdfFontDescriptor _fontDescriptor = default!;
+        readonly PdfFontDescriptor _fontDescriptor = null!;
 
         internal PdfFontEncoding FontEncoding { get; init; }
 
@@ -38,20 +51,15 @@ namespace PdfSharp.Pdf.Advanced
 
         internal void AddChars(CodePointGlyphIndexPair[] codePoints)
         {
-            _cmapInfo.AddChars(codePoints);
+            CMapInfo.AddChars(codePoints);
             _fontDescriptor.CMapInfo.AddChars(codePoints);
         }
 
         /// <summary>
         /// Gets or sets the CMapInfo of a PDF font.
-        /// For a Unicode font only this characters come to the ToUnicode map.
+        /// For a Unicode font only these characters come to the ToUnicode map.
         /// </summary>
-        internal CMapInfo CMapInfo
-        {
-            get => _cmapInfo ?? NRT.ThrowOnNull<CMapInfo>();
-            set => _cmapInfo = value;
-        }
-        internal CMapInfo _cmapInfo = default!;
+        internal CMapInfo CMapInfo { get; init; }
 
         /// <summary>
         /// Gets or sets ToUnicodeMap.
@@ -61,6 +69,7 @@ namespace PdfSharp.Pdf.Advanced
             get => _toUnicodeMap ?? NRT.ThrowOnNull<PdfToUnicodeMap>();
             set => _toUnicodeMap = value;
         }
+
         // ReSharper disable once InconsistentNaming
         internal PdfToUnicodeMap? _toUnicodeMap;
 
@@ -98,5 +107,25 @@ namespace PdfSharp.Pdf.Advanced
             [KeyInfo(KeyType.Dictionary | KeyType.MustBeIndirect, typeof(PdfFontDescriptor))]
             public const string FontDescriptor = "/FontDescriptor";
         }
+    }
+}
+
+namespace PdfSharp.Pdf.Advanced
+{
+    /// <summary>
+    /// An internal hack to allow to interact PdfSharp.Graphics.FontFace with
+    /// PDFsharp core lib.
+    /// </summary>
+    interface IFontProxy // #PSGFX  IXGlyphTypeFaceProxy
+    {
+        void CheckVersion();
+
+        string Key { get; }
+
+        OpenTypeFontFace FontFace { get; }
+
+        string FaceName { get; }
+
+        string GetBaseName();
     }
 }

@@ -70,8 +70,8 @@ namespace MigraDoc.Rendering
                     inherentWidth = Math.Max(renderer.RenderInfo.LayoutInfo.MinWidth, inherentWidth);
                 }
             }
-            inherentWidth.Point += TextArea.LeftPadding.Point;
-            inherentWidth.Point += TextArea.RightPadding.Point;
+            inherentWidth.Point += (float_)TextArea.LeftPadding.Point;
+            inherentWidth.Point += (float_)TextArea.RightPadding.Point;
             return inherentWidth;
         }
 

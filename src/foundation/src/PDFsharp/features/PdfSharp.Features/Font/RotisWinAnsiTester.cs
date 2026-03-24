@@ -15,7 +15,8 @@ using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Quality;
 
-#pragma warning disable 1591
+#pragma warning disable CS1591 // Internal class
+
 namespace PdfSharp.Features.Font
 {
     public class RotisWinAnsiTester : Feature
@@ -169,7 +170,7 @@ namespace PdfSharp.Features.Font
         /// </returns>
         public FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
         {
-            // Note: PDFsharp calls ResolveTypeface only once for each unique combination
+            // Note that PDFsharp calls ResolveTypeface only once for each unique combination
             // of familyName, isBold, and isItalic.
 
             // In this sample we use 6 fonts from the Segoe font family which come with the
@@ -281,7 +282,7 @@ namespace PdfSharp.Features.Font
         /// </returns>
         public byte[] GetFont(string faceName)
         {
-            // Note: PDFsharp never calls GetFont twice with the same face name.
+            // Note that PDFsharp never calls GetFont twice with the same face name.
 
             // Return the bytes of a font.
             switch (faceName)
@@ -394,7 +395,8 @@ namespace PdfSharp.Features.Font
 
             var count = (int)stream.Length;
             var data = new byte[count];
-            stream.Read(data, 0, count);
+            var read = stream.Read(data, 0, count);
+            Debug.Assert(read == count);
             return data;
         }
     }

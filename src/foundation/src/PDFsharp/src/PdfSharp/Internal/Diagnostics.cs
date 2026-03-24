@@ -2,6 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Content;
@@ -56,16 +57,19 @@ namespace PdfSharp.Internal
 
     static class ParserDiagnostics  // #CLEANUP 
     {
+        [DoesNotReturn]
         public static void ThrowParserException(string message)
         {
             throw new PdfReaderException(message);
         }
 
+        [DoesNotReturn]
         public static void ThrowParserException(string message, Exception innerException)
         {
             throw new PdfReaderException(message, innerException);
         }
 
+        [DoesNotReturn]
         public static void HandleUnexpectedCharacter(char ch, string dump)
         {
             // Hex formatting does not work with type Char. It must be cast to integer.
@@ -75,6 +79,7 @@ namespace PdfSharp.Internal
                 dump;
             ThrowParserException(message);
         }
+        [DoesNotReturn]
         public static void HandleUnexpectedToken(string token, string dump)
         {
             string message =
@@ -84,6 +89,7 @@ namespace PdfSharp.Internal
             ThrowParserException(message);
         }
 
+        [DoesNotReturn]
         public static void CannotFindEndOfStream(PdfDictionary dict)
         {
             string message = $"Cannot find end of stream in object '{dict.ObjectID}'.";
@@ -93,22 +99,26 @@ namespace PdfSharp.Internal
 
     static class ContentReaderDiagnostics  // #CLEANUP 
     {
+        [DoesNotReturn]
         public static void ThrowContentReaderException(string message)
         {
             throw new ContentReaderException(message);
         }
 
+        [DoesNotReturn]
         public static void ThrowContentReaderException(string message, Exception innerException)
         {
             throw new ContentReaderException(message, innerException);
         }
 
+        [DoesNotReturn]
         public static void ThrowNumberOutOfIntegerRange(long value)
         {
             string message = String.Format(CultureInfo.InvariantCulture, "Number '{0}' out of integer range.", value);
             ThrowContentReaderException(message);
         }
 
+        [DoesNotReturn]
         public static void HandleUnexpectedCharacter(char ch)
         {
             string message = String.Format(CultureInfo.InvariantCulture,

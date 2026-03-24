@@ -6,6 +6,8 @@ using System.IO;
 #endif
 using PdfSharp.Pdf;
 
+#pragma warning disable CS1591 // TODO_DOC: Missing XML comment for publicly visible type or member
+
 namespace PdfSharp.Quality
 {
     /// <summary>
@@ -14,6 +16,11 @@ namespace PdfSharp.Quality
     /// </summary>
     public static class PdfFileUtility
     {
+        public static string GetUnitTestPath(Type type)
+        {
+            return $"unit-tests/{type.Namespace}/{type.Name}/";
+        }
+
         /// <summary>
         /// Creates a temporary name of a PDF file with the pattern '{namePrefix}-{WIN|WSL|LNX|...}-{...uuid...}_temp.pdf'.
         /// The name ends with '_temp.pdf' to make it easy to delete it using the pattern '*_temp.pdf'.

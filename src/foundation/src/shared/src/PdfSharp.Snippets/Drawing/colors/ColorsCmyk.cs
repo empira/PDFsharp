@@ -6,20 +6,29 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Drawing
 {
+    /// <summary>
+    /// Snippet that demonstrates CMYK colors.
+    /// </summary>
     public class ColorsCmyk : Snippet
     {
+        /// <summary>
+        /// Creates a new ColorsCmyk instance.
+        /// </summary>
         public ColorsCmyk()
         {
             Title = "CMYK Colors";
         }
 
-        public XRect GetDeciRect(int i)
+        XRect GetDeciRect(int i)
         {
             var left = i * BoxWidth / 10;
             var right = (i + 1) * BoxWidth / 10;
             return new XRect(left, 0, right - left, BoxHeight);
         }
 
+        /// <summary>
+        /// Renders the snippet.
+        /// </summary>
         public override void RenderSnippet(XGraphics gfx)
         {
             // White.

@@ -2,6 +2,9 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
+#if PSGFX
+using PdfSharp.Graphics.Media.MatrixExtensions;
+#endif
 
 namespace PdfSharp.Charting.Renderers
 {
@@ -69,7 +72,7 @@ namespace PdfSharp.Charting.Renderers
                 }
 
                 // Add space for tick marks.
-                size.Height += yari.MajorTickMarkWidth * 1.5;
+                size.Height += (float_)(yari.MajorTickMarkWidth * 1.5);
 
                 // Measure axis title.
                 XSize titleSize = new XSize(0, 0);
@@ -80,8 +83,8 @@ namespace PdfSharp.Charting.Renderers
                     parms.RendererInfo = yari;
                     var atr = new AxisTitleRenderer(parms);
                     atr.Format();
-                    titleSize.Height = yari.AxisTitleRendererInfo.Height;
-                    titleSize.Width = yari.AxisTitleRendererInfo.Width;
+                    titleSize.Height = (float_)yari.AxisTitleRendererInfo.Height;
+                    titleSize.Width = (float_)yari.AxisTitleRendererInfo.Width;
                 }
 
                 yari.Height = size.Height + titleSize.Height;
@@ -107,9 +110,11 @@ namespace PdfSharp.Charting.Renderers
             double yMinorTick = yari.MinorTick;
 
             XMatrix matrix = new XMatrix();
-            matrix.TranslatePrepend(-yMin, -yari.Y);
-            matrix.Scale(yari.InnerRect.Width / (yMax - yMin), 1, XMatrixOrder.Append);
-            matrix.Translate(yari.X, yari.Y, XMatrixOrder.Append);
+            matrix.TranslatePrepend((float_)(-yMin), (float_)(-yari.Y));
+            //matrix.Scale(yari.InnerRect.Width / (yMax - yMin), 1, XMatrixOrder.Append);
+            matrix.ScaleAppend((float_)(yari.InnerRect.Width / (yMax - yMin)), 1);
+            //matrix.Translate(yari.X, yari.Y, XMatrixOrder.Append);
+            matrix.TranslateAppend((float_)yari.X, (float_)yari.Y);
 
             // Draw axis.
             // First draw tick marks, second draw axis.
@@ -124,10 +129,10 @@ namespace PdfSharp.Charting.Renderers
             {
                 for (double y = yMin + yMinorTick; y < yMax; y += yMinorTick)
                 {
-                    points[0].X = y;
-                    points[0].Y = minorTickMarkStart;
-                    points[1].X = y;
-                    points[1].Y = minorTickMarkEnd;
+                    points[0].X = (float_)y;
+                    points[0].Y = (float_)minorTickMarkStart;
+                    points[1].X = (float_)y;
+                    points[1].Y = (float_)minorTickMarkEnd;
                     matrix.TransformPoints(points);
                     lineFormatRenderer.DrawLine(points[0], points[1]);
                 }
@@ -144,18 +149,18 @@ namespace PdfSharp.Charting.Renderers
                 XSize labelSize = gfx.MeasureString(str, yari.TickLabelsFont);
                 if (yari.MajorTickMark != TickMarkType.None)
                 {
-                    labelSize.Height += 1.5f * yari.MajorTickMarkWidth;
-                    points[0].X = y;
-                    points[0].Y = majorTickMarkStart;
-                    points[1].X = y;
-                    points[1].Y = majorTickMarkEnd;
+                    labelSize.Height += 1.5f * (float_)yari.MajorTickMarkWidth;
+                    points[0].X = (float_)y;
+                    points[0].Y = (float_)majorTickMarkStart;
+                    points[1].X = (float_)y;
+                    points[1].Y = (float_)majorTickMarkEnd;
                     matrix.TransformPoints(points);
                     lineFormatRenderer.DrawLine(points[0], points[1]);
                 }
 
                 XPoint[] layoutText = new XPoint[1];
-                layoutText[0].X = y;
-                layoutText[0].Y = yari.Y + 1.5 * yari.MajorTickMarkWidth;
+                layoutText[0].X = (float_)y;
+                layoutText[0].Y = (float_)(yari.Y + 1.5 * yari.MajorTickMarkWidth);
                 matrix.TransformPoints(layoutText);
                 layoutText[0].X -= labelSize.Width / 2; // Center text vertically.
                 gfx.DrawString(str, yari.TickLabelsFont, yari.TickLabelsBrush, layoutText[0], xsf);
@@ -163,10 +168,10 @@ namespace PdfSharp.Charting.Renderers
 
             if (yari.LineFormat != null)
             {
-                points[0].X = yMin;
-                points[0].Y = yari.Y;
-                points[1].X = yMax;
-                points[1].Y = yari.Y;
+                points[0].X = (float_)yMin;
+                points[0].Y = (float_)yari.Y;
+                points[1].X = (float_)yMax;
+                points[1].Y = (float_)yari.Y;
                 matrix.TransformPoints(points);
                 if (yari.MajorTickMark != TickMarkType.None)
                 {
@@ -184,7 +189,7 @@ namespace PdfSharp.Charting.Renderers
                 parms.Graphics = gfx;
                 parms.RendererInfo = yari;
                 XRect rcTitle = yari.Rect;
-                rcTitle.Height = yari.AxisTitleRendererInfo.Height;
+                rcTitle.Height = (float_)yari.AxisTitleRendererInfo.Height;
                 rcTitle.Y += yari.Rect.Height - rcTitle.Height;
                 yari.AxisTitleRendererInfo.Rect = rcTitle;
                 AxisTitleRenderer atr = new AxisTitleRenderer(parms);

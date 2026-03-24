@@ -21,8 +21,14 @@ namespace Xunit
         /// <returns>True if slow tests should be skipped.</returns>
         public static bool SkipSlowTests()
         {
+#if RUN_SLOW_TESTS
+            return false;
+#else
             var env = Environment.GetEnvironmentVariable("PDFsharpTests");
+            //#/warning slow tests
+            //            env = "x";
             return String.IsNullOrEmpty(env);
+#endif
         }
 
         /// <summary>
@@ -32,7 +38,7 @@ namespace Xunit
         /// <returns>True if slow tests should be skipped.</returns>
         public static bool SkipSlowTestsUnderDotNetFramework()
         {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             return false;
 #else
             return SkipSlowTests();

@@ -9,12 +9,8 @@
 #define DRAW_BMP_
 #endif
 
-using System;
-using System.Diagnostics;
 using System.ComponentModel;
-using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Windows.Forms;
 using PdfSharp.Drawing;
 
 #if !GDI
@@ -40,7 +36,7 @@ namespace PdfSharp.Forms
         /// </summary>
         public delegate void RenderEvent(XGraphics gfx);
 
-        private Container components = null!;
+        Container components = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PagePreview"/> class.
@@ -70,10 +66,6 @@ namespace PdfSharp.Forms
             //virtPageSize = new Size();
             //showNonPrintableArea = false;
             //virtualPrintableArea = new Rectangle();
-
-            //_printableArea.GetType();
-            //showNonPrintableArea.GetType();
-            //virtualPrintableArea.GetType();
 
             // Prevent bogus compiler warnings
             _posOffset = new Point();
@@ -171,7 +163,7 @@ namespace PdfSharp.Forms
         [DefaultValue((int)Zoom.FullPage), Description("Determines the zoom of the page."), Category("Preview Properties")]
         public Zoom Zoom
         {
-            get { return _zoom; }
+            get => _zoom;
             set
             {
                 if ((int)value < (int)Zoom.Minimum || (int)value > (int)Zoom.Maximum)
@@ -197,7 +189,7 @@ namespace PdfSharp.Forms
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public int ZoomPercent
         {
-            get { return _zoomPercent; }
+            get => _zoomPercent;
             set
             {
                 if (value < (int)Zoom.Minimum || value > (int)Zoom.Maximum)
@@ -223,7 +215,7 @@ namespace PdfSharp.Forms
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public Color PageColor
         {
-            get { return _pageColor; }
+            get => _pageColor;
             set
             {
                 if (value != _pageColor)
@@ -242,7 +234,7 @@ namespace PdfSharp.Forms
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public Color DesktopColor
         {
-            get { return _desktopColor; }
+            get => _desktopColor;
             set
             {
                 if (value != _desktopColor)
@@ -252,7 +244,7 @@ namespace PdfSharp.Forms
                 }
             }
         }
-        internal Color _desktopColor = SystemColors.ControlDark;
+            Color _desktopColor = SystemColors.ControlDark;
 
         /// <summary>
         /// Gets or sets a value indicating whether the scrollbars are visible.
@@ -260,7 +252,7 @@ namespace PdfSharp.Forms
         [DefaultValue(true), Description("Determines whether the scrollbars are visible."), Category("Preview Properties")]
         public bool ShowScrollbars
         {
-            get { return _showScrollbars; }
+            get => _showScrollbars;
             set
             {
                 if (value != _showScrollbars)
@@ -280,7 +272,7 @@ namespace PdfSharp.Forms
         [DefaultValue(true), Description("Determines whether the page visible."), Category("Preview Properties")]
         public bool ShowPage
         {
-            get { return _showPage; }
+            get => _showPage;
             set
             {
                 if (value != _showPage)
@@ -315,7 +307,7 @@ namespace PdfSharp.Forms
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public Size PageSizeF
         {
-            get { return new Size(Convert.ToInt32(_pageSize.Width), Convert.ToInt32(_pageSize.Height)); }
+            get => new(Convert.ToInt32(_pageSize.Width), Convert.ToInt32(_pageSize.Height));
             set
             {
                 _pageSize = value;
@@ -349,7 +341,7 @@ namespace PdfSharp.Forms
         /// Required method for Designer support - do not modify 
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
+        void InitializeComponent()
         {
             Name = "PagePreview";
             Size = new System.Drawing.Size(228, 252);

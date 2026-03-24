@@ -29,6 +29,7 @@
     </ReadLinesFromFile>
 
     <PropertyGroup>
+      <PDFsharpNuGetPackageTag Condition=" '$(Configuration)'=='Debug' ">-DEBUG</PDFsharpNuGetPackageTag>
       <NuspecProperties>$(NuspecProperties);id=$(NuGetId)</NuspecProperties>
       <NuspecProperties>$(NuspecProperties);title=$(NuGetTitle)</NuspecProperties>
       <NuspecProperties>$(NuspecProperties);config=$(Configuration)</NuspecProperties>
@@ -39,12 +40,16 @@
       <NuspecProperties>$(NuspecProperties);owners=$(Owners)</NuspecProperties>
       <NuspecProperties>$(NuspecProperties);projectUrl=$(NuGetProjectUrl)</NuspecProperties>
       <NuspecProperties>$(NuspecProperties);copyright=$(Copyright)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);CopyrightPdfSharp=$(CopyrightPdfSharp)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);CopyrightMigraDoc=$(CopyrightMigraDoc)</NuspecProperties>
       <NuspecProperties>$(NuspecProperties);releaseNotes=$(NuGetReleaseNotes)</NuspecProperties>
       <NuspecProperties>$(NuspecProperties);tags=$(NuGetTags)</NuspecProperties>
 
       <NuspecProperties>$(NuspecProperties);NetCore_PackageVersion=$(NetCore_PackageVersion)</NuspecProperties>
       <NuspecProperties>$(NuspecProperties);Logging_Abstractions_PackageVersion=$(Logging_Abstractions_PackageVersion)</NuspecProperties>
       <NuspecProperties>$(NuspecProperties);Cryptography_PackageVersion=$(Cryptography_PackageVersion)</NuspecProperties>
+
+      <NuspecProperties>$(NuspecProperties);pdfsharpnugetpackagetag=$(PDFsharpNuGetPackageTag)</NuspecProperties>
   </PropertyGroup>
 
   <!--

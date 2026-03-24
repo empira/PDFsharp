@@ -1,14 +1,14 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.Collections.Generic;
+#pragma warning disable CS1591 // TODO_DOC: Missing XML comment for publicly visible type or member
 
 namespace PdfSharp.Pdf.Advanced
 {
     /// <summary>
     /// Base class for all dictionaries that map resource names to objects.
     /// </summary>
-    class PdfResourceMap : PdfDictionary
+    public class PdfResourceMap : PdfDictionary
     {
         public PdfResourceMap()
         { }
@@ -21,16 +21,16 @@ namespace PdfSharp.Pdf.Advanced
             : base(dict)
         { }
 
-        //    public int Count
-        //    {
-        //      get {return resources.Count;}
-        //    }
+        // public int Count
+        // {
+        //   get {return resources.Count;}
+        // }
         //
-        //    public PdfObject this[string key]
-        //    {
-        //      get {return resources[key] as PdfObject;}
-        //      set {resources[key] = value;}
-        //    }
+        // public PdfObject this[string key]
+        // {
+        //   get {return resources[key] as PdfObject;}
+        //   set {resources[key] = value;}
+        // }
 
         /// <summary>
         /// Adds all imported resource names to the specified hashtable.

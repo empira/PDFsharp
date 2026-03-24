@@ -40,31 +40,31 @@ namespace PdfSharp.Charting.Renderers
             if (lri.BorderPen != null!)
                 paddingFactor = 2;
             XRect legendRect = lri.Rect;
-            legendRect.X += LeftPadding * paddingFactor;
+            legendRect.X += (float_)(LeftPadding * paddingFactor);
             if (verticalLegend)
-                legendRect.Y = legendRect.Bottom - BottomPadding * paddingFactor;
+                legendRect.Y = (float_)(legendRect.Bottom - BottomPadding * paddingFactor);
             else
-                legendRect.Y += TopPadding * paddingFactor;
+                legendRect.Y += (float_)(TopPadding * paddingFactor);
 
             if (cri.LegendRendererInfo != null)
             {
                 foreach (var leri in cri.LegendRendererInfo.Entries)
                 {
                     if (verticalLegend)
-                        legendRect.Y -= leri.Height;
+                        legendRect.Y -= (float_)leri.Height;
 
                     XRect entryRect = legendRect;
-                    entryRect.Width = leri.Width;
-                    entryRect.Height = leri.Height;
+                    entryRect.Width = (float_)leri.Width;
+                    entryRect.Height = (float_)leri.Height;
 
                     leri.Rect = entryRect;
                     parms.RendererInfo = leri;
                     ler.Draw();
 
                     if (verticalLegend)
-                        legendRect.Y -= EntrySpacing;
+                        legendRect.Y -= (float_)EntrySpacing;
                     else
-                        legendRect.X += entryRect.Width + EntrySpacing;
+                        legendRect.X += (float_)(entryRect.Width + EntrySpacing);
                 }
             }
 
@@ -72,10 +72,10 @@ namespace PdfSharp.Charting.Renderers
             if (lri.BorderPen != null)
             {
                 XRect borderRect = lri.Rect;
-                borderRect.X += LeftPadding;
-                borderRect.Y += TopPadding;
-                borderRect.Width -= LeftPadding + RightPadding;
-                borderRect.Height -= TopPadding + BottomPadding;
+                borderRect.X += (float_)LeftPadding;
+                borderRect.Y += (float_)TopPadding;
+                borderRect.Width -= (float_)(LeftPadding + RightPadding);
+                borderRect.Height -= (float_)(TopPadding + BottomPadding);
                 gfx.DrawRectangle(lri.BorderPen, borderRect);
             }
         }

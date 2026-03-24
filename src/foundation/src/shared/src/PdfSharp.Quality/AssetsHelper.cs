@@ -27,6 +27,9 @@ namespace PdfSharp.Quality
                 var dirInfo = Directory.GetParent(path);
                 if (dirInfo == null)
                     break;
+
+                // Is an endless loop possible? Yes.
+                path = dirInfo.FullName; // Update path to prevent endless loop.
             }
             return null;
         }

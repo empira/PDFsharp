@@ -168,9 +168,11 @@ namespace PdfSharp.Pdf.Filters
                 //    Crypt = new Crypt();
                 //  return Crypt;
 
-                
+
                 case PdfFilterNames.RunLengthDecode:
+                case PdfFilterNames.RunLengthDecodeAbbreviation:
                 case PdfFilterNames.CcittFaxDecode:
+                case PdfFilterNames.CcittFaxDecodeAbbreviation:
                 case PdfFilterNames.Jbig2Decode:
                 case PdfFilterNames.JpxDecode:
                 case PdfFilterNames.Crypt:
@@ -266,18 +268,21 @@ namespace PdfSharp.Pdf.Filters
         {
             byte[]? result = null;
 
-#if true
-            PdfReference.Dereference(ref filterItem);
-#else
-            if (filterItem is PdfReference iref)
-            {
-                Debug.Assert(iref.Value != null, "Indirect /Filter value is null");
-                filterItem = iref.Value;
-            }
-#endif
+            // #US373.
+//            // TODO Make sure Decode is never called with a reference.
+//#if true
+//            PdfReference.Dereference(ref filterItem);
+//#else
+//            if (filterItem is PdfReference iref)
+//            {
+//                Debug.Assert(iref.Value != null, "Indirect /Filter value is null");
+//                filterItem = iref.Value;
+//            }
+//#endif
 
-            if (decodeParms is not null)
-                PdfReference.Dereference(ref decodeParms);
+//            // TODO Make sure Decode is never called with a reference.
+//            if (decodeParms is not null)
+//                PdfReference.Dereference(ref decodeParms);
 
             if (filterItem is PdfName && decodeParms is null or PdfDictionary)
             {

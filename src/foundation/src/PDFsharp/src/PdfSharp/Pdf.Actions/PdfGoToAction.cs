@@ -3,6 +3,8 @@
 
 using PdfSharp.Pdf.IO;
 
+// v7.0.0 REVIEW
+
 namespace PdfSharp.Pdf.Actions
 {
     /// <summary>
@@ -10,6 +12,8 @@ namespace PdfSharp.Pdf.Actions
     /// </summary>
     public sealed class PdfGoToAction : PdfAction
     {
+        // Reference 2.0: 12.6.4.2 Go-To actions / Page 511
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfGoToAction"/> class.
         /// </summary>
@@ -29,6 +33,14 @@ namespace PdfSharp.Pdf.Actions
         }
 
         /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfGoToAction(PdfDictionary dict)
+            : base(dict)
+        { }
+
+        /// <summary>
         /// Creates a link within the current document.
         /// </summary>
         /// <param name="destinationName">The Named Destination’s name in the target document.</param>
@@ -44,8 +56,7 @@ namespace PdfSharp.Pdf.Actions
 
         void Inititalize()
         {
-            Elements.SetName(PdfAction.Keys.Type, "/Action");
-            Elements.SetName(PdfAction.Keys.S, "/GoTo");
+            Elements.SetName(PdfAction.Keys.S, PdfNamedActionTypes.GoTo);
         }
 
         internal override void WriteObject(PdfWriter writer)
@@ -60,9 +71,11 @@ namespace PdfSharp.Pdf.Actions
         /// </summary>
         internal new class Keys : PdfAction.Keys
         {
+            // Reference 2.0: Table 202 — Additional entries specific to a go-to action / Page 511
+
             ///// <summary>
             ///// (Required) The type of action that this dictionary describes;
-            ///// must be GoTo for a go-to action.
+            ///// shall be GoTo for a go-to action.
             ///// </summary>
             //[KeyInfo(KeyType.Name | KeyType.Required, FixedValue = "GoTo")]
             //public const string S = "/S";
@@ -70,8 +83,15 @@ namespace PdfSharp.Pdf.Actions
             /// <summary>
             /// (Required) The destination to jump to (see Section 8.2.1, “Destinations”).
             /// </summary>
-            [KeyInfo(KeyType.Name | KeyType.ByteString | KeyType.Array | KeyType.Required)]
+            //[KeyInfo(KeyType.Name | KeyType.ByteString | KeyType.Array | KeyType.Required)] // #US373 Cannot "|" types.
+            [KeyInfo(KeyType.NameOrByteStringOrArray | KeyType.Required)]
             public const string D = "/D";
+
+            /// <summary>
+            /// (Required) The destination to jump to (see Section 8.2.1, “Destinations”).
+            /// </summary>
+            [KeyInfo(KeyType.Array | KeyType.Optional)]
+            public const string SD = "/SD";
         }
     }
 }

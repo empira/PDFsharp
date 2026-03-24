@@ -1,6 +1,13 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using Microsoft.Extensions.Logging;
+using PdfSharp.Logging;
+using PdfSharp.Internal;
+using PdfSharp.Internal.OpenType;
+using PdfSharp.Internal.Threading;
+using PdfSharp.Fonts.Internal;
+using PdfSharp.Fonts;
 #if GDI
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -9,9 +16,6 @@ using GdiFont = System.Drawing.Font;
 using GdiFontStyle = System.Drawing.FontStyle;
 #endif
 #if WPF
-//using System.Windows;
-//using System.Windows.Documents;
-//using System.Windows.Media;
 using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfTypeface = System.Windows.Media.Typeface;
 using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
@@ -20,58 +24,44 @@ using WpfStyleSimulations = System.Windows.Media.StyleSimulations;
 #if WUI
 using Windows.UI.Xaml.Media;
 #endif
-using Microsoft.Extensions.Logging;
-using PdfSharp.Fonts;
-using PdfSharp.Fonts.Internal;
-using PdfSharp.Fonts.OpenType;
-using PdfSharp.Internal;
-using PdfSharp.Logging;
 
 namespace PdfSharp.Drawing
 {
+    // TODO-7.0: Use OpenTypeGlyphTypeface as implementation of XGlyphTypeface.
+
     /// <summary>
     /// Specifies a physical font face that corresponds to a font file on the disk or in memory.
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public sealed class XGlyphTypeface
     {
-        // Implementation Notes
-        //
-        // * Each XGlyphTypeface can belong to one or more XFont objects.
-        // * An XGlyphTypeface hold an XFontFamily.
-        // * XGlyphTypeface hold a reference to an OpenTypeFontFace. 
-
         const string KeySuffix = ":TFK";  // Typeface Key
-
 #if CORE
-        XGlyphTypeface(string key, XFontFamily fontFamily, XFontSource fontSource, XStyleSimulations styleSimulations)
+        XGlyphTypeface(string key, XFontFamily fontFamily, XFontSource fontSource,
+            XStyleSimulations styleSimulations)
         {
             Key = key;
             FontFamily = fontFamily;
             FontSource = fontSource;
 
-            FontFace = OpenTypeFontFace.CetOrCreateFrom(fontSource);
+            Debug.Assert(fontSource.OTFontFace != null);
+            //OTFontFace = OpenTypeFontFace.GetOrCreateFrom(fontSource.OTFontSource);
+            OTFontFace = fontSource.OTFontFace;
             
-            // Check why it fails.
-            //Debug.Assert(ReferenceEquals(FontSource.FontFace, FontFace));
-
             StyleSimulations = styleSimulations;
             Initialize();
         }
 #endif
 
 #if GDI
-        XGlyphTypeface(string key, XFontFamily fontFamily, XFontSource fontSource, XStyleSimulations styleSimulations, GdiFont gdiFont)
+        XGlyphTypeface(string key, XFontFamily fontFamily, XFontSource fontSource, 
+            XStyleSimulations styleSimulations, GdiFont gdiFont)
         {
             Key = key;
             FontFamily = fontFamily;
             FontSource = fontSource;
-
-            FontFace = OpenTypeFontFace.CetOrCreateFrom(fontSource);
-            Debug.Assert(ReferenceEquals(FontSource.FontFace, FontFace));
-
+            OTFontFace = FontSource.OTFontFace;
             _gdiFont = gdiFont;
-
             StyleSimulations = styleSimulations;
             Initialize();
         }
@@ -83,16 +73,13 @@ namespace PdfSharp.Drawing
         /// </summary>
         public XGlyphTypeface(XFontSource fontSource)
         {
-            string familyName = fontSource.FontFace.name.Name;
+            string familyName = fontSource.OTFontFace.name.OTFamilyName;
             FontFamily = new XFontFamily(familyName, false);
-            FontFace = fontSource.FontFace;
-            IsBold = FontFace.os2.IsBold;
-            IsItalic = FontFace.os2.IsItalic;
-
+            OTFontFace = fontSource.OTFontFace;
+            IsBold = OTFontFace.os2.IsBold;
+            IsItalic = OTFontFace.os2.IsItalic;
             Key = ComputeGtfKey(familyName, IsBold, IsItalic);
-            //_fontFamily =xfont  FontFamilyCache.GetFamilyByName(familyName);
             FontSource = fontSource;
-
             Initialize();
         }
 #endif
@@ -104,13 +91,9 @@ namespace PdfSharp.Drawing
             FontFamily = fontFamily;
             FontSource = fontSource;
             StyleSimulations = styleSimulations;
-
-            FontFace = OpenTypeFontFace.CetOrCreateFrom(fontSource);
-            Debug.Assert(ReferenceEquals(FontSource.FontFace, FontFace));
-
+            OTFontFace = FontSource.OTFontFace;
             WpfTypeface = wpfTypeface;
             WpfGlyphTypeface = wpfGlyphTypeface;
-
             Initialize();
         }
 #endif
@@ -123,7 +106,7 @@ namespace PdfSharp.Drawing
             _fontSource = fontSource;
             _styleSimulations = styleSimulations;
 
-            _fontFace = OpenTypeFontFace.CetOrCreateFrom(fontSource);
+            _fontFace = OpenTypeFontFace.GetOrCreateFromBytes(fontSource);
             Debug.Assert(ReferenceEquals(_fontSource.FontFace, _fontFace));
 
             //_wpfTypeface = wpfTypeface;
@@ -141,16 +124,15 @@ namespace PdfSharp.Drawing
             try
             {
                 // Lock around TryGetGlyphTypeface and AddGlyphTypeface.
-                Locks.EnterFontFactory();
-                if (GlyphTypefaceCache.TryGetGlyphTypeface(typefaceKey, out glyphTypeface))
+                Locks.EnterFontManagement();
+                var glyphTypefaceCache = PsGlobals.Global.Fonts.GlyphTypefaceCache;
+                if (glyphTypefaceCache.TryGetGlyphTypeface(typefaceKey, out glyphTypeface))
                 {
                     // Just return existing one.
                     return glyphTypeface;
                 }
 
                 //// Resolve typeface by FontFactory. If no success, try fallback font resolver.
-                //var fontResolverInfo = FontFactory.ResolveTypeface(familyName, fontResolvingOptions, typefaceKey, false) ??
-                //                       FontFactory.ResolveTypeface(familyName, fontResolvingOptions, typefaceKey, true);
                 FontResolverInfo? fontResolverInfo = null;
                 try  // Custom font resolvers may throw an exception.
                 {
@@ -176,7 +158,7 @@ namespace PdfSharp.Drawing
                 }
 
                 void LogErrorBecauseFontResolverThrowsException(string name, Exception ex)
-                    => PdfSharpLogHost.Logger.LogError("A font resolver cannot resolve font family '{}' and throws an exception, " +
+                    => PdfSharpLogHost.Logger.LogError("A font resolver cannot resolve font family '{familyName}' and throws an exception, " +
                                                        "but it must return null if the font cannot be resolved. Exception text: " + ex.Message, name);
 
                 if (fontResolverInfo == null)
@@ -194,7 +176,7 @@ namespace PdfSharp.Drawing
                     throw new InvalidOperationException($"No appropriate font found for family name '{familyName}'.");
                 }
 #if GDI
-                GdiFont gdiFont = default!;
+                GdiFont gdiFont = null!;
 #endif
 #if WPF
                 // ReSharper disable once TooWideLocalVariableScope
@@ -215,9 +197,6 @@ namespace PdfSharp.Drawing
 #if CORE
                     // Get or create font family for custom font resolver retrieved font source.
                     fontFamily = XFontFamily.GetOrCreateFontFamily(familyName);
-                    //// Cannot come here
-                    //fontFamily = null;
-                    //Debug.Assert(false);
 #endif
 #if GDI
                     // Reuse GDI+ font from platform font resolver.
@@ -244,7 +223,8 @@ namespace PdfSharp.Drawing
                 }
 
                 // We have a valid font resolver info. That means we also have an XFontSource object loaded in the cache.
-                XFontSource fontSource = FontFactory.GetFontSourceByFontName(fontResolverInfo.FaceName);
+                var fontSourceCache = PsGlobals.Global.Fonts.FontSourceCache;
+                XFontSource fontSource = fontSourceCache.GetFontSourceByFontName(fontResolverInfo.FaceName);
                 Debug.Assert(fontSource != null);
 
                 // Each font source already contains its OpenTypeFontFace.
@@ -260,9 +240,9 @@ namespace PdfSharp.Drawing
 #if WUI
                 glyphTypeface = new XGlyphTypeface(typefaceKey, fontFamily, fontSource, fontResolverInfo.StyleSimulations);
 #endif
-                GlyphTypefaceCache.AddGlyphTypeface(glyphTypeface);
+                glyphTypefaceCache.AddGlyphTypeface(glyphTypeface);
             }
-            finally { Locks.ExitFontFactory(); }
+            finally { Locks.ExitFontManagement(); }
             return glyphTypeface;
         }
 
@@ -277,9 +257,10 @@ namespace PdfSharp.Drawing
             try
             {
                 // Lock around TryGetGlyphTypeface and AddGlyphTypeface.
-                Locks.EnterFontFactory();
+                Locks.EnterFontManagement();
                 string typefaceKey = ComputeGtfKey(gdiFont);
-                if (GlyphTypefaceCache.TryGetGlyphTypeface(typefaceKey, out glyphTypeface))
+                var glyphTypefaceCache = PsGlobals.Global.Fonts.GlyphTypefaceCache;
+                if (glyphTypefaceCache.TryGetGlyphTypeface(typefaceKey, out glyphTypeface))
                 {
                     // We have the glyph typeface already in cache.
                     return glyphTypeface;
@@ -292,15 +273,16 @@ namespace PdfSharp.Drawing
 
                 // Check if styles must be simulated.
                 XStyleSimulations styleSimulations = XStyleSimulations.None;
-                if (gdiFont.Bold && !fontSource.FontFace.os2.IsBold)
+                if (gdiFont.Bold && !fontSource.OTFontFace.os2.IsBold)
                     styleSimulations |= XStyleSimulations.BoldSimulation;
-                if (gdiFont.Italic && !fontSource.FontFace.os2.IsItalic)
+                if (gdiFont.Italic && !fontSource.OTFontFace.os2.IsItalic)
                     styleSimulations |= XStyleSimulations.ItalicSimulation;
 
                 glyphTypeface = new XGlyphTypeface(typefaceKey, fontFamily, fontSource, styleSimulations, gdiFont);
-                GlyphTypefaceCache.AddGlyphTypeface(glyphTypeface);
+                //var glyphTypefaceCache = PsGlobals.Global.Fonts.GlyphTypefaceCache;
+                glyphTypefaceCache.AddGlyphTypeface(glyphTypeface);
             }
-            finally { Locks.ExitFontFactory(); }
+            finally { Locks.ExitFontManagement(); }
 
             return glyphTypeface;
         }
@@ -324,7 +306,7 @@ namespace PdfSharp.Drawing
             // Lock around TryGetGlyphTypeface and AddGlyphTypeface.
             try
             {
-                Locks.EnterFontFactory();
+                Locks.EnterFontManagement();
 
                 // Create WPF glyph typeface.
                 if (!wpfTypeface.TryGetGlyphTypeface(out var wpfGlyphTypeface))
@@ -343,7 +325,8 @@ namespace PdfSharp.Drawing
                 // ReSharper restore UnusedVariable
 #endif
 
-                if (GlyphTypefaceCache.TryGetGlyphTypeface(typefaceKey, out var glyphTypeface))
+                var glyphTypefaceCache = PsGlobals.Global.Fonts.GlyphTypefaceCache;
+                if (glyphTypefaceCache.TryGetGlyphTypeface(typefaceKey, out var glyphTypeface))
                 {
                     // We have the glyph typeface already in cache.
                     return glyphTypeface;
@@ -355,11 +338,11 @@ namespace PdfSharp.Drawing
                 glyphTypeface = new XGlyphTypeface(typefaceKey, fontFamily, fontSource,
                     (XStyleSimulations)wpfGlyphTypeface.StyleSimulations,
                     wpfTypeface, wpfGlyphTypeface);
-                GlyphTypefaceCache.AddGlyphTypeface(glyphTypeface);
+                glyphTypefaceCache.AddGlyphTypeface(glyphTypeface);
 
                 return glyphTypeface;
             }
-            finally { Locks.ExitFontFactory(); }
+            finally { Locks.ExitFontManagement(); }
         }
 #endif
 
@@ -368,7 +351,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public XFontFamily FontFamily { get; }
 
-        internal OpenTypeFontFace FontFace { get; }
+        internal OpenTypeFontFace OTFontFace { get; }
 
         /// <summary>
         /// Gets the font source of this glyph typeface.
@@ -377,51 +360,49 @@ namespace PdfSharp.Drawing
 
         void Initialize()
         {
-            FamilyName = FontFace.name.Name;
-            //if (String.IsNullOrEmpty(FaceName) || FaceName.StartsWith("?", StringComparison.Ordinal))
-#if TEST_CODE_
-            if (!String.IsNullOrEmpty(FaceName))
-                _ = typeof(int);
-#endif
-            FaceName = FontFace.name.FullFontName;
-            StyleName = FontFace.name.Style;
-            DisplayName = FontFace.name.FullFontName;
+            FamilyName = OTFontFace.name.OTFamilyName;
+            FaceName = OTFontFace.name.OTSubfamilyName;
+            FontName = DisplayName = OTFontFace.name.OTFullFontName;
             if (String.IsNullOrEmpty(DisplayName))
             {
-                DisplayName = FamilyName;
-                if (!String.IsNullOrEmpty(StyleName))
-                    DisplayName += " (" + StyleName + ")";
+                FontName = DisplayName = FamilyName;
+                if (!String.IsNullOrEmpty(FaceName))
+                    DisplayName += " (" + FaceName + ")";
             }
 
             // Bold, as defined in OS/2 table.
-            IsBold = FontFace.os2.IsBold;
-            // Debug.Assert(_isBold == (_fontFace.os2.usWeightClass > 400), "Check font weight.");
+            IsBold = OTFontFace.os2.IsBold;
 
             // Italic, as defined in OS/2 table.
-            IsItalic = FontFace.os2.IsItalic;
+            IsItalic = OTFontFace.os2.IsItalic;
         }
 
         /// <summary>
-        /// Gets the name of the font face. This can be a file name, an URI, or a GUID.
+        /// Gets the name of the font face. This can be a file name, a URI, or a GUID.
         /// </summary>
-        internal string FaceName { get; private set; } = default!;
+        internal string FontName{ get; private set; } = null!;  // Former FaceName
 
         /// <summary>
         /// Gets the English family name of the font, for example "Arial".
         /// </summary>
-        public string FamilyName { get; private set; } = default!;
+        public string FamilyName { get; private set; } = null!;
 
         /// <summary>
         /// Gets the English subfamily name of the font,
         /// for example "Bold".
         /// </summary>
-        public string StyleName { get; private set; } = default!;
+        /// <remarks>
+        /// Prior to PDFsharp 7 this function incorrectly returns the family.
+        /// Starting with PDFsharp 7 it returns the correct value.
+        /// This is a breaking change.
+        /// </remarks>
+        public string FaceName { get; private set; } = null!;
 
         /// <summary>
         /// Gets the English display name of the font,
         /// for example "Arial italic".
         /// </summary>
-        public string DisplayName { get; private set; } = default!;
+        public string DisplayName { get; private set; } = null!;
 
         /// <summary>
         /// Gets a value indicating whether the font weight is bold.
@@ -492,9 +473,9 @@ namespace PdfSharp.Drawing
             var italic = fontResolvingOptions.IsItalic;
             var key = bold switch
             {
-                false when !italic => name + "/N/400/500" + simulationSuffix + KeySuffix,
-                true when !italic => name + "/N/700/500" + simulationSuffix + KeySuffix,
-                false when italic => name + "/I/400/500" + simulationSuffix + KeySuffix,
+                false when !italic => name + "/N/400/5" + simulationSuffix + KeySuffix,
+                true when !italic => name + "/N/700/5" + simulationSuffix + KeySuffix,
+                false when italic => name + "/I/400/5" + simulationSuffix + KeySuffix,
                 _ => name + "/I/700/500" + simulationSuffix + KeySuffix,
             };
             return key;
@@ -589,8 +570,8 @@ namespace PdfSharp.Drawing
         internal WpfTypeface? WpfTypeface { get; }
         internal WpfGlyphTypeface? WpfGlyphTypeface { get; }
 #endif
-        internal void CheckVersion() => Globals.Global.Fonts.CheckVersion(_globalFontStorageVersion);
-        readonly int _globalFontStorageVersion = Globals.Global.Fonts.Version;
+        internal void CheckVersion() => PsGlobals.Global.Fonts.CheckVersion(_globalFontStorageVersion);
+        readonly int _globalFontStorageVersion = PsGlobals.Global.Fonts.Version;
 
         /// <summary>
         /// Gets the DebuggerDisplayAttribute text.
@@ -598,7 +579,7 @@ namespace PdfSharp.Drawing
         // ReSharper disable UnusedMember.Local
         internal string DebuggerDisplay
             // ReSharper restore UnusedMember.Local
-            => Invariant($"{FamilyName} - {StyleName} ({FaceName})");
+            => Invariant($"{FamilyName} - {FaceName} ({FontName})");
     }
 }
 
@@ -721,5 +702,4 @@ namespace PdfSharp.Drawing
    
    XHeight	
    Gets the Western x-height relative to em size for the font represented by the GlyphTypeface object.
-
 */

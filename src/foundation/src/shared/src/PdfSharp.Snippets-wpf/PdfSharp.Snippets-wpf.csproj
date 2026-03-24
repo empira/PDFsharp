@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0-windows;net9.0-windows;net10.0-windows;net462</TargetFrameworks>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_Windows)</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <RootNamespace>PdfSharp.Snippets</RootNamespace>
     <UseWPF>true</UseWPF>
@@ -77,7 +77,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Security.Cryptography.Pkcs" />
+    <!--<PackageReference Include="System.Security.Cryptography.Pkcs" />-->
     <PackageReference Include="BouncyCastle.Cryptography" />
   </ItemGroup>
 

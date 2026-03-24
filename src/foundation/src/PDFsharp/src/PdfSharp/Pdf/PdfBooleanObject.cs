@@ -10,7 +10,7 @@ namespace PdfSharp.Pdf
     /// an external PDF file, the value is converted into a direct object.
     /// </summary>
     [DebuggerDisplay("({" + nameof(Value) + "})")]
-    public sealed class PdfBooleanObject : PdfObject
+    public sealed class PdfBooleanObject : PdfPrimitiveObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfBooleanObject"/> class.
@@ -30,7 +30,21 @@ namespace PdfSharp.Pdf
         /// Initializes a new instance of the <see cref="PdfBooleanObject"/> class.
         /// </summary>
         public PdfBooleanObject(PdfDocument document, bool value)
-            : base(document)
+            : base(document, true)
+        {
+            _value = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PdfBooleanObject"/> class
+        /// without making it indirect.
+        /// Used in PDF parser only.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <param name="value">The initial value.</param>
+        /// <param name="createIndirect">If true creates an indirect object.</param>
+        internal PdfBooleanObject(PdfDocument document, bool value, bool createIndirect)
+            : base(document, createIndirect)
         {
             _value = value;
         }
@@ -45,7 +59,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Returns "false" or "true".
         /// </summary>
-        public override string ToString() 
+        public override string ToString()
             => _value ? bool.TrueString : bool.FalseString;
 
         /// <summary>

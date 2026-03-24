@@ -1,8 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Internal.OpenType;
 using PdfSharp.Drawing;
-using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 
 namespace PdfSharp.Events
@@ -10,7 +10,8 @@ namespace PdfSharp.Events
     /// <summary>
     /// EventArgs for PrepareTextEvent.
     /// </summary>
-    public class PrepareTextEventArgs(PdfObject source, XFont font, string text) : PdfSharpEventArgs(source)
+    public class PrepareTextEventArgs(PdfDocument source, XFont font, string text) 
+        : PdfSharpEventArgs(source)
     {
         /// <summary>
         /// Gets the font used to draw the text.
@@ -35,7 +36,8 @@ namespace PdfSharp.Events
     /// <summary>
     /// EventArgs for RenderTextEvent.
     /// </summary>
-    public class RenderTextEventArgs(PdfObject source, XFont font, CodePointGlyphIndexPair[] codePointGlyphIndexPair) : PdfSharpEventArgs(source)
+    public class RenderTextEventArgs(PdfDocument source, XFont font, CodePointGlyphIndexPair[] codePointGlyphIndexPair) 
+        : PdfSharpEventArgs(source)
     {
         /// <summary>
         /// Gets or sets a value indicating whether the determination of the glyph identifiers must be reevaluated.

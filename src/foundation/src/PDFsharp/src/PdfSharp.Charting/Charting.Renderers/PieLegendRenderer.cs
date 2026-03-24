@@ -35,10 +35,15 @@ namespace PdfSharp.Charting.Renderers
                 };
 
                 lri.Font = Converter.ToXFont(lri.Legend._font, cri.DefaultFont);
-                lri.FontColor = new XSolidBrush(XColors.Black);
+                lri.FontColor = XBrushes.Black;
 
                 if (lri.Legend._lineFormat != null)
-                    lri.BorderPen = Converter.ToXPen(lri.Legend._lineFormat, XColors.Black, DefaultLineWidth, XDashStyle.Solid);
+                    lri.BorderPen = Converter.ToXPen(lri.Legend._lineFormat, XColors.Black, DefaultLineWidth,
+#if PSGFX
+                        XDashStyles.Solid);
+#else
+                        XDashStyle.Solid);
+#endif
 
                 XSeries? xseries = null;
                 if (cri.Chart._xValues != null)

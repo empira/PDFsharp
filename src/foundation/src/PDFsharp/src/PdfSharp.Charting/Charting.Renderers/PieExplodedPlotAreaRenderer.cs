@@ -45,10 +45,10 @@ namespace PdfSharp.Charting.Renderers
             XRect pieRect = cri.PlotAreaRendererInfo.Rect;
             if (textMeasure != 0)
             {
-                pieRect.X += textMeasure;
-                pieRect.Y += textMeasure;
-                pieRect.Width -= 2 * textMeasure;
-                pieRect.Height -= 2 * textMeasure;
+                pieRect.X += (float_)textMeasure;
+                pieRect.Y += (float_)textMeasure;
+                pieRect.Width -= (float_)(2 * textMeasure);
+                pieRect.Height -= (float_)(2 * textMeasure);
             }
 
             XPoint origin = new XPoint(pieRect.X + pieRect.Width / 2, pieRect.Y + pieRect.Height / 2);
@@ -74,11 +74,11 @@ namespace PdfSharp.Charting.Renderers
                     sectorStartAngle = Math.Max(0, startAngle + deltaAngle);
                     sectorSweepAngle = Math.Max(sweepAngle, sweepAngle - deltaAngle);
 
-                    p1.X = origin.X + rInnerCircle * Math.Cos(midAngle / 180 * Math.PI);
-                    p1.Y = origin.Y + rInnerCircle * Math.Sin(midAngle / 180 * Math.PI);
-                    innerRect.X = p1.X - rOuterCircle + rInnerCircle;
-                    innerRect.Y = p1.Y - rOuterCircle + rInnerCircle;
-                    innerRect.Width = (rOuterCircle - rInnerCircle) * 2;
+                    p1.X = (float_)(origin.X + rInnerCircle * Math.Cos(midAngle / 180 * Math.PI));
+                    p1.Y = (float_)(origin.Y + rInnerCircle * Math.Sin(midAngle / 180 * Math.PI));
+                    innerRect.X = (float_)(p1.X - rOuterCircle + rInnerCircle);
+                    innerRect.Y = (float_)(p1.Y - rOuterCircle + rInnerCircle);
+                    innerRect.Width = (float_)((rOuterCircle - rInnerCircle) * 2);
                     innerRect.Height = innerRect.Width;
 
                     sector.Rect = innerRect;

@@ -21,7 +21,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         Version0 = 1,
 
-        // Note: Version1 is also possible, but with significantly more code. Version 1
+        // Note that Version1 is also possible, but with significantly more code. Version 1
         // uses extended graphical capabilities like gradient brushes and much more.
     }
 }

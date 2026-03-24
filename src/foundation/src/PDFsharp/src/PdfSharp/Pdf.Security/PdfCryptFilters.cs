@@ -17,9 +17,9 @@ namespace PdfSharp.Pdf.Security
         { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PdfCryptFilters"/> class.
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
         /// </summary>
-        /// <param name="dict"></param>
         internal PdfCryptFilters(PdfDictionary dict) : base(dict)
         { }
 
@@ -28,8 +28,9 @@ namespace PdfSharp.Pdf.Security
         /// </summary>
         public PdfCryptFilter? GetCryptFilter(string name)
         {
-            var key = PdfName.AddSlash(name);
-            var value = Elements[key];
+            var key = Name.MakeName(name);
+            //var value = Elements[key]; // #US373: Should we expect references here?
+            var value = Elements.GetValue(key); // #US373: Should we expect references here?
 
             return value is null ? null : Convert(value, key);
         }
@@ -39,7 +40,7 @@ namespace PdfSharp.Pdf.Security
         /// </summary>
         public void AddCryptFilter(string name, PdfCryptFilter cryptFilter)
         {
-            var key = PdfName.AddSlash(name);
+            var key = Name.MakeName(name);
             Elements[key] = cryptFilter;
         }
 
@@ -48,7 +49,7 @@ namespace PdfSharp.Pdf.Security
         /// </summary>
         public bool RemoveCryptFilter(string name)
         {
-            var key = PdfName.AddSlash(name);
+            var key = Name.MakeName(name);
             return Elements.Remove(key);
         }
 
@@ -62,8 +63,9 @@ namespace PdfSharp.Pdf.Security
             // Instead, enumerate Keys and get value via Elements[key], which shall be O(1).
             foreach (var key in Elements.Keys)
             {
-                var value = Elements[key]!;
-                var name = PdfName.RemoveSlash(key);
+                //var value = Elements[key]!; // #US373: Should we expect references here?
+                var value = Elements.GetValue(key)!; // #US373: Should we expect references here?
+                var name = Name.RemoveSlash(key);
                 var cryptFilter = Convert(value, key);
                 yield return (name, cryptFilter);
             }

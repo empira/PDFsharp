@@ -7,6 +7,7 @@
 //using PdfSharp.Quality;
 //using PdfSharp.Snippets.Font;
 
+using PdfSharp.Fonts;
 using PdfSharp.UniversalAccessibility;
 using Features = PdfSharp.Features.PdfSharpFeatures;
 
@@ -16,6 +17,9 @@ namespace PdfSharp.Features
     {
         static void Main(string[] args)
         {
+#if CORE
+            GlobalFontSettings.UseWindowsFontsUnderWindows = true;
+#endif
             Memory<byte> m = null;
             ReadOnlyMemory<byte> rom = null;
             Span<byte> s = null;
@@ -41,14 +45,14 @@ namespace PdfSharp.Features
 
             // Drawing/text
             //features[PdfSharpFeatures.Names.Drawing_text_SurrogateChars__Surrogates].Run();
-            //features[PdfSharpFeatures.Names.Drawing_text_SymbolFonts__Symbols].Run();
+            features[PdfSharpFeatures.Names.Drawing_text_SymbolFonts__Symbols].Run();
 
-            //features[PdfSharpFeatures.Names.Font_encoding_Encodings_AnsiEncoding].Run();
+            features[PdfSharpFeatures.Names.Font_encoding_Encodings_AnsiEncoding].Run();
 
             // Pdf/annotations
 
             // Pdf/pdfa
-            features[PdfSharpFeatures.Names.Pdf_pdfa_PdfA].Run();
+            //features[PdfSharpFeatures.Names.Pdf_pdfa_PdfA].Run();
 
 
 
@@ -64,8 +68,8 @@ namespace PdfSharp.Features
 
             // Drawing.text
             //new Features.Drawing.AutoFontEncoding().Ensure_one_PdfFontDescriptor_per_FontFace();
-            //new Features.Drawing.AutoFontEncoding().Test2();
-            //new Features.Drawing.AutoFontEncoding().MeasureString_Test();
+            new Features.Drawing.AutoFontEncoding().Test2();
+            new Features.Drawing.AutoFontEncoding().MeasureString_Test();
             //new Features.Drawing.Encodings().Ansi();
             //new Features.Drawing.SurrogateChars().Test1();
 

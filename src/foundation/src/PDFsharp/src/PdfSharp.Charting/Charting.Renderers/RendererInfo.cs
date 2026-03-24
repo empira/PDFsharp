@@ -7,11 +7,16 @@ namespace PdfSharp.Charting.Renderers
 {
     /// <summary>
     /// Represents the base class of all renderer infos.
-    /// Renderer infos are used to hold all necessary information and time consuming calculations
+    /// Renderer infos are used to hold all necessary information and time-consuming calculations
     /// between rendering cycles.
     /// </summary>
     abstract class RendererInfo
-    { }
+    {
+        void Foo()
+        {
+            var x = new XFont("xxx", 10);
+        }
+    }
 
     /// <summary>
     /// Base class for all renderer infos which defines an area.
@@ -24,7 +29,7 @@ namespace PdfSharp.Charting.Renderers
         public virtual double X
         {
             get => _rect.X;
-            set => _rect.X = value;
+            set => _rect.X = (float_)value;
         }
 
         /// <summary>
@@ -33,7 +38,7 @@ namespace PdfSharp.Charting.Renderers
         public virtual double Y
         {
             get => _rect.Y;
-            set => _rect.Y = value;
+            set => _rect.Y = (float_)value;
         }
 
         /// <summary>
@@ -42,7 +47,7 @@ namespace PdfSharp.Charting.Renderers
         public virtual double Width
         {
             get => _rect.Width;
-            set => _rect.Width = value;
+            set => _rect.Width = (float_)value;
         }
 
         /// <summary>
@@ -51,7 +56,7 @@ namespace PdfSharp.Charting.Renderers
         public virtual double Height
         {
             get => _rect.Height;
-            set => _rect.Height = value;
+            set => _rect.Height = (float_)value;
         }
 
         /// <summary>
@@ -298,7 +303,7 @@ namespace PdfSharp.Charting.Renderers
             set
             {
                 base.X = value;
-                InnerRect.X = value;
+                InnerRect.X = (float_)value;
             }
         }
 
@@ -310,7 +315,7 @@ namespace PdfSharp.Charting.Renderers
             set
             {
                 base.Y = value;
-                InnerRect.Y = value + LabelSize.Height / 2;
+                InnerRect.Y = (float_)(value + LabelSize.Height / 2);
             }
         }
 
@@ -322,7 +327,7 @@ namespace PdfSharp.Charting.Renderers
             set
             {
                 base.Height = value;
-                InnerRect.Height = value - (InnerRect.Y - Y);
+                InnerRect.Height = (float_)(value - (InnerRect.Y - Y));
             }
         }
 
@@ -334,7 +339,7 @@ namespace PdfSharp.Charting.Renderers
             set
             {
                 base.Width = value;
-                InnerRect.Width = value - LabelSize.Width / 2;
+                InnerRect.Width = (float_)(value - LabelSize.Width / 2);
             }
         }
 

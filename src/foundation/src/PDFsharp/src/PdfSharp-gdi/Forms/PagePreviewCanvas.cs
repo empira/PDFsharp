@@ -45,7 +45,7 @@ namespace PdfSharp.Forms
         {
             if (!_preview._showPage)
             {
-                e.Graphics.Clear(_preview._desktopColor);
+                e.Graphics.Clear(_preview.DesktopColor);
                 return;
             }
             bool zoomChanged;

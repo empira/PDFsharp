@@ -6,20 +6,29 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Drawing
 {
+    /// <summary>
+    /// Snippet that demonstrates RGB colors.
+    /// </summary>
     public class ColorsRgb : Snippet
     {
+        /// <summary>
+        /// Creates a new ColorsRgb instance.
+        /// </summary>
         public ColorsRgb()
         {
             Title = "RGB Colors";
         }
 
-        public XRect GetDeciRect(int i)
+        XRect GetDeciRect(int i)
         {
             var left = i * BoxWidth / 10;
             var right = (i + 1) * BoxWidth / 10;
             return new XRect(left, 0, right - left, BoxHeight);
         }
 
+        /// <summary>
+        /// Renders the snippet.
+        /// </summary>
         public override void RenderSnippet(XGraphics gfx)
         {
             // White.
@@ -29,7 +38,7 @@ namespace PdfSharp.Snippets.Drawing
                 for (int idx = 0; idx < 10; idx++)
                 {
                     var rect = GetDeciRect(idx);
-                    gfx.DrawRectangle(new XSolidBrush(XColor.FromArgb(idx * 255 / 9, 255, 255, 255)), rect); 
+                    gfx.DrawRectangle(new XSolidBrush(XColor.FromArgb(idx * 255 / 9, 255, 255, 255)), rect);
                 }
             }
             EndBox(gfx);

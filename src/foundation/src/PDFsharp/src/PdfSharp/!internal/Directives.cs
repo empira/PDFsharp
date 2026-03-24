@@ -12,14 +12,36 @@
 #warning ***********************************************************
 #endif
 
+#if !DEBUG && PDFSHARP_DEBUG
+#warning ****************************************************************
+#warning ***** ‘PDFSHARP_DEBUG’ MUST BE UNDEFINED FOR FINAL RELEASE *****
+#warning ****************************************************************
+#endif
+
+#if !DEBUG && FEWER_FRAMEWORKS
+#warning ******************************************************************
+#warning ***** ‘FEWER_FRAMEWORKS’ MUST BE UNDEFINED FOR FINAL RELEASE *****
+#warning ******************************************************************
+#endif
+
 #if TEST_CODE_  // ‘’
 // Ensure not to accidentally rename ‘TEST_CODE’ to ‘TEST_CODE_’.
 // This would compile code previously disabled with ‘#if TEST_CODE_’.
-// Rename ‘TEST_CODE’ always to ‘TEST_CODE_xxx’ in ‘Directory.Build.targets’.
-#warning *****************************************************
-#warning ***** ‘TEST_CODE_’ MUST NEVER BE DEFINED        *****
-#warning ***** THIS ACCIDENTALLY ACTIVATES EXCLUDED CODE *****
-#warning *****************************************************
+// Rename ‘TEST_CODE’ always to ‘TEST_CODExxx’ in ‘Directory.Build.targets’.
+#warning *********************************************************
+#warning ***** ‘TEST_CODE_’ MUST NEVER BE DEFINED            *****
+#warning ***** THIS MAY ACCIDENTALLY ACTIVATES EXCLUDED CODE *****
+#warning *********************************************************
+#endif
+
+#if PDFSHARP_DEBUG_  // ‘’
+// Ensure not to accidentally rename ‘PDFSHARP_DEBUG’ to ‘PDFSHARP_DEBUG_’.
+// This would compile code previously disabled with ‘#if PDFSHARP_DEBUG_’.
+// Rename ‘PDFSHARP_DEBUG’ always to ‘PDFSHARP_DEBUGxxx’ in ‘Directory.Build.targets’.
+#warning *********************************************************
+#warning ***** ‘PDFSHARP_DEBUG_’ MUST NEVER BE DEFINED       *****
+#warning ***** THIS MAY ACCIDENTALLY ACTIVATES EXCLUDED CODE *****
+#warning *********************************************************
 #endif
 
 #if GDI && WPF

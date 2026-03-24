@@ -29,12 +29,21 @@ namespace MigraDoc.Rendering.ChartMapper
 
             lineFormat.DashStyle = domLineFormat.DashStyle switch
             {
+#if PSGFX
+                DocumentObjectModel.Shapes.DashStyle.Dash => XDashStyles.Dash,
+                DocumentObjectModel.Shapes.DashStyle.DashDot => XDashStyles.DashDot,
+                DocumentObjectModel.Shapes.DashStyle.DashDotDot => XDashStyles.DashDotDot,
+                DocumentObjectModel.Shapes.DashStyle.Solid => XDashStyles.Solid,
+                DocumentObjectModel.Shapes.DashStyle.SquareDot => XDashStyles.Dot,
+                _ => XDashStyles.Solid
+#else
                 DocumentObjectModel.Shapes.DashStyle.Dash => XDashStyle.Dash,
                 DocumentObjectModel.Shapes.DashStyle.DashDot => XDashStyle.DashDot,
                 DocumentObjectModel.Shapes.DashStyle.DashDotDot => XDashStyle.DashDotDot,
                 DocumentObjectModel.Shapes.DashStyle.Solid => XDashStyle.Solid,
                 DocumentObjectModel.Shapes.DashStyle.SquareDot => XDashStyle.Dot,
                 _ => XDashStyle.Solid
+#endif
             };
             lineFormat.Style = domLineFormat.Style switch
             {

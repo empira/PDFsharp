@@ -97,7 +97,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
         {
             // BUG_OLD: HasValue("a.b") not handled
             if (name.Contains('.'))
-                throw new NotImplementedException($"'{name}' contains a dot.");
+                throw new NotSupportedException($"'{name}' contains a dot.");
 
             return ValueDescriptors.HasName(name);
         }
@@ -109,7 +109,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
         public void SetNull(DocumentObject dom, string name)
         {
             if (name.Contains('.'))
-                throw new NotImplementedException($"'{name}' contains a dot.");
+                throw new NotSupportedException($"'{name}' contains a dot.");
 
             var vd = ValueDescriptors[name];
             if (vd == null)

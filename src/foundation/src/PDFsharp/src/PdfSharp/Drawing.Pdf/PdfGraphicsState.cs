@@ -27,6 +27,11 @@ namespace PdfSharp.Drawing.Pdf
     /// </remarks>
     sealed class PdfGraphicsState(XGraphicsPdfRenderer renderer) : ICloneable
     {
+        const string DefaultNumberFormat2 = Config.SignificantDecimalPlaces2;
+        const string DefaultNumberFormat3 = Config.SignificantDecimalPlaces3;
+        const string DefaultNumberFormat4 = Config.SignificantDecimalPlaces4;
+        const string DefaultNumberFormat7 = Config.SignificantDecimalPlaces7;
+
         public PdfGraphicsState Clone()
         {
             var state = (PdfGraphicsState)MemberwiseClone();
@@ -37,7 +42,7 @@ namespace PdfSharp.Drawing.Pdf
 
         internal int Level;
 
-        internal InternalGraphicsState InternalState = default!;
+        internal InternalGraphicsState InternalState = null!;
 
         public void PushState()
         {
@@ -58,14 +63,14 @@ namespace PdfSharp.Drawing.Pdf
         int _realizedLineJoin = -1;
         double _realizedMiterLimit = -1;
         XDashStyle _realizedDashStyle = (XDashStyle)(-1);
-        string _realizedDashPattern = default!;
-        XColor _realizedStrokeColor = XColor.Empty;
+        string _realizedDashPattern = null!;
+        XColor? _realizedStrokeColor; // Null means no stroke color has been realized yet.
         bool _realizedStrokeOverPrint;
 
         public void RealizePen(XPen pen, PdfColorMode colorMode)
         {
-            const string format = Config.SignificantDecimalPlaces3;
-            const string format2 = Config.SignificantDecimalPlaces2;
+            const string format = DefaultNumberFormat3;
+            const string format2 = DefaultNumberFormat2;
 
             XColor color = pen.Color;
             bool overPrint = pen.Overprint;
@@ -165,7 +170,7 @@ namespace PdfSharp.Drawing.Pdf
 
             if (colorMode != PdfColorMode.Cmyk)
             {
-                if (_realizedStrokeColor.Rgb != color.Rgb)
+                if (_realizedStrokeColor == null || _realizedStrokeColor.Value.Rgb != color.Rgb)
                 {
                     renderer.Append(PdfEncoders.ToString(color, PdfColorMode.Rgb));
                     renderer.Append(" RG\n");
@@ -173,21 +178,25 @@ namespace PdfSharp.Drawing.Pdf
             }
             else
             {
-                if (!ColorSpaceHelper.IsEqualCmyk(_realizedStrokeColor, color))
+                if (_realizedStrokeColor == null || !ColorSpaceHelper.IsEqualCmyk(_realizedStrokeColor.Value, color))
                 {
                     renderer.Append(PdfEncoders.ToString(color, PdfColorMode.Cmyk));
                     renderer.Append(" K\n");
                 }
             }
 
-            if (renderer.Owner.Version >= 14 && (_realizedStrokeColor.A != color.A || _realizedStrokeOverPrint != overPrint))
+            if (renderer.Owner.Version >= 14 // CA and ca keys of PdfExtGState are supported since PDF version 1.4.
+                && (// Add PdfExtGState, if no stroke color has been realized yet...
+                    _realizedStrokeColor == null
+                    // or if alpha or overPrint value has changed.
+                    || _realizedStrokeColor.Value.A != color.A || _realizedStrokeOverPrint != overPrint))
             {
                 PdfExtGState extGState = renderer.Owner.ExtGStateTable.GetExtGStateStroke(color.A, overPrint);
                 string gs = renderer.Resources.AddExtGState(extGState);
                 renderer.AppendFormatString("{0} gs\n", gs);
 
                 // Must create transparency group.
-                if (renderer._page != null! && color.A < 1)
+                if (renderer._page != null! && color.A < 1.0)
                     renderer._page.TransparencyUsed = true;
             }
             _realizedStrokeColor = color;
@@ -198,7 +207,7 @@ namespace PdfSharp.Drawing.Pdf
 
         #region Fill
 
-        XColor _realizedFillColor = XColor.Empty;
+        XColor? _realizedFillColor; // Null means no fill color has been realized yet.
         bool _realizedNonStrokeOverPrint;
 
         public void RealizeBrush(XBrush brush, PdfColorMode colorMode, int renderingMode, double fontEmSize)
@@ -253,7 +262,7 @@ namespace PdfSharp.Drawing.Pdf
 
             if (colorMode != PdfColorMode.Cmyk)
             {
-                if (_realizedFillColor.IsEmpty || _realizedFillColor.Rgb != color.Rgb)
+                if (_realizedFillColor == null || _realizedFillColor.Value.Rgb != color.Rgb)
                 {
                     renderer.Append(PdfEncoders.ToString(color, PdfColorMode.Rgb));
                     renderer.Append(" rg\n");
@@ -263,16 +272,19 @@ namespace PdfSharp.Drawing.Pdf
             {
                 Debug.Assert(colorMode == PdfColorMode.Cmyk);
 
-                if (_realizedFillColor.IsEmpty || !ColorSpaceHelper.IsEqualCmyk(_realizedFillColor, color))
+                if (_realizedFillColor == null || !ColorSpaceHelper.IsEqualCmyk(_realizedFillColor.Value, color))
                 {
                     renderer.Append(PdfEncoders.ToString(color, PdfColorMode.Cmyk));
                     renderer.Append(" k\n");
                 }
             }
 
-            if (renderer.Owner.Version >= 14 && (_realizedFillColor.A != color.A || _realizedNonStrokeOverPrint != overPrint))
+            if (renderer.Owner.Version >= 14 // CA and ca keys of PdfExtGState are supported since PDF version 1.4.
+                && (// Add PdfExtGState, if no fill color has been realized yet...
+                    _realizedFillColor == null
+                    // or if alpha or overPrint value has changed.
+                    || _realizedFillColor.Value.A != color.A || _realizedNonStrokeOverPrint != overPrint))
             {
-
                 PdfExtGState extGState = renderer.Owner.ExtGStateTable.GetExtGStateNonStroke(color.A, overPrint);
                 string gs = renderer.Resources.AddExtGState(extGState);
                 renderer.AppendFormatString("{0} gs\n", gs);
@@ -288,7 +300,7 @@ namespace PdfSharp.Drawing.Pdf
 
         internal void RealizeNonStrokeTransparency(double transparency, PdfColorMode colorMode)
         {
-            XColor color = _realizedFillColor;
+            XColor color = _realizedFillColor ?? XColor.Empty; // Use empty color as origin if no fill color has been realized yet.
             color.A = transparency;
             RealizeFillColor(color, _realizedNonStrokeOverPrint, colorMode);
         }
@@ -305,9 +317,11 @@ namespace PdfSharp.Drawing.Pdf
         int _realizedRenderingMode; // Reference: TABLE 5.2  Text state operators / Page 398
         double _realizedCharSpace;  // Reference: TABLE 5.2  Text state operators / Page 398
 
+        internal string RealizedFontName => _realizedFontName;
+
         public void RealizeFont(XGlyphTypeface glyphTypeface, double emSize, XBrush brush, int renderingMode, FontType fontType)
         {
-            const string format = Config.SignificantDecimalPlaces3;
+            const string format = DefaultNumberFormat3;
 
             // So far rendering mode 0 (fill text) and 2 (fill, then stroke text) only.
             RealizeBrush(brush, renderer._colorMode, renderingMode, emSize); // _renderer.page.document.Options.ColorMode);
@@ -342,26 +356,23 @@ namespace PdfSharp.Drawing.Pdf
             string fontName = renderer.GetFontName(glyphTypeface, fontType, out _realizedFont);
             if (fontName != _realizedFontName || _realizedFontSize != emSize)
             {
-                s_formatTf ??= "{0} {1:" + format + "} Tf\n";
+                const string formatTf = "{0} {1:" + format + "} Tf\n";
                 if (renderer.Gfx.PageDirection == XPageDirection.Downwards)
                 {
                     // earlier:
                     // renderer.AppendFormatFont("{0} {1:" + format + "} Tf\n", fontName, emSize);
-                    renderer.AppendFormatFont(s_formatTf, fontName, emSize);
+                    renderer.AppendFormatFont(formatTf, fontName, emSize);
                 }
                 else
                 {
                     // earlier:
                     // renderer.AppendFormatFont("{0} {1:" + format + "} Tf\n", fontName, emSize);
-                    renderer.AppendFormatFont(s_formatTf, fontName, emSize);
+                    renderer.AppendFormatFont(formatTf, fontName, emSize);
                 }
                 _realizedFontName = fontName;
                 _realizedFontSize = emSize;
             }
         }
-        // ReSharper disable InconsistentNaming
-        static string? s_formatTf;
-        // ReSharper restore InconsistentNaming
 
         public XPoint RealizedTextPosition;
 
@@ -432,8 +443,15 @@ namespace PdfSharp.Drawing.Pdf
             {
                 // Take chirality into account and
                 // invert the direction of rotation.
+#if true
+                // Prevent getting negative zeros in cm operator.
+                transform.M12 = value.M12 == 0.0 ? 0 : -value.M12;
+                transform.M21 = value.M21 == 0.0 ? 0 : -value.M21;
+#else
+                // Can result in e.g. "1 -0 -0 1 200 150 cm".
                 transform.M12 = -value.M12;
                 transform.M21 = -value.M21;
+#endif
             }
             UnrealizedCtm.Prepend(transform);
 
@@ -450,16 +468,16 @@ namespace PdfSharp.Drawing.Pdf
             {
                 Debug.Assert(!UnrealizedCtm.IsIdentity, "mrCtm is unnecessarily set.");
 
-                const string format = Config.SignificantDecimalPlaces7;
-                s_formatCtm ??= "{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:"
-                                + format + "} {5:" + format + "} cm\n";
+                const string format = DefaultNumberFormat7;
+                const string formatCtm =
+                    "{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} cm\n";
 
                 double[] matrix = UnrealizedCtm.GetElements();
                 // Use up to six decimal digits to prevent round up problems.
                 // earlier:
                 // renderer.AppendFormatArgs("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} cm\n",
                 //     matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
-                renderer.AppendFormatArgs(s_formatCtm, matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
+                renderer.AppendFormatArgs(formatCtm, matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
 
                 RealizedCtm.Prepend(UnrealizedCtm);
                 UnrealizedCtm = new XMatrix();
@@ -469,7 +487,7 @@ namespace PdfSharp.Drawing.Pdf
             }
         }
         // ReSharper disable InconsistentNaming
-        static string? s_formatCtm;
+        //static string? s_formatCtm;
         // ReSharper restore InconsistentNaming
         #endregion
 

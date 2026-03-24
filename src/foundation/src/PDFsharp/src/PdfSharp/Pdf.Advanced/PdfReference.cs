@@ -2,11 +2,14 @@
 // See the LICENSE file in the solution root for more information.
 
 // With this define each iref object gets a unique number (uid) to make them distinguishable in the debugger.
-#define UNIQUE_IREF_
+#define UNIQUE_IREF_xxx  // TODO Move to Directory.Build.targets
 
 using Microsoft.Extensions.Logging;
 using PdfSharp.Logging;
 using PdfSharp.Pdf.IO;
+
+// v7.0.0 TODO review MakeDocument and proxy objects
+
 
 namespace PdfSharp.Pdf.Advanced
 {
@@ -16,30 +19,15 @@ namespace PdfSharp.Pdf.Advanced
     [DebuggerDisplay("iref({ObjectNumber}, {GenerationNumber})")]
     public sealed class PdfReference : PdfItem
     {
-        // About PdfReference
-        //
-        // * A PdfReference holds either the ObjectID or the PdfObject or both.
-        //
-        // * Each PdfObject has a PdfReference if and only if it is an indirect object. Direct objects have
-        //   no PdfReference, because they are embedded in a parent object.
-        //
-        // * PdfReference objects are used to reference PdfObject instances. A value in a PDF dictionary
-        //   or array that is a PdfReference represents an indirect reference. A value in a PDF dictionary
-        //   or array that is a PdfObject represents a direct (or embedded) object.
-        //
-        // * When a PDF file is imported, the PdfXRefTable is filled with PdfReference objects keeping the
-        //   ObjectsIDs and file positions (offsets) of all indirect objects.
-        //
-        // * Indirect objects can easily be renumbered because they do not rely on their ObjectsIDs.
-        //
-        // * During modification of a document the ObjectID of an indirect object has no meaning,
-        //   except that they must be different in pairs.
-
         /// <summary>
         /// Initializes a new PdfReference instance for the specified indirect object.
         /// An indirect PDF object has one and only one reference.
         /// You cannot create an instance of PdfReference.
         /// </summary>
+        /// <param name="pdfObject">A direct PDF object.</param>
+        /// <param name="objectID">The object ID. Can be undefined.</param>
+        /// <param name="position">The position in the PDF file stream, or -1, if unknown.</param>
+        /// <exception cref="InvalidOperationException"></exception>
         PdfReference(PdfObject pdfObject, PdfObjectID objectID, SizeType position)
         {
             if (pdfObject.Reference != null)
@@ -50,19 +38,14 @@ namespace PdfSharp.Pdf.Advanced
 
             if (position != 0)
                 _position = position;
-            //else
-            //{
-            //    // Can be 0 or -1.
-            //    //_ = typeof(int);
-            //    //PdfSharpLogHost.DocumentProcessingLogger.LogError("Position is 0.");
-            //}
 #if UNIQUE_IREF && DEBUG
             _uid = ++s_counter;
 #endif
         }
 
         /// <summary>
-        /// Initializes a new PdfReference instance from the specified object identifier and file position.
+        /// Initializes a new instance of the <see cref="PdfReference"/> class from the specified
+        /// object identifier and file position.
         /// </summary>
         PdfReference(PdfObjectID objectID, SizeType position)
         {
@@ -74,14 +57,44 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="PdfReference"/> class for a proxy container.
+        /// Used for objects that represents two different types, e.g. a PDF dictionary that is both
+        /// an interactive field and a widget annotation.
+        /// </summary>
+        /// <param name="cont">The dominant container which is in the IRefTable.</param>
+        /// <param name="proxy">The proxy container which will use the Elements of the master.</param>
+        internal PdfReference(PdfContainer cont, PdfContainer proxy)
+            : base(cont)
+        {
+            Debug.Assert(cont.IsIndirect, "The dominant container must be an indirect object.");
+            Debug.Assert(!proxy.IsIndirect, "The proxy container must be a direct object.");
+
+            // DELETE ItemFlags = ItemFlags.IsProxyReference;
+
+            var xref = cont.RequiredReference;
+            _document = xref.Document;
+            _objectID = xref.ObjectID;
+            _position = xref.Position;
+            _value = proxy;
+
+            // Make proxy an indirect object that only exists in memory.
+            proxy.Reference = this;
+        }
+
+        /// <summary>
         /// Creates a PdfReference from a PdfObject.
         /// </summary>
-        /// <param name="pdfObject"></param>
-        /// <param name="objectID"></param>
-        /// <param name="position"></param>
+        /// <param name="pdfObject">A direct PDF object.</param>
+        /// <param name="objectID">The object ID. Can be undefined.</param>
+        /// <param name="position">The position in the PDF file stream, or -1, if unknown.</param>
         /// <returns></returns>
         internal static PdfReference CreateFromObject(PdfObject pdfObject, PdfObjectID objectID, SizeType position)
-            => new(pdfObject, objectID, position);
+        {
+#if TEST_CODE
+            Debug.Assert(pdfObject.ObjectID.IsEmpty || pdfObject.ObjectID == objectID); // TODO Remove objectID in parameters?
+#endif
+            return new(pdfObject, objectID, position);
+        }
 
         /// <summary>
         /// Creates a PdfReference from a PdfObjectID.
@@ -90,7 +103,9 @@ namespace PdfSharp.Pdf.Advanced
         /// <param name="position"></param>
         /// <returns></returns>
         internal static PdfReference CreateForObjectID(PdfObjectID objectID, SizeType position)
-            => new(objectID, position);
+        {
+            return new(objectID, position);
+        }
 
         /// <summary>
         /// Writes the object in PDF iref table format.
@@ -99,7 +114,7 @@ namespace PdfSharp.Pdf.Advanced
         {
             // PDFsharp does not yet support PDF 1.5 object streams for writing.
 
-            // Each line must be exactly 20 bytes long, otherwise Acrobat repairs the file.
+            // Each line must be exactly 20 bytes long, otherwise Acrobat wants to repair the file.
             writer.WriteRaw(Invariant($"{_position:0000000000} {_objectID.GenerationNumber:00000} n \n"));
         }
 
@@ -118,22 +133,8 @@ namespace PdfSharp.Pdf.Advanced
         public PdfObjectID ObjectID
         {
             get => _objectID;
-            set
-            {
-                _objectID = value;
-#if true_
-                if (Document != null)
-                {
-                    //PdfXRefTable table = Document.xrefTable;
-                    //table.Remove(this);
-                    //objectID = value;
-                    //table.Add(this);
-                }
-#endif
-            }
+            internal set => _objectID = value;
         }
-
-        // ReSharper disable once InconsistentNaming
         PdfObjectID _objectID;
 
         /// <summary>
@@ -163,6 +164,9 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets or sets the referenced PdfObject.
         /// </summary>
+        /// <remarks>
+        /// The returned value can be null during the reading of a PDF file.
+        /// </remarks>
         public PdfObject Value
         {
             get => _value;
@@ -170,8 +174,19 @@ namespace PdfSharp.Pdf.Advanced
             {
                 Debug.Assert(value != null, "The value of a PdfReference must never be null.");
                 Debug.Assert(value.Reference == null || ReferenceEquals(value.Reference, this), "The reference of the value must be null or this.");
-                _value = value;
+
                 // value must never be null.
+                if (value == null!)
+                    throw new ArgumentNullException(nameof(value), "value must not be null.");
+
+                _value = value;
+#if DEBUG
+                if (value.Reference != null)
+                {
+                    _ = typeof(int);
+                    Debug.Assert(ReferenceEquals(value.Reference, this));
+                }
+#endif
                 value.Reference = this;
             }
         }
@@ -183,7 +198,7 @@ namespace PdfSharp.Pdf.Advanced
         internal void ResetObject() => _value = null!;
 
         /// <summary>
-        /// Gets or sets the document this object belongs to.
+        /// Gets the document this object belongs to.
         /// </summary>
         public PdfDocument Document
         {
@@ -191,13 +206,11 @@ namespace PdfSharp.Pdf.Advanced
             {
 #if DEBUG
                 if (_document == null)
-                {
                     PdfSharpLogHost.Logger.LogDebug("Document of object {_objectID} is null.", _objectID);
-                }
 #endif
                 return _document!;
             }
-            set => _document = value;
+            internal set => _document = value;
         }
         PdfDocument? _document;
 
@@ -207,23 +220,57 @@ namespace PdfSharp.Pdf.Advanced
         public override string ToString() => _objectID + " R";
 
         /// <summary>
+        /// Returns true if the specified item is an indirect object; false otherwise.
+        /// </summary>
+        public static bool IsIndirect(PdfItem item)  // PDFsharp/NT
+            => item is PdfReference or PdfObject { Reference: not null };
+
+        /// <summary>
         /// Dereferences the specified item. If the item is a PdfReference, the item is set
         /// to the referenced value. Otherwise, no action is taken.
         /// </summary>
-        public static void Dereference(ref object item)
+        public static void Dereference(ref PdfItem item)  // Do not change to 'ref PdfItem?'.
         {
             if (item is PdfReference reference)
                 item = reference.Value;
         }
 
         /// <summary>
-        /// Dereferences the specified item. If the item is a PdfReference, the item is set
-        /// to the referenced value. Otherwise, no action is taken.
+        /// If the specified item is an indirect object it is replaced by its PdfReference.
+        /// Otherwise, no action is taken.
         /// </summary>
-        public static void Dereference(ref PdfItem item)
+        internal static void ToReference(ref PdfItem item)
         {
-            if (item is PdfReference reference)
-                item = reference.Value;
+            if (item is PdfObject { Reference: not null } obj)
+                item = obj.RequiredReference;
+        }
+
+        /// <summary>
+        /// Makes a PDF object an indirect object of the specified document
+        /// and returns a reference to it.
+        /// </summary>
+        /// <param name="obj">A newly created object.</param>
+        /// <param name="doc">The PDF document the object is added as indirect object.</param>
+        public static PdfReference MakeIndirect(PdfObject obj, PdfDocument doc)  // PDFsharp/NT
+        {
+            if (obj == null)
+                throw new ArgumentNullException(nameof(obj));
+            //ArgumentNullException.ThrowIfNull(obj);
+            //ArgumentNullExceptionEx.ThrowIfNull(obj);
+
+            if (doc == null)
+                throw new ArgumentNullException(nameof(doc));
+
+            if (obj.IsIndirect)
+                throw new InvalidOperationException("Object is already an indirect object.");
+
+            if (obj.Owner != null! && obj.Owner != doc)
+                throw new InvalidOperationException("Object already has an owner that is not the specified document.");
+
+            doc.Internals.AddObject(obj);
+
+            Debug.Assert(obj.Reference != null);
+            return obj.Reference;
         }
 
         internal static PdfReferenceComparer Comparer => new();
@@ -238,12 +285,45 @@ namespace PdfSharp.Pdf.Advanced
                 if (l != null)
                 {
                     if (r != null)
-                        return l._objectID.CompareTo(r._objectID);
+                    {
+                        if (l.ObjectNumber == r.ObjectNumber)
+                            return l.GenerationNumber - r.GenerationNumber;
+                        return l.ObjectNumber - r.ObjectNumber;
+                    }
                     return -1;
                 }
                 return r != null ? 1 : 0;
             }
         }
+
+        internal void SetTemp() => ItemFlags |= ItemFlags.IsTempRef;
+
+        internal void ClearTemp() => ItemFlags &= ~ItemFlags.IsTempRef;
+
+        internal bool IsTemp() => (ItemFlags & ItemFlags.IsTempRef) != 0;
+
+        /// <summary>
+        /// Not yet used.
+        /// </summary>
+        internal int AddRef()  // TODO: Use it for all indirect objects.
+        {
+            return Interlocked.Increment(ref _refCount);
+        }
+
+        /// <summary>
+        /// Not yet used.
+        /// </summary>
+        internal int Release()
+        {
+            return Interlocked.Decrement(ref _refCount);
+        }
+
+        /// <summary>
+        /// Gets the reference count of this PdfReference.
+        /// </summary>
+        internal int RefCounter => _refCount;
+
+        int _refCount;
 
 #if UNIQUE_IREF && DEBUG
         static int s_counter = 0;

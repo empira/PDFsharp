@@ -302,16 +302,11 @@ namespace MigraDoc.DocumentObjectModel
                 else
                     fontStyle = "(\"" + ((FormattedText)Parent).Style + "\")";
 
-                //bool needBlank = false;  // nice, but later...
+                //bool needBlank = false;  // nice, but later…
                 serializer.Write("\\font" + fontStyle + "[");
 
                 if (!String.IsNullOrEmpty(Values.Name))
                     serializer.WriteSimpleAttribute("Name", Name);
-
-#if DEBUG_ // Test
-                if (Size != Unit.Empty && Size != 0 && Size.Point == 0)
-                    _ = typeof(int);
-#endif
 
                 if (!Values.Size.IsValueNullOrEmpty())
                     serializer.WriteSimpleAttribute("Size", Size);
@@ -348,11 +343,6 @@ namespace MigraDoc.DocumentObjectModel
                     serializer.WriteSimpleAttribute("Name", Name);
                 }
 
-#if DEBUG_
-                // Test
-                if (!_size.IsNull && Size != 0 && Size.Point == 0)
-                    _ = typeof(int);
-#endif
 
                 if (!Values.Size.IsValueNullOrEmpty() && (font == null || Size != font.Size))
                     serializer.WriteSimpleAttribute("Size", Size);

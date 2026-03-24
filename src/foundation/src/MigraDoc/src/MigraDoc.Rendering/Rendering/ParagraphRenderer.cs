@@ -1,12 +1,11 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System.Diagnostics;
 using System.Text;
-using MigraDoc.DocumentObjectModel;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Drawing;
+using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.Rendering.Extensions;
@@ -115,7 +114,7 @@ namespace MigraDoc.Rendering
             for (int idx = 0; idx < parFormatInfo.LineCount; idx++)
             {
                 LineInfo lineInfo = parFormatInfo.GetLineInfo(idx);
-                _isLastLine = (idx == parFormatInfo.LineCount - 1);
+                _isLastLine = idx == parFormatInfo.LineCount - 1;
 
                 _lastTabPosition = 0;
                 if (lineInfo.ReMeasureLine)
@@ -179,9 +178,9 @@ namespace MigraDoc.Rendering
             {
                 if (field is DateField dateField)
                 {
-                    var dt = _fieldInfos?.Date ?? NRT.ThrowOnNull<DateTime>();
-                    if (dt == DateTime.MinValue)
-                        dt = DateTime.Now;
+                    var dt = _fieldInfos?.Date ?? NRT.ThrowOnNull<DateTimeOffset>();
+                    if (dt == DateTimeOffset.MinValue)
+                        dt = DateTimeOffset.Now;
 
                     return FormatDateTimeForField(dt, dateField);
                 }
@@ -194,7 +193,7 @@ namespace MigraDoc.Rendering
             return "";
         }
 
-        static String FormatDateTimeForField(DateTime dateTime, DateField dateField)
+        static String FormatDateTimeForField(DateTimeOffset dateTime, DateField dateField)
         {
             var culture = dateField.Document!.EffectiveCulture;
             var dtfInfo = culture.DateTimeFormat;
@@ -361,7 +360,7 @@ namespace MigraDoc.Rendering
         XUnitPt ProbeAfterLeftAlignedTab(XUnitPt tabStopPosition, out bool notFitting)
         {
             //--- Save ---------------------------------
-            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth, 
+            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth,
                 out var lineEndsWithLineBreak);
             //------------------------------------------
 
@@ -387,7 +386,7 @@ namespace MigraDoc.Rendering
         XUnitPt ProbeAfterRightAlignedTab(XUnitPt tabStopPosition, out bool notFitting)
         {
             //--- Save ---------------------------------
-            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth, 
+            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth,
                 out var lineEndsWithLineBreak);
             //------------------------------------------
 
@@ -431,7 +430,7 @@ namespace MigraDoc.Rendering
         XUnitPt ProbeAfterCenterAlignedTab(XUnitPt tabStopPosition, out bool notFitting)
         {
             //--- Save ---------------------------------
-            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth, 
+            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth,
                 out var lineEndsWithLineBreak);
             //------------------------------------------
 
@@ -475,7 +474,7 @@ namespace MigraDoc.Rendering
             notFitting = false;
 
             //--- Save ---------------------------------
-            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth, 
+            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth,
                 out var lineEndsWithLineBreak);
             //------------------------------------------
 
@@ -571,7 +570,7 @@ namespace MigraDoc.Rendering
             return ProbeAfterRightAlignedTab(tabStopPosition, out notFitting);
         }
 
-        void SaveBeforeProbing(out ParagraphIterator? paragraphIter, out int blankCount, out XUnitPt wordsWidth, out XUnitPt xPosition, out XUnitPt lineWidth, out XUnitPt blankWidth, 
+        void SaveBeforeProbing(out ParagraphIterator? paragraphIter, out int blankCount, out XUnitPt wordsWidth, out XUnitPt xPosition, out XUnitPt lineWidth, out XUnitPt blankWidth,
             out bool lineEndsWithLineBreak)
         {
             paragraphIter = _currentLeaf;
@@ -583,7 +582,7 @@ namespace MigraDoc.Rendering
             lineEndsWithLineBreak = _currentLineEndsWithLineBreak;
         }
 
-        void RestoreAfterProbing(ParagraphIterator? paragraphIter, int blankCount, XUnitPt wordsWidth, XUnitPt xPosition, XUnitPt lineWidth, XUnitPt blankWidth, 
+        void RestoreAfterProbing(ParagraphIterator? paragraphIter, int blankCount, XUnitPt wordsWidth, XUnitPt xPosition, XUnitPt lineWidth, XUnitPt blankWidth,
             bool lineEndsWithLineBreak)
         {
             _currentLeaf = paragraphIter;
@@ -606,7 +605,7 @@ namespace MigraDoc.Rendering
             _currentBlankCount = 0;
             // Extra for auto tab after list symbol.
 
-            //TODO_OLD: KLPO4KLPO: Check if this conditional statement is still required.
+            // Check if this conditional statement is still required.
             if (_currentLeaf != null && IsTab(_currentLeaf.Current))
                 _currentLeaf = _currentLeaf.GetNextLeaf();
 
@@ -820,7 +819,7 @@ namespace MigraDoc.Rendering
         void ReMeasureLine(ref LineInfo lineInfo)
         {
             //--- Save ---------------------------------
-            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth, 
+            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth,
                 out var lineEndsWithLineBreak);
             bool origLastTabPassed = _lastTabPassed;
             //------------------------------------------
@@ -957,7 +956,7 @@ namespace MigraDoc.Rendering
                     break;
 
                 default:
-                    throw new NotImplementedException(docObj.GetType().Name + " is not implemented.");
+                    throw new NotSupportedException(docObj.GetType().Name + " is not implemented.");
             }
         }
 
@@ -1021,7 +1020,7 @@ namespace MigraDoc.Rendering
 
                 var destinationName = bookmarkField.Name;
                 var position = GetDestinationPosition();
-                pdfDocument.AddNamedDestination(destinationName, pageNr, PdfNamedDestinationParameters.CreatePosition(position));
+                pdfDocument.AddNamedDestination(destinationName, pageNr, PdfNamedDestinationParameters.CreatePosition(position.AsXPoint));
             }
 
             RenderUnderline(0, false);
@@ -1043,7 +1042,7 @@ namespace MigraDoc.Rendering
             return pdfPosition;
         }
         // ReSharper disable once InconsistentNaming
-        static readonly XUnitPt _margin = XUnitPt.FromCentimeter(0.5);
+        static readonly XUnitPt _margin = XUnitPt.FromCentimeter(0.5f);
 
         void RenderPageRefField(PageRefField pageRefField)
         {
@@ -1268,31 +1267,31 @@ namespace MigraDoc.Rendering
                         var pdfDocument = _gfx.PdfPage?.Owner;
                         if (pdfDocument != null)
                         {
-                            page.AddDocumentLink(new PdfRectangle(rect), hyperlink.BookmarkName);
+                            page.AddDocumentLink(new PdfRectangle(rect.AsXRect), hyperlink.BookmarkName);
                         }
                         // Otherwise use page from bookmark’s fieldInfo.
                         else
                         {
                             var pageRef = _fieldInfos?.GetPhysicalPageNumber(hyperlink.BookmarkName) ?? NRT.ThrowOnNull<int>();
                             if (pageRef > 0)
-                                page.AddDocumentLink(new PdfRectangle(rect), pageRef);
+                                page.AddDocumentLink(new PdfRectangle(rect.AsXRect), pageRef);
                         }
                         break;
 
                     case HyperlinkType.ExternalBookmark:
-                        page.AddDocumentLink(new PdfRectangle(rect), hyperlink.Filename, hyperlink.BookmarkName, ConvertHyperlinkTargetWindow(hyperlink.NewWindow));
+                        page.AddDocumentLink(new PdfRectangle(rect.AsXRect), hyperlink.Filename, hyperlink.BookmarkName, ConvertHyperlinkTargetWindow(hyperlink.NewWindow));
                         break;
 
                     case HyperlinkType.EmbeddedDocument:
-                        page.AddEmbeddedDocumentLink(new PdfRectangle(rect), hyperlink.Filename, hyperlink.BookmarkName, ConvertHyperlinkTargetWindow(hyperlink.NewWindow));
+                        page.AddEmbeddedDocumentLink(new PdfRectangle(rect.AsXRect), hyperlink.Filename, hyperlink.BookmarkName, ConvertHyperlinkTargetWindow(hyperlink.NewWindow));
                         break;
 
                     case HyperlinkType.Web:
-                        page.AddWebLink(new PdfRectangle(rect), hyperlink.Filename);
+                        page.AddWebLink(new PdfRectangle(rect.AsXRect), hyperlink.Filename);
                         break;
 
                     case HyperlinkType.File:
-                        page.AddFileLink(new PdfRectangle(rect), hyperlink.Filename);
+                        page.AddFileLink(new PdfRectangle(rect.AsXRect), hyperlink.Filename);
                         break;
                 }
                 _hyperlinkRect = new XRect();
@@ -1905,7 +1904,9 @@ namespace MigraDoc.Rendering
         FormatResult FormatDateField(DateField dateField, Rectangle fittingRect)
         {
             _reMeasureLine = true;
-            var estimatedFieldValue = FormatDateTimeForField(DateTime.Now, dateField);
+            // Use a fixed date to measure the dimensions required.
+            var estimatedFieldValue = FormatDateTimeForField(new DateTimeOffset(2999, 08, 28, 22, 28, 28, TimeSpan.Zero), dateField);
+            //var estimatedFieldValue = FormatDateTimeForField(DateTimeOffset.Now, dateField);
             return FormatWord(estimatedFieldValue, fittingRect);
         }
 
@@ -2221,7 +2222,7 @@ namespace MigraDoc.Rendering
                 return FormatResult.Continue;
 
             //--- Save ---------------------------------
-            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth, 
+            SaveBeforeProbing(out var iter, out var blankCount, out var wordsWidth, out var xPosition, out var lineWidth, out var blankWidth,
                 out var lineEndsWithLineBreak);
             //------------------------------------------
             _currentLeaf = nextIter;
@@ -2367,7 +2368,7 @@ namespace MigraDoc.Rendering
             if (_startLeaf != null && _startLeaf == _currentLeaf)
                 HandleNonFittingLine();
 #endif
-            
+
             lineInfo.LastTab = _lastTab;
             _renderInfo.LayoutInfo.ContentArea = contentArea ?? NRT.ThrowOnNull<Area>();
 
@@ -2511,7 +2512,7 @@ namespace MigraDoc.Rendering
                 lineHeight = singleLineSpace * factor;
                 lineHeight = Math.Max(lineHeight, _currentVerticalInfo.Height);
             }
-            
+
             XUnitPt descent;
             if (lineSpacingRule == LineSpacingRule.Exactly)
             {
@@ -2541,7 +2542,7 @@ namespace MigraDoc.Rendering
 
             return new(lineHeight, descent, inherentLineSpace);
         }
-        
+
         /// <summary>
         /// The font used for the current paragraph element.
         /// </summary>
@@ -2676,7 +2677,11 @@ namespace MigraDoc.Rendering
         {
             XUnitPt yPosition = CurrentBaselinePosition;
             yPosition += 0.33 * _currentVerticalInfo.Descent;
+#if PSGFX
+            _gfx.DrawLine(pen, new(_underlineStartPos, yPosition), new(xPosition, yPosition));
+#else
             _gfx.DrawLine(pen, _underlineStartPos, yPosition, xPosition, yPosition);
+#endif
         }
 
         XPen? _currentUnderlinePen;
@@ -2739,16 +2744,30 @@ namespace MigraDoc.Rendering
             XPen pen = new XPen(XColor.FromArgb(font.Color.Argb), font.Size / 16);
 #else
             Debug.Assert(_paragraph.Document != null, "_paragraph.Document != null");
+#if PSGFX
+            var xxx = ColorHelper.ToXColor(font.Color, _paragraph.Document.UseCmykColor);
+            var pen = new XPen(new XSolidBrush(xxx), (float_)font.Size.Point / 16);
+#else
             var pen = new XPen(ColorHelper.ToXColor(font.Color, _paragraph.Document.UseCmykColor), font.Size.Point / 16);
+#endif
 #endif
             pen.DashStyle = font.Underline switch
             {
+#if PSGFX
+                Underline.DotDash => XDashStyles.DashDot,
+                Underline.DotDotDash => XDashStyles.DashDotDot,
+                Underline.Dash => XDashStyles.Dash,
+                Underline.Dotted => XDashStyles.Dot,
+                Underline.Single => XDashStyles.Solid,
+                _ => XDashStyles.Solid
+#else
                 Underline.DotDash => XDashStyle.DashDot,
                 Underline.DotDotDash => XDashStyle.DashDotDot,
                 Underline.Dash => XDashStyle.Dash,
                 Underline.Dotted => XDashStyle.Dot,
                 Underline.Single => XDashStyle.Solid,
                 _ => XDashStyle.Solid
+#endif
             };
             return pen;
         }
@@ -2769,7 +2788,7 @@ namespace MigraDoc.Rendering
         bool _isFirstLine;
         bool _isLastLine;
         VerticalLineInfo _currentVerticalInfo;
-        Area _formattingArea = default!;
+        Area _formattingArea = null!;
         XUnitPt _currentYPosition;
         XUnitPt _currentXPosition;
         ParagraphIterator? _currentLeaf;

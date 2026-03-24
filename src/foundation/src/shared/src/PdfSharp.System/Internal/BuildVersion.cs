@@ -18,7 +18,7 @@
 //        /// The PDFsharp build version used as fourth value in AssemblyFileVersion.
 //        /// Must be set in gitversion.yml.
 //        /// </summary>
-//        public static int BuildVersionNumber = (DateTime.Now - new DateTime(2005, 1, 1)).Days;
+//        public static int BuildVersionNumber = (Date/Time.Now - new Date/Time(2005, 1, 1)).Days;
 //    }
 //#endif
 //}

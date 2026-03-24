@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using MigraDoc.DocumentObjectModel;
@@ -60,10 +60,10 @@ namespace MigraDoc.Tests
             // Layout and render document to PDF.
             pdfRenderer.RenderDocument();
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("TableTopBorder");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/tables/TableTopBorder");
             pdfRenderer.PdfDocument.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
 #if DEBUG___
@@ -117,10 +117,10 @@ namespace MigraDoc.Tests
             // Layout and render document to PDF.
             pdfRenderer.RenderDocument();
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("ClonedTable");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/tables/ClonedTable");
             pdfRenderer.PdfDocument.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
@@ -170,10 +170,10 @@ namespace MigraDoc.Tests
             // Layout and render document to PDF.
             pdfRenderer.RenderDocument();
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("ClonedTable");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/tables/ClonedTable");
             pdfRenderer.PdfDocument.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
     }

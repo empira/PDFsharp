@@ -1,4 +1,4 @@
-﻿// MigraDoc - Creating Documents on the Fly
+// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using System;

@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0-windows;net462</TargetFrameworks>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_Windows)</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <UseWPF>true</UseWPF>
     <DefineConstants>WPF</DefineConstants>
     <!--
     PDFsharp internal class RuntimeHelpers is visible in this assembly because of InternalsVisibleTo.
     This conflics with mscorlib, and therefore it is disabled. -->
-    <NoWarn>CS1685</NoWarn>
+    <NoWarn>$(NoWarn);1685</NoWarn>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>

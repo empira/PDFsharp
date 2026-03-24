@@ -23,7 +23,7 @@ namespace PdfSharp.Charting.Renderers
         public RendererParameters(XGraphics gfx, double x, double y, double width, double height)
         {
             Graphics = gfx;
-            Box = new XRect(x, y, width, height);
+            Box = new XRect((float_)x, (float_)y, (float_)width, (float_)height);
         }
 
         /// <summary>

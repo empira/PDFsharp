@@ -25,7 +25,6 @@ namespace PdfSharp.Pdf.Advanced
             : base(document)
         {
             Elements.SetName(Keys.Type, "/ExtGState");
-
 #if true_
             //AIS false
             //BM /Normal
@@ -52,6 +51,14 @@ namespace PdfSharp.Pdf.Advanced
             //            Elements.SetValue(Keys.OPM, new PdfInteger(1));
             //#endif
         }
+
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfExtGState(PdfDictionary dict)
+            : base(dict)
+        { }
 
         /// <summary>
         /// Used in Edf.Xps.
@@ -118,7 +125,8 @@ namespace PdfSharp.Pdf.Advanced
             {
                 // #PDF-A
                 // ReSharper disable once CompareOfFloatsByEqualityOperator
-                if (_document.IsPdfA && value != 1.0)
+                Debug.Assert(ReferenceEquals(_document2, Document));
+                if (Document.IsPdfA && value != 1.0)
                 {
                     PdfSharpLogHost.Logger.LogWarning("PDF/A: Stroke alpha value set to 1.");
                     value = 1.0;
@@ -139,8 +147,9 @@ namespace PdfSharp.Pdf.Advanced
             set
             {
                 // #PDF-A
+                Debug.Assert(ReferenceEquals(_document2, Document));
                 // ReSharper disable once CompareOfFloatsByEqualityOperator
-                if (_document.IsPdfA && value != 1.0)
+                if (Document.IsPdfA && value != 1.0)
                 {
                     PdfSharpLogHost.Logger.LogWarning("PDF/A: Non-stroke alpha value set to 1.");
                     value = 1.0;
@@ -188,7 +197,7 @@ namespace PdfSharp.Pdf.Advanced
         /// </summary>
         public PdfSoftMask SoftMask
         {
-            set => Elements.SetReference(Keys.SMask, value);
+            set => Elements.SetObject(Keys.SMask, value);
         }
 
         internal string Key => _key;
@@ -211,7 +220,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Common keys for all streams.
         /// </summary>
-        internal sealed class Keys : KeysBase
+        public sealed class Keys : KeysBase
         {
             // ReSharper disable InconsistentNaming
 
@@ -384,7 +393,6 @@ namespace PdfSharp.Pdf.Advanced
             /// Gets the KeysMeta for these keys.
             /// </summary>
             internal static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
-
             static DictionaryMeta? _meta;
         }
 

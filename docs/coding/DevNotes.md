@@ -6,13 +6,13 @@ Just here before being moved to an appropriate place.
 
 ## Temporary tags
 
-Temporary tags are allowed in develop branch, but must be removed in releases.
+Temporary tags are allowed in develop branch, but must be removed in (final) releases.
 
 Create a unit test that fails if a temporary tag is in the C# code.
 
 ### TODO
 
-**Here is something to be done __before the project is released__.**
+**Here is something to be done __before the project is finally released__.**
 
 ### BUG
 
@@ -55,7 +55,7 @@ documentation or reference purposes and shall not be removed.
 
 ### IMPROVE
 
-Here is code that substantially works but has potential for improvements
+Here is correct code that substantially works but has potential for improvements
 for better reliability.
 
 **Example**
@@ -78,7 +78,9 @@ Here is code that should be covered by (more) unit tests.
 Remove all this stuff from existing code.
 
 * Hack:
-* Note:
+* Note:  
+  Write "Note that ..."  
+  Do not delete it in text pasted from the PDF Reference.
 * Magic:
 * ToDo
 * UNDONE

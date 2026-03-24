@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0;net10.0;net462;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_Library)</TargetFrameworks>
     <RootNamespace>MigraDoc</RootNamespace>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
@@ -12,9 +12,9 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <DefineConstants>;</DefineConstants>
-  </PropertyGroup>
+  <!--<PropertyGroup>
+    <DefineConstants>$(DefineConstants);</DefineConstants>
+  </PropertyGroup>-->
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net462|AnyCPU'">
     <WarningLevel>0</WarningLevel>
@@ -33,7 +33,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-      <Compile Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />
+      <!--<Compile Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="CompilerServices.cs" />-->
+      <Compile Include="..\..\..\..\..\foundation\src\shared\src\PdfSharp.Shared\dotnet\GetSubArray.cs" Link="Properties\GetSubArray(included).cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,6 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="$(AssemblyName).Tests, PublicKey=00240000048000009400000006020000002400005253413100040000010001008794e803e566eccc3c9181f52c4f7044e5442cc2ce3cbba9fc11bc4186ba2e446cd31deea20c1a8f499e978417fad2bc74143a4f8398f7cf5c5c0271b0f7fe907c537cff28b9d582da41289d1dae90168a3da2a5ed1115210a18fdae832479d3e639ca4003286ba8b98dc9144615c040ed838981ac816112df3b5a9e7cab4fbb" />
+    <InternalsVisibleTo Include="$(AssemblyName).Tests, PublicKey=$(PDFsharpStronNamePublicKey)" />
   </ItemGroup>
 </Project>

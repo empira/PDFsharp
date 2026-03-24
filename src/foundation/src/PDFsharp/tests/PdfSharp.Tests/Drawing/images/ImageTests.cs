@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 #if WPF
@@ -18,6 +18,7 @@ using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
 #if CORE
+using PdfSharp.Internal.Imaging;
 #endif
 using Xunit;
 
@@ -123,10 +124,10 @@ namespace PdfSharp.Tests.Drawing
 
             gfx.DrawImage(image, 100, 100, 100, 100);
 
-            // Save the document...
-            string filename = PdfFileUtility.GetTempPdfFileName("ImageTests");
+            // Save the document…
+            string filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/images/ImageTests");
             document.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
@@ -188,9 +189,10 @@ namespace PdfSharp.Tests.Drawing
             GC.WaitForFullGCComplete();
 
             int offset = 0;
-            int imageHeight = 800 / imagePaths.Length;
+            int imageHeight = 800 / imagePaths.Length / 2;
             foreach (var imagePath in imagePaths)
             {
+                // Read from file.
                 var fullName = IOUtility.GetAssetsPath(imagePath)!;
                 var image = XImage.FromFile(fullName);
 
@@ -198,9 +200,21 @@ namespace PdfSharp.Tests.Drawing
 
                 offset += imageHeight;
             }
+            foreach (var imagePath in imagePaths)
+            {
+                // Read from stream.
+                var fullName = IOUtility.GetAssetsPath(imagePath)!;
+                using (var stream = new FileStream(fullName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    var image = XImage.FromStream(stream);
+                    gfx.DrawImage(image, 10, 10 + offset, imageHeight, imageHeight);
+                }
+
+                offset += imageHeight;
+            }
 
             // Save the document.
-            string filename = PdfFileUtility.GetTempPdfFileName("FlateDecodeImageTest");
+            string filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/images/FlateDecodeImageTest");
             document.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
@@ -237,7 +251,7 @@ namespace PdfSharp.Tests.Drawing
                 // TODO_OLD Check filter types. This works for "/Filter [/FlateDecode /DCTDecode]" only.
                 var imageFilename = Path.Combine(dir, $"image-{Guid.NewGuid():N}.jpg");
 
-                var stream = image.Stream.Value;
+                var stream = image.Stream!.Value;
                 var fd = new FlateDecode();
                 var decoded = fd.Decode(stream);
                 using var fs = new FileStream(imageFilename, FileMode.Create, FileAccess.Write);
@@ -261,15 +275,18 @@ namespace PdfSharp.Tests.Drawing
 
                 var imagePath = IOUtility.GetAssetsPath("PDFsharp/images/samples/jpeg/truecolorA.jpg")!;
 
-                var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read);
+                // WPF stores a reference to the stream internally.
+                // We must not destroy the stream before the PDF has been written, otherwise rendering the PDF will fail.
+                // Same for GDI.
+                using var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 using var xImage = XImage.FromStream(stream);
 
                 gfx.DrawImage(xImage, 100, 100, 100, 100);
 
-                // Save the document...
-                var filename = PdfFileUtility.GetTempPdfFileName("ImageFromStream");
+                // Save the document…
+                var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/images/ImageFromStream");
                 document.Save(filename);
-                // ...and start a viewer.
+                // … and start a viewer.
                 PdfFileUtility.ShowDocumentIfDebugging(filename);
             }
 
@@ -294,15 +311,15 @@ namespace PdfSharp.Tests.Drawing
                 var pngBytes = File.ReadAllBytes(imagePath);
 
                 // Create a MemoryStream that does not allow GetBuffer.
-                var stream = new MemoryStream(pngBytes);
+                using var stream = new MemoryStream(pngBytes);
                 using var xImage = XImage.FromStream(stream);
 
                 gfx.DrawImage(xImage, 100, 100, 100, 100);
 
-                // Save the document...
-                var filename = PdfFileUtility.GetTempPdfFileName("ImageFromStream");
+                // Save the document…
+                var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/images/ImageFromStream");
                 document.Save(filename);
-                // ...and start a viewer.
+                // … and start a viewer.
                 PdfFileUtility.ShowDocumentIfDebugging(filename);
             }
 
@@ -327,15 +344,15 @@ namespace PdfSharp.Tests.Drawing
                 var pngBytes = File.ReadAllBytes(imagePath);
 
                 // Create a MemoryStream that allows GetBuffer.
-                var stream = new MemoryStream(pngBytes, 0, pngBytes.Length, false, true);
+                using var stream = new MemoryStream(pngBytes, 0, pngBytes.Length, false, true);
                 using var xImage = XImage.FromStream(stream);
 
                 gfx.DrawImage(xImage, 100, 100, 100, 100);
 
-                // Save the document...
-                var filename = PdfFileUtility.GetTempPdfFileName("ImageFromStream");
+                // Save the document…
+                var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/images/ImageFromStream");
                 document.Save(filename);
-                // ...and start a viewer.
+                // … and start a viewer.
                 PdfFileUtility.ShowDocumentIfDebugging(filename);
             }
 
@@ -376,16 +393,16 @@ namespace PdfSharp.Tests.Drawing
             xImage = XImage.FromGdiPlusImage(gdiImage);
             gfx.DrawImage(xImage, new RectangleF(0f, 144f, 128f, 128f));
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("ImageFromStream");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/images/ImageFromGDI");
             document.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
 #endif
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
         [Fact]
         public async Task PDF_with_Image_from_http_stream()
         {
@@ -409,10 +426,10 @@ namespace PdfSharp.Tests.Drawing
                 var xImage = XImage.FromBitmapImageStreamThatCannotSeek(imageStream);
                 gfx.DrawImage(xImage, 100, 100, 100, 100);
 
-                // Save the document...
-                var filename = PdfFileUtility.GetTempPdfFileName("ImageFromStream");
+                // Save the document…
+                var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/images/ImageFromStream");
                 document.Save(filename);
-                // ...and start a viewer.
+                // … and start a viewer.
                 PdfFileUtility.ShowDocumentIfDebugging(filename);
 #endif
 

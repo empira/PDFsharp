@@ -13,7 +13,8 @@ using PdfSharp.Pdf;
 using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
 
-#pragma warning disable 1591
+#pragma warning disable CS1591 // Internal class
+
 namespace PdfSharp.Features.Drawing
 {
     public class NotoSans : Feature
@@ -59,7 +60,7 @@ namespace PdfSharp.Features.Drawing
                     gfx.DrawString($"{idx + 1:##}: (this is a symbol font)", fontInfo, XBrushes.Black, 20, y);
                 else
                     gfx.DrawString($"{idx + 1:##}: {pangram}", font, XBrushes.Black, 20, y);
-                gfx.DrawString($"    {font.Name2}      {Style(font, glyphTypeface)}", fontInfo, XBrushes.DarkBlue, 20, y + 12);
+                gfx.DrawString($"    {font.Name}      {Style(font, glyphTypeface)}", fontInfo, XBrushes.DarkBlue, 20, y + 12);
                 y += 30;
 
                 if ((idx + 1) % 30 == 0)

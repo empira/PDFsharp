@@ -4,9 +4,14 @@
 #define ITALIC_SIMULATION
 
 using System.Text;
-using Microsoft.Extensions.Logging;
+using PdfSharp.Internal;
+using PdfSharp.Internal.OpenType;
 using PdfSharp.Events;
 using PdfSharp.Fonts.Internal;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.Internal;
+using PdfSharp.Pdf.Advanced;
+using PdfSharp.Pdf.IO;
 #if GDI
 using System.Drawing.Drawing2D;
 #endif
@@ -20,29 +25,37 @@ using Windows.UI.Xaml.Media;
 using SysPoint = Windows.Foundation.Point;
 using SysSize = Windows.Foundation.Size;
 #endif
-using PdfSharp.Fonts.OpenType;
-using PdfSharp.Internal;
-using PdfSharp.Logging;
-using PdfSharp.Fonts;
-using PdfSharp.Pdf;
-using PdfSharp.Pdf.Internal;
-using PdfSharp.Pdf.Advanced;
-using PdfSharp.Pdf.IO;
 
 // ReSharper disable RedundantNameQualifier
 // ReSharper disable CompareOfFloatsByEqualityOperator
+
+namespace PdfSharp.Pdf  // #FILE 
+{
+    /// <summary>
+    /// Either XGraphics or DrawingContext object.
+    /// </summary>
+    internal interface IPageContentRenderer
+    {
+        // Just a marker interface.
+    }
+}
 
 namespace PdfSharp.Drawing.Pdf
 {
     /// <summary>
     /// Represents a drawing surface for PdfPages.
     /// </summary>
-    class XGraphicsPdfRenderer : IXGraphicsRenderer
+    class XGraphicsPdfRenderer : IXGraphicsRenderer, IPageContentRenderer
     {
+        const string DefaultNumberFormat2 = Config.SignificantDecimalPlaces2;
+        const string DefaultNumberFormat3 = Config.SignificantDecimalPlaces3;
+        const string DefaultNumberFormat4 = Config.SignificantDecimalPlaces4;
+        const string DefaultNumberFormat7 = Config.SignificantDecimalPlaces7;
+
         public XGraphicsPdfRenderer(PdfPage page, XGraphics gfx, XGraphicsPdfPageOptions options)
         {
             _page = page;
-            _colorMode = page._document.Options.ColorMode;
+            _colorMode = page.Document.Options.ColorMode;
             _options = options;
             _gfx = gfx;
             _content = new StringBuilder();
@@ -75,12 +88,30 @@ namespace PdfSharp.Drawing.Pdf
         {
             if (_page != null!)
             {
-                var content2 = _page.RenderContent!; // NRT
-                content2.CreateStream(PdfEncoders.RawEncoding.GetBytes(GetContent()));
+                var renderer = _page.RenderContent?.Renderer;
+                if (!ReferenceEquals(renderer, this))
+                {
+                    throw new InvalidOperationException(
+                        "This XGraphicsPdfRenderer is not the owner of currently rendered content stream. " +
+                        "Maybe a PDFsharp Graphics DrawingContext is still open.");
+                }
+                var content = _page.RenderContent;
+                Debug.Assert(content != null);
+                var contentString = GetContent();
+                // Create stream of content even if contentString is empty, but remove content below
+                // except it is the only content stream.
+                content.CreateStream(PdfEncoders.RawEncoding.GetBytes(contentString));
 
                 _gfx = null!;
-                _page.RenderContent!.SetRenderer(null);
-                _page.RenderContent = null!;
+                content.SetRenderer(null);
+                _page.RenderContent = null;
+                // Remove empty content stream, but only if page has at least another content stream.
+                if (contentString.Length == 0 && _page.Contents.Elements.Count > 1)
+                {
+                    _page.Contents.Elements.Remove(content);
+                    Debug.Assert(_page.Contents.Elements.Count != 0);
+                }
+                content = null!;
                 _page = null!;
             }
             else if (_form != null!)
@@ -116,7 +147,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawLines(XPen pen, XPoint[] points)
         {
             // #PDF-UA
-            if (Owner._uaManager != null)
+            if (Owner.UAManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             if (pen == null)
@@ -130,7 +161,7 @@ namespace PdfSharp.Drawing.Pdf
 
             Realize(pen);
 
-            const string format = Config.SignificantDecimalPlaces4;
+            const string format = DefaultNumberFormat4;
             AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
             for (int idx = 1; idx < count; idx++)
                 AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", points[idx].X, points[idx].Y);
@@ -149,7 +180,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawBeziers(XPen pen, XPoint[] points)
         {
             // #PDF-UA
-            if (Owner._uaManager != null)
+            if (Owner.UAManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             if (pen == null)
@@ -166,7 +197,7 @@ namespace PdfSharp.Drawing.Pdf
 
             Realize(pen);
 
-            const string format = Config.SignificantDecimalPlaces4;
+            const string format = DefaultNumberFormat4;
             AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
             for (int idx = 1; idx < count; idx += 3)
                 AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
@@ -182,7 +213,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawCurve(XPen pen, XPoint[] points, double tension)
         {
             // #PDF-UA
-            if (Owner._uaManager != null)
+            if (Owner.UAManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             if (pen == null)
@@ -201,7 +232,7 @@ namespace PdfSharp.Drawing.Pdf
 
             Realize(pen);
 
-            const string format = Config.SignificantDecimalPlaces4;
+            const string format = DefaultNumberFormat4;
             AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
             if (count == 2)
             {
@@ -223,7 +254,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawArc(XPen pen, double x, double y, double width, double height, double startAngle, double sweepAngle)
         {
             // #PDF-UA
-            if (Owner._uaManager != null)
+            if (Owner.UAManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             if (pen == null)
@@ -240,7 +271,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawRectangle(XPen? pen, XBrush? brush, double x, double y, double width, double height)
         {
             // #PDF-UA
-            if (Owner._uaManager != null)
+            if (Owner.UAManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             if (pen == null && brush == null)
@@ -248,7 +279,7 @@ namespace PdfSharp.Drawing.Pdf
                 throw new ArgumentNullException(nameof(pen) + " and " + nameof(brush));
             }
 
-            const string format = Config.SignificantDecimalPlaces4;
+            const string format = DefaultNumberFormat4;
 
             Realize(pen, brush);
             //AppendFormat123("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} re\n", x, y, width, -height);
@@ -279,7 +310,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawRoundedRectangle(XPen? pen, XBrush? brush, double x, double y, double width, double height, double ellipseWidth, double ellipseHeight)
         {
             // #PDF-UA
-            if (Owner._uaManager != null)
+            if (Owner.UAManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             XGraphicsPath path = new XGraphicsPath();
@@ -292,7 +323,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawEllipse(XPen? pen, XBrush? brush, double x, double y, double width, double height)
         {
             // #PDF-UA
-            if (Owner._uaManager != null)
+            if (Owner.UAManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             Realize(pen, brush);
@@ -309,7 +340,7 @@ namespace PdfSharp.Drawing.Pdf
             double y0 = rect.Y + δy;
 
             // Approximate an ellipse by drawing four cubic splines.
-            const string format = Config.SignificantDecimalPlaces4;
+            const string format = DefaultNumberFormat4;
             AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", x0 + δx, y0);
             AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
               x0 + δx, y0 + fy, x0 + fx, y0 + δy, x0, y0 + δy);
@@ -327,7 +358,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawPolygon(XPen? pen, XBrush? brush, XPoint[] points, XFillMode fillmode)
         {
             // #PDF-UA
-            if (Owner._uaManager != null)
+            if (Owner.UAManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             Realize(pen, brush);
@@ -336,7 +367,7 @@ namespace PdfSharp.Drawing.Pdf
             if (points.Length < 2)
                 throw new ArgumentException(PsMsgs.PointArrayAtLeast(2), nameof(points));
 
-            const string format = Config.SignificantDecimalPlaces4;
+            const string format = DefaultNumberFormat4;
             AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
             for (int idx = 1; idx < count; idx++)
                 AppendFormatPoint("{0:" + format + "} {1:" + format + "} l\n", points[idx].X, points[idx].Y);
@@ -350,12 +381,12 @@ namespace PdfSharp.Drawing.Pdf
           double startAngle, double sweepAngle)
         {
             // #PDF-UA
-            if (Owner._uaManager != null)
+            if (Owner.UAManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             Realize(pen, brush);
 
-            const string format = Config.SignificantDecimalPlaces4;
+            const string format = DefaultNumberFormat4;
             AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", x + width / 2, y + height / 2);
             AppendPartialArc(x, y, width, height, startAngle, sweepAngle, PathStart.LineTo1st, new XMatrix());
             AppendStrokeFill(pen, brush, XFillMode.Alternate, true);
@@ -366,7 +397,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawClosedCurve(XPen? pen, XBrush? brush, XPoint[] points, double tension, XFillMode fillmode)
         {
             // #PDF-UA
-            if (Owner._uaManager != null)
+            if (Owner.UAManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             int count = points.Length;
@@ -380,7 +411,7 @@ namespace PdfSharp.Drawing.Pdf
 
             Realize(pen, brush);
 
-            const string format = Config.SignificantDecimalPlaces4;
+            const string format = DefaultNumberFormat4;
             AppendFormatPoint("{0:" + format + "} {1:" + format + "} m\n", points[0].X, points[0].Y);
             if (count == 2)
             {
@@ -403,7 +434,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawPath(XPen? pen, XBrush? brush, XGraphicsPath path)
         {
             // #PDF-UA
-            if (Owner._uaManager != null)
+            if (Owner.UAManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
             if (pen == null && brush == null)
@@ -444,7 +475,7 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawString(string s, XFont font, XBrush brush, XRect rect, XStringFormat format)
         {
             // #PDF-UA
-            if (Owner._uaManager != null)
+            if (Owner.UAManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.DrawString });
 
             font.CheckVersion();
@@ -652,7 +683,7 @@ namespace PdfSharp.Drawing.Pdf
 
             Debug.Assert(textParts.Sum(p => p.Count) == glyphCount, "Character count mismatch.");
 
-            const string format2 = Config.SignificantDecimalPlaces4;
+            const string format2 = DefaultNumberFormat4;
             var layerBytes = new byte[2];
             foreach (var textPart in textParts)
             {
@@ -670,7 +701,7 @@ namespace PdfSharp.Drawing.Pdf
                         if (layer.paletteIndex != 0xffff)
                         {
                             var color = otDescriptor.FontFace.cpal!.colorRecords[layer.paletteIndex];
-                            _gfxState.RealizeBrush(new XSolidBrush(color), _colorMode, 0, 0);
+                            _gfxState.RealizeBrush(new XSolidBrush(XColor.FromArgb(color.Argb)), _colorMode, 0, 0);
                         }
                         else
                         {
@@ -744,7 +775,7 @@ namespace PdfSharp.Drawing.Pdf
             }
 
             // Select the number of decimal places used for the relative text positioning.
-            const string formatTj = Config.SignificantDecimalPlaces4;
+            const string formatTj = DefaultNumberFormat4;
 #if ITALIC_SIMULATION
             if (italicSimulation)
             {
@@ -805,8 +836,8 @@ namespace PdfSharp.Drawing.Pdf
                 }
             }
 #else
-                AdjustTextMatrix(ref pos);
-                AppendFormat2("{0:" + format2 + "} {1:" + format2 + "} Td {2} Tj\n", pos.X, pos.Y, text);
+            AdjustTextMatrix(ref pos);
+            AppendFormat2("{0:" + format2 + "} {1:" + format2 + "} Td {2} Tj\n", pos.X, pos.Y, text);
 #endif
             if (underline)
             {
@@ -880,10 +911,10 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawImage(XImage image, double x, double y, double width, double height)
         {
             // #PDF-UA
-            if (Owner._uaManager != null)
+            if (Owner.UAManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
-            const string format = Config.SignificantDecimalPlaces4;
+            const string format = DefaultNumberFormat4;
 
             string name = Realize(image);
             if (image is not XForm form)
@@ -945,10 +976,10 @@ namespace PdfSharp.Drawing.Pdf
         public void DrawImage(XImage image, XRect destRect, XRect srcRect, XGraphicsUnit srcUnit)
         {
             // #PDF-UA
-            if (Owner._uaManager != null)
+            if (Owner.UAManager != null)
                 Owner.Events.OnPageGraphicsAction(Owner, new PageGraphicsEventArgs(Owner) { Page = _page, Graphics = Gfx, ActionType = PageGraphicsActionType.Draw });
 
-            const string format = Config.SignificantDecimalPlaces4;
+            const string numFormat = DefaultNumberFormat4;
 
             double x = destRect.X;
             double y = destRect.Y;
@@ -960,13 +991,23 @@ namespace PdfSharp.Drawing.Pdf
             {
                 if (_gfx.PageDirection == XPageDirection.Downwards)
                 {
-                    AppendFormatImage("q {2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do\nQ\n",
+#if true
+                    const string format = "q {2:" + numFormat + "} 0 0 {3:" + numFormat + "} {0:" + numFormat + "} {1:" + numFormat + "} cm {4} Do Q\n";
+                    AppendFormatImage(format, x, y + height, width, height, name);
+#else
+                    AppendFormatImage("q {2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q\n",
                         x, y + height, width, height, name);
+#endif
                 }
                 else
                 {
+#if true
+                    const string format = "q {2:" + numFormat + "} 0 0 {3:" + numFormat + "} {0:" + numFormat + "} {1:" + numFormat + "} cm {4} Do Q\n";
+                    AppendFormatImage(format, x, y, width, height, name);
+#else
                     AppendFormatImage("q {2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q\n",
                         x, y, width, height, name);
+#endif
                 }
             }
             else
@@ -984,7 +1025,13 @@ namespace PdfSharp.Drawing.Pdf
                 {
                     var xForm = form as XPdfForm;
                     // Reset colors in this graphics state. Usually PDF images should set them, but in rare cases they don’t and this may result in changed colors inside the image.
+#if true
+                    bool resetColor = xForm != null;
+                    const string resetColorCode = "\n0 g\n0 G\n";
+#else
+                    bool resetColorXX = xForm != null;
                     var resetColor = xForm != null ? "\n0 g\n0 G\n" : " ";
+#endif
 
                     if (_gfx.PageDirection == XPageDirection.Downwards)
                     {
@@ -996,14 +1043,27 @@ namespace PdfSharp.Drawing.Pdf
                             xDraw -= xForm.Page!.MediaBox.X1;
                             yDraw += xForm.Page.MediaBox.Y1;
                         }
+#if true
+                        const string formatReset = "q" + resetColorCode + "{2:" + numFormat + "} 0 0 {3:" + numFormat + "} {0:" + numFormat + "} {1:" + numFormat + "} cm {4} Do Q\n";
+                        const string format = "q {2:" + numFormat + "} 0 0 {3:" + numFormat + "} {0:" + numFormat + "} {1:" + numFormat + "} cm {4} Do Q\n";
+
+                        AppendFormatImage(resetColor ? formatReset : format, xDraw, yDraw + height, cx, cy, name);
+#else
                         AppendFormatImage("q" + resetColor + "{2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q\n",
                             xDraw, yDraw + height, cx, cy, name);
+#endif
                     }
                     else
                     {
                         // TODO_OLD Translation for MediaBox.
+#if true
+                        const string formatReset = "q" + resetColorCode + "{2:" + numFormat + "} 0 0 {3:" + numFormat + "} {0:" + numFormat + "} {1:" + numFormat + "} cm {4} Do Q\n";
+                        const string format = "q {2:" + numFormat + "} 0 0 {3:" + numFormat + "} {0:" + numFormat + "} {1:" + numFormat + "} cm {4} Do Q\n";
+                        AppendFormatImage(resetColor ? formatReset : format, x, y, cx, cy, name);
+#else
                         AppendFormatImage("q" + resetColor + "{2:" + format + "} 0 0 {3:" + format + "} {0:" + format + "} {1:" + format + "} cm {4} Do Q\n",
                             x, y, cx, cy, name);
+#endif
                     }
                 }
             }
@@ -1187,7 +1247,7 @@ namespace PdfSharp.Drawing.Pdf
                 α = α + (1 + Math.Floor((Math.Abs(α) / 360))) * 360;
             else if (α > 360)
                 α = α - Math.Floor(α / 360) * 360;
-            Debug.Assert(α >= 0 && α <= 360);
+            Debug.Assert(α is >= 0 and <= 360);
 
             double β = sweepAngle;
             if (β < -360)
@@ -1335,7 +1395,7 @@ namespace PdfSharp.Drawing.Pdf
             sinβ = Math.Sin(β);
             double cosβ = Math.Cos(β);
 
-            const string format = Config.SignificantDecimalPlaces4;
+            const string format = DefaultNumberFormat4;
             XPoint pt1, pt2, pt3;
             if (!reflect)
             {
@@ -1391,7 +1451,7 @@ namespace PdfSharp.Drawing.Pdf
         void AppendPartialArc(SysPoint point1, SysPoint point2, double rotationAngle,
             SysSize size, bool isLargeArc, SweepDirection sweepDirection, PathStart pathStart)
         {
-            const string format = Config.SignificantDecimalPlaces4;
+            const string format = DefaultNumberFormat4;
 
             Debug.Assert(pathStart == PathStart.Ignore1st);
 
@@ -1417,7 +1477,7 @@ namespace PdfSharp.Drawing.Pdf
         /// </summary>
         void AppendCurveSegment(XPoint pt0, XPoint pt1, XPoint pt2, XPoint pt3, double tension3)
         {
-            const string format = Config.SignificantDecimalPlaces4;
+            const string format = DefaultNumberFormat4;
             AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} c\n",
                 pt1.X + tension3 * (pt2.X - pt0.X), pt1.Y + tension3 * (pt2.Y - pt0.Y),
                 pt2.X - tension3 * (pt3.X - pt1.X), pt2.Y - tension3 * (pt3.Y - pt1.Y),
@@ -1595,7 +1655,7 @@ namespace PdfSharp.Drawing.Pdf
 #if CORE || GDI
         void AppendPath(XPoint[] points, byte[] types)
         {
-            const string format = Config.SignificantDecimalPlaces4;
+            const string format = DefaultNumberFormat4;
             int count = points.Length;
             if (count == 0)
                 return;
@@ -1649,7 +1709,7 @@ namespace PdfSharp.Drawing.Pdf
         /// </summary>
         internal void AppendPath(PathGeometry geometry)
         {
-            const string format = Config.SignificantDecimalPlaces4;
+            const string format = DefaultNumberFormat4;
 
             foreach (PathFigure figure in geometry.Figures)
             {
@@ -1825,11 +1885,6 @@ namespace PdfSharp.Drawing.Pdf
         internal void AppendFormatArgs(string format, params object[] args)
         {
             _content.AppendFormat(CultureInfo.InvariantCulture, format, args);
-#if DEBUG_
-            string dummy = _content.ToString();
-            dummy = dummy.Substring(Math.Max(0, dummy.Length - 100));
-            dummy.GetType();
-#endif
         }
 
         internal void AppendFormatString(string format, string s)
@@ -1946,6 +2001,8 @@ namespace PdfSharp.Drawing.Pdf
                 DefaultViewMatrix = new XMatrix();
                 if (_gfx.PageDirection == XPageDirection.Downwards)
                 {
+                    // Case Downwards, the default and only implemented direction.
+
                     // Take TrimBox into account.
                     PageHeightPt = Size.Height;
                     XPoint trimOffset = new XPoint();
@@ -1993,20 +2050,16 @@ namespace PdfSharp.Drawing.Pdf
                     if (!DefaultViewMatrix.IsIdentity)
                     {
                         Debug.Assert(_gfxState.RealizedCtm.IsIdentity);
-                        //_gfxState.RealizedCtm = DefaultViewMatrix;
-                        const string format = Config.SignificantDecimalPlaces7;
+                        const string format = DefaultNumberFormat7;
                         double[] cm = DefaultViewMatrix.GetElements();
                         AppendFormatArgs("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} cm ",
                                      cm[0], cm[1], cm[2], cm[3], cm[4], cm[5]);
                     }
-
-                    // Set page transformation
-                    //double[] cm = DefaultViewMatrix.GetElements();
-                    //AppendFormat("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} cm ",
-                    //  cm[0], cm[1], cm[2], cm[3], cm[4], cm[5]);
                 }
                 else
                 {
+                    // Case Upwards - not implemented.
+
                     // Scale with page units.
                     switch (_gfx.PageUnit)
                     {
@@ -2035,7 +2088,7 @@ namespace PdfSharp.Drawing.Pdf
                     // Save initial graphic state.
                     SaveState();
                     // Set page transformation.
-                    const string format = Config.SignificantDecimalPlaces7;
+                    const string format = DefaultNumberFormat7;
                     double[] cm = DefaultViewMatrix.GetElements();
                     AppendFormat3Points("{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "} {4:" + format + "} {5:" + format + "} cm ",
                         cm[0], cm[1], cm[2], cm[3], cm[4], cm[5]);
@@ -2075,13 +2128,8 @@ namespace PdfSharp.Drawing.Pdf
             if (_streamMode == StreamMode.Graphic)
                 return;
 
-            Debug.Assert(_streamMode == StreamMode.Text, "Undefined stream mode. Check what happened.");
-
-            // Why the check?
-            if (_streamMode == StreamMode.Text)
-                _content.Append("ET\n");
-
             _streamMode = StreamMode.Graphic;
+            _content.Append("ET\n");
         }
 
         /// <summary>
@@ -2092,10 +2140,9 @@ namespace PdfSharp.Drawing.Pdf
             if (_streamMode == StreamMode.Text)
                 return;
 
-            Debug.Assert(_streamMode == StreamMode.Graphic, "Undefined stream mode. Check what happened.");
-
             _streamMode = StreamMode.Text;
             _content.Append("BT\n");
+
             // Text matrix is empty after BT.
             _gfxState.RealizedTextPosition = new XPoint();
             _gfxState.ItalicSimulationOn = false;
@@ -2409,6 +2456,7 @@ namespace PdfSharp.Drawing.Pdf
             return top;
         }
 
+        internal PdfGraphicsState PdfGraphicsState => _gfxState;
         /// <summary>
         /// The current graphical state.
         /// </summary>

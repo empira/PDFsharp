@@ -318,7 +318,7 @@ namespace PdfSharp.Quality
                 return;
             }
 
-            var stream = new MemoryStream(PngBytes);
+            var stream = new MemoryStream(PngBytes, 0, PngBytes.Length, false, true);
             var image = XImage.FromStream(stream);
             image.Interpolate = false;
             gfx.DrawImage(image, box);
@@ -432,8 +432,8 @@ namespace PdfSharp.Quality
         {
             int length = (int)stream.Length;
             var bytes = new byte[length];
-            _ = stream.Read(bytes, 0, length);
-
+            var read = stream.Read(bytes, 0, length);
+            Debug.Assert(read == length);
             using var fs = new FileStream(path, FileMode.Create);
             fs.Write(bytes, 0, length);
         }

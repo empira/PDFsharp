@@ -76,7 +76,7 @@ namespace PdfSharp.Forms
 
         /// <summary>
         /// Sets the zoom factor so that the printable area of the document fits horizontally into the window.
-        /// Currently not yet implemented and the same as ZoomBestFit.
+        /// Not yet implemented and the same as ZoomBestFit.
         /// </summary>
         TextFit = -2,
 

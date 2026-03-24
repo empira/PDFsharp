@@ -6,16 +6,22 @@ using PdfSharp.Drawing;
 namespace PdfSharp.Snippets.Drawing
 {
     /// <summary>
-    /// 
+    /// Snippet that demonstrates graphics units.
     /// </summary>
     public class GraphicsUnitUpwards : GraphicsUnitBase
     {
+        /// <summary>
+        /// Creates a new GraphicsUnitUpwards instance.
+        /// </summary>
         public GraphicsUnitUpwards()
         {
             Title = "Graphics Unit";
             PathName = "snippets/drawing/graphics/GraphicsUnit-Upwards";
         }
 
+        /// <summary>
+        /// Renders the snippet.
+        /// </summary>
         public override void RenderSnippet(XGraphics gfx)
         {
 #pragma warning disable CS0618 // Type or member is obsolete

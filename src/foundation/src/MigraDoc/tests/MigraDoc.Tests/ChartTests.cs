@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.TestHelper;
@@ -55,10 +55,10 @@ namespace MigraDoc.Tests
             // Layout and render document to PDF.
             pdfRenderer.RenderDocument();
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("ChartTests");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/charts/ChartTests");
             pdfRenderer.PdfDocument.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
 #if DEBUG___

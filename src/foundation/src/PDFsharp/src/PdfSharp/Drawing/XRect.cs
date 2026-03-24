@@ -26,7 +26,7 @@ namespace PdfSharp.Drawing
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     [Serializable, StructLayout(LayoutKind.Sequential)] // , ValueSerializer(typeof(RectValueSerializer)), TypeConverter(typeof(RectConverter))]
-    public struct XRect : IFormattable
+    public struct XRect : IFormattable, IEquatable<XRect>
     {
         /// <summary>
         /// Initializes a new instance of the XRect class.
@@ -141,7 +141,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Determines whether the two rectangles are equal.
         /// </summary>
-            // ReSharper disable CompareOfFloatsByEqualityOperator
+        // ReSharper disable CompareOfFloatsByEqualityOperator
         public static bool operator ==(XRect rect1, XRect rect2) =>
             rect1.X == rect2.X && rect1.Y == rect2.Y && rect1.Width == rect2.Width && rect1.Height == rect2.Height;
         // ReSharper restore CompareOfFloatsByEqualityOperator
@@ -363,7 +363,7 @@ namespace PdfSharp.Drawing
             get
             {
                 if (IsEmpty)
-                    return double.NegativeInfinity;
+                    return Double.NegativeInfinity;
                 return _x + _width;
             }
         }
@@ -376,7 +376,7 @@ namespace PdfSharp.Drawing
             get
             {
                 if (IsEmpty)
-                    return double.NegativeInfinity;
+                    return Double.NegativeInfinity;
                 return _y + _height;
             }
         }
@@ -660,7 +660,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Converts this instance to a System.Drawing.RectangleF.
         /// </summary>
-        public RectangleF ToRectangleF() 
+        public RectangleF ToRectangleF()
             => new((float)_x, (float)_y, (float)_width, (float)_height);
 #endif
 
@@ -668,13 +668,13 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Performs an implicit  conversion from a System.Drawing.Rectangle to an XRect.
         /// </summary>
-        public static implicit operator XRect(Rectangle rect) 
+        public static implicit operator XRect(Rectangle rect)
             => new(rect.X, rect.Y, rect.Width, rect.Height);
 
         /// <summary>
         /// Performs an implicit  conversion from a System.Drawing.RectangleF to an XRect.
         /// </summary>
-        public static implicit operator XRect(RectangleF rect) 
+        public static implicit operator XRect(RectangleF rect)
             => new(rect.X, rect.Y, rect.Width, rect.Height);
 #endif
 

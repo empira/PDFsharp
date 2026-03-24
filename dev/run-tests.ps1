@@ -4,15 +4,15 @@
 
 .DESCRIPTION
     The script builds the solution located in the script’s root parent folder and runs 'dotnet test' for all libraries to test, that are found via its projects.
-    These tests are run in the following environment, as far as available: Windows with NET8 or NET10, Windows with NET462 and Linux/WSL (NET8 or NET10).
+    These tests are run in the following environment, as far as available: Windows with NET8 or NET6, Windows with NET462 and Linux/WSL (NET8 or NET6).
     For each environment, libraries not to be run (like WPF in Linux or Linux-targeting DLLs in Windows) are excluded from testing.
     The test results are displayed in tables per library / code base comparing the test results in the different environments.
 
 .PARAMETER Config
     Specifies the configuration to build and test the solution ("Debug" or "Release"). "Debug" is the default.
 
-.PARAMETER Net10
-    Specifies whether NET10 shall be tested instead of NET8. $False is the default.
+.PARAMETER Net6
+    Specifies whether NET6 shall be tested instead of NET8. $False is the default.
 
 .PARAMETER SkipBuild
     Specifies whether the build of the solution shall be skipped. $False is the default.
@@ -68,7 +68,7 @@ BUG: Allow to run all tests, including GBE.
 
 param (
     [Parameter(Mandatory = $false)] [string]$Config = 'Debug',
-    [Parameter(Mandatory = $false)] [bool]$Net10 = $false,
+    [Parameter(Mandatory = $false)] [bool]$Net6 = $false,
     [Parameter(Mandatory = $false)] [bool]$SkipBuild = $false,
     [Parameter(Mandatory = $false)] [bool]$RunAllTests = $false
 )
@@ -77,7 +77,7 @@ $script:SystemNameWindows = "Windows"
 $script:SystemNameLinux = "Linux"
 $script:SystemNameWsl = "WSL"
 $script:NetName462 = "net462"
-$script:NetName10 = "net10"
+$script:NetName6 = "net6"
 $script:NetName8 = "net8"
 
 
@@ -179,9 +179,9 @@ function InitializeScript()
     }
     Write-Output ""
 
-    if ($script:Net10)
+    if ($script:Net6)
     {
-        Write-Output "NET10 Tests will be run instead of NET8."
+        Write-Output "NET6 Tests will be run instead of NET8."
         Write-Output ""
     }
 
@@ -231,8 +231,8 @@ function CheckNetRuntime($isWsl)
         $wslOrLocal = "the local machine"
     }
 
-    if ($script:Net10) {
-        $netMajorVersion = 10;
+    if ($script:Net6) {
+        $netMajorVersion = 6;
     }
     else {
         $netMajorVersion = 8;
@@ -285,22 +285,20 @@ function LoadTestDllInfos()
 
     $testDllInfos = $dllInfos | Where-Object { $_.IsTestDll }
 
-    # If Net10 parameter is true, remove net8 DLLs.
-    if ($script:Net10)
+    # If Net6 parameter is true, remove net8 DLLs.
+    if ($script:Net6)
     {
         $testDllInfos = $testDllInfos | Where-Object `
         {
             $_.TargetFramework.Contains("net8") -eq $false
-            $_.TargetFramework.Contains("net9") -eq $false
         }
     }
-    # If Net10 parameter is false, remove net10 DLLs.
+    # If Net6 parameter is false, remove net6 DLLs.
     else
     {
         $testDllInfos = $testDllInfos | Where-Object `
         {
-            $_.TargetFramework.Contains("net10") -eq $false
-            $_.TargetFramework.Contains("net9") -eq $false
+            $_.TargetFramework.Contains("net6") -eq $false
         }
     }
 
@@ -599,11 +597,11 @@ function RunTestsForSystem($testDllInfos, $systemName, $isHostedWsl)
 # Gets the name of the environment for the given system and framework.
 function GetEnvironmentName($systemName, $targetFramework)
 {
-    if ($script:Net10 -and $targetFramework.Contains("net10"))
+    if ($script:Net6 -and $targetFramework.Contains("net6"))
     {
-        $frameworkName = $script:NetName10
+        $frameworkName = $script:NetName6
     }
-    elseif ($script:Net10 -eq $false -and $targetFramework.Contains("net8"))
+    elseif ($script:Net6 -eq $false -and $targetFramework.Contains("net8"))
     {
         $frameworkName = $script:NetName8
     }
@@ -619,13 +617,13 @@ function GetEnvironmentName($systemName, $targetFramework)
     # HACK: For Linux the frameworkName shall not be shown.
     if ($systemName -eq $script:SystemNameCurrentLinux)
     {
-        if ($script:Net10 -and $frameworkName -ne "net10")
+        if ($script:Net6 -and $frameworkName -ne "net6")
         {
-            Write-Error ("For Linux there’s only one column supported (net10) by test script with Net10 parameter set to true.")
+            Write-Error ("For Linux there’s only one column supported (net6) by test script with Net6 parameter set to true.")
         }
-        elseif ($script:Net10 -eq $false -and $frameworkName -ne "net8")
+        elseif ($script:Net6 -eq $false -and $frameworkName -ne "net8")
         {
-            Write-Error ("For Linux there’s only one column supported (net8) by test script with Net10 parameter set to false.")
+            Write-Error ("For Linux there’s only one column supported (net8) by test script with Net6 parameter set to false.")
         }
         return "$systemName"
     }
@@ -670,9 +668,9 @@ function LoadAndShowTestResults()
     Write-Output "TestResults"
     Write-Output "=================================================="
 
-    if ($script:Net10)
+    if ($script:Net6)
     {
-        $netNameX = $script:NetName10
+        $netNameX = $script:NetName6
     }
     else
     {

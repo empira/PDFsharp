@@ -1,6 +1,13 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using Microsoft.Extensions.Logging;
+using PdfSharp.Internal;
+using PdfSharp.Internal.Threading;
+using PdfSharp.Internal.Imaging;
+using PdfSharp.Logging;
+using PdfSharp.Pdf.IO;
+using PdfSharp.Pdf.Advanced;
 #if CORE
 // Nothing to import.
 #endif
@@ -8,7 +15,6 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using PdfSharp.Internal;
 #endif
 #if WPF
 using System.Text;
@@ -17,9 +23,6 @@ using System.Windows.Media.Imaging;
 #if WUI
 using Windows.UI.Xaml.Media.Imaging;
 #endif
-using PdfSharp.Drawing.Internal;
-using PdfSharp.Pdf.IO;
-using PdfSharp.Pdf.Advanced;
 
 namespace PdfSharp.Drawing
 {
@@ -39,10 +42,10 @@ namespace PdfSharp.Drawing
     {
         // The hierarchy is adapted to WPF
         //
-        // XImage                           <-- ImageSource
+        // XImage                       <-- ImageSource
         //   XForm
         //   PdfForm
-        //   XBitmapSource               <-- BitmapSource
+        //   XBitmapSource              <-- BitmapSource
         //     XBitmapImage             <-- BitmapImage
 
         // ???
@@ -77,6 +80,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         XImage(Image image)
         {
+            // Procedure -> Create ImportedImage
             _gdiImage = image;
 #if WPF  // Is defined in hybrid build.
             _wpfImage = ImageHelper.CreateBitmapSource(image);
@@ -155,11 +159,14 @@ namespace PdfSharp.Drawing
 #endif
             _path = path;
 
-            //FileStream file = new FileStream(filename, FileMode.Open);
-            //BitsLength = (int)file.Length;
-            //Bits = new byte[BitsLength];
-            //file.Read(Bits, 0, BitsLength);
-            //file.Close();
+            // Use ImageImporter for supported formats.
+            if (TryImportImage(path, out var image))
+            {
+                _importedImage = image;
+                Initialize();
+                return;
+            }
+
 #if GDI
             try
             {
@@ -172,21 +179,20 @@ namespace PdfSharp.Drawing
             _wpfImage = BitmapFromUri(new Uri(path));
 #endif
 
-#if true_
-            float vres = image.VerticalResolution;
-            float hres = image.HorizontalResolution;
-            SizeF size = image.PhysicalDimension;
-            int flags = image.Flags;
-            Size sz = image.Size;
-            GraphicsUnit units = GraphicsUnit.Millimeter;
-            RectangleF rect = image.GetBounds(ref units);
-            int width = image.Width;
-#endif
             Initialize();
         }
 
         XImage(Stream stream)
         {
+            // Use ImageImporter for supported formats.
+            if (TryImportImage(stream, out var image))
+            {
+                _importedImage = image;
+                // We do not store stream here because ImageImporter gets all information we need.
+                Initialize();
+                return;
+            }
+
             //// Create a dummy unique path.
             //_path = "*" + Guid.NewGuid().ToString("B");
 
@@ -318,6 +324,7 @@ namespace PdfSharp.Drawing
 #endif
 
 #if CORE
+
         /// <summary>
         /// Creates an image from the specified file.
         /// </summary>
@@ -327,10 +334,16 @@ namespace PdfSharp.Drawing
             if (PdfReader.TestPdfFile(path) > 0)
                 return new XPdfForm(path);
 
-            var ii = ImageImporter.GetImageImporter();
-            var i = ii.ImportImage(path) ?? throw new InvalidOperationException("Unsupported image format.");
+            PdfSharp.Internal.Imaging.ImportedImage ii;
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                // We can use FromStream, now that we have a stream.
+                var success = ToBeNamed.TryImportImage(stream, out ii!);
+                if (!success)
+                    throw new InvalidOperationException("Unsupported image format.");
+            }
 
-            var image = new XImage(i);
+            var image = new XImage(ii);
             image._path = path;
             return image;
         }
@@ -351,10 +364,11 @@ namespace PdfSharp.Drawing
             if (PdfReader.TestPdfFile(stream) > 0)
                 return new XPdfForm(stream);
 
-            var ii = ImageImporter.GetImageImporter();
-            var i = ii.ImportImage(stream) ?? throw new InvalidOperationException("Unsupported image format.");
+            var success = ToBeNamed.TryImportImage(stream, out var ii);
+            if (!success)
+                throw new InvalidOperationException("Unsupported image format.");
 
-            XImage image = new XImage(i);
+            XImage image = new XImage(ii!);
             image._stream = stream;
             return image;
         }
@@ -371,10 +385,12 @@ namespace PdfSharp.Drawing
             if (stream.CanSeek)
                 throw new InvalidOperationException("Use this function only for streams that do not support Seek.");
 
-            var ii = ImageImporter.GetImageImporter();
-            var i = ii.ImportImage(stream) ?? throw new InvalidOperationException("Unsupported image format.");
+            var worker = new StreamReaderWorker(stream);
+            var success = ToBeNamed.TryImportImage(worker.Data, out var i);
+            if (!success)
+                throw new InvalidOperationException("Unsupported image format.");
 
-            XImage image = new XImage(i);
+            XImage image = new XImage(i!);
             image._stream = stream;
             return image;
         }
@@ -385,7 +401,7 @@ namespace PdfSharp.Drawing
         /// Creates an image from the specified file.
         /// </summary>
         /// <param name="path">The path to a BMP, PNG, GIF, JPEG, TIFF, or PDF file.</param>
-        /// <param name="platformIndependent">Uses an platform-independent implementation if set to true.
+        /// <param name="platformIndependent">Uses a platform-independent implementation if set to true.
         /// The platform-dependent implementation, if available, will support more image formats.</param>
         public static XImage FromFile(string path, bool platformIndependent)
         {
@@ -394,10 +410,12 @@ namespace PdfSharp.Drawing
 
             // TODO_OLD: Check PDF file.
 
-            var ii = ImageImporter.GetImageImporter();
-            var i = ii.ImportImage(path) ?? throw new InvalidOperationException("Unsupported image format."); ;
+            var reader = new StreamReaderWorker(path);
+            var success = ToBeNamed.TryImportImage(reader.Data, out var img);
+            if (!success)
+                throw new InvalidOperationException("Unsupported image format."); ;
 
-            var image = new XImage(i);
+            var image = new XImage(img!);
             image._path = path;
             return image;
         }
@@ -406,7 +424,7 @@ namespace PdfSharp.Drawing
         /// Creates an image from the specified stream.<br/>
         /// </summary>
         /// <param name="stream">The stream containing a BMP, PNG, GIF, JPEG, TIFF, or PDF file.</param>
-        /// <param name="platformIndependent">Uses an platform-independent implementation if set to true.
+        /// <param name="platformIndependent">Uses a platform-independent implementation if set to true.
         /// The platform-dependent implementation, if available, will support more image formats.</param>
         public static XImage FromStream(Stream stream, bool platformIndependent)
         {
@@ -418,10 +436,11 @@ namespace PdfSharp.Drawing
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
-            var ii = ImageImporter.GetImageImporter();
-            var i = ii.ImportImage(stream) ?? throw new InvalidOperationException("Unsupported image format.");
+            var success = ToBeNamed.TryImportImage(stream, out var img);
+            if (!success)
+                throw new InvalidOperationException("Unsupported image format.");
 
-            XImage image = new XImage(i);
+            XImage image = new XImage(img!);
             image._stream = stream;
             return image;
         }
@@ -471,7 +490,7 @@ namespace PdfSharp.Drawing
             if (_importedImage != null)
             {
                 // In PDF there are two formats: JPEG and PDF bitmap.
-                if (_importedImage is ImportedImageJpeg)
+                if (_importedImage is ImportedJpegImage)
                     _format = XImageFormat.Jpeg;
                 else
                     _format = XImageFormat.Png;
@@ -769,7 +788,7 @@ namespace PdfSharp.Drawing
                 imageBits[9] == 0x46 &&
                 imageBits[10] == 0x0*/)
             {
-                // HACK_OLD: store the file in PDF if extension matches ...
+                // HACK_OLD: store the file in PDF if extension matches...
                 return null;
             }
             return false;
@@ -828,7 +847,7 @@ namespace PdfSharp.Drawing
             {
 #if CORE || GDI || WPF
                 if (_importedImage != null)
-                    return _importedImage.Information.Width;
+                    return _importedImage.PixelWidth;
 #endif
 #if CORE
                 return 100;
@@ -869,8 +888,7 @@ namespace PdfSharp.Drawing
             {
 #if CORE || GDI || WPF
                 if (_importedImage != null)
-                    return _importedImage.Information.Height;
-
+                    return _importedImage.PixelHeight;
 #endif
 #if CORE
                 return 100;
@@ -925,12 +943,7 @@ namespace PdfSharp.Drawing
 #if CORE || GDI || WPF
                 if (_importedImage != null)
                 {
-                    if (_importedImage.Information.HorizontalDPM > 0)
-                        return _importedImage.Information.Width * FactorDPM72 / _importedImage.Information.HorizontalDPM;
-                    if (_importedImage.Information.HorizontalDPI > 0)
-                        return _importedImage.Information.Width * 72 / _importedImage.Information.HorizontalDPI;
-                    // Assume 72 DPI if information not available.
-                    return _importedImage.Information.Width;
+                    return _importedImage.Width;
                 }
 #endif
 #if CORE
@@ -951,9 +964,6 @@ namespace PdfSharp.Drawing
                 Debug.Assert(DoubleUtil.AreRoughlyEqual(gdiWidth, wpfWidth, 5));
                 return wpfWidth;
 #endif
-                //#if GDI && !WPF
-                //                return _gdiImage.Width * 72 / _gdiImage.HorizontalResolution;
-                //#endif
 #if WPF && !GDI
                 Debug.Assert(Math.Abs(_wpfImage.PixelWidth * 72 / _wpfImage.DpiX - _wpfImage.Width * (72.0 / 96.0)) < 0.001);
                 return _wpfImage.Width * (72.0 / 96.0);
@@ -976,12 +986,7 @@ namespace PdfSharp.Drawing
 #if CORE || GDI || WPF
                 if (_importedImage != null)
                 {
-                    if (_importedImage.Information.VerticalDPM > 0)
-                        return _importedImage.Information.Height * FactorDPM72 / _importedImage.Information.VerticalDPM;
-                    if (_importedImage.Information.VerticalDPI > 0)
-                        return _importedImage.Information.Height * 72 / _importedImage.Information.VerticalDPI;
-                    // Assume 72 DPI if information not available.
-                    return _importedImage.Information.Height;
+                    return _importedImage.Height;
                 }
 #endif
 #if CORE
@@ -1001,9 +1006,6 @@ namespace PdfSharp.Drawing
                 Debug.Assert(DoubleUtil.AreRoughlyEqual(gdiHeight, wpfHeight, 5));
                 return wpfHeight;
 #endif
-                //#if GDI && !WPF
-                //                return _gdiImage.Height * 72 / _gdiImage.HorizontalResolution;
-                //#endif
 #if WPF && !GDI
                 Debug.Assert(Math.Abs(_wpfImage.PixelHeight * 72 / _wpfImage.DpiY - _wpfImage.Height * (72.0 / 96.0)) < 0.001);
                 return _wpfImage.Height * (72.0 / 96.0);
@@ -1023,7 +1025,7 @@ namespace PdfSharp.Drawing
             {
 #if CORE || GDI || WPF
                 if (_importedImage != null)
-                    return (int)_importedImage.Information.Width;
+                    return (int)_importedImage.PixelWidth;
 #endif
 #if CORE
                 return 100;
@@ -1042,9 +1044,6 @@ namespace PdfSharp.Drawing
                 Debug.Assert(gdiWidth == wpfWidth);
                 return wpfWidth;
 #endif
-                //#if GDI && !WPF
-                //                return _gdiImage.Width;
-                //#endif
 #if WPF && !GDI
                 return _wpfImage.PixelWidth;
 #endif
@@ -1063,7 +1062,7 @@ namespace PdfSharp.Drawing
             {
 #if CORE || GDI || WPF
                 if (_importedImage != null)
-                    return (int)_importedImage.Information.Height;
+                    return (int)_importedImage.PixelHeight;
 #endif
 #if CORE
                 return 100;
@@ -1109,13 +1108,7 @@ namespace PdfSharp.Drawing
 #if CORE || GDI || WPF
                 if (_importedImage != null)
                 {
-                    if (_importedImage.Information.HorizontalDPI > 0)
-                        return _importedImage.Information.HorizontalDPI;
-                    if (_importedImage.Information.HorizontalDPM > 0)
-                        return _importedImage.Information.HorizontalDPM / FactorDPM;
-                    if (_importedImage.Information.DefaultDPI > 0)
-                        return _importedImage.Information.DefaultDPI;
-                    return 96;
+                    return _importedImage.DpiX;
                 }
 #endif
 #if CORE
@@ -1157,13 +1150,7 @@ namespace PdfSharp.Drawing
 #if CORE || GDI || WPF
                 if (_importedImage != null)
                 {
-                    if (_importedImage.Information.VerticalDPI > 0)
-                        return (double)_importedImage.Information.VerticalDPI;
-                    if (_importedImage.Information.VerticalDPM > 0)
-                        return (double)(_importedImage.Information.VerticalDPM / FactorDPM);
-                    if (_importedImage.Information.DefaultDPI > 0)
-                        return (double)_importedImage.Information.DefaultDPI;
-                    return 96;
+                    return _importedImage.DpiY;
                 }
 #endif
 #if CORE
@@ -1208,6 +1195,40 @@ namespace PdfSharp.Drawing
         public XImageFormat Format => _format ?? NRT.ThrowOnNull<XImageFormat>();
 
         XImageFormat? _format;
+
+        static bool TryImportImage(string path,
+            [MaybeNullWhen(false)] out ImportedImage image)
+        {
+            image = null!;
+            try
+            {
+                using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    var success = ToBeNamed.TryImportImage(stream, out image!);
+                    if (!success)
+                        return false;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                PdfSharpLogHost.Logger.LogWarning(
+                    $"Unhandled exception in TryImportImage, maybe caused by an unsupported image format. {ex.ToString()}");
+            }
+            return false;
+        }
+
+        static bool TryImportImage(Stream stream,
+            [MaybeNullWhen(false)] out ImportedImage image)
+        {
+            image = null!;
+            var success = ToBeNamed.TryImportImage(stream, out image!);
+            if (!success)
+                return false;
+
+            return true;
+        }
 
 #if WPF
         /// <summary>
@@ -1399,7 +1420,6 @@ namespace PdfSharp.Drawing
         XGraphics? _associatedGraphics;
 
 #if CORE || GDI || WPF
-        // ReSharper disable once InconsistentNaming
         internal ImportedImage? _importedImage;
 #endif
 #if GDI

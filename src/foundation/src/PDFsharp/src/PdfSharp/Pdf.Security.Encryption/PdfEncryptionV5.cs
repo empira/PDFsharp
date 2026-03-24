@@ -2,13 +2,12 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.Numerics;
-using PdfSharp.Pdf.IO;
-using System.Security.Cryptography;
 using System.Text;
+using System.Security.Cryptography;
+using PdfSharp.Pdf.IO;
 using PdfSharp.Internal;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Internal;
-using System.Runtime.CompilerServices;
 
 namespace PdfSharp.Pdf.Security.Encryption
 {
@@ -19,7 +18,7 @@ namespace PdfSharp.Pdf.Security.Encryption
     {
         public PdfEncryptionV5(PdfStandardSecurityHandler securityHandler) : base(securityHandler)
         {
-            SecurityHandler._document.SetRequiredVersion(20);
+            SecurityHandler.Document.SetRequiredVersion(20);
         }
 
         /// <summary>
@@ -28,26 +27,23 @@ namespace PdfSharp.Pdf.Security.Encryption
         /// <param name="encryptMetadata">True, if the document metadata stream shall be encrypted (default: true).</param>
         public void Initialize(bool encryptMetadata = true)
         {
-            VersionValue = 5; // Always 5 for PdfEncryptionV5.
+            VersionValue = 5;  // Always 5 for PdfEncryptionV5.
             RevisionValue = 6; // Always 6 for PdfEncryptionV5.
             LengthValue = GetDefaultLength(); // Deprecated in PDF 2.0. But the adobe powered PDF viewer extension for edge cannot open files correctly, if length is missing.
-
+            
             EncryptMetadata = encryptMetadata;
 
             SecurityHandler.GetOrAddStandardCryptFilter().SetEncryptionToAESForV5();
         }
 
-        int GetDefaultLength()
-        {
-            return 256; // Always 256 for PdfEncryptionV5.
-        }
+        int GetDefaultLength() => 256; // Always 256 for PdfEncryptionV5.
 
         /// <summary>
         /// Initializes the PdfEncryptionV5 with the values that were saved in the security handler.
         /// </summary>
         public override void InitializeFromLoadedSecurityHandler()
         {
-            var encryptMetadata = (SecurityHandler.Elements[PdfStandardSecurityHandler.Keys.EncryptMetadata] as PdfBoolean)?.Value ?? true; // GetBoolean() returns false if not existing, but default is true.
+            var encryptMetadata = (SecurityHandler.Elements[PdfStandardSecurityHandler.Keys.EncryptMetadata] as PdfBoolean)?.Value ?? true; // GetBoolean() returns false if not existing, but default is true. // #US373
             Initialize(encryptMetadata);
         }
 
@@ -198,7 +194,7 @@ namespace PdfSharp.Pdf.Security.Encryption
             {
                 SecurityHandler.Elements.SetBoolean(PdfStandardSecurityHandler.Keys.EncryptMetadata, EncryptMetadata);
 
-                var metadata = SecurityHandler._document.Catalog.Elements.GetDictionary(PdfCatalog.Keys.Metadata);
+                var metadata = SecurityHandler.Document.Catalog.Elements.GetDictionary(PdfCatalog.Keys.Metadata, VCF.Create);
                 if (metadata is null)
                     throw TH.InvalidOperationException_CouldNotFindMetadataDictionary();
 
@@ -236,7 +232,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         void CreateAndStoreEncryptionKey()
         {
             // The file encryption key shall be a 256-bit (32-byte) value generated with a strong random number generator.
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             _encryptionKey = RandomNumberGenerator.GetBytes(32);
 #else
             using var cryptoProvider = new RNGCryptoServiceProvider();
@@ -280,7 +276,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         (byte[] UserValue, byte[] UserEValue) ComputeUserValues(byte[] utf8InputPassword)
         {
             // a) Generate random bytes for user validation salt and user key salt.
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             var validationSalt = RandomNumberGenerator.GetBytes(8);
             var keySalt = RandomNumberGenerator.GetBytes(8);
 #else
@@ -317,7 +313,7 @@ namespace PdfSharp.Pdf.Security.Encryption
         (byte[] OwnerValue, byte[] OwnerEValue) ComputeOwnerValues(byte[] utf8InputPassword, byte[] userValue)
         {
             // a) Generate random bytes for owner validation salt and owner key salt.
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             var validationSalt = RandomNumberGenerator.GetBytes(8);
             var keySalt = RandomNumberGenerator.GetBytes(8);
 #else
@@ -380,7 +376,7 @@ namespace PdfSharp.Pdf.Security.Encryption
             var input = password.Concat(salt);
             if (computeOwnerHash)
                 input = input.Concat(userValue!); // Shall not be null, if computeOwnerHash is true.
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             var k = SHA256.HashData(input.ToArray());
 #else
             var sha = SHA256.Create();
@@ -415,15 +411,15 @@ namespace PdfSharp.Pdf.Security.Encryption
 
                 // c) + d): Take the first 16 bytes of e as an unsigned big-endian integer.
                 var e16 = e[..16];
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                 var e16BigEndianUnsigned = new BigInteger(e16, true, true);
 #else
-            var e16BigEndianUnsigned = DotNetHelper.CreateBigInteger(e16, true, true);
+                var e16BigEndianUnsigned = BigInteger.CreateBigInteger(e16, true, true);
 #endif
-                // Calculate the remainder of the result by modulo 3
-                // and according to that result choose the SHA algorithm to calculate the new k from e.
+                // Calculate the remainder of the result by modulo 3 and according to that result
+                // choose the SHA algorithm to calculate the new k from e.
                 BigInteger.DivRem(e16BigEndianUnsigned, 3, out var remainder);
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                 if (remainder == 0)
                     k = SHA256.HashData(e);
                 else if (remainder == 1)
@@ -457,7 +453,7 @@ namespace PdfSharp.Pdf.Security.Encryption
             var input = password.Concat(salt);
             if (computeOwnerHash)
                 input = input.Concat(userValue!); // Shall not be null, if computeOwnerHash is true.
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             var k = SHA256.HashData(input.ToArray());
 #else
             var sha = SHA256.Create();
@@ -497,7 +493,7 @@ namespace PdfSharp.Pdf.Security.Encryption
             perms[11] = (byte)'b';
 
             // e) Set bytes 12-15 to 4 bytes of random data, which will be ignored.
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             var randomData = RandomNumberGenerator.GetBytes(4);
 #else
             var randomData = new byte[4];
@@ -538,7 +534,7 @@ namespace PdfSharp.Pdf.Security.Encryption
             var permissionsValue = SecurityHandler.Elements.GetUnsignedInteger(PdfStandardSecurityHandler.Keys.P);
             var permsValue = PdfEncoders.RawEncoding.GetBytes(SecurityHandler.Elements.GetString(PdfStandardSecurityHandler.Keys.Perms));
 
-            EncryptMetadata = (SecurityHandler.Elements[PdfStandardSecurityHandler.Keys.EncryptMetadata] as PdfBoolean)?.Value ?? true; // GetBoolean() returns false if not existing, but default is true.
+            EncryptMetadata = (SecurityHandler.Elements[PdfStandardSecurityHandler.Keys.EncryptMetadata] as PdfBoolean)?.Value ?? true; // GetBoolean() returns false if not existing, but default is true. // #US373
 
             // 7.6.4.3.3 a) - b): Create UTF-8 password.
             var utf8InputPassword = CreateUtf8Password(inputPassword);
@@ -706,7 +702,7 @@ namespace PdfSharp.Pdf.Security.Encryption
                 return false;
 
             // Bytes 0-3 of the decrypted Perms entry, treated as a little-endian integer, are the user permissions. They should match the value in the P key.
-#if NET6_0_OR_GREATER || USE_INDEX_AND_RANGE_
+#if NET8_0_OR_GREATER || USE_INDEX_AND_RANGE_
             var pFromPerms = BitConverter.ToUInt32(permsDecrypted[..4]);  // Little-endian is default, so we don’t have to change the order.
 #else
             var pFromPerms = BitConverter.ToUInt32(permsDecrypted.Take(4).ToArray(), 0); // Little-endian is default, so we don’t have to change the order.

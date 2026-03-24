@@ -27,6 +27,16 @@ namespace PdfSharp.Pdf.Structure
         }
 
         /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfObjectReference(PdfDictionary dict)
+            : base(dict)
+        {
+            Elements.SetName(Keys.Type, "/OBJR");
+        }
+
+        /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
         internal class Keys : KeysBase

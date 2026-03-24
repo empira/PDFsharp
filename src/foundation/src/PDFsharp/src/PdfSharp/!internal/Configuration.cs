@@ -1,6 +1,8 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+//#define WRITE_LEADING_ZEROS
+
 global using System.Diagnostics;
 global using PdfSharp.Diagnostics;
 global using System.Globalization;
@@ -13,16 +15,50 @@ namespace PdfSharp
     /// </summary>
     static class Config
     {
+#if WRITE_LEADING_ZEROS
 #if DEBUG
         public const string SignificantDecimalPlaces0 = "0";    // for testing only
         public const string SignificantDecimalPlaces1 = "0.#";  // for testing only
 #endif
-        public const string SignificantDecimalPlaces2 = "0.##";
-        public const string SignificantDecimalPlaces3 = "0.###";
-        public const string SignificantDecimalPlaces4 = "0.####";
-        public const string SignificantDecimalPlaces7 = "0.#######";
-        public const string SignificantDecimalPlaces10 = "0.##########";
-        public const string SignificantDecimalPlaces1Plus9 = "0.0#########";
+        public const string SignificantDecimalPlaces2 = "0.##;-0.##;0";
+        public const string SignificantDecimalPlaces3 = "0.###;-0.###;0";
+        public const string SignificantDecimalPlaces4 = "0.####;-0.####;0";
+        public const string SignificantDecimalPlaces7 = "0.#######;-0.#######;0";
+        public const string SignificantDecimalPlaces10 = "0.##########;-0.##########;0"; // Used by DebuggerDisplay only.
+        public const string SignificantDecimalPlaces1Plus9 = "0.0#########;-0.0#########;0.0"; // Used by CReal only.
+
+        // #US263 CReal writes 5 as "5.0" while PdfReal writes 5 as "5".
+
+        public const string NumberFormat2SignificantDecimalPlacesWithLeadingZero = "0.##;-0.##;0";
+        /// <summary>
+        /// The number format2 significant decimal places with leading zero
+        /// </summary>
+        public const string NumberFormat_0_2 = "0.##;-0.##;0";
+        public const string NumberFormat_x_2 = ".##;-.##;0";
+#else
+#if DEBUG
+        public const string SignificantDecimalPlaces0 = "0";         // for testing only
+        public const string SignificantDecimalPlaces1 = ".#;-.#;0";  // for testing only
+#endif
+        public const string SignificantDecimalPlaces2 = ".##;-.##;0";
+        public const string SignificantDecimalPlaces3 = ".###;-.###;0";
+        public const string SignificantDecimalPlaces4 = ".####;-.####;0";
+        public const string SignificantDecimalPlaces7 = ".#######;-.#######;0";
+        public const string SignificantDecimalPlaces10 = ".##########;-.##########;0"; // Used by DebuggerDisplay only.
+        public const string SignificantDecimalPlaces1Plus9 = ".0#########;-.0#########;0.0"; // Used by CReal only.
+
+        public const string NumberFormat2SignificantDecimalPlacesWithLeadingZero = "0.##;-0.##;0";
+        /// <summary>
+        /// The number format2 significant decimal places with leading zero
+        /// </summary>
+        public const string NumberFormat_0_2 = "0.##;-0.##;0";
+        public const string NumberFormat_x_2 = ".##;-.##;0";
+#endif
+
+        public const string ColorFormat = NumberFormat_x_2;
+        public const string ColorFormatLz = NumberFormat_0_2;
+        public const string CoordFormat = NumberFormat_x_2;
+        public const string CoordFormatLz = NumberFormat_0_2;
     }
 
     static class Const

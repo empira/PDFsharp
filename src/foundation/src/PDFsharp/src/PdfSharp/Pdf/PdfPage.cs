@@ -1,22 +1,27 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.ComponentModel;
 using Microsoft.Extensions.Logging;
-using PdfSharp.Pdf.IO;
 using PdfSharp.Drawing;
+#if CORE
+using PdfSharp.Internal.Imaging;
+#endif
 using PdfSharp.Logging;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Annotations;
-using InvalidOperationException = System.InvalidOperationException;
+using PdfSharp.Pdf.IO;
+using System.ComponentModel;
+
+// v7.0.0 TODO review, TODO Keys 2.0
 
 namespace PdfSharp.Pdf
 {
     /// <summary>
     /// Represents a page in a PDF document.
     /// </summary>
-    public sealed class PdfPage : PdfDictionary, IContentStream
+    public sealed class PdfPage : PdfPageTreeBase, IContentStream
     {
+        // 7.7.3.3 Page objects
         /// <summary>
         /// Initializes a new page. The page must be added to a document before it can be used.
         /// Depending on the IsMetric property of the current region, the page size is set to 
@@ -37,10 +42,14 @@ namespace PdfSharp.Pdf
             : base(document)
         {
             Elements.SetName(Keys.Type, "/Page");
-            Elements[Keys.Parent] = document.Pages.Reference;
+            Elements[Keys.Parent] = document.Pages.RequiredReference;
             Initialize(false);
         }
 
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
         internal PdfPage(PdfDictionary dict)
             : base(dict)
         {
@@ -53,7 +62,7 @@ namespace PdfSharp.Pdf
             {
                 // Setup page size from MediaBox.
                 var rectangle = Elements.GetRectangle(InheritablePageKeys.MediaBox, false);
-                if (rectangle.IsZero)
+                if (rectangle == null)
                     throw new InvalidOperationException("Page has no MediaBox.");
 
                 _width = XUnit.FromPoint(rectangle.X2 - rectangle.X1);
@@ -92,18 +101,14 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Gets or sets the PdfDocument this page belongs to.
         /// </summary>
-        internal override PdfDocument Document
+        public override PdfDocument Document
         {
-            set
+            internal set
             {
-                if (!ReferenceEquals(_document, value))
+                if (!ReferenceEquals(base.Document, value))
                 {
-                    if (_document != null)
-                        throw new InvalidOperationException("Cannot change document.");
-                    _document = value;
-                    if (Reference != null)
-                        Reference.Document = value;
-                    Elements[Keys.Parent] = _document.Pages.Reference;
+                    base.Document = value;
+                    Elements[Keys.Parent] = value.Pages.RequiredReference;
                 }
             }
         }
@@ -173,7 +178,7 @@ namespace PdfSharp.Pdf
         public PageSize Size
         {
             [Obsolete("Use Width and Height to get the absolute size of the page.")]
-            get => throw new InvalidOperationException("Cannot get PageSize. Use Width or Height instead.");
+            get => throw new InvalidOperationException("Cannot get PageSize. Use Width and Height instead.");
             set
             {
                 if (!Enum.IsDefined(typeof(PageSize), value))
@@ -191,12 +196,12 @@ namespace PdfSharp.Pdf
         {
             get
             {
-                _trimMargins ??= new TrimMargins();
+                _trimMargins ??= new();
                 return _trimMargins;
             }
             set
             {
-                _trimMargins ??= new TrimMargins();
+                _trimMargins ??= new();
                 if (value != null!)
                 {
                     _trimMargins.Left = value.Left;
@@ -216,13 +221,10 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfRectangle MediaBox
         {
-            get => Elements.GetRectangle(InheritablePageKeys.MediaBox, true);
+            get => Elements.GetRequiredRectangle(InheritablePageKeys.MediaBox);
             set
             {
                 // Can be different from 0 in case of imported PDF.
-                //if (value is not { X1: 0, Y1: 0 })
-                //    throw new ArgumentException("MediaBox origin cannot be other than (0,0).");
-
                 _width = XUnit.FromPoint(value.X2 - value.X1);
                 _height = XUnit.FromPoint(value.Y2 - value.Y1);
                 UpdateOrientation();
@@ -233,43 +235,40 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Gets a value indicating whether a media box is set.
         /// </summary>
-        public bool HasMediaBox => Elements[InheritablePageKeys.MediaBox] != null;
+        public bool HasMediaBox => Elements.HasValue(InheritablePageKeys.MediaBox);
 
         /// <summary>
-        /// Gets a copy of the media box if it exists, or PdfRectangle.Empty if no media box is set.
+        /// Gets a copy of the media box if it exists, or an empty PdfRectangle if no media box is set.
         /// </summary>
-        public PdfRectangle MediaBoxReadOnly => Elements.GetRectangle(InheritablePageKeys.MediaBox, false);
+        [Obsolete("Use properties HasMediaBox and MediaBox.")]
+        public PdfRectangle MediaBoxReadOnly => Elements.GetRequiredRectangle(InheritablePageKeys.MediaBox, false, new());
 
         /// <summary>
         /// Gets or sets the crop box.
         /// </summary>
         public PdfRectangle CropBox
         {
-            get => Elements.GetRectangle(InheritablePageKeys.CropBox, true);
+            get => Elements.GetRequiredRectangle(InheritablePageKeys.CropBox);
             set => Elements.SetRectangle(InheritablePageKeys.CropBox, value);
         }
 
         /// <summary>
         /// Gets a value indicating whether a crop box is set.
         /// </summary>
-        public bool HasCropBox => Elements[InheritablePageKeys.CropBox] != null;
+        public bool HasCropBox => Elements.HasValue(InheritablePageKeys.CropBox);
 
         /// <summary>
-        /// Gets a copy of the crop box if it exists, or PdfRectangle.Empty if no crop box is set.
+        /// Gets a copy of the crop box if it exists, or an empty PdfRectangle if no crop box is set.
         /// </summary>
-        public PdfRectangle CropBoxReadOnly => Elements.GetRectangle(InheritablePageKeys.CropBox, false);
+        [Obsolete("Use properties HasCropBox and CropBox.")]
+        public PdfRectangle CropBoxReadOnly => Elements.GetRequiredRectangle(InheritablePageKeys.CropBox, false, new());
 
         /// <summary>
-        /// Gets a copy of the effective crop box if it exists, or PdfRectangle.Empty if neither crop box nor media box are set.
+        /// Gets a copy of the effective crop box if it exists, or an empty PdfRectangle if neither crop box nor media box are set.
         /// </summary>
         public PdfRectangle EffectiveCropBoxReadOnly
         {
-            get
-            {
-                if (HasCropBox)
-                    return CropBox;
-                return MediaBoxReadOnly;
-            }
+            get => HasCropBox ? CropBox : MediaBox;
         }
 
         /// <summary>
@@ -277,22 +276,24 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfRectangle BleedBox
         {
-            get => Elements.GetRectangle(Keys.BleedBox, true);
+            get => Elements.GetRequiredRectangle(Keys.BleedBox);
             set => Elements.SetRectangle(Keys.BleedBox, value);
         }
 
         /// <summary>
         /// Gets a value indicating whether a bleed box is set.
         /// </summary>
-        public bool HasBleedBox => Elements[Keys.BleedBox] != null;
+        public bool HasBleedBox => Elements.HasValue(Keys.BleedBox);
 
         /// <summary>
-        /// Gets a copy of the bleed box if it exists, or PdfRectangle.Empty if no bleed box is set.
+        /// Gets a copy of the bleed box if it exists, or an empty PdfRectangle if no bleed box is set.
         /// </summary>
-        public PdfRectangle BleedBoxReadOnly => Elements.GetRectangle(Keys.BleedBox, false);
+        [Obsolete("Use properties HasBleedBox and BleedBox.")]
+
+        public PdfRectangle BleedBoxReadOnly => Elements.GetRequiredRectangle(Keys.BleedBox, false, new());
 
         /// <summary>
-        /// Gets a copy of the effective bleed box if it exists, or PdfRectangle.Empty if neither bleed box nor crop box nor media box are set.
+        /// Gets a copy of the effective bleed box if it exists, or an empty PdfRectangle if neither bleed box nor crop box nor media box are set.
         /// </summary>
         public PdfRectangle EffectiveBleedBoxReadOnly
         {
@@ -309,22 +310,23 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfRectangle ArtBox
         {
-            get => Elements.GetRectangle(Keys.ArtBox, true);
+            get => Elements.GetRequiredRectangle(Keys.ArtBox);
             set => Elements.SetRectangle(Keys.ArtBox, value);
         }
 
         /// <summary>
         /// Gets a value indicating whether an art box is set.
         /// </summary>
-        public bool HasArtBox => Elements[Keys.ArtBox] != null;
+        public bool HasArtBox => Elements.HasValue(Keys.ArtBox);
 
         /// <summary>
-        /// Gets a copy of the art box if it exists, or PdfRectangle.Empty if no art box is set.
+        /// Gets a copy of the art box if it exists, or an empty PdfRectangle if no art box is set.
         /// </summary>
-        public PdfRectangle ArtBoxReadOnly => Elements.GetRectangle(Keys.ArtBox, false);
+        [Obsolete("Use properties HasArtBox and ArtBox.")]
+        public PdfRectangle ArtBoxReadOnly => Elements.GetRequiredRectangle(Keys.ArtBox, false, new());
 
         /// <summary>
-        /// Gets a copy of the effective art box if it exists, or PdfRectangle.Empty if neither art box nor crop box nor media box are set.
+        /// Gets a copy of the effective art box if it exists, or an empty PdfRectangle if neither art box nor crop box nor media box are set.
         /// </summary>
         public PdfRectangle EffectiveArtBoxReadOnly
         {
@@ -341,22 +343,24 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfRectangle TrimBox
         {
-            get => Elements.GetRectangle(Keys.TrimBox, true);
+            get => Elements.GetRequiredRectangle(Keys.TrimBox);
             set => Elements.SetRectangle(Keys.TrimBox, value);
         }
 
         /// <summary>
         /// Gets a value indicating whether a trim box is set.
         /// </summary>
-        public bool HasTrimBox => Elements[Keys.TrimBox] != null;
+        public bool HasTrimBox => Elements.HasValue(Keys.TrimBox);
 
         /// <summary>
-        /// Gets a copy of the trim box if it exists, or PdfRectangle.Empty if no trim box is set.
+        /// Gets a copy of the trim box if it exists, or an empty PdfRectangle if no trim box is set.
         /// </summary>
-        public PdfRectangle TrimBoxReadOnly => Elements.GetRectangle(Keys.TrimBox, false);
+        [Obsolete("Use properties HasTrimBox and TrimBox.")]
+
+        public PdfRectangle TrimBoxReadOnly => Elements.GetRequiredRectangle(Keys.TrimBox, false, new());
 
         /// <summary>
-        /// Gets a copy of the effective trim box if it exists, or PdfRectangle.Empty if neither trim box nor crop box nor media box are set.
+        /// Gets a copy of the effective trim box if it exists, or an empty PdfRectangle if neither trim box nor crop box nor media box are set.
         /// </summary>
         public PdfRectangle EffectiveTrimBoxReadOnly
         {
@@ -378,7 +382,7 @@ namespace PdfSharp.Pdf
 #if DEBUG
             get
             {
-                var rectangle = Elements.GetRectangle(InheritablePageKeys.MediaBox, true);
+                var rectangle = Elements.GetRequiredRectangle(InheritablePageKeys.MediaBox);
                 var height = XUnit.FromPoint(rectangle.Y2 - rectangle.Y1);
                 Debug.Assert(height == _height);
                 return _height;
@@ -407,7 +411,7 @@ namespace PdfSharp.Pdf
 #if DEBUG
             get
             {
-                var rectangle = Elements.GetRectangle(InheritablePageKeys.MediaBox, true);
+                var rectangle = Elements.GetRequiredRectangle(InheritablePageKeys.MediaBox);
                 var width = XUnit.FromPoint(rectangle.X2 - rectangle.X1);
                 Debug.Assert(width == _width);
                 return _width;
@@ -426,6 +430,27 @@ namespace PdfSharp.Pdf
         }
         XUnit _width;
 
+        /// <summary>
+        /// Gets or sets the height of the page in point.
+        /// If the page width is less than or equal to page height, the orientation is Portrait;
+        /// otherwise Landscape.
+        /// </summary>
+        public double PointHeight
+        {
+            get => _height.Point;
+            set => Height = XUnit.FromPoint(value);  // Use property to update orientation.
+        }
+
+        /// <summary>
+        /// Gets or sets the width of the page in point.
+        /// If the page width is less than or equal to page height, the orientation is Portrait;
+        /// otherwise Landscape.
+        /// </summary>
+        public double PointWidth
+        {
+            get => _width.Point;
+            set => Width = XUnit.FromPoint(value);  // Use property to update orientation.
+        }
 
         /// <summary>
         /// Gets or sets the /Rotate entry of the PDF page. The value is the number of degrees by which the page 
@@ -500,7 +525,8 @@ namespace PdfSharp.Pdf
                 {
                     if (true) // || Document.IsImported)
                     {
-                        var item = Elements[Keys.Contents];
+                        //var item = Elements[Keys.Contents];
+                        var item = Elements.GetValue(Keys.Contents); // #US373
                         if (item == null)
                         {
                             _contents = new PdfContents(Owner);
@@ -508,8 +534,8 @@ namespace PdfSharp.Pdf
                         }
                         else
                         {
-                            if (item is PdfReference reference)
-                                item = reference.Value;
+                            //if (item is PdfReference reference) // TODO #US373
+                            //    item = reference.Value;
 
                             if (item is PdfArray array)
                             {
@@ -538,13 +564,11 @@ namespace PdfSharp.Pdf
                     //  _content = new PdfContent(Document);
                     //  Document.xrefTable.Add(_content);
                     //}
-                    Debug.Assert(_contents.Reference == null);
                     Elements[Keys.Contents] = _contents;
                 }
                 return _contents;
             }
         }
-
         PdfContents? _contents;
 
         #region Annotations
@@ -556,11 +580,7 @@ namespace PdfSharp.Pdf
         {
             get
             {
-                if (_hasAnnotations == null)
-                {
-                    // Get annotations array if it exists.
-                    _hasAnnotations = (PdfAnnotations?)Elements.GetValue(Keys.Annots) != null;
-                }
+                _hasAnnotations ??= (PdfAnnotations?)Elements.GetValue(Keys.Annots) != null;
                 return _hasAnnotations.Value;
             }
         }
@@ -573,17 +593,21 @@ namespace PdfSharp.Pdf
         {
             get
             {
-                if (_annotations == null)
-                {
-                    // Get or create annotations array.
-                    _annotations = (PdfAnnotations?)Elements.GetValue(Keys.Annots, VCF.Create) ?? NRT.ThrowOnNull<PdfAnnotations>();
-                    _annotations.Page = this;
-                    _hasAnnotations = false;
-                }
-                return _annotations;
+                // Get or create annotations array.
+                var annots = Elements.GetRequiredArray<PdfAnnotations>(Keys.Annots, VCF.Create);
+                annots.Page = this;
+                return annots;
+                //if (_annotations == null)
+                //{
+                //    // Get or create annotations array.
+                //    _annotations = (PdfAnnotations?)Elements.GetValue(Keys.Annots, VCF.Create) ?? NRT.ThrowOnNull<PdfAnnotations>();
+                //    _annotations.Page = this;
+                //    _hasAnnotations = false;
+                //}
+                //return _annotations;
             }
         }
-        PdfAnnotations? _annotations;
+        //PdfAnnotations? _annotations;
 
         /// <summary>
         /// Adds an internal document link.
@@ -593,8 +617,7 @@ namespace PdfSharp.Pdf
         /// <param name="point">The position in the destination page.</param>
         public PdfLinkAnnotation AddDocumentLink(PdfRectangle rect, int destinationPage, XPoint? point = null)
         {
-            var annotation = PdfLinkAnnotation.CreateDocumentLink(rect, destinationPage, point);
-            Annotations.Add(annotation);
+            var annotation = PdfLinkAnnotation.CreateDocumentLink(this, rect, destinationPage, point);
             return annotation;
         }
 
@@ -605,8 +628,7 @@ namespace PdfSharp.Pdf
         /// <param name="destinationName">The Named Destination’s name.</param>
         public PdfLinkAnnotation AddDocumentLink(PdfRectangle rect, string destinationName)
         {
-            var annotation = PdfLinkAnnotation.CreateDocumentLink(rect, destinationName);
-            Annotations.Add(annotation);
+            var annotation = PdfLinkAnnotation.CreateDocumentLink(this, rect, destinationName);
             return annotation;
         }
 
@@ -619,8 +641,7 @@ namespace PdfSharp.Pdf
         /// <param name="newWindow">True, if the destination document shall be opened in a new window. If not set, the viewer application should behave in accordance with the current user preference.</param>
         public PdfLinkAnnotation AddDocumentLink(PdfRectangle rect, string documentPath, string destinationName, bool? newWindow = null)
         {
-            var annotation = PdfLinkAnnotation.CreateDocumentLink(rect, documentPath, destinationName, newWindow);
-            Annotations.Add(annotation);
+            var annotation = PdfLinkAnnotation.CreateDocumentLink(this, rect, documentPath, destinationName, newWindow);
             return annotation;
         }
 
@@ -636,8 +657,7 @@ namespace PdfSharp.Pdf
         /// If not set, the viewer application should behave in accordance with the current user preference.</param>
         public PdfLinkAnnotation AddEmbeddedDocumentLink(PdfRectangle rect, string destinationPath, bool? newWindow = null)
         {
-            var annotation = PdfLinkAnnotation.CreateEmbeddedDocumentLink(rect, destinationPath, newWindow);
-            Annotations.Add(annotation);
+            var annotation = PdfLinkAnnotation.CreateEmbeddedDocumentLink(this, rect, destinationPath, newWindow);
             return annotation;
         }
 
@@ -654,8 +674,7 @@ namespace PdfSharp.Pdf
         /// If not set, the viewer application should behave in accordance with the current user preference.</param>
         public PdfLinkAnnotation AddEmbeddedDocumentLink(PdfRectangle rect, string documentPath, string destinationPath, bool? newWindow = null)
         {
-            var annotation = PdfLinkAnnotation.CreateEmbeddedDocumentLink(rect, documentPath, destinationPath, newWindow);
-            Annotations.Add(annotation);
+            var annotation = PdfLinkAnnotation.CreateEmbeddedDocumentLink(this, rect, documentPath, destinationPath, newWindow);
             return annotation;
         }
 
@@ -666,8 +685,7 @@ namespace PdfSharp.Pdf
         /// <param name="url">The URL.</param>
         public PdfLinkAnnotation AddWebLink(PdfRectangle rect, string url)
         {
-            var annotation = PdfLinkAnnotation.CreateWebLink(rect, url);
-            Annotations.Add(annotation);
+            var annotation = PdfLinkAnnotation.CreateWebLink(this, rect, url);
             return annotation;
         }
 
@@ -678,8 +696,7 @@ namespace PdfSharp.Pdf
         /// <param name="fileName">Name of the file.</param>
         public PdfLinkAnnotation AddFileLink(PdfRectangle rect, string fileName)
         {
-            var annotation = PdfLinkAnnotation.CreateFileLink(rect, fileName);
-            Annotations.Add(annotation);
+            var annotation = PdfLinkAnnotation.CreateFileLink(this, rect, fileName);
             return annotation;
         }
 
@@ -688,7 +705,6 @@ namespace PdfSharp.Pdf
         // TODO_OLD: PdfActions
 
         // TODO_OLD: PdfPageTransition
-
 
         /// <summary>
         /// Gets or sets the custom values.
@@ -716,10 +732,16 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfResources Resources
         {
-            get => _resources ??= (PdfResources?)Elements.GetValue(InheritablePageKeys.Resources, VCF.Create)
-                                  ?? NRT.ThrowOnNull<PdfResources>();
+            get
+            {
+#if true
+                return field ??= Elements.GetRequiredDictionary<PdfResources>(InheritablePageKeys.Resources, VCF.Create);
+#else
+                return _resources ??= (PdfResources?)Elements.GetValue(InheritablePageKeys.Resources, VCF.Create)
+                                      ?? NRT.ThrowOnNull<PdfResources>();
+#endif
+            }
         }
-        PdfResources? _resources;
 
         /// <summary>
         /// Implements the interface because the primary function is internal.
@@ -731,7 +753,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         internal string GetFontName(XGlyphTypeface glyphTypeface, FontType fontType, out PdfFont pdfFont)
         {
-            pdfFont = _document.FontTable.GetOrCreateFont(glyphTypeface, fontType);
+            pdfFont = Document.FontTable.GetOrCreateFont(glyphTypeface, fontType);
             Debug.Assert(pdfFont != null);
             string name = Resources.AddFont(pdfFont);
             return name;
@@ -746,7 +768,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         internal string? TryGetFontName(string idName, out PdfFont? pdfFont)
         {
-            pdfFont = _document.FontTable.TryGetFont(idName);
+            pdfFont = Document.FontTable.TryGetFont(idName);
             string? name = null;
             if (pdfFont != null)
                 name = Resources.AddFont(pdfFont);
@@ -758,7 +780,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         internal string GetFontName(string idName, byte[] fontData, out PdfFont pdfFont)
         {
-            pdfFont = _document.FontTable.GetFont(idName, fontData);
+            pdfFont = Document.FontTable.GetFont(idName, fontData);
             //pdfFont = new PdfType0Font(Owner, idName, fontData);
             //pdfFont.Document = _document;
             Debug.Assert(pdfFont != null);
@@ -774,11 +796,21 @@ namespace PdfSharp.Pdf
         /// </summary>
         internal string GetImageName(XImage image)
         {
-            var pdfImage = _document.ImageTable.GetImage(image);
+            var pdfImage = Document.ImageTable.GetImage(image);
             Debug.Assert(pdfImage != null);
             string name = Resources.AddImage(pdfImage);
             return name;
         }
+
+#if CORE
+        internal string GetImageName(PdfSharp.Internal.Imaging.ImportedImage importedImage)
+        {
+            var pdfImage = Document.ImageTable.GetImage(importedImage);
+            Debug.Assert(pdfImage != null);
+            string name = Resources.AddImage(pdfImage);
+            return name;
+        }
+#endif
 
         /// <summary>
         /// Implements the interface because the primary function is internal.
@@ -791,7 +823,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         internal string GetFormName(XForm form)
         {
-            var pdfForm = _document.FormTable.GetForm(form);
+            var pdfForm = Document.FormTable.GetForm(form);
             Debug.Assert(pdfForm != null);
             string name = Resources.AddForm(pdfForm);
             return name;
@@ -807,7 +839,7 @@ namespace PdfSharp.Pdf
         {
             // #PDF-A
             // Suppress transparency group if PDF-A is required.
-            if (!_document.IsPdfA)
+            if (!Document.IsPdfA)
             {
                 // Add transparency group to prevent rendering problems of Adobe viewer.
                 // Update (PDFsharp 1.50 beta 3): Add transparency group only if ColorMode is defined.
@@ -815,11 +847,11 @@ namespace PdfSharp.Pdf
                 // we respect this and skip the transparency group.
                 TransparencyUsed = true; // TODO_OLD: check XObjects
                 if (TransparencyUsed && !Elements.ContainsKey(Keys.Group) &&
-                    _document.Options.ColorMode != PdfColorMode.Undefined)
+                    Document.Options.ColorMode != PdfColorMode.Undefined)
                 {
                     var group = new PdfDictionary();
                     Elements["/Group"] = group;
-                    if (_document.Options.ColorMode != PdfColorMode.Cmyk)
+                    if (Document.Options.ColorMode != PdfColorMode.Cmyk)
                         group.Elements.SetName("/CS", "/DeviceRGB");
                     else
                         group.Elements.SetName("/CS", "/DeviceCMYK");
@@ -837,20 +869,68 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// HACK_OLD to indicate that a page-level transparency group must be created.
         /// </summary>
-        internal bool TransparencyUsed;
+        internal bool TransparencyUsed { get; set; }
 
         /// <summary>
-        /// Inherit values from parent node.
+        /// Applies inherited values from the parent nodes to this page.
         /// </summary>
-        internal static void InheritValues(PdfDictionary page, InheritedValues values)
+        internal void ApplyInheritedValues(ref readonly PdfPageTreeNode.InheritedValues inheritedValues)  // TODO review
         {
+#if true
+            if (inheritedValues.Resources != null)
+            {
+                var resources = Elements.GetDictionary(InheritablePageKeys.Resources);
+                //if (res is PdfReference pdfReference)
+                //{
+                //    resources = (PdfDictionary)pdfReference.Value.Clone();
+                //    resources.Document = Owner;
+                //}
+                //else
+                //    resources = (PdfDictionary?)res;
+
+                // The PDF 2.0 specifications states:
+                // “All values shall be inherited as-is, without merging, even for composite data types such as arrays and dictionaries.”
+
+                if (resources == null)
+                {
+                    //resources = values.Resources.Clone();
+                    //resources.Document = Owner;
+                    Elements.Add(InheritablePageKeys.Resources, inheritedValues.Resources);
+                }
+                else
+                {
+
+                    //foreach (var name in values.Resources.Elements.KeyNames)
+                    //{
+                    //    if (!resources.Elements.ContainsKey(name.Value))
+                    //    {
+                    //        var item = values.Resources.Elements[name];
+                    //        Debug.Assert(item != null);
+                    //        if (item is PdfObject)
+                    //            item = item.Clone();
+                    //        resources.Elements.Add(name.ToString(), item);
+                    //    }
+                    //}
+                }
+            }
+
+            if (inheritedValues.MediaBox != null && Elements.GetValue(InheritablePageKeys.MediaBox) == null)
+                Elements[InheritablePageKeys.MediaBox] = inheritedValues.MediaBox;
+
+            if (inheritedValues.CropBox != null && Elements.GetValue(InheritablePageKeys.CropBox) == null)
+                Elements[InheritablePageKeys.CropBox] = inheritedValues.CropBox;
+
+            if (inheritedValues.Rotate != null && Elements.GetValue(InheritablePageKeys.Rotate) == null)
+                Elements[InheritablePageKeys.Rotate] = inheritedValues.Rotate;
+#else
+            // Old code - DELETE
             if (values.Resources != null!)
             {
                 PdfDictionary? resources;
                 var res = page.Elements[InheritablePageKeys.Resources];
-                if (res is PdfReference)
+                if (res is PdfReference pdfReference)
                 {
-                    resources = (PdfDictionary)((PdfReference)res).Value.Clone();
+                    resources = (PdfDictionary)pdfReference.Value.Clone();
                     resources.Document = page.Owner;
                 }
                 else
@@ -868,7 +948,8 @@ namespace PdfSharp.Pdf
                     {
                         if (!resources.Elements.ContainsKey(name.Value))
                         {
-                            PdfItem? item = values.Resources.Elements[name];
+                            var item = values.Resources.Elements[name];
+                            Debug.Assert(item != null);
                             if (item is PdfObject)
                                 item = item.Clone();
                             resources.Elements.Add(name.ToString(), item);
@@ -885,37 +966,7 @@ namespace PdfSharp.Pdf
 
             if (values.Rotate != null! && page.Elements[InheritablePageKeys.Rotate] == null)
                 page.Elements[InheritablePageKeys.Rotate] = values.Rotate;
-        }
-
-        /// <summary>
-        /// Add all inheritable values from the specified page to the specified values structure.
-        /// </summary>
-        internal static void InheritValues(PdfDictionary page, ref InheritedValues values)
-        {
-            var item = page.Elements[InheritablePageKeys.Resources];
-            if (item != null)
-            {
-                if (item is PdfReference reference)
-                    values.Resources = (PdfDictionary)(reference.Value);
-                else
-                    values.Resources = (PdfDictionary)item;
-            }
-
-            item = page.Elements[InheritablePageKeys.MediaBox];
-            if (item != null)
-                values.MediaBox = new PdfRectangle(item);
-
-            item = page.Elements[InheritablePageKeys.CropBox];
-            if (item != null)
-                values.CropBox = new PdfRectangle(item);
-
-            item = page.Elements[InheritablePageKeys.Rotate];
-            if (item != null)
-            {
-                if (item is PdfReference)
-                    item = ((PdfReference)item).Value;
-                values.Rotate = (PdfInteger)item;
-            }
+#endif
         }
 
         internal override void PrepareForSave()
@@ -935,22 +986,25 @@ namespace PdfSharp.Pdf
                 double width = _trimMargins.Left.Point + Width.Point + _trimMargins.Right.Point;
                 double height = _trimMargins.Top.Point + Height.Point + _trimMargins.Bottom.Point;
 
-                MediaBox = new PdfRectangle(0, 0, width, height);
-                CropBox = new PdfRectangle(0, 0, width, height);
-                BleedBox = new PdfRectangle(0, 0, width, height);
+                MediaBox = new(0, 0, width, height);
+                CropBox = new(0, 0, width, height);
+                BleedBox = new(0, 0, width, height);
 
                 var rect = new PdfRectangle(_trimMargins.Left.Point, _trimMargins.Top.Point,
                   width - _trimMargins.Right.Point, height - _trimMargins.Bottom.Point);
                 TrimBox = rect;
-                ArtBox = rect.Clone();
+                ArtBox = rect;
             }
         }
 
         /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
-        internal sealed class Keys : InheritablePageKeys
+        public sealed class Keys : InheritablePageKeys
         {
+            // IMPROVE Reference 2.0: Table 31
+            // All entries except the inheritable page keys.
+
             /// <summary>
             /// (Required) The type of PDF object that this dictionary describes;
             /// must be Page for a page object.
@@ -993,7 +1047,7 @@ namespace PdfSharp.Pdf
 
             /// <summary>
             /// (Optional; PDF 1.3) A rectangle, expressed in default user space units, defining the
-            /// extent of the page’s meaningful content (including potential white space) as intended
+            /// extent of the page’s meaningful content (including potential white-space) as intended
             /// by the page’s creator. Default value: the value of CropBox.
             /// </summary>
             [KeyInfo("1.3", KeyType.Rectangle | KeyType.Optional)]
@@ -1018,7 +1072,8 @@ namespace PdfSharp.Pdf
             /// to the page’s logical content or organization. Applications that consume or produce PDF 
             /// files are not required to preserve the existing structure of the Contents array.
             /// </summary>
-            [KeyInfo(KeyType.Array | KeyType.Stream | KeyType.Optional)]
+            //[KeyInfo(KeyType.Array | KeyType.Stream | KeyType.Optional)] // #US373 Note that you cannot use "|" with types.
+            [KeyInfo(KeyType.StreamOrArray | KeyType.Optional)] // #US373
             public const string Contents = "/Contents";
 
             /// <summary>
@@ -1152,7 +1207,6 @@ namespace PdfSharp.Pdf
             /// Gets the KeysMeta for these keys.
             /// </summary>
             internal static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
-
             static DictionaryMeta? _meta;
         }
 
@@ -1164,8 +1218,11 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Predefined keys common to PdfPage and PdfPages.
         /// </summary>
-        internal class InheritablePageKeys : KeysBase
+        public class InheritablePageKeys : KeysBase
         {
+            // TODO Reference 2.0: Table 31
+            // These 4 entries are the inheritable page keys.
+
             /// <summary>
             /// (Required; inheritable) A dictionary containing any resources required by the page. 
             /// If the page requires no resources, the value of this entry should be an empty dictionary.
@@ -1197,17 +1254,6 @@ namespace PdfSharp.Pdf
             /// </summary>
             [KeyInfo(KeyType.Integer | KeyType.Optional)]
             public const string Rotate = "/Rotate";
-        }
-
-        /// <summary>
-        /// Values inherited from a parent in the parent chain of a page tree.
-        /// </summary>
-        internal struct InheritedValues
-        {
-            public PdfDictionary Resources;
-            public PdfRectangle MediaBox;
-            public PdfRectangle CropBox;
-            public PdfInteger Rotate;
         }
     }
 }

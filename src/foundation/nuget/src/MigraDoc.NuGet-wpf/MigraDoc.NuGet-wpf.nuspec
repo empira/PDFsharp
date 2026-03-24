@@ -13,7 +13,7 @@
         <readme>README.md</readme>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <releaseNotes>$releaseNotes$</releaseNotes>
-        <copyright>$copyright$</copyright>
+        <copyright>$CopyrightMigraDoc$</copyright>
         <tags>$tags$</tags>
         <repository type="git" url="https://github.com/empira/PDFsharp" branch="master" commit="" />
         <title>$title$</title>
@@ -21,22 +21,22 @@
             <group targetFramework="net8.0-windows7.0">
                 <dependency id="Microsoft.Extensions.Logging.Abstractions" version="$Logging_Abstractions_PackageVersion$" />
                 <dependency id="System.Security.Cryptography.Pkcs" version="$Cryptography_PackageVersion$" />
-                <dependency id="PDFsharp-WPF" version="$version$" />
+                <dependency id="PDFsharp-WPF$pdfsharpnugetpackagetag$" version="$version$" />
             </group>
             <group targetFramework="net9.0-windows7.0">
                 <dependency id="Microsoft.Extensions.Logging.Abstractions" version="$Logging_Abstractions_PackageVersion$" />
                 <dependency id="System.Security.Cryptography.Pkcs" version="$Cryptography_PackageVersion$" />
-                <dependency id="PDFsharp-WPF" version="$version$" />
+                <dependency id="PDFsharp-WPF$pdfsharpnugetpackagetag$" version="$version$" />
             </group>
             <group targetFramework="net10.0-windows7.0">
                 <dependency id="Microsoft.Extensions.Logging.Abstractions" version="$Logging_Abstractions_PackageVersion$" />
                 <dependency id="System.Security.Cryptography.Pkcs" version="$Cryptography_PackageVersion$" />
-                <dependency id="PDFsharp-WPF" version="$version$" />
+                <dependency id="PDFsharp-WPF$pdfsharpnugetpackagetag$" version="$version$" />
             </group>
             <group targetFramework="net462">
                 <dependency id="Microsoft.Extensions.Logging.Abstractions" version="$Logging_Abstractions_PackageVersion$" />
                 <dependency id="System.Security.Cryptography.Pkcs" version="$Cryptography_PackageVersion$" />
-                <dependency id="PDFsharp-WPF" version="$version$" />
+                <dependency id="PDFsharp-WPF$pdfsharpnugetpackagetag$" version="$version$" />
             </group>
         </dependencies>
         <frameworkReferences>

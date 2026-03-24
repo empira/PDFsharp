@@ -52,7 +52,7 @@ namespace MigraDoc.DocumentObjectModel
                 // Aqua == Cyan
                 // Fuchsia == Magenta
                 //var key = new Style();  ??? 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                 StandardColors.TryAdd(d, c);
 #else
                 if (!StandardColors.ContainsKey(d))
@@ -307,7 +307,7 @@ namespace MigraDoc.DocumentObjectModel
             //   
             //   While comparing a string to "" may seem like it’s checking for an empty string, it’s actually checking
             //   for a specific value of an empty string. This can be a problem if the empty string is represented by
-            //   something other than "" in the code, such as null or whitespace.
+            //   something other than "" in the code, such as null or white-space.
             //   
             //   On the other hand, comparing the length of a string to 0 is always checking for an empty string,
             //   regardless of how it’s represented in the code. However, this operation can be less efficient than comparing

@@ -1,7 +1,11 @@
 <Project>
   <PropertyGroup>
     <!-- USE_LONG_SIZE: Read/write PDF files larger than 2 GiB -->
-    <!-- TEST_CODE - Must be set to TEST_CODE_xxx in every release build. DO NOT RENAME TO TEST_CODE_ -->
-    <DefineConstants>$(DefineConstants);USE_LONG_SIZE;TEST_CODE_xxx</DefineConstants>
+    <!-- USE_64BIT_NUMBERS: Use double instead of float in PDFsharp Graphics. NYI-->
+    <!-- TEST_CODE - Must be set to TEST_CODExxx in every release build. DO NOT RENAME TO TEST_CODE_ -->
+    <!-- PRESERVE_PARSED_VALUES - Must be set to PRESERVE_PARSED_VALUESxxx in every release build. DO NOT RENAME TO PDFSHARP_DEBUG_ -->
+    <!-- PDFSHARP_DEBUG - Must be set to PDFSHARP_DEBUGxxx in every release build. DO NOT RENAME TO PDFSHARP_DEBUG_ -->
+    <DefineConstants>$(DefineConstants);USE_LONG_SIZE;TEST_CODExxx;PRESERVE_PARSED_VALUESxxx;PDFSHARP_DEBUGxxx</DefineConstants>
   </PropertyGroup>
+  <Import Condition="Exists('PdfSharpBuildConfig.targets')" Project="PdfSharpBuildConfig.targets" />
 </Project>

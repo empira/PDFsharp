@@ -62,7 +62,7 @@ namespace PdfSharp.Charting.Renderers
             else
             {
                 rendererInfo.TickLabelsFont = defaultFont;
-                rendererInfo.TickLabelsBrush = new XSolidBrush(XColors.Black);
+                rendererInfo.TickLabelsBrush = XBrushes.Black;
                 rendererInfo.TickLabelsFormat = GetDefaultTickLabelsFormat();
             }
         }
@@ -107,7 +107,7 @@ namespace PdfSharp.Charting.Renderers
             else if (rendererInfo.Axis?.HasMinorGridlines ?? false)
             {
                 // No minor gridlines object are given, but user asked for.
-                rendererInfo.MinorGridlinesLineFormat = new XPen(XColors.Black, DefaultGridLineWidth);
+                rendererInfo.MinorGridlinesLineFormat = new XPen(XColors.Black, (float_)DefaultGridLineWidth);
             }
 
             if (rendererInfo.Axis?._majorGridlines != null)
@@ -118,7 +118,7 @@ namespace PdfSharp.Charting.Renderers
             else if (rendererInfo.Axis?.HasMajorGridlines ?? false)
             {
                 // No major gridlines object are given, but user asked for.
-                rendererInfo.MajorGridlinesLineFormat = new XPen(XColors.Black, DefaultGridLineWidth);
+                rendererInfo.MajorGridlinesLineFormat = new XPen(XColors.Black, (float_)DefaultGridLineWidth);
             }
         }
 

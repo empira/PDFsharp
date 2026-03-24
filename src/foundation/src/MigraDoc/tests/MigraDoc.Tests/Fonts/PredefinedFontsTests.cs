@@ -39,14 +39,14 @@ namespace MigraDoc.Tests.Fonts
                 // In GDI and WPF builds rendering a document must succeed if the error font is available - even is an error message is rendered.
                 var document = CreateDocumentWithErrorMessage();
 
-                var filename = PdfFileUtility.GetTempPdfFileName("Use_default_error_font");
+                var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/fonts/Use_default_error_font");
 
                 // Even with error message the document must be successfully created.
                 var pdfDocument = RenderDocumentShouldSucceed(document, filename);
 
                 CheckErrorFont(pdfDocument, "Courier New");
 #else
-                throw new NotImplementedException("Unknown flavor.");
+                throw new NotSupportedException("Unknown flavor.");
 #endif
             }
             finally
@@ -77,14 +77,14 @@ namespace MigraDoc.Tests.Fonts
                 // In GDI and WPF builds rendering a document must succeed if the error font is available - even is an error message is rendered.
                 var document = CreateDocumentWithErrorMessage();
 
-                var filename = PdfFileUtility.GetTempPdfFileName("Use_alternate_error_font");
+                var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/fonts/Use_alternate_error_font");
 
                 // Even with error message the document must be successfully created.
                 var pdfDocument = RenderDocumentShouldSucceed(document, filename);
 
                 CheckErrorFont(pdfDocument, "Segoe UI");
 #else
-                throw new NotImplementedException("Unknown flavor.");
+                throw new NotSupportedException("Unknown flavor.");
 #endif
             }
             finally
@@ -137,14 +137,14 @@ namespace MigraDoc.Tests.Fonts
                 // In GDI and WPF builds rendering a document with bullet lists must succeed if the bullet fonts are available.
                 var document = CreateDocumentWithBulletList();
 
-                var filename = PdfFileUtility.GetTempPdfFileName("Use_default_bullets_font");
+                var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/fonts/Use_default_bullets_font");
 
                 // The document must be successfully created.
                 var pdfDocument = RenderDocumentShouldSucceed(document, filename);
 
                 CheckBulletFonts(pdfDocument, "Courier New", "Courier New", "Courier New");
 #else
-                throw new NotImplementedException("Unknown flavor.");
+                throw new NotSupportedException("Unknown flavor.");
 #endif
             }
             finally
@@ -175,14 +175,14 @@ namespace MigraDoc.Tests.Fonts
                 // In GDI and WPF builds rendering a document with bullet lists must succeed if the bullet fonts are available.
                 var document = CreateDocumentWithBulletList();
 
-                var filename = PdfFileUtility.GetTempPdfFileName("Use_alternate_bullets_font");
+                var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/fonts/Use_alternate_bullets_font");
 
                 // The document must be successfully created.
                 var pdfDocument = RenderDocumentShouldSucceed(document, filename);
 
                 CheckBulletFonts(pdfDocument, "Arial", "Times new roman", "Verdana");
 #else
-                throw new NotImplementedException("Unknown flavor.");
+                throw new NotSupportedException("Unknown flavor.");
 #endif
             }
             finally
@@ -254,9 +254,9 @@ namespace MigraDoc.Tests.Fonts
 
             var pdfDocument = pdfRenderer.PdfDocument;
 
-            // Save the document...
+            // Save the document…
             pdfRenderer.PdfDocument.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
             return pdfDocument;

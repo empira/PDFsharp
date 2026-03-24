@@ -121,24 +121,6 @@ namespace MigraDoc.DocumentObjectModel
             return borders;
         }
 
-        ///// <summary>
-        ///// Gets an enumerator for the borders object.
-        ///// </summary>
-        //public IEnumerator<Border> GetEnumerator()
-        //{
-        //    throw new NotImplementedException();
-        //    //var ht = new Dictionary<string, Border?>
-        //    //{
-        //    //    { "Top", Values.Top },
-        //    //    { "Left", Values.Left },
-        //    //    { "Bottom", Values.Bottom },
-        //    //    { "Right", Values.Right },
-        //    //    { "DiagonalUp", Values.DiagonalUp },
-        //    //    { "DiagonalDown", Values.DiagonalDown }
-        //    //};
-        //    //return new BorderEnumerator(ht);
-        //}
-
         /// <summary>
         /// Clears all Border objects from the collection. Additionally, 'Borders = null'
         /// is written to the DDL stream when serialized.
@@ -420,60 +402,6 @@ namespace MigraDoc.DocumentObjectModel
             return null;
         }
 
-        //        /// <summary>
-        //        /// Returns an enumerator that can iterate through the Borders.
-        //        /// </summary>
-        //        public class BorderEnumerator : IEnumerator<Border>
-        //        {
-        //#war/ning This class must be checked with a unit test.
-        //            /// <summary>
-        //            /// Creates a new BorderEnumerator.
-        //            /// </summary>
-        //            public BorderEnumerator(Dictionary<string, Border?> ht)
-        //            {
-        //                _ht = ht;
-        //                _index = -1;
-        //            }
-
-        //            public void Dispose()
-        //                => throw new NotImplementedException();
-
-        //            /// <summary>
-        //            /// Sets the enumerator to its initial position, which is before the first element in the border collection.
-        //            /// </summary>
-        //            public void Reset() => _index = -1;
-
-        //            object IEnumerator.Current => Current;
-
-        //            /// <summary>
-        //            /// Gets the current element in the border collection.
-        //            /// </summary>
-        //            public Border Current
-        //            {
-        //                get
-        //                {
-        //                    IEnumerator enumerator = _ht.GetEnumerator();
-        //                    enumerator.Reset();
-        //                    for (int idx = 0; idx < _index + 1; idx++)
-        //                        enumerator.MoveNext();
-        //                    // return (((DictionaryEntry)enumerator.Current).Value as Border)!; // B_UG: May return null
-        //                    return (((KeyValuePair<string, Border>)enumerator.Current).Value as Border)!;
-        //                }
-        //            }
-
-        //            /// <summary>
-        //            /// Advances the enumerator to the next element of the border collection.
-        //            /// </summary>
-        //            public bool MoveNext()
-        //            {
-        //                _index++;
-        //                return (_index < _ht.Count);
-        //            }
-
-        //            int _index;
-        //            readonly Dictionary<string, Border?> _ht;
-        //        }
-
         /// <summary>
         /// Returns the metaobject of this instance.
         /// </summary>
@@ -589,11 +517,5 @@ namespace MigraDoc.DocumentObjectModel
             /// </summary>
             public bool? BordersCleared { get; set; }
         }
-
-        //IEnumerator IEnumerable.GetEnumerator()
-        //{
-        //    throw new NotImplementedException();
-        //    //return GetEnumerator();
-        //}
     }
 }
