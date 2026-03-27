@@ -62,7 +62,24 @@ namespace PdfSharp.Pdf.Advanced
             return extGState;
         }
 
+
+        /// <summary>
+        /// Gets a PdfExtGState with the key 'BM' set to the specified blend mode (no initial slash).
+        /// </summary>
+        public PdfExtGState GetExtGStateBlendMode(string blendMode)
+        {
+            string key = blendMode;
+            if (!_blendModeValues.TryGetValue(key, out var extGState)) {
+                extGState = new PdfExtGState(Owner);
+                extGState.Elements[PdfExtGState.Keys.BM] = new PdfName("/" + blendMode);
+
+                _blendModeValues[key] = extGState;
+            }
+            return extGState;
+        }
+
         readonly Dictionary<string, PdfExtGState> _strokeAlphaValues = [];
         readonly Dictionary<string, PdfExtGState> _nonStrokeStates = [];
+        readonly Dictionary<string, PdfExtGState> _blendModeValues = [];
     }
 }
