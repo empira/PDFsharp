@@ -386,8 +386,9 @@ namespace MigraDoc.Rendering
             ++_sectionPages;
             InitFieldInfos();
             FormatHeadersFooters();
+            Rectangle rect = CalcContentRect(_currentPage);
             _isNewSection = false;
-            return CalcContentRect(_currentPage);
+            return rect;
         }
 
         int _currentPage;
