@@ -199,7 +199,7 @@ namespace MigraDoc.Rendering
             height -= topMargin;
             double bottomMargin = pageSetup.BottomMargin.Point;
             if (_formattedFooters.TryGetValue(new HeaderFooterPosition(_sectionNumber, CurrentPagePosition), out FormattedHeaderFooter? footer))
-                bottomMargin = Math.Max(bottomMargin, pageSetup.PageHeight.Value - footer.ContentRect.Y.Point);
+                bottomMargin = Math.Max(bottomMargin, pageSetup.PageHeight.Point - footer.ContentRect.Y.Point);
             height -= bottomMargin;
             XUnitPt x;
             XUnitPt y = topMargin;
