@@ -98,8 +98,8 @@ namespace MigraDoc.DocumentObjectModel.Tables
         /// <summary>
         /// Adds a new paragraph with the specified text to the cell.
         /// </summary>
-        public Paragraph AddParagraph(string paragraphText)
-            => Elements.AddParagraph(paragraphText);
+        public Paragraph AddParagraph(string paragraphText, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddParagraph(paragraphText, textRenderOption);
 
         /// <summary>
         /// Adds a new chart with the specified type to the cell.

@@ -900,7 +900,7 @@ namespace MigraDoc.Rendering
                         break;
                     }
                     if (IsSoftHyphen(obj))
-                        RenderSoftHyphen();
+                        RenderSoftHyphen(obj.TextRenderOption);
                     else
                         RenderBlank();
                     //if (IsBlank(docObj))
@@ -980,32 +980,32 @@ namespace MigraDoc.Rendering
             if (_fieldInfos is null)
                 NRT.ThrowOnNull();
             var value = FormatDateTimeForField(_fieldInfos.Date, dateField);
-            RenderWord(value);
+            RenderWord(value, dateField.TextRenderOption);
         }
 
         void RenderInfoField(InfoField infoField)
         {
-            RenderWord(GetDocumentInfo(infoField.Name));
+            RenderWord(GetDocumentInfo(infoField.Name), infoField.TextRenderOption);
         }
 
         void RenderNumPagesField(NumPagesField numPagesField)
         {
-            RenderWord(GetFieldValue(numPagesField));
+            RenderWord(GetFieldValue(numPagesField), numPagesField.TextRenderOption);
         }
 
         void RenderPageField(PageField pageField)
         {
-            RenderWord(GetFieldValue(pageField));
+            RenderWord(GetFieldValue(pageField), pageField.TextRenderOption);
         }
 
         void RenderSectionField(SectionField sectionField)
         {
-            RenderWord(GetFieldValue(sectionField));
+            RenderWord(GetFieldValue(sectionField), sectionField.TextRenderOption);
         }
 
         void RenderSectionPagesField(SectionPagesField sectionPagesField)
         {
-            RenderWord(GetFieldValue(sectionPagesField));
+            RenderWord(GetFieldValue(sectionPagesField), sectionPagesField.TextRenderOption);
         }
 
         void RenderBookmarkField(BookmarkField bookmarkField)
@@ -1046,7 +1046,7 @@ namespace MigraDoc.Rendering
 
         void RenderPageRefField(PageRefField pageRefField)
         {
-            RenderWord(GetFieldValue(pageRefField));
+            RenderWord(GetFieldValue(pageRefField), TextRenderOption.Default);
         }
 
         void RenderCharacter(Character character)
@@ -1094,7 +1094,7 @@ namespace MigraDoc.Rendering
             for (int idx = 1; idx < character.Count; idx++)
                 completeWord += sym;
 
-            RenderWord(completeWord);
+            RenderWord(completeWord, character.TextRenderOption);
         }
 
         void RenderTab()
@@ -1216,21 +1216,21 @@ namespace MigraDoc.Rendering
             }
         }
 
-        void RenderSoftHyphen()
+        void RenderSoftHyphen(TextRenderOption textRenderOption)
         {
             if (_currentLeaf is null || _endLeaf is null)
                 NRT.ThrowOnNull();
 
             if (_currentLeaf.Current == _endLeaf.Current)
-                RenderWord("-");
+                RenderWord("-", textRenderOption);
         }
 
         void RenderText(Text text)
         {
-            RenderWord(text.Content);
+            RenderWord(text.Content, text.TextRenderOption);
         }
 
-        void RenderWord(string word)
+        void RenderWord(string word, TextRenderOption textRenderOption)
         {
             Font font = CurrentDomFont;
             XFont xFont = CurrentFont;
@@ -1238,11 +1238,49 @@ namespace MigraDoc.Rendering
                 xFont = FontHandler.ToSubSuperFont(xFont);
 
             if (CurrentBrush != null)
-                _gfx.DrawString(word, xFont, CurrentBrush, _currentXPosition, CurrentBaselinePosition);
+            {
+                switch (textRenderOption)
+                {
+                    case TextRenderOption.Path:
+                    case TextRenderOption.FlattenPath:
+                        RenderAsPath(word, textRenderOption, xFont, font);
+                        break;
+                    default:
+                        RenderAsText(word, xFont);
+                        break;
+                }
+            }
             XUnitPt wordWidth = MeasureString(word);
             RenderUnderline(wordWidth, true);
             RealizeHyperlink(wordWidth);
             _currentXPosition += wordWidth;
+        }
+
+        private void RenderAsText(string word, XFont xFont)
+        {
+            _gfx.DrawString(word, xFont, CurrentBrush, _currentXPosition, CurrentBaselinePosition);
+        }
+
+        private void RenderAsPath(string word, TextRenderOption textRenderOption, XFont xFont, Font font)
+        {
+            var currentBaselinePosition = CurrentBaselinePosition.Point;
+
+            var path = new XGraphicsPath();
+            path.AddString(
+                word,
+                xFont.FontFamily,
+                xFont.Style,
+                xFont.Size,
+                new XPoint(_currentXPosition, currentBaselinePosition),
+                XStringFormats.Default);
+            var fill = new XSolidBrush(XColor.FromArgb(font.Color.Argb));
+
+            if (textRenderOption == TextRenderOption.FlattenPath)
+            {
+                path.Flatten();
+            }
+
+            _gfx.DrawPath(fill, path);
         }
 
         void StartHyperlink(XUnitPt left, XUnitPt top)

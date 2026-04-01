@@ -106,11 +106,11 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                         case '\t':
                             if (currentString.Length > 0)
                             {
-                                elements.InsertObject(idx + insertedObjects, new Text(currentString.ToString()));
+                                elements.InsertObject(idx + insertedObjects, new Text(currentString.ToString(), text.TextRenderOption));
                                 ++insertedObjects;
                                 currentString.Clear();
                             }
-                            elements.InsertObject(idx + insertedObjects, new Text(" "));
+                            elements.InsertObject(idx + insertedObjects, new Text(" ", text.TextRenderOption));
                             ++insertedObjects;
                             break;
 
@@ -141,7 +141,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                             // Only start new Text if minus is not a sign, because numbers like "-5.5" have to be stored in one Text for correct DecimalTab alignment.
                             if (!isSign)
                             {
-                                elements.InsertObject(idx + insertedObjects, new Text(currentString.ToString()));
+                                elements.InsertObject(idx + insertedObjects, new Text(currentString.ToString(), text.TextRenderOption));
                                 ++insertedObjects;
                                 currentString.Clear();
                             }
@@ -152,7 +152,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                         case '\u200C': // zero width non-joiner.
                             if (currentString.Length > 0)
                             {
-                                elements.InsertObject(idx + insertedObjects, new Text(currentString.ToString()));
+                                elements.InsertObject(idx + insertedObjects, new Text(currentString.ToString(), text.TextRenderOption));
                                 ++insertedObjects;
                                 currentString.Clear();
                             }
@@ -161,11 +161,11 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                         case '\u00AD': // soft hyphen.
                             if (currentString.Length > 0)
                             {
-                                elements.InsertObject(idx + insertedObjects, new Text(currentString.ToString()));
+                                elements.InsertObject(idx + insertedObjects, new Text(currentString.ToString(), text.TextRenderOption));
                                 ++insertedObjects;
                                 currentString.Clear();
                             }
-                            elements.InsertObject(idx + insertedObjects, new Text("\u00AD"));
+                            elements.InsertObject(idx + insertedObjects, new Text("\u00AD", text.TextRenderOption));
                             ++insertedObjects;
                             //currentString = "";
                             break;
@@ -177,7 +177,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
                 }
                 if (currentString.Length > 0)
                 {
-                    elements.InsertObject(idx + insertedObjects, new Text(currentString.ToString()));
+                    elements.InsertObject(idx + insertedObjects, new Text(currentString.ToString(), text.TextRenderOption));
                     ++insertedObjects;
                 }
                 elements.RemoveObjectAt(idx + insertedObjects);
