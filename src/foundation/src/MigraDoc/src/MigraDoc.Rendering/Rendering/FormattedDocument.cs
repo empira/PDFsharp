@@ -193,10 +193,16 @@ namespace MigraDoc.Rendering
 
             XUnitPt height = pageSetup.PageHeight.Point;
 
-            height -= pageSetup.TopMargin.Point;
-            height -= pageSetup.BottomMargin.Point;
+            double topMargin = pageSetup.TopMargin.Point;
+            if (_formattedHeaders.TryGetValue(new HeaderFooterPosition(_sectionNumber, CurrentPagePosition), out FormattedHeaderFooter? header))
+                topMargin = Math.Max(topMargin, header.ContentRect.Y.Point + header.ContentRect.Height.Point);
+            height -= topMargin;
+            double bottomMargin = pageSetup.BottomMargin.Point;
+            if (_formattedFooters.TryGetValue(new HeaderFooterPosition(_sectionNumber, CurrentPagePosition), out FormattedHeaderFooter? footer))
+                bottomMargin = Math.Max(bottomMargin, pageSetup.PageHeight.Value - footer.ContentRect.Y.Point);
+            height -= bottomMargin;
             XUnitPt x;
-            XUnitPt y = pageSetup.TopMargin.Point;
+            XUnitPt y = topMargin;
             if (pageSetup.MirrorMargins)
                 x = page % 2 == 0 ? pageSetup.RightMargin.Point : pageSetup.LeftMargin.Point;
             else
