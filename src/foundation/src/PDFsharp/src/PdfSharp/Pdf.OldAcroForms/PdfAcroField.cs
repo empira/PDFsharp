@@ -2,6 +2,7 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.Advanced;
+using System.Collections;
 
 namespace PdfSharp.Pdf.OldAcroForms
 {
@@ -264,7 +265,7 @@ namespace PdfSharp.Pdf.OldAcroForms
         /// <summary>
         /// Holds a collection of interactive fields.
         /// </summary>
-        public sealed class PdfFormFieldCollection : PdfArray
+        public sealed class PdfFormFieldCollection : PdfArray, IEnumerable<PdfFormField>
         {
             internal PdfFormFieldCollection(PdfArray array)
                 : base(array)
@@ -402,7 +403,65 @@ namespace PdfSharp.Pdf.OldAcroForms
                         return new PdfGenericField(dict);
                 }
             }
-        }
+
+            public new PdfAcroFieldEnumerator GetEnumerator()
+			{
+				return new PdfAcroFieldEnumerator(this);
+			}
+			
+            IEnumerator<PdfFormField> IEnumerable<PdfFormField>.GetEnumerator()
+			{
+				return GetEnumerator();
+			}
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return new PdfAcroFieldEnumerator(this);
+            }
+
+            /// <summary>
+            /// Enumerates the elements of a <see cref="PdfAcroFieldCollection"/>.
+            /// </summary>
+			public struct PdfAcroFieldEnumerator : IEnumerator<PdfAcroField>, IEnumerator, IDisposable
+			{
+				private readonly PdfAcroFieldCollection _collection;
+				private int _currentIndex;
+				private PdfAcroField? _currentItem;
+
+				internal PdfAcroFieldEnumerator(PdfAcroFieldCollection fieldCollection)
+				{
+					_collection = fieldCollection;
+					_currentIndex = -1;
+					_currentItem = default;
+				}
+
+				public readonly PdfAcroField Current => _currentItem!;
+
+				readonly Object IEnumerator.Current => Current;
+
+				public readonly void Dispose() { }
+
+				public Boolean MoveNext()
+				{
+					if (++_currentIndex >= _collection.Count)
+					{
+						return false;
+					}
+					else
+					{
+                        // Gettig the current item using the index will convert
+                        // the PdfItem to PdfAcroField for us
+						_currentItem = _collection[_currentIndex];
+					}
+					return true;
+				}
+
+				public void Reset()
+				{
+					_currentIndex = -1;
+				}
+			}
+		}
 
         /// <summary>
         /// Predefined keys of this dictionary. 
