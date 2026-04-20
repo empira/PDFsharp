@@ -404,9 +404,9 @@ namespace PdfSharp.Pdf.OldAcroForms
                 }
             }
 
-            public new PdfAcroFieldEnumerator GetEnumerator()
+            public new PdfFormFieldEnumerator GetEnumerator()
 			{
-				return new PdfAcroFieldEnumerator(this);
+				return new PdfFormFieldEnumerator(this);
 			}
 			
             IEnumerator<PdfFormField> IEnumerable<PdfFormField>.GetEnumerator()
@@ -416,26 +416,26 @@ namespace PdfSharp.Pdf.OldAcroForms
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                return new PdfAcroFieldEnumerator(this);
+                return new PdfFormFieldEnumerator(this);
             }
 
             /// <summary>
-            /// Enumerates the elements of a <see cref="PdfAcroFieldCollection"/>.
+            /// Enumerates the elements of a <see cref="PdfFormFieldCollection"/>.
             /// </summary>
-			public struct PdfAcroFieldEnumerator : IEnumerator<PdfAcroField>, IEnumerator, IDisposable
+			public struct PdfFormFieldEnumerator : IEnumerator<PdfFormField>, IEnumerator, IDisposable
 			{
-				private readonly PdfAcroFieldCollection _collection;
+				private readonly PdfFormFieldCollection _collection;
 				private int _currentIndex;
-				private PdfAcroField? _currentItem;
+				private PdfFormField? _currentItem;
 
-				internal PdfAcroFieldEnumerator(PdfAcroFieldCollection fieldCollection)
+				internal PdfFormFieldEnumerator(PdfFormFieldCollection fieldCollection)
 				{
 					_collection = fieldCollection;
 					_currentIndex = -1;
 					_currentItem = default;
 				}
 
-				public readonly PdfAcroField Current => _currentItem!;
+				public readonly PdfFormField Current => _currentItem!;
 
 				readonly Object IEnumerator.Current => Current;
 
