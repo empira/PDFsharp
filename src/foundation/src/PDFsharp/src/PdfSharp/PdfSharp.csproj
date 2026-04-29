@@ -70,6 +70,10 @@
     <InternalsVisibleTo Include="PdfSharp.Graphics.Pdf,       PublicKey=$(PDFsharpStronNamePublicKey)" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Text.Encoding.CodePages" />
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Include="..\..\..\shared\src\PdfSharp.Shared\dotnet\GetSubArray.cs" Link="Properties\GetSubArray(included).cs" />
     <Compile Include="..\..\..\shared\src\PdfSharp.System\Properties\FloatOrDouble.cs" Link="Properties\FloatOrDouble.cs" />
