@@ -37,6 +37,7 @@
     <PackageVersion Include="Xunit.SkippableFact" Version="1.5.61" />
     <PackageVersion Include="XunitXml.TestLogger" Version="8.0.0" />
     <PackageVersion Include="FluentAssertions" Version="7.2.1" /> <!-- Latest 7.x version under Apache license. -->
+    <PackageVersion Include="System.Text.Encoding.CodePages" Version="10.0.5" />
     <!-- Other packages -->
     <PackageVersion Include="System.Resources.Extensions" Version="10.0.5" />
     <!-- Needed for PDFsharp-GDI. -->
