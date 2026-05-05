@@ -1,12 +1,18 @@
-﻿# PDFsharp & MigraDoc 7
+﻿[![Maintained by PDFsharp Team](https://img.shields.io/badge/Maintained%20by-PDFsharp%20Team-blue?style=flat)](https://www.pdfsharp.com) 
+[![Commercial Support Available](https://img.shields.io/badge/Commercial%20Support-Available-blue?style=flat)](https://www.pdfsharp.com/Offers)
+
+> This project is actively maintained by the PDFsharp Team.  
+> Professional assistance for production is available upon request.
+
+# PDFsharp & MigraDoc 7
 
 Version **7.0.0 Preview 1**  
 Published **2026-03-24**
 
 This is a preview version of the **PDFsharp** project, the main project of PDFsharp & MigraDoc 7 with updates for C# 12 and .NET 8, .NET 9, and .NET 10.
 
-PDFsharp: Copyright (c) 2005-2026 empira Software GmbH, Troisdorf (Cologne Area), Germany
-MigraDoc: Copyright (c) 2001-2026 empira Software GmbH, Troisdorf (Cologne Area), Germany
+PDFsharp: Copyright (c) 2005-2026 empira Software GmbH, Troisdorf (Cologne Area), Germany  
+MigraDoc: Copyright (c) 2001-2026 empira Software GmbH, Troisdorf (Cologne Area), Germany  
 Published Open Source under the [MIT License](https://docs.pdfsharp.net/LICENSE.html)
 
 For more information see [docs.pdfsharp.net](https://docs.pdfsharp.net/)
