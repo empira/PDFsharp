@@ -258,6 +258,71 @@ namespace PdfSharp.Tests.IO
 
         }
 
+        [Fact]
+        public void ScanName_UTF8_encoded_name_is_decoded_correctly()
+        {
+            // UTF-8 encoding of "日本語" is E6 97 A5 E6 9C AC E8 AA 9E.
+            // ScanName returns the token INCLUDING the leading '/', e.g. "/日本語".
+            var nameBytes = System.Text.Encoding.UTF8.GetBytes("日本語");
+            var bytes = new byte[1 + nameBytes.Length + 1];
+            bytes[0] = (byte)'/';
+            nameBytes.CopyTo(bytes, 1);
+            bytes[^1] = (byte)' ';
+
+            var lexer = CreateLexerFromBytes(bytes);
+            var symbol = lexer.ScanName();
+
+            symbol.Should().Be(Symbol.Name);
+            lexer.Token.Should().Be("/日本語");
+        }
+
+        [Fact]
+        public void ScanName_NonUTF8_bytes_do_not_throw()
+        {
+            // 0xE3 0x81 is an invalid UTF-8 sequence (incomplete 3-byte sequence).
+            // Regardless of platform, this must not throw and must return some string.
+            byte[] bytes = [(byte)'/', 0xE3, 0x81, (byte)' '];
+
+            var lexer = CreateLexerFromBytes(bytes);
+            var symbol = lexer.ScanName();
+
+            symbol.Should().Be(Symbol.Name);
+            lexer.Token.Should().NotBeNullOrEmpty();
+            lexer.Token.Should().StartWith("/");
+        }
+
+#if NET8_0_OR_GREATER
+        [SkippableFact]
+        public void ScanName_ShiftJIS_name_is_decoded_on_ShiftJIS_default_encoding()
+        {
+            // This test verifies Shift-JIS decoding when Encoding.Default is CP932.
+            // On non-Japanese environments, Encoding.Default may not be CP932 and
+            // the decoded string will differ, so we skip this test if CP932 is not the default.
+            Skip.If(System.Text.Encoding.Default.CodePage != 932,
+                "Requires Encoding.Default to use code page 932 (Shift-JIS).");
+
+            // Shift-JIS encoding of "日本語": 93 FA 96 D1 8C EA
+            // ScanName returns the token INCLUDING the leading '/'.
+            byte[] sjisBytes = [0x93, 0xFA, 0x96, 0xD1, 0x8C, 0xEA];
+            byte[] bytes = new byte[1 + sjisBytes.Length + 1];
+            bytes[0] = (byte)'/';
+            sjisBytes.CopyTo(bytes, 1);
+            bytes[^1] = (byte)' ';
+
+            var lexer = CreateLexerFromBytes(bytes);
+            var symbol = lexer.ScanName();
+
+            symbol.Should().Be(Symbol.Name);
+            lexer.Token.Should().Be("/日本語");
+        }
+#endif
+
+        static Lexer CreateLexerFromBytes(byte[] bytes)
+        {
+            var stream = new MemoryStream(bytes);
+            return new Lexer(stream, null);
+        }
+
         Lexer CreateLexer(string text)
         {
             var pdfString = new PdfString(text, PdfStringEncoding.RawEncoding);
