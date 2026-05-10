@@ -25,6 +25,13 @@ namespace MigraDoc.Rendering
             _formatter = new TopDownFormatter(this, _documentRenderer, _headerFooter.Elements);
             _formatter.FormatOnAreas(gfx, false);
             _contentHeight = RenderInfo.GetTotalHeight(GetRenderInfos());
+            if (_headerFooter.IsHeader)
+                ContentRect.Height = _contentHeight;
+            if (_headerFooter.IsFooter)
+            {
+                ContentRect.Y = ContentRect.Y + ContentRect.Height - _contentHeight;
+                ContentRect.Height = _contentHeight;
+            }
         }
 
         Area? IAreaProvider.GetNextArea()
