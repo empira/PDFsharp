@@ -94,7 +94,7 @@ namespace PdfSharp.Drawing.Pdf
                 _realizedLineJoin = (int)pen.LineJoin;
             }
 
-            if (_realizedLineCap == (int)XLineJoin.Miter)
+            if (_realizedLineJoin == (int)XLineJoin.Miter)
             {
                 if (_realizedMiterLimit != (int)pen.MiterLimit && (int)pen.MiterLimit != 0)
                 {
