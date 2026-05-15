@@ -164,6 +164,13 @@ namespace PdfSharp.Drawing
 
         #endregion
 
+        #region Blending
+
+        void SetBlendMode(XBlendMode blendMode);
+
+        #endregion
+
+
         #region Miscellaneous
 
         /// <summary>
