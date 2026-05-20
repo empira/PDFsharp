@@ -65,7 +65,16 @@ namespace MigraDoc.DocumentObjectModel.Tests
             {
                 type.IsAbstract.Should().BeFalse();
 
-                var dom = (DocumentObject?)Activator.CreateInstance(type);
+                DocumentObject dom;
+                if (type.IsSubclassOf(typeof(TextBasedDocumentObject)))
+                {
+                    dom = (TextBasedDocumentObject?)Activator.CreateInstance(type, TextRenderOption.Default);
+                }
+                else
+                {
+                    dom = (DocumentObject?)Activator.CreateInstance(type);
+                }
+
                 dom.Should().NotBeNull();
                 var meta = dom!.Meta;
                 meta.Should().NotBeNull();
