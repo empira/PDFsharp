@@ -175,16 +175,8 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         void RenderDimensionSettings()
         {
-            var shapeWidthPt = GetShapeWidth().Point;
-            var shapeHeightPt = GetShapeHeight().Point;
-
-            var scaleX = shapeWidthPt / _originalWidth.Point;
-            var scaleY = shapeHeightPt / _originalHeight.Point;
-            _rtfWriter.WriteControl("picscalex", (int)(scaleX * 100));
-            _rtfWriter.WriteControl("picscaley", (int)(scaleY * 100));
-
-            RenderUnit("pichgoal", shapeHeightPt / scaleY);
-            RenderUnit("picwgoal", shapeWidthPt / scaleX);
+            RenderUnit("pichgoal", shapeHeightPt);
+            RenderUnit("picwgoal", shapeWidthPt);
 
             //A bit obscure, but necessary for Word 2000:
             _rtfWriter.WriteControl("pich", (int)(_originalHeight.Millimeter * 100));
