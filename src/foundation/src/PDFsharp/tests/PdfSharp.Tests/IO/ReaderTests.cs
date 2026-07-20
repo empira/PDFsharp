@@ -17,6 +17,9 @@ using PdfSharp.Fonts;
 using Xunit;
 using FluentAssertions;
 using PdfSharp.Diagnostics;
+using System.Runtime.CompilerServices;
+using static System.Net.Mime.MediaTypeNames;
+using System.Text;
 
 #if PDFSHARP_DEBUG
 using static PdfSharp.Diagnostics.DebugBreakHelper;
@@ -566,6 +569,30 @@ namespace PdfSharp.Tests.IO
                 var format = XStringFormats.BottomCenter;
                 gfx.DrawString(footer, font, color, box, format);
             }
+        }
+
+        [Fact]
+        public async Task Read_FileWithInvalidStreamLengths_Success()
+        {
+            var doc = new PdfDocument();
+            var page = doc.AddPage();
+            using var gfx = XGraphics.FromPdfPage(page);
+
+            var font = new XFont(UnitTestFontResolver.ArialFont, 20, XFontStyleEx.Regular);
+            
+            gfx.DrawString(string.Concat(Enumerable.Repeat("Hello World!", 30)), font, XBrushes.Black, new XPoint(100, 100));
+
+            using var stream = new MemoryStream();
+            await doc.SaveAsync(stream, false);
+
+            using StreamReader reader = new StreamReader(stream, PdfSharp.Pdf.Internal.PdfEncoders.RawEncoding);
+            var fullFile = await reader.ReadToEndAsync();
+            var invalidLengthFile = fullFile.Replace("/Length 417", "/Length 317");
+            fullFile.Should().NotBe(invalidLengthFile);
+            MemoryStream newStream = new MemoryStream(PdfSharp.Pdf.Internal.PdfEncoders.RawEncoding.GetBytes(invalidLengthFile));
+
+            var doc2 = PdfReader.Open(newStream, PdfDocumentOpenMode.Import);
+            doc2.Should().NotBeNull();
         }
     }
 }

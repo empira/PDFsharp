@@ -553,15 +553,29 @@ namespace PdfSharp.Pdf.IO
             var oldLength = streamLength;
             //_lexer.DetermineStreamLength(dict.Reference!.Position, streamLength - length, ref streamLength);
 
-            // Try to read 20 extra bytes in case reported stream length is too small.
-            int scanWindow = streamLength + 20;
+            // If this mismatch is larger than a few bytes, search up to the next object (or EOF).
+            // This keeps valid files fast and improves robustness for malformed /Length values.
+            var behindPosition = _document.IrefTable.GetPositionOfObjectBehind(dict, streamStart);
+            int scanWindow;
+            if (behindPosition != -1)
+            {
+                // Read up to next object.
+                scanWindow = (int)(behindPosition - streamStart);
+            }
+            else
+            {
+                // Object is the last one in the file, so read up to EOF.
+                scanWindow = (int)(_lexer.PdfLength - streamStart);
+            }
+
             // Make sure we do not try to read beyond EOF.
             if (streamStart + scanWindow > _lexer.PdfLength)
             {
                 // We're close to the EOF, so casting to int is OK here.
                 scanWindow = (int)(_lexer.PdfLength - streamStart);
-                Debug.Assert(scanWindow >= oldLength);
             }
+
+            Debug.Assert(scanWindow >= oldLength);
 
             streamLength = _lexer.DetermineStreamLength(streamStart, scanWindow, suppressObjectOrderExceptions);
             if (SuppressExceptions.HasError(suppressObjectOrderExceptions))
