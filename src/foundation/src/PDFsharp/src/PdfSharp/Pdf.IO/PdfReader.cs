@@ -305,6 +305,14 @@ namespace PdfSharp.Pdf.IO
                     throw new PdfReaderException("PdfReader needs a stream that supports the Length property.", ex);
                 }
 
+                if (openMode == PdfDocumentOpenMode.ModifyIncremental)
+                {
+                    // An incremental update writes the bytes of the original file unchanged before it appends
+                    // the modified objects. The stream is not necessarily available anymore when the document
+                    // is saved, therefore the bytes are kept in memory.
+                    _document.OriginalBytes = ReadAllBytes(stream);
+                }
+
                 // Get file version.
                 byte[] header = new byte[1024];
                 stream.Position = 0;
@@ -440,7 +448,7 @@ namespace PdfSharp.Pdf.IO
                 reachables = document.xrefTable.AllXRefs;
                 document.xrefTable.CheckConsistence();
 #endif
-                if (openMode == PdfDocumentOpenMode.Modify)
+                if (openMode is PdfDocumentOpenMode.Modify or PdfDocumentOpenMode.ModifyIncremental)
                 {
                     // Create new or change existing document IDs.
                     if (_document.Internals.SecondDocumentID == "")
@@ -455,20 +463,42 @@ namespace PdfSharp.Pdf.IO
                     // Change modification date.
                     _document.Info.ModificationDate = DateTimeOffset.Now;
 
-                    // Remove all unreachable objects.
-                    int removed = _document.IrefTable.Compact();
-                    if (removed != 0)
+                    if (openMode == PdfDocumentOpenMode.ModifyIncremental)
                     {
-                        //Debug.WriteLine("Number of deleted unreachable objects: " + removed);
-                        PdfSharpLogHost.PdfReadingLogger.LogInformation("Number of deleted unreachable objects: {Removed}", removed);
+                        // An incremental update rewrites only the objects that were modified. The document
+                        // information dictionary was just modified, so it must be written again.
+                        _document.MarkAsModified(_document.Info);
+                    }
+                    else
+                    {
+                        // Remove all unreachable objects.
+                        // Not for an incremental update: the objects of the original file are written unchanged
+                        // and may be referenced by an earlier revision of the document.
+                        int removed = _document.IrefTable.Compact();
+                        if (removed != 0)
+                        {
+                            //Debug.WriteLine("Number of deleted unreachable objects: " + removed);
+                            PdfSharpLogHost.PdfReadingLogger.LogInformation("Number of deleted unreachable objects: {Removed}", removed);
+                        }
                     }
 
                     // Force flattening of page tree.
                     _document.Pages.FlattenPageTree();
 
                     _document.IrefTable.CheckConsistence();
-                    _document.IrefTable.Renumber();
-                    _document.IrefTable.CheckConsistence();
+                    if (openMode == PdfDocumentOpenMode.Modify)
+                    {
+                        // Renumbering the objects would invalidate the cross-reference table of the original
+                        // file, which is kept unchanged by an incremental update.
+                        _document.IrefTable.Renumber();
+                        _document.IrefTable.CheckConsistence();
+                    }
+                    else
+                    {
+                        // Remember the objects of the original file. An incremental update writes all objects
+                        // that are not contained here, because they were created after the document was read.
+                        _document.OriginalObjectIDs = [.. _document.IrefTable.AllObjectIDs];
+                    }
                 }
                 else if (openMode == PdfDocumentOpenMode.Import)
                 {
@@ -494,6 +524,32 @@ namespace PdfSharp.Pdf.IO
                 throw;
             }
             return _document;
+        }
+
+        /// <summary>
+        /// Reads the whole stream from its beginning and restores the original stream position.
+        /// </summary>
+        static byte[] ReadAllBytes(Stream stream)
+        {
+            var position = stream.Position;
+            try
+            {
+                stream.Position = 0;
+                var bytes = new byte[stream.Length];
+                var offset = 0;
+                while (offset < bytes.Length)
+                {
+                    var read = stream.Read(bytes, offset, bytes.Length - offset);
+                    if (read <= 0)
+                        throw new PdfReaderException("Unexpected end of the stream to be read.");
+                    offset += read;
+                }
+                return bytes;
+            }
+            finally
+            {
+                stream.Position = position;
+            }
         }
 
         /// <summary>
