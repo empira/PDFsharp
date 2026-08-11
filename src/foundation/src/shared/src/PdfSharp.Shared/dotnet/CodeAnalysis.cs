@@ -3,7 +3,10 @@
 
 namespace System.Diagnostics.CodeAnalysis
 {
-#if !NET8_0_OR_GREATER
+// These types exist since .NET 5, so they must only be defined for the frameworks that do not have them.
+// A build for .NET 6 or .NET 7 fails with CS0433 (type exists in two assemblies) if the condition is
+// '!NET8_0_OR_GREATER'.
+#if NET462 || NETSTANDARD2_0
     /// <summary>
     /// Indicates that certain members on a specified <see cref="Type"/> are accessed dynamically,
     /// for example through <see cref="Reflection"/>.
