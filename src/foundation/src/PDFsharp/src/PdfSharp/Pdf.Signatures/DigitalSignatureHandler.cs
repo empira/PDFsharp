@@ -218,6 +218,10 @@ namespace PdfSharp.Pdf.Signatures
 
             signatureField.Elements.Add(PdfAnnotation.Keys.Rect, new PdfRectangle(Options.Rectangle));
 
+            // Without the print flag, a viewer never prints the annotation, so the visual representation
+            // of the signature would be missing on paper. See 12.5.3 Annotation flags.
+            signatureField.Elements.Add(PdfAnnotation.Keys.F, new PdfInteger((int)PdfAnnotationFlags.Print));
+
             // TODO COMPILE
             signatureField.CustomAppearanceHandler = Options.AppearanceHandler ?? new DefaultSignatureAppearanceHandler()
             {
