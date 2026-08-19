@@ -33,7 +33,7 @@ namespace PdfSharp.Pdf
     /// Represents a PDF document.
     /// </summary>
     [DebuggerDisplay("(Name={" + nameof(Name) + "})")] // A unique name makes debugging easier.
-    public sealed class PdfDocument : IDisposable
+    public sealed partial class PdfDocument : IDisposable
     {
         /// <summary>
         /// Creates a new PDF document in memory.
@@ -195,7 +195,7 @@ namespace PdfSharp.Pdf
 
         static int _nameCount;
 
-        internal bool CanModify => OpenMode == PdfDocumentOpenMode.Modify;
+        internal bool CanModify => OpenMode is PdfDocumentOpenMode.Modify or PdfDocumentOpenMode.ModifyIncremental;
 
         /// <summary>
         /// Gets or sets a value indicating whether to save a document even if it is imported.
@@ -669,7 +669,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Returns a value indicating whether the document is read only or can be modified.
         /// </summary>
-        public bool IsReadOnly => (OpenMode != PdfDocumentOpenMode.Modify);
+        public bool IsReadOnly => !CanModify;
 
         /// <summary>
         /// Gets information about the document.

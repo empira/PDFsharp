@@ -198,6 +198,16 @@ namespace PdfSharp.Pdf.Signatures
             }
             
             acroForm.Fields.Elements.Add(signatureField);
+
+            // The page, the array of annotations (which may be an indirect object of its own), the
+            // interactive form and the catalog are objects of the original file that are modified here.
+            // An incremental update must write them again.
+            Document.MarkAsModified(page);
+            if (annotations != null)
+                Document.MarkAsModified(annotations);
+            Document.MarkAsModified(acroForm);
+            Document.MarkAsModified(acroForm.Fields);
+            Document.MarkAsModified(catalog);
         }
 
         PdfFormSignatureField GetSignatureField(PdfSignature signatureDic) // #US321 TODO Use appropriate classes.
