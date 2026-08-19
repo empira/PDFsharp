@@ -236,7 +236,14 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public void Write(PdfRectangle rect)
         {
-            const string format = Config.SignificantDecimalPlaces3;
+            // With three decimal places, writing an existing page rounds its /MediaBox
+            // (e.g. 595.2756 -> 595.276). That is a change of the page geometry, which a validator
+            // reports as a changed page for every digital signature the document already contains.
+            //
+            // Note that the coordinates are written as they are, while Write(double) converts a real
+            // number to a single first. Doing that here would defeat the purpose: the single nearest to
+            // 595.2756 is 595.27557, which does not round-trip either.
+            const string format = Config.SignificantDecimalPlaces7;
             WriteSeparator(CharCat.Delimiter);
             WriteRaw(PdfEncoders.Format("[{0:" + format + "} {1:" + format + "} {2:" + format + "} {3:" + format + "}]", rect.X1, rect.Y1, rect.X2, rect.Y2));
         }
