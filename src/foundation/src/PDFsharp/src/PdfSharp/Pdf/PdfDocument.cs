@@ -9,6 +9,7 @@ using PdfSharp.Events;
 using PdfSharp.Logging;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Attachments;
+using PdfSharp.Pdf.C2pa;
 using PdfSharp.Pdf.Filters;
 using PdfSharp.Pdf.Forms;
 using PdfSharp.Pdf.Internal;
@@ -883,6 +884,11 @@ namespace PdfSharp.Pdf
 
         internal PdfAManager GetPdfAManager()
             => PdfAManager ??= PdfAManager.ForDocument(this);
+
+        internal C2paManager? C2paManager { get; set; }
+
+        internal C2paManager GetC2paManager()
+            => C2paManager ??= C2paManager.ForDocument(this);
 
         // ReSharper disable once InconsistentNaming
         internal UAManager? UAManager { get; set; }

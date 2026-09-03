@@ -264,6 +264,8 @@
     <Compile Include="..\PdfSharp\Pdf.Attachments\PdfAFRelationship.cs" Link="Pdf.Attachments\PdfAFRelationship.cs" />
     <Compile Include="..\PdfSharp\Pdf.Attachments\PdfEmbeddedFiles.cs" Link="Pdf.Attachments\PdfEmbeddedFiles.cs" />
     <Compile Include="..\PdfSharp\Pdf.Attachments\PdfFileSpecification.cs" Link="Pdf.Attachments\PdfFileSpecification.cs" />
+    <Compile Include="..\PdfSharp\Pdf.C2pa\C2paManager.cs" Link="Pdf.C2pa\C2paManager.cs" />
+    <Compile Include="..\PdfSharp\Pdf.C2pa\C2paManifestInfo.cs" Link="Pdf.C2pa\C2paManifestInfo.cs" />
     <Compile Include="..\PdfSharp\Pdf.Content.Objects\CObjects.cs" Link="Pdf.Content.Objects\CObjects.cs" />
     <Compile Include="..\PdfSharp\Pdf.Content.Objects\enum\OpCodeFlags.cs" Link="Pdf.Content.Objects\enum\OpCodeFlags.cs" />
     <Compile Include="..\PdfSharp\Pdf.Content.Objects\enum\OpCodeName.cs" Link="Pdf.Content.Objects\enum\OpCodeName.cs" />
