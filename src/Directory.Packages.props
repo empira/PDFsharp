@@ -40,5 +40,7 @@
     <!-- Other packages -->
     <PackageVersion Include="System.Resources.Extensions" Version="10.0.5" />
     <!-- Needed for PDFsharp-GDI. -->
+    <!-- Used by samples to decode COSE/CBOR structures inside C2PA manifests. -->
+    <PackageVersion Include="System.Formats.Cbor" Version="8.0.0" />
   </ItemGroup>
 </Project>

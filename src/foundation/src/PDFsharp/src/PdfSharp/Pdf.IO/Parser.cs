@@ -422,7 +422,7 @@ namespace PdfSharp.Pdf.IO
         int GetStreamLength(PdfDictionary dict, SuppressExceptions? suppressObjectOrderExceptions)
         {
             //if (dict.Elements["/F"] != null) // TODO #US373 Just a null check.
-            if (dict.Elements.HasValue("/F")) // #US373
+            if (IsExternalFileStream(dict)) // #US373
                 throw new NotImplementedException("File streams are not yet implemented.");
 #if TEST_CODE_
             // By uncommenting this and the label below,
@@ -526,6 +526,51 @@ namespace PdfSharp.Pdf.IO
             dict.Elements["/Length"] = new PdfInteger(lenStream);
 
             return lenStream;
+        }
+
+        /// <summary>
+        /// Determines whether the stream dictionary's /F entry denotes an external file stream
+        /// (PDF 2.0 §7.3.8.2), i.e. the stream data is stored outside the PDF file and the bytes
+        /// between 'stream' and 'endstream' must be ignored.
+        /// Some producers misuse /F for unrelated purposes (e.g. embedded file parameters), so we
+        /// only treat it as an external file stream if its value actually looks like a file specification.
+        /// </summary>
+        static bool IsExternalFileStream(PdfDictionary dict)
+        {
+            switch (dict.Elements["/F"])
+            {
+                case null:
+                    return false;
+
+                // A file specification can be a simple string containing the file name.
+                case PdfString or PdfStringObject:
+                    return true;
+
+                // A dictionary is only a file specification if it looks like one.
+                case PdfDictionary fileSpec:
+                    return IsFileSpecificationDictionary(fileSpec);
+
+                case PdfReference { Value: PdfDictionary fileSpec }:
+                    return IsFileSpecificationDictionary(fileSpec);
+
+                // An indirect object not yet read. We assume it is a file specification.
+                case PdfReference:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        static bool IsFileSpecificationDictionary(PdfDictionary dict)
+        {
+            if (dict.Elements.TryGetName("/Type", out var type) && type == "/Filespec")
+                return true;
+
+            // The /Type entry is only required if /EF or /RF is present, so we also check
+            // for the entries a file specification dictionary is made of.
+            return dict.Elements.HasValue("/FS") || dict.Elements.HasValue("/F") || dict.Elements.HasValue("/UF")
+                   || dict.Elements.HasValue("/DOS") || dict.Elements.HasValue("/Mac") || dict.Elements.HasValue("/Unix");
         }
 
         /// <summary>

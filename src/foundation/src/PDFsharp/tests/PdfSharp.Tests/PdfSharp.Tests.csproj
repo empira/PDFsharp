@@ -37,6 +37,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- PDF files needed by tests that are not part of the downloaded assets. -->
+    <None Update="Pdf.C2pa\testdata\*.pdf" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" />
     <PackageReference Include="Xunit.SkippableFact" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" />

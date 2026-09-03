@@ -53,6 +53,11 @@ namespace PdfSharp.Pdf.Attachments
         /// shall be used if this file specification is a schema definition for the associated object (e.g. an XML schema associated with a metadata stream).
         /// </summary>
         public const string Schema = nameof(Schema);
+
+        /// <summary>
+        /// shall be used if this file specification denotes a C2PA manifest (content credentials) associated with this PDF document.
+        /// </summary>
+        public const string C2paManifest = "C2PA_Manifest";
     }
 }
 
