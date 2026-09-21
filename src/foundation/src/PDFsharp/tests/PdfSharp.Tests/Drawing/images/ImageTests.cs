@@ -436,5 +436,49 @@ namespace PdfSharp.Tests.Drawing
             }
         }
 #endif
+
+#if CORE
+        [Fact]
+        public void Indexed4_PNG_with_transparency_has_same_alpha_mask_as_RGBA_PNG()
+        {
+            // See https://github.com/empira/PDFsharp/issues/392.
+            // 96×36 pixels, 4 bits per pixel, palette with tRNS chunk (alpha values 0, 255, 55, 199, 121).
+            const string indexedPng =
+                "iVBORw0KGgoAAAANSUhEUgAAAGAAAAAkBAMAAACEfyJxAAAAD1BMVEUAAAAAAAAAAAAAAAAAAABPDueNAAAABXRSTlMA/zfHeZAoe0QAAADsSURBVHic3ZSLDYMgEIb/qgN44gCKHUBsB7CP/WfqQRDEgiEmTdr+iZ4X+LgHIPAfomzVR4HcVE7fBBQyBB5EYkahizpRZ2xJ8+IDA493a0BxB0QaqHSH2gBopfIT3oCepkqxXQO8Sp0EODrbMQRATQqoqAH0Kx8Y9ax2J6VGysEDzPIstQF6Gj1g5ADTWdzEGhAXsqlkAjw+IZVSNMKT9z5VdLwG7AGxLpkP7ndPWIDFT+yDjirM4wDrJ3Za10X3My/kAOuzjZwlrdJ00wPWj55W2BB0hQesH7kPTlIi0OJvb1ymjgMf//P9ul70IzZ3eP6YRgAAAABJRU5ErkJggg==";
+            // The same image converted to 32 bit RGBA.
+            const string rgbaPng =
+                "iVBORw0KGgoAAAANSUhEUgAAAGAAAAAkCAYAAAB2UT9CAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAYKADAAQAAAABAAAAJAAAAAAEQKHHAAAC4UlEQVRoBe1ZW3ITMRA0FHeCbw7AWfILB4BfzsIB8htyKtiuuF3ttkY7K2tdSTyqcqSd9/RotNrK4VCjECgECoFC4F4R+NBJ/F+HV6wxBC7w/jhmp7RmIfApYeiiagmdEjlHIDxNqgPOgbr5UxXg5pCfO8wcQeca9QQEPgsMz7KeusS5pWfX9+X56UgjjzPo4PtAoJRRWy6nMppcVl/j0jiy+pF/jRO21I/qgK5xqx7WlHX6YcsR9G3R/nJh4YUA+s/lh0De40BR/y6/Xv7ga/FTOGwpgBr8cQwGAcExB543B0HlVzpjZ2NzcbAQuB0CB80fcr1OoI3U7G2j7ecg45nymDkQTItOPmeV0QSy+lFsWf3IP+JTXtThazLkM9/TPNoBJwPHxS8jKIjGelOPvtEegujRCRw4BdL5zyoAnb/nGUdNdOPxDfg1C8Ssa6jvlCjQbFyRXHpnRQY20nHx4PjDRTDz3RCw2+QZBQAo/pJqe7ueqi+8662tW9Bbz+OKOApEeRTOu6KpPloAOODuoFM6iM5J8msWBEYL4KDDJHYnwN/r+IGPll/Qf3d44L/aMVoAgM0zka25J/AE8BY+6Auznut4sfb880SAHrHBujtGCwAHqTOu6/1tMdfO9ag7u1nufQ31HdO6xTjNdboJrDDdlvuCutNUR3cyAHZZuvdbIE8F8odm/3p7WqyQ5g57DlQPax89PhKmT8zRUBsem/K2+oc/9d/Sz8jQxkX8e3cAHPouAkAAFj+stXX3uEFd69+/clEEdgLi96JMy8GrBkek+S5bWN2hurThc8vmjA5AYKP+mRRi83hbz60cYIOytJeaXUmTiBz1DEdJwG5kb1YBENeIf80HsSgGxAcz6OwK1eGasnw+zb1/uEMJoyfzIrHtrweqL71tlsakZ/hXG5n4h7AMqzaW911rhVje4iV818ivJZ/5EGP7rNkq/gAC1QEDoJVKIVAIFAKFQCEwA4H/Fu39jErviWsAAAAASUVORK5CYII=";
+
+            var indexedAlpha = GetSoftMaskOfImage(Convert.FromBase64String(indexedPng));
+            var rgbaAlpha = GetSoftMaskOfImage(Convert.FromBase64String(rgbaPng));
+
+            indexedAlpha.Should().HaveCount(96 * 36);
+            indexedAlpha.Should().Contain(b => b != 0, "the image must not be completely transparent");
+            indexedAlpha.Should().Equal(rgbaAlpha);
+
+            static byte[] GetSoftMaskOfImage(byte[] png)
+            {
+                var document = new PdfDocument();
+                var page = document.AddPage();
+                using (var gfx = XGraphics.FromPdfPage(page))
+                {
+                    using var stream = new MemoryStream(png);
+                    using var image = XImage.FromStream(stream);
+                    gfx.DrawImage(image, 100, 100);
+                }
+
+                using var pdf = new MemoryStream();
+                document.Save(pdf, false);
+                pdf.Position = 0;
+
+                var docRead = PdfReader.Open(pdf, PdfDocumentOpenMode.Import);
+                var xObjects = docRead.Pages[0].Elements.GetDictionary("/Resources")!.Elements.GetDictionary("/XObject")!;
+                var xObject = (PdfDictionary)((PdfReference)xObjects.Elements.Values.Single()!).Value;
+                var smask = xObject.Elements.GetDictionary("/SMask");
+                smask.Should().NotBeNull("an image with transparency must have a soft mask");
+                return new FlateDecode().Decode(smask!.Stream!.Value);
+            }
+        }
+#endif
     }
 }
