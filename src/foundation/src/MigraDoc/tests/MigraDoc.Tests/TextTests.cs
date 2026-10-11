@@ -10,6 +10,7 @@ using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Rendering;
 using MigraDoc.RtfRendering;
 using PdfSharp.Diagnostics;
+using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Logging;
 using PdfSharp.Quality;
@@ -33,6 +34,135 @@ namespace MigraDoc.Tests
         public void Dispose()
         {
             PdfSharpCore.ResetAll();
+        }
+
+        [Theory]
+        [InlineData(false, false, true, true)]
+        [InlineData(true, false, true, true)]
+        [InlineData(true, true, true, true)]
+        [InlineData(false, false, false, true)]
+        [InlineData(false, false, true, false)]
+        public void StyledRunsRespectNonbreakingSpace(bool splitPunctuation, bool longUrl,
+            bool nonbreakingSpace, bool hyperlink)
+        {
+            var document = new Document();
+            document.Styles.Normal.Font.Name = "Arial";
+            document.Styles.Normal.Font.Size = 9;
+            var section = document.AddSection();
+            section.PageSetup.PageWidth = Unit.FromPoint(longUrl ? 612 : 160);
+            section.PageSetup.LeftMargin = Unit.FromPoint(longUrl ? 72 : 20);
+            section.PageSetup.RightMargin = Unit.FromPoint(longUrl ? 72 : 20);
+            var paragraph = section.AddParagraph();
+            paragraph.AddText(longUrl
+                ? "Committee on Industry and Technology, 5 December 2022, Catherine Lovrics, "
+                : splitPunctuation ? "Reference text" : "Reference text ");
+            if (longUrl)
+                paragraph.AddFormattedText("Open Parliament").Font.Italic = true;
+            if (splitPunctuation)
+                paragraph.AddFormattedText(", ").Font.Italic = true;
+            paragraph.AddText("online");
+            paragraph.AddFormattedText(nonbreakingSpace ? ":\u00a0" : ": ");
+            var url = longUrl
+                ? "https://openparliament.ca/committees/industry/44-1/49/catherine-lovrics-2/"
+                : "https://a.co";
+            if (hyperlink)
+                paragraph.AddHyperlink(url, HyperlinkType.Url).AddText(url);
+            else
+                paragraph.AddFormattedText(url).Font.Bold = true;
+
+            var renderer = new PdfDocumentRenderer { Document = document };
+            renderer.RenderDocument();
+            var content = string.Concat(renderer.PdfDocument.Pages[0].Contents.Elements
+                .OfType<PdfSharp.Pdf.Advanced.PdfReference>()
+                .Select(reference => reference.Value)
+                .OfType<PdfSharp.Pdf.Advanced.PdfContent>()
+                .Where(stream => stream.Stream != null)
+                .Select(stream => Encoding.GetEncoding(28591).GetString(stream.Stream!.UnfilteredValue)));
+            var online = content.IndexOf("(online) Tj", StringComparison.Ordinal);
+            var link = content.IndexOf("(https://", StringComparison.Ordinal);
+            online.Should().BeGreaterThan(0);
+            link.Should().BeGreaterThan(online);
+            if (longUrl && nonbreakingSpace)
+                Regex.Matches(content[..online], @"-?\d+(?:\.\d+)? -\d+(?:\.\d+)? Td")
+                    .Count.Should().BeGreaterThan(0);
+            var lineBreaks = Regex.Matches(content[online..link], @"-?\d+(?:\.\d+)? -\d+(?:\.\d+)? Td")
+                .Cast<Match>().ToArray();
+            if (nonbreakingSpace)
+                lineBreaks.Should().BeEmpty();
+            else
+                lineBreaks.Should().NotBeEmpty();
+        }
+
+        [Fact]
+        public void RepeatedCitationUrlsKeepExpectedLineCount()
+        {
+            var document = new Document();
+            document.Styles.Normal.Font.Name = "Arial";
+            document.Styles.Normal.Font.Size = 8;
+            var section = document.AddSection();
+            section.PageSetup.PageWidth = Unit.FromPoint(612);
+            section.PageSetup.LeftMargin = Unit.FromPoint(72);
+            section.PageSetup.RightMargin = Unit.FromPoint(72);
+            var paragraph = section.AddParagraph();
+            paragraph.AddText("Committee on Industry and Technology, 5 December 2022, Catherine Lovrics, Open Parliament, ");
+            for (var index = 0; index < 3; index++)
+            {
+                paragraph.AddFormattedText("online:\u00a0").Font.Italic = true;
+                paragraph.AddFormattedText("https://openparliament.ca/committees/industry/44-1/");
+                paragraph.AddFormattedText($"{49 + index}/catherine-lovrics-2/");
+                paragraph.AddText("; Committee on Industry and Technology, 15 February 2023, Open Parliament, ");
+            }
+
+            var renderer = new PdfDocumentRenderer { Document = document };
+            renderer.RenderDocument();
+            var content = string.Concat(renderer.PdfDocument.Pages[0].Contents.Elements
+                .OfType<PdfSharp.Pdf.Advanced.PdfReference>()
+                .Select(reference => reference.Value)
+                .OfType<PdfSharp.Pdf.Advanced.PdfContent>()
+                .Where(stream => stream.Stream != null)
+                .Select(stream => Encoding.GetEncoding(28591).GetString(stream.Stream!.UnfilteredValue)));
+            Regex.Matches(content, @"-?\d+(?:\.\d+)? -\d+(?:\.\d+)? Td")
+                .Count.Should().Be(4);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ConsecutiveStyledNonbreakingSpacesKeepTheChainTogether(bool followingTextContainsSpace)
+        {
+            using var measure = XGraphics.CreateMeasureContext(new XSize(200, 200),
+                XGraphicsUnit.Point, XPageDirection.Downwards);
+            var italicFont = new XFont("Arial", 9, XFontStyleEx.Italic);
+            var boldFont = new XFont("Arial", 9, XFontStyleEx.Bold);
+            var regularFont = new XFont("Arial", 9);
+            var chainWidth = measure.MeasureString("online:\u00a0", italicFont).Width +
+                measure.MeasureString("https://a.co\u00a0", boldFont).Width +
+                measure.MeasureString("source", regularFont).Width;
+            var document = new Document();
+            document.Styles.Normal.Font.Name = "Arial";
+            document.Styles.Normal.Font.Size = 9;
+            var section = document.AddSection();
+            section.PageSetup.PageWidth = Unit.FromPoint(chainWidth + 42);
+            section.PageSetup.LeftMargin = Unit.FromPoint(20);
+            section.PageSetup.RightMargin = Unit.FromPoint(20);
+            var paragraph = section.AddParagraph("x ");
+            paragraph.AddFormattedText("online:\u00a0").Font.Italic = true;
+            paragraph.AddFormattedText("https://a.co\u00a0").Font.Bold = true;
+            paragraph.AddText(followingTextContainsSpace ? "source later" : "source");
+
+            var renderer = new PdfDocumentRenderer { Document = document };
+            renderer.RenderDocument();
+            var content = PdfFileHelper.GetPageContentStream(renderer.PdfDocument, 0);
+            var prefix = content.IndexOf("(x) Tj", StringComparison.Ordinal);
+            var online = content.IndexOf("(online", StringComparison.Ordinal);
+            var source = content.IndexOf("(source) Tj", StringComparison.Ordinal);
+            prefix.Should().BeGreaterThan(0);
+            online.Should().BeGreaterThan(prefix);
+            source.Should().BeGreaterThan(online);
+            Regex.Matches(content[prefix..online], @"-?\d+(?:\.\d+)? -\d+(?:\.\d+)? Td")
+                .Count.Should().Be(1);
+            Regex.Matches(content[online..source], @"-?\d+(?:\.\d+)? -\d+(?:\.\d+)? Td")
+                .Count.Should().Be(0);
         }
 
         [Fact]
