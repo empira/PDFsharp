@@ -262,7 +262,7 @@ namespace MigraDoc.Rendering
             }
         }
 
-        XPen? GetPen(BorderType type)
+        internal XPen? GetPen(BorderType type)
         {
             var borderWidth = GetWidth(type);
             if (borderWidth == 0)
