@@ -51,6 +51,28 @@ namespace PdfSharp.Tests.Drawing
             GlobalFontSettings.ResetFontManagement();
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void Render_text_event_can_replace_two_glyphs_with_one(bool unicode)
+        {
+            var document = new PdfDocument();
+            document.RenderEvents.RenderTextEvent += (_, args) =>
+                args.CodePointGlyphIndexPairs = [args.CodePointGlyphIndexPairs[0]];
+            var page = document.AddPage();
+            var encoding = unicode ? PdfFontEncoding.Unicode : PdfFontEncoding.WinAnsi;
+            var font = new XFont("Arial", 12, XFontStyleEx.Regular, new XPdfFontOptions(encoding));
+            using (var graphics = XGraphics.FromPdfPage(page))
+                graphics.DrawString("fl", font, XBrushes.Black, 50, 100);
+
+            var content = PdfFileHelper.GetPageContentStreamEnumerator(document, 0);
+            content.Text.MoveAndGetNext(true, out var text).Should().BeTrue();
+            if (unicode)
+                PdfFileHelper.GetHexStringAsGlyphIndices(text!.Text).Should().ContainSingle();
+            else
+                text!.Text.Should().Be("f");
+        }
+
         [Fact]
         public void PDF_with_Emojis()
         {

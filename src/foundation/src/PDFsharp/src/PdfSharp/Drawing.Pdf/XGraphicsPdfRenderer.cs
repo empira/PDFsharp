@@ -517,6 +517,10 @@ namespace PdfSharp.Drawing.Pdf
                 codePoints = args.CodePointGlyphIndexPairs.Select(pair => pair.CodePoint).ToArray();
                 codePointsWithGlyphIndices = otDescriptor.GlyphIndicesFromCodePoints(codePoints);
             }
+            else
+            {
+                codePoints = codePointsWithGlyphIndices.Select(pair => pair.CodePoint).ToArray();
+            }
 
             // Decide text encoding.
             FontType fontType;
@@ -612,7 +616,7 @@ namespace PdfSharp.Drawing.Pdf
                 }
             }
 
-            var glyphCount = codePoints.Length;
+            var glyphCount = codePointsWithGlyphIndices.Length;
             // Check font whether colored glyphs are opt-in.
             bool isDefaultCase = font.PdfOptions.ColoredGlyphs == PdfFontColoredGlyphs.None;
         DefaultCase:
