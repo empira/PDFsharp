@@ -613,6 +613,11 @@ namespace MigraDoc.Rendering
             while (_currentLeaf != null && !IsLineBreak(_currentLeaf.Current) && !IsTab(_currentLeaf.Current))
             {
                 FormatResult result = FormatElement(_currentLeaf.Current);
+                if (result == FormatResult.Ignore)
+                {
+                    _currentLeaf = _currentLeaf.GetNextLeaf();
+                    continue;
+                }
                 if (result != FormatResult.Continue)
                     break;
 
