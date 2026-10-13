@@ -1,6 +1,7 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
+using System.Globalization;
 using System.Text;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
@@ -1865,6 +1866,18 @@ namespace MigraDoc.Rendering
         FormatResult FormatWord(string word, Rectangle fittingRect)
         {
             XUnitPt width = MeasureString(word);
+            if (_phase == Phase.Formatting && word.Length == 1 &&
+                word[0] is >= '\u3000' and <= '\u303f' &&
+                char.GetUnicodeCategory(word[0]) is UnicodeCategory.ClosePunctuation or
+                    UnicodeCategory.FinalQuotePunctuation &&
+                _currentLeaf?.GetPreviousLeaf()?.Current is Text { Content: { Length: > 0 } previousText } &&
+                !char.IsWhiteSpace(previousText[^1]) &&
+                _currentXPosition > StartXPosition + Tolerance)
+            {
+                var right = fittingRect.X + fittingRect.Width - RightIndent + Tolerance;
+                if (_currentXPosition < right && _currentXPosition + width > right)
+                    width = right - _currentXPosition;
+            }
             return FormatAsWord(width, fittingRect);
         }
 

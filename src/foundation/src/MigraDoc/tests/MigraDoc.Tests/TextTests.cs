@@ -33,6 +33,45 @@ namespace MigraDoc.Tests
             PdfSharpCore.ResetAll();
         }
 
+        [Theory]
+        [InlineData("\u300d", 216, true)]
+        [InlineData("\u300f", 216, true)]
+        [InlineData("\u3011", 216, true)]
+        [InlineData("\u300d", 224, true)]
+        [InlineData(")", 216, true)]
+        [InlineData("\u300d", 216, false)]
+        public void ClosingPunctuationInFollowingRunMovesWithPrecedingWord(
+            string mark, double pageWidth, bool adjacent)
+        {
+            var document = new Document();
+            document.Styles.Normal.Font.Name = "Arial";
+            document.Styles.Normal.Font.Size = 18;
+            var section = document.AddSection();
+            section.PageSetup.PageWidth = Unit.FromPoint(pageWidth);
+            section.PageSetup.LeftMargin = Unit.FromPoint(72);
+            section.PageSetup.RightMargin = Unit.FromPoint(72);
+            var paragraph = section.AddParagraph();
+            paragraph.AddText("of ");
+            paragraph.AddFormattedText("authors.");
+            paragraph.AddFormattedText(adjacent ? mark : " " + mark);
+
+            var renderer = new PdfDocumentRenderer { Document = document };
+            renderer.RenderDocument();
+
+            var enumerator = PdfFileHelper.GetPageContentStreamEnumerator(renderer.PdfDocument, 0);
+            var words = new List<(string Text, double Y)>();
+            while (enumerator.Text.MoveAndGetNext(true, out var text))
+                words.Add((text!.Text, text.Y));
+            var prefix = words.Single(word => word.Text.StartsWith("of", StringComparison.Ordinal));
+            var preceding = words.Single(word => word.Text == "authors.");
+            var closing = words.Last();
+            preceding.Y.Should().NotBe(prefix.Y);
+            if (adjacent)
+                closing.Y.Should().Be(preceding.Y);
+            else
+                closing.Y.Should().NotBe(preceding.Y);
+        }
+
         [Fact]
         public void Surrogate_Pairs_Test()
         {
