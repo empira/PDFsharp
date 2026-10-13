@@ -66,7 +66,6 @@ namespace PdfSharp.Pdf.Advanced
 
             SetModified();
             PdfContent content = new PdfContent(Owner);
-            Owner.IrefTable.Add(content);
             Debug.Assert(content.Reference != null);
             Elements.Insert(0, content.Reference);
             return content;

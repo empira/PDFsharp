@@ -7,6 +7,7 @@ using PdfSharp.Drawing;
 using PdfSharp.Drawing.Layout;
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
 using PdfSharp.Quality;
 using System.Drawing;
 using Xunit;
@@ -29,6 +30,25 @@ namespace PdfSharp.Tests.Basics
         public void Dispose()
         {
             PdfSharpCore.ResetAll();
+        }
+
+        [Fact]
+        public void PrependContentToImportedPage()
+        {
+            using var source = new PdfDocument();
+            using (var graphics = XGraphics.FromPdfPage(source.AddPage()))
+                graphics.DrawLine(XPens.Black, 0, 0, 20, 20);
+            using var original = new MemoryStream();
+            source.Save(original, false);
+
+            using var modified = PdfReader.Open(new MemoryStream(original.ToArray()), PdfDocumentOpenMode.Modify);
+            using (var graphics = XGraphics.FromPdfPage(modified.Pages[0], XGraphicsPdfPageOptions.Prepend))
+                graphics.DrawRectangle(XBrushes.Yellow, 0, 0, 20, 20);
+
+            using var result = new MemoryStream();
+            modified.Save(result, false);
+            using var reopened = PdfReader.Open(new MemoryStream(result.ToArray()), PdfDocumentOpenMode.Import);
+            reopened.Pages[0].Contents.Elements.Count.Should().Be(2);
         }
 
         [Fact]
