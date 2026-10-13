@@ -664,7 +664,7 @@ namespace MigraDoc.Rendering
                 defaultTabStop = _paragraph.Document.DefaultTabStop.Point;
 
             var currTabPos = defaultTabStop;
-            while (currTabPos + _formattingArea.X <= _formattingArea.Width - RightIndent)
+            while (currTabPos <= _formattingArea.Width - RightIndent)
             {
                 if (currTabPos > lastPosition && currTabPos + _formattingArea.X > _currentXPosition + Tolerance)
                     return new TabStop(currTabPos.Point);
