@@ -1865,6 +1865,38 @@ namespace MigraDoc.Rendering
         FormatResult FormatWord(string word, Rectangle fittingRect)
         {
             XUnitPt width = MeasureString(word);
+            if (_phase == Phase.Formatting && _currentLeaf?.Current is Text &&
+                _currentXPosition > StartXPosition + Tolerance && word.Length > 0 &&
+                word.All(character => character <= 127 && char.IsLetterOrDigit(character)))
+            {
+                var previous = _currentLeaf.GetPreviousLeaf();
+                if (previous == null || IsBlank(previous.Current) || IsTab(previous.Current))
+                {
+                    var original = _currentLeaf;
+                    var next = original.GetNextLeaf();
+                    var sequenceWidth = width;
+                    var hasContinuation = false;
+                    try
+                    {
+                        while (next?.Current is Text text && text.Content.Length > 0 &&
+                               text.Content.All(character => character <= 127 && char.IsLetterOrDigit(character)))
+                        {
+                            _currentLeaf = next;
+                            sequenceWidth += MeasureString(text.Content);
+                            hasContinuation = true;
+                            next = next.GetNextLeaf();
+                        }
+                    }
+                    finally
+                    {
+                        _currentLeaf = original;
+                    }
+                    var right = fittingRect.X + fittingRect.Width - RightIndent + Tolerance;
+                    if (hasContinuation && sequenceWidth <= right - StartXPosition &&
+                        _currentXPosition + sequenceWidth > right)
+                        return FormatResult.NewLine;
+                }
+            }
             return FormatAsWord(width, fittingRect);
         }
 

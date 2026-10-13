@@ -8,6 +8,7 @@ using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.Rendering;
 using MigraDoc.RtfRendering;
 using PdfSharp.Diagnostics;
+using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Logging;
 using PdfSharp.Quality;
@@ -31,6 +32,44 @@ namespace MigraDoc.Tests
         public void Dispose()
         {
             PdfSharpCore.ResetAll();
+        }
+
+        [Theory]
+        [InlineData("1", "5", "0")]
+        [InlineData("A", "b", "c")]
+        public void AdjacentStyledAsciiRunsFitAsOneWord(string firstText, string secondText, string thirdText)
+        {
+            var document = new Document();
+            document.Styles.Normal.Font.Name = "Arial";
+            document.Styles.Normal.Font.Size = 9;
+            using var graphics = XGraphics.CreateMeasureContext(new XSize(100, 100),
+                XGraphicsUnit.Point, XPageDirection.Downwards);
+            var normal = new XFont("Arial", 9);
+            var bold = new XFont("Arial", 9, XFontStyleEx.Bold);
+            var contentWidth = graphics.MeasureString("Reference number ", normal).Width +
+                graphics.MeasureString(firstText, normal).Width +
+                graphics.MeasureString(secondText, bold).Width + 0.2;
+            var section = document.AddSection();
+            section.PageSetup.PageWidth = Unit.FromPoint(contentWidth + 40);
+            section.PageSetup.LeftMargin = Unit.FromPoint(20);
+            section.PageSetup.RightMargin = Unit.FromPoint(20);
+            var paragraph = section.AddParagraph();
+            paragraph.AddText("Reference number ");
+            paragraph.AddFormattedText(firstText);
+            paragraph.AddFormattedText(secondText).Bold = true;
+            paragraph.AddFormattedText(thirdText).Italic = true;
+            paragraph.AddText(" February");
+
+            var renderer = new PdfDocumentRenderer { Document = document };
+            renderer.RenderDocument();
+            var stream = PdfFileHelper.GetPageContentStreamEnumerator(renderer.PdfDocument, 0);
+            stream.Text.MoveAndGetNext(item => item.Text == "number", true, out var prefix).Should().BeTrue();
+            stream.Text.MoveAndGetNext(item => item.Text == firstText, true, out var first).Should().BeTrue();
+            stream.Text.MoveAndGetNext(item => item.Text == secondText, true, out var second).Should().BeTrue();
+            stream.Text.MoveAndGetNext(item => item.Text == thirdText, true, out var third).Should().BeTrue();
+            first!.IsAtYPosition(prefix!.Y).Should().BeFalse();
+            second!.IsAtYPosition(first.Y).Should().BeTrue();
+            third!.IsAtYPosition(first.Y).Should().BeTrue();
         }
 
         [Fact]
