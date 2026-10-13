@@ -516,6 +516,8 @@ namespace PdfSharp.Drawing.Pdf
             {
                 codePoints = args.CodePointGlyphIndexPairs.Select(pair => pair.CodePoint).ToArray();
                 codePointsWithGlyphIndices = otDescriptor.GlyphIndicesFromCodePoints(codePoints);
+                for (var index = 0; index < codePointsWithGlyphIndices.Length; index++)
+                    codePointsWithGlyphIndices[index].UnicodeText = args.CodePointGlyphIndexPairs[index].UnicodeText;
             }
             else
             {
@@ -544,6 +546,11 @@ namespace PdfSharp.Drawing.Pdf
                     fontType = font.FontTypeFromUnicodeFlag;
                     isAnsi = fontType == FontType.TrueTypeWinAnsi;
                 }
+            }
+            if (codePointsWithGlyphIndices.Any(pair => !string.IsNullOrEmpty(pair.UnicodeText)))
+            {
+                fontType = FontType.Type0Unicode;
+                isAnsi = false;
             }
 
             //Realize(font, brush, boldSimulation ? 2 : 0);

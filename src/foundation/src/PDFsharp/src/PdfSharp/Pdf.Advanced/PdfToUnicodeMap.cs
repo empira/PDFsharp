@@ -68,6 +68,16 @@ namespace PdfSharp.Pdf.Advanced
                 //glyphIndexToCharacter.Add(index, entry.Key);
                 glyphIndexToCharacter[index] = entry.Key;  // BUG_OLD - Key may be a surrogate pair. Should it be the code point?
             }
+            foreach (var glyphIndex in CMapInfo.GlyphUnicodeSequences.Keys)
+            {
+                lowIndex = Math.Min(lowIndex, glyphIndex);
+                hiIndex = Math.Max(hiIndex, glyphIndex);
+            }
+            foreach (var glyphIndex in CMapInfo.AdditionalGlyphUnicodeMappings.Keys)
+            {
+                lowIndex = Math.Min(lowIndex, glyphIndex);
+                hiIndex = Math.Max(hiIndex, glyphIndex);
+            }
 
             using var ms = new MemoryStream();
             using var wrt = new StreamWriter(ms, Encoding.ASCII);
@@ -81,24 +91,27 @@ namespace PdfSharp.Pdf.Advanced
 
             // Sorting seems not necessary. The limit is 100 entries, we will see.
             //wrt.WriteLine(String.Format(CultureInfo.InvariantCulture, "{0} beginbfrange", glyphIndexToCharacter.Count));
-            wrt.WriteLine(Invariant($"{glyphIndexToCharacter.Count} beginbfrange"));
-            var array = glyphIndexToCharacter.Keys.ToArray();
+            var array = glyphIndexToCharacter.Keys
+                .Union(CMapInfo.GlyphUnicodeSequences.Keys.Select(index => (int)index))
+                .Union(CMapInfo.AdditionalGlyphUnicodeMappings.Keys.Select(index => (int)index)).ToArray();
+            wrt.WriteLine(Invariant($"{array.Length} beginbfrange"));
             Array.Sort(array);
 
             //foreach (var item in glyphIndexToCharacter)
             for (int idx = 0; idx < array.Length; idx++)
             {
                 var key = array[idx];
-                var value = glyphIndexToCharacter[key];
+                glyphIndexToCharacter.TryGetValue(key, out var value);
 #if DEBUG
                 PdfSharpLogHost.Logger.LogDebug($"Glyph index: {key,-7} {(value /*& 0xFFFF_0000*/) >>> 16,4:X4}-{value & 0xFFFF,4:X4}");
 #endif
                 //wrt.WriteLine(String.Format(CultureInfo.InvariantCulture, "<{0:X4}><{0:X4}><{1:X4}>", item.Key, (int)item.Value));
-                if ((value & 0xFFFF_0000) == 0)
-                {
-                    // TODO_OLD: handle surrogate pairs here.
-                }
-                wrt.WriteLine(Invariant($"<{key:X4}><{key:X4}><{(uint)value:X4}>"));
+                string destination = Invariant($"{(uint)value:X4}");
+                if (CMapInfo.GlyphUnicodeSequences.TryGetValue((ushort)key, out var unicodeText))
+                    destination = string.Concat(unicodeText.Select(character => Invariant($"{(int)character:X4}")));
+                else if (CMapInfo.AdditionalGlyphUnicodeMappings.TryGetValue((ushort)key, out var additionalText))
+                    destination = string.Concat(additionalText.Select(character => Invariant($"{(int)character:X4}")));
+                wrt.WriteLine(Invariant($"<{key:X4}><{key:X4}><{destination}>"));
             }
             wrt.WriteLine("endbfrange");
             wrt.Write(suffix);

@@ -20,7 +20,7 @@ namespace PdfSharp.Fonts
             GlyphIndicesNew = new(glyphCount);
         }
 
-        public void AddChars(CodePointGlyphIndexPair[] codePoints)
+        public void AddChars(CodePointGlyphIndexPair[] codePoints, bool mapUnicodeText = true)
         {
             int length = codePoints.Length;
 
@@ -29,6 +29,30 @@ namespace PdfSharp.Fonts
                 var item = codePoints[idx];
                 if (item.GlyphIndex == 0)
                     continue;
+                if (mapUnicodeText && GlyphUnicodeSequences.TryGetValue(item.GlyphIndex, out var priorText) &&
+                    priorText != (string.IsNullOrEmpty(item.UnicodeText)
+                        ? char.ConvertFromUtf32(item.CodePoint) : item.UnicodeText))
+                    throw new InvalidOperationException("A glyph cannot have multiple ToUnicode mappings in one font resource.");
+                if (mapUnicodeText && !string.IsNullOrEmpty(item.UnicodeText))
+                {
+                    if (AdditionalGlyphUnicodeMappings.TryGetValue(item.GlyphIndex, out var existingText) &&
+                        existingText != item.UnicodeText)
+                        throw new InvalidOperationException("A glyph cannot have multiple ToUnicode mappings in one font resource.");
+                    if (!GlyphUnicodeSequences.ContainsKey(item.GlyphIndex))
+                    {
+                        foreach (var prior in CodePointsToGlyphIndices)
+                        {
+                            if (prior.Value == item.GlyphIndex &&
+                                char.ConvertFromUtf32(prior.Key) != item.UnicodeText)
+                                throw new InvalidOperationException("A glyph cannot have multiple ToUnicode mappings in one font resource.");
+                        }
+                    }
+                    GlyphUnicodeSequences[item.GlyphIndex] = item.UnicodeText;
+                }
+                if (mapUnicodeText && string.IsNullOrEmpty(item.UnicodeText) &&
+                    CodePointsToGlyphIndices.TryGetValue(item.CodePoint, out var mappedGlyph) &&
+                    mappedGlyph != item.GlyphIndex)
+                    AdditionalGlyphUnicodeMappings[item.GlyphIndex] = char.ConvertFromUtf32(item.CodePoint);
 #if true  // #PSGFX
                 if (!CodePointsToGlyphIndices.ContainsKey(item.CodePoint))
                 {
@@ -90,6 +114,10 @@ namespace PdfSharp.Fonts
         /// Used for ToUnicode table and /W entry.
         /// </summary>
         public readonly Dictionary<int, ushort> CodePointsToGlyphIndices = [];
+
+        internal readonly Dictionary<ushort, string> GlyphUnicodeSequences = [];
+
+        internal readonly Dictionary<ushort, string> AdditionalGlyphUnicodeMappings = [];
 
         /// <summary>
         /// Collects all used glyph IDs. Value is now used by PDFsharp Graphics where it is possible

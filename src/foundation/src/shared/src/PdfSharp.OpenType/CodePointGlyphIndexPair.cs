@@ -20,6 +20,12 @@ namespace PdfSharp.Internal.OpenType
         /// The value is 0 if the specific font has no glyph for the code point.
         /// </summary>
         public ushort GlyphIndex = glyphIndex;
+
+        /// <summary>
+        /// Optional Unicode text represented by this glyph in a PDF ToUnicode map.
+        /// Setting this value selects Type0 encoding for the text run.
+        /// </summary>
+        public string? UnicodeText;
     }
 
     /// <summary>
