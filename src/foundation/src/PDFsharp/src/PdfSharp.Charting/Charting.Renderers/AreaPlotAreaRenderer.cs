@@ -2,6 +2,9 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
+#if PSGFX
+using PdfSharp.Graphics.Media.MatrixExtensions;
+#endif
 
 namespace PdfSharp.Charting.Renderers
 {
@@ -39,16 +42,16 @@ namespace PdfSharp.Charting.Renderers
                 {
                     int count = sri.Series.Elements.Count;
                     var points = new XPoint[count + 2];
-                    points[0] = new XPoint(xMajorTick / 2, 0);
+                    points[0] = new XPoint((float_)(xMajorTick / 2), 0);
                     for (int idx = 0; idx < count; idx++)
                     {
                         double pointValue = sri.Series.Elements[idx].Value;
                         if (Double.IsNaN(pointValue))
                             pointValue = 0;
-                        points[idx + 1] = new XPoint(idx + xMajorTick / 2, pointValue);
+                        points[idx + 1] = new XPoint((float_)(idx + xMajorTick / 2), (float_)pointValue);
                     }
 
-                    points[count + 1] = new XPoint(count - 1 + xMajorTick / 2, 0);
+                    points[count + 1] = new XPoint((float_)(count - 1 + xMajorTick / 2), 0);
                     matrix.TransformPoints(points);
                     gfx.DrawPolygon(sri.LineFormat, sri.FillFormat, points, XFillMode.Winding);
                 }

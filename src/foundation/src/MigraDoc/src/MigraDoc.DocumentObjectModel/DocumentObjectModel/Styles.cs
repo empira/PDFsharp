@@ -428,7 +428,7 @@ namespace MigraDoc.DocumentObjectModel
                 fSerialized[0] = true;                       // consider DefaultParagraphFont as serialized
                 bool[] fSerializePending = new bool[count];  // currently serializing
                 bool newLine = false;  // gets true if at least one style was written
-                                       //Start from 1 and do not serialize DefaultParagraphFont
+                                       // Start from 1 and do not serialize DefaultParagraphFont
                 for (int index = 1; index < count; index++)
                 {
                     if (!fSerialized[index])

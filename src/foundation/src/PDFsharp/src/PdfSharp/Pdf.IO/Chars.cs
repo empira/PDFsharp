@@ -49,6 +49,7 @@ namespace PdfSharp.Pdf.IO
         /// The horizontal tab character.
         /// </summary>
         public const char HT = '\t';   // Horizontal tab
+
         /// <summary>
         /// The vertical tab character.
         /// </summary>

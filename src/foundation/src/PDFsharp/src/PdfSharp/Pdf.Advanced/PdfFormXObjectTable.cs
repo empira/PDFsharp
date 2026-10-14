@@ -69,15 +69,15 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         /// <summary>
-        /// Gets the imported object table.
+        /// Gets the imported object table of the specified page.
         /// </summary>
         public PdfImportedObjectTable GetImportedObjectTable(PdfPage page)
         {
             // Is the external PDF file from which is imported already known for the current document?
-            Selector selector = new Selector(page);
+            var selector = new Selector(page);
             if (!_forms.TryGetValue(selector, out var importedObjectTable))
             {
-                importedObjectTable = new PdfImportedObjectTable(Owner, page.Owner);
+                importedObjectTable = new(Owner, page.Owner);
                 _forms[selector] = importedObjectTable;
             }
             return importedObjectTable;

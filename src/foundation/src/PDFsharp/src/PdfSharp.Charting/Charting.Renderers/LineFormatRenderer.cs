@@ -33,7 +33,7 @@ namespace PdfSharp.Charting.Renderers
             //if (visible)
             if (visible && lineFormat != null)
             {
-                _pen = new XPen(lineFormat.Color, width)
+                _pen = new XPen(lineFormat.Color,(float_) width)
                 {
                     DashStyle = lineFormat.DashStyle
                 };

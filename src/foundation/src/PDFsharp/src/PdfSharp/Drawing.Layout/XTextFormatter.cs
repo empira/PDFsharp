@@ -1,8 +1,6 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Collections.Generic;
 using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Drawing.Layout
@@ -10,7 +8,7 @@ namespace PdfSharp.Drawing.Layout
     /// <summary>
     /// Represents a very simple text formatter.
     /// If this class does not satisfy your needs on formatting paragraphs, I recommend taking a look
-    /// at MigraDoc Foundation. Alternatively, you should copy this class in your own source code and modify it.
+    /// at MigraDoc. Alternatively, you should copy this class in your own source code and modify it.
     /// </summary>
     public class XTextFormatter
     {
@@ -167,7 +165,7 @@ namespace PdfSharp.Drawing.Layout
                     blockLength = 0;
                     _blocks.Add(new Block(BlockType.LineBreak));
                 }
-                // The non-breaking space is whitespace, so we treat it like non-whitespace.
+                // The non-breaking space is whitespace, so we treat it like non-white-space.
                 else if (ch != Chars.NonBreakableSpace && Char.IsWhiteSpace(ch))
                 {
                     if (inNonWhiteSpace)

@@ -17,6 +17,14 @@ namespace PdfSharp.Pdf.Advanced
         { }
 
         /// <summary>
+        /// Initializes a new instance from an existing dictionary.
+        /// Used for object type transformation.
+        /// </summary>
+        protected PdfXObject(PdfDictionary dict)
+            : base(dict)
+        { }
+
+        /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
         public class Keys : PdfStream.Keys

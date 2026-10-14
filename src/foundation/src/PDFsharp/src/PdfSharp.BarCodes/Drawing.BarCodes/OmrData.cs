@@ -9,7 +9,7 @@ namespace PdfSharp.Drawing.BarCodes
     /// </summary>
     class OmrData
     {
-        private OmrData()
+        OmrData()
         { }
 
         public static OmrData ForTesting
@@ -48,7 +48,7 @@ namespace PdfSharp.Drawing.BarCodes
         /// Adds a mark description by name.
         /// </summary>
         /// <param name="name">The name to for setting or unsetting the mark.</param>
-        private void AddMarkDescription(string name)
+        void AddMarkDescription(string name)
         {
             if (_marksInitialized)
                 throw new InvalidOperationException(BcgSR.OmrAlreadyInitialized);
@@ -57,7 +57,7 @@ namespace PdfSharp.Drawing.BarCodes
             ++AddedDescriptions;
         }
 
-        private void InitMarks()
+        void InitMarks()
         {
             if (AddedDescriptions == 0)
                 throw new InvalidOperationException();
@@ -67,7 +67,7 @@ namespace PdfSharp.Drawing.BarCodes
             _marksInitialized = true;
         }
 
-        private int FindIndex(string name)
+        int FindIndex(string name)
         {
             if (!_marksInitialized)
                 InitMarks();

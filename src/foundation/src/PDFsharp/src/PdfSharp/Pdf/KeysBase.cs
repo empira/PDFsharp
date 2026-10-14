@@ -10,7 +10,10 @@ namespace PdfSharp.Pdf
     /// </summary>
     public class KeysBase
     {
-        internal static DictionaryMeta CreateMeta([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] Type type) => new(type);
+        internal static DictionaryMeta CreateMeta(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
+            Type type)
+                => new(type);
 
         /// <summary>
         /// Creates the DictionaryMeta with the specified default type to return in DictionaryElements.GetValue
@@ -19,7 +22,12 @@ namespace PdfSharp.Pdf
         /// <param name="type">The type.</param>
         /// <param name="defaultContentKeyType">Default type of the content key.</param>
         /// <param name="defaultContentType">Default type of the content.</param>
-        internal static DictionaryMeta CreateMeta([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)] Type type, KeyType defaultContentKeyType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type defaultContentType) 
-            => new(type, defaultContentKeyType, defaultContentType);
+        internal static DictionaryMeta CreateMeta(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
+            Type type,
+            KeyType defaultContentKeyType,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            Type defaultContentType)
+                => new(type, defaultContentKeyType, defaultContentType);
     }
 }

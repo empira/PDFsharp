@@ -1,15 +1,18 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using PdfSharp.Events;
 using PdfSharp.Pdf;
+using PdfSharp.Internal;
+#if PSXGRA
 using PdfSharp.Drawing;
+#endif
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Visitors;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.DocumentObjectModel.Tables;
+using PdfSharp.Drawing;
 
 namespace MigraDoc.Rendering
 {
@@ -37,9 +40,11 @@ namespace MigraDoc.Rendering
             _previousListNumbers[ListType.NumberList2] = 0;
             _previousListNumbers[ListType.NumberList3] = 0;
             _formattedDocument = new FormattedDocument(_document, this);
-
+#if PSGFX
+            var gfx = (XGraphics)null!;  //XGraphics.CreateMeasureContext(new XSize(2000, 2000), XGraphicsUnit.Point, XPageDirection.Downwards, renderEvents);
+#else
             var gfx = XGraphics.CreateMeasureContext(new XSize(2000, 2000), XGraphicsUnit.Point, XPageDirection.Downwards, renderEvents);
-
+#endif
             _previousListInfo = null;
             _formattedDocument.Format(gfx);
         }
@@ -95,7 +100,7 @@ namespace MigraDoc.Rendering
 
             var fieldInfos = _formattedDocument.GetFieldInfos(page);
 
-            fieldInfos.Date = PrintDate != DateTime.MinValue ? PrintDate : DateTime.Now;
+            fieldInfos.Date = PrintDate ?? DateTimeOffset.Now;
 
             if ((options & PageRenderOptions.RenderHeader) == PageRenderOptions.RenderHeader)
                 RenderHeader(gfx, page);
@@ -163,7 +168,7 @@ namespace MigraDoc.Rendering
                 throw new ArgumentException(MdPdfMsgs.ObjectNotRenderable(documentObject.GetType().Name).Message);
 
             var renderer = Renderer.Create(graphics, this, documentObject, null);
-            renderer!.Format(new Rectangle(xPosition, yPosition, width, double.MaxValue), null);
+            renderer!.Format(new Rectangle(xPosition, yPosition, width, Single.MaxValue), null);
 
             RenderInfo renderInfo = renderer.RenderInfo;
             renderInfo.LayoutInfo.ContentArea.X = xPosition;
@@ -299,7 +304,7 @@ namespace MigraDoc.Rendering
         /// <summary>
         /// Gets or sets the print date, i.e. the rendering date.
         /// </summary>
-        public DateTime PrintDate { get; set; } = DateTime.MinValue;
+        public DateTimeOffset? PrintDate { get; set; } = null;  // TODO: Breaking change, is now 'DateTimeOffset?'.
 
         internal PredefinedFontsAndChars FontsAndChars => _fontsAndChars ??= new ();
         PredefinedFontsAndChars? _fontsAndChars;
@@ -320,12 +325,17 @@ namespace MigraDoc.Rendering
             {
                 try
                 {
+#if PSGFX
+                    //return new(familyName, emSize, style);
+                    return null!;
+#else
                     return new(familyName, emSize, style);
+#endif
                 }
                 catch (Exception ex)
                 {
                     throw new InvalidOperationException(
-                        $"The font '{familyName}' cannot be resolved for {propertyDescription}. Use another font name or fix your font resolver.", ex);
+                        $"The font '{familyName}' cannot be resolved for {propertyDescription}. Use another font name or fix your font resolver. See {UrlLiterals.LinkToMigraDocFontResolving} and {UrlLiterals.LinkToFontResolving} for further information.", ex);
                 }
             }
 

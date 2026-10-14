@@ -12,7 +12,13 @@ namespace MigraDoc.Rendering.ChartMapper
         void MapObject(FillFormat fillFormat, DocumentObjectModel.Shapes.FillFormat domFillFormat)
         {
             if (domFillFormat.Color.IsEmpty)
+            {
+#if PSGFX
+                fillFormat.Color = PdfSharp.Graphics.Color.FromArgb(0, 0, 0, 0);
+#else
                 fillFormat.Color = XColor.Empty;
+#endif
+            }
             else
             {
 #if noCMYK

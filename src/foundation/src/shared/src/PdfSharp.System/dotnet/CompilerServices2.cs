@@ -1,0 +1,99 @@
+// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
+
+// This file contains code from the .NET source to use some newer C# features in .NET Standard / Framework.
+// All classes are internal, i.e. using PDFsharp packages does not make this functionality visible in
+// your projects.
+
+#pragma warning disable IDE0130 // Namespace does not match folder structure
+namespace System.Runtime.CompilerServices
+#pragma warning restore IDE0130 // Namespace does not match folder structure
+{
+#if false //!NET8_0_OR_GREATER
+    /// <summary>
+    /// Extension method GetSubArray required for the built-in range operator (e.g.'[1..9]').
+    /// Fun fact: This class must be compiled into each assembly. If it is only visible through
+    /// InternalsVisibleTo code will not compile with .NET Framework 4.6.2 and .NET Standard 2.0.
+    /// </summary>
+    /*public*/
+    static class RuntimeHelpers xxx
+    {
+        /// <summary>
+        /// Slices the specified array using the specified range.
+        /// </summary>
+        public static T[] GetSubArray<T>(T[] array, Range range)
+        {
+            if (array == null)
+                throw new ArgumentNullException(nameof(array));
+
+            (int offset, int length) = range.GetOffsetAndLength(array.Length);
+
+            if (default(T) != null || typeof(T[]) == array.GetType())
+            {
+                // We know the type of the array to be exactly T[].
+                if (length == 0)
+                    return [];
+
+                var dest = new T[length];
+                Array.Copy(array, offset, dest, 0, length);
+                return dest;
+            }
+            else
+            {
+                // The array is actually a U[] where U:T.
+                var dest = (T[])Array.CreateInstance(array.GetType().GetElementType()!, length);
+                Array.Copy(array, offset, dest, 0, length);
+                return dest;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Specifies that a type has required members or that a member is required.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Field | AttributeTargets.Property,
+        AllowMultiple = false, Inherited = false)]
+    [Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+    internal sealed class RequiredMemberAttribute : global::System.Attribute
+    {
+        public RequiredMemberAttribute() { }
+    }
+
+    /// <summary>
+    /// Indicates that compiler support for a particular feature is required for the location where this attribute is applied.
+    /// </summary>
+    [AttributeUsage(global::System.AttributeTargets.All, AllowMultiple = true, Inherited = false)]
+    [Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+    internal sealed class CompilerFeatureRequiredAttribute : global::System.Attribute
+    {
+        /// <summary>
+        /// Creates a new instance of the <see cref="global::System.Runtime.CompilerServices.CompilerFeatureRequiredAttribute"/> type.
+        /// </summary>
+        /// <param name="featureName">The name of the feature to indicate.</param>
+        public CompilerFeatureRequiredAttribute(string featureName)
+        {
+            FeatureName = featureName;
+        }
+
+        /// <summary>
+        /// The name of the compiler feature.
+        /// </summary>
+        public string FeatureName { get; }
+
+        /// <summary>
+        /// If true, the compiler can choose to allow access to the location where this attribute is applied if it does not understand <see cref="FeatureName"/>.
+        /// </summary>
+        public bool IsOptional { get; set; }
+
+        /// <summary>
+        /// The <see cref="FeatureName"/> used for the ref structs C# feature.
+        /// </summary>
+        public const string RefStructs = nameof(RefStructs);
+
+        /// <summary>
+        /// The <see cref="FeatureName"/> used for the required members C# feature.
+        /// </summary>
+        public const string RequiredMembers = nameof(RequiredMembers);
+    }
+#endif
+}

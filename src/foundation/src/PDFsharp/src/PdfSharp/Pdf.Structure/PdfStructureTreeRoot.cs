@@ -28,6 +28,16 @@ namespace PdfSharp.Pdf.Structure
             Elements.SetName(Keys.Type, "/StructTreeRoot");
         }
 
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfStructureTreeRoot(PdfDictionary dict)
+            : base(dict)
+        {
+            Elements.SetName(Keys.Type, "/StructTreeRoot");
+        }
+
         internal override void PrepareForSave()
         {
             foreach (var k in PdfStructureElement.GetKids(Elements))
@@ -71,7 +81,7 @@ namespace PdfSharp.Pdf.Structure
             /// Each integer key in the number tree corresponds to a single page of the
             /// document or to an individual object (such as an annotation or an XObject)
             /// that is a content item in its own right. The integer key is given as the
-            /// value of the StructParent or StructParents entry in that object.
+            /// value of the ParentInfo or StructParents entry in that object.
             /// The form of the associated value depends on the nature of the object:
             ///     • For an object that is a content item in its own right, the value is an
             ///       indirect reference to the object’s parent element (the structure element

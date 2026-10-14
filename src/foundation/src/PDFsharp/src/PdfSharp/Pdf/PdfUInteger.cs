@@ -1,6 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+#if false // DELETE 2025-12-31 - PDF has no explicit unsigned number type.
+
 using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Pdf
@@ -71,12 +73,12 @@ namespace PdfSharp.Pdf
         public double ToDouble(IFormatProvider? provider) => Value;
 
         /// <summary>
-        /// Returns an undefined DateTime structure.
+        /// Returns an undefined Date/Time structure.
         /// </summary>
-        public DateTime ToDateTime(IFormatProvider? provider)
+        public Date/Time ToDateTime(IFormatProvider? provider)
         {
             // TODO_OLD:  Add PdfUInteger.ToDateTime implementation
-            return new DateTime();
+            return new Date/Time();
         }
 
         /// <summary>
@@ -85,7 +87,7 @@ namespace PdfSharp.Pdf
         public float ToSingle(IFormatProvider? provider) => Value;
 
         /// <summary>
-        /// Converts the value of this instance to an equivalent Boolean value.
+        /// Converts the value of this instance to an equivalent boolean value.
         /// </summary>
         public bool ToBoolean(IFormatProvider? provider)
             => Convert.ToBoolean(Value);
@@ -160,3 +162,4 @@ namespace PdfSharp.Pdf
         #endregion
     }
 }
+#endif

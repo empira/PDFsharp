@@ -106,7 +106,7 @@ namespace PdfSharp.Fonts
 
         public byte[]? GetFont(string faceName)
         {
-            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract because it can be null.
+            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract because it can yet be null.
             _fontsPath ??= Capabilities.OperatingSystem.IsWindows
                 ? WindowsFontsPath
                 : WindowsFontsPathUnderWsl2;

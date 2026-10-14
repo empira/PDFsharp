@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_Tests_Exe)</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="TestResults\**" />
+    <EmbeddedResource Remove="TestResults\**" />
+    <None Remove="TestResults\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\PdfSharp.OpenType\PdfSharp.OpenType.csproj" />
+    <ProjectReference Include="..\..\src\PdfSharp.Quality\PdfSharp.Quality.csproj" />
+    <ProjectReference Include="..\..\src\PdfSharp.System\PdfSharp.System.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="FontSources\" />
+    <Folder Include="GlyphTypefaces\" />
+    <Folder Include="FontFamilies\" />
+  </ItemGroup>
+
+</Project>

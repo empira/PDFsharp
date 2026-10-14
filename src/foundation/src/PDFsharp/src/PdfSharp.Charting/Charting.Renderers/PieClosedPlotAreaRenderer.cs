@@ -45,10 +45,10 @@ namespace PdfSharp.Charting.Renderers
             XRect pieRect = cri.PlotAreaRendererInfo.Rect;
             if (textMeasure != 0)
             {
-                pieRect.X += textMeasure;
-                pieRect.Y += textMeasure;
-                pieRect.Width -= 2 * textMeasure;
-                pieRect.Height -= 2 * textMeasure;
+                pieRect.X += (float_)textMeasure;
+                pieRect.Y += (float_)textMeasure;
+                pieRect.Width -= (float_)(2 * textMeasure);
+                pieRect.Height -= (float_)(2 * textMeasure);
             }
 
             double startAngle = 270;

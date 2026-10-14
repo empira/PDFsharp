@@ -51,7 +51,6 @@ namespace PdfSharp.Pdf.Security.Encryption
                                           "If PDFsharp will load the file and the contents seem to be correct, the file is at least partly not encrypted as expected.");
                 return true;
             }
-
             return false;
         }
 
@@ -71,9 +70,9 @@ namespace PdfSharp.Pdf.Security.Encryption
 
         public int? RevisionValue { get; protected set; }
 
-        public int? LengthValue { get; protected set; }
-
-        public int? ActualLength { get; protected set; }
+        // Due to PDF reference length has not always to be set. But the adobe powered PDF viewer extension for edge cannot open files correctly, if length is missing.
+        // So we always output a length value.
+        public int LengthValue { get; protected set; }
 
         public bool EncryptMetadata { get; protected set; }
     }

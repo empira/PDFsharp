@@ -30,6 +30,17 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfShadingPattern(PdfDictionary dict)
+            : base(dict)
+        {
+            Elements.SetName(Keys.Type, "/Pattern");
+            Elements[Keys.PatternType] = new PdfInteger(2);
+        }
+
+        /// <summary>
         /// Setups the shading pattern from the specified brush.
         /// </summary>
         internal void SetupFromBrush(XLinearGradientBrush brush, XMatrix matrix, XGraphicsPdfRenderer renderer)
@@ -37,7 +48,8 @@ namespace PdfSharp.Pdf.Advanced
             if (brush == null)
                 throw new ArgumentNullException(nameof(brush));
 
-            PdfShading shading = new PdfShading(_document);
+            Debug.Assert(ReferenceEquals(_document2, Document));
+            PdfShading shading = new PdfShading(Document);
             shading.SetupFromBrush(brush, renderer);
             Elements[Keys.Shading] = shading;
             //Elements[Keys.Matrix] = new PdfLiteral("[" + PdfEncoders.ToString(matrix) + "]");
@@ -89,7 +101,6 @@ namespace PdfSharp.Pdf.Advanced
             /// Gets the KeysMeta for these keys.
             /// </summary>
             internal static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
-
             static DictionaryMeta? _meta;
         }
 

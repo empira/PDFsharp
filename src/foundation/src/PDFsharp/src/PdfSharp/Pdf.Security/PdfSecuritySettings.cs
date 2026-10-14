@@ -1,6 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Internal;
+
 namespace PdfSharp.Pdf.Security
 {
     /// <summary>
@@ -16,17 +18,10 @@ namespace PdfSharp.Pdf.Security
         readonly PdfDocument _document;
 
         /// <summary>
-        /// Indicates whether the granted access to the document is 'owner permission'. Returns true if the document 
-        /// is unprotected or was opened with the owner password. Returns false if the document was opened with the
-        /// user password.
+        /// Indicates whether the document is opened with full permission.
+        /// Returns true unless an owner password secured document was opened with the user password.
         /// </summary>
-        public bool HasOwnerPermissions
-        {
-            internal get => _hasOwnerPermissions;
-            set => _hasOwnerPermissions = value;
-        }
-        /*internal*/
-        bool _hasOwnerPermissions = true;
+        public bool HasFullPermission { get; internal set; } = true;
 
         /// <summary>
         /// Sets the user password of the document. Setting a password automatically sets the
@@ -62,6 +57,9 @@ namespace PdfSharp.Pdf.Security
 
             if (effectiveSecurityHandler != null)
             {
+                if (effectiveSecurityHandler.DoNotResetEncryption)
+                    return true;
+
                 if (String.IsNullOrEmpty(effectiveSecurityHandler.UserPassword) && String.IsNullOrEmpty(effectiveSecurityHandler.OwnerPassword))
                 {
                     message = PsMsgs.UserOrOwnerPasswordRequired;

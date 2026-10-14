@@ -1,0 +1,37 @@
+﻿{ // Hard coded version information
+  "UseThisInformation": 0,
+  "MajorMinorPatch": "6.4.0",
+  "BranchName": "release/6.4.0"
+  // "SemVer": "6.9.100",
+  // "InformationalVersion": "6.3.0-dev-factur-x0171",
+
+  //"PreReleaseLabel": "preview-2",
+  //"PreReleaseNumber": 3456
+
+  //"Major": 6,
+  //"Minor": 9,
+  //"Patch": 100,
+  //"PreReleaseTagWithDash": "",
+  //"PreReleaseLabelWithDash": "",
+  //"WeightedPreReleaseNumber": 0,
+  //"BuildMetaData": null,
+  //"BuildMetaDataPadded": "",
+  //"FullBuildMetaData": "",
+  //"LegacySemVer": "6.3.0-dev-factur-x171",
+  //"LegacySemVerPadded": "6.3.0-dev-factur-x0171",
+  //"AssemblySemVer": "6.3.0.0",
+  //"AssemblySemFileVer": "6.3.0.7443",
+  //"FullSemVer": "6.3.0-dev-factur-x.171",
+  //"EscapedBranchName": "feature-factur-x",
+  //"Sha": "a8e9a5dd283153ef472b755ee392651d8c6e9c99",
+  //"ShortSha": "a8e9a5d",
+  //"NuGetVersionV2": "6.3.0-dev-factur-x0171",
+  //"NuGetVersion": "6.3.0-dev-factur-x0171",
+  //"NuGetPreReleaseTagV2": "dev-factur-x0171",
+  //"NuGetPreReleaseTag": "dev-factur-x0171",
+  //"VersionSourceSha": "6b44fd61bb92647043c2f851bc44be1092480c0d",
+  // "CommitsSinceVersionSource": 0
+  //"CommitsSinceVersionSourcePadded": "0171",
+  //"UncommittedChanges": 2
+  //"CommitDate": "2025-06-07"
+}

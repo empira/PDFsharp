@@ -53,7 +53,7 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         public static string ExtractPageNumber(string path, out int pageNumber)
         {
-            // Note: duplicated from class XPdfForm.
+            // This code is duplicated from class XPdfForm.
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
 

@@ -12,6 +12,14 @@ namespace PdfSharp.Pdf
             : base(document)
         { }
 
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfViewerPreferences(PdfDictionary dict)
+            : base(dict)
+        { }
+
         ///// <summary>
         ///// Initializes a new instance of the <see cref="PdfViewerPreferences"/> class.
         ///// </summary>
@@ -21,7 +29,7 @@ namespace PdfSharp.Pdf
 
         /// <summary>
         /// Gets or sets a value indicating whether to hide the viewer application’s
-        /// tool bars when the document is active.
+        /// toolbars when the document is active.
         /// </summary>
         public bool HideToolbar
         {
@@ -123,7 +131,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
-        internal sealed class Keys : KeysBase
+        public sealed class Keys : KeysBase
         {
             /// <summary>
             /// (Optional) A flag specifying whether to hide the viewer application’s tool
@@ -261,7 +269,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Gets the KeysMeta for these keys.
             /// </summary>
-            public static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
+            internal static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
 
             static DictionaryMeta? _meta;
         }

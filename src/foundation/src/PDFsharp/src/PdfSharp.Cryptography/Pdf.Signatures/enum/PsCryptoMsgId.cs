@@ -10,7 +10,7 @@ namespace PdfSharp.Pdf.Signatures
     /// </summary>
     // GPT 4 recommends to use Crypto instead of Cry as abbreviation,
     // because Cry is too ambiguous.
-    enum PsCryptoMsgId
+    internal enum PsCryptoMsgId
     {
         None = 0,
 

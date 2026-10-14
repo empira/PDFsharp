@@ -10,6 +10,7 @@ using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Fields;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.Rendering;
+using PdfSharp.Pdf.PdfA;
 
 // For clarity, we do not use var keyword.
 // ReSharper disable SuggestVarOrType_SimpleTypes
@@ -49,14 +50,15 @@ namespace HelloWorld
             };
 
             PdfDocument pdfDocument = pdfRenderer.PdfDocument;
+            PdfAManager.ForDocument(pdfDocument).SetFormat(PdfAFormats.PdfA_3a);
 
             // Layout and render document to PDF.
             pdfRenderer.RenderDocument();
 
-            // Save the document...
-            var fullName = PdfFileUtility.GetTempPdfFullFileName("MigraDocSamples/HelloWorld/HelloWorld" + Capabilities.Build.BuildTag);
+            // Save the document…
+            var fullName = PdfFileUtility.GetTempPdfFullFileName("samples/MigraDoc/HelloWorld/HelloWorld" + Capabilities.Build.BuildTag);
             pdfRenderer.PdfDocument.Save(fullName);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocument(fullName);
         }
 

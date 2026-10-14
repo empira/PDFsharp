@@ -150,7 +150,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         {
             //   StyleName [: BaseStyleName]
             //   {
-            //     ...
+            //     …
             //   }
             Style? style = null;
             try
@@ -276,7 +276,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             ReadMoreContent:
                 // If a section contains only one paragraph, the paragraph keyword is omitted in MDDDL and the paragraph content is directly inserted into the section.
                 // The IsParagraphContent() check has to be made, before moving to the next token by ReadCode().
-                if (IsParagraphContent()) 
+                if (IsParagraphContent())
                 {
                     // Paragraph content was inserted directly into the section.
                     var paragraph = section.Elements.AddParagraph();
@@ -430,12 +430,12 @@ namespace MigraDoc.DocumentObjectModel.IO
             // All section content will be treated as paragraph content.
             //
             // but this is ambiguous:
-            //   \section { \image(...) }
+            //   \section { \image(…) }
             // It could be an image inside a paragraph or at the section level.
             // In this case it will be treated as an image on section level.
             //
             // If this is not your intention it must be like this:
-            //   \section { \paragraph { \image(...) } }
+            //   \section { \paragraph { \image(…) } }
             //
 
             while (TokenType == TokenType.KeyWord)
@@ -728,7 +728,7 @@ namespace MigraDoc.DocumentObjectModel.IO
 
             EnsureSymbol(Symbol.ParenLeft);
             ReadCode();
-            //NYI: Check token for correct Unit format
+            // NYI: Check token for correct Unit format
             formattedText.Font.Size = Token;
             ReadCode();
             EnsureSymbol(Symbol.ParenRight);
@@ -960,7 +960,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             ReadCode();
 
             Hyperlink hyperlink = elements.AddHyperlink("");
-            //NYI: Without name and type the hyperlink is senseless, so attributes need to be checked
+            // NYI: Without name and type the hyperlink is senseless, so attributes need to be checked
             if (Symbol == Symbol.BracketLeft)
                 ParseAttributes(hyperlink);
 
@@ -1254,9 +1254,9 @@ namespace MigraDoc.DocumentObjectModel.IO
         {
             // Future syntax by example
             //   \image("Name")
-            //   \image("Name")[...]
-            //   \image{base64...}       //NYI
-            //   \image[...]{base64...}  //NYI
+            //   \image("Name")[…]
+            //   \image{base64…}       // NYI
+            //   \image[…]{base64…}  // NYI
             Debug.Assert(image != null);
 
             try
@@ -1903,7 +1903,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                 switch (Symbol)
                 {
                     case Symbol.Assign:
-                        //DomValueDescriptor is needed from assignment routine.
+                        // DomValueDescriptor is needed from assignment routine.
                         var pvd = doc.Meta[valueName];
                         EnsureCondition(pvd != null, () => MdDomMsgs.InvalidValueName(valueName));
                         ParseAssign(doc, pvd);
@@ -1920,33 +1920,30 @@ namespace MigraDoc.DocumentObjectModel.IO
                         ParagraphFormat paragraphFormat = (ParagraphFormat)doc;
                         TabStops tabStops = paragraphFormat.TabStops;
 
-                        if (true) // HACK_OLD in ParseAttributeStatement       // BUG_OLD THHO4STLA Already existed in 2019.
+                        bool fAddItem = Symbol == Symbol.PlusAssign;
+                        var tabStop = new TabStop();
+
+                        ReadCode();
+
+                        if (Symbol == Symbol.BraceLeft)
                         {
-                            bool fAddItem = Symbol == Symbol.PlusAssign;
-                            var tabStop = new TabStop();
+                            ParseAttributeBlock(tabStop);
+                        }
+                        else if (Symbol is Symbol.StringLiteral or Symbol.RealLiteral or Symbol.IntegerLiteral)
+                        {
+                            // Special hack for tab stops...
+                            Unit unit = Token;
+                            tabStop.SetValue("Position", unit);
 
                             ReadCode();
-
-                            if (Symbol == Symbol.BraceLeft)
-                            {
-                                ParseAttributeBlock(tabStop);
-                            }
-                            else if (Symbol is Symbol.StringLiteral or Symbol.RealLiteral or Symbol.IntegerLiteral)
-                            {
-                                // Special hack for tab stops...
-                                Unit unit = Token;
-                                tabStop.SetValue("Position", unit);
-
-                                ReadCode();
-                            }
-                            else
-                                ThrowParserException(MdDomMsgs.UnexpectedSymbol(Token));
-
-                            if (fAddItem)
-                                tabStops.AddTabStop(tabStop);
-                            else
-                                tabStops.RemoveTabStop(tabStop.Position);
                         }
+                        else
+                            ThrowParserException(MdDomMsgs.UnexpectedSymbol(Token));
+
+                        if (fAddItem)
+                            tabStops.AddTabStop(tabStop);
+                        else
+                            tabStops.RemoveTabStop(tabStop.Position);
                         break;
 
                     case Symbol.BraceLeft:
@@ -2609,7 +2606,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                 switch (Symbol)
                 {
                     case Symbol.Assign:
-                        //read one more symbol
+                        // Read one more symbol.
                         ReadCode();
                         break;
 

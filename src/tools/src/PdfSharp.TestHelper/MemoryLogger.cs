@@ -42,7 +42,7 @@ namespace PdfSharp.TestHelper
         /// </summary>
         public void Clear() => _logEntries.Clear();
 
-        public Boolean IsEnabled(LogLevel logLevel)
+        public bool IsEnabled(LogLevel logLevel)
         {
             var level = _config.LogLevel;
             return level != LogLevel.None && logLevel >= level;

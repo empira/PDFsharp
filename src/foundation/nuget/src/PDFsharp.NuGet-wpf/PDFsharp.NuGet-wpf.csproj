@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0-windows;net8.0-windows;net462</TargetFrameworks>
+    <TargetFrameworks>$(PDFsharpTargetFrameworks_NuGet_Window)</TargetFrameworks>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
-    <NoBuild>true</NoBuild>
+    <!--<NoBuild>true</NoBuild>-->
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\StrongnameKey.snk</AssemblyOriginatorKeyFile>
@@ -12,8 +12,9 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <NuspecFile>$(MSBuildThisFileDirectory)$(MSBuildProjectName).nuspec</NuspecFile>
+    <NuspecFile>$(MSBuildThisFileDirectory)$(MSBuildProjectName)$(NuGetNuspecTag).nuspec</NuspecFile>
     <NuGetId>PDFsharp-WPF</NuGetId>
+    <NuGetId Condition=" '$(Configuration)'=='Debug' ">$(NuGetId)-DEBUG</NuGetId>
     <NuGetTitle>PDFsharp for Windows WPF apps</NuGetTitle>
     <NuGetDescription Condition=" '$(Configuration)'=='Debug' ">$(DebugBuildMessage)%0D$(NuGetDescription)</NuGetDescription>
     <NuGetSummary>A .NET library for processing PDF.</NuGetSummary>

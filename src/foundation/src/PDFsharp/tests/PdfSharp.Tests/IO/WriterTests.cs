@@ -22,7 +22,7 @@ namespace PdfSharp.Tests.IO
         {
             var testFile = IOUtility.GetAssetsPath("archives/samples-1.5/PDFs/SomeLayout.pdf")!;
 
-            var filename = PdfFileUtility.GetTempPdfFileName("ImportTest");
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/IO/ImportTest");
 
             var doc = PdfReader.Open(testFile, PdfDocumentOpenMode.Import);
 

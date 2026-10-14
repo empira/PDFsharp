@@ -22,7 +22,7 @@ namespace MigraDoc.DocumentObjectModel.Internals
 
         // What to log?
 
-        // Image not found (not loadable, not found, ...)
+        // Image not found (not loadable, not found, …)
         // Font not found under Linux (use Linux substitution)
         // Information/Trace-level for e.g. TabStop inheritance, style inheritance
         // Differences in RTF vs Word (decimal tab)

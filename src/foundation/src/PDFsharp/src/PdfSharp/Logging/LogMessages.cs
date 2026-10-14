@@ -9,7 +9,7 @@ using PdfSharp.Pdf;
 namespace PdfSharp.Logging
 {
     /// <summary>
-    /// Defines the logging event ids of PDFsharp.
+    /// Defines the logging event IDs of PDFsharp.
     /// </summary>
     public static class PdfSharpEventId  // draft...
     {

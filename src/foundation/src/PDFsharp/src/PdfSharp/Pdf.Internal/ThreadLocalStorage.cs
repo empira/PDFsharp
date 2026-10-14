@@ -88,7 +88,7 @@ namespace PdfSharp.Pdf.Internal
         /// <summary>
         /// Maps path to document handle.
         /// </summary>
-        private readonly Dictionary<string, PdfDocument.DocumentHandle> _importedDocuments = [];
+        readonly Dictionary<string, PdfDocument.DocumentHandle> _importedDocuments = [];
     }
 }
 #endif

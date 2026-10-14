@@ -112,9 +112,9 @@ function InitializeScript()
         exit
     }
 
-    Write-Host
-    Write-Host "Started run-tests for solution `"$script:Solution`"."
-    Write-Host
+    Write-Output ""
+    Write-Output "Started run-tests for solution `"$script:Solution`"."
+    Write-Output ""
 
     $script:TimeStart = Get-Date
     $script:ConsoleWidth = $Host.UI.RawUI.WindowSize.Width
@@ -167,43 +167,43 @@ function InitializeScript()
     }
 
     # Output current system information.
-    Write-Host
-    Write-Host "Started script in $script:SystemNameHost."
+    Write-Output ""
+    Write-Output "Started script in $script:SystemNameHost."
     if ($script:RunOnHostedWsl)
     {
-        Write-Host "Tests will be run on $script:SystemNameHost host and hosted $script:SystemNameCurrentLinux."
+        Write-Output "Tests will be run on $script:SystemNameHost host and hosted $script:SystemNameCurrentLinux."
     }
     else
     {
-        Write-Host "Tests will be run on $script:SystemNameHost host only."
+        Write-Output "Tests will be run on $script:SystemNameHost host only."
     }
-    Write-Host
+    Write-Output ""
 
     if ($script:Net6)
     {
-        Write-Host "NET6 Tests will be run instead of NET8."
-        Write-Host
+        Write-Output "NET6 Tests will be run instead of NET8."
+        Write-Output ""
     }
 
     if ($script:SkipBuild)
     {
-        Write-Host "Building solution in $script:Config build will be skipped."
-        Write-Host
+        Write-Output "Building solution in $script:Config build will be skipped."
+        Write-Output ""
     }
 
     if ($script:RunAllTests)
     {
         $env:PDFsharpTests = "runalltests"
         $script:EnvironmentForHostedWsl = "PDFsharpTests=runalltests"
-        Write-Host "Running all tests of solution."
+        Write-Output "Running all tests of solution."
     }
     else
     {
         $env:PDFsharpTests = $null
         $script:EnvironmentForHostedWsl = "PDFsharpTests=$null"
-        Write-Host "Skipping slow tests of solution."
+        Write-Output "Skipping slow tests of solution."
     }
-    Write-Host
+    Write-Output ""
 
     CheckNetRuntimes
 }
@@ -263,10 +263,10 @@ function BuildSolution()
         return
     }
 
-    Write-Host
-    Write-Host "Building solution in $script:Config build"
-    Write-Host ==================================================
-    Write-Host
+    Write-Output ""
+    Write-Output "Building solution in $script:Config build"
+    Write-Output ==================================================
+    Write-Output ""
 
     dotnet build $script:Solution -c $script:Config
     RestoreForegroundColor # The dotnet call may change the foreground color, e. g. when displaying test result exceptions.
@@ -276,10 +276,10 @@ function BuildSolution()
 # Loads DllInfo objects for all DLLs of the solution to run dotnet test for and saves the Windows and Linux specific lists.
 function LoadTestDllInfos()
 {
-    Write-Host
-    Write-Host "Analyzing Solution to find test DLLs"
-    Write-Host ==================================================
-    Write-Host
+    Write-Output ""
+    Write-Output "Analyzing Solution to find test DLLs"
+    Write-Output ==================================================
+    Write-Output ""
 
     $dllInfos = GetDllInfos
 
@@ -352,9 +352,9 @@ function OutputTestDlls($testDllInfos, $systemName)
 {
     $testDllsOutput = $testDllInfos | Select-Object -Property DllFileName, EnvironmentName, DllFolder
 
-    Write-Host "DLLs to test in $systemName found in `"$script:Solution`":"
-    Write-Host ----------------------------------------
-    Write-Host ($testDllsOutput | Format-Table | Out-String)
+    Write-Output "DLLs to test in $systemName found in `"$script:Solution`":"
+    Write-Output ----------------------------------------
+    Write-Output ($testDllsOutput | Format-Table | Out-String)
 }
 
 # Gets DllInfo objects for all DLLs of the solution.
@@ -543,9 +543,9 @@ function RunTests()
 # Runs dotnet test for all needed DLLs for the given $systemName.
 function RunTestsForSystem($testDllInfos, $systemName, $isHostedWsl)
 {
-    Write-Host
-    Write-Host Running tests on $systemName
-    Write-Host ==================================================
+    Write-Output ""
+    Write-Output Running tests on $systemName
+    Write-Output ==================================================
     foreach ($testDllInfo in $testDllInfos)
     {
         # Work with absolute DLL path here to avoid errors.
@@ -565,10 +565,10 @@ function RunTestsForSystem($testDllInfos, $systemName, $isHostedWsl)
 
         $TestResultsFilename = GetTestResultsFilename $testDllInfo.EnvironmentName
 
-        Write-Host
-        Write-Host ($systemName): dotnet test $testDllInfo.DllFileName ("(" + $testDllInfo.TargetFramework + ")")...
-        Write-Host ----------------------------------------
-        Write-Host
+        Write-Output ""
+        Write-Output ($systemName): dotnet test $testDllInfo.DllFileName ("(" + $testDllInfo.TargetFramework + ")")...
+        Write-Output ----------------------------------------
+        Write-Output ""
 
         # Change current location to store the trx file in the default "TestResults" folder inside the project folder.
         Push-Location $testDllInfo.ProjectFolder
@@ -590,8 +590,8 @@ function RunTestsForSystem($testDllInfos, $systemName, $isHostedWsl)
             Pop-Location
         }
     }
-    Write-Host
-    Write-Host
+    Write-Output ""
+    Write-Output ""
 }
 
 # Gets the name of the environment for the given system and framework.
@@ -662,10 +662,11 @@ function GetTestResultsFilename($environmentName)
 # Loads the trx files and displays the test results.
 function LoadAndShowTestResults()
 {
-    Write-Host
-    Write-Host
-    Write-Host "TestResults" -ForegroundColor Green # Green color is used to make it the same conspicuity like the given green Format-Table header output.
-    Write-Host "==================================================" -ForegroundColor Green
+    # TODO  -ForegroundColor Green # Green color is used to make it the same conspicuity like the given green Format-Table header output.
+    Write-Output ""
+    Write-Output ""
+    Write-Output "TestResults"
+    Write-Output "=================================================="
 
     if ($script:Net6)
     {
@@ -737,12 +738,13 @@ function LoadAndShowTestResults()
 
         $genericCodeBaseWithExtension = $genericCodeBaseInfo.GenericCodeBase + $genericCodeBaseInfo.GenericCodeBaseExtension
 
-        Write-Host
-        Write-Host
+        # TODO  -ForegroundColor Green # Green color is used to make it the same conspicuity like the given green Format-Table header output.
+        Write-Output ""
+        Write-Output ""
         $title = ("CodeBase:").PadRight($padValue + 1, ' ')
-        Write-Host $title $genericCodeBaseWithExtension -ForegroundColor Green # Green color is used to make it the same conspicuity like the given green Format-Table header output.
-        Write-Host "----------------------------------------------------------------------------------------------------" -ForegroundColor Green
-        Write-Host Test files:
+        Write-Output $title $genericCodeBaseWithExtension
+        Write-Output "----------------------------------------------------------------------------------------------------"
+        Write-Output Test files:
 
 
         $codeBaseResults = @() # Collects all results for this GenericCodeBase.
@@ -768,18 +770,18 @@ function LoadAndShowTestResults()
             # If the project is not targeting this environment.
             if ($notTargetingEnvironment)
             {
-                Write-Host $title Not implemented.
+                Write-Output $title Not implemented.
             }
             # If trx file is not found or outdated, output "No test results found" and continue loop.
             elseif ($testResultsFileExists -eq $false -or $testResultsFileOutdated)
             {
                 $testResultsFile = $null
-                Write-Host $title No test results found.
+                Write-Output $title No test results found.
             }
             # If trx file is found and from this test run, collect results from the file.
             else
             {
-                Write-Host $title $testResultsFile
+                Write-Output $title $testResultsFile
 
                 # Read trx content.
                 [xml]$fileContent = Get-Content -Path $testResultsFile
@@ -857,11 +859,12 @@ function LoadAndShowTestResults()
 
 
     # Add summary for all grouped test results.
-    Write-Host
-    Write-Host
-    Write-Host
-    Write-Host Summary -ForegroundColor Green # Green color is used to make it the same conspicuity like the given green Format-Table header output.
-    Write-Host "----------------------------------------------------------------------------------------------------" -ForegroundColor Green
+    # TODO  -ForegroundColor Green # Green color is used to make it the same conspicuity like the given green Format-Table header output.
+    Write-Output ""
+    Write-Output ""
+    Write-Output ""
+    Write-Output Summary
+    Write-Output "----------------------------------------------------------------------------------------------------"
 
     # Create test summary from grouped test results.
     $summary = CreateTestSummary $allGroupedResults $environmentNames

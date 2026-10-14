@@ -1,18 +1,26 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using Microsoft.Extensions.Logging;
+using PdfSharp.Logging;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
+using System;
+using System.Reflection;
+
+// ReSharper disable UnusedMember.Global  // TODO
+#pragma warning disable CS1591 // TODO_DOC: Missing XML comment for publicly visible type or member
 
 namespace PdfSharp.Pdf
 {
     /// <summary>
-    /// Represents a name tree node.
+    /// Represents a node in a name tree.
     /// </summary>
     [DebuggerDisplay("({" + nameof(DebuggerDisplay) + "})")]
-    public sealed class PdfNameTreeNode : PdfDictionary
+    public class PdfNameTreeNode : PdfDictionary
     {
-        // Reference: 3.8.5  Name Trees / Page 161
+        // Reference 1.7: 3.8.5  Name Trees / Page 161
+        // Reference 2.0: 7.9.6  Name trees / Page 119
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfNameTreeNode"/> class.
@@ -21,9 +29,10 @@ namespace PdfSharp.Pdf
         { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PdfNameTreeNode"/> class.
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
         /// </summary>
-        public PdfNameTreeNode(PdfDictionary dict)
+        internal PdfNameTreeNode(PdfDictionary dict)
             : base(dict)
         {
             Initialize();
@@ -37,9 +46,37 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Gets a value indicating whether this instance is a root node.
         /// </summary>
-        public bool IsRoot
+        public bool IsRoot => Parent == null;
+
+        public bool IsLeaf => Parent != null && Kids == null;
+
+        public bool IsIntermediate => Parent != null && Kids != null;
+
+        public PdfNameTreeKids? Kids
         {
-            get => Parent == null;
+            get
+            {
+                var kids = Elements.GetValue<PdfNameTreeKids>(Keys.Kids);
+                return kids;
+            }
+        }
+
+        public PdfNameTreeNames? Names
+        {
+            get
+            {
+                var names = Elements.GetValue<PdfNameTreeNames>(Keys.Names);
+                return names;
+            }
+        }
+
+        public PdfNameTreeLimits? Limits
+        {
+            get
+            {
+                var limits = Elements.GetValue<PdfNameTreeLimits>(Keys.Limits);
+                return limits;
+            }
         }
 
         /// <summary>
@@ -62,7 +99,7 @@ namespace PdfSharp.Pdf
             get
             {
                 var names = Elements.GetArray(Keys.Names);
-                // Entries are key / value pairs, so divide by 2.
+                // Entries are key-value pairs, so divide by 2.
                 return names != null ? names.Elements.Count / 2 : 0;
             }
         }
@@ -72,15 +109,60 @@ namespace PdfSharp.Pdf
         /// </summary>
         public int NamesCountTotal => GetNames(true).Count;
 
-        /// <summary>
-        /// Gets the kids of this item.
-        /// </summary>
-        public IEnumerable<PdfNameTreeNode> Kids => _kids;
+        /////// <summary>
+        /////// Gets the kids of this item.
+        /////// </summary>
+        ////public IEnumerable<PdfNameTreeNode> Kids => _kids;
 
-        private readonly List<PdfNameTreeNode> _kids = new();
+        ////private readonly List<PdfNameTreeNode> _kids = new();
 
-        private void Initialize()
+        void Initialize()
         {
+#if true
+            var kids = Elements.GetValue(Keys.Kids);
+            if (kids != null)
+            {
+                if (kids is PdfArray array)
+                {
+                    kids = new PdfNameTreeKids(array);
+                    Elements[Keys.Kids] = kids;
+                }
+                else
+                {
+                    throw new InvalidOperationException("Value of name tree key 'Kids' is not of type PdfArray.");
+                }
+            }
+
+            var names = Elements.GetValue(Keys.Names);
+            if (names != null)
+            {
+                if (names is PdfArray array)
+                {
+                    if (names is not PdfNameTreeNames)
+                        names = new PdfNameTreeNames(array);
+                    Elements[Keys.Names] = names;
+                }
+                else
+                {
+                    throw new InvalidOperationException("Value of name tree key 'Names' is not of type PdfArray.");
+                }
+            }
+
+            var limits = Elements.GetValue(Keys.Limits);
+            if (limits != null)
+            {
+                if (limits is PdfArray array)
+                {
+                    if (limits is not PdfNameTreeNames)
+                        limits = new PdfNameTreeNames(array);
+                    Elements[Keys.Limits] = limits;
+                }
+                else
+                {
+                    throw new InvalidOperationException("Value of name tree key 'Limits' is not of type PdfArray.");
+                }
+            }
+#else
             var kids = Elements.GetArray(Keys.Kids);
             if (kids != null)
             {
@@ -96,13 +178,15 @@ namespace PdfSharp.Pdf
             }
             _updateRequired = true;
             UpdateLimits();
+#endif
         }
+
         /// <summary>
         /// Gets the list of names this node contains
         /// </summary>
         /// <param name="includeKids">Specifies whether the names of the kids should also be returned</param>
         /// <returns>The list of names this node contains</returns>
-        /// <remarks>Note: When kids are included, the names are not guaranteed to be sorted</remarks>
+        /// <remarks>Note that if kids are included, the names are not guaranteed to be sorted</remarks>
         public IReadOnlyList<string> GetNames(bool includeKids = false)
         {
             var result = new List<string>();
@@ -116,9 +200,14 @@ namespace PdfSharp.Pdf
             }
             if (includeKids)
             {
-                foreach (var kid in _kids)
+                var item = Elements.GetValue(Keys.Kids);
+                if (item is PdfNumberTreeKids kids)
                 {
-                    result.AddRange(kid.GetNames(true));
+                    foreach (var kid in kids)
+                    {
+                        // result.AddRange(kid.GetNames(true));
+                        //TODO
+                    }
                 }
             }
             return result;
@@ -142,11 +231,11 @@ namespace PdfSharp.Pdf
             }
             if (includeKids)
             {
-                foreach (var kid in _kids)
-                {
-                    if (!kid.ContainsName(name, true))
-                        return true;
-                }
+                //foreach (var kid in _kids)
+                //{
+                //    if (!kid.ContainsName(name, true))
+                //        return true;
+                //}
             }
             return false;
         }
@@ -156,7 +245,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         /// <param name="name">The name whose value should be retrieved</param>
         /// <param name="includeKids">Specifies whether the kids should also be searched</param>
-        /// <returns>The value for <paramref name="name"/> when found, otwerwise null</returns>
+        /// <returns>The value for <paramref name="name"/> when found, otherwise null</returns>
         public PdfItem? GetValue(string name, bool includeKids = false)
         {
             var names = Elements.GetArray(Keys.Names);
@@ -173,12 +262,12 @@ namespace PdfSharp.Pdf
             }
             if (includeKids)
             {
-                foreach (var kid in _kids)
-                {
-                    var value = kid.GetValue(name, true);
-                    if (value != null)
-                        return value;
-                }
+                //foreach (var kid in _kids)
+                //{
+                //    var value = kid.GetValue(name, true);
+                //    if (value != null)
+                //        return value;
+                //}
             }
             return null;
         }
@@ -200,7 +289,7 @@ namespace PdfSharp.Pdf
         }
 
         /// <summary>
-        /// Adds a key/value pair to the Names array of this node.
+        /// Adds a key-value pair to the Names array of this node.
         /// </summary>
         public void AddName(string key, PdfItem value)
         {
@@ -214,12 +303,13 @@ namespace PdfSharp.Pdf
             // Insert names sorted by key.
             int i = 0;
             while (i < names.Elements.Count && string.CompareOrdinal(names.Elements.GetString(i), key) < 0)
-                // Entries are key / value pairs, so add 2.
+            {
+                // Entries are key-value pairs, so add 2.
                 i += 2;
-
+            }
             names.Elements.Insert(i, new PdfString(key));
             names.Elements.Insert(i + 1, value);
-            _updateRequired = true;
+            _updateRequired = true;  // TODO
         }
 
         /// <summary>
@@ -230,10 +320,10 @@ namespace PdfSharp.Pdf
             get
             {
                 UpdateLimits();
-                return _leastKey;
+                return _leastKey_;
             }
         }
-        private string _leastKey = "?";
+        string _leastKey_ = "?";
 
         /// <summary>
         /// Gets the greatest key.
@@ -246,7 +336,7 @@ namespace PdfSharp.Pdf
                 return _greatestKey;
             }
         }
-        private string _greatestKey = "?";
+        string _greatestKey = "?";
 
         /// <summary>
         /// Updates the limits by inspecting Kids and Names.
@@ -259,15 +349,14 @@ namespace PdfSharp.Pdf
                 names.Sort(StringComparer.Ordinal);
                 if (names.Count > 0)
                 {
-                    _leastKey = names[0];
+                    _leastKey_ = names[0];
                     _greatestKey = names[^1];
                     Elements[Keys.Limits] = new PdfArray(Owner,
-                        new PdfString(_leastKey), new PdfString(_greatestKey));
+                        new PdfString(_leastKey_), new PdfString(_greatestKey));
                 }
                 _updateRequired = false;
             }
         }
-
         bool _updateRequired;
 
         internal override void PrepareForSave()
@@ -283,19 +372,10 @@ namespace PdfSharp.Pdf
             base.WriteObject(writer);
         }
 
-        ///// <summary>
-        ///// Returns the value in the PDF date format.
-        ///// </summary>
-        //public override string ToString()
-        //{
-        //    string delta = _value.ToString("zzz").Replace(':', '\'');
-        //    return String.Format("D:{0:yyyyMMddHHmmss}{1}'", _value, delta);
-        //}
-
         /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
-        internal sealed class Keys : KeysBase
+        public sealed class Keys : KeysBase
         {
             // Reference: TABLE 3.33  Entries in a name tree node dictionary / Page 162
 
@@ -331,7 +411,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Gets the KeysMeta for these keys.
             /// </summary>
-            public static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
+            internal static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
 
             static DictionaryMeta? _meta;
 
@@ -350,7 +430,208 @@ namespace PdfSharp.Pdf
         // ReSharper disable UnusedMember.Local
         string DebuggerDisplay
         // ReSharper restore UnusedMember.Local
-            =>
-                String.Format("root:{0}", IsRoot);
+            => $"root:{IsRoot}";
     }
+
+    // TODO
+    static class PdfNameTreeNodeHelper
+    {
+        public static void BuildNameTree(PdfNameTreeNode node)
+        {
+            var sp = node.ParentInfo;
+
+            //PdfEmbeddedFileStream
+        }
+    }
+
+    #region Name tree stuff / #NewFile
+
+    public class PdfNameTreeKids : PdfArray
+    {
+        public PdfNameTreeKids()
+        { }
+
+        public PdfNameTreeKids(PdfArray array)
+            : base(array)
+        { }
+
+        public void Insert(PdfNameTreeNode node)
+        {
+            // TODO
+        }
+    }
+
+    public class PdfNameTreeNames : PdfArray
+    {
+        public PdfNameTreeNames()
+        { }
+
+        public PdfNameTreeNames(PdfArray array)
+            : base(array)
+        {
+            //foreach (var item in array)
+            //{ }
+        }
+
+        public int Count => Elements.Count / 2;
+
+        public NameTreeNameEntry this[int index]
+        {
+            get
+            {
+                index *= 2;
+                var key = Elements.GetString(index);
+                var item = Elements[index + 1];
+                var result = new NameTreeNameEntry(key, item);
+                return result;
+            }
+        }
+
+        public PdfItem? this[string key]
+        {
+            get
+            {
+                var count = Elements.Count;
+                for (int idx = 0; idx < count - 1; idx += 2)
+                {
+                    var k = Elements.GetString(idx);
+                    if (key == k)
+                        return Elements[idx + 1];
+                }
+                return null;
+            }
+        }
+
+        public string[] NamesKeys
+        {
+            get
+            {
+                var count = Elements.Count;
+                count >>= 1;  // Suppress odd numbers.
+                if (count == 0)
+                    return [];
+
+                var keys = new string[count];
+                for (int idx = 0; idx < count; idx++)
+                {
+                    keys[idx] = Elements.GetString(idx * 2);
+                }
+                return keys;
+            }
+        }
+
+        internal void TransformItems()
+        {
+            int count = Elements.Count;
+            if (count == 0)
+                return;
+            if (count % 2 != 0)
+                throw new InvalidOperationException("Number of elements in a name tree /Names array must be even.");
+
+            for (int idx = 1; idx < count; idx++)
+            {
+                var item = Elements[idx];
+                //Debug.Assert(item.GetType()==typeof());
+            }
+        }
+
+        public T TransformType<T>(PdfItem item)
+        {
+            return default(T)!;
+        }
+
+        public void Insert(NameTreeNameEntry nameEntry)
+        {
+            string key = nameEntry.Key.Value;
+
+            Elements.Insert(0, nameEntry.Key);
+            Elements.Insert(1, nameEntry.Value);
+            UpdateLimits();
+        }
+
+        void UpdateLimits()
+        {
+            if (ParentInfo != null)
+            {
+            }
+        }
+    }
+
+    // Pair of PDF string and PDF item.
+    public class NameTreeNameEntry
+    {
+        public NameTreeNameEntry()
+        { }
+
+        public NameTreeNameEntry(PdfString key, PdfItem item)
+        {
+            Key = key;
+            Value = item;
+        }
+
+        public NameTreeNameEntry(string key, PdfItem item)
+        {
+            Key = new(key);
+            Value = item;
+        }
+
+        public PdfString Key { get; set; } = PdfString.Empty;
+
+        public PdfItem Value { get; set; } = PdfNull.Value;
+
+
+    }
+
+    public class PdfNameTreeLimits : PdfArray
+    {
+        public PdfNameTreeLimits()
+        {
+            Elements.Add(new PdfString());
+            Elements.Add(new PdfString());
+        }
+
+        protected PdfNameTreeLimits(PdfArray array)
+            : base(array)
+        {
+            EnsureSize();
+        }
+
+        public string First
+        {
+            get => Elements.GetString(0);
+            set => Elements[0] = new PdfString(value);
+        }
+
+        public string Last
+        {
+            get => Elements.GetString(1);
+            set => Elements[1] = new PdfString(value);
+        }
+
+        void EnsureSize()
+        {
+            if (Elements.Count != 2)
+            {
+                PdfSharpLogHost.Logger.LogError("NameTreeLimits must have 2 elements.");
+            }
+        }
+
+    }
+
+    public class PdfNumberTreeKids : PdfArray
+    {
+        // TODO
+    }
+
+    public class PdfNumberTreeNames : PdfArray
+    {
+        // TODO
+    }
+
+    public class PdfNumberTreeLimits : PdfArray
+    {
+        // TODO
+    }
+
+    #endregion
 }

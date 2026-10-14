@@ -410,7 +410,7 @@ namespace PdfSharp.Drawing
             // Get vector from chord to center.
             XVector vectRotated;
 
-            // (comparing two Booleans here!)
+            // (comparing two booleans here!)
             if (isLargeArc == isCounterclockwise)
                 vectRotated = new XVector(-vect.Y, vect.X);
             else
@@ -430,7 +430,7 @@ namespace PdfSharp.Drawing
             double α = Math.Atan2(pt1.Y - center.Y, pt1.X - center.X);
             double β = Math.Atan2(pt2.Y - center.Y, pt2.X - center.X);
 
-            // (another comparison of two Booleans!)
+            // (another comparison of two booleans!)
             if (isLargeArc == (Math.Abs(β - α) < Math.PI))
             {
                 if (α < β)
@@ -605,9 +605,9 @@ namespace PdfSharp.Drawing
                                 dist = (4/3)*(R - Rcos(a/2)) / Rsin(a/2) 
  
                 and use some trig:
-                                    __________ 
+                                     __________ 
                         cos(a/2) = \/1 + cos(a) / 2
-                                        ________________         __________
+                                       ________________         __________
                         R*cos(a/2) = \/R^2 + R^2 cos(a) / 2 = \/R^2 + rDot / 2 */
 
             double cos = (radSquared + dot) / 2;   // =(R*cos(a))^2

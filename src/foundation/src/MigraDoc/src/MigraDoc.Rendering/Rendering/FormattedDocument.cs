@@ -190,7 +190,7 @@ namespace MigraDoc.Rendering
 
             width -= pageSetup.RightMargin.Point;
             width -= pageSetup.LeftMargin.Point;
-            
+
             XUnitPt height = pageSetup.PageHeight.Point;
 
             height -= pageSetup.TopMargin.Point;
@@ -423,7 +423,7 @@ namespace MigraDoc.Rendering
         }
 
         XSize CalcPageSize(PageSetup pageSetup)
-            => new(pageSetup.PageWidth.Point, pageSetup.PageHeight.Point);
+            => new((float_)pageSetup.PageWidth.Point, (float_)pageSetup.PageHeight.Point);
 
         bool IAreaProvider.PositionHorizontally(LayoutInfo layoutInfo)
         {

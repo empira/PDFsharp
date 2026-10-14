@@ -27,6 +27,16 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfSoftMask(PdfDictionary dict)
+            : base(dict)
+        {
+            Elements.SetName(Keys.Type, "/Mask");
+        }
+
+        /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
         public class Keys : KeysBase

@@ -1,6 +1,7 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+#if false // DELETE 2025-12-31 - PDF has no explicit unsigned number type.
 using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Pdf
@@ -61,3 +62,4 @@ namespace PdfSharp.Pdf
         }
     }
 }
+#endif

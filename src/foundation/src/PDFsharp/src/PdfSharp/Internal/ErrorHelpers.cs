@@ -12,17 +12,23 @@ namespace PdfSharp.Internal
     // ReSharper disable once InconsistentNaming
     static class TH
     {
-        private const string SendUsTheFile = "\nPDFsharp cannot read this PDF file. " +
-            "If you think your file is a valid PDF file please send it to us so that we can fix this bug in the PDF parser.";
+        const string SendUsTheFile = "\nPDFsharp cannot read this PDF file. " +
+            "If you think your file is a valid PDF file please send it to us so that we can fix this bug in the PDF parser. "+
+            "See " + UrlLiterals.LinkToCannotOpenPdfFile;
 
         public static InvalidOperationException InvalidOperationException_CouldNotFindMetadataDictionary() =>
             new("Could not find document’s metadata dictionary." + SendUsTheFile);
 
+        public static InvalidOperationException InvalidOperationException_ReferenceMustNotBeNull() =>
+            new("The reference must not be null.");
+
         #region Reader Messages
 
-        public static ObjectNotAvailableException ObjectNotAvailableException_CannotRetrieveStreamLength(Exception? innerException = null)
+        public static ObjectNotAvailableException ObjectNotAvailableException_CannotRetrieveStreamLength(SizeType? streamStart, Exception? innerException = null)
         {
-            const string message = "Cannot retrieve stream length." + SendUsTheFile;
+            string message = "Cannot retrieve stream length." +
+                             (streamStart.HasValue ? $" Stream begins at {streamStart.Value}." : null) +
+                             SendUsTheFile;
             return innerException != null ? new(message, innerException) : new(message);
         }
 

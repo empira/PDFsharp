@@ -8,7 +8,8 @@ using PdfSharp.Quality;
 using System.Drawing.Text;
 #endif
 
-#pragma warning disable 1591
+#pragma warning disable CS1591 // Internal class
+
 namespace PdfSharp.Features.Font
 {
     public class RenderInstalledFonts : Feature

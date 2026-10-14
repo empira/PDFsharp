@@ -3,10 +3,10 @@
 
 using Microsoft.Extensions.Logging;
 using PdfSharp;
-using PdfSharp.Drawing;
-using PdfSharp.Fonts;
 using PdfSharp.Logging;
 using PdfSharp.Pdf;
+using PdfSharp.Fonts;
+using PdfSharp.Drawing;
 using PdfSharp.Quality;
 
 namespace HelloWorld
@@ -31,12 +31,15 @@ namespace HelloWorld
             LogHost.Factory = loggerFactory;
 
             GlobalFontSettings.UseWindowsFontsUnderWindows = true;
+            GlobalFontSettings.UseWindowsFontsUnderWsl2 = true;
 
             // Create a new PDF document.
             var document = new PdfDocument();
+            document.ViewerPreferences.FitWindow = true;
             document.Info.Title = "Created with PDFsharp";
             document.Info.Author = "PDFsharp team";
             document.Info.Subject = "Hello, World!";
+            document.ViewerPreferences.FitWindow = true;
 
             // Create an empty page in this document.
             var page = document.AddPage();
@@ -61,11 +64,11 @@ namespace HelloWorld
             gfx.DrawString("Hello, PDFsharp!", font, XBrushes.Black,
                 new XRect(0, 0, width, height), XStringFormats.Center);
 
-            // Save the document...
-            var fullName = PdfFileUtility.GetTempPdfFullFileName("PdfSharpSamples/HelloWorld/HelloWorld" + Capabilities.Build.BuildTag);
+            // Save the document…
+            var fullName = PdfFileUtility.GetTempPdfFullFileName("samples/PDFsharp/HelloWorld/HelloWorld" + Capabilities.Build.BuildTag);
             document.Save(fullName);
 
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocument(fullName);
         }
     }

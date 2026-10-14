@@ -29,11 +29,15 @@ namespace CopyAsLink
             var pattern = "*.cs;…";  // The files to be included, separated by ';'.
 
             // Root on your PC.
-            var root = @"D:\repos\emp\PDFsharp\src\foundation\src\";
+            var root = @"D:\repos\emp\PDFsharp\src\foundation\src\";  //D:\repos\emp\PDFsharp\src\foundation\src\PDFsharp\src\PdfSharp\Pdf.AcroForms
 
-            // PdfSharp.Charting
-            source = root + @"PDFsharp\src\PdfSharp.Charting\";
-            prefix = @"..\PdfSharp.Charting\";
+            // PdfSharp - attention, requires extra work because of UI elements (exclusive for GDI) and PNG library (exclusive for CORE).
+            //source = root + @"PDFsharp\src\PdfSharp\";
+            //prefix = @"..\PdfSharp\";
+
+            // PdfSharp
+            source = root + @"PDFsharp\src\PdfSharp\Pdf.AcroForms";
+            prefix = @"..\PdfSharp\";
 
             // MigraDoc.Rendering
             //source = root + @"MigraDoc\src\MigraDoc.Rendering\";
@@ -50,7 +54,7 @@ namespace CopyAsLink
                 if (info.Contains(@"\obj\"))
                     continue;
 
-                var link = info[source.Length..];
+                var link = info[(source.Length -13)..];
                 var include = prefix + link;
 
                 var res = $"    <Compile Include=\"{include}\" Link=\"{link}\" />";

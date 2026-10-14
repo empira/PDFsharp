@@ -1,12 +1,17 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System.Diagnostics;
 using System.Reflection;
 using PdfSharp.Pdf;
 using PdfSharp.Drawing;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.Rendering.Internals;
+#if PSGFX
+using PdfSharp.Graphics.Pdf;
+using PdfSharp.Graphics.Pdf.Media;
+
+#else
+#endif
 
 namespace MigraDoc.Rendering
 {
@@ -143,10 +148,12 @@ namespace MigraDoc.Rendering
             var pdfDocument = PdfDocument;
             foreach (var item in _document?.EmbeddedFiles ?? NRT.ThrowOnNull<EmbeddedFiles>())
             {
-                if (item as EmbeddedFile is { } embeddedFile)
-                    pdfDocument.AddEmbeddedFile(embeddedFile.Name, embeddedFile.Path);
+                if (item as DocumentObjectModel.EmbeddedFile is { } embeddedFile)
+#pragma warning disable CS0618 // Type or member is obsolete
+                    pdfDocument.AddEmbeddedFile(embeddedFile.Name, embeddedFile.Path);  // TODO: Do not use this function anymore.
+#pragma warning restore CS0618 // Type or member is obsolete
                 else
-                    NRT.ThrowOnNull<EmbeddedFile>();
+                    NRT.ThrowOnNull<DocumentObjectModel.EmbeddedFile>();
             }
 
             WriteDocumentInformation();
@@ -200,17 +207,31 @@ namespace MigraDoc.Rendering
 
             _pdfDocument ??= CreatePdfDocument();
 
-            DocumentRenderer.PrintDate = DateTime.Now;
+            DocumentRenderer.PrintDate = DateTimeOffset.Now;
             for (int pageNr = startPage; pageNr <= endPage; ++pageNr)
             {
                 var pdfPage = _pdfDocument.AddPage();
                 var pageInfo = DocumentRenderer.FormattedDocument.GetPageInfo(pageNr);
+#if PSGFX
+                pdfPage.Width = PdfSharp.Drawing.XUnit.FromPoint(pageInfo.Width);
+                pdfPage.Height = PdfSharp.Drawing.XUnit.FromPoint(pageInfo.Height);
+#else
                 pdfPage.Width = pageInfo.Width;
                 pdfPage.Height = pageInfo.Height;
+#endif
                 pdfPage.Orientation = pageInfo.Orientation;
 
+#if PSGFX
+                var pageVisual = PdfPageVisual.FromPdfPage(pdfPage);
+                var gfx = pageVisual.RenderOpen();
+#else
                 using var gfx = XGraphics.FromPdfPage(pdfPage);
+#endif
                 DocumentRenderer.RenderPage(gfx, pageNr);
+#if PSGFX
+                // DrawingContext must be closed.
+                gfx.Close();
+#endif
             }
         }
 

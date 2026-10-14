@@ -25,7 +25,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         /// </summary>
         /// <param name="nextOfThisType">The element must not be a direct neighbor.</param>
         /// <param name="obj">The loaded object.</param>
-        public Boolean MoveAndGetNext(bool nextOfThisType, out T? obj)
+        public bool MoveAndGetNext(bool nextOfThisType, out T? obj)
         {
             return MoveAndGet(1, nextOfThisType, false, out obj);
         }
@@ -35,7 +35,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         /// </summary>
         /// <param name="previousOfThisType">The element must not be a direct neighbor.</param>
         /// <param name="obj">The loaded object.</param>
-        public Boolean MoveAndGetPrevious(bool previousOfThisType, out T? obj)
+        public bool MoveAndGetPrevious(bool previousOfThisType, out T? obj)
         {
             return MoveAndGet(1, previousOfThisType, true, out obj);
         }
@@ -166,7 +166,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
 
         protected (bool, T?) GetObjectFailed()
         {
-            return new ValueTuple<Boolean, T?>(false, default);
+            return new ValueTuple<bool, T?>(false, default);
         }
 
         protected ContentStreamEnumerator ContentStreamEnumerator { get; init; } = contentStreamEnumerator;

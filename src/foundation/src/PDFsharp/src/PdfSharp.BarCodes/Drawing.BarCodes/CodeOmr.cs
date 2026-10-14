@@ -97,7 +97,7 @@ namespace PdfSharp.Drawing.BarCodes
         ///// Renders the mark at the given position.
         ///// </summary>
         ///// <param name="position">The mark position to render.</param>
-        //private void RenderMark(int position)
+        //void RenderMark(int position)
         //{
         //  double yPos =  TopLeft.Y + UpperDistance + position * ToUnit(markDistance).Centimeter;
         //  //Center mark
@@ -114,7 +114,7 @@ namespace PdfSharp.Drawing.BarCodes
         //  get { return markDistance; }
         //  set { markDistance = value; }
         //}
-        //private MarkDistance markDistance = MarkDistance.Inch2_6;
+        //MarkDistance markDistance = MarkDistance.Inch2_6;
 
         ///// <summary>
         ///// Converts a mark distance to an XUnit object.
@@ -161,7 +161,7 @@ namespace PdfSharp.Drawing.BarCodes
         //  get { return upperDistance; }
         //  set { upperDistance = value; }
         //}
-        //private double upperDistance = XUnit.FromInch(8.0 / 6.0).Centimeter;
+        //double upperDistance = XUnit.FromInch(8.0 / 6.0).Centimeter;
 
         ///// <summary>
         ///// The lower distance from the last possible mark to the end of the reading zone.
@@ -172,7 +172,7 @@ namespace PdfSharp.Drawing.BarCodes
         //  get { return lowerDistance; }
         //  set { lowerDistance = value; }
         //}
-        //private double lowerDistance = XUnit.FromInch(2.0 / 6.0).Centimeter;
+        //double lowerDistance = XUnit.FromInch(2.0 / 6.0).Centimeter;
 
         ///// <summary>
         ///// Gets or sets the width of the reading zone.

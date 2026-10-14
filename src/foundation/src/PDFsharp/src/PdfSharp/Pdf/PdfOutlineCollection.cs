@@ -1,9 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
-using System.Collections.Generic;
 using System.Collections;
+using PdfSharp.Internal;
 using PdfSharp.Drawing;
 
 // Review: CountOpen does not work. - StL/14-10-05
@@ -15,6 +14,7 @@ namespace PdfSharp.Pdf
     /// </summary>
     public class PdfOutlineCollection : PdfObject, ICollection<PdfOutline>, IList<PdfOutline>
     {
+        // TODO: Derive from PdfArray?
         /// <summary>
         /// Can only be created as part of PdfOutline.
         /// </summary>
@@ -293,6 +293,6 @@ namespace PdfSharp.Pdf
         /// </summary>
         readonly PdfOutline _parent;
 
-        readonly List<PdfOutline> _outlines = new List<PdfOutline>();
+        readonly List<PdfOutline> _outlines = [];
     }
 }

@@ -5,6 +5,7 @@ using PdfSharp.Pdf;
 using PdfSharp.Drawing;
 using PdfSharp.Events;
 using PdfSharp.Pdf.Advanced;
+using PdfSharp.Pdf.Internal;
 using PdfSharp.Pdf.Structure;
 
 namespace PdfSharp.UniversalAccessibility
@@ -14,58 +15,58 @@ namespace PdfSharp.UniversalAccessibility
     /// By using its StructureBuilder, you can easily build up the structure tree to give hints to screen readers about how to read the document.
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public class UAManager
+    public class UAManager : ManagerBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="UAManager"/> class.
         /// </summary>
         /// <param name="document">The PDF document.</param>
-        UAManager(PdfDocument document)
+        UAManager(PdfDocument document) : base(document)
         {
             //document._uaManager = this; done in ForDocument
-            _document = document;
+            //Document = document;
 
             // Set default language to English.
             SetDocumentLanguage("en");
 
             // DisplayDocTitle must be true.
-            _document.ViewerPreferences.DisplayDocTitle = true;
+            Document.ViewerPreferences.DisplayDocTitle = true;
 
-            var internals = _document.Internals;
+            var internals = Document.Internals;
 
-            _document.Events.PageAdded += OnPageAdded;
-            _document.Events.PageRemoved += OnPageRemoved;
-            _document.Events.PageGraphicsCreated += OnPageGraphicsCreated;
-            _document.Events.PageGraphicsAction += OnPageGraphicsAction;
+            Document.Events.PageAdded += OnPageAdded;
+            Document.Events.PageRemoved += OnPageRemoved;
+            Document.Events.PageGraphicsCreated += OnPageGraphicsCreated;
+            Document.Events.PageGraphicsAction += OnPageGraphicsAction;
 
             // Marked must be true in MarkInfo.
             var markInfo = new PdfMarkInformation();
             internals.AddObject(markInfo);
 
             markInfo.Elements.SetBoolean(PdfMarkInformation.Keys.Marked, true);
-            internals.Catalog.Elements.SetReference(PdfCatalog.Keys.MarkInfo, markInfo);
+            internals.Catalog.Elements.SetObject(PdfCatalog.Keys.MarkInfo, markInfo);
 
             // Build Structure Tree.
             StructureTreeRoot = new PdfStructureTreeRoot();
             internals.AddObject(StructureTreeRoot);
-            internals.Catalog.Elements.SetReference(PdfCatalog.Keys.StructTreeRoot, StructureTreeRoot);
+            internals.Catalog.Elements.SetObject(PdfCatalog.Keys.StructTreeRoot, StructureTreeRoot);
 
             // Set parent tree root.
             var parentTreeRoot = new PdfNumberTreeNode(true);
-            _document.Internals.AddObject(parentTreeRoot);
-            StructureTreeRoot.Elements.SetReference(PdfStructureTreeRoot.Keys.ParentTree, parentTreeRoot);
+            Document.Internals.AddObject(parentTreeRoot);
+            StructureTreeRoot.Elements.SetObject(PdfStructureTreeRoot.Keys.ParentTree, parentTreeRoot);
 
             // Child node for Document is recommended.
-            StructureTreeElementDocument = new PdfStructureElement(_document);
-            _document.Internals.AddObject(StructureTreeElementDocument);
+            StructureTreeElementDocument = new PdfStructureElement(Document);
+            Document.Internals.AddObject(StructureTreeElementDocument);
 
             // Parent is root.
-            StructureTreeElementDocument.Elements.SetReference(PdfStructureElement.Keys.P, StructureTreeRoot);
+            StructureTreeElementDocument.Elements.SetObject(PdfStructureElement.Keys.P, StructureTreeRoot);
 
             // Type is document.
             StructureTreeElementDocument.Elements.SetName(PdfStructureElement.Keys.S, "/Document");
 
-            StructureTreeRoot.Elements.SetReference(PdfStructureElement.Keys.K, StructureTreeElementDocument);
+            StructureTreeRoot.Elements.SetObject(PdfStructureElement.Keys.K, StructureTreeElementDocument);
         }
 
         /// <summary>
@@ -81,8 +82,8 @@ namespace PdfSharp.UniversalAccessibility
         /// <summary>
         /// Gets or creates the Universal Accessibility Manager for the specified document.
         /// </summary>
-        public static UAManager ForDocument(PdfDocument document) 
-            => document._uaManager ??= new UAManager(document);
+        public static UAManager ForDocument(PdfDocument document)
+            => document.UAManager ??= new(document);
 
         /// <summary>
         /// Gets the structure builder.
@@ -139,8 +140,7 @@ namespace PdfSharp.UniversalAccessibility
         /// <summary>
         /// Gets the owning document for this UAManager.
         /// </summary>
-        public PdfDocument Owner => _document;
-        readonly PdfDocument _document;
+        public PdfDocument Owner => Document;
 
         /// <summary>
         /// Gets the current page.
@@ -155,25 +155,25 @@ namespace PdfSharp.UniversalAccessibility
         /// <summary>
         /// Sets the language of the document.
         /// </summary>
-        public void SetDocumentLanguage(string lang) 
-            => _document.Internals.Catalog.Language = lang;
+        public void SetDocumentLanguage(string lang)
+            => Document.Internals.Catalog.Language = lang;
 
         /// <summary>
         /// Sets the text mode.
         /// </summary>
-        public void BeginTextMode() 
+        public void BeginTextMode()
             => PdfRendererExtensions.BeginTextMode(CurrentGraphics);
 
         /// <summary>
         /// Sets the graphic mode.
         /// </summary>
-        public void BeginGraphicMode() 
+        public void BeginGraphicMode()
             => PdfRendererExtensions.BeginGraphicMode(CurrentGraphics);
 
         /// <summary>
         /// Determine if renderer is in Text mode or Graphic mode.
         /// </summary>
-        public bool IsInTextMode() 
+        public bool IsInTextMode()
             => PdfRendererExtensions.IsInTextMode(CurrentGraphics);
     }
 }

@@ -4,9 +4,9 @@
 namespace PdfSharp.Pdf
 {
     /// <summary>
-    /// Base class for direct number values (not yet used, maybe superfluous).
+    /// Base class for direct number values.
     /// </summary>
-    public abstract class PdfNumber : PdfItem
+    public abstract class PdfNumber : PdfPrimitive
     {
         /// <summary>
         /// Gets or sets a value indicating whether this instance is a 32-bit signed integer.

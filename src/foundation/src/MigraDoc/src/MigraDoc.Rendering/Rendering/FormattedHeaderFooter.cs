@@ -30,7 +30,7 @@ namespace MigraDoc.Rendering
         Area? IAreaProvider.GetNextArea()
         {
             if (_isFirstArea)
-                return new Rectangle(ContentRect.X, ContentRect.Y, ContentRect.Width, double.MaxValue);
+                return new Rectangle(ContentRect.X, ContentRect.Y, ContentRect.Width, FLOAT_.MaxValue);
 
             return null;
         }

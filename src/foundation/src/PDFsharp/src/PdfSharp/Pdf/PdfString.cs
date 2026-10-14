@@ -3,7 +3,6 @@
 
 using System.Text;
 using Microsoft.Extensions.Logging;
-using PdfSharp.Internal;
 using PdfSharp.Logging;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Internal;
@@ -47,7 +46,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Not yet used by PDFsharp.
         /// </summary>
-        MacRomanEncoding = PdfStringFlags.MacExpertEncoding,
+        MacRomanEncoding = PdfStringFlags.MacRomanEncoding,
 
         /// <summary>
         /// Not yet used by PDFsharp.
@@ -68,12 +67,12 @@ namespace PdfSharp.Pdf
     enum PdfStringFlags
     {
         // ReSharper disable InconsistentNaming
-        RawEncoding = 0x00,
-        StandardEncoding = 0x01,  // not used by PDFsharp
+        RawEncoding = 0x00,        // Each char maps to a byte.
+        StandardEncoding = 0x01,   // Not used by PDFsharp.
         PDFDocEncoding = 0x02,
         WinAnsiEncoding = 0x03,
-        MacRomanEncoding = 0x04,  // not used by PDFsharp
-        MacExpertEncoding = 0x05,  // not used by PDFsharp
+        MacRomanEncoding = 0x04,   // Not used by PDFsharp.
+        MacExpertEncoding = 0x05,  // Not used by PDFsharp.
         Unicode = 0x06,
         EncodingMask = 0x0F,
 
@@ -85,16 +84,13 @@ namespace PdfSharp.Pdf
     /// Represents a direct text string value.
     /// </summary>
     [DebuggerDisplay("({" + nameof(Value) + "})")]
-    public sealed class PdfString : PdfItem
+    public sealed class PdfString : PdfPrimitive  // #HEX_STRING_FIX DELETE
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfString"/> class.
         /// </summary>
         public PdfString()
-        {
-            // Redundant assignment.
-            //_flags = PdfStringFlags.RawEncoding;
-        }
+        { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfString"/> class.
@@ -102,22 +98,26 @@ namespace PdfSharp.Pdf
         /// <param name="value">The value.</param>
         public PdfString(string value)
         {
-#if true
             if (!IsRawEncoding(value))
                 _flags = PdfStringFlags.Unicode;
             _value = value;
-#else
-            CheckRawEncoding(value);
-            _value = value;
-            //_flags = PdfStringFlags.RawEncoding;
-#endif
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PdfString"/> class.
+        /// </summary>
+        /// <param name="value">The string value.</param>
+        /// <param name="hexString">If set to <c>true</c> the string is written as hexadecimal string.</param>
+        public PdfString(string value, bool hexString) : this(value)
+        {
+            _flags |= PdfStringFlags.HexLiteral;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfString"/> class.
         /// </summary>
         /// <param name="value">The value.</param>
-        /// <param name="encoding">The encoding.</param>
+        /// <param name="encoding">The string value.</param>
         public PdfString(string value, PdfStringEncoding encoding)
         {
             switch (encoding)
@@ -149,6 +149,17 @@ namespace PdfSharp.Pdf
             //if ((flags & PdfStringFlags.EncodingMask) == 0)
             //  flags |= PdfStringFlags.PDFDocEncoding;
             _flags = (PdfStringFlags)encoding;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PdfString"/> class.
+        /// </summary>
+        /// <param name="value">The string value.</param>
+        /// <param name="encoding">The encoding.</param>
+        /// <param name="hexString">If set to <c>true</c> the string is written as hexadecimal string.</param>
+        public PdfString(string value, PdfStringEncoding encoding, bool hexString) : this(value)
+        {
+            _flags |= PdfStringFlags.HexLiteral;
         }
 
         internal PdfString(string? value, PdfStringFlags flags)
@@ -274,7 +285,7 @@ namespace PdfSharp.Pdf
                 return true;
             }
 
-            // UTF-16LE Unicode strings start with U+FFE ("ÿþ").
+            // UTF-16LE Unicode strings start with U+FFFE ("ÿþ").
             // Adobe Reader also supports UTF-16LE with BOM, so we do.
             if (value is ['\xFF', '\xFE', ..])
             {
@@ -327,6 +338,12 @@ namespace PdfSharp.Pdf
             return _value;
 #endif
         }
+
+        /// <summary>
+        /// Get an empty PdfString.
+        /// </summary>
+        public static PdfString Empty => _empty ??= new PdfString();
+        static PdfString? _empty;
 
 #if true_ 
         /// <summary>

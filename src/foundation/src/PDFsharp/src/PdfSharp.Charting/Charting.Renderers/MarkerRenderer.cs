@@ -24,7 +24,7 @@ namespace PdfSharp.Charting.Renderers
             double x0, y0, x1, y1;
             double g;
 
-            var foreground = new XPen(rendererInfo.MarkerForegroundColor, 0.5);
+            var foreground = new XPen(rendererInfo.MarkerForegroundColor, 0.5f);
             var background = new XSolidBrush(rendererInfo.MarkerBackgroundColor);
 
             var gp = new XGraphicsPath();
@@ -117,8 +117,8 @@ namespace PdfSharp.Charting.Renderers
                         double rad = -(Math.PI / 2); // 90°
                         for (int idx = 0; idx < 10; idx += 2)
                         {
-                            points[idx].X = pos.X + outerCircle * Math.Cos(rad);
-                            points[idx].Y = pos.Y + outerCircle * Math.Sin(rad);
+                            points[idx].X = (float_)(pos.X + outerCircle * Math.Cos(rad));
+                            points[idx].Y = (float_)(pos.Y + outerCircle * Math.Sin(rad));
                             rad += radStep;
                         }
 
@@ -126,27 +126,33 @@ namespace PdfSharp.Charting.Renderers
                         rad = -(Math.PI / 4); // 45°
                         double x = innerCircle * Math.Cos(rad);
                         double y = innerCircle * Math.Sin(rad);
-                        points[1].X = pos.X + x;
-                        points[1].Y = pos.Y + y;
-                        points[9].X = pos.X - x;
-                        points[9].Y = pos.Y + y;
+                        points[1].X = (float_)(pos.X + x);
+                        points[1].Y = (float_)(pos.Y + y);
+                        points[9].X = (float_)(pos.X - x);
+                        points[9].Y = (float_)(pos.Y + y);
                         rad += radStep;
                         x = innerCircle * Math.Cos(rad);
                         y = innerCircle * Math.Sin(rad);
-                        points[3].X = pos.X + x;
-                        points[3].Y = pos.Y + y;
-                        points[7].X = pos.X - x;
-                        points[7].Y = pos.Y + y;
+                        points[3].X = (float_)(pos.X + x);
+                        points[3].Y = (float_)(pos.Y + y);
+                        points[7].X = (float_)(pos.X - x);
+                        points[7].Y = (float_)(pos.Y + y);
                         rad += radStep;
                         y = innerCircle * Math.Sin(rad);
                         points[5].X = pos.X;
-                        points[5].Y = pos.Y + y;
+                        points[5].Y = (float_)(pos.Y + y);
+#if PSGFX
+                        throw new NotImplementedException("AddLines");
+                        //gp.AddLines(points);
+                    }
+#else
                         gp.AddLines(points);
                     }
                     break;
+#endif
             }
-
             gp.CloseFigure();
+
             if (rendererInfo.MarkerStyle != MarkerStyle.Dot)
             {
                 graphics.DrawPath(background, gp);

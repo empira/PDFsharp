@@ -224,21 +224,6 @@ namespace MigraDoc.DocumentObjectModel
         //    .Kerning = 0
         //    .Animation = wdAnimationNone
 
-        ///// <summary>
-        ///// Gets a value indicating whether the specified font exists.
-        ///// </summary>
-        //[Obsolete("This function is removed from DocumentObjectModel and always returns false.")]
-        //public static bool Exists(string fontName)
-        //{
-        //    //System.Drawing.FontFamily[] families = System.Drawing.FontFamily.Families;
-        //    //foreach (System.Drawing.FontFamily family in families)
-        //    //{
-        //    //  if (String.Compare(family.Name, fontName, true) == 0)
-        //    //    return true;
-        //    //}
-        //    return false;
-        //}
-
         /// <summary>
         /// Get a bitmask of all non-null properties.
         /// </summary>
@@ -317,16 +302,11 @@ namespace MigraDoc.DocumentObjectModel
                 else
                     fontStyle = "(\"" + ((FormattedText)Parent).Style + "\")";
 
-                //bool needBlank = false;  // nice, but later...
+                //bool needBlank = false;  // nice, but later…
                 serializer.Write("\\font" + fontStyle + "[");
 
                 if (!String.IsNullOrEmpty(Values.Name))
                     serializer.WriteSimpleAttribute("Name", Name);
-
-#if DEBUG_ // Test
-                if (Size != Unit.Empty && Size != 0 && Size.Point == 0)
-                    _ = typeof(int);
-#endif
 
                 if (!Values.Size.IsValueNullOrEmpty())
                     serializer.WriteSimpleAttribute("Size", Size);
@@ -363,11 +343,6 @@ namespace MigraDoc.DocumentObjectModel
                     serializer.WriteSimpleAttribute("Name", Name);
                 }
 
-#if DEBUG_
-                // Test
-                if (!_size.IsNull && Size != 0 && Size.Point == 0)
-                    _ = typeof(int);
-#endif
 
                 if (!Values.Size.IsValueNullOrEmpty() && (font == null || Size != font.Size))
                     serializer.WriteSimpleAttribute("Size", Size);

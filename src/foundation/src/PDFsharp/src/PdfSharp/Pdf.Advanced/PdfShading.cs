@@ -27,6 +27,14 @@ namespace PdfSharp.Pdf.Advanced
         { }
 
         /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfShading(PdfDictionary dict)
+            : base(dict)
+        { }
+
+        /// <summary>
         /// Setups the shading from the specified brush.
         /// </summary>
         internal void SetupFromBrush(XLinearGradientBrush brush, XGraphicsPdfRenderer renderer)
@@ -34,7 +42,7 @@ namespace PdfSharp.Pdf.Advanced
             if (brush == null)
                 throw new ArgumentNullException(nameof(brush));
 
-            PdfColorMode colorMode = _document.Options.ColorMode;
+            PdfColorMode colorMode = Document.Options.ColorMode;
             XColor color1 = ColorSpaceHelper.EnsureColorMode(colorMode, brush._color1);
             XColor color2 = ColorSpaceHelper.EnsureColorMode(colorMode, brush._color2);
 
@@ -115,7 +123,7 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Common keys for all streams.
         /// </summary>
-        internal sealed class Keys : KeysBase
+        public sealed class Keys : KeysBase
         {
             /// <summary>
             /// (Required) The shading type:

@@ -171,7 +171,7 @@ namespace MigraDoc.DocumentObjectModel
                 {
                     if (SymbolName == SymbolName.Blank)
                     {
-                        // Note: Don’t try to optimize it by leaving away the braces in case a single space is added.
+                        // Do not try to optimize it by leaving away the braces in case a single space is added.
                         // This would lead to confusion with '(' in directly following text.
                         text = Invariant($@"\\space({Count})");
                     }

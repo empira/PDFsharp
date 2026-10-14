@@ -2,6 +2,9 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
+#if PSGFX
+using PdfSharp.Graphics.Media.MatrixExtensions;
+#endif
 
 namespace PdfSharp.Charting.Renderers
 {
@@ -56,10 +59,10 @@ namespace PdfSharp.Charting.Renderers
                 lineFormatRenderer = new LineFormatRenderer(gfx, xari.MinorGridlinesLineFormat);
                 for (double x = xMin + xMinorTick; x < xMax; x += xMinorTick)
                 {
-                    points[0].Y = x;
-                    points[0].X = yMin;
-                    points[1].Y = x;
-                    points[1].X = yMax;
+                    points[0].Y = (float_)x;
+                    points[0].X = (float_)yMin;
+                    points[1].Y = (float_)x;
+                    points[1].X = (float_)yMax;
                     matrix.TransformPoints(points);
                     lineFormatRenderer.DrawLine(points[0], points[1]);
                 }
@@ -70,10 +73,10 @@ namespace PdfSharp.Charting.Renderers
                 lineFormatRenderer = new LineFormatRenderer(gfx, xari.MajorGridlinesLineFormat);
                 for (double x = xMin; x <= xMax; x += xMajorTick)
                 {
-                    points[0].Y = x;
-                    points[0].X = yMin;
-                    points[1].Y = x;
-                    points[1].X = yMax;
+                    points[0].Y = (float_)x;
+                    points[0].X = (float_)yMin;
+                    points[1].Y = (float_)x;
+                    points[1].X = (float_)yMax;
                     matrix.TransformPoints(points);
                     lineFormatRenderer.DrawLine(points[0], points[1]);
                 }
@@ -84,10 +87,10 @@ namespace PdfSharp.Charting.Renderers
                 lineFormatRenderer = new LineFormatRenderer(gfx, yari.MinorGridlinesLineFormat);
                 for (double y = yMin + yMinorTick; y < yMax; y += yMinorTick)
                 {
-                    points[0].Y = xMin;
-                    points[0].X = y;
-                    points[1].Y = xMax;
-                    points[1].X = y;
+                    points[0].Y = (float_)xMin;
+                    points[0].X = (float_)y;
+                    points[1].Y = (float_)xMax;
+                    points[1].X = (float_)y;
                     matrix.TransformPoints(points);
                     lineFormatRenderer.DrawLine(points[0], points[1]);
                 }
@@ -98,10 +101,10 @@ namespace PdfSharp.Charting.Renderers
                 lineFormatRenderer = new LineFormatRenderer(gfx, yari.MajorGridlinesLineFormat);
                 for (double y = yMin; y <= yMax; y += yMajorTick)
                 {
-                    points[0].Y = xMin;
-                    points[0].X = y;
-                    points[1].Y = xMax;
-                    points[1].X = y;
+                    points[0].Y = (float_)xMin;
+                    points[0].X = (float_)y;
+                    points[1].Y = (float_)xMax;
+                    points[1].X = (float_)y;
                     matrix.TransformPoints(points);
                     lineFormatRenderer.DrawLine(points[0], points[1]);
                 }

@@ -11,15 +11,23 @@ namespace PdfSharp.Pdf.Structure
         /// <summary>
         /// Constructor of the abstract <see cref="PdfSharp.Pdf.Structure.PdfAttributesBase"/> class.
         /// </summary>
+        protected PdfAttributesBase()
+        { }
+
+        /// <summary>
+        /// Constructor of the abstract <see cref="PdfSharp.Pdf.Structure.PdfAttributesBase"/> class.
+        /// </summary>
         /// <param name="document">The document that owns this object.</param>
         internal PdfAttributesBase(PdfDocument document)
             : base(document)
         { }
 
         /// <summary>
-        /// Constructor of the abstract <see cref="PdfSharp.Pdf.Structure.PdfAttributesBase"/> class.
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
         /// </summary>
-        protected PdfAttributesBase()
+        internal PdfAttributesBase(PdfDictionary dict)
+            : base(dict)
         { }
 
         /// <summary>

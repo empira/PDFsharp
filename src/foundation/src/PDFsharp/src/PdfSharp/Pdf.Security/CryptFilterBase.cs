@@ -22,12 +22,14 @@ namespace PdfSharp.Pdf.Security
         { }
 
         /// <summary>
-        /// Encrypts the given bytes. Returns true if the crypt filter encrypted the bytes, or false, if the security handler shall do it.
+        /// Encrypts the given bytes. Returns true if the crypt filter encrypted the bytes,
+        /// or false, if the security handler shall do it.
         /// </summary>
         internal abstract bool EncryptForEnteredObject(ref byte[] bytes);
 
         /// <summary>
-        /// Decrypts the given bytes. Returns true if the crypt filter decrypted the bytes, or false, if the security handler shall do it.
+        /// Decrypts the given bytes. Returns true if the crypt filter decrypted the bytes,
+        /// or false, if the security handler shall do it.
         /// </summary>
         internal abstract bool DecryptForEnteredObject(ref byte[] bytes);
     }

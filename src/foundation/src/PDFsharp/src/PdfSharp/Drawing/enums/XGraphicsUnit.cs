@@ -8,6 +8,8 @@ namespace PdfSharp.Drawing
     /// </summary>
     public enum XGraphicsUnit  // NOT the same values as System.Drawing.GraphicsUnit
     {
+        // Values are identical to PdfSharp.Graphics.GraphicsUnit.
+
         /// <summary>
         /// Specifies a printer’s point (1/72 inch) as the unit of measure.
         /// </summary>

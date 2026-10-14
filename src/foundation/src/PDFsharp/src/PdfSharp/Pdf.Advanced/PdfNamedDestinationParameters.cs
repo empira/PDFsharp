@@ -20,7 +20,7 @@ namespace PdfSharp.Pdf.Advanced
 
         static PdfNamedDestinationParameters CreateXYZ(double? left, double? top, double? zoom)
         {
-            return new PdfNamedDestinationParameters(Format("/XYZ {0} {1} {2}", left, top, zoom));
+            return new(Format("/XYZ {0} {1} {2}", left, top, zoom));
         }
 
         /// <summary>
@@ -170,7 +170,6 @@ namespace PdfSharp.Pdf.Advanced
             {
                 objValues[i] = values[i] ?? (object)"null";
             }
-
             return PdfEncoders.Format(format, objValues);
         }
 

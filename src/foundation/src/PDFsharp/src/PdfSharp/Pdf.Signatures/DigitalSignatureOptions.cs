@@ -4,6 +4,8 @@
 using PdfSharp.Drawing;
 using PdfSharp.Pdf.Annotations;
 
+// v7.0.0 Ready
+
 namespace PdfSharp.Pdf.Signatures
 {
     /// <summary>
@@ -34,7 +36,7 @@ namespace PdfSharp.Pdf.Signatures
         /// <summary>
         /// Gets or sets the name of the application used to sign the document.
         /// </summary>
-        public string AppName { get; init; } = "PDFsharp http://www.pdfsharp.net";
+        public string AppName { get; init; } = "PDFsharp http://www.pdfsharp.com";
 
         /// <summary>
         /// The location of the visual representation on the selected page.
@@ -42,7 +44,7 @@ namespace PdfSharp.Pdf.Signatures
         public XRect Rectangle { get; init; }
 
         /// <summary>
-        /// The page index, zero-based, of the page showing the signature.
+        /// The page zero-based index of the page showing the signature.
         /// </summary>
         public int PageIndex { get; init; }
     }

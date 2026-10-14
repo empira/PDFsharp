@@ -804,7 +804,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var style = doc.Styles[styleName];
             style.Should().NotBeNull();
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             foreach (var desiredValue in Enum.GetValues<ParagraphAlignment>())
 #else
             foreach (ParagraphAlignment desiredValue in Enum.GetValues(typeof(ParagraphAlignment)))

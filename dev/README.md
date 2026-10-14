@@ -15,3 +15,9 @@ Builds NuGet packages for release on NuGet.org.
 
 ## run-tests
 Run unit tests on Windows and WSL2.
+
+## set-en.ps1
+Sets UI language for dotnet build etc. to en-US.
+
+## zip-PDFsharp.ps1
+Creates a PDFsharp.zip file.

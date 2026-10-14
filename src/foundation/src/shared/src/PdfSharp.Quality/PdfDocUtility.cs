@@ -5,6 +5,7 @@
 using System.IO;
 #endif
 using System.Reflection;
+using System.Runtime.InteropServices;
 using PdfSharp.Pdf;
 
 namespace PdfSharp.Quality
@@ -21,7 +22,7 @@ namespace PdfSharp.Quality
         /// The title.
         /// </value>
         public string Title { get; set; } = "";
-        
+
         // PageSize, Orientation, ...
     }
 

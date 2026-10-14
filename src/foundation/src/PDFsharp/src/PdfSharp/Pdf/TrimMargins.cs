@@ -1,7 +1,6 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.Diagnostics;
 using PdfSharp.Drawing;
 
 namespace PdfSharp.Pdf
@@ -13,7 +12,7 @@ namespace PdfSharp.Pdf
     public sealed class TrimMargins
     {
         /// <summary>
-        /// Sets all four crop margins simultaneously.
+        /// Sets all four crop margins simultaneously to the specified value.
         /// </summary>
         public XUnit All
         {

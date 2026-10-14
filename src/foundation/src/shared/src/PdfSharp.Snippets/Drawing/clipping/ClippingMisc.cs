@@ -6,13 +6,22 @@ using PdfSharp.Quality;
 
 namespace PdfSharp.Snippets.Drawing
 {
+    /// <summary>
+    /// Snippet that demonstrates clipping.
+    /// </summary>
     public class ClippingMisc : Snippet
     {
+        /// <summary>
+        /// Creates a new ClippingMisc instance.
+        /// </summary>
         public ClippingMisc()
         {
             Title = "Clipping Miscellaneous";
         }
 
+        /// <summary>
+        /// Renders the snippet.
+        /// </summary>
         public override void RenderSnippet(XGraphics gfx)
         {
             // Clipping only.
@@ -20,7 +29,7 @@ namespace PdfSharp.Snippets.Drawing
             {
                 var path = new XGraphicsPath();
                 path.AddPolygon(GetPentagram(70, BoxCenter));
-                
+
                 gfx.IntersectClip(path);
 
                 const int offset = 50;
@@ -49,7 +58,7 @@ namespace PdfSharp.Snippets.Drawing
                 }
                 gfx.EndContainer(cont);
 
-                for (var x = offset; x < BoxWidth -offset; x += 10)
+                for (var x = offset; x < BoxWidth - offset; x += 10)
                     gfx.DrawLine(XPens.DarkRed, new XPoint(x, 0.75 * BoxHeight), new XPoint(x + 0.25 * offset, BoxHeight));
             }
             EndBox(gfx);

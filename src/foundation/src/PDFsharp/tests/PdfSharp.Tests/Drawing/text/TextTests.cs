@@ -1,14 +1,14 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using FluentAssertions;
+using PdfSharp.Internal.OpenType;
 using PdfSharp.Drawing;
 using PdfSharp.Fonts;
-using PdfSharp.Fonts.Internal;
 using PdfSharp.Pdf;
 using PdfSharp.Quality;
 using PdfSharp.TestHelper;
 using Xunit;
+using FluentAssertions;
 
 namespace PdfSharp.Tests.Drawing
 {
@@ -76,10 +76,10 @@ namespace PdfSharp.Tests.Drawing
             gfx.DrawString("glyphs  \ud83d\udca9\ud83d\udc1b\ud83e\udd84\u2615\ud83d\ude82\ud83d\udef8\u2714", font, XBrushes.Black, new XRect(0, 20, width, height), XStringFormats.Center);
             gfx.DrawString("\ud83d\udca9\ud83d\udca9\ud83d\udca9\u2713\u2714\u2705\ud83d\udc1b\ud83d\udc4c\ud83c\udd97\ud83d\udd95 \ud83e\udd84 \ud83e\udd82 \ud83c\udf47 \ud83c\udf46 \u2615 \ud83d\ude82 \ud83d\udef8 \u2601 \u2622 \u264c \u264f \u2705 \u2611 \u2714 \u2122 \ud83c\udd92 \u25fb", font, XBrushes.Black, new XRect(0, 100, width, height), XStringFormats.Center);
 
-            // Save the document...
+            // Save the document…
             string filename = PdfFileUtility.GetTempPdfFullFileName("PDFsharp/UnitTests/Drawing/text/HelloEmoji");
             document.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
@@ -114,10 +114,10 @@ namespace PdfSharp.Tests.Drawing
             var font = new XFont("Arial", 12, XFontStyleEx.Bold, options);
             gfx.DrawString("No\u2011break\u2011hyphen-Test", font, XBrushes.Black, new XRect(0, 50, page.Width.Point, page.Height.Point), XStringFormats.Center);
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("PdfWithNoBreakHyphen");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/text/PdfWithNoBreakHyphen");
             document.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
             // Analyze the drawn text in the PDF’s content stream.
@@ -170,10 +170,10 @@ namespace PdfSharp.Tests.Drawing
                 gfx.DrawString("1 þ", font, XBrushes.Black, new XRect(50, 100, 20, 20), XStringFormats.Center);
             }
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("PdfWithWingdings");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/text/PdfWithWingdings");
             document.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
             containsNotFoundGlyphs.Should().BeFalse();
@@ -350,10 +350,10 @@ namespace PdfSharp.Tests.Drawing
             pos += 30;
 #endif
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("PdfLigatureTest-TextEvent");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/text/PdfLigatureTest-TextEvent");
             document.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
             // Analyze the drawn text in the PDF’s content stream.
@@ -471,10 +471,10 @@ namespace PdfSharp.Tests.Drawing
             gfx.DrawString(text, font, XBrushes.Black, new XRect(50, 62, page.Width.Point, page.Height.Point),
                 XStringFormats.TopLeft);
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("PdfLigatureTest-RenderEvent");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/text/PdfLigatureTest-RenderEvent");
             document.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
             // Analyze the drawn text in the PDF’s content stream.

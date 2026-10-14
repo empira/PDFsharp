@@ -2,6 +2,8 @@
 // See the LICENSE file in the solution root for more information.
 
 using System.IO.Compression;
+using Microsoft.Extensions.Logging;
+using PdfSharp.Logging;
 
 namespace PdfSharp.Pdf.Filters
 {
@@ -127,16 +129,30 @@ namespace PdfSharp.Pdf.Filters
         {
             using var msInput = new MemoryStream(data);
             using var msOutput = new MemoryStream();
+#if true
+            // CMF (Compression Method Flags) must be deflated.
+            byte byte1 = (byte)msInput.ReadByte();
+            if ((byte1 & 0xF) != 0x8)
+                PdfSharpLogHost.Logger.LogWarning("Cannot decode stream. Compression method must be deflate.");
 
+
+            // Flags.
+            byte byte2 = (byte)msInput.ReadByte();
+            if ((byte2 & 0x20) != 0)
+                PdfSharpLogHost.Logger.LogWarning("Cannot decode stream. DeflateStream does not support Adler32.");
+#else
             // ReSharper disable once RedundantAssignment
             var header = new byte[]
             {
                 (byte)msInput.ReadByte(), // CMF (Compression Method and flags)
                 (byte)msInput.ReadByte()  // Flags
             };
-#if true
-            Debug.Assert((header[0] & 0xF) == 0x8); // Compression method must be deflate.
-            Debug.Assert((header[1] & 0x20) == 0);  // DeflateStream does not support Adler32.
+
+            if ((header[0] & 0xF) != 0x8)
+                PdfSharpLogHost.Logger.LogWarning("Can’t decode stream: Wrong header: Compression method must be deflate.");
+
+            if ((header[1] & 0x20) != 0)
+                PdfSharpLogHost.Logger.LogWarning("Can’t decode stream: Wrong header: DeflateStream does not support Adler32.");
 #endif
 
             using var zip = new DeflateStream(msInput, CompressionMode.Decompress, true);
@@ -149,7 +165,6 @@ namespace PdfSharp.Pdf.Filters
                 if (parms?.DecodeParms != null)
                     return StreamDecoder.Decode(msOutput.GetBuffer(), parms.DecodeParms);
             }
-
             return msOutput.GetBuffer();
         }
     }

@@ -2,6 +2,9 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
+#if PSGFX
+using PdfSharp.Graphics.Media.MatrixExtensions;
+#endif
 
 namespace PdfSharp.Charting.Renderers
 {
@@ -33,9 +36,11 @@ namespace PdfSharp.Charting.Renderers
             XRect plotAreaBox = cri.PlotAreaRendererInfo.Rect;
 
             cri.PlotAreaRendererInfo.Matrix = new XMatrix();
-            cri.PlotAreaRendererInfo.Matrix.TranslatePrepend(-yMin, xMin);
-            cri.PlotAreaRendererInfo.Matrix.Scale(plotAreaBox.Width / (yMax - yMin), plotAreaBox.Height / (xMax - xMin), XMatrixOrder.Append);
-            cri.PlotAreaRendererInfo.Matrix.Translate(plotAreaBox.X, plotAreaBox.Y, XMatrixOrder.Append);
+            cri.PlotAreaRendererInfo.Matrix.TranslatePrepend((float_)(-yMin), (float_)xMin);
+            //cri.PlotAreaRendererInfo.Matrix.Scale((float_)(plotAreaBox.Width / (yMax - yMin)), (float_)(plotAreaBox.Height / (xMax - xMin)), XMatrixOrder.Append);
+            cri.PlotAreaRendererInfo.Matrix.ScaleAppend((float_)(plotAreaBox.Width / (yMax - yMin)), (float_)(plotAreaBox.Height / (xMax - xMin)));
+            //cri.PlotAreaRendererInfo.Matrix.Translate(plotAreaBox.X, plotAreaBox.Y, XMatrixOrder.Append);
+            cri.PlotAreaRendererInfo.Matrix.TranslateAppend(plotAreaBox.X, plotAreaBox.Y);
 
             CalcBars();
         }
@@ -71,9 +76,9 @@ namespace PdfSharp.Charting.Renderers
                 {
                     XPoint[] points = new XPoint[2];
                     points[0].X = 0;
-                    points[0].Y = xMin;
+                    points[0].Y = (float_)xMin;
                     points[1].X = 0;
-                    points[1].Y = xMax;
+                    points[1].Y = (float_)xMax;
                     cri.PlotAreaRendererInfo.Matrix.TransformPoints(points);
 
                     if (cri.YAxisRendererInfo.MinorGridlinesLineFormat != null)

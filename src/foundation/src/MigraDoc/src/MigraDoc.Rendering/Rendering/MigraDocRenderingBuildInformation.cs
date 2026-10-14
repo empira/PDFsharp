@@ -1,63 +1,40 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System.Reflection;
-using System.Runtime.Versioning;
-
-#pragma warning disable 0436
-
-namespace MigraDoc.Rendering
+namespace MigraDoc.Rendering  // DELETE
 {
     /// <summary>
-    /// Information about the build of the renderer.
+    /// Use MigraDocProductVersionInformation instead.
     /// </summary>
+    [Obsolete("Do not use this class anymore. It is not useful and will be removed.")]
     public static class MigraDocRenderingBuildInformation
     {
         /// <summary>
-        /// Gets the git semantic version number created by GitVersionTask.
+        /// Gets the git semantic version number.
         /// </summary>
-        public static string GitSemVer => global::GitVersionInformation.SemVer;
+        [Obsolete("Do not use this class anymore. Use 'PdfSharp.Internal.SemVersionInformation.Version' instead.")]
+        public static string GitSemVer => "do not use this anymore";
 
         /// <summary>
-        /// Gets the name of the branch created by GitVersionTask.
+        /// Gets the name of the branch.
         /// </summary>
-        public static string BranchName => global::GitVersionInformation.BranchName;
+        [Obsolete("Do not use this class anymore. Use 'PdfSharp.Internal.SemVersionInformation.BranchName' instead.")]
+        public static string BranchName => "do not use this anymore";
 
         /// <summary>
-        /// Gets the commit date created by GitVersionTask.
+        /// Gets the commit date.
         /// </summary>
-        public static string CommitDate => global::GitVersionInformation.CommitDate;
+        [Obsolete("Do not use this class anymore. Use 'PdfSharp.Internal.SemVersionInformation.CommitDate' instead.")]
+        public static string CommitDate => "do not use this anymore";
 
         /// <summary>
         /// Gets the assembly title attribute value.
         /// </summary>
-        public static string AssemblyTitle
-            => ((AssemblyTitleAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyTitleAttribute), false)[0]).Title;
+        public static string AssemblyTitle => "do not use this anymore";
 
-#if !NET6_0_OR_GREATER
         /// <summary>
         /// Gets the target platform attribute value.
         /// </summary>
-        public static string TargetPlatform
-        {
-            get
-            {
-                // TargetPlatformAttribute is not available under .NET Framework.
-                return "Unknown Target Platform";
-            }
-        }
-#else
-        /// <summary>
-        /// Gets the target platform attribute value.
-        /// </summary>
-        public static string TargetPlatform
-        {
-            get
-            {
-                var attribute = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(TargetPlatformAttribute), false);
-                return attribute.Length == 1 ? ((TargetPlatformAttribute)attribute[0]).PlatformName : "Unknown Target Platform";
-            }
-        }
-#endif
+        public static string TargetPlatform => "do not use this anymore";
     }
 }

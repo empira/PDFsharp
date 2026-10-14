@@ -42,6 +42,7 @@ namespace MigraDoc.Rendering
 
             var path = new XGraphicsPath();
 
+#if !PSGFX
             switch (roundedCorner)
             {
                 case RoundedCorner.TopLeft:
@@ -61,6 +62,7 @@ namespace MigraDoc.Rendering
                     path.AddLine(new XPoint(x, y), new XPoint(x + width, y));
                     break;
             }
+#endif
             path.CloseFigure();
             _gfx.DrawPath(_brush, path);
         }

@@ -86,7 +86,7 @@ namespace MigraDoc.DocumentObjectModel
             if (_fWriteStamp)
             {
                 WriteComment("Created by empira MigraDoc Document Object Model");
-                WriteComment(String.Format("generated file created {0:d} at {0:t}", DateTime.Now));
+                WriteComment(String.Format("generated file created {0:d} at {0:t}", DateTimeOffset.Now));
             }
         }
 
@@ -297,7 +297,7 @@ namespace MigraDoc.DocumentObjectModel
 
         ///// <summary>
         ///// Mighty function to figure out if a blank is required as separator.
-        ///// // Does not work without context...
+        ///// // Does not work without context…
         ///// </summary>
         //bool IsBlankRequired(char left, char right)
         //{

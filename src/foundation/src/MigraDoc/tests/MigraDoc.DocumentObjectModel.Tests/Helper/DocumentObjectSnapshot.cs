@@ -121,7 +121,7 @@ namespace MigraDoc.DocumentObjectModel.Tests.Helper
             ExcludeFromComparison = parentType is not null && Name is not null && PropertiesExcludedFromComparison.TryGetValue(parentType, out var propertiesToExclude) && propertiesToExclude.Contains(Name);
 
             IsNull = obj is null;
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             IsDocumentObjectType = Type != null && Type.IsAssignableTo(typeof(DocumentObject));
 #else
             IsDocumentObjectType = Type != null && Type.IsSubclassOf(typeof(DocumentObject));

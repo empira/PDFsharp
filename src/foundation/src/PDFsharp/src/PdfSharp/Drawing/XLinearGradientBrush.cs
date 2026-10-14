@@ -1,9 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System;
 using System.ComponentModel;
-using PdfSharp.Internal;
+using PdfSharp.Internal.Threading;
 #if GDI
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -120,17 +119,17 @@ namespace PdfSharp.Drawing
         //public XLinearGradientBrush(RectangleF rect, XColor color1, XColor color2, double angle, bool isAngleScaleable);
         //public XLinearGradientBrush(RectangleF rect, XColor color1, XColor color2, double angle, bool isAngleScaleable);
 
-        //private Blend _GetBlend();
-        //private ColorBlend _GetInterpolationColors();
-        //private XColor[] _GetLinearColors();
-        //private RectangleF _GetRectangle();
-        //private Matrix _GetTransform();
-        //private WrapMode _GetWrapMode();
-        //private void _SetBlend(Blend blend);
-        //private void _SetInterpolationColors(ColorBlend blend);
-        //private void _SetLinearColors(XColor color1, XColor color2);
-        //private void _SetTransform(Matrix matrix);
-        //private void _SetWrapMode(WrapMode wrapMode);
+        //Blend _GetBlend();
+        //ColorBlend _GetInterpolationColors();
+        //XColor[] _GetLinearColors();
+        //RectangleF _GetRectangle();
+        //Matrix _GetTransform();
+        //WrapMode _GetWrapMode();
+        //void _SetBlend(Blend blend);
+        //void _SetInterpolationColors(ColorBlend blend);
+        //void _SetLinearColors(XColor color1, XColor color2);
+        //void _SetTransform(Matrix matrix);
+        //void _SetWrapMode(WrapMode wrapMode);
 
         //public override object Clone();
 
@@ -238,7 +237,7 @@ namespace PdfSharp.Drawing
             GdiLinearGradientBrush brush;
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 if (_useRect)
                 {
                     brush = new GdiLinearGradientBrush(_rect.ToRectangleF(),
@@ -254,7 +253,7 @@ namespace PdfSharp.Drawing
                     brush.Transform = _matrix.ToGdiMatrix();
                 //brush.WrapMode = WrapMode.Clamp;
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
             return brush;
         }
 #endif

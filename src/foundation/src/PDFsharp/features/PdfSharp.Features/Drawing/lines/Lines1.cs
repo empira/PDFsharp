@@ -3,7 +3,6 @@
 
 using PdfSharp.Drawing;
 
-//#pragma warning disable 1591
 namespace PdfSharp.Features.Drawing
 {
     /// <summary>

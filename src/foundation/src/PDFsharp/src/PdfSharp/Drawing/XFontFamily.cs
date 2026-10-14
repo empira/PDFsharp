@@ -1,18 +1,19 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using PdfSharp.Internal.OpenType;
+using PdfSharp.Fonts;
+using PdfSharp.Internal;
 #if GDI
 using GdiFont = System.Drawing.Font;
 using GdiFontFamily = System.Drawing.FontFamily;
 using GdiFontStyle = System.Drawing.FontStyle;
 #endif
 #if WPF
+using PdfSharp.Fonts.Internal;
 using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfFontStyle = System.Windows.FontStyle;
 #endif
-using PdfSharp.Fonts;
-using PdfSharp.Fonts.Internal;
-using PdfSharp.Fonts.OpenType;
 
 namespace PdfSharp.Drawing
 {
@@ -62,20 +63,20 @@ namespace PdfSharp.Drawing
         //}
 #endif
 
-        internal static XFontFamily CreateFromName_not_used(string name, bool createPlatformFamily)
-        {
-            XFontFamily fontFamily = new XFontFamily(name);
-            if (createPlatformFamily)
-            {
-#if GDI
-                //fontFamily._gdiFamily = new System.Drawing.FontFamily(name);
-#endif
-#if WPF
-                //fontFamily._wpfFamily = new System.Windows.Media.FontFamily(name);
-#endif
-            }
-            return fontFamily;
-        }
+////        internal static XFontFamily CreateFromName_not_used(string name, bool createPlatformFamily)
+////        {
+////            XFontFamily fontFamily = new XFontFamily(name);
+////            if (createPlatformFamily)
+////            {
+////#if GDI
+////                //fontFamily._gdiFamily = new System.Drawing.FontFamily(name);
+////#endif
+////#if WPF
+////                //fontFamily._wpfFamily = new System.Windows.Media.FontFamily(name);
+////#endif
+////            }
+////            return fontFamily;
+////        }
 
         /// <summary>
         /// An XGlyphTypeface for a font source that comes from a custom font resolver
@@ -84,15 +85,16 @@ namespace PdfSharp.Drawing
         internal static XFontFamily GetOrCreateFontFamily(string name)
         {
             // Custom font resolver face names must not clash with platform family names.
-            var fontFamilyInternal = FontFamilyCache.GetFamilyByName(name);
+            var fontFamilyCache = PsGlobals.Global.Fonts.FontFamilyCache;
+            var fontFamilyInternal = fontFamilyCache.GetFamilyByName(name);
             if (fontFamilyInternal == null)
             {
                 fontFamilyInternal = FontFamilyInternal.GetOrCreateFromName(name, false);
-                fontFamilyInternal = FontFamilyCache.CacheOrGetFontFamily(fontFamilyInternal);
+                fontFamilyInternal = fontFamilyCache.CacheOrGetFontFamily(fontFamilyInternal);
             }
 
             // Create font family and save it in cache. Do not try to create platform objects.
-            return new XFontFamily(fontFamilyInternal);
+            return new(fontFamilyInternal);
         }
 
 #if GDI
@@ -107,7 +109,7 @@ namespace PdfSharp.Drawing
         internal static XFontFamily GetOrCreateFromWpf(WpfFontFamily wpfFontFamily)
         {
             FontFamilyInternal fontFamilyInternal = FontFamilyInternal.GetOrCreateFromWpf(wpfFontFamily);
-            return new XFontFamily(fontFamilyInternal);
+            return new(fontFamilyInternal);
         }
 #endif
 
@@ -132,7 +134,9 @@ namespace PdfSharp.Drawing
         /// </summary>
         public int GetCellAscent(XFontStyleEx style)
         {
-            OpenTypeDescriptor descriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptor(Name, style);
+            var fontDescriptorCache = PsGlobals.Global.Fonts.FontDescriptorCache;
+            OpenTypeFontDescriptor descriptor = (OpenTypeFontDescriptor)fontDescriptorCache.GetOrCreateDescriptor(Name, style);
+
             int result = descriptor.Ascender;
 #if DEBUG_ && GDI
             int gdiValue = _gdiFamily.GetCellAscent((FontStyle)style);
@@ -146,7 +150,8 @@ namespace PdfSharp.Drawing
         /// </summary>
         public int GetCellDescent(XFontStyleEx style)
         {
-            OpenTypeDescriptor descriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptor(Name, style);
+            var fontDescriptorCache = PsGlobals.Global.Fonts.FontDescriptorCache;
+            OpenTypeFontDescriptor descriptor = (OpenTypeFontDescriptor)fontDescriptorCache.GetOrCreateDescriptor(Name, style);
             int result = descriptor.Descender;
 #if DEBUG_ && GDI
             int gdiValue = _gdiFamily.GetCellDescent((FontStyle)style);
@@ -160,7 +165,8 @@ namespace PdfSharp.Drawing
         /// </summary>
         public int GetEmHeight(XFontStyleEx style)
         {
-            OpenTypeDescriptor descriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptor(Name, style);
+            var fontDescriptorCache = PsGlobals.Global.Fonts.FontDescriptorCache;
+            OpenTypeFontDescriptor descriptor = (OpenTypeFontDescriptor)fontDescriptorCache.GetOrCreateDescriptor(Name, style);
             int result = descriptor.UnitsPerEm;
 #if DEBUG_ && GDI
             int gdiValue = _gdiFamily.GetEmHeight((FontStyle)style);
@@ -179,7 +185,8 @@ namespace PdfSharp.Drawing
         /// </summary>
         public int GetLineSpacing(XFontStyleEx style)
         {
-            OpenTypeDescriptor descriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptor(Name, style);
+            var fontDescriptorCache = PsGlobals.Global.Fonts.FontDescriptorCache;
+            OpenTypeFontDescriptor descriptor = (OpenTypeFontDescriptor)fontDescriptorCache.GetOrCreateDescriptor(Name, style);
             int result = descriptor.LineSpacing;
 #if DEBUG_ && GDI
             int gdiValue = _gdiFamily.GetLineSpacing((FontStyle)style);
@@ -204,12 +211,12 @@ namespace PdfSharp.Drawing
             throw new InvalidOperationException("In Core build it is the responsibility of the developer to provide all required font faces.");
 #endif
 #if GDI && !WPF
-            if (GdiFamily != null)
+            if (GdiFamily != null!)
                 return GdiFamily.IsStyleAvailable((GdiFontStyle)xStyle);
             return false;
 #endif
 #if WPF && !GDI
-            if (WpfFamily != null)
+            if (WpfFamily != null!)
                 return FontHelper.IsStyleAvailable(this, xStyle);
             return false;
 #endif

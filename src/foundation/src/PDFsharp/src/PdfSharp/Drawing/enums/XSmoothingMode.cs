@@ -10,7 +10,7 @@ namespace PdfSharp.Drawing
     /// and the edges of filled areas.
     /// </summary>
     [Flags]
-    public enum XSmoothingMode  // same values as System.Drawing.Drawing2D.SmoothingMode
+    public enum XSmoothingMode  // Same values as System.Drawing.Drawing2D.SmoothingMode
     {
         // Not used in PDF rendering process.
 

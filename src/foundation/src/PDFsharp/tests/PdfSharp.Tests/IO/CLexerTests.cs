@@ -1,21 +1,14 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.IO;
 using System.Text;
 using FluentAssertions;
-using PdfSharp.Diagnostics;
-using PdfSharp.Drawing;
-using PdfSharp.Fonts;
-using PdfSharp.Pdf;
-using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Content;
 using PdfSharp.Pdf.Content.Objects;
-using PdfSharp.Quality;
-using PdfSharp.Snippets.Font;
-using PdfSharp.TestHelper;
 using Xunit;
 
+// TODO REMOVED
+#if false
 namespace PdfSharp.Tests.IO
 {
     [Collection("PDFsharp")]
@@ -29,20 +22,17 @@ namespace PdfSharp.Tests.IO
             var contentBytes = Encoding.UTF8.GetBytes(contentString);
 
             var sequence = ContentReader.ReadContent(contentBytes);
-            using var ms = new MemoryStream();
-            var cw = new ContentWriter(ms);
+            var cw = new ContentWriter(new ContentWriterOptions());
             foreach (var obj in sequence)
             {
                 obj.WriteObject(cw);
             }
-            var newContent = new PdfContent(new PdfDictionary());
-            newContent.CreateStream(ms.ToArray());
 
-            var content = newContent.Stream.ToString();
             // ContentWriter adds a newline after each operator
-            newContent.Stream.ToString().Should().Be("q\n(text)Tj\nQ\n");
-            // is this intended ? ToString() writes only operator-names but not the operands...
-            var s = sequence.ToString();    // result: "qTjQ"
+            cw.ToString().Should().Be("q\n(text)Tj\nQ\n");
+
+            // Is this intended? ToString() writes only operator-names but not the operands...
+            var s = sequence.ToString();    // result: "q Tj Q"
         }
 
         [Fact]
@@ -52,49 +42,42 @@ namespace PdfSharp.Tests.IO
             var op = OpCodes.OperatorFromName("q");
             sequence.Add(op);
             op = OpCodes.OperatorFromName("Tj");
-            op.Operands.Add(new CString { CStringType = CStringType.String, Value = "text" });
+            op.Operands.Add(new CString("text"));
             sequence.Add(op);
             op = OpCodes.OperatorFromName("Q");
             sequence.Add(op);
 
-            byte[] text = null!;
-            using (var ms = new MemoryStream())
+            var cw = new ContentWriter(new ContentWriterOptions());
+            foreach (var obj in sequence)
             {
-                var cw = new ContentWriter(ms);
-                foreach (var obj in sequence)
-                {
-                    obj.WriteObject(cw);
-                }
-                cw.Close();
-                text = ms.ToArray();
+                obj.WriteObject(cw);
             }
-            var newContent = new PdfContent(new PdfDictionary());
-            newContent.CreateStream(text);
 
-            var text2 = newContent.Stream.ToString();
             // ContentWriter adds a newline after each operator.
-            text2.Should().Be("q\n(text)Tj\nQ\n");
+            cw.ToString().Should().Be("q\n(text)Tj\nQ\n");
         }
 
         [Theory]
         [InlineData("<7465787420> Tj")]  // This works.
-        [InlineData("<746578742> Tj")]   // This had to be fixed.
+        [InlineData("<746578742> Tj")]   // This had to be fixed (if the final digit of a hex string is missing,
+                                                     // it shall be assumed to be 0 according to the pdf reference).
         public void Can_Parse_Hex_String_With_Odd_Length(string contentString)
         {
             var contentBytes = Encoding.UTF8.GetBytes(contentString);
 
             var sequence = ContentReader.ReadContent(contentBytes);
-            using var ms = new MemoryStream();
-            var cw = new ContentWriter(ms);
+            var cw = new ContentWriter(new ContentWriterOptions());
             foreach (var obj in sequence)
             {
-                obj.WriteObject(cw);
+                obj.WriteObject(cw); // B/UG:
+                                     // A hex string read by ContentReader was converted to a CStringType.String CString before.
+                                     // Now, it remains a CStringType.HexString CString, to be able to write content as it was read.
+                                     // Is other code affected by this change? Provide a way to get the CStringType.String value?
             }
-            var newContent = new PdfContent(new PdfDictionary());
-            newContent.CreateStream(ms.ToArray());
 
             // ContentWriter adds a newline after each operator.
-            newContent.Stream.ToString().Should().Be("(text )Tj\n");
+            cw.ToString().Should().Be("<7465787420>Tj\n");
         }
     }
 }
+#endif

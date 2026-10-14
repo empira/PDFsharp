@@ -32,28 +32,28 @@ namespace PdfSharp.Charting.Renderers
                         cri.LegendRendererInfo.X = remainingRect.Left;
                         cri.LegendRendererInfo.Y = remainingRect.Height / 2 - cri.LegendRendererInfo.Height / 2;
                         double width = cri.LegendRendererInfo.Width + LegendSpacing;
-                        remainingRect.X += width;
-                        remainingRect.Width -= width;
+                        remainingRect.X += (float_)width;
+                        remainingRect.Width -= (float_)width;
                         break;
 
                     case DockingType.Right:
                         cri.LegendRendererInfo.X = remainingRect.Right - cri.LegendRendererInfo.Width;
                         cri.LegendRendererInfo.Y = remainingRect.Height / 2 - cri.LegendRendererInfo.Height / 2;
-                        remainingRect.Width -= cri.LegendRendererInfo.Width + LegendSpacing;
+                        remainingRect.Width -= (float_)(cri.LegendRendererInfo.Width + LegendSpacing);
                         break;
 
                     case DockingType.Top:
                         cri.LegendRendererInfo.X = remainingRect.Width / 2 - cri.LegendRendererInfo.Width / 2;
                         cri.LegendRendererInfo.Y = remainingRect.Top;
                         double height = cri.LegendRendererInfo.Height + LegendSpacing;
-                        remainingRect.Y += height;
-                        remainingRect.Height -= height;
+                        remainingRect.Y += (float_)height;
+                        remainingRect.Height -= (float_)height;
                         break;
 
                     case DockingType.Bottom:
                         cri.LegendRendererInfo.X = remainingRect.Width / 2 - cri.LegendRendererInfo.Width / 2;
                         cri.LegendRendererInfo.Y = remainingRect.Bottom - cri.LegendRendererInfo.Height;
-                        remainingRect.Height -= cri.LegendRendererInfo.Height + LegendSpacing;
+                        remainingRect.Height -= (float_)(cri.LegendRendererInfo.Height + LegendSpacing);
                         break;
                 }
             }

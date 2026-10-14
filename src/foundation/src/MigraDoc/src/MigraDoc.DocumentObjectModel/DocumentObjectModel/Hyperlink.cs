@@ -514,7 +514,7 @@ namespace MigraDoc.DocumentObjectModel
 
         /// <summary>
         /// Gets or sets the target bookmark name of the Hyperlink.
-        ///Used for HyperlinkTypes ExternalBookmark and Bookmark.
+        /// Used for HyperlinkTypes ExternalBookmark and Bookmark.
         /// </summary>
         public string BookmarkName
         {

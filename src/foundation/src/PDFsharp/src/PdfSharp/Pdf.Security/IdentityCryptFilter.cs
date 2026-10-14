@@ -1,15 +1,28 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+#pragma warning disable CS1591 // TODO_DOC: Missing XML comment for publicly visible type or member
+
 namespace PdfSharp.Pdf.Security
 {
     /// <summary>
     /// Represents the identity crypt filter, which shall be provided by a PDF processor and pass the data unchanged.
     /// </summary>
-    class IdentityCryptFilter : CryptFilterBase
+    public class IdentityCryptFilter : CryptFilterBase
     {
+        public IdentityCryptFilter()
+        { }
+
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal IdentityCryptFilter(PdfDictionary dict)
+            : base(dict)
+        { }
+
         internal static IdentityCryptFilter Instance { get; } = new();
-        
+
         /// <summary>
         /// Encrypts the given bytes. Returns true if the crypt filter encrypted the bytes, or false, if the security handler shall do it.
         /// </summary>

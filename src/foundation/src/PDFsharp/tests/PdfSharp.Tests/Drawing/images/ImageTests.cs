@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 #if WPF
@@ -18,6 +18,7 @@ using PdfSharp.Quality;
 using PdfSharp.Snippets.Font;
 using PdfSharp.TestHelper;
 #if CORE
+using PdfSharp.Internal.Imaging;
 #endif
 using Xunit;
 
@@ -71,7 +72,7 @@ namespace PdfSharp.Tests.Drawing
             var font = new XFont("Arial", 20, XFontStyleEx.BoldItalic);
 
             // Draw the text.
-            gfx.DrawString("Hello, dotnet 6.0!", font, XBrushes.Black,
+            gfx.DrawString("Hello, World!", font, XBrushes.Black,
                 new XRect(0, 0, width, height), XStringFormats.Center);
 
             //var imagePath = "PDFsharp/images/samples/jpeg/windows7problem.jpg"; // OK
@@ -123,10 +124,10 @@ namespace PdfSharp.Tests.Drawing
 
             gfx.DrawImage(image, 100, 100, 100, 100);
 
-            // Save the document...
-            string filename = PdfFileUtility.GetTempPdfFileName("ImageTests");
+            // Save the document…
+            string filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/images/ImageTests");
             document.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
@@ -164,7 +165,7 @@ namespace PdfSharp.Tests.Drawing
             var font = new XFont("Arial", 20, XFontStyleEx.BoldItalic);
 
             // Draw the text.
-            gfx.DrawString("Hello, dotnet 6.0!", font, XBrushes.Black,
+            gfx.DrawString("Hello, World!", font, XBrushes.Black,
                 new XRect(0, 0, width, height), XStringFormats.Center);
 
             var imagePaths = new[]
@@ -188,9 +189,10 @@ namespace PdfSharp.Tests.Drawing
             GC.WaitForFullGCComplete();
 
             int offset = 0;
-            int imageHeight = 800 / imagePaths.Length;
+            int imageHeight = 800 / imagePaths.Length / 2;
             foreach (var imagePath in imagePaths)
             {
+                // Read from file.
                 var fullName = IOUtility.GetAssetsPath(imagePath)!;
                 var image = XImage.FromFile(fullName);
 
@@ -198,9 +200,21 @@ namespace PdfSharp.Tests.Drawing
 
                 offset += imageHeight;
             }
+            foreach (var imagePath in imagePaths)
+            {
+                // Read from stream.
+                var fullName = IOUtility.GetAssetsPath(imagePath)!;
+                using (var stream = new FileStream(fullName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    var image = XImage.FromStream(stream);
+                    gfx.DrawImage(image, 10, 10 + offset, imageHeight, imageHeight);
+                }
+
+                offset += imageHeight;
+            }
 
             // Save the document.
-            string filename = PdfFileUtility.GetTempPdfFileName("FlateDecodeImageTest");
+            string filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/images/FlateDecodeImageTest");
             document.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
@@ -237,7 +251,7 @@ namespace PdfSharp.Tests.Drawing
                 // TODO_OLD Check filter types. This works for "/Filter [/FlateDecode /DCTDecode]" only.
                 var imageFilename = Path.Combine(dir, $"image-{Guid.NewGuid():N}.jpg");
 
-                var stream = image.Stream.Value;
+                var stream = image.Stream!.Value;
                 var fd = new FlateDecode();
                 var decoded = fd.Decode(stream);
                 using var fs = new FileStream(imageFilename, FileMode.Create, FileAccess.Write);
@@ -248,7 +262,7 @@ namespace PdfSharp.Tests.Drawing
         }
 
         [Fact]
-        void PDF_with_Image_from_stream()
+        public void PDF_with_Image_from_stream()
         {
             // Attempt to avoid "image file locked" under .NET 4.6.2.
             GC.Collect();
@@ -261,15 +275,18 @@ namespace PdfSharp.Tests.Drawing
 
                 var imagePath = IOUtility.GetAssetsPath("PDFsharp/images/samples/jpeg/truecolorA.jpg")!;
 
-                var stream = new FileStream(imagePath, FileMode.Open);
+                // WPF stores a reference to the stream internally.
+                // We must not destroy the stream before the PDF has been written, otherwise rendering the PDF will fail.
+                // Same for GDI.
+                using var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 using var xImage = XImage.FromStream(stream);
 
                 gfx.DrawImage(xImage, 100, 100, 100, 100);
 
-                // Save the document...
-                var filename = PdfFileUtility.GetTempPdfFileName("ImageFromStream");
+                // Save the document…
+                var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/images/ImageFromStream");
                 document.Save(filename);
-                // ...and start a viewer.
+                // … and start a viewer.
                 PdfFileUtility.ShowDocumentIfDebugging(filename);
             }
 
@@ -278,7 +295,114 @@ namespace PdfSharp.Tests.Drawing
             GC.WaitForFullGCComplete();
         }
 
-#if NET6_0_OR_GREATER
+        [Fact]
+        public void PDF_with_Image_from_private_memorystream()
+        {
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
+            GC.Collect();
+            GC.WaitForFullGCComplete();
+
+            {
+                var document = new PdfDocument();
+                var page = document.AddPage();
+                var gfx = XGraphics.FromPdfPage(page);
+
+                var imagePath = IOUtility.GetAssetsPath("PDFsharp/images/samples/jpeg/truecolorA.jpg")!;
+                var pngBytes = File.ReadAllBytes(imagePath);
+
+                // Create a MemoryStream that does not allow GetBuffer.
+                using var stream = new MemoryStream(pngBytes);
+                using var xImage = XImage.FromStream(stream);
+
+                gfx.DrawImage(xImage, 100, 100, 100, 100);
+
+                // Save the document…
+                var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/images/ImageFromStream");
+                document.Save(filename);
+                // … and start a viewer.
+                PdfFileUtility.ShowDocumentIfDebugging(filename);
+            }
+
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
+            GC.Collect();
+            GC.WaitForFullGCComplete();
+        }
+
+        [Fact]
+        public void PDF_with_Image_from_public_memorystream()
+        {
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
+            GC.Collect();
+            GC.WaitForFullGCComplete();
+
+            {
+                var document = new PdfDocument();
+                var page = document.AddPage();
+                var gfx = XGraphics.FromPdfPage(page);
+
+                var imagePath = IOUtility.GetAssetsPath("PDFsharp/images/samples/jpeg/truecolorA.jpg")!;
+                var pngBytes = File.ReadAllBytes(imagePath);
+
+                // Create a MemoryStream that allows GetBuffer.
+                using var stream = new MemoryStream(pngBytes, 0, pngBytes.Length, false, true);
+                using var xImage = XImage.FromStream(stream);
+
+                gfx.DrawImage(xImage, 100, 100, 100, 100);
+
+                // Save the document…
+                var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/images/ImageFromStream");
+                document.Save(filename);
+                // … and start a viewer.
+                PdfFileUtility.ShowDocumentIfDebugging(filename);
+            }
+
+            // Attempt to avoid "image file locked" under .NET 4.6.2.
+            GC.Collect();
+            GC.WaitForFullGCComplete();
+        }
+
+#if GDI
+        [Fact]
+        public void PDF_with_image_from_GDI()
+        {
+            // Create a new PDF document.
+            var document = new PdfDocument();
+
+#if DEBUG
+            // Create PDF files that are somewhat human-readable.
+            document.Options.Layout = PdfWriterLayout.Verbose;
+#endif
+
+            // Create an empty page in this document.
+            var page = document.AddPage();
+
+            // Get an XGraphics object for drawing on this page.
+            var gfx = XGraphics.FromPdfPage(page);
+
+            var imageFolder = IOUtility.GetAssetsPath("pdfsharp/images/samples/jpeg");
+            var imageFile = Path.Combine(imageFolder ?? throw new InvalidOperationException("Call Download-Assets.ps1 before running the tests."), "truecolorA.jpg");
+
+            var gdiImage = Image.FromFile(imageFile);
+            var xImage = XImage.FromGdiPlusImage(gdiImage);
+            gfx.DrawImage(xImage, new RectangleF(0f, 0f, 128f, 128f));
+
+            imageFolder = IOUtility.GetAssetsPath("pdfsharp/images/samples/png");
+            imageFile = Path.Combine(imageFolder ?? throw new InvalidOperationException("Call Download-Assets.ps1 before running the tests."), "truecolorA.png");
+
+            gdiImage = Image.FromFile(imageFile);
+            xImage = XImage.FromGdiPlusImage(gdiImage);
+            gfx.DrawImage(xImage, new RectangleF(0f, 144f, 128f, 128f));
+
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/images/ImageFromGDI");
+            document.Save(filename);
+            // … and start a viewer.
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
+        }
+
+#endif
+
+#if NET8_0_OR_GREATER
         [Fact]
         public async Task PDF_with_Image_from_http_stream()
         {
@@ -302,10 +426,10 @@ namespace PdfSharp.Tests.Drawing
                 var xImage = XImage.FromBitmapImageStreamThatCannotSeek(imageStream);
                 gfx.DrawImage(xImage, 100, 100, 100, 100);
 
-                // Save the document...
-                var filename = PdfFileUtility.GetTempPdfFileName("ImageFromStream");
+                // Save the document…
+                var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/pdfsharp/drawing/images/ImageFromStream");
                 document.Save(filename);
-                // ...and start a viewer.
+                // … and start a viewer.
                 PdfFileUtility.ShowDocumentIfDebugging(filename);
 #endif
 

@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using MigraDoc.DocumentObjectModel.Tables;
@@ -422,7 +422,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
         }
 
         /// <summary>
-        /// Updates the orientation according to a PageSetup�s PageWidth and PageHeight.
+        /// Updates the orientation according to a PageSetup’s PageWidth and PageHeight.
         /// </summary>
         static void UpdateOrientation(PageSetup pageSetup)
         {

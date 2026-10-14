@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member because it is for internal use only.
@@ -99,8 +99,16 @@ namespace PdfSharp.Pdf.IO
 
         public ReaderProblemDelegate? ReaderProblemCallback { get; set; }
 
-        // Testing only
+        /// <summary>
+        /// Allow opening owner password secured PDF files for modification without specifying the owner password.
+        /// The default behavior is to throw an exception and deny the modification to respect the author’s intention.
+        /// </summary>
+        public bool AllowModifyWithoutOwnerPassword { get; set; }
 
-        //public bool UseOldCode { get; set; } = false;
+        /// <summary>
+        /// Do not reset the encryption of an opened document and reuse these settings when saving.
+        /// The default behaviour is to reset the encryption, so that it’s on the user to set an encryption before saving.
+        /// </summary>
+        public bool DoNotResetEncryption { get; set; }
     }
 }

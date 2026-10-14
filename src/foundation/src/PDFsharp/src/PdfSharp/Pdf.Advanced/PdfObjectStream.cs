@@ -1,6 +1,8 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using Microsoft.Extensions.Logging;
+using PdfSharp.Logging;
 using PdfSharp.Pdf.IO;
 
 namespace PdfSharp.Pdf.Advanced
@@ -28,16 +30,28 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         /// <summary>
-        /// Initializes a new instance from an existing dictionary. Used for object type transformation.
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfObjectStream(PdfDictionary dict)
+            : base(dict)
+        { }
+
+        /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
         /// </summary>
         internal PdfObjectStream(PdfDictionary dict, Parser documentParser)
             : base(dict)
         {
             int n = Elements.GetInteger(Keys.N);
             int first = Elements.GetInteger(Keys.First);
-            Stream.TryUncompress();
+            Stream?.TryUncompress();
 
-            var parser = new Parser(_document, new MemoryStream(Stream.Value), documentParser);
+            if (Stream == null)
+                throw new InvalidOperationException("PdfObjectStream has no stream. Unexpected error.");
+
+            var parser = new Parser(base.Document, new MemoryStream(Stream.UnfilteredValue), documentParser);
             _header = parser.ReadObjectStreamHeader(n, first);
 
 #if DEBUG_ && CORE
@@ -49,57 +63,36 @@ namespace PdfSharp.Pdf.Advanced
         }
 
         /// <summary>
-        /// Reads all references inside the ObjectStream and returns all ObjectIDs and offsets for its objects.
+        /// Returns all ObjectIDs and read positions for the objects inside this ObjectStream.
         /// </summary>
-        internal ICollection<KeyValuePair<PdfObjectID, SizeType>> ReadReferencesAndOffsets(PdfCrossReferenceTable xrefTable)
+        internal ICollection<KeyValuePair<PdfObjectID, SizeType>> ReadObjectIDsWithOffsets()
         {
             var length = _header.Length;
-            _objectOffsets = [];
 
-            ////// Create parser for stream.
-            ////Parser parser = new Parser(_document, new MemoryStream(Stream.Value));
-            for (var idx = 0; idx < length; idx++)
+            Dictionary<PdfObjectID, SizeType> objectOffsets = [];
+
+            // For duplicate IDs the newest object should be read first, to ignore older objects with the same ID read later.
+            // Therefore, we read the offsets from high to low.
+            for (var idx = length - 1; idx >= 0; idx--)
             {
                 int objectNumber = _header[idx][0];
                 int offset = _header[idx][1];
 
                 var objectID = new PdfObjectID(objectNumber);
 
-                // HACK_OLD: -1 indicates compressed object.
-                var iref = new PdfReference(objectID, -1);
-                ////iref.ObjectID = objectID;
-                ////iref.Value = xrefStream;
-                
-                _objectOffsets.Add(objectID, offset);
-
-                if (!xrefTable.Contains(iref.ObjectID))
+                // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd
+                if (!objectOffsets.ContainsKey(objectID))
                 {
-                    xrefTable.Add(iref);
+                    objectOffsets.Add(objectID, offset);
                 }
                 else
                 {
-#if DEBUG_
-                    _ = typeof(int);
-#endif
+                    // Ignore object with objectID already on the list.
+                    PdfSharpLogHost.PdfReadingLogger.LogWarning("Ignoring object with ID {objectID} while reading offsets in object stream {objectStreamId} because an object with that ID was already read in that object stream.", objectID, ObjectID);
                 }
             }
 
-            return _objectOffsets;
-        }
-
-        /// <summary>
-        /// Tries to get the position of the PdfObject inside this ObjectStream.
-        /// </summary>
-        internal bool TryGetObjectOffset(PdfObjectID pdfObjectID, out SizeType offset, SuppressExceptions? suppressObjectOrderExceptions)
-        {
-            if (_objectOffsets == null)
-            {
-                SuppressExceptions.HandleError(suppressObjectOrderExceptions, () => throw TH.InvalidOperationException_ReferencesOfObjectStreamNotYetRead());
-                offset = -1;
-                return false;
-            }
-
-            return _objectOffsets.TryGetValue(pdfObjectID, out offset);
+            return objectOffsets;
         }
 
         /// <summary>
@@ -109,11 +102,6 @@ namespace PdfSharp.Pdf.Advanced
         /// i.e. the byte offset plus First entry.
         /// </summary>
         readonly int[][] _header = default!; // Reference: Page 102
-
-        /// <summary>
-        /// Manages the read positions for all PdfObjects inside this ObjectStream.
-        /// </summary>
-        Dictionary<PdfObjectID, SizeType>? _objectOffsets;
 
         /// <summary>
         /// Predefined keys common to all font dictionaries.

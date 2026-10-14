@@ -2,7 +2,11 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Diagnostics;
+#if PSGFX
+using PdfSharp.Graphics.Media.MatrixExtensions;
+#else
 using PdfSharp.Drawing;
+#endif
 
 namespace PdfSharp.Charting.Renderers
 {
@@ -69,10 +73,10 @@ namespace PdfSharp.Charting.Renderers
                             yMax += y;
                         }
 
-                        points[0].X = x0; // upper left
-                        points[0].Y = y1;
-                        points[1].X = x1; // lower right
-                        points[1].Y = y0;
+                        points[0].X = (float_)x0; // upper left
+                        points[0].Y = (float_)y1;
+                        points[1].X = (float_)x1; // lower right
+                        points[1].Y = (float_)y0;
 
                         cri.PlotAreaRendererInfo.Matrix.TransformPoints(points);
 
@@ -89,7 +93,7 @@ namespace PdfSharp.Charting.Renderers
         /// <summary>
         /// Stacked columns are always inside.
         /// </summary>
-        protected override bool IsDataInside(double yMin, double yMax, double yValue) 
+        protected override bool IsDataInside(double yMin, double yMax, double yValue)
             => true;
     }
 }

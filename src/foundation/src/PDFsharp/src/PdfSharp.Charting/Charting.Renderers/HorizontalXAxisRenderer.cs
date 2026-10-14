@@ -110,9 +110,9 @@ namespace PdfSharp.Charting.Renderers
                 tickLabelStep = xari.Width / countTickLabels;
 
             //XPoint startPos = new XPoint(xari.X + tickLabelStep / 2, xari.Y + /*xari.TickLabelsHeight +*/ xari.MajorTickMarkWidth);
-            XPoint startPos = new XPoint(xari.X + tickLabelStep / 2, xari.Y + xari.TickLabelsHeight);
+            XPoint startPos = new XPoint((float_)(xari.X + tickLabelStep / 2), (float_)(xari.Y + xari.TickLabelsHeight));
             if (xari.MajorTickMark != TickMarkType.None)
-                startPos.Y += xari.MajorTickMarkWidth;
+                startPos.Y += (float_)xari.MajorTickMarkWidth;
             foreach (var xs in (xari.XValues ?? throw new InvalidOperationException()).Cast<XSeries>()) // BUG_OLD???
             {
                 for (int idx = 0; idx < countTickLabels && idx < xs.Count; idx++)
@@ -124,7 +124,7 @@ namespace PdfSharp.Charting.Renderers
                         XSize size = gfx.MeasureString(tickLabel, xari.TickLabelsFont);
                         gfx.DrawString(tickLabel, xari.TickLabelsFont, xari.TickLabelsBrush, startPos.X - size.Width / 2, startPos.Y);
                     }
-                    startPos.X += tickLabelStep;
+                    startPos.X += (float_)tickLabelStep;
                 }
             }
 
@@ -142,13 +142,13 @@ namespace PdfSharp.Charting.Renderers
             {
                 int countMinorTickMarks = (int)(xMax / xMinorTick);
                 double minorTickMarkStep = xari.Width / countMinorTickMarks;
-                startPos.X = xari.X;
+                startPos.X = (float_)xari.X;
                 for (int x = 0; x <= countMinorTickMarks; x++)
                 {
-                    points[0].X = startPos.X + minorTickMarkStep * x;
-                    points[0].Y = minorTickMarkStart;
-                    points[1].X = points[0].X;
-                    points[1].Y = minorTickMarkEnd;
+                    points[0].X = (float_)(startPos.X + minorTickMarkStep * x);
+                    points[0].Y = (float_)minorTickMarkStart;
+                    points[1].X = (float_)points[0].X;
+                    points[1].Y = (float_)minorTickMarkEnd;
                     lineFormatRenderer.DrawLine(points[0], points[1]);
                 }
             }
@@ -160,13 +160,13 @@ namespace PdfSharp.Charting.Renderers
                 double majorTickMarkStep = xari.Width;
                 if (countMajorTickMarks != 0)
                     majorTickMarkStep = xari.Width / countMajorTickMarks;
-                startPos.X = xari.X;
+                startPos.X = (float_)xari.X;
                 for (int x = 0; x <= countMajorTickMarks; x++)
                 {
-                    points[0].X = startPos.X + majorTickMarkStep * x;
-                    points[0].Y = majorTickMarkStart;
-                    points[1].X = points[0].X;
-                    points[1].Y = majorTickMarkEnd;
+                    points[0].X = (float_)(startPos.X + majorTickMarkStep * x);
+                    points[0].Y = (float_)majorTickMarkStart;
+                    points[1].X = (float_)points[0].X;
+                    points[1].Y = (float_)majorTickMarkEnd;
                     lineFormatRenderer.DrawLine(points[0], points[1]);
                 }
             }
@@ -174,10 +174,10 @@ namespace PdfSharp.Charting.Renderers
             // Axis.
             if (xari.LineFormat != null)
             {
-                points[0].X = xari.X;
-                points[0].Y = xari.Y;
-                points[1].X = xari.X + xari.Width;
-                points[1].Y = xari.Y;
+                points[0].X = (float_)xari.X;
+                points[0].Y = (float_)xari.Y;
+                points[1].X = (float_)(xari.X + xari.Width);
+                points[1].Y = (float_)xari.Y;
                 if (xari.MajorTickMark != TickMarkType.None)
                 {
                     points[0].X -= xari.LineFormat.Width / 2;

@@ -156,7 +156,7 @@ namespace PdfSharp
                 => "8.0";
 #elif NET7_0_OR_GREATER
                 => "7.0";
-#elif NET6_0_OR_GREATER
+#elif NET8_0_OR_GREATER
                 => "6.0";
 #elif NET481
                 => "4.8";
@@ -185,29 +185,29 @@ namespace PdfSharp
             /// </summary>
             public static bool IsWindows =>
                 _isWindows ??= RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-            private static bool? _isWindows;
+            static bool? _isWindows;
 
             /// <summary>
             /// Indicates whether the current application is running on Linux.
             /// </summary>
             public static bool IsLinux =>
                 _isLinux ??= RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-            private static bool? _isLinux;
+            static bool? _isLinux;
 
             /// <summary>
             /// Indicates whether the current application is running on OSX.
             /// </summary>
             public static bool IsOSX =>
                 _isOSX ??= RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
-            private static bool? _isOSX;
+            static bool? _isOSX;
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             /// <summary>
             /// Indicates whether the current application is running on FreeBSD.
             /// </summary>
             public static bool IsFreeBSD =>
                 _isFreeBSD ??= RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD);
-            private static bool? _isFreeBSD;
+            static bool? _isFreeBSD;
 #endif
 
             /// <summary>
@@ -218,7 +218,7 @@ namespace PdfSharp
             public static bool IsWsl2 =>
                 _isWsl2 ??= IsLinux &&
                 Environment.GetEnvironmentVariable("WSL_DISTRO_NAME") != null;
-            private static bool? _isWsl2;
+            static bool? _isWsl2;
             // New implementation checking Environment.GetEnvironmentVariable("WSL_DISTRO_NAME").
             // Checking WSL_DISTRO_NAME seems to be the best way to check whether we are under WSL2.
 #else
@@ -256,7 +256,7 @@ namespace PdfSharp
                         return "LNX";
                     if (IsOSX)
                         return "OSX";
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                     if (IsFreeBSD)
                         return "BSD";
 #endif

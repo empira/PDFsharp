@@ -21,7 +21,7 @@ namespace MigraDoc.GrammarByExample
 
             var folder0 = @"D:\GBE-Output\";
             Directory.CreateDirectory(DdlGbeTestBase.WslPathHack(folder0));
-            var now = DateTime.Now;
+            var now = DateTimeOffset.Now;
             //Console.WriteLine($"Now {now})");
 #if GBE
             const string tag = "GBE";
@@ -32,12 +32,24 @@ namespace MigraDoc.GrammarByExample
 #elif WPF
             const string tag = "WPF";
 #endif
-#if NET8_0
+#if NET462
+            const string tag2 = "NET462";
+#elif NET12_0
+            const string tag2 = "NET120";
+#elif NET11_0
+            const string tag2 = "NET110";
+#elif NET10_0
+            const string tag2 = "NET100";
+#elif NET9_0
+            const string tag2 = "NET90";
+#elif NET8_0
             const string tag2 = "NET80";
+#elif NET7_0
+            const string tag2 = "NET70";
 #elif NET6_0
             const string tag2 = "NET60";
-#elif NET462
-            const string tag2 = "NET462";
+#elif NET5_0
+            const string tag2 = "NET50";
 #elif NETSTANDARD2_0
             const string tag2 = "NETstandard20";
 #else

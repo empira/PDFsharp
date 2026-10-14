@@ -14,20 +14,15 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfLongInteger"/> class.
         /// </summary>
-        public PdfLongInteger()
-        {
-            IsLongInteger = true;
-        }
+        public PdfLongInteger() 
+            => IsLongInteger = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfLongInteger"/> class.
         /// </summary>
         /// <param name="value">The value.</param>
-        public PdfLongInteger(long value)
-        {
-            IsLongInteger = true;
-            Value = value;
-        }
+        public PdfLongInteger(long value):this() 
+            => Value = value;
 
         /// <summary>
         /// Gets the value as 64-bit integer.
@@ -58,8 +53,6 @@ namespace PdfSharp.Pdf
             => Value;
 
         DateTime IConvertible.ToDateTime(IFormatProvider? provider)
-            //// TO-DO: Add PdfInteger.ToDateTime implementation
-            // => new DateTime();
             => throw new InvalidCastException();
 
         float IConvertible.ToSingle(IFormatProvider? provider)
@@ -98,11 +91,8 @@ namespace PdfSharp.Pdf
         decimal IConvertible.ToDecimal(IFormatProvider? provider)
             => Value;
 
-        object IConvertible.ToType(Type conversionType, IFormatProvider? provider)
-        {
-            // TODO_OLD: Add PdfInteger.ToType implementation
-            return null!;
-        }
+        object IConvertible.ToType(Type conversionType, IFormatProvider? provider) 
+            => throw new NotImplementedException("Conversion not implemented.");
 
         uint IConvertible.ToUInt32(IFormatProvider? provider)
             => Convert.ToUInt32(Value);

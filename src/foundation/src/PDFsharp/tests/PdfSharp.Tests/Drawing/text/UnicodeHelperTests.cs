@@ -1,11 +1,9 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using FluentAssertions;
-using PdfSharp.Fonts;
-using PdfSharp.Fonts.Internal;
-using PdfSharp.Snippets.Font;
+using PdfSharp.Internal.OpenType;
 using Xunit;
+using FluentAssertions;
 
 namespace PdfSharp.Tests.Drawing
 {

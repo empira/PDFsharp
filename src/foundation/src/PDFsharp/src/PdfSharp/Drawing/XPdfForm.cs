@@ -19,7 +19,7 @@ namespace PdfSharp.Drawing
     /// PDF document. XPdfForm objects are used like images to draw an existing PDF page of an external
     /// document in the current document. XPdfForm objects can only be placed in PDF documents. If you try
     /// to draw them using a XGraphics based on an GDI+ context no action is taken if no placeholder image
-    /// is specified. Otherwise, the place holder is drawn.
+    /// is specified. Otherwise, the placeholder is drawn.
     /// </summary>
     public class XPdfForm : XForm
     {
@@ -90,7 +90,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         internal override void Finish()
         {
-            if (_formState == FormState.NotATemplate || _formState == FormState.Finished)
+            if (_formState is FormState.NotATemplate or FormState.Finished)
                 return;
 
             base.Finish();
@@ -110,10 +110,10 @@ namespace PdfSharp.Drawing
             //  if (_document.Options.CompressContentStreams)
             //  {
             //    _pdfForm.Stream.Value = Filtering.FlateDecode.Encode(pdfForm.Stream.Value);
-            //    _pdfForm.Elements["/Filter"] = new PdfName("/FlateDecode");
+            //    _pdfForm.Elements.SetName(PdfStream.Keys.Filter, "/FlateDecode");
             //  }
             //  int length = _pdfForm.Stream.Length;
-            //  _pdfForm.Elements.SetInteger("/Length", length);
+            //  _pdfForm.Elements.SetInteger(PdfStream.Keys.Length, length);
             //}
         }
 
@@ -267,14 +267,24 @@ namespace PdfSharp.Drawing
         /// </summary>
         public override XMatrix Transform
         {
-            get => _transform;
+            //get => _transform;
+            //set
+            //{
+            //    if (_transform != value)
+            //    {
+            //        // Discard PdfFromXObject when Transform changed.
+            //        _pdfForm = null;
+            //        _transform = value;
+            //    }
+            //}
+            get => base.Transform;
             set
             {
-                if (_transform != value)
+                if (Transform != value)
                 {
                     // Discard PdfFromXObject when Transform changed.
                     _pdfForm = null;
-                    _transform = value;
+                    Transform = value;
                 }
             }
         }
@@ -339,7 +349,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         public static string ExtractPageNumber(string path, out int pageNumber)
         {
-            // Note: duplicated in class ImageHelper.
+            // This code is duplicated in class ImageHelper.
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
 

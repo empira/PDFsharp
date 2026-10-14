@@ -18,7 +18,7 @@ namespace PdfSharp.TestHelper
             var pdfPage = pdfDocument.Pages[pageIdx];
             var contentReference = (PdfReference)pdfPage.Contents.Elements.Items[0];
             var content = (PdfDictionary)contentReference.Value;
-            var contentStream = content.Stream.ToString();
+            var contentStream = content.Stream?.ToString() ?? "";
 
             return contentStream;
         }
@@ -90,14 +90,13 @@ namespace PdfSharp.TestHelper
                 var page = pdfDocument.Pages[0];
 
                 // Get the font dictionary.
-                var fontDict = (PdfDictionary)page.Resources.Elements[PdfResources.Keys.Font]!;
+                var fontDict = page.Resources.Elements.GetDictionary(PdfResources.Keys.Font)!;
 
                 // Get the font object;
-                var fontObject = fontDict.Elements[fontId]!;
-                PdfReference.Dereference(ref fontObject);
+                var fontObject = fontDict.Elements.GetObject<PdfFont>(fontId)!;
 
                 // Get the font descriptor.
-                var fontDescriptor = ((PdfFont)fontObject).FontDescriptor;
+                var fontDescriptor = fontObject.FontDescriptor;
 
                 // Get the font name.
                 var fontName = fontDescriptor.FontName;

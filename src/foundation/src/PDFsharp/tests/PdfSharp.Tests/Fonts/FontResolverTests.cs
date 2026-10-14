@@ -64,30 +64,31 @@ namespace PdfSharp.Tests.Fonts
             SegoeUIShouldFail();
 
             var arial = new XFont(ArialName, 10, XFontStyleEx.Regular);
+            var name = arial.Name;
             ArialShouldSucceed();
-            arial.GlyphTypeface.FaceName.Should().Be("Arial");
+            arial.GlyphTypeface.FamilyName.Should().Be("Arial");
 
             var times = new XFont(TimesName, 10, XFontStyleEx.Regular);
-            times.GlyphTypeface.FaceName.Should().Be("Times New Roman");
+            times.GlyphTypeface.FamilyName.Should().Be("Times New Roman");
 
             var courier = new XFont(CourierName, 10, XFontStyleEx.Regular);
-            courier.GlyphTypeface.FaceName.Should().Be("Courier New");
+            courier.GlyphTypeface.FamilyName.Should().Be("Courier New");
 
             var verdana = new XFont(VerdanaName, 10, XFontStyleEx.Regular);
-            verdana.GlyphTypeface.FaceName.Should().Be("Verdana");
+            verdana.GlyphTypeface.FamilyName.Should().Be("Verdana");
 
             var lucida = new XFont(LucidaName, 10, XFontStyleEx.Regular);
-            lucida.GlyphTypeface.FaceName.Should().Be("Lucida Console");
+            lucida.GlyphTypeface.FamilyName.Should().Be("Lucida Console");
 
             // Test Symbol font because it is a symbol font.
             var symbol = new XFont(SymbolName, 10, XFontStyleEx.Regular);
             var symbolB = new XFont(SymbolName, 10, XFontStyleEx.Bold, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.BoldSimulation);
             var symbolI = new XFont(SymbolName, 10, XFontStyleEx.Italic, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.ItalicSimulation);
             var symbolBI = new XFont(SymbolName, 10, XFontStyleEx.BoldItalic, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.BoldItalicSimulation);
-            symbol.GlyphTypeface.FaceName.Should().Be("Symbol");
-            symbolB.GlyphTypeface.FaceName.Should().Be("Symbol");
-            symbolI.GlyphTypeface.FaceName.Should().Be("Symbol");
-            symbolBI.GlyphTypeface.FaceName.Should().Be("Symbol");
+            symbol.GlyphTypeface.FamilyName.Should().Be("Symbol");
+            symbolB.GlyphTypeface.FamilyName.Should().Be("Symbol");
+            symbolI.GlyphTypeface.FamilyName.Should().Be("Symbol");
+            symbolBI.GlyphTypeface.FamilyName.Should().Be("Symbol");
             symbol.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.None);
             symbolB.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.BoldSimulation);
             symbolI.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.ItalicSimulation);
@@ -98,10 +99,10 @@ namespace PdfSharp.Tests.Fonts
             var winDingsB = new XFont(WingdingsName, 10, XFontStyleEx.Bold, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.BoldSimulation);
             var winDingsI = new XFont(WingdingsName, 10, XFontStyleEx.Italic, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.ItalicSimulation);
             var winDingsBI = new XFont(WingdingsName, 10, XFontStyleEx.BoldItalic, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.BoldItalicSimulation);
-            winDings.GlyphTypeface.FaceName.Should().Be("Wingdings");
-            winDingsB.GlyphTypeface.FaceName.Should().Be("Wingdings");
-            winDingsI.GlyphTypeface.FaceName.Should().Be("Wingdings");
-            winDingsBI.GlyphTypeface.FaceName.Should().Be("Wingdings");
+            winDings.GlyphTypeface.FamilyName.Should().Be("Wingdings");
+            winDingsB.GlyphTypeface.FamilyName.Should().Be("Wingdings");
+            winDingsI.GlyphTypeface.FamilyName.Should().Be("Wingdings");
+            winDingsBI.GlyphTypeface.FamilyName.Should().Be("Wingdings");
             winDings.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.None);
             winDingsB.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.BoldSimulation);
             winDingsI.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.ItalicSimulation);
@@ -211,47 +212,47 @@ namespace PdfSharp.Tests.Fonts
             var arial0 = new XFont(ArialName, 10, XFontStyleEx.Regular);
             var arial1 = new XFont(ArialName, 10, XFontStyleEx.Italic);
             var arial = new XFont(ArialName, 10, XFontStyleEx.Bold);
-            arial0.GlyphTypeface.FaceName.Should().Be("Arial");
-            arial1.GlyphTypeface.FaceName.Should().Be("Arial Italic");
-            arial.GlyphTypeface.FaceName.Should().Be("Arial Bold");
+            arial0.GlyphTypeface.FontName.Should().Be("Arial");
+            arial1.GlyphTypeface.FontName.Should().Be("Arial Italic");
+            arial.GlyphTypeface.FontName.Should().Be("Arial Bold");
 
             var times0 = new XFont(TimesName, 10, XFontStyleEx.Regular);
             var times1 = new XFont(TimesName, 10, XFontStyleEx.Bold);
             var times = new XFont(TimesName, 10, XFontStyleEx.Italic);
-            times0.GlyphTypeface.FaceName.Should().Be("Times New Roman");
-            times1.GlyphTypeface.FaceName.Should().Be("Times New Roman Bold");
+            times0.GlyphTypeface.FontName.Should().Be("Times New Roman");
+            times1.GlyphTypeface.FontName.Should().Be("Times New Roman Bold");
             times.GlyphTypeface.DisplayName.Should().Be("Times New Roman Italic");
 
             var courier0 = new XFont(CourierName, 10, XFontStyleEx.Bold);
             var courier1 = new XFont(CourierName, 10, XFontStyleEx.Bold);
             var courier = new XFont(CourierName, 10, XFontStyleEx.BoldItalic);
-            courier0.GlyphTypeface.FaceName.Should().Be("Courier New Bold");
-            courier1.GlyphTypeface.FaceName.Should().Be("Courier New Bold");
-            courier.GlyphTypeface.FaceName.Should().Be("Courier New Bold Italic");
+            courier0.GlyphTypeface.FontName.Should().Be("Courier New Bold");
+            courier1.GlyphTypeface.FontName.Should().Be("Courier New Bold");
+            courier.GlyphTypeface.FontName.Should().Be("Courier New Bold Italic");
 
             var verdana0 = new XFont(VerdanaName, 10, XFontStyleEx.Bold);
             var verdana1 = new XFont(VerdanaName, 10, XFontStyleEx.Bold);
             var verdana = new XFont(VerdanaName, 10, XFontStyleEx.BoldItalic);
-            verdana0.GlyphTypeface.FaceName.Should().Be("Verdana Bold");
-            verdana1.GlyphTypeface.FaceName.Should().Be("Verdana Bold");
-            verdana.GlyphTypeface.FaceName.Should().Be("Verdana Bold Italic");
+            verdana0.GlyphTypeface.FontName.Should().Be("Verdana Bold");
+            verdana1.GlyphTypeface.FontName.Should().Be("Verdana Bold");
+            verdana.GlyphTypeface.FontName.Should().Be("Verdana Bold Italic");
 
             var lucida0 = new XFont(LucidaName, 10, XFontStyleEx.Regular);
             var lucida1 = new XFont(LucidaName, 10, XFontStyleEx.Italic);
             var lucida = new XFont(LucidaName, 10, XFontStyleEx.Italic);
-            lucida0.GlyphTypeface.FaceName.Should().Be("Lucida Console");
-            lucida1.GlyphTypeface.FaceName.Should().Be("Lucida Console");
-            lucida.GlyphTypeface.FaceName.Should().Be("Lucida Console");
+            lucida0.GlyphTypeface.FontName.Should().Be("Lucida Console");
+            lucida1.GlyphTypeface.FontName.Should().Be("Lucida Console");
+            lucida.GlyphTypeface.FontName.Should().Be("Lucida Console");
 
             var symbol0 = new XFont(SymbolName, 10, XFontStyleEx.Italic, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.ItalicSimulation);
             var symbol1 = new XFont(SymbolName, 10, XFontStyleEx.Bold, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.BoldSimulation);
             var symbol = new XFont(SymbolName, 10, XFontStyleEx.BoldItalic, XPdfFontOptions.AutomaticEncoding, XStyleSimulations.BoldItalicSimulation);
-            symbol0.GlyphTypeface.FaceName.Should().Be("Symbol");
+            symbol0.GlyphTypeface.FontName.Should().Be("Symbol");
             symbol0.IsSymbolFont.Should().BeTrue();
             symbol0.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.ItalicSimulation);
-            symbol1.GlyphTypeface.FaceName.Should().Be("Symbol");
+            symbol1.GlyphTypeface.FontName.Should().Be("Symbol");
             symbol1.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.BoldSimulation);
-            symbol.GlyphTypeface.FaceName.Should().Be("Symbol");
+            symbol.GlyphTypeface.FontName.Should().Be("Symbol");
             symbol.GlyphTypeface.StyleSimulations.Should().Be(XStyleSimulations.BoldItalicSimulation);
 
             var arialCount = FontHelper.CountGlyphs(arial);
@@ -294,21 +295,21 @@ namespace PdfSharp.Tests.Fonts
 #endif
             // Platform font resolver creates Arial.
             var arial = new XFont(ArialName, 10, XFontStyleEx.Regular);
-            arial.GlyphTypeface.FaceName.Should().Be("Arial");
+            arial.GlyphTypeface.FontName.Should().Be("Arial");
 #if CORE
             // Fallback font resolver creates Segoe WP.
             var dummy = new XFont("Dummy", 10, XFontStyleEx.Regular);
-            dummy.GlyphTypeface.FaceName.Should().Be("Segoe WP");
+            dummy.GlyphTypeface.FamilyName.Should().Be("Segoe WP");
 #endif
 #if GDI
             // Fallback font resolver creates Segoe WP.
             var dummy = new XFont("Dummy", 10, XFontStyleEx.Regular);
-            dummy.GlyphTypeface.FaceName.Should().Be("Segoe WP");
+            dummy.GlyphTypeface.FontName.Should().Be("Segoe WP");
 #endif
 #if WPF
             // Fallback font resolver creates Segoe WP.
             var dummy = new XFont("Dummy", 10, XFontStyleEx.Regular);
-            dummy.GlyphTypeface.FaceName.Should().Be("Segoe WP");
+            dummy.GlyphTypeface.FamilyName.Should().Be("Segoe WP");
 #endif
         }
 
@@ -335,7 +336,7 @@ namespace PdfSharp.Tests.Fonts
             var xfilesB = new XFont(XFilesName, 10, XFontStyleEx.Bold);
             var xfilesI = new XFont(XFilesName, 10, XFontStyleEx.Italic);
             var xfilesBI = new XFont(XFilesName, 10, XFontStyleEx.BoldItalic);
-            xfilesR.GlyphTypeface.FaceName.Should().Be("X-Files");
+            xfilesR.GlyphTypeface.FontName.Should().Be("X-Files");
 
             var xfilesCount = FontHelper.CountGlyphs(xfilesR);
 
@@ -363,11 +364,11 @@ namespace PdfSharp.Tests.Fonts
             // Arial fails not no because of fallback font resolver
             // but was resolved as Segoe WP.
             var arial = new XFont(ArialName, 10, XFontStyleEx.Regular);
-            arial.GlyphTypeface.FaceName.Should().Be("Segoe WP");
+            arial.GlyphTypeface.FontName.Should().Be("Segoe WP");
 
             // X-Files resolved by font resolver.
             var xfiles = new XFont(XFilesName, 10, XFontStyleEx.Regular);
-            xfiles.GlyphTypeface.FaceName.Should().Be("X-Files");
+            xfiles.GlyphTypeface.FontName.Should().Be("X-Files");
         }
 
         [Fact]
@@ -397,11 +398,11 @@ namespace PdfSharp.Tests.Fonts
             // Arial fails not because custom font resolver calls
             // platform font resolver.
             var arial = new XFont(ArialName, 10, XFontStyleEx.Regular);
-            arial.GlyphTypeface.FaceName.Should().Be("Arial");
+            arial.GlyphTypeface.FontName.Should().Be("Arial");
 
             // X-Files resolved by font resolver.
             var xfiles = new XFont(XFilesName, 10, XFontStyleEx.Regular);
-            xfiles.GlyphTypeface.FaceName.Should().Be("X-Files");
+            xfiles.GlyphTypeface.FontName.Should().Be("X-Files");
 
 #if CORE
             // Dummy fails because it cannot be resolved.
@@ -411,14 +412,14 @@ namespace PdfSharp.Tests.Fonts
 #if GDI
             // Dummy resolved by platform font resolver and creates Microsoft Sans Serif.
             //var dummy = new XFont("Dummy", 10, XFontStyleEx.Regular);
-            //dummy.GlyphTypeface.FaceName.Should().Be("Microsoft Sans Serif");
+            //dummy.GlyphTypeface.FontFamily.Should().Be("Microsoft Sans Serif");
             Func<XFont> createDummy = () => new XFont("Dummy", 10, XFontStyleEx.Regular);
             createDummy.Should().Throw<InvalidOperationException>();
 #endif
 #if WPF
             //// Dummy resolved by platform font resolver and creates Microsoft Sans Serif.
             //var dummy = new XFont("Dummy", 10, XFontStyleEx.Regular);
-            //dummy.GlyphTypeface.FaceName.Should().Be("Microsoft Sans Serif");
+            //dummy.GlyphTypeface.FontFamily.Should().Be("Microsoft Sans Serif");
             // Dummy fails because it cannot be resolved.
             Func<XFont> createDummy = () => new XFont("Dummy", 10, XFontStyleEx.Regular);
             createDummy.Should().Throw<InvalidOperationException>();
@@ -449,25 +450,25 @@ namespace PdfSharp.Tests.Fonts
             // Arial fails not because custom font resolver calls
             // platform font resolver.
             var arial = new XFont(ArialName, 10, XFontStyleEx.Regular);
-            arial.GlyphTypeface.FaceName.Should().Be("Arial");
+            arial.GlyphTypeface.FontName.Should().Be("Arial");
 #endif
 
             // X-Files resolved by font resolver.
             var xfiles = new XFont(XFilesName, 10, XFontStyleEx.Regular);
-            xfiles.GlyphTypeface.FaceName.Should().Be("X-Files");
+            xfiles.GlyphTypeface.FamilyName.Should().Be("X-Files");
 
             // Dummy resolved by fallback font resolver and creates Segoe WP.
             var dummy = new XFont("Dummy", 10, XFontStyleEx.Regular);
 #if CORE
-            dummy.GlyphTypeface.FaceName.Should().Be("Segoe WP");
+            dummy.GlyphTypeface.FamilyName.Should().Be("Segoe WP");
 #endif
 #if GDI
             // PDFsharp ignores the fact that GDI resolve every unknown font with 'Microsoft Sans Serif'.
-            //dummy.GlyphTypeface.FaceName.Should().Be("Microsoft Sans Serif");
-            dummy.GlyphTypeface.FaceName.Should().Be("Segoe WP");
+            //dummy.GlyphTypeface.FontFamily.Should().Be("Microsoft Sans Serif");
+            dummy.GlyphTypeface.FamilyName.Should().Be("Segoe WP");
 #endif
 #if WPF
-            dummy.GlyphTypeface.FaceName.Should().Be("Segoe WP");
+            dummy.GlyphTypeface.FamilyName.Should().Be("Segoe WP");
 #endif
         }
 
@@ -480,7 +481,7 @@ namespace PdfSharp.Tests.Fonts
 
             // X-Files resolved by font resolver.
             var xfiles = new XFont(XFilesName, 10, XFontStyleEx.Regular);
-            xfiles.GlyphTypeface.FaceName.Should().Be("X-Files");
+            xfiles.GlyphTypeface.FamilyName.Should().Be("X-Files");
 
             // Arial fails because fallback font resolver calls platform font resolver,
             // which is illegal.
@@ -548,9 +549,9 @@ namespace PdfSharp.Tests.Fonts
             EnsureFail(ArialName, style);
         }
 
-        void ArialShouldBeReplacedBy(string faceName, XFontStyleEx style = XFontStyleEx.Regular)
+        void ArialShouldBeReplacedBy(string fontName, XFontStyleEx style = XFontStyleEx.Regular)
         {
-            EnsureSuccess(ArialName, faceName, style);
+            EnsureSuccess(ArialName, fontName, style);
         }
 
         void DummyShouldFail(XFontStyleEx style = XFontStyleEx.Regular)
@@ -558,9 +559,9 @@ namespace PdfSharp.Tests.Fonts
             EnsureFail("Dummy", style);
         }
 
-        void DummyShouldBeReplacedBy(string faceName, XFontStyleEx style = XFontStyleEx.Regular)
+        void DummyShouldBeReplacedBy(string fontName, XFontStyleEx style = XFontStyleEx.Regular)
         {
-            EnsureSuccess("Dummy", faceName, style);
+            EnsureSuccess("Dummy", fontName, style);
         }
 
         // ReSharper disable once InconsistentNaming
@@ -576,9 +577,9 @@ namespace PdfSharp.Tests.Fonts
         }
 
         // ReSharper disable once InconsistentNaming
-        void SegoeUIShouldBeReplacedBy(string faceName, XFontStyleEx style = XFontStyleEx.Regular)
+        void SegoeUIShouldBeReplacedBy(string fontName, XFontStyleEx style = XFontStyleEx.Regular)
         {
-            EnsureSuccess(SegoeUIName, faceName, style);
+            EnsureSuccess(SegoeUIName, fontName, style);
         }
 
         void XFilesShouldSucceed(XFontStyleEx style = XFontStyleEx.Regular)
@@ -590,20 +591,20 @@ namespace PdfSharp.Tests.Fonts
         {
             EnsureFail(XFilesName, style);
         }
-        void XFilesShouldBeReplacedBy(string faceName, XFontStyleEx style = XFontStyleEx.Regular)
+        void XFilesShouldBeReplacedBy(string fontName, XFontStyleEx style = XFontStyleEx.Regular)
         {
-            EnsureSuccess(XFilesName, faceName, style);
+            EnsureSuccess(XFilesName, fontName, style);
         }
 
-        void EnsureSuccess(string inputFaceName, string resolvedFaceName, XFontStyleEx style = XFontStyleEx.Regular)
+        void EnsureSuccess(string inputFontName, string resolvedFontName, XFontStyleEx style = XFontStyleEx.Regular)
         {
-            var font = new XFont(inputFaceName, 10, style);
-            font.GlyphTypeface.FaceName.Should().Be(resolvedFaceName);
+            var font = new XFont(inputFontName, 10, style);
+            font.GlyphTypeface.FontName.Should().Be(resolvedFontName);
         }
 
-        void EnsureFail(string inputFaceName, XFontStyleEx style = XFontStyleEx.Regular)
+        void EnsureFail(string inputFontName, XFontStyleEx style = XFontStyleEx.Regular)
         {
-            var font = () => new XFont(inputFaceName, 10, style);
+            var font = () => new XFont(inputFontName, 10, style);
             font.Should().Throw<InvalidOperationException>();
         }
     }

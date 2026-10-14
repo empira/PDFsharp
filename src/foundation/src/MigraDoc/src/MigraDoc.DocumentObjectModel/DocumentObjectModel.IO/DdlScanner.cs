@@ -94,7 +94,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                 Symbol = Symbol.StringLiteral;
                 TokenType = TokenType.StringLiteral;
             }
-            //NYI: else if (IsNumber())
+            // NYI: else if (IsNumber())
             //      symbol = ScanNumber(false);
             else if (IsDigit(_currChar) ||
                      _currChar is '-' or '+' && IsDigit(_nextChar))
@@ -311,7 +311,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             int idx = _idx - 1;
             int length = _ddlLength - idx;
 
-            // Move to first non whitespace
+            // Move to first non-white-space
             char ch = Char.MinValue;
             while (length > 0)
             {
@@ -427,7 +427,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// Returns whether the linebreak should be ignored because the previous symbol is already a whitespace.
+        /// Returns whether the linebreak should be ignored because the previous symbol is already a white-space.
         /// </summary>
         bool IgnoreLineBreak()
         {
@@ -580,7 +580,7 @@ namespace MigraDoc.DocumentObjectModel.IO
             ScanNextChar();
             while (loop)
             {
-                // Scan to next EOL and ignore any white space.
+                // Scan to next EOL and ignore any white-space.
                 MoveToNonWhiteSpaceOrEol();
                 switch (_currChar)
                 {
@@ -606,7 +606,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                                 return false;
                             }
 
-                            //TODO_OLD NiSc NYI
+                            // TODO_OLD NiSc NYI
                             //Check.NotImplemented("empty line at non-root level");
                         }
                         break;
@@ -636,9 +636,9 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// If the current character is not a white space, the function immediately returns it.
-        /// Otherwise, the DDL cursor is moved forward to the first non-white space or EOF.
-        /// White spaces are SPACE, HT, VT, CR, and LF.???
+        /// If the current character is not a white-space, the function immediately returns it.
+        /// Otherwise, the DDL cursor is moved forward to the first non-white-space or EOF.
+        /// White-spaces are SPACE, HT, VT, CR, and LF.???
         /// </summary>
         internal char MoveToNonWhiteSpaceOrEol()
         {
@@ -660,9 +660,9 @@ namespace MigraDoc.DocumentObjectModel.IO
         }
 
         /// <summary>
-        /// If the current character is not a white space, the function immediately returns it.
-        /// Otherwise, the DDL cursor is moved forward to the first non-white space or EOF.
-        /// White spaces are SPACE, HT, VT, CR, and LF.
+        /// If the current character is not a white-space, the function immediately returns it.
+        /// Otherwise, the DDL cursor is moved forward to the first non-white-space or EOF.
+        /// White-spaces are SPACE, HT, VT, CR, and LF.
         /// </summary>
         internal char MoveToNonWhiteSpace()
         {
@@ -816,7 +816,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                         break;
 
                     case Chars.LF:
-                        //NYI: Unix uses LF only
+                        // NYI: Unix uses LF only
                         _idxLine++;
                         _idxLinePos = 0;
                         break;
@@ -881,7 +881,7 @@ namespace MigraDoc.DocumentObjectModel.IO
         internal static bool IsLetter(char ch) => Char.IsLetter(ch);
 
         /// <summary>
-        /// Is character a white space.
+        /// Is character a white-space.
         /// </summary>
         internal static bool IsWhiteSpace(char ch) => Char.IsWhiteSpace(ch);
 
@@ -1410,7 +1410,7 @@ namespace MigraDoc.DocumentObjectModel.IO
                             }
                             break;
 
-                        //NYI: octal numbers
+                        // NYI: octal numbers
                         //case '0':
                         //{
                         //  ScanNextChar();

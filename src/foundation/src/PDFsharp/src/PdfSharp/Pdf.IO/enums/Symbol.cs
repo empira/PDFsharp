@@ -15,7 +15,9 @@ namespace PdfSharp.Pdf.IO
         BeginStream, EndStream,
         BeginArray, EndArray,
         BeginDictionary, EndDictionary,
-        Obj, EndObj, R, XRef, Trailer, StartXRef, Eof,
+        Obj, EndObj,
+        R, // Is replaced by ObjRef.
+        XRef, Trailer, StartXRef, Eof,
         
         // The lexer now can parse references in the form "nnn ggg R"
         // as a symbol in one step.

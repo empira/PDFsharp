@@ -58,9 +58,13 @@ namespace PdfSharp.Charting
                                      Size.Width, Size.Height, 20, 20);
 
             XRect chartRect = new XRect(Location.X, Location.Y, Size.Width, Size.Height);
+#if PSGFX
+            var brush = new XSolidBrush(XColor.FromArgb(0xFFD0DEEF));
+#else
             var brush = new XLinearGradientBrush(chartRect, XColor.FromArgb(0xFFD0DEEF), XColors.White,
                                                                   XLinearGradientMode.Vertical);
-            var penBorder = new XPen(XColors.SteelBlue, 2.5);
+#endif
+            var penBorder = new XPen(XColors.SteelBlue, 2.5f);
             gfx.DrawRoundedRectangle(penBorder, brush,
                                      Location.X, Location.Y, Size.Width, Size.Height,
                                      15, 15);

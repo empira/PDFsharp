@@ -1,7 +1,6 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using PdfSharp.Drawing;
 using MigraDoc.DocumentObjectModel.Shapes;
@@ -86,21 +85,20 @@ namespace MigraDoc.Rendering
                 }
                 catch (Exception)
                 {
-                    RenderFailureImage(destRect);
+                    RenderFailureImage(destRect, formatInfo.ImagePath);
                 }
                 finally
                 {
-                    if (xImage != null)
-                        xImage.Dispose();
+                    xImage?.Dispose();
                 }
             }
             else
-                RenderFailureImage(destRect);
+                RenderFailureImage(destRect, formatInfo.ImagePath);
 
             RenderLine();
         }
 
-        void RenderFailureImage(XRect destRect)
+        void RenderFailureImage(XRect destRect, string? imagePath)
         {
             _gfx.DrawRectangle(XBrushes.LightGray, destRect);
             string failureString;
@@ -113,7 +111,7 @@ namespace MigraDoc.Rendering
                     break;
 
                 case ImageFailure.FileNotFound:
-                    failureString = MdPdfMsgs.DisplayImageFileNotFound("???").Message;
+                    failureString = MdPdfMsgs.DisplayImageFileNotFound(imagePath ?? "Unknown image").Message;
                     break;
 
                 case ImageFailure.InvalidType:
@@ -188,9 +186,9 @@ namespace MigraDoc.Rendering
                         }
                         // ReSharper restore CompareOfFloatsByEqualityOperator
 
-                        XUnitPt inherentWidth = XUnitPt.FromInch(xPixels / horzRes);
+                        XUnitPt inherentWidth = XUnitPt.FromInch((float_)(xPixels / horzRes));
                         double yPixels = xImage.PixelHeight;
-                        XUnitPt inherentHeight = XUnitPt.FromInch(yPixels / vertRes);
+                        XUnitPt inherentHeight = XUnitPt.FromInch((float_)(yPixels / vertRes));
 
                         //bool lockRatio = _image.IsNull("LockAspectRatio") ? true : _image.LockAspectRatio;
                         bool lockRatio = _image.Values.LockAspectRatio is null || _image.LockAspectRatio;
@@ -251,7 +249,7 @@ namespace MigraDoc.Rendering
                         if (_image.Values.PictureFormat != null)
                         {
                             PictureFormat picFormat = _image.PictureFormat;
-                            //Cropping in pixels.
+                            // Cropping in pixels.
                             XUnitPt cropLeft = picFormat.CropLeft.Point;
                             XUnitPt cropRight = picFormat.CropRight.Point;
                             XUnitPt cropTop = picFormat.CropTop.Point;
@@ -261,7 +259,7 @@ namespace MigraDoc.Rendering
                             formatInfo.CropWidth -= (int)(horzRes * (cropLeft + cropRight).Inch);
                             formatInfo.CropHeight -= (int)(vertRes * (cropTop + cropBottom).Inch);
 
-                            //Scaled cropping of the height and width.
+                            // Scaled cropping of the height and width.
                             double xScale = resultWidth / inherentWidth;
                             double yScale = resultHeight / inherentHeight;
 
@@ -275,8 +273,8 @@ namespace MigraDoc.Rendering
                         }
                         if (resultHeight <= 0 || resultWidth <= 0)
                         {
-                            formatInfo.Width = XUnitPt.FromCentimeter(2.5);
-                            formatInfo.Height = XUnitPt.FromCentimeter(2.5);
+                            formatInfo.Width = XUnitPt.FromCentimeter(2.5f);
+                            formatInfo.Height = XUnitPt.FromCentimeter(2.5f);
                             //Debug.WriteLine(Messages2.EmptyImageSize);
                             MigraDocLogHost.PdfRenderingLogger.LogError(MdPdfMsgs.EmptyImageSize.Message);
                             _failure = ImageFailure.EmptySize;
@@ -305,13 +303,13 @@ namespace MigraDoc.Rendering
                 if (!_image.Values.Width.IsValueNullOrEmpty())
                     formatInfo.Width = _image.Width.Point;
                 else
-                    formatInfo.Width = XUnitPt.FromCentimeter(2.5);
+                    formatInfo.Width = XUnitPt.FromCentimeter(2.5f);
 
                 //if (_image.Values.Height is not null)
                 if (!_image.Values.Height.IsValueNullOrEmpty())
                     formatInfo.Height = _image.Height.Point;
                 else
-                    formatInfo.Height = XUnitPt.FromCentimeter(2.5);
+                    formatInfo.Height = XUnitPt.FromCentimeter(2.5f);
             }
         }
 
@@ -326,7 +324,7 @@ namespace MigraDoc.Rendering
                 // Same for GDI.
                 // We have to rely on the garbage collector to properly dispose the MemoryStream.
                 {
-                    Stream stream = new MemoryStream(bytes);
+                    Stream stream = new MemoryStream(bytes, 0, bytes.Length, false, true);
                     XImage image = XImage.FromStream(stream);
                     return image;
                 }

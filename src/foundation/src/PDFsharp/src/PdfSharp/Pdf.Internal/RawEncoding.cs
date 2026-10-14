@@ -3,16 +3,26 @@
 
 using System.Text;
 
+// v7.0.0 clean up
+
 namespace PdfSharp.Pdf.Internal
 {
+    // TODO Merge documentation of RawEncoding and mention that C# raw strings is something completely different.
     /// <summary>
     /// An encoder for raw strings. The raw encoding is simply the identity relation between
-    /// characters and bytes. PDFsharp internally works with raw encoded strings instead of
+    /// characters and bytes. PDFsharp internally often works with raw encoded strings instead of
     /// byte arrays because strings are much more handy than byte arrays.
     /// </summary>
     /// <remarks>
     /// Raw encoded strings represent an array of bytes. Therefore, a character greater than
-    /// 255 is not valid in a raw encoded string.
+    /// 255 is not valid in a raw encoded string.<br/>
+    /// 
+    /// A byte array with n bytes is decoded to a string with n characters, where each character has
+    /// the value of the corresponding byte. I.e. each character has a value from 0 to 255. Its high
+    /// order byte is always 0<br/>
+    /// A raw string with n characters is encoded to a byte array with n bytes, where each byte is
+    /// the corresponding character cast to byte. If the high order byte of a character has an illegal
+    /// value other than 0 this value is ignored.
     /// </remarks>
     public sealed class RawEncoding : Encoding
     {

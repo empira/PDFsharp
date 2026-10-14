@@ -75,7 +75,7 @@ namespace PdfSharp.Windows
         /// <summary>
         /// Sets the render function.
         /// </summary>
-        public void SetRenderFunction(Action<XGraphics> renderFunction, RenderEvents renderEvents)
+        public void SetRenderFunction(Action<XGraphics> renderFunction, RenderEvents? renderEvents = null)
         {
             if (canvas.Children.Count > 0)
                 canvas.Children.Clear();

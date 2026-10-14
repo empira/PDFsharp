@@ -87,12 +87,12 @@ namespace MigraDoc.Tests.Experimental.CreateOnRequest
             return false;
         }
 
-        static Boolean ISectionInterface<Section>.operator ==(Section? c1, Section? c2)
+        static bool ISectionInterface<Section>.operator ==(Section? c1, Section? c2)
         {
             return c2 is null;
         }
 
-        static Boolean ISectionInterface<Section>.operator !=(Section? c1, Section? c2)
+        static bool ISectionInterface<Section>.operator !=(Section? c1, Section? c2)
         {
             return true;
         }
@@ -172,36 +172,36 @@ namespace MigraDoc.Tests.Experimental.CreateOnRequest
             return stringBuilder.ToString();
         }
 
-        static Boolean ISectionInterface<Section>.operator ==(Section? c1, Section? c2)
+        static bool ISectionInterface<Section>.operator ==(Section? c1, Section? c2)
         {
             Console.WriteLine("==");
             return true;
         }
 
-        static Boolean ISectionInterface<Section>.operator !=(Section? c1, Section? c2)
+        static bool ISectionInterface<Section>.operator !=(Section? c1, Section? c2)
         {
             Console.WriteLine("!=");
             return true;
         }
 
-        public static Boolean operator ==(Section? c1, Section? c2)
+        public static bool operator ==(Section? c1, Section? c2)
         {
             return true;
         }
 
-        public static Boolean operator !=(Section? c1, Section? c2)
+        public static bool operator !=(Section? c1, Section? c2)
         {
             return true;
         }
 
-        //static Boolean SectionInterface.operator ==(SectionInterface c1, SectionInterface c2)
+        //static bool SectionInterface.operator ==(SectionInterface c1, SectionInterface c2)
         //{
         //    if (c2 is null)
         //        return true;
         //    return false;
         //}
 
-        //static Boolean SectionInterface.operator !=(SectionInterface c1, SectionInterface c2)
+        //static bool SectionInterface.operator !=(SectionInterface c1, SectionInterface c2)
         //{
         //    return !(c1 == c2);
         //}

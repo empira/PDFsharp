@@ -252,7 +252,7 @@ namespace PdfSharp.UniversalAccessibility
             var ste = UaManager.Owner.Internals.CreateIndirectObject<PdfStructureElement>();
 
             // Set parent ...
-            ste.Elements.SetReference(PdfStructureElement.Keys.P, parent);
+            ste.Elements.SetObject(PdfStructureElement.Keys.P, parent);
 
             // ...and structure type.
             ste.Elements.SetName(PdfStructureElement.Keys.S, tag);
@@ -290,7 +290,7 @@ namespace PdfSharp.UniversalAccessibility
             // Set the Page of this StructureElement, if not yet set.
             var stePage = ste.Elements.GetReference(PdfStructureElement.Keys.Pg);
             if (stePage == null)
-                ste.Elements.SetReference(PdfStructureElement.Keys.Pg, UaManager.CurrentPage);
+                ste.Elements.SetObject(PdfStructureElement.Keys.Pg, UaManager.CurrentPage);
 
             // Is the added Marked Content on the Page, the StructureElement began?
             if (stePage == null || stePage.Value == UaManager.CurrentPage)
@@ -302,7 +302,7 @@ namespace PdfSharp.UniversalAccessibility
             {
                 // No. Add a MarkedContentReference that contains the Page of this Marked Content and the MCID.
                 var mcr = new PdfMarkedContentReference();
-                mcr.Elements.SetReference(PdfMarkedContentReference.Keys.Pg, UaManager.CurrentPage);
+                mcr.Elements.SetObject(PdfMarkedContentReference.Keys.Pg, UaManager.CurrentPage);
                 mcr.Elements.SetInteger(PdfMarkedContentReference.Keys.MCID, mcid);
                 steKids.Elements.Add(mcr);
             }
@@ -378,7 +378,7 @@ namespace PdfSharp.UniversalAccessibility
 
         /// <summary>
         /// Adds the structure element to the ParentTree.
-        /// Sets the annotation’s "/StructParent" key to the index of the structure element in the ParentTree.
+        /// Sets the annotation’s /StructParent key to the index of the structure element in the ParentTree.
         /// </summary>
         /// <param name="ste">The structure element to be added to the parent tree.</param>
         /// <param name="annotation">The annotation to be added.</param>
@@ -421,7 +421,7 @@ namespace PdfSharp.UniversalAccessibility
                 var count = parentTreeRootNums.Elements.Count;
                 var lastKey = count > 0 ? parentTreeRootNums.Elements[count - 2] as PdfInteger : new PdfInteger(-1);
 
-                Debug.Assert(lastKey != null && lastKey.Value + 1 == structParents.Value, "The values should be continous.");
+                Debug.Assert(lastKey != null && lastKey.Value + 1 == structParents.Value, "The values should be continuous.");
 
                 parentTreeRoot.AddNumber(structParents.Value, ste);
             }
@@ -455,8 +455,8 @@ namespace PdfSharp.UniversalAccessibility
             }
 
             var objr = new PdfObjectReference();
-            objr.Elements.SetReference(PdfObjectReference.Keys.Obj, annotation);
-            objr.Elements.SetReference(PdfObjectReference.Keys.Pg, page);
+            objr.Elements.SetObject(PdfObjectReference.Keys.Obj, annotation);
+            objr.Elements.SetObject(PdfObjectReference.Keys.Pg, page);
 
             steK.Elements.Add(objr);
 

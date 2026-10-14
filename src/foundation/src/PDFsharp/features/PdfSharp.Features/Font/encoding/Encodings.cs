@@ -10,7 +10,8 @@ using PdfSharp.Quality;
 using PdfSharp.Snippets.Drawing;
 using PdfSharp.Snippets.Font;
 
-#pragma warning disable 1591
+#pragma warning disable CS1591 // Internal class
+
 namespace PdfSharp.Features.Font
 {
     public class Encodings : Feature

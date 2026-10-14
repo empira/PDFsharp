@@ -44,7 +44,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var pdfRenderer = new PdfDocumentRenderer { Document = document };
             pdfRenderer.RenderDocument();
 
-            var filename = PdfFileUtility.GetTempPdfFileName("Test_Empty_Paragraph");
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/text/Test_Empty_Paragraph");
             pdfRenderer.PdfDocument.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
@@ -62,7 +62,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var pdfRenderer = new PdfDocumentRenderer { Document = document };
             pdfRenderer.RenderDocument();
 
-            var filename = PdfFileUtility.GetTempPdfFileName("Test_Empty_FormattedText");
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/text/Test_Empty_FormattedText");
             pdfRenderer.PdfDocument.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
@@ -215,7 +215,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             }
 
             // Save sumDoc.
-            var filename = PdfFileUtility.GetTempPdfFileName("Test_Multiline_Border_Paragraph_PageBreaks");
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/text/Test_Multiline_Border_Paragraph_PageBreaks");
             sumDoc.PageLayout = PdfPageLayout.TwoPageLeft;
             sumDoc.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
@@ -373,7 +373,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             }
 
             // Save sumDoc.
-            var filename = PdfFileUtility.GetTempPdfFileName("Test_Trailing_Objects_Border_Paragraph_PageBreak");
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/text/Test_Trailing_Objects_Border_Paragraph_PageBreak");
             sumDoc.PageLayout = PdfPageLayout.TwoPageLeft;
             sumDoc.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
@@ -469,10 +469,10 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var pdfDocument = pdfRenderer.PdfDocument;
             pdfDocument.Options.CompressContentStreams = false;
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("Test_LineSpacingRule");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/text/Test_LineSpacingRule");
             pdfRenderer.PdfDocument.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
 
@@ -654,10 +654,10 @@ namespace MigraDoc.DocumentObjectModel.Tests
             // Layout and render document to PDF.
             pdfRenderer.RenderDocument();
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("Test_PageBreak_And_Fitting_Line_Height");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/text/Test_PageBreak_And_Fitting_Line_Height");
             pdfRenderer.PdfDocument.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
@@ -696,10 +696,66 @@ namespace MigraDoc.DocumentObjectModel.Tests
             // Layout and render document to PDF.
             pdfRenderer.RenderDocument();
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("Test_Line_And_PageBreak_Big_Words");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/text/Test_Line_And_PageBreak_Big_Words");
             pdfRenderer.PdfDocument.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
+            PdfFileUtility.ShowDocumentIfDebugging(filename);
+        }
+
+        [Fact]
+        public void Test_New_Font()
+        {
+            // In this test the font of style "Normal" is replaced by a new font instance without a color been set.
+            // For this reason the ultimately inherited font color is Font.Empty and no text and underline is visible.
+
+            // In the future, a warning could be shown if an empty color is used for drawing an object.
+            // Alternatively or additionally, Colors.Black could automatically been used, if the color is still Colors.Empty after flattening.
+
+            // This test helped to find bugs in PDFsharp 6.2.1, as PdfGraphicsState was not implemented correctly to start with drawing
+            // strokes and fills with alpha channel set to 0, like Color.Empty. The bugs resulted in drawing the content partly in black:
+            // The text was completely visible and the underline until drawing the border. So this test also helps to verify the bugfix.
+
+            var document = new Document();
+
+            // Due to this line the ultimately inherited font color is Font.Empty and no text and underline is visible.
+            document.Styles.Normal.Font = new Font("Arial", 9);
+            document.Styles.Normal.Font.Underline = Underline.Single;
+
+            var section = document.AddSection();
+            section.AddParagraph("Paragraph - underline visible in PDFsharp 6.2.1");
+
+            var tbl1 = section.AddTable();
+            tbl1.AddColumn(Unit.FromCentimeter(10));
+            var row = tbl1.AddRow();
+            row.Cells[0].AddParagraph("Table 1 - underline visible in PDFsharp 6.2.1");
+
+            var tbl2 = section.AddTable();
+            tbl2.AddColumn(Unit.FromCentimeter(10));
+            row = tbl2.AddRow();
+
+            row.Borders.Left = new Border { Width = 0.75, Color = Colors.Black };
+
+            row.Cells[0].AddParagraph("Table 2 With Border - underline still visible in PDFsharp 6.2.1");
+
+            var tbl3 = section.AddTable();
+            tbl3.AddColumn(Unit.FromCentimeter(10));
+            row = tbl3.AddRow();
+            row.Cells[0].AddParagraph("Table 3 - underline not visible in PDFsharp 6.2.1 from now on");
+
+            section.AddParagraph("Paragraph after table - underline not visible");
+
+
+            // Create a renderer for the MigraDoc document.
+            var pdfRenderer = new PdfDocumentRenderer { Document = document };
+
+            // Layout and render document to PDF.
+            pdfRenderer.RenderDocument();
+
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/text/Test_New_Font");
+            pdfRenderer.PdfDocument.Save(filename);
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
     }

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// PDFsharp - A .NET library for processing PDF
+// See the LICENSE file in the solution root for more information.
 
 // ReSharper disable once CheckNamespace
 namespace Xunit
@@ -18,8 +15,12 @@ namespace Xunit
         /// <returns>True if slow tests should be skipped.</returns>
         public static bool SkipSlowTests()
         {
+#if RUN_SLOW_TESTS
+            return false;
+#else
             var env = Environment.GetEnvironmentVariable("PDFsharpTests");
             return String.IsNullOrEmpty(env);
+#endif
         }
 
         //            /// <summary>
@@ -29,7 +30,7 @@ namespace Xunit
         //            /// <returns>True if slow tests should be skipped.</returns>
         //            public static bool SkipSlowTestsUnderDotNetFramework()
         //            {
-        //#if NET6_0_OR_GREATER
+        //#if NET8_0_OR_GREATER
         //                return false;
         //#else
         //            return SkipSlowTests();

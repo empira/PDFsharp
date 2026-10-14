@@ -3,6 +3,7 @@
 
 using PdfSharp.Internal;
 #if GDI
+using PdfSharp.Internal.Threading;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -68,10 +69,10 @@ namespace PdfSharp.Drawing
             }
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 Source._gdiImage.Save(stream, ImageFormat.Png);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
             DiagnosticsHelper.ThrowNotImplementedException("Save...");

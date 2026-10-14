@@ -103,7 +103,7 @@ namespace PdfSharp.Drawing.BarCodes
             grid = Iec16022Ecc200(matrixColumns, matrixRows, _encoding, _text.Length, _text, len, maxlen, ecclen);
 
             if (grid == null || matrixColumns == 0)
-                throw new ArgumentException(BcgSR.DataMatrixNull); //DaSt: ever happen?
+                throw new ArgumentException(BcgSR.DataMatrixNull);
             return grid;
         }
 
@@ -619,7 +619,7 @@ namespace PdfSharp.Drawing.BarCodes
                 alog[v] = p;
                 log[p] = v;
                 p <<= 1;
-                if ((p & b) != 0) //DaSt: check!
+                if ((p & b) != 0)
                     p ^= poly;
             }
         }
@@ -644,7 +644,7 @@ namespace PdfSharp.Drawing.BarCodes
                 rspoly[i] = 1;
                 for (k = i - 1; k > 0; k--)
                 {
-                    if (rspoly[k] != 0) //DaSt: check!
+                    if (rspoly[k] != 0)
                         rspoly[k] = alog[(log[rspoly[k]] + index) % logmod];
                     rspoly[k] ^= rspoly[k - 1];
                 }
@@ -668,12 +668,12 @@ namespace PdfSharp.Drawing.BarCodes
                 m = result[rlen - 1] ^ data[i];
                 for (k = rlen - 1; k > 0; k--)
                 {
-                    if ((m != 0) && (rspoly[k] != 0)) //DaSt: check!
+                    if (m != 0 && rspoly[k] != 0)
                         result[k] = result[k - 1] ^ alog[(log[m] + log[rspoly[k]]) % logmod];
                     else
                         result[k] = result[k - 1];
                 }
-                if ((m != 0) && (rspoly[0] != 0)) //DaSt: check!
+                if (m != 0 && rspoly[0] != 0)
                     result[0] = alog[(log[m] + log[rspoly[0]]) % logmod];
                 else
                     result[0] = 0;

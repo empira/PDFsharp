@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Internal;
@@ -48,7 +48,7 @@ namespace MigraDoc.RtfRendering
             => new(MdRtfMsgId.InvalidNumericFieldFormat, $"'{format}' is not a valid format for a numeric field and will be ignored.");
 
         internal static MdRtfMsg CharacterNotAllowedInDateFormat(char character)
-            => new(MdRtfMsgId.CharacterNotAllowedInDateFormat, $"The character '{character}' is not allowed in a date field�s format string and will be ignored.");
+            => new(MdRtfMsgId.CharacterNotAllowedInDateFormat, $"The character '{character}' is not allowed in a date field’s format string and will be ignored.");
 
         internal static MdRtfMsg UpdateField
             => new(MdRtfMsgId.UpdateField, "< Please update this field. >");

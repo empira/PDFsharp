@@ -1,7 +1,9 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-#pragma warning disable 0436
+//#pragma warning disable 0436
+
+using PdfSharp.Internal;
 
 namespace PdfSharp
 {
@@ -11,8 +13,8 @@ namespace PdfSharp
     // TODO_OLD: These literals are not in sync with the NuGet metadata. Should be fixed.
     public static class PdfSharpProductVersionInformation
     {
-        // Cannot use const string anymore because GitVersionInformation used static string.
         // The fields are reordered to take initialization chronology into account.
+        // Today this may be not necessary anymore.
 
         /// <summary>
         /// The title of the product.
@@ -27,48 +29,53 @@ namespace PdfSharp
         /// <summary>
         /// The major version number of the product.
         /// </summary>
-        public static readonly string VersionMajor = GitVersionInformation.Major;
+        public static readonly string VersionMajor = SemVersionInformation.Major;
 
         /// <summary>
         /// The minor version number of the product.
         /// </summary>
-        public static readonly string VersionMinor = GitVersionInformation.Minor;
+        public static readonly string VersionMinor = SemVersionInformation.Minor;
 
         /// <summary>
         /// The patch number of the product.
         /// </summary>
-        public static readonly string VersionPatch = GitVersionInformation.Patch;
+        public static readonly string VersionPatch = SemVersionInformation.Patch;
 
         /// <summary>
         /// The Version PreRelease string for NuGet.
         /// </summary>
-        public static readonly string VersionPreRelease = GitVersionInformation.NuGetPreReleaseTagV2;
-
+        public static readonly string VersionPreRelease = SemVersionInformation.PreReleaseLabel;
+        
         /// <summary>
         /// The PDF creator application information string.
         /// </summary>
-        public static readonly string Creator = $"{Title} {GitVersionInformation.NuGetVersion}{Technology}";
+        public static readonly string Creator = $"{Title} {SemVersionInformation.InformationalVersion}{Technology}";
 
         /// <summary>
         /// The PDF producer (created by) information string.
         /// TODO_OLD: Called Creator in MigraDoc???
         /// </summary>
-        public static readonly string Producer = $"{Title} {GitVersionInformation.NuGetVersion} ({Url})";
+        public static readonly string Producer = $"{Title} {SemVersionInformation.InformationalVersion} ({Url})";
 
         /// <summary>
         /// The full version number.
         /// </summary>
-        public static readonly string Version = GitVersionInformation.MajorMinorPatch;
+        public static readonly string Version = SemVersionInformation.Version;
 
         /// <summary>
-        /// The full semantic version number created by GitVersion.
+        /// The full file version number.
         /// </summary>
-        public static readonly string SemanticVersion = GitVersionInformation.SemVer;
+        public static readonly string FileVersion = SemVersionInformation.FileVersion;
+
+        /// <summary>
+        /// The full semantic version number.
+        /// </summary>
+        public static readonly string SemanticVersion = SemVersionInformation.InformationalVersion;
 
         /// <summary>
         /// The home page of this product.
         /// </summary>
-        public const string Url = "www.pdfsharp.net";
+        public const string Url = "www.pdfsharp.com";
 
         /// <summary>
         /// Unused.
@@ -88,7 +95,7 @@ namespace PdfSharp
         /// <summary>
         /// The copyright information.
         /// </summary>
-        public const string Copyright = "Copyright © 2005-2024 empira Software GmbH.";
+        public const string Copyright = "Copyright © 2005-2026 empira Software GmbH."; // Not used as NuGet Copyright. See Directory.Build.Props.
 
         /// <summary>
         /// The trademark of the product.
@@ -105,7 +112,7 @@ namespace PdfSharp
         /// The calculated build number.
         /// </summary>
         // ReSharper disable RedundantNameQualifier
-        public static int BuildNumber = (DateTime.Now - new DateTime(2005, 1, 1)).Days;
+        public static int BuildNumber = (DateTimeOffset.Now - new DateTimeOffset(2005, 1, 1)).Days;
         // ReSharper restore RedundantNameQualifier
 #endif
 

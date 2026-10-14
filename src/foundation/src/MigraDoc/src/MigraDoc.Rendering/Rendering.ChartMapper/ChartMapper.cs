@@ -17,8 +17,8 @@ namespace MigraDoc.Rendering.ChartMapper
         {
             var chartFrame = new ChartFrame
             {
-                Size = new XSize(domChart.Width.Point, domChart.Height.Point),
-                Location = new XPoint(domChart.Left.Position.Point, domChart.Top.Position.Point)
+                Size = new XSize((float_)domChart.Width.Point, (float_)domChart.Height.Point),
+                Location = new XPoint((float_)domChart.Left.Position.Point, (float_)domChart.Top.Position.Point)
             };
 
             var chart = new Chart((ChartType)domChart.Type);

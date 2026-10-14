@@ -1,4 +1,4 @@
-// MigraDoc - Creating Documents on the Fly
+﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
 using MigraDoc.DocumentObjectModel.Visitors;
@@ -136,15 +136,15 @@ namespace MigraDoc.DocumentObjectModel
             bool hasEvenPage = HasHeaderFooter(Values.EvenPage);
             bool hasFirstPage = HasHeaderFooter(Values.FirstPage);
 
-            // \primary...
+            // \primary…
             if (hasPrimary)
                 Primary.Serialize(serializer, "primary");
 
-            // \even... 
+            // \even… 
             if (hasEvenPage)
                 EvenPage.Serialize(serializer, "evenpage");
 
-            // \firstpage...
+            // \firstpage…
             if (hasFirstPage)
                 FirstPage.Serialize(serializer, "firstpage");
         }

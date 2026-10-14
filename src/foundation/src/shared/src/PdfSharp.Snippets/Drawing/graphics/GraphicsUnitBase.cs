@@ -7,13 +7,34 @@ using System.Xml;
 
 namespace PdfSharp.Snippets.Drawing
 {
+    /// <summary>
+    /// Baseclass for graphics units snippets.
+    /// </summary>
     public abstract class GraphicsUnitBase : Snippet
     {
+        /// <summary>
+        /// 10 pt font using Presentation units.
+        /// </summary>
         protected XFont font10ptinPP = new("Arial", XUnit.FromPoint(10).Presentation);
+
+        /// <summary>
+        /// 10 pt font.
+        /// </summary>
         protected XFont font10pt = new("Arial", 10);
+
+        /// <summary>
+        /// 10 pt font using millimeters.
+        /// </summary>
         protected XFont font10ptInMM = new("Arial", XUnit.FromPoint(10).Millimeter);
+
+        /// <summary>
+        /// 10 pt font centimeters.
+        /// </summary>
         protected XFont font10ptInCM = new("Arial", XUnit.FromPoint(10).Centimeter);
 
+        /// <summary>
+        /// Converts the specified size and unit to PageUnit.
+        /// </summary>
         protected double CalcSizeForGraphics(double size, XGraphicsUnit graphicsUnit)
         {
             var x = new XUnit(size, graphicsUnit);

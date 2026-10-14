@@ -24,37 +24,27 @@ namespace Shared.TestApp
                     //.AddFilter("System", LogLevel.Warning)
                     //.AddFilter("LoggingConsoleApp.Program", LogLevel.Debug)
                     .AddFilter("", LogLevel.Debug)
+                    .AddFilter(PdfSharpLogCategory.DocumentProcessing, LogLevel.Debug)
+                    .AddFilter(PdfSharpLogCategory.FontManagement, LogLevel.Debug)
+                    .AddFilter(PdfSharpLogCategory.PdfReading, LogLevel.Debug)
+                    .AddFilter(PdfSharpLogCategory.ImageProcessing, LogLevel.Debug)
                     //.AddFilter("PDFsharp", LogLevel.Critical)
                     .AddConsole();
             });
-
-            ILogger logger = loggerFactory.CreateLogger<Program>();
-            //logger.LogInformation("Example log message 1");
-
-            //LogHost.Logger.LogInformation("Example log message 2");
-
             LogHost.Factory = loggerFactory;
 
-            //LogHost.Logger.LogError("Something went wrong.");
-            //LogHost.Logger.TestMessage(LogLevel.Critical, "blah");
-            //LogHost.Logger.TestMessage("di-blub");
-            //LogHost.Logger.TestMessage("------------------------------------------------------------------------------");
+            ILogger logger = loggerFactory.CreateLogger<Program>();
 
+            LogHost.Logger.TestMessage("------------------------------------------------------------------------------");
 
-
-            var tempFileName = PdfFileUtility.GetTempPdfFullFileName("tests");
-
-            //document.Save(tempFileName);
 
             // Call some developer specific test code from a file not in the repo.
             // Implement your code in ProgramEx.cs in partial class Program.
-            var test = typeof(Program).GetMethod("Test", BindingFlags.Static| BindingFlags.NonPublic);
+            var test = typeof(Program).GetMethod("Test", BindingFlags.Static | BindingFlags.NonPublic);
             if (test != null)
             {
                 test.Invoke(null, null);
             }
-
-            //PdfFileUtility.ShowDocumentIfDebugging(tempFileName);
         }
     }
 }

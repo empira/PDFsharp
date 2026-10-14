@@ -1,15 +1,15 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-#if GDI
+
 using PdfSharp.Internal;
+using PdfSharp.Internal.Threading;
+#if GDI
 #endif
 #if WPF
-using PdfSharp.Internal;
 #endif
 #if WUI
 using Windows.UI.Xaml.Media.Imaging;
-using PdfSharp.Internal;
 #endif
 
 namespace PdfSharp.Drawing
@@ -29,11 +29,11 @@ namespace PdfSharp.Drawing
 #if GDI
             try
             {
-                Lock.EnterGdiPlus();
+                Locks.EnterGdiPlus();
                 // Create a default 24-bit ARGB bitmap.
                 _gdiImage = new Bitmap(width, height);
             }
-            finally { Lock.ExitGdiPlus(); }
+            finally { Locks.ExitGdiPlus(); }
 #endif
 #if WPF
             DiagnosticsHelper.ThrowNotImplementedException("CreateBitmap");

@@ -182,7 +182,7 @@ namespace MigraDoc.RtfRendering
             //    throw new InvalidOperationException("This version of MigraDoc cannot render charts to RTF. Use the WPF build under Windows to create RTF files with charts.");
 
             return false;
-#else
+#else // GDI case here.
             try
             {
                 const float resolution = 96;
@@ -192,18 +192,8 @@ namespace MigraDoc.RtfRendering
                 XGraphics gfx =
                     XGraphics.CreateMeasureContext(new XSize(horzPixels, vertPixels), XGraphicsUnit.Point, XPageDirection.Downwards, new RenderEvents());
 #else
-#if GDI
                 Bitmap bmp = new Bitmap(horzPixels, vertPixels);
                 XGraphics gfx = XGraphics.FromGraphics(Graphics.FromImage(bmp), new XSize(horzPixels, vertPixels), new RenderEvents());
-#else
-                // TODOWPF
-                // TODOCORE
-                return false;
-#endif
-#if WPF
-                // TODOWPF
-                XGraphics gfx = null; //XGraphics.FromGraphics(Graphics.FromImage(bmp), new XSize(horzPixels, vertPixels));
-#endif
 #endif
                 //REM: Should not be necessary:
                 gfx.ScaleTransform(resolution / 72);
@@ -211,10 +201,8 @@ namespace MigraDoc.RtfRendering
 
                 DocumentRenderer renderer = new MigraDoc.Rendering.DocumentRenderer(_chart.Document!);
                 renderer.RenderObject(gfx, 0, 0, GetShapeWidth().Point, _chart);
-#if GDI
                 bmp.SetResolution(resolution, resolution);
                 bmp.Save(fileName, System.Drawing.Imaging.ImageFormat.Png);
-#endif
             }
             catch (Exception)
             {

@@ -25,6 +25,14 @@ namespace PdfSharp.Pdf
         }
 
         /// <summary>
+        /// Initializes a new instance of this class using the elements of the specified dictionary.
+        /// After this type transformation the specified dictionary is dead and cannot be used anymore.
+        /// </summary>
+        internal PdfNumberTreeNode(PdfDictionary dict)
+            : base(dict)
+        { }
+
+        /// <summary>
         /// Gets a value indicating whether this instance is a root node.
         /// </summary>
         public bool IsRoot { get; private init; }
@@ -49,7 +57,7 @@ namespace PdfSharp.Pdf
             get
             {
                 var names = Elements.GetArray(Keys.Nums);
-                // Entries are key / value pairs, so divide by 2.
+                // Entries are key-value pairs, so divide by 2.
                 return names != null ? names.Elements.Count / 2 : 0;
             }
         }
@@ -70,7 +78,7 @@ namespace PdfSharp.Pdf
         }
 
         /// <summary>
-        /// Adds a key/value pair to the Nums array of this node.
+        /// Adds a key-value pair to the Nums array of this node.
         /// </summary>
         public void AddNumber(int key, PdfObject value)
         {
@@ -134,7 +142,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Predefined keys of this dictionary.
         /// </summary>
-        internal sealed class Keys : KeysBase
+        public sealed class Keys : KeysBase
         {
             // Reference: TABLE 3.34  Entries in a number tree node dictionary / Page 166
 
@@ -170,7 +178,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Gets the KeysMeta for these keys.
             /// </summary>
-            public static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
+            internal static DictionaryMeta Meta => _meta ??= CreateMeta(typeof(Keys));
 
             static DictionaryMeta? _meta;
 

@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.IO;
@@ -6,12 +6,15 @@ using PdfSharp.Pdf.IO;
 namespace PdfSharp.Pdf
 {
     /// <summary>
-    /// Represents an indirect reference that is not in the cross-reference table.
+    /// Represents a direct reference that is not in the cross-reference table.
     /// </summary>
-    public sealed class PdfNull : PdfItem
+    public sealed class PdfNull : PdfPrimitive
     {
         // Reference: 3.2.8  Null Object / Page 63
 
+        /// <summary>
+        /// Use PdfNull.Value to get an instance of this class.
+        /// </summary>
         PdfNull()
         { }
 
@@ -23,11 +26,12 @@ namespace PdfSharp.Pdf
         /// </returns>
         public override string ToString() => "null";
 
+        /// <summary>
+        /// Writes ‘null’.
+        /// </summary>
+
         internal override void WriteObject(PdfWriter writer)
-        {
-            // Implemented because it must be overridden.
-            writer.WriteRaw(" null ");
-        }
+            => writer.Write(this);
 
         /// <summary>
         /// The only instance of this class.

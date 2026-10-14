@@ -1,6 +1,7 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+#if false  // DELETE 2025-12-31
 #if GDI
 using System.Runtime.InteropServices;
 using PdfSharp.Logging;
@@ -28,3 +29,4 @@ namespace PdfSharp.Drawing
     public sealed class XPrivateFontCollection
     { }
 }
+#endif

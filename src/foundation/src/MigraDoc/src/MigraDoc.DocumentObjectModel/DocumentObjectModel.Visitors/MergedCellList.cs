@@ -39,7 +39,7 @@ namespace MigraDoc.DocumentObjectModel.Visitors
 #if true
             int rows = table.Rows.Count;
             int columns = table.Columns.Count;
-            var flags = new Boolean[rows, columns];
+            var flags = new bool[rows, columns];
             for (int rwIdx = 0; rwIdx < rows; ++rwIdx)
             {
                 for (int clmIdx = 0; clmIdx < columns; ++clmIdx)

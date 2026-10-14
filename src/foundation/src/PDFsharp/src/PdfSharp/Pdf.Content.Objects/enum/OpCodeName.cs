@@ -1,21 +1,34 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-// ReSharper disable InconsistentNaming
+// v7.0.0 TODO
 
 namespace PdfSharp.Pdf.Content.Objects
 {
+    /*
+     Zero/non-zero winding and alternate/winding modes both refer to polygon filling rules,
+     with "non-zero" and "winding" being the same rule, while "zero" and "alternate" refer to
+     the same "even-odd" rule. The core difference is that non-zero winding (also called winding mode)
+     counts the direction of path segments, filling any region where the winding number is not zero,
+     whereas alternate filling (also called even-odd) simply counts the number of crossings and fills every other region. 
+     non-zero = winding
+     even-odd = alternate
+
+     */
+
     /// <summary>
     /// The names of the op-codes. 
     /// </summary>
-    public enum OpCodeName
+    public enum OpCodeName  // TODO sync names with PDFsharp PDF Graphics.
     {
+        // ReSharper disable InconsistentNaming
+
         /// <summary>
         /// Pseudo op-code for the name of a dictionary.
         /// </summary>
         Dictionary,  // Name followed by dictionary.
 
-        // I know that this is not useable in VB or other languages with no case sensitivity.
+        // I know that this is not usable in VB or other languages with no case sensitivity.
 
         // Reference: TABLE A.1  PDF content stream operators / Page 985
         // Reference 2.0: Table A.1 — PDF content stream operators / Page 844
@@ -23,22 +36,24 @@ namespace PdfSharp.Pdf.Content.Objects
         /// <summary>
         /// Close, fill, and stroke path using non-zero winding number rule.
         /// </summary>
-        b,
+        b,  // CloseFillStrokePathWinding
 
         /// <summary>
         /// Fill and stroke path using non-zero winding number rule.
         /// </summary>
-        B,
+        B,  // FillStrokePathAlternate
 
         /// <summary>
         /// Close, fill, and stroke path using even-odd rule.
         /// </summary>
-        bx,  // actually b*
+        bx, // CloseFillStrokePathWinding
+        // actually b*
 
         /// <summary>
         /// Fill and stroke path using even-odd rule.
         /// </summary>
-        Bx,  // actually B*
+        Bx,  // FillStrokeEvenOdd_BStar
+        // actually B*
 
         /// <summary>
         /// (PDF 1.2) Begin marked-content sequence with property list
@@ -283,7 +298,7 @@ namespace PdfSharp.Pdf.Content.Objects
         /// <summary>
         /// (PDF 1.3) Paint area defined by shading pattern.
         /// </summary>
-        sh,
+        Sh,
 
         /// <summary>
         /// Move to start of next text line.
@@ -354,11 +369,19 @@ namespace PdfSharp.Pdf.Content.Objects
         /// Append curved segment to path (initial point replicated).
         /// </summary>
         v,
+        /// <summary>
+        /// Append curved segment to path (initial point replicated).
+        /// </summary>
+        AppendCurvedSegmentToPath = v,
 
         /// <summary>
         /// Set line width.
         /// </summary>
         w,
+        /// <summary>
+        /// Set line width.
+        /// </summary>
+        SetLineWidth = w,
 
         /// <summary>
         /// Set clipping path using non-zero winding number rule.

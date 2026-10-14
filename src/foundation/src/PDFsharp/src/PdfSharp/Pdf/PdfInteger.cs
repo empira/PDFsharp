@@ -15,19 +15,33 @@ namespace PdfSharp.Pdf
         /// Initializes a new instance of the <see cref="PdfInteger"/> class.
         /// </summary>
         public PdfInteger()
-        {
-            IsInteger = true;
-        }
+            => IsInteger = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfInteger"/> class.
         /// </summary>
         /// <param name="value">The value.</param>
-        public PdfInteger(int value)
+        public PdfInteger(int value) : this()
+            => Value = value;
+
+        internal PdfInteger(int value, bool isFlag) : this()
         {
-            IsInteger = true;
             Value = value;
+            IsFlag = isFlag;
         }
+
+#if PRESERVE_PARSED_VALUES
+        internal PdfInteger(int value, string parsedValue, bool isFlag) : this()
+        {
+            Value = value;
+            ParsedValue = parsedValue;
+            IsFlag = isFlag;
+        }
+#endif        
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is used as a 32-bt flag.
+        /// </summary>
+        public bool IsFlag { get; set; }
 
         /// <summary>
         /// Gets the value as integer.
@@ -38,7 +52,11 @@ namespace PdfSharp.Pdf
         /// Returns the integer as string.
         /// </summary>
         public override string ToString()
+#if PRESERVE_PARSED_VALUES
+            => ParsedValue ?? Value.ToString(CultureInfo.InvariantCulture);
+#else
             => Value.ToString(CultureInfo.InvariantCulture);
+#endif
 
         /// <summary>
         /// Writes the integer as string.
@@ -58,8 +76,6 @@ namespace PdfSharp.Pdf
             => Value;
 
         DateTime IConvertible.ToDateTime(IFormatProvider? provider)
-            //// TO-DO: Add PdfInteger.ToDateTime implementation
-            // => new DateTime();
             => throw new InvalidCastException();
 
         float IConvertible.ToSingle(IFormatProvider? provider)
@@ -99,10 +115,7 @@ namespace PdfSharp.Pdf
             => Value;
 
         object IConvertible.ToType(Type conversionType, IFormatProvider? provider)
-        {
-            // TODO_OLD: Add PdfInteger.ToType implementation
-            return null!;
-        }
+            => throw new NotImplementedException("Conversion not implemented.");
 
         uint IConvertible.ToUInt32(IFormatProvider? provider)
             => Convert.ToUInt32(Value);

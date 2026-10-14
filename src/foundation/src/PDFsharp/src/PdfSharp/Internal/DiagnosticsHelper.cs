@@ -122,8 +122,8 @@ namespace PdfSharp.Internal
         {
             var bold = glyphTypeface.IsBold ? " (bold)" : "";
 
-            var stretch = XFontStretches.FontStretchFromFaceName(glyphTypeface.FaceName);
-            var weight = XFontWeights.FontWeightFromFaceName(glyphTypeface.FaceName);
+            var stretch = XFontStretches.FontStretchFromFaceName(glyphTypeface.FontName);
+            var weight = XFontWeights.FontWeightFromFaceName(glyphTypeface.FontName);
 
             return (stretch.ToString(), weight.ToString() + bold);
         }

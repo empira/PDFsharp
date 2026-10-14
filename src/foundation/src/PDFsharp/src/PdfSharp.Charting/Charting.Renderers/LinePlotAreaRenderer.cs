@@ -2,6 +2,9 @@
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Drawing;
+#if PSGFX
+using PdfSharp.Graphics.Media.MatrixExtensions;
+#endif
 
 namespace PdfSharp.Charting.Renderers
 {
@@ -50,14 +53,14 @@ namespace PdfSharp.Charting.Renderers
                         double v = sri.Series.Elements[idx].Value;
                         if (Double.IsNaN(v) /*&& cri.Chart.DisplayBlanksAs == BlankType.Zero*/) // TODO_OLD DisplayBlanksAs
                             v = 0;
-                        points[idx] = new XPoint(idx + xMajorTick / 2, v);
+                        points[idx] = new XPoint((float_)(idx + xMajorTick / 2), (float_)v);
                     }
 
                     matrix.TransformPoints(points);
                     gfx.DrawLines(sri.LineFormat, points);
                     DrawMarker(gfx, points, sri);
                 }
-
+                    
                 //gfx.ResetClip();
             }
             gfx.Restore(state);

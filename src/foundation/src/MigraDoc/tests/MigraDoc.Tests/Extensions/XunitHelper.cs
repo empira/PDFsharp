@@ -1,4 +1,7 @@
-﻿using System;
+﻿// MigraDoc - Creating Documents on the Fly
+// See the LICENSE file in the solution root for more information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,8 +21,14 @@ namespace Xunit
         /// <returns>True if slow tests should be skipped.</returns>
         public static bool SkipSlowTests()
         {
+#if RUN_SLOW_TESTS
+            return false;
+#else
             var env = Environment.GetEnvironmentVariable("PDFsharpTests");
+            //#/warning slow tests
+            //            env = "x";
             return String.IsNullOrEmpty(env);
+#endif
         }
 
         /// <summary>
@@ -29,7 +38,7 @@ namespace Xunit
         /// <returns>True if slow tests should be skipped.</returns>
         public static bool SkipSlowTestsUnderDotNetFramework()
         {
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
             return false;
 #else
             return SkipSlowTests();

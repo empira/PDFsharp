@@ -15,19 +15,18 @@ namespace PdfSharp.Pdf
         /// Initializes a new instance of the <see cref="PdfReal"/> class.
         /// </summary>
         public PdfReal()
-        {
-            IsReal = true;
-        }
+            => IsReal = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfReal"/> class.
         /// </summary>
         /// <param name="value">The value.</param>
-        public PdfReal(double value)
+        public PdfReal(double value) : this()
         {
+
             if (value is < Single.MinValue or > Single.MaxValue)
-                Debug.Assert(false);
-            IsReal = true;
+                throw new ArgumentException($"The value must fit in the range of type Single.");
+
             Value = value;
         }
 
@@ -43,7 +42,7 @@ namespace PdfSharp.Pdf
             => Value.ToString(Config.SignificantDecimalPlaces3, CultureInfo.InvariantCulture);
 
         /// <summary>
-        /// Writes the real value with up to three digits.
+        /// Writes the real value with up to three digits.  
         /// </summary>
         internal override void WriteObject(PdfWriter writer)
             => writer.Write(this);
@@ -88,7 +87,7 @@ namespace PdfSharp.Pdf
 
         long IConvertible.ToInt64(IFormatProvider? provider)
             => Convert.ToInt64(Value);
-        
+
         /// <summary>
         /// Returns TypeCode for 32-bit integers.
         /// </summary>
@@ -99,10 +98,7 @@ namespace PdfSharp.Pdf
             => Convert.ToDecimal(Value);
 
         object IConvertible.ToType(Type conversionType, IFormatProvider? provider)
-        {
-            // TODO_OLD: Add PdfInteger.ToType implementation
-            return null!;
-        }
+            => throw new NotImplementedException("Conversion not implemented.");
 
         uint IConvertible.ToUInt32(IFormatProvider? provider)
             => Convert.ToUInt32(Value);

@@ -56,10 +56,10 @@ namespace MigraDoc.DocumentObjectModel.Tests
 
             rendering.Should().Throw<InvalidOperationException>();
 
-            //// Save the document...
+            //// Save the document…
             //var filename = PdfFileUtility.GetTempPdfFileName("HelloWorld");
             //pdfRenderer.PdfDocument.Save(filename);
-            //// ...and start a viewer.
+            //// … and start a viewer.
             //PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
@@ -126,7 +126,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var pdfRenderer = CreateReadablePdfDocumentRenderer(document);
             pdfRenderer.RenderDocument();
 
-            var filename = PdfFileUtility.GetTempPdfFileName("Test_MergeDown");
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/tables/Test_MergeDown");
             pdfRenderer.PdfDocument.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
@@ -169,7 +169,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var pdfRenderer = CreateReadablePdfDocumentRenderer(document);
             pdfRenderer.RenderDocument();
 
-            var filename = PdfFileUtility.GetTempPdfFileName("Test_MergeDown_PageBreak");
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/tables/Test_MergeDown_PageBreak");
             pdfRenderer.PdfDocument.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
@@ -207,7 +207,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var pdfRenderer = CreateReadablePdfDocumentRenderer(document);
             pdfRenderer.RenderDocument();
 
-            var filename = PdfFileUtility.GetTempPdfFileName("Test_MergeDown_LineBreak_RowHeight");
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/tables/Test_MergeDown_LineBreak_RowHeight");
             pdfRenderer.PdfDocument.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
@@ -245,7 +245,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             // Find "ID#2" text object.
             var id2Found = streamEnumerator.Text.MoveAndGetNext(x => x.Text == "ID#2", true, out _);
             id2Found.Should().BeTrue("text object \"ID#2\" shall be found");
-            
+
             // Check the following lines drawing the borders for the correct values.
             streamEnumerator.MoveNext().Should().BeTrue();
             streamEnumerator.Current.Should().Be("ET", "\"ID#1\" shall be the last text of the cell");
@@ -303,7 +303,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var pdfRenderer = CreateReadablePdfDocumentRenderer(document);
             pdfRenderer.RenderDocument();
 
-            var filename = PdfFileUtility.GetTempPdfFileName("Test_Border_Inheritance");
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/tables/Test_Border_Inheritance");
             pdfRenderer.PdfDocument.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
@@ -311,7 +311,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var page = pdfRenderer.PdfDocument.Pages[0];
             var contentReference = (PdfReference)page.Contents.Elements.Items[0];
             var content = (PdfDictionary)contentReference.Value;
-            var contentStream = content.Stream.ToString();
+            var contentStream = content.Stream?.ToString() ?? "";
             var contentLines = contentStream.Split('\n');
 
             // 1.5 is the desired border width. It shall be set only once.
@@ -388,7 +388,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var pdfRenderer = CreateReadablePdfDocumentRenderer(document);
             pdfRenderer.RenderDocument();
 
-            var filename = PdfFileUtility.GetTempPdfFileName("Test_Huge_MergeDown_Cell");
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/tables/Test_Huge_MergeDown_Cell");
             pdfRenderer.PdfDocument.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
@@ -432,7 +432,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var pdfRenderer = CreateReadablePdfDocumentRenderer(document);
             pdfRenderer.RenderDocument();
 
-            var filename = PdfFileUtility.GetTempPdfFileName("Test_Repeated_Heading_Border");
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/tables/Test_Repeated_Heading_Border");
             pdfRenderer.PdfDocument.Save(filename);
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
@@ -443,7 +443,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
             {
                 var contentStream = PdfFileHelper.GetPageContentStream(pdfRenderer.PdfDocument, pageIdx);
 
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
                 // Split ContentStream where the "Row" text is rendered.
                 var contentByRows = contentStream.Split("(Row) Tj");
                 contentByRows.Length.Should().Be(3, "as \"Row\" occurs twice per page, the stream should be split into 3 parts");
@@ -474,7 +474,7 @@ namespace MigraDoc.DocumentObjectModel.Tests
                 bottomBorderDrawLinePartLines.Should().NotContain(contentStreamBottomWidth, "heading bottom border should not be of content bottom border width");
                 bottomBorderDrawLinePartLines.Should().NotContain(contentStreamBottomColor, "heading bottom border should not be of content bottom border color");
 
-                
+
                 // Row 1.
                 contentRowDrawLineParts = rowsByDrawLinesByLines[1];
                 contentRowDrawLineParts.Length.Should().Be(3, "for the content rows one bottom and one top border should split the content into 3 parts");

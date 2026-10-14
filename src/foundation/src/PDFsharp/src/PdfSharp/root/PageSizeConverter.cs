@@ -15,7 +15,7 @@ namespace PdfSharp
     /// <summary>
     /// Converter from <see cref="PageSize"/> to <see cref="XSize"/>.
     /// </summary>
-    public static class PageSizeConverter
+    public static class PageSizeConverter  // TODO: See class Calc.
     {
         /// <summary>
         /// Converts the specified page size enumeration to a pair of values in point.

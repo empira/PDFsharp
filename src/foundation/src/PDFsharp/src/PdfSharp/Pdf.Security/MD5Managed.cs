@@ -23,6 +23,7 @@
 // a security warning and PDFsharp does not work for users that must use code that is FIPS
 // compliant. We also need the code for PDFsharp running on Blazor and other platforms
 // where the .NET implementation lacks of the retired MD5 class.
+// Also used in PdfEmbeddedFileStream to calculate the value of /CheckSum.
 
 using System.Security.Cryptography;
 
@@ -48,6 +49,14 @@ namespace PdfSharp.Pdf.Security
 
         public new static MD5Managed Create() => new();
 
+        public static string ComputeHashHex(byte[] bytes)
+        {
+            var md5 = Create();
+            var hash = md5.ComputeHash(bytes);
+            var hex = BitConverter.ToString(hash).Replace("-", "");
+            return hex;
+        }
+
         public sealed override void Initialize()
         {
             _data = new byte[64];
@@ -56,7 +65,7 @@ namespace PdfSharp.Pdf.Security
             _abcd = new()
             {
                 // Initialize values as defined in RFC 1321.
-                // Note: The code below may look strange but is correct.
+                // Note that the code below may look strange but is correct.
                 A = A,
                 B = B,
                 C = C,
@@ -104,7 +113,7 @@ namespace PdfSharp.Pdf.Security
         MD5Core.ABCD _abcd = new()
         {
             // Initialize values as defined in RFC 1321.
-            // Note: The code below may look strange but is correct.
+            // Note that the code below may look strange but is correct.
             A = A,
             B = B,
             C = C,
@@ -125,7 +134,7 @@ namespace PdfSharp.Pdf.Security
                     throw new ArgumentNullException(nameof(input));
 
                 // Initialize values defined in RFC 1321.
-                // Note: The code below may look strange but is correct.
+                // Note that the code below may look strange but is correct.
                 var abcd = new ABCD
                 {
                     A = A,
@@ -153,7 +162,7 @@ namespace PdfSharp.Pdf.Security
                 byte[] length = BitConverter.GetBytes(len);
 
                 // Padding is a single bit 1, followed by the number of 0s required to make size congruent to 448 modulo 512. Step 1 of RFC 1321  
-                // The CLR ensures that our buffer is 0-assigned, we don't need to explicitly set it. This is why it ends up being quicker to just
+                // The CLR ensures that our buffer is 0-assigned, we don’t need to explicitly set it. This is why it ends up being quicker to just
                 // use a temporary array rather than doing in-place assignment (5% for small inputs).
                 Array.Copy(input, ibStart, working, 0, cbSize);
                 working[cbSize] = 0x80;

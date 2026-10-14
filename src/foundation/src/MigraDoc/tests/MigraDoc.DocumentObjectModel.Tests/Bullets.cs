@@ -58,10 +58,10 @@ namespace MigraDoc.DocumentObjectModel.Tests
             // Layout and render document to PDF.
             pdfRenderer.RenderDocument();
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("HelloWorld");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/bullets/HelloWorld");
             pdfRenderer.PdfDocument.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
         }
 
@@ -264,10 +264,10 @@ namespace MigraDoc.DocumentObjectModel.Tests
             var pdfDocument = pdfRenderer.PdfDocument;
             pdfDocument.Options.CompressContentStreams = false;
 
-            // Save the document...
-            var filename = PdfFileUtility.GetTempPdfFileName("BulletLineSpacingTest");
+            // Save the document…
+            var filename = PdfFileUtility.GetTempPdfFullFileName("unittests/migradoc/bullets/BulletLineSpacingTest");
             pdfRenderer.PdfDocument.Save(filename);
-            // ...and start a viewer.
+            // … and start a viewer.
             PdfFileUtility.ShowDocumentIfDebugging(filename);
 
 

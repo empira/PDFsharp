@@ -1,9 +1,11 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-#pragma warning disable 0436
+using PdfSharp.Internal;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace MigraDoc
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 {
     /// <summary>
     /// Version information for all MigraDoc related assemblies.
@@ -11,7 +13,6 @@ namespace MigraDoc
     // TODO_OLD: These literals are not completely in sync with the NuGet metadata. Should be reviewed and fixed.
     public static class MigraDocProductVersionInformation
     {
-        // Cannot use const string anymore because GitVersionInformation used static string.
         // The fields are reordered to take initialization chronology into account.
 
         /// <summary>
@@ -27,43 +28,48 @@ namespace MigraDoc
         /// <summary>
         /// The major version number of the product.
         /// </summary>
-        public static readonly string VersionMajor = GitVersionInformation.Major;
+        public static readonly string VersionMajor = SemVersionInformation.Major;
 
         /// <summary>
         /// The minor version number of the product.
         /// </summary>
-        public static readonly string VersionMinor = GitVersionInformation.Minor;
+        public static readonly string VersionMinor = SemVersionInformation.Minor;
 
         /// <summary>
         /// The patch number of the product.
         /// </summary>
-        public static readonly string VersionPatch = GitVersionInformation.Patch;
+        public static readonly string VersionPatch = SemVersionInformation.Patch;
 
         /// <summary>
         /// The Version pre-release string for NuGet.
         /// </summary>
-        public static readonly string VersionPreRelease = GitVersionInformation.NuGetPreReleaseTagV2;
+        public static readonly string VersionPreRelease = SemVersionInformation.PreReleaseLabel;
 
         /// <summary>
         /// The PDF creator application information string.
         /// The PDF producer (created by) is PDFsharp anyway.
         /// </summary>
-        public static readonly string Creator = $"{Title} {GitVersionInformation.NuGetVersion} ({Url})";
+        public static readonly string Creator = $"{Title} {SemVersionInformation.InformationalVersion} ({Url})";
 
         /// <summary>
         /// The full version number.
         /// </summary>
-        public static readonly string Version = GitVersionInformation.MajorMinorPatch;
+        public static readonly string Version = SemVersionInformation.Version;
 
         /// <summary>
-        /// The full semantic version number created by GitVersion.
+        /// The full file version number.
         /// </summary>
-        public static readonly string SemanticVersion = GitVersionInformation.SemVer;
+        public static readonly string FileVersion = SemVersionInformation.FileVersion;
+
+        /// <summary>
+        /// The full semantic version number.
+        /// </summary>
+        public static readonly string SemanticVersion = SemVersionInformation.InformationalVersion;
 
         /// <summary>
         /// The home page of this product.
         /// </summary>
-        public const string Url = "www.pdfsharp.net";
+        public const string Url = "www.pdfsharp.com";
 
         /// <summary>
         /// Unused.
@@ -83,7 +89,7 @@ namespace MigraDoc
         /// <summary>
         /// The copyright information.
         /// </summary>
-        public const string Copyright = "Copyright © 2001-2024 empira Software GmbH."; // Also used as NuGet Copyright.
+        public const string Copyright = "Copyright © 2001-2026 empira Software GmbH."; // Not used as NuGet Copyright. See Directory.Build.Props.
 
         /// <summary>
         /// The trademark of the product.
@@ -96,14 +102,8 @@ namespace MigraDoc
         public const string Culture = "";
 
         // Build = days since 2001-07-04 - change values ONLY here
-#if DEBUG_
-        // ReSharper disable RedundantNameQualifier
-        //public static int BuildNumber = (System.DateTime.Now - new System.DateTime(2001, 7, 4)).Days;
-        public static int BuildNumber = (System.DateTime.Now - new System.DateTime(2005, 1, 1)).Days; // Same BuildNumber like PDFsharp
-                                                                                                      // ReSharper restore RedundantNameQualifier
-#endif
 
-#if Not_used_anymore
+#if Not_used_anymore // #DELETE 25-12-31
 
         /// <summary>
         /// E.g. "2005-01-01", for use in NuGet Script
@@ -137,7 +137,7 @@ namespace MigraDoc
         /// <summary>
         /// Nuspec Doc: A long description of the package. This shows up in the right pane of the Add Package Dialog as well as in the Package Manager Console when listing packages using the Get-Package command. 
         /// </summary>
-        public const string NuGetDescription = "MigraDoc Foundation - the Open Source .NET library that easily creates documents based on an object model with paragraphs, tables, styles, etc. and renders them into PDF or RTF.";
+        public const string NuGetDescription = "MigraDoc - the Open Source .NET library that easily creates documents based on an object model with paragraphs, tables, styles, etc. and renders them into PDF or RTF.";
 
         /// <summary>
         /// Nuspec Doc: A description of the changes made in each release of the package. This field only shows up when the _Updates_ tab is selected and the package is an update to a previously installed package.
@@ -171,7 +171,7 @@ namespace MigraDoc
         public const string NuGetLicenseUrl = "http://www.pdfsharp.net/MigraDoc_License.ashx";
 
         /// <summary>
-        /// Nuspec Doc: A Boolean value that specifies whether the client needs to ensure that the package license (described by licenseUrl) is accepted before the package is installed.
+        /// Nuspec Doc: A boolean value that specifies whether the client needs to ensure that the package license (described by licenseUrl) is accepted before the package is installed.
         /// </summary>                  
         public const bool NuGetRequireLicenseAcceptance = false;
 

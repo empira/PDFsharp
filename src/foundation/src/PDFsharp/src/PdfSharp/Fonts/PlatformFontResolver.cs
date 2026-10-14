@@ -106,8 +106,8 @@ namespace PdfSharp.Fonts
             else
             {
 #if GDI && !WPF
-                bool mustSimulateBold = gdiFont.Bold && !fontSource.FontFace.os2.IsBold;
-                bool mustSimulateItalic = gdiFont.Italic && !fontSource.FontFace.os2.IsItalic;
+                bool mustSimulateBold = gdiFont.Bold && !fontSource.OTFontFace.os2.IsBold;
+                bool mustSimulateItalic = gdiFont.Italic && !fontSource.OTFontFace.os2.IsItalic;
                 fontResolverInfo = new PlatformFontResolverInfo(typefaceKey, mustSimulateBold, mustSimulateItalic, gdiFont);
 #endif
 #if WPF
@@ -168,8 +168,8 @@ namespace PdfSharp.Fonts
                 typefaceKey = XGlyphTypeface.ComputeGtfKey(familyName, fontResolvingOptions);
             var style = fontResolvingOptions.FontStyle;
 
-            var fontResolverInfosByName = Globals.Global.Fonts.FontResolverInfosByName;
-            var fontSourcesByName = Globals.Global.Fonts.FontSourcesByName;
+            var fontResolverInfosByName = PsGlobals.Global.Fonts.FontResolverInfosByName;
+            var fontSourcesByName = PsGlobals.Global.Fonts.FontSourcesByName;
 
             // Was this typeface requested before?
             if (fontResolverInfosByName.TryGetValue(typefaceKey, out var fontResolverInfo))
@@ -314,11 +314,6 @@ namespace PdfSharp.Fonts
                 typefaceKey = XGlyphTypeface.ComputeGtfKey(familyName, fontResolvingOptions);
             XFontStyleEx style = fontResolvingOptions.FontStyle;
 
-#if DEBUG_
-            if (StringComparer.OrdinalIgnoreCase.Compare(familyName, "Segoe UI Semilight") == 0
-                && (style & XFontStyleEx.BoldItalic) == XFontStyleEx.Italic)
-                familyName.GetType();
-#endif
             wpfFontFamily = null;
             wpfTypeface = null;
             wpfGlyphTypeface = null;
@@ -326,21 +321,6 @@ namespace PdfSharp.Fonts
             // Use WPF technique to create font data.
             // No more XPrivateFontCollection.
             //wpfTypeface = XPrivateFontCollection.TryCreateTypeface(familyName, style, out wpfFontFamily);
-#if DEBUG_
-            if (wpfTypeface != null)
-            {
-                WpfGlyphTypeface glyphTypeface;
-                ICollection<WpfTypeface> list = wpfFontFamily.GetTypefaces();
-                foreach (WpfTypeface tf in list)
-                {
-                    if (!tf.TryGetGlyphTypeface(out glyphTypeface))
-                        Debug-Break.Break();
-                }
-
-                //if (!WpfTypeface.TryGetGlyphTypeface(out glyphTypeface))
-                //    throw new InvalidOperationException(PsMgs.CannotGetGlyphTypeface(familyName));
-            }
-#endif
             wpfFontFamily ??= new WpfFontFamily(familyName);
 
             wpfTypeface ??= FontHelper.CreateTypeface(wpfFontFamily, style);

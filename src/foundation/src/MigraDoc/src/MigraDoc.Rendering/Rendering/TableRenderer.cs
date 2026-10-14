@@ -1,7 +1,6 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
-using System.Diagnostics;
 using MigraDoc.DocumentObjectModel.Internals;
 using PdfSharp.Drawing;
 using MigraDoc.DocumentObjectModel;
@@ -216,25 +215,25 @@ namespace MigraDoc.Rendering
             XUnitPt contentHeight = formattedCell.ContentHeight;
             XUnitPt innerHeight = innerRect.Height;
             Debug.Assert(cell.Column != null, "cell.Column != null");
-            XUnitPt targetX = innerRect.X + cell.Column.LeftPadding.Point;
+            XUnitPt targetX = (float_)(innerRect.X + cell.Column.LeftPadding.Point);
 
             XUnitPt targetY;
             Debug.Assert(cell.Row != null, "cell.Row != null");
             if (verticalAlignment == VerticalAlignment.Bottom)
             {
                 targetY = innerRect.Y + innerRect.Height;
-                targetY -= cell.Row.BottomPadding.Point;
+                targetY -= (float_)cell.Row.BottomPadding.Point;
                 targetY -= contentHeight;
             }
             else if (verticalAlignment == VerticalAlignment.Center)
             {
-                targetY = innerRect.Y + cell.Row.TopPadding.Point;
-                targetY += innerRect.Y + innerRect.Height - cell.Row.BottomPadding.Point;
+                targetY = (float_)(innerRect.Y + cell.Row.TopPadding.Point);
+                targetY += (float_)(innerRect.Y + innerRect.Height - cell.Row.BottomPadding.Point);
                 targetY -= contentHeight;
                 targetY /= 2;
             }
             else
-                targetY = innerRect.Y + cell.Row.TopPadding.Point;
+                targetY = (float_)(innerRect.Y + cell.Row.TopPadding.Point);
 
             RenderByInfos(targetX, targetY, renderInfos);
         }
@@ -283,7 +282,7 @@ namespace MigraDoc.Rendering
             int cellColIndex = cell.Column.Index; // Cache property result.
             for (int clmIdx = 0; clmIdx < cellColIndex; ++clmIdx)
             {
-                x += _table.Columns[clmIdx]?.Width.Point ?? NRT.ThrowOnNull<int>();
+                x += (float_)(_table.Columns[clmIdx]?.Width.Point ?? NRT.ThrowOnNull<int>());
             }
             x += LeftBorderOffset;
 
@@ -491,7 +490,7 @@ namespace MigraDoc.Rendering
                 //foreach (Column clm in _table.Columns)
                 foreach (var clm in _table.Columns.Cast<Column>())
                 {
-                    width += clm.Width.Point;
+                    width += (float_)(clm.Width.Point);
                 }
                 layoutInfo.ContentArea.Width = width;
             }
@@ -499,12 +498,12 @@ namespace MigraDoc.Rendering
 
             //if (_table.Rows.Values.LeftIndent is not null)
             if (!_table.Rows.Values.LeftIndent.IsValueNullOrEmpty())
-                layoutInfo.Left = _table.Rows.LeftIndent.Point;
+                layoutInfo.Left = (float_)_table.Rows.LeftIndent.Point;
 
             else if (_table.Rows.Alignment == RowAlignment.Left)
             {
                 XUnitPt leftOffset = LeftBorderOffset;
-                leftOffset += _table.Columns[0].LeftPadding.Point;
+                leftOffset += (float_)_table.Columns[0].LeftPadding.Point;
                 layoutInfo.Left = -leftOffset;
             }
 
@@ -590,7 +589,7 @@ namespace MigraDoc.Rendering
                     _lastHeaderRow = row.Index;
                 else break;
             }
-            // Note: Do not use _connectedRowsMap here, it was not yet initialized.
+            // Do not use _connectedRowsMap here, it was not yet initialized.
             if (_lastHeaderRow >= 0)
                 _lastHeaderRow = CalcLastConnectedRowDirect(_lastHeaderRow);
 
@@ -876,7 +875,7 @@ namespace MigraDoc.Rendering
         {
 #if DEBUG
             // Comparing the result of the new implementation with the old version.
-            // Note: It does not matter which cell is actually returned. Just the bottom margin of the cell matters.
+            // It does not matter which cell is actually returned. Just the bottom margin of the cell matters.
             var originalResult = GetMinMergedCellOriginal(row);
 #endif
 
@@ -896,7 +895,7 @@ namespace MigraDoc.Rendering
                     // Does it matter which cell we return??? 2023-03-08 Yes, we need a result that is in _mergedCells.
                     Debug.Assert(originalResult == cell);
 
-                    // Note: It does not matter which cell is actually returned. Just the bottom margin of the cell matters.
+                    // It does not matter which cell is actually returned. Just the bottom margin of the cell matters.
                     Debug.Assert(originalResult.Row!.Index + originalResult.MergeDown ==
                                  cell.Row!.Index + cell.MergeDown);
 #endif

@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 using PdfSharp.Pdf.Advanced;
@@ -168,9 +168,11 @@ namespace PdfSharp.Pdf.Filters
                 //    Crypt = new Crypt();
                 //  return Crypt;
 
-                
+
                 case PdfFilterNames.RunLengthDecode:
+                case PdfFilterNames.RunLengthDecodeAbbreviation:
                 case PdfFilterNames.CcittFaxDecode:
+                case PdfFilterNames.CcittFaxDecodeAbbreviation:
                 case PdfFilterNames.Jbig2Decode:
                 case PdfFilterNames.JpxDecode:
                 case PdfFilterNames.Crypt:
@@ -266,15 +268,21 @@ namespace PdfSharp.Pdf.Filters
         {
             byte[]? result = null;
 
-#if true
-            PdfReference.Dereference(ref filterItem);
-#else
-            if (filterItem is PdfReference iref)
-            {
-                Debug.Assert(iref.Value != null, "Indirect /Filter value is null");
-                filterItem = iref.Value;
-            }
-#endif
+            // #US373.
+//            // TODO Make sure Decode is never called with a reference.
+//#if true
+//            PdfReference.Dereference(ref filterItem);
+//#else
+//            if (filterItem is PdfReference iref)
+//            {
+//                Debug.Assert(iref.Value != null, "Indirect /Filter value is null");
+//                filterItem = iref.Value;
+//            }
+//#endif
+
+//            // TODO Make sure Decode is never called with a reference.
+//            if (decodeParms is not null)
+//                PdfReference.Dereference(ref decodeParms);
 
             if (filterItem is PdfName && decodeParms is null or PdfDictionary)
             {
@@ -285,7 +293,7 @@ namespace PdfSharp.Pdf.Filters
             else if (filterItem is PdfArray itemArray && decodeParms is null or PdfArray)
             {
                 var decodeArray = decodeParms as PdfArray;
-                // Array length of filter and decode parms should match. If they don�t, return data unmodified.
+                // Array length of filter and decode parms should match. If they don’t, return data unmodified.
                 if (decodeArray != null && decodeArray.Elements.Count != itemArray.Elements.Count)
                     return data;
                 for (var i = 0; i < itemArray.Elements.Count; i++)

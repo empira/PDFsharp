@@ -127,7 +127,7 @@
     <value>Image could not be read.</value>
   </data>
     <data name="NumberTooLargeForLetters" xml:space="preserve">
-    <value>The number {0} is to large to be displayed as letters.</value>
+    <value>The number {0} is too large to be displayed as letters.</value>
   </data>
     <data name="BookmarkNotDefined" xml:space="preserve">
     <value>Bookmark '{0}' is not defined within the document.</value>
@@ -136,7 +136,7 @@
     <value>Invalid image type: '{0}'.</value>
   </data>
     <data name="NumberTooLargeForRoman" xml:space="preserve">
-    <value>The number {0} is to large to be displayed as roman.</value>
+    <value>The number {0} is too large to be displayed as roman.</value>
   </data>
     <data name="ImageNotFound" xml:space="preserve">
     <value>Image '{0}' not found.</value>

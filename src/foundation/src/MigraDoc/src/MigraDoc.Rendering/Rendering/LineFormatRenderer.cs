@@ -72,11 +72,19 @@ namespace MigraDoc.Rendering
             var pen = new XPen(GetColor(), width);
             pen.DashStyle = (_lineFormat?.DashStyle ?? NRT.ThrowOnNull<DashStyle>()) switch
             {
+#if PSGFX
+                DashStyle.Dash => XDashStyles.Dash,
+                DashStyle.DashDot => XDashStyles.DashDot,
+                DashStyle.DashDotDot => XDashStyles.DashDotDot,
+                DashStyle.Solid => XDashStyles.Solid,
+                DashStyle.SquareDot => XDashStyles.Dot,
+#else
                 DashStyle.Dash => XDashStyle.Dash,
                 DashStyle.DashDot => XDashStyle.DashDot,
                 DashStyle.DashDotDot => XDashStyle.DashDotDot,
                 DashStyle.Solid => XDashStyle.Solid,
                 DashStyle.SquareDot => XDashStyle.Dot,
+#endif
                 _ => pen.DashStyle
             };
             return pen;

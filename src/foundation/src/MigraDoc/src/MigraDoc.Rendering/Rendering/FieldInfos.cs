@@ -61,6 +61,6 @@ namespace MigraDoc.Rendering
         internal int Section;
         internal int SectionPages;
         internal int NumPages;
-        internal DateTime Date;
+        internal DateTimeOffset Date;
     }
 }

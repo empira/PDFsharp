@@ -1,6 +1,11 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using System.Text;
+using PdfSharp.Pdf.Internal;
+using PdfSharp.Drawing;
+using PdfSharp.Fonts.Internal;
+using PdfSharp.Internal.OpenType;
 #if GDI
 using System.Drawing;
 using System.Drawing.Text;
@@ -8,10 +13,6 @@ using System.Drawing.Text;
 #if WPF
 using System.Windows.Media;
 #endif
-using System.Text;
-using PdfSharp.Drawing;
-using PdfSharp.Fonts.Internal;
-using PdfSharp.Pdf.Internal;
 
 namespace PdfSharp.Fonts
 {

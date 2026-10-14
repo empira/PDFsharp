@@ -23,9 +23,9 @@ $source = "https://assets.pdfsharp.net/"
 $destination = "$PSScriptRoot/../assets/"
 
 if (test-path -PathType container $destination) {
-    Remove-Item -LiteralPath $destination -Force -Recurse
+    Remove-Item -LiteralPath $destination -Force -Recurse | Out-Null
 }
-New-Item -ItemType Directory -Path $destination
+New-Item -ItemType Directory -Path $destination | Out-Null
 
 # Download assets version.
 $url = $source + ".assets-version"
@@ -38,7 +38,7 @@ foreach ($asset in $assetList) {
     $dest = $destination + $asset
 
     $folder = [IO.Path]::GetDirectoryName($dest)
-    New-Item -ItemType Directory -Path $folder -Force
+    New-Item -ItemType Directory -Path $folder -Force | Out-Null
 
     Invoke-WebRequest $url -OutFile $dest
 
@@ -56,8 +56,8 @@ foreach ($asset in $assetList) {
 $source = "https://assets.pdfsharp.net/"
 $destination = "$PSScriptRoot/../assets/fonts/Noto/Noto_Sans/static/"
 
-New-Item -ItemType Directory -Path $destination
-New-Item -ItemType Directory -Path "$destination/temp/"
+New-Item -ItemType Directory -Path $destination | Out-Null
+New-Item -ItemType Directory -Path "$destination/temp/" | Out-Null
 
 $url = $source + "fonts/Noto/Noto_Sans.zip"
 $dest = $destination

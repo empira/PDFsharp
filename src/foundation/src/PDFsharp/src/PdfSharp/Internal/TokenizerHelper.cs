@@ -31,7 +31,7 @@ namespace PdfSharp.Internal
             _quoteChar = quoteChar;
             _argSeparator = separator;
 
-            // Skip any whitespace.
+            // Skip any white-space.
             while (_charIndex < _strLen)
             {
                 if (!Char.IsWhiteSpace(_str!, _charIndex))
@@ -110,7 +110,7 @@ namespace PdfSharp.Internal
             int newTokenIndex = _charIndex;
             int newTokenLength = 0;
 
-            // Loop until hit end of string or hit a separator or whitespace.
+            // Loop until hit end of string or hit a separator or white-space.
             while (_charIndex < _strLen)
             {
                 currentChar = _str[_charIndex];
@@ -166,11 +166,11 @@ namespace PdfSharp.Internal
             {
                 char currentChar = _str![_charIndex];
 
-                // Ensure that currentChar is a white space or separator.
+                // Ensure that currentChar is a white-space or separator.
                 if (currentChar != separator && !Char.IsWhiteSpace(currentChar))
                     throw new InvalidOperationException("ExtraDataEncountered"); //SR.Get(SRID.TokenizerHelperExtraDataEncountered, new object[0]));
 
-                // Loop until a character that isn’t the separator or white space.
+                // Loop until a character that isn’t the separator or white-space.
                 int argSepCount = 0;
                 while (_charIndex < _strLen)
                 {
@@ -186,7 +186,7 @@ namespace PdfSharp.Internal
                     }
                     else if (Char.IsWhiteSpace(currentChar))
                     {
-                        // Skip white space.
+                        // Skip white-space.
                         ++_charIndex;
                     }
                     else

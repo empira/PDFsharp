@@ -1,25 +1,24 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using Microsoft.Extensions.Logging;
-using PdfSharp.Fonts.Internal;
-using PdfSharp.Fonts.OpenType;
-using PdfSharp.Logging;
-using PdfSharp.Pdf.Internal;
+using System.Collections;
+using PdfSharp.Internal.OpenType;
 
 namespace PdfSharp.Fonts
 {
     /// <summary>
-    /// Helper class that determines the characters used in a particular font.
+    /// Helper class that collects the characters and glyphs used in a particular font.
+    /// The glyphs are used in /FontDescriptor for calculating the font subset.
+    /// The characters are used in /TrueType fonts with /WinAnsiEncoding for the /Widths array.
+    /// The characters are used in /Type0 fonts with /Identity-H encoding for /ToUnicode map and
+    /// in the descendant /CIDFontType2 for the /W array.
     /// </summary>
     class CMapInfo
     {
-        public CMapInfo(OpenTypeDescriptor descriptor)
+        public CMapInfo(int glyphCount)
         {
-            Debug.Assert(descriptor != null);
-            _descriptor = descriptor;
+            GlyphIndicesNew = new(glyphCount);
         }
-        readonly OpenTypeDescriptor _descriptor;
 
         public void AddChars(CodePointGlyphIndexPair[] codePoints)
         {
@@ -30,7 +29,22 @@ namespace PdfSharp.Fonts
                 var item = codePoints[idx];
                 if (item.GlyphIndex == 0)
                     continue;
-
+#if true  // #PSGFX
+                if (!CodePointsToGlyphIndices.ContainsKey(item.CodePoint))
+                {
+                    CodePointsToGlyphIndices.Add(item.CodePoint, item.GlyphIndex);
+                    GlyphIndices[item.GlyphIndex] = null;
+                    GlyphIndicesNew[item.GlyphIndex] = true;
+                    MinCodePoint = Math.Min(MinCodePoint, item.CodePoint);
+                    MaxCodePoint = Math.Max(MaxCodePoint, item.CodePoint);
+                }
+                else
+                {
+                    // In PDFsharp Graphics we also can draw glyphs without a code point.
+                    GlyphIndices[item.GlyphIndex] = null;
+                    GlyphIndicesNew[item.GlyphIndex] = true;
+                }
+#else
                 if (CodePointsToGlyphIndices.ContainsKey(item.CodePoint))
                     continue;
 
@@ -38,6 +52,7 @@ namespace PdfSharp.Fonts
                 GlyphIndices[item.GlyphIndex] = default;
                 MinCodePoint = Math.Min(MinCodePoint, item.CodePoint);
                 MaxCodePoint = Math.Max(MaxCodePoint, item.CodePoint);
+#endif
             }
         }
 
@@ -55,6 +70,9 @@ namespace PdfSharp.Fonts
             }
         }
 
+        /// <summary>
+        /// Gets an ordered array glyph indices.
+        /// </summary>
         public ushort[] GetGlyphIndices()
         {
             var indices = new ushort[GlyphIndices.Count];
@@ -63,17 +81,25 @@ namespace PdfSharp.Fonts
             return indices;
         }
 
-        public int MinCodePoint = Int32.MaxValue;  
+        public int MinCodePoint = Int32.MaxValue;
         public int MaxCodePoint = Int32.MinValue;
 
         /// <summary>
-        /// Maps a Unicode code point to a glyph ID.
+        /// Maps a Unicode code point to a glyphs.
+        /// Contains all used codepoints and their glyphs.
+        /// Used for ToUnicode table and /W entry.
         /// </summary>
-        public Dictionary<int, ushort> CodePointsToGlyphIndices = [];
+        public readonly Dictionary<int, ushort> CodePointsToGlyphIndices = [];
 
         /// <summary>
-        /// Collects all used glyph IDs. Value is not used.
+        /// Collects all used glyph IDs. Value is now used by PDFsharp Graphics where it is possible
+        /// to draw only glyphs without associated code point. Therefore, this dictionary is now
+        /// relevant for computing the font subset.
+        /// We also use this dictionary to fast lookup if a glyph is already added.
         /// </summary>
-        public Dictionary<ushort, object?> GlyphIndices = [];
+        public readonly Dictionary<ushort, object?> GlyphIndices = [];
+        
+        // TODO #PSGFX Use a BitArray for collection the glyphs.
+        public readonly BitArray GlyphIndicesNew;
     }
 }

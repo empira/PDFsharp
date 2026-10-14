@@ -14,7 +14,6 @@ namespace Shared.TestApp
     {
         public const int IdXxxx = 7000;
         public const int IdYyyy = 7010;
-
     };
     
     public static partial class TestAppLogMessages

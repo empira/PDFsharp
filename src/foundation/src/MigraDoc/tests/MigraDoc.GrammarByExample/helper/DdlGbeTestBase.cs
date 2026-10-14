@@ -3,7 +3,7 @@
 
 using System;
 using System.Diagnostics;
-#if NET6_0_OR_GREATER
+#if NET8_0_OR_GREATER
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 #endif
 using MigraDoc.DocumentObjectModel;
@@ -106,7 +106,7 @@ namespace GdiGrammarByExample
             style!.Font.Name = "Verdana";
 #endif
 #if CORE
-            // Note: Core uses SnippetsFontResolver and all required fonts should be available.
+            // Core uses SnippetsFontResolver and all required fonts should be available.
             var style = document.Styles[Style.DefaultParagraphName];
             Debug.Assert(style != null, nameof(style) + " != null");
             // Since all reference documents created with PDFsharp 1.40 or earlier use Verdana, we change the default to Verdana here for all DLL snippets.
@@ -116,7 +116,7 @@ namespace GdiGrammarByExample
 
         internal static string WslPathHack(string path)
         {
-#if !NET6_0_OR_GREATER
+#if !NET8_0_OR_GREATER
             // .NET 4.6.2 or .NETStandard 2.0, for Windows only.
             return path;
 #else
@@ -130,7 +130,7 @@ namespace GdiGrammarByExample
                 return path.Replace(@"D:\", "/mnt/c/").Replace('\\', '/');
             }
 
-            throw new NotImplementedException($"Platform {Environment.OSVersion} not yet supported.");
+            throw new NotSupportedException($"Platform {Environment.OSVersion} not yet supported.");
 #endif
         }
 

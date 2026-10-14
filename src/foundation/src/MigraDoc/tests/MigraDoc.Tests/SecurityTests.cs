@@ -1,23 +1,27 @@
 ﻿// MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
+using System.IO;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Logging;
+using MigraDoc.DocumentObjectModel;
+using MigraDoc.Rendering;
+using PdfSharp;
+using PdfSharp.Drawing;
+using PdfSharp.Drawing.Layout;
+using PdfSharp.Fonts;
+using PdfSharp.Logging;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Security;
-using MigraDoc.Rendering;
-using Xunit;
-using FluentAssertions;
-using Microsoft.Extensions.Logging;
-using MigraDoc.DocumentObjectModel;
-using PdfSharp;
-using PdfSharp.Drawing;
-using PdfSharp.Fonts;
-using PdfSharp.Logging;
+using PdfSharp.Pdf.Signatures;
 using PdfSharp.Quality;
 using PdfSharp.TestHelper;
 using PdfSharp.TestHelper.Analysis.ContentStream;
-using static PdfSharp.TestHelper.SecurityTestHelper;
+using Xunit;
+using FluentAssertions;
 using static MigraDoc.Tests.Helper.SecurityTestHelper;
+using static PdfSharp.TestHelper.SecurityTestHelper;
 
 namespace MigraDoc.Tests
 {
@@ -87,10 +91,18 @@ namespace MigraDoc.Tests
         //   - Perm{X} = Permissions test
 
         // ReSharper disable once UnusedParameter.Local
-        static void OpenPdf(string filename)
+        static void OpenPdf(Stream stream)
         {
 #if true_ // Should be "true_" by default and in source control. Change to "true" to enable automatic PDF starting for testing purposes.
-            Process.Sta/rt(new ProcessStartInfo(filename) { UseShellExecute = true });
+            if (stream is FileStream fileStream)
+            {
+                var filename = fileStream.Name;
+                Process.Start(new ProcessStartInfo(filename) { UseShellExecute = true });
+            }
+            else if (stream is MemoryStream)
+            {
+                throw new InvalidOperationException("Cannot open PDF from MemoryStream.");
+            }
 #endif
         }
 
@@ -99,9 +111,9 @@ namespace MigraDoc.Tests
         {
             Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
 
-            var filename = AddPrefixToFilename("w.pdf");
-            WriteStandardTestDocument(filename);
-            OpenPdf(filename);
+            var stream = AddPrefixToFilename("w.pdf");
+            WriteStandardTestDocument(stream);
+            OpenPdf(stream);
         }
 
         [SkippableFact]
@@ -114,9 +126,9 @@ namespace MigraDoc.Tests
             var pdfDoc = PdfReader.Open(tempFile);
             var pdfRenderer = new PdfDocumentRenderer { PdfDocument = pdfDoc };
 
-            var filename = AddPrefixToFilename("r.pdf");
-            pdfRenderer.Save(filename);
-            OpenPdf(filename);
+            var stream = AddPrefixToFilename("r.pdf");
+            pdfRenderer.Save(stream, false);
+            OpenPdf(stream);
         }
 
         [SkippableTheory]
@@ -199,13 +211,13 @@ namespace MigraDoc.Tests
 
             var options = TestOptions.ByEnum(optionsEnum);
             options.SetDefaultPasswords(true);
-            var tempFile = GetSecuredStandardTestDocument(options);
+            var tempDoc = GetSecuredStandardTestDocument(options);
 
             Exception? e = null;
             try
             {
                 // ReSharper disable once UnusedVariable
-                var pdfDoc = PdfReader.Open(tempFile, PasswordWrong);
+                var pdfDoc = PdfReader.Open(tempDoc, PasswordWrong);
             }
             catch (Exception ex)
             {
@@ -232,9 +244,9 @@ namespace MigraDoc.Tests
 
             var pdfRenderer = new PdfDocumentRenderer { PdfDocument = pdfDoc };
 
-            var filename = AddPrefixToFilename("r U.pdf", options);
-            pdfRenderer.Save(filename);
-            OpenPdf(filename);
+            var stream = AddPrefixToFilename("r U.pdf", options);
+            pdfRenderer.Save(stream, false);
+            OpenPdf(stream);
         }
 
         [SkippableTheory]
@@ -299,9 +311,9 @@ namespace MigraDoc.Tests
 
             var pdfRenderer = new PdfDocumentRenderer { PdfDocument = pdfDoc };
 
-            var filename = AddPrefixToFilename("r O-X_Imp.pdf", options);
-            pdfRenderer.Save(filename);
-            OpenPdf(filename);
+            var stream = AddPrefixToFilename("r O-X_Imp.pdf", options);
+            pdfRenderer.Save(stream, false);
+            OpenPdf(stream);
         }
 
         [SkippableTheory]
@@ -347,15 +359,15 @@ namespace MigraDoc.Tests
 
             var pdfRenderer = new PdfDocumentRenderer { PdfDocument = pdfDoc };
 
-            var filename = AddPrefixToFilename("r O.pdf", options);
-            pdfRenderer.Save(filename);
-            OpenPdf(filename);
+            var stream = AddPrefixToFilename("r O.pdf", options);
+            pdfRenderer.Save(stream, false);
+            OpenPdf(stream);
         }
 
         [SkippableTheory]
         [ClassData(typeof(TestData.AllWriteVersions))]
         [ClassData(typeof(TestData.AllWriteVersionsSkipped), Skip = SkippedTestOptionsMessage)]
-        public void Test_Write_UserOwnerPassword(TestOptionsEnum optionsEnum)
+        public void Test_Write_UserAndOwnerPassword(TestOptionsEnum optionsEnum)
         {
             Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
 
@@ -454,6 +466,7 @@ namespace MigraDoc.Tests
         [ClassData(typeof(TestData.AllWriteVersions))]
         [ClassData(typeof(TestData.AllWriteVersionsSkipped), Skip = SkippedTestOptionsMessage)]
         [InlineData(TestOptionsEnum.V5R5ReadOnly)]
+        [InlineData(TestOptionsEnum.V5WithoutMetadata)]
         public void Test_Read_UserAndOwnerPassword_User_Import(TestOptionsEnum optionsEnum)
         {
             Skip.If(SkippableTests.SkipSlowTestsUnderDotNetFramework());
@@ -470,9 +483,9 @@ namespace MigraDoc.Tests
 
             var pdfRenderer = new PdfDocumentRenderer { PdfDocument = pdfDoc };
 
-            var filename = AddPrefixToFilename("r UO-U_Imp.pdf", options);
-            pdfRenderer.Save(filename);
-            OpenPdf(filename);
+            var stream = AddPrefixToFilename("r UO-U_Imp.pdf", options);
+            pdfRenderer.Save(stream, false);
+            OpenPdf(stream);
         }
 
         [SkippableTheory]
@@ -491,9 +504,9 @@ namespace MigraDoc.Tests
 
             var pdfRenderer = new PdfDocumentRenderer { PdfDocument = pdfDoc };
 
-            var filename = AddPrefixToFilename("r UO-O.pdf", options);
-            pdfRenderer.Save(filename);
-            OpenPdf(filename);
+            var stream = AddPrefixToFilename("r UO-O.pdf", options);
+            pdfRenderer.Save(stream, false);
+            OpenPdf(stream);
         }
 
         [SkippableTheory]
@@ -511,18 +524,18 @@ namespace MigraDoc.Tests
             options.SetPasswords(userPassword, ownerPassword);
 
             // Write encrypted file.
-            var filename = AddPrefixToFilename("w UO-long.pdf", options);
-            WriteSecuredStandardTestDocument(filename, options);
-            OpenPdf(filename);
+            var stream = AddPrefixToFilename("w UO-long.pdf", options);
+            WriteSecuredStandardTestDocument(stream, options);
+            OpenPdf(stream);
 
             // Read encrypted file and write it without encryption.
-            var pdfDoc = PdfReader.Open(filename, ownerPassword);
+            var pdfDoc = PdfReader.Open(stream, ownerPassword);
 
             var pdfRenderer = new PdfDocumentRenderer { PdfDocument = pdfDoc };
 
-            var filenameRead = AddPrefixToFilename("r UO-long.pdf", options);
-            pdfRenderer.Save(filenameRead);
-            OpenPdf(filenameRead);
+            var streamRead = AddPrefixToFilename("r UO-long.pdf", options);
+            pdfRenderer.Save(streamRead, false);
+            OpenPdf(streamRead);
         }
 
         [SkippableTheory]
@@ -546,18 +559,18 @@ namespace MigraDoc.Tests
             options.SetPasswords(userPassword, ownerPassword);
 
             // Write encrypted file.
-            var filename = AddPrefixToFilename("w UO-unic.pdf", options);
-            WriteSecuredStandardTestDocument(filename, options);
-            OpenPdf(filename);
+            var stream = AddPrefixToFilename("w UO-unic.pdf", options);
+            WriteSecuredStandardTestDocument(stream, options);
+            OpenPdf(stream);
 
             // Read encrypted file and write it without encryption.
-            var pdfDoc = PdfReader.Open(filename, ownerPassword);
+            var pdfDoc = PdfReader.Open(stream, ownerPassword);
 
             var pdfRenderer = new PdfDocumentRenderer { PdfDocument = pdfDoc };
 
-            var filenameRead = AddPrefixToFilename("r UO-unic.pdf", options);
-            pdfRenderer.Save(filenameRead);
-            OpenPdf(filenameRead);
+            var streamRead = AddPrefixToFilename("r UO-unic.pdf", options);
+            pdfRenderer.Save(streamRead, false);
+            OpenPdf(streamRead);
         }
 
         /// <summary>
@@ -573,7 +586,7 @@ namespace MigraDoc.Tests
             options.SetDefaultPasswords(true, true);
 
             // Write file to embed.
-            var filenameEmbedded = "temp.pdf";
+            var filenameEmbedded = PdfFileUtility.GetTempPdfFullFileName("temp_a_embedded");
             var documentEmbedded = CreateEmptyTestDocument();
 
             var sectionEmbedded = documentEmbedded.AddSection();
@@ -584,7 +597,7 @@ namespace MigraDoc.Tests
             pdfRendererEmbedded.Save(filenameEmbedded);
 
             // Write file containing embedded file with only this embedded file stream encrypted.
-            var filename = AddPrefixToFilename("_EmbWrap w UO.pdf", options);
+            var stream = AddPrefixToFilename("_EmbWrap w UO.pdf", options);
             var referenceNameEmbedded = "referenceEmbedded";
             var document = CreateEmptyTestDocument();
             document.AddEmbeddedFile(referenceNameEmbedded, filenameEmbedded);
@@ -595,16 +608,16 @@ namespace MigraDoc.Tests
             var link = paragraph.AddHyperlinkToEmbeddedDocument(referenceNameEmbedded + '\\');
             link.AddText("Link to embedded file");
 
-            var pdfRenderer = RenderSecuredDocument(document, options);
-            pdfRenderer.Save(filename);
+            var streamRenderer = RenderSecuredDocument(document, options);
+            streamRenderer.Save(stream, false);
 
             // Read encrypted file and write it without encryption.
-            var pdfDoc = PdfReader.Open(filename, PasswordOwnerDefault);
+            var pdfDoc = PdfReader.Open(stream, PasswordOwnerDefault);
             var pdfRendererRead = new PdfDocumentRenderer { PdfDocument = pdfDoc };
 
-            var filenameRead = AddPrefixToFilename("_EmbWrap r UO.pdf", options);
-            pdfRendererRead.Save(filenameRead);
-            OpenPdf(filenameRead);
+            var streamRead = AddPrefixToFilename("_EmbWrap r UO.pdf", options);
+            pdfRendererRead.Save(streamRead, false);
+            OpenPdf(streamRead);
         }
 
         /// <summary>
@@ -620,7 +633,7 @@ namespace MigraDoc.Tests
             options.SetDefaultPasswords(true, true);
 
             // Write file to embed.
-            var filenameEmbedded = "temp.pdf";
+            var filenameEmbedded = PdfFileUtility.GetTempPdfFullFileName("temp_b_embedded");
             var documentEmbedded = CreateEmptyTestDocument();
 
             var sectionEmbedded = documentEmbedded.AddSection();
@@ -631,7 +644,7 @@ namespace MigraDoc.Tests
             pdfRendererEmbedded.Save(filenameEmbedded);
 
             // Write file containing embedded file with only this embedded file stream encrypted.
-            var filename = AddPrefixToFilename("_EmbEmb w UO.pdf", options);
+            var stream = AddPrefixToFilename("_EmbEmb w UO.pdf", options);
             var referenceNameEmbedded = "referenceEmbedded";
             var document = CreateEmptyTestDocument();
             document.AddEmbeddedFile(referenceNameEmbedded, filenameEmbedded);
@@ -643,15 +656,15 @@ namespace MigraDoc.Tests
             link.AddText("Link to embedded file");
 
             var pdfRenderer = RenderDocument(document);
-            pdfRenderer.Save(filename);
+            pdfRenderer.Save(stream, false);
 
             // Read encrypted file and write it without encryption.
-            var pdfDoc = PdfReader.Open(filename, PasswordOwnerDefault);
+            var pdfDoc = PdfReader.Open(stream, PasswordOwnerDefault);
             var pdfRendererRead = new PdfDocumentRenderer { PdfDocument = pdfDoc };
 
-            var filenameRead = AddPrefixToFilename("_EmbEmb r UO.pdf", options);
-            pdfRendererRead.Save(filenameRead);
-            OpenPdf(filenameRead);
+            var streamRead = AddPrefixToFilename("_EmbEmb r UO.pdf", options);
+            pdfRendererRead.Save(streamRead, false);
+            OpenPdf(streamRead);
         }
 
         /// <summary>
@@ -667,7 +680,7 @@ namespace MigraDoc.Tests
             options.SetDefaultPasswords(true, true);
 
             // Write file to embed.
-            var filenameEmbedded = "temp.pdf";
+            var filenameEmbedded = PdfFileUtility.GetTempPdfFullFileName("temp_c_embedded");
             var documentEmbedded = CreateEmptyTestDocument();
 
             var sectionEmbedded = documentEmbedded.AddSection();
@@ -678,7 +691,7 @@ namespace MigraDoc.Tests
             pdfRendererEmbedded.Save(filenameEmbedded);
 
             // Write file containing embedded file with only this embedded file stream encrypted.
-            var filename = AddPrefixToFilename("_EmbBoth w UO.pdf", options);
+            var stream = AddPrefixToFilename("_EmbBoth w UO.pdf", options);
             var referenceNameEmbedded = "referenceEmbedded";
             var document = CreateEmptyTestDocument();
             document.AddEmbeddedFile(referenceNameEmbedded, filenameEmbedded);
@@ -690,18 +703,21 @@ namespace MigraDoc.Tests
             link.AddText("Link to embedded file");
 
             var pdfRenderer = RenderSecuredDocument(document, options);
-            pdfRenderer.Save(filename);
+            pdfRenderer.Save(stream, false);
 
             // Read encrypted file and write it without encryption.
-            var pdfDoc = PdfReader.Open(filename, PasswordOwnerDefault);
+            var pdfDoc = PdfReader.Open(stream, PasswordOwnerDefault);
             var pdfRendererRead = new PdfDocumentRenderer { PdfDocument = pdfDoc };
 
-            var filenameRead = AddPrefixToFilename("_EmbBoth r UO.pdf", options);
-            pdfRendererRead.Save(filenameRead);
-            OpenPdf(filenameRead);
+            var streamRead = AddPrefixToFilename("_EmbBoth r UO.pdf", options);
+            pdfRendererRead.Save(streamRead, false);
+            OpenPdf(streamRead);
         }
 #if true
-        const string SkippedTestEmbeddedFilesMessage = "The feature to encrypt embedded file streams only is not yet correctly implemented. The resulting files may not be readyble with PDF readers.";
+        const string SkippedTestEmbeddedFilesMessage =
+            "The feature to encrypt embedded file streams only is not yet correctly implemented. " +
+            "The resulting files may not be readable with PDF readers. " +
+            "This feature is not very important, as you can instead encrypt the file before importing it.";
 
         [SkippableTheory]
         [ClassData(typeof(TestData.V4), Skip = SkippedTestEmbeddedFilesMessage)]
@@ -724,7 +740,7 @@ namespace MigraDoc.Tests
             options.SetDefaultPasswords(true, true);
 
             // Write file to embed.
-            var filenameEmbedded = "temp.pdf";
+            var filenameEmbedded = PdfFileUtility.GetTempPdfFullFileName("temp_d_embedded");
             var documentEmbedded = CreateEmptyTestDocument();
 
             var sectionEmbedded = documentEmbedded.AddSection();
@@ -735,7 +751,7 @@ namespace MigraDoc.Tests
             pdfRendererEmbedded.Save(filenameEmbedded);
 
             // Write file containing embedded file with only this embedded file stream encrypted.
-            var filename = AddPrefixToFilename("_EmbOnly w UO.pdf", options);
+            var stream = AddPrefixToFilename("_EmbOnly w UO.pdf", options);
             var referenceNameEmbedded = "referenceEmbedded";
             var document = CreateEmptyTestDocument();
             document.AddEmbeddedFile(referenceNameEmbedded, filenameEmbedded);
@@ -749,15 +765,15 @@ namespace MigraDoc.Tests
             var pdfRenderer = RenderSecuredDocument(document, options);
             var pdfDocument = pdfRenderer.PdfDocument;
             pdfDocument.SecurityHandler.EncryptEmbeddedFileStreamsOnly();
-            pdfRenderer.Save(filename);
+            pdfRenderer.Save(stream, false);
 
             // Read encrypted file and write it without encryption.
-            var pdfDoc = PdfReader.Open(filename, PasswordOwnerDefault);
+            var pdfDoc = PdfReader.Open(stream, PasswordOwnerDefault);
             var pdfRendererRead = new PdfDocumentRenderer { PdfDocument = pdfDoc };
 
-            var filenameRead = AddPrefixToFilename("_EmbOnly r UO.pdf", options);
-            pdfRendererRead.Save(filenameRead);
-            OpenPdf(filenameRead);
+            var streamRead = AddPrefixToFilename("_EmbOnly r UO.pdf", options);
+            pdfRendererRead.Save(streamRead, false);
+            OpenPdf(streamRead);
         }
 
         [SkippableTheory]
@@ -777,7 +793,7 @@ namespace MigraDoc.Tests
             // Generates and checks test several test documents with each document containing one more permission property set to false (from none to all properties).
             for (var falseCount = 0; falseCount <= count; falseCount++)
             {
-                var filename = AddPrefixToFilename($"Perm{falseCount}.pdf", options);
+                var stream = AddPrefixToFilename($"Perm{falseCount}.pdf", options);
 
                 var pdfRenderer = RenderSecuredStandardTestDocument(options);
                 var pdfDoc = pdfRenderer.PdfDocument;
@@ -789,9 +805,9 @@ namespace MigraDoc.Tests
                     permissionProperty.SetValue(pdfDoc.SecuritySettings, false);
                 }
 
-                pdfRenderer.Save(filename);
+                pdfRenderer.Save(stream, false);
 
-                var pdfDocRead = PdfReader.Open(filename, PasswordUserDefault);
+                var pdfDocRead = PdfReader.Open(stream, PasswordUserDefault);
 
                 // All properties from 0 to falseCount should be false.
                 for (var i = 0; i < falseCount; i++)
@@ -841,7 +857,7 @@ namespace MigraDoc.Tests
                 LogHost.Factory = loggerFactory;
 
                 // The randomizedTestStringCount should be big enough for a good chance to create encrypted strings that seem to begin with a Unicode BOM.
-                // These strings are an important test case to ensure reread as unicode is done after decryption.
+                // These strings are an important test case to ensure reread as Unicode is done after decryption.
                 const int randomizedTestStringCount = 100000;
 
                 // Define test strings. Avoid spaces, hyphens or other characters that may split the strings in two objects in the page content stream.
@@ -866,8 +882,6 @@ namespace MigraDoc.Tests
 
                 const int linesPerPage = 50;
 
-                var date = DateTime.Now;
-
                 var options = TestOptions.ByEnum(optionsEnum);
                 options.SetDefaultPasswords(true);
 
@@ -877,7 +891,7 @@ namespace MigraDoc.Tests
 
                 var normalStyle = doc.Styles.Normal;
                 normalStyle.ParagraphFormat.TabStops.AddTabStop(Unit.FromCentimeter(2));
-                normalStyle.Font.Name = font.Name2;
+                normalStyle.Font.Name = font.Name;
                 normalStyle.Font.Size = font.Size;
 
                 var section = doc.AddSection();
@@ -901,6 +915,7 @@ namespace MigraDoc.Tests
                 }
 
                 // Render the document.
+                var date = DateTimeOffset.Now;
                 var pdfRenderer = new PdfDocumentRenderer { Document = doc };
                 pdfRenderer.RenderDocument();
 
@@ -917,16 +932,16 @@ namespace MigraDoc.Tests
 
                 // Secure and save the document.
                 SecureDocument(pdfDocument, options);
-                var encryptedFile = AddPrefixToFilename("Test_Strings w U.pdf", options);
-                pdfRenderer.Save(encryptedFile);
+                var encryptedStream = AddPrefixToFilename("Test_Strings w U.pdf", options);
+                pdfRenderer.Save(encryptedStream, false);
 
                 // Open the saved file
-                pdfDocument = PdfReader.Open(encryptedFile, PasswordUserDefault);
+                pdfDocument = PdfReader.Open(encryptedStream, PasswordUserDefault);
 
                 // Ensure entries in DocumentInformation have not changed.
                 var documentInfo = pdfDocument.Info;
                 // We don’t know the saved CreationDate exactly, but it should be less than 5 seconds ago.
-                (documentInfo.CreationDate - date).TotalMilliseconds.Should().BeLessThan(5000, "PDF CreationDate should be less than 5 seconds ago.");
+                (documentInfo.CreationDate - date)?.TotalMilliseconds.Should().BeLessThan(5000, "PDF CreationDate should be less than 5 seconds ago.");
                 documentInfo.Creator.Should().Be(MigraDocProductVersionInformation.Creator, "PDF Creator should match");
                 //documentInfo.Producer.Should().Be($"{PdfSharpProductVersionInformation.Creator} under {RuntimeInformation.OSDescription}", "PDF Producer should match");
                 documentInfo.Producer.Should().StartWith(PdfSharpProductVersionInformation.Creator, "PDF Producer should match");
@@ -949,7 +964,7 @@ namespace MigraDoc.Tests
                     textInfo!.Text.Should().Be(i + ".");
 
                     streamEnumerator.Text.MoveAndGetNext(true, out textInfo).Should().BeTrue();
-                    textInfo!.TextEquals(testString, font, out var encodedText).Should().BeTrue($"encoded test string {i} (\"{encodedText}\") should match in paragraphs");
+                    textInfo!.TextEquals(testString, font, out var encodedText).Should().BeTrue($"encoded test string {i} ('{encodedText}') should match in paragraphs");
 
                     if (i == 10)
                         textInfo.Text.Should().Be(@"\(\)\\\(\\\)\\", "test string {i} should match in paragraphs");
@@ -989,6 +1004,135 @@ namespace MigraDoc.Tests
             {
                 // Restore old logger factory to not disturb other tests.
                 LogHost.Factory = oldLoggerFactory;
+            }
+        }
+
+        [Fact]
+        public void Test_Hyperlink()
+        {
+            // Create a MigraDoc document.
+            var document = CreateDocument();
+            // Associate the MigraDoc document with a renderer.
+            var pdfRenderer = new PdfDocumentRenderer
+            {
+                Document = document,
+                PdfDocument = new PdfDocument
+                {
+                    PageLayout = PdfPageLayout.SinglePage
+                }
+            };
+            // Layout and render document to PDF.
+            pdfRenderer.RenderDocument();
+            // Set security settings directly on the PDF document
+            var securitySettings = pdfRenderer.PdfDocument.SecuritySettings;
+            securitySettings.OwnerPassword = "Secret";
+            // Save the document...
+            var filename = PdfFileUtility.GetTempPdfFullFileName("HyperlinkWithEncryptionTest");
+            pdfRenderer.PdfDocument.Save(filename);
+            // ...and start a viewer.
+            // Process.Start(new ProcessStartInfo(filename) { UseShellExecute = true });
+            // Creates minimalistic document with hyperlink.
+            static Document CreateDocument()
+            {
+                // Create a new MigraDoc document.
+                var document = new Document();
+                // Add a section to the document.
+                var section = document.AddSection();
+                // Add a paragraph to the section.
+                var paragraph = section.AddParagraph();
+                // Add a hyperlink to a web URL to the paragraph.
+                var hyperlink = paragraph.AddHyperlink("https://docs.pdfsharp.net", HyperlinkType.Url);
+                hyperlink.AddText("link");
+                return document;
+            }
+        }
+
+        [SkippableTheory]
+        [ClassData(typeof(TestData.AllWriteVersions))]
+        [ClassData(typeof(TestData.AllWriteVersionsSkipped), Skip = SkippedTestOptionsMessage)]
+        public void Test_SignedDocument(TestOptionsEnum optionsEnum)
+        {
+            var options = TestOptions.ByEnum(optionsEnum);
+            options.SetDefaultPasswords(true);
+
+            var filename = AddPrefixToFilename("SigningWithEncryptionTest.pdf", options);
+
+            var document = CreateDocument();
+            SecureDocument(document, options);
+
+            // Save the document.
+            document.Save(filename);
+            
+            // Read encrypted file and write it without encryption.
+            var pdfDocRead = PdfReader.Open(filename, PasswordUserDefault);
+
+            var filenameRead = AddPrefixToFilename("Read SigningWithEncryptionTest.pdf", options);
+            pdfDocRead.Save(filenameRead);
+
+
+            // Creates minimalistic document with hyperlink.
+            static PdfDocument CreateDocument()
+            {
+                const int requiredAssets = 1014;
+                string? timestampURL = null;
+
+                var certType = "test-cert_rsa_1024";
+                var digestType = PdfMessageDigestType.SHA256;
+
+                IOUtility.EnsureAssetsVersion(requiredAssets);
+
+                var font = new XFont("Verdana", 10, XFontStyleEx.Regular);
+                var fontHeader = new XFont("Verdana", 18, XFontStyleEx.Regular);
+                var document = new PdfDocument();
+                var pdfPage = document.AddPage();
+                var xGraphics = XGraphics.FromPdfPage(pdfPage);
+                var layoutRectangle = new XRect(0, 72, pdfPage.Width.Point, pdfPage.Height.Point);
+                xGraphics.DrawString("Document Signature Test", fontHeader, XBrushes.Black, layoutRectangle, XStringFormats.TopCenter);
+                var textFormatter = new XTextFormatter(xGraphics);
+                layoutRectangle = new XRect(72, 144, pdfPage.Width.Point - 144, pdfPage.Height.Point - 144);
+
+                var text = "Lorem ipsum...";
+                textFormatter.DrawString(text, font, XBrushes.Black, layoutRectangle, XStringFormats.TopLeft);
+
+                var pdfPosition = xGraphics.Transformer.WorldToDefaultPage(new XPoint(144, 216));  
+                var options = new DigitalSignatureOptions
+                {
+                    // We do not set an appearance handler, so the default handler is used.
+                    // It is highly recommended to set an appearance handler to get a nicer representation of the signature.
+                    ContactInfo = "John Doe",
+                    Location = "Seattle",
+                    Reason = "License Agreement",
+                    Rectangle = new XRect(pdfPosition.X, pdfPosition.Y, 200, 50),
+                    AppName = "PDFsharp Library"
+                };
+
+                Uri? timestampURI = String.IsNullOrEmpty(timestampURL) ? null : new Uri(timestampURL, UriKind.Absolute);
+
+                var digitalSignatureHandler = DigitalSignatureHandler.ForDocument(document, new PdfSharpDefaultSigner(GetCertificate(certType), digestType, timestampURI), options);
+
+                return document;
+            }
+
+            static X509Certificate2 GetCertificate(string certName)
+            {
+                var certFolder = IOUtility.GetAssetsPath("pdfsharp-6.x/signatures");
+                var pfxFile = Path.Combine(certFolder ?? throw new InvalidOperationException("Call Download-Assets.ps1 before running the tests."), $"{certName}.pfx");
+                var rawData = File.ReadAllBytes(pfxFile);
+
+                // Do not use password literals for real certificates in source code.
+                var certificatePassword = "Seecrit1243";  // Used in certificate.
+
+#if NET9_0_OR_GREATER
+                // New API introduced with .NET 9.
+                var certificate = X509CertificateLoader.LoadPkcs12(rawData, certificatePassword,
+                    X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+#else
+                // Old API, obsolete since .NET 9.
+                var certificate = new X509Certificate2(rawData,
+                    certificatePassword,
+                    /*X509KeyStorageFlags.MachineKeySet |*/ X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+#endif
+                return certificate;
             }
         }
     }

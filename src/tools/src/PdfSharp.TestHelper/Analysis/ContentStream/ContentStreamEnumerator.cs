@@ -32,7 +32,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         public string? Current => _state.Current;
 
         /// <summary>
-        /// Moves to the next white space separated element inside the content stream.
+        /// Moves to the next white-space separated element inside the content stream.
         /// </summary>
         public bool MoveNext()
         {
@@ -45,7 +45,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
             if (!_elements.TryGetValue(elementIdx, out var elementBase))
             {
                 var position = _state.CurrentPosition + _state.CurrentLength; // Start after the current element.
-                var skipOneNecessaryWhiteSpace = position > 0; // For the first element, there must not be a separating white space before.
+                var skipOneNecessaryWhiteSpace = position > 0; // For the first element, there must not be a separating white-space before.
 
                 // Try to move to the beginning of the next element.
                 var hasNextElement = MoveAfterWhiteSpaces(ref position, skipOneNecessaryWhiteSpace);
@@ -69,7 +69,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         }
 
         /// <summary>
-        /// Moves to the previous white space separated element inside the content stream.
+        /// Moves to the previous white-space separated element inside the content stream.
         /// </summary>
         public bool MovePrevious()
         {
@@ -90,7 +90,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         }
 
         /// <summary>
-        /// Moves to the next white space separated element inside the content stream.
+        /// Moves to the next white-space separated element inside the content stream.
         /// </summary>
         /// <param name="steps">Moves this count of elements.</param>
         public bool MoveNext(int steps)
@@ -99,7 +99,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         }
 
         /// <summary>
-        /// Moves to the next white space separated element inside the content stream.
+        /// Moves to the next white-space separated element inside the content stream.
         /// </summary>
         /// <param name="check">The element must satisfy this check.</param>
         /// <param name="nextMatch">The element must not be a direct neighbor.</param>
@@ -109,7 +109,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         }
 
         /// <summary>
-        /// Moves to the next white space separated element inside the content stream.
+        /// Moves to the next white-space separated element inside the content stream.
         /// </summary>
         /// <param name="check">The element must satisfy this check.</param>
         /// <param name="steps">Moves this count of elements.</param>
@@ -120,7 +120,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         }
 
         /// <summary>
-        /// Moves to the previous white space separated element inside the content stream.
+        /// Moves to the previous white-space separated element inside the content stream.
         /// </summary>
         /// <param name="steps">Moves this count of elements.</param>
         public bool MovePrevious(int steps)
@@ -129,7 +129,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         }
 
         /// <summary>
-        /// Moves to the previous white space separated element inside the content stream.
+        /// Moves to the previous white-space separated element inside the content stream.
         /// </summary>
         /// <param name="check">The element must satisfy this check.</param>
         /// <param name="previousMatch">The element must not be a direct neighbor.</param>
@@ -139,7 +139,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         }
 
         /// <summary>
-        /// Moves to the previous white space separated element inside the content stream.
+        /// Moves to the previous white-space separated element inside the content stream.
         /// </summary>
         /// <param name="check">The element must satisfy this check.</param>
         /// <param name="steps">Moves this count of elements.</param>
@@ -150,7 +150,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         }
 
         /// <summary>
-        /// Moves to the previous or next white space separated element inside the content stream and returns it.
+        /// Moves to the previous or next white-space separated element inside the content stream and returns it.
         /// </summary>
         /// <param name="check">The element must satisfy this check.</param>
         /// <param name="steps">Moves this count of elements.</param>
@@ -214,7 +214,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
         }
 
         /// <summary>
-        /// Moves to the previous or next white space separated element inside the content stream and returns it.
+        /// Moves to the previous or next white-space separated element inside the content stream and returns it.
         /// </summary>
         /// <param name="check">The element must satisfy this check.</param>
         /// <param name="steps">Moves this count of elements.</param>
@@ -284,10 +284,10 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
 
         bool MoveAfterWhiteSpaces(ref int position, bool moveByOneNecessaryWhiteSpace)
         {
-            // If we have to move by one white space, return false, if it was not found.
+            // If we have to move by one white-space, return false, if it was not found.
             if (moveByOneNecessaryWhiteSpace)
             {
-                // There is no white space after the last character.
+                // There is no white-space after the last character.
                 if (position >= _contentStreamLength)
                     return false;
 
@@ -298,7 +298,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
                     return false;
             }
 
-            // Move after the last white space.
+            // Move after the last white-space.
             while (true)
             {
                 if (position >= _contentStreamLength)
@@ -311,7 +311,7 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
                     return true;
             }
 
-            // There is no element after these white spaces.
+            // There is no element after these white-spaces.
             return false;
         }
 
@@ -379,11 +379,11 @@ namespace PdfSharp.TestHelper.Analysis.ContentStream
                         if (position >= _contentStreamLength)
                             return position - startPosition;
 
-                        // Other elements are separated by white spaces.
+                        // Other elements are separated by white-spaces.
                         if (IsWhiteSpace(c))
                             return position - startPosition;
 
-                        // Reached the end of the string. There is no white space after the last character.
+                        // Reached the end of the string. There is no white-space after the last character.
                         if (position + 1 >= _contentStreamLength)
                             return position - startPosition + 1;
 

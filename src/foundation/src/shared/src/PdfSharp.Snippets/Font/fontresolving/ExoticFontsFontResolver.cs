@@ -92,7 +92,7 @@ namespace PdfSharp.Snippets.Font
         /// </returns>
         public byte[]? GetFont(string faceName)
         {
-            // Note: PDFsharp never calls GetFont twice with the same face name.
+            // Note that PDFsharp never calls GetFont twice with the same face name.
 
             // Return the bytes of a font.
             return faceName switch

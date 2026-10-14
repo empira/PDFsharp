@@ -1,6 +1,9 @@
 // PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using Microsoft.Extensions.Logging;
+using PdfSharp.Logging;
+
 namespace PdfSharp.Pdf
 {
     /// <summary>
@@ -10,38 +13,39 @@ namespace PdfSharp.Pdf
     // ReSharper disable once InconsistentNaming
     public readonly struct PdfObjectID : IComparable
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PdfObjectID"/> class.
-        /// </summary>
-        /// <param name="objectNumber">The object number.</param>
-        public PdfObjectID(int objectNumber)
-        {
-            Debug.Assert(objectNumber >= 1, "Object number out of range.");
-            _objectNumber = objectNumber;
-            _generationNumber = 0;
-#if DEBUG_
-            // Just a place for a breakpoint during debugging.
-            if (objectNumber == 5894)
-                _ = typeof(int);
-#endif
-        }
+        internal const int MaxObjectNumber = 0x_7F_FF_FF;  // 23 binary digits.
+        internal const int MaxGenerationNumber = 0x_FF_FF; // 16 binary digits.
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PdfObjectID"/> class.
         /// </summary>
         /// <param name="objectNumber">The object number.</param>
         /// <param name="generationNumber">The generation number.</param>
-        public PdfObjectID(int objectNumber, int generationNumber)
+        public PdfObjectID(int objectNumber, int generationNumber = 0)
         {
             Debug.Assert(objectNumber >= 1, "Object number out of range.");
             //Debug.Assert(generationNumber >= 0 && generationNumber <= 65535, "Generation number out of range.");
-#if DEBUG_
-            // iText creates generation numbers with a value of 65536... 
-            if (generationNumber > 65535)
-                Debug.WriteLine(String.Format("Generation number: {0}", generationNumber));
-#endif
+
+            if (objectNumber is < 1 or > MaxObjectNumber)
+            {
+                // We do not break existing code.
+                PdfSharpLogHost.PdfReadingLogger.LogError("Object number '{ObjectNumber}' is out of range [1..8388607].", objectNumber);
+                // No high-performance logging because it is a rare case.
+            }
+
+            if (generationNumber is < 0 or > MaxGenerationNumber)
+            {
+                // We do not break existing code.
+                // We found an iText document with generation numbers with a value of 65536... 
+                PdfSharpLogHost.PdfReadingLogger.LogError("Generation number '{GenerationNumber}' is out of range [0..65535].", generationNumber);
+                // No high-performance logging because it is a rare case.
+            }
+
             _objectNumber = objectNumber;
-            _generationNumber = (ushort)generationNumber;
+            _generationNumber = generationNumber;
+            // Make number easy to read.
+            UnifiedNumber = (ulong)objectNumber * 100000 + (uint)generationNumber;
+            //UnifiedNumber = ((ulong)objectNumber << 32) + (uint)generationNumber;
         }
 
         /// <summary>
@@ -56,10 +60,16 @@ namespace PdfSharp.Pdf
         /// </summary>
         public int GenerationNumber => _generationNumber;
 
-        readonly ushort _generationNumber;
+        readonly int _generationNumber; // Not ushort anymore because there are PDF files with large generation numbers.
+
+        /// <summary>
+        /// Calculates a single 64-bit unsigned integer from object and generation number.
+        /// </summary>
+        public ulong UnifiedNumber { get; }
 
         /// <summary>
         /// Indicates whether this object is an empty object identifier.
+        /// This is the case if the object number is 0.
         /// </summary>
         public bool IsEmpty => _objectNumber == 0;
 
@@ -70,8 +80,9 @@ namespace PdfSharp.Pdf
         {
             if (obj is PdfObjectID id)
             {
-                if (_objectNumber == id._objectNumber)
-                    return _generationNumber == id._generationNumber;
+                //if (_objectNumber == id._objectNumber)
+                //    return _generationNumber == id._generationNumber;
+                return UnifiedNumber == id.UnifiedNumber;
             }
             return false;
         }
@@ -80,7 +91,7 @@ namespace PdfSharp.Pdf
         /// Returns the hash code for this instance.
         /// </summary>
         public override int GetHashCode()
-            => _objectNumber ^ _generationNumber;
+            => _objectNumber ^ (_generationNumber << 23);
 
         /// <summary>
         /// Determines whether the two objects are equal.
@@ -98,11 +109,11 @@ namespace PdfSharp.Pdf
         /// Returns the object and generation numbers as a string.
         /// </summary>
         public override string ToString()
-            //return _objectNumber.ToString(CultureInfo.InvariantCulture) + " " + _generationNumber.ToString(CultureInfo.InvariantCulture);
             => Invariant($"{_objectNumber} {_generationNumber}");
 
         /// <summary>
         /// Creates an empty object identifier.
+        /// Direct PDF objects have an empty ID, i.e. both numbers are zero.
         /// </summary>
         public static PdfObjectID Empty => new();
 
