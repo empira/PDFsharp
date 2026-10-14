@@ -36,6 +36,7 @@
 
     <!-- Other packages -->
     <PackageVersion Include="System.Resources.Extensions" Version="8.0.0" />
+    <PackageVersion Include="System.Text.Encoding.CodePages" Version="10.0.5" />
   </ItemGroup>
 
 </Project>

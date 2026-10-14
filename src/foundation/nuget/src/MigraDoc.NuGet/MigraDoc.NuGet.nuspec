@@ -8,14 +8,14 @@
         <authors>$authors$</authors>
         <owners>$owners$</owners>
         <projectUrl>$projectUrl$</projectUrl>
-        <license type="expression">MIT</license>
+        <license type="expression">AGPL-3.0-only</license>
         <icon>images\MigraDoc-128x128.png</icon>
         <readme>README.md</readme>
-        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <requireLicenseAcceptance>true</requireLicenseAcceptance>
         <releaseNotes>$releaseNotes$</releaseNotes>
         <copyright>$copyright$</copyright>
         <tags>$tags$</tags>
-        <repository type="git" url="https://github.com/empira/PDFsharp" branch="master" commit="" />
+        <repository type="git" url="https://github.com/empira/PDFsharp" branch="release/6.5" commit="" />
         <title>$title$</title>
         <dependencies>
             <group targetFramework="net8.0">

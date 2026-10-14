@@ -1,9 +1,10 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
-using System.Text;
 using Microsoft.Extensions.Logging;
 using PdfSharp.Logging;
+using PdfSharp.Pdf.Internal;
+using System.Text;
 
 namespace PdfSharp.Pdf.Content
 {
@@ -39,7 +40,6 @@ namespace PdfSharp.Pdf.Content
                 _content = content.ToArray();
                 ContLength = _content.Length;
             }
-
             _charIndex = 0;
         }
 
@@ -103,7 +103,8 @@ namespace PdfSharp.Pdf.Content
         }
 
         /// <summary>
-        /// Scans a comment line. (Not yet used, comments are skipped by lexer.)
+        /// Scans a comment line.
+        /// Not used, comments are skipped by lexer.
         /// </summary>
         public CSymbol ScanComment()
         {
@@ -210,20 +211,28 @@ namespace PdfSharp.Pdf.Content
             }
 
             var name = Token;
-            // Check token for UTF-8 encoding.
+            // Check for non-ASCII bytes that may indicate a multi-byte or legacy ANSI encoding.
             for (int idx = 0; idx < name.Length; idx++)
             {
-                // If the two top most significant bits are set this identifies a 2, 3, or 4
-                // byte UTF-8 encoding sequence.
-                if ((name[idx] & 0xC0) == 0xC0)
+                if ((name[idx] & 0x80) != 0)
                 {
-                    // Special characters in Name objects use UTF-8 encoding.
+                    // Special characters in Name objects may use UTF-8 or a legacy ANSI encoding.
                     var length = name.Length;
                     var bytes = new byte[length];
                     for (int idx2 = 0; idx2 < length; idx2++)
                         bytes[idx2] = (byte)name[idx2];
 
-                    var decodedName = Encoding.UTF8.GetString(bytes);
+                    string decodedName;
+                    try
+                    {
+                        // Try strict UTF-8 first; throws DecoderFallbackException on invalid sequences.
+                        decodedName = StrictUtf8.GetString(bytes);
+                    }
+                    catch (DecoderFallbackException)
+                    {
+                        // Fallback to ANSI code page encoding if UTF-8 decoding fails.
+                        decodedName = PdfEncoders.AnsiCodepageEncoding.GetString(bytes);
+                    }
                     _token.Clear();
                     _token.Append(decodedName);
                     break;
@@ -474,6 +483,8 @@ namespace PdfSharp.Pdf.Content
             return Symbol = CSymbol.Real; // CLexer returns "Real" because there is no "LongInteger".
         }
 
+        static UTF8Encoding StrictUtf8 => _strictUtf8 ??= new(false, true);
+        static UTF8Encoding? _strictUtf8;
         static readonly double[] PowersOf10 = [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000, 100_000_000, 1_000_000_000, 10_000_000_000];
 
         /// <summary>
@@ -579,7 +590,7 @@ namespace PdfSharp.Pdf.Content
                                     default:
                                         if (Char.IsDigit(ch))
                                         {
-                                            // Octal character code
+                                            // Octal character code.
                                             int n = ch - '0';
                                             if (Char.IsDigit(_nextChar))
                                             {
@@ -836,9 +847,9 @@ namespace PdfSharp.Pdf.Content
         }
 
         /// <summary>
-        /// If the current character is not a white space, the function immediately returns it.
-        /// Otherwise, the PDF cursor is moved forward to the first non-white space or EOF.
-        /// White spaces are NUL, HT, LF, FF, CR, and SP.
+        /// If the current character is not a white-space, the function immediately returns it.
+        /// Otherwise, the PDF cursor is moved forward to the first non-white-space or EOF.
+        /// White-spaces are NUL, HT, LF, FF, CR, and SP.
         /// </summary>
         public char MoveToNonWhiteSpace()
         {

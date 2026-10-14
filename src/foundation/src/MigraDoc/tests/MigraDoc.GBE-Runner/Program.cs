@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 using GdiGrammarByExample;
 using MigraDoc.GrammarByExample;
+using PdfSharp;
 
 namespace MigraDoc.GBE_Runner
 {
@@ -18,6 +19,9 @@ namespace MigraDoc.GBE_Runner
 
         static void Main(string[] args)
         {
+            // Set AGPL license.
+            PdfSharpLicense.SetAgplLicense();
+
             // ReSharper disable once LocalizableElement
             Console.WriteLine("Running GBE Tests." + Environment.OSVersion);
             var sw = new Stopwatch();

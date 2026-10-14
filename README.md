@@ -1,13 +1,13 @@
 ﻿# PDFsharp & MigraDoc 6
 
-Version **6.2.4**  
-Published **2026-01-06**
+Version **6.5.0**  
+Published **2026-10-13**
 
 This is a final version of the **PDFsharp** project, the main project of PDFsharp & MigraDoc 6 with updates for C# 12 and .NET 8, .NET 9, and .NET 10.
 
 PDFsharp: Copyright (c) 2005-2026 empira Software GmbH, Troisdorf (Cologne Area), Germany
 MigraDoc: Copyright (c) 2001-2026 empira Software GmbH, Troisdorf (Cologne Area), Germany
-Published Open Source under the [MIT License](https://docs.pdfsharp.net/LICENSE.html)
+Published Open Source under [AGPL and Commercial License](https://docs.pdfsharp.net/LICENSE.html)
 
 For more information see [docs.pdfsharp.net](https://docs.pdfsharp.net/)
 
@@ -36,7 +36,7 @@ Execute
 * You need the latest .NET SDK version installed
 * Please note that you need a git repository with at least one commit in order to build the PDFsharp solution.  
   Without a git repository with at least one commit, you will get an error message from `GitVersion.MsBuild` while building the solution.
-  You can set a tag to define a valid version, e.g.: `git tag v6.2.0` to make it build with a specific version number. Without tag, version 0.1.0 will be used.
+  You can set a tag to define a valid version, e.g.: `git tag v6.5.0` to make it build with a specific version number. Without tag, version 0.1.0 will be used.
 
 ### Central package management
 
@@ -70,5 +70,5 @@ Andreas Seifert
 
 ## Libraries used by PDFsharp
 
-The Core build of PDFsharp uses BigGustave to read PNG images. BigGustave was released into the public domain and does not restrict the MIT license used by PDFsharp.  
+The Core build of PDFsharp uses BigGustave to read PNG images. BigGustave was released into the public domain and does not restrict the AGPL or Commercial License used by PDFsharp.  
 Link to project repository: https://github.com/EliotJones/BigGustave

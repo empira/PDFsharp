@@ -931,9 +931,8 @@ namespace MigraDoc.Tests
                 var documentInfo = pdfDocument.Info;
                 // We don’t know the saved CreationDate exactly, but it should be less than 5 seconds ago.
                 (documentInfo.CreationDate - date).TotalMilliseconds.Should().BeLessThan(5000, "PDF CreationDate should be less than 5 seconds ago.");
-                documentInfo.Creator.Should().Be(MigraDocProductVersionInformation.Creator, "PDF Creator should match");
-                //documentInfo.Producer.Should().Be($"{PdfSharpProductVersionInformation.Creator} under {RuntimeInformation.OSDescription}", "PDF Producer should match");
-                documentInfo.Producer.Should().StartWith(PdfSharpProductVersionInformation.Creator, "PDF Producer should match");
+                documentInfo.Creator.Should().StartWith(MigraDocProductVersionInformation.Creator, "PDF Creator should start with MigraDocProductVersionInformation.Creator");
+                documentInfo.Producer.Should().StartWith(PdfSharpProductVersionInformation.Creator, "PDF Producer should start with PdfSharpProductVersionInformation.Creator");
 
 
                 // Analyze the drawn text in the PDF’s content stream.

@@ -16,6 +16,7 @@ namespace PdfSharp.Pdf.IO
     {
         public PdfWriter(Stream pdfStream, PdfDocument document, PdfStandardSecurityHandler? effectiveSecurityHandler)
         {
+            PdfSharpLicense.CheckLicense();
             _stream = pdfStream ?? throw new ArgumentNullException(nameof(pdfStream));
             _document = document ?? throw new ArgumentNullException(nameof(document));
             EffectiveSecurityHandler = effectiveSecurityHandler;

@@ -4,8 +4,10 @@
 #if !NET6_0_OR_GREATER
 using System.Text;
 #endif
+using PdfSharp.Drawing;
 using PdfSharp.Pdf.AcroForms;
 using PdfSharp.Pdf.Advanced;
+using PdfSharp.Pdf.Annotations;
 using PdfSharp.Pdf.Internal;
 using PdfSharp.Pdf.IO;
 
@@ -147,21 +149,20 @@ namespace PdfSharp.Pdf.Signatures
             _placeholderItem = new(signatureSize);
             _signatureFieldByteRangePlaceholder = new PdfPlaceholderObject(ByteRangePlaceholderLength);
 
+            var catalog = Document.Catalog;
+            if (catalog.Elements.GetObject(PdfCatalog.Keys.AcroForm) == null)
+                catalog.Elements.Add(PdfCatalog.Keys.AcroForm, new PdfAcroForm(Document));
+
+            var acroForm = catalog.AcroForm;
+
             var signatureDictionary = GetSignatureDictionary(_placeholderItem, _signatureFieldByteRangePlaceholder);
-            var signatureField = GetSignatureField(signatureDictionary);
+            var signatureField = GetSignatureField(signatureDictionary, ChooseFieldName(acroForm));
 
             var annotations = Document.Pages[Options.PageIndex].Elements.GetArray(PdfPage.Keys.Annots);
             if (annotations == null)
                 Document.Pages[Options.PageIndex].Elements.Add(PdfPage.Keys.Annots, new PdfArray(Document, signatureField));
             else
                 annotations.Elements.Add(signatureField);
-
-            // acroform
-
-            var catalog = Document.Catalog;
-
-            if (catalog.Elements.GetObject(PdfCatalog.Keys.AcroForm) == null)
-                catalog.Elements.Add(PdfCatalog.Keys.AcroForm, new PdfAcroForm(Document));
 
             if (!catalog.AcroForm.Elements.ContainsKey(PdfAcroForm.Keys.SigFlags))
                 catalog.AcroForm.Elements.Add(PdfAcroForm.Keys.SigFlags, new PdfInteger(3));
@@ -172,12 +173,48 @@ namespace PdfSharp.Pdf.Signatures
                     catalog.AcroForm.Elements.SetInteger(PdfAcroForm.Keys.SigFlags, 3);
             }
 
+            // Without the print flag, a viewer never prints the annotation, so the visual representation
+            // of the signature would be missing on paper. See 12.5.3 Annotation flags.
+            signatureField.Elements.Add(PdfAnnotation.Keys.F, new PdfInteger((int)PdfAnnotationFlags.Print));
+
             if (catalog.AcroForm.Elements.GetValue(PdfAcroForm.Keys.Fields) == null)
                 catalog.AcroForm.Elements.SetValue(PdfAcroForm.Keys.Fields, new PdfAcroField.PdfAcroFieldCollection(new PdfArray()));
             catalog.AcroForm.Fields.Elements.Add(signatureField);
         }
 
-        PdfSignatureField GetSignatureField(PdfSignature2 signatureDic)
+        /// <summary>
+        /// Chooses the partial field name of the signature field to be created, e.g. “Signature1”, “Signature2”, …
+        /// Interactive form fields must have unique fully qualified names. If a document is signed more than once,
+        /// reusing a name leads to two fields with the same name, which validators either merge or reject.
+        /// Therefore, the first unused name is taken.
+        /// </summary>
+        static string ChooseFieldName(PdfAcroForm acroForm)
+        {
+            // Only the names of the fields at the root of the form are relevant here, because the new field
+            // is added there. The name of a field below the root is relative to the name of its parent field
+            // and therefore cannot collide with a name at the root.
+            var usedNames = new HashSet<string>(StringComparer.Ordinal);
+            var fields = acroForm.Elements.GetArray(PdfAcroForm.Keys.Fields);
+            if (fields != null)
+            {
+                int count = fields.Elements.Count;
+                for (int idx = 0; idx < count; idx++)
+                {
+                    var name = fields.Elements.GetDictionary(idx)?.Elements.GetString(PdfAcroField.Keys.T);
+                    if (!String.IsNullOrEmpty(name))
+                        usedNames.Add(name!);
+                }
+            }
+
+            for (int idx = 1; ; idx++)
+            {
+                var name = Invariant($"Signature{idx}");
+                if (!usedNames.Contains(name))
+                    return name;
+            }
+        }
+
+        PdfSignatureField GetSignatureField(PdfSignature2 signatureDic, string fieldName)
         {
             var signatureField = new PdfSignatureField(Document);
 
@@ -185,7 +222,7 @@ namespace PdfSharp.Pdf.Signatures
 
             // Annotation keys.
             signatureField.Elements.Add(PdfAcroField.Keys.FT, new PdfName("/Sig"));
-            signatureField.Elements.Add(PdfAcroField.Keys.T, new PdfString("Signature1")); // TODO_OLD If already exists, will it cause error? implement a name chooser if yes.
+            signatureField.Elements.Add(PdfAcroField.Keys.T, new PdfString(fieldName));
             signatureField.Elements.Add(PdfAcroField.Keys.Ff, new PdfInteger(132));
             signatureField.Elements.Add(PdfAcroField.Keys.DR, new PdfDictionary());
             signatureField.Elements.Add(PdfSignatureField.Keys.Type, new PdfName("/Annot"));

@@ -1,4 +1,4 @@
-// PDFsharp - A .NET library for processing PDF
+﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member because it is for internal use only.
@@ -98,6 +98,8 @@ namespace PdfSharp.Pdf.IO
         public PdfReaderProblemBehavior IssuesWithDecryption { get; set; } = PdfReaderProblemBehavior.SilentlyIgnore;
 
         public ReaderProblemDelegate? ReaderProblemCallback { get; set; }
+
+        public PdfReaderProblemBehavior DictionaryKeyNotAName { get; set; } = PdfReaderProblemBehavior.SilentlyIgnore;
 
         // Testing only
 

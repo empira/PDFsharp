@@ -16,6 +16,9 @@ namespace PdfSharp.Features
     {
         static void Main(string[] args)
         {
+            // Set AGPL license.
+            PdfSharpLicense.SetAgplLicense();
+
             Memory<byte> m = null;
             ReadOnlyMemory<byte> rom = null;
             Span<byte> s = null;

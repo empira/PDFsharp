@@ -279,11 +279,17 @@ namespace PdfSharp.Tests.Pdf
         [SkippableFact]
         public void Sign_with_Certificate_from_Store()
         {
+            // Get empira Software GmbH certificates.
             const string certName = "empira Software GmbH";
             X509Certificate2 certificate = null!;
             var store = new X509Store(StoreLocation.CurrentUser);
             store.Open(OpenFlags.ReadOnly);
             X509Certificate2Collection cers = store.Certificates.Find(X509FindType.FindBySubjectName, certName, false);
+
+            // This test works only with the old local certificates.
+            cers = cers.Find(X509FindType.FindByTimeExpired, new DateTime(2026, 10, 6), false);
+
+            // Only continue test, if matching certificates were found.
             Skip.If(cers.Count == 0);
 
             if (cers.Count > 0)

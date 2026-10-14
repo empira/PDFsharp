@@ -10,6 +10,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <!-- In 7.0 this is part of SemVersion.props. -->
+    <PdfSharpLicenseVersion>6.5.0</PdfSharpLicenseVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <!-- Enable Build Acceleration in Visual Studio. -->
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <!--

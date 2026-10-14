@@ -16,6 +16,29 @@ namespace PdfSharp.Pdf.Internal
     /// </summary>
     public static class PdfEncoders
     {
+        static PdfEncoders()
+        {
+#if !NETFRAMEWORK
+#if NETSTANDARD
+            // .NET Standard 2.0 can run under .NET Framework, so we make the check at runtime.
+            // Skip code page registration for .NET Framework as it is not needed there.
+            if (System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase))
+                return;
+#endif
+            RegisterCodePages();
+#endif
+        }
+
+#if !NETFRAMEWORK
+        private static void RegisterCodePages()
+        {
+            // Register CodePagesEncodingProvider so that legacy encodings like Shift-JIS (CP932),
+            // GBK (CP936), Big5 (CP950), EUC-KR (CP949), etc. are available on all platforms.
+            // On .NET Framework, all code pages are natively available and registration is not needed.
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
+#endif
+
         /// <summary>
         /// Gets the raw encoding.
         /// </summary>
@@ -49,6 +72,20 @@ namespace PdfSharp.Pdf.Internal
         /// </summary>
         public static Encoding UnicodeEncoding => _unicodeEncoding ??= Encoding.Unicode;
         static Encoding? _unicodeEncoding;
+
+        /// <summary>
+        /// Gets an encoding that corresponds to the ANSI code page of the current culture.
+        /// </summary>
+        /// <remarks>The returned encoding is determined by the ANSI code page associated with the current
+        /// thread's culture. If the current culture does not define an ANSI code page, a default encoding such as
+        /// Latin1 may be used. This property is useful for interoperability with legacy systems or file formats that
+        /// rely on culture-specific encodings.</remarks>
+        public static Encoding AnsiCodepageEncoding =>
+#if NET5_0_OR_GREATER
+            CultureInfo.CurrentCulture.TextInfo.ANSICodePage != 0 ? Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.ANSICodePage) : Encoding.Latin1;
+#else
+            Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.ANSICodePage);
+#endif
 
         ///// <summary>
         ///// Encodes a string from a byte array. Each character gets the code of the corresponding byte.

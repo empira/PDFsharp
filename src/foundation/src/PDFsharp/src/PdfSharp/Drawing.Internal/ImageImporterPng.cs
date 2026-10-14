@@ -33,9 +33,10 @@ namespace PdfSharp.Drawing.Internal
                 }
             }
             // ReSharper disable once EmptyGeneralCatchClause
-            catch (Exception)
+            catch (InvalidOperationException)
             {
-                // Eat exceptions to have this image importer skipped.
+                // Eat InvalidOperationException to have this image importer skipped.
+                // Do not eat other exceptions like OutOfMemoryException.
                 // We try to find an image importer that can handle the image.
             }
             return null;

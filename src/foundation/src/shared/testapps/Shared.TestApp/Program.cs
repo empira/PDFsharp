@@ -4,6 +4,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
+using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Logging;
 using PdfSharp.Pdf;
@@ -40,7 +41,8 @@ namespace Shared.TestApp
             //LogHost.Logger.TestMessage("di-blub");
             LogHost.Logger.TestMessage("------------------------------------------------------------------------------");
 
-
+            // Set AGPL license.
+            PdfSharpLicense.SetAgplLicense();
 
             var tempFileName = PdfFileUtility.GetTempPdfFullFileName("tests");
 

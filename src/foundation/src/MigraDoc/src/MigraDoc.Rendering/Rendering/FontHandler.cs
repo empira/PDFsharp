@@ -1,6 +1,7 @@
 // MigraDoc - Creating Documents on the Fly
 // See the LICENSE file in the solution root for more information.
 
+#define FORCE_MEMORYLEAK_
 #define CACHE_FONTS_
 
 using System.Diagnostics;
@@ -23,11 +24,13 @@ namespace MigraDoc.Rendering
         /// </summary>
         internal static XFont FontToXFont(Font font)
         {
-            // Check if both WeakReferences are still valid and point to the font we need.
-            if (_lastXFont != null && _lastFont != null &&
-                _lastFont.TryGetTarget(out var lastFont) && font == lastFont &&
-                _lastXFont.TryGetTarget(out var lastXFont))
-                return lastXFont;
+            // Check if WeakReference is still valid and points to the font we need.
+            if (_lastEntry != null &&
+                _lastEntry.TryGetTarget(out var lastEntry))
+            {
+                if (lastEntry.Font == font)
+                    return lastEntry.XFont;
+            }
 
             XFontStyleEx style = GetXStyle(font);
 
@@ -40,16 +43,29 @@ namespace MigraDoc.Rendering
 #if DEBUG_
             CreateFontCounter++;
 #endif
-            _lastFont = new(font);
-            _lastXFont = new(xFont);
+            _lastEntry =new(new(font, xFont));
 #if FORCE_MEMORYLEAK
             _lastFont2 = font;
 #endif
             return xFont;
         }
 
-        static WeakReference<XFont>? _lastXFont;
-        static WeakReference<Font>? _lastFont;
+        /// <summary>
+        /// The single-entry font cache.
+        /// </summary>
+        internal sealed class FontCacheEntry
+        {
+            internal FontCacheEntry(Font font, XFont xFont)
+            {
+                Font = font;
+                XFont = xFont;
+            }
+
+            internal readonly Font Font;
+            internal readonly XFont XFont;
+        }
+
+        static volatile WeakReference<FontCacheEntry>? _lastEntry;
 #if FORCE_MEMORYLEAK
         static Font? _lastFont2;
 #endif

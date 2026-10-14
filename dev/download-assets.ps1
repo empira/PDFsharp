@@ -17,6 +17,7 @@
     # Grammar by example archive => Move to PDFsharp.Lab
     "archives/grammar-by-example/GBE.zip"
     "archives/samples-1.5/samples-1.5.zip"
+    "license/license.zip"
 )
 
 $source = "https://assets.pdfsharp.net/"

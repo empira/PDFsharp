@@ -30,6 +30,9 @@ namespace HelloWorld
             });
             LogHost.Factory = loggerFactory;
 
+            // Set AGPL license.
+            PdfSharpLicense.SetAgplLicense();
+
             GlobalFontSettings.UseWindowsFontsUnderWindows = true;
 
             // Create a new PDF document.

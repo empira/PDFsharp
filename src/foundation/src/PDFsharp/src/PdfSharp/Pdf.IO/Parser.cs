@@ -11,13 +11,13 @@ namespace PdfSharp.Pdf.IO
     /*
        Direct and indirect objects
 
-       * If a simple object (boolean, integer, number, date, string, rectangle etc.) is referenced indirectly,
+       * If a primitive object (boolean, integer, number, date, string, rectangle etc.) is referenced indirectly,
          the parser reads this object immediately and consumes the indirection.
 
        * If a composite object (dictionary, array etc.) is referenced indirectly, a PdfReference object
          is returned.
 
-       * If a composite object is a direct object, no PdfReference is created and the object is
+       * If a compound object is a direct object, no PdfReference is created and the object is
          parsed immediately.
 
        * A reference to a non-existing object is specified as legal, therefore null is returned.
@@ -632,7 +632,46 @@ namespace PdfSharp.Pdf.IO
             {
                 var val = items[idx];
                 if (val is not PdfName)
-                    ParserDiagnostics.ThrowParserException("Name expected."); // TODO_OLD L10N using PsMsgs
+                {
+                    if (_options.DictionaryKeyNotAName == PdfReaderProblemBehavior.ThrowException)
+                        ParserDiagnostics.ThrowParserException("Name expected."); // TODO_OLD L10N using PsMsgs
+
+                    if (_options.DictionaryKeyNotAName == PdfReaderProblemBehavior.LogInformation ||
+                        _options.DictionaryKeyNotAName == PdfReaderProblemBehavior.LogWarning ||
+                        _options.DictionaryKeyNotAName == PdfReaderProblemBehavior.LogError)
+                    {
+                        switch (_options.DictionaryKeyNotAName)
+                        {
+                            case PdfReaderProblemBehavior.LogInformation:
+                                _logger.LogInformation("A PDF Name object was expected, but {stringValue} was found.", val.ToString());
+                                break;
+
+                            case PdfReaderProblemBehavior.LogWarning:
+                                _logger.LogWarning("A PDF Name object was expected, but {stringValue} was found.", val.ToString());
+                                break;
+
+                            case PdfReaderProblemBehavior.LogError:
+                                _logger.LogError("A PDF Name object was expected, but {stringValue} was found.", val.ToString());
+                                break;
+                        }
+                    }
+
+                    string str = val switch
+                    {
+                        PdfString stringValue => stringValue.Value,
+                        PdfInteger intValue => intValue.ToString(),
+                        PdfLongInteger intValue => intValue.ToString(),
+                        _ => Fail()
+                    };
+
+                    static string Fail()
+                    {
+                        ParserDiagnostics.ThrowParserException("Name expected.");
+                        return null!;
+                    }
+
+                    val = PdfName.FromString(str);
+                }
 
                 string key = val.ToString() ?? NRT.ThrowOnNull<string>();
                 val = items[idx + 1];

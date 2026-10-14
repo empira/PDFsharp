@@ -24,6 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="..\MigraDoc.GrammarByExample\Initializer.cs" Link="Initializer.cs" />
         <Compile Include="..\MigraDoc.GrammarByExample\helper\DdlGbeTestBase.cs" Link="helper\DdlGbeTestBase.cs" />
         <Compile Include="..\MigraDoc.GrammarByExample\helper\DdlToPdfHelper.cs" Link="helper\DdlToPdfHelper.cs" />
         <Compile Include="..\MigraDoc.GrammarByExample\helper\GbeFixture.cs" Link="helper\GbeFixture.cs" />

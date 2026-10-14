@@ -1,0 +1,3 @@
+﻿# Ignore generated C# file
+GitVersion.json
+SemVersionInformation-generated.cs
