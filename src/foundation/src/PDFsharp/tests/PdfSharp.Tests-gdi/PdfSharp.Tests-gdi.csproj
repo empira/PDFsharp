@@ -30,6 +30,7 @@
   <ItemGroup>
     <!--<Compile Include="..\..\..\shared\src\PdfSharp.System\System\CompilerServices.cs" Link="Build\CompilerServices.cs" />-->
     <Compile Include="..\..\..\shared\src\PdfSharp.Shared\dotnet\GetSubArray.cs" Link="Properties\GetSubArray(included).cs" />
+    <Compile Include="..\PdfSharp.Tests\Initializer.cs" Link="Initializer.cs" />
     <Compile Include="..\PdfSharp.Tests\Pdf.Annotations\AnnotationTestBase.cs" Link="Pdf.Annotations\AnnotationTestBase.cs" />
     <Compile Include="..\PdfSharp.Tests\Properties\GlobalDeclarations.cs" Link="Properties\GlobalDeclarations.cs" />
     <Compile Include="..\PdfSharp.Tests\Basics\SmokeTests.cs" Link="Basics\SmokeTests.cs" />

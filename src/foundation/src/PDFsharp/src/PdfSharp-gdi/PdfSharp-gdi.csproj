@@ -447,6 +447,7 @@
     <Compile Include="..\PdfSharp\Properties\GlobalDeclarations.cs" Link="Properties\GlobalDeclarations.cs" />
     <Compile Include="..\PdfSharp\Properties\PdfSharpProductVersionInformation.cs" Link="Properties\PdfSharpProductVersionInformation.cs" />
     <Compile Include="..\PdfSharp\root\Capabilities.cs" Link="root\Capabilities.cs" />
+    <Compile Include="..\PdfSharp\root\PdfSharpLicense.cs" Link="root\PdfSharpLicense.cs" />
     <Compile Include="..\PdfSharp\root\enums\PageOrientation.cs" Link="root\enums\PageOrientation.cs" />
     <Compile Include="..\PdfSharp\root\enums\PageRotation.cs" Link="root\enums\PageRotation.cs" />
     <Compile Include="..\PdfSharp\root\enums\PageSize.cs" Link="root\enums\PageSize.cs" />
@@ -483,10 +484,17 @@
     <EmbeddedResource Include="..\PdfSharp\Resources\sRGB2014.icc" Link="Resources\sRGB2014.icc" />
   </ItemGroup>
 
+  <ItemGroup >
+    <Reference Include="PdfSharp.License">
+      <HintPath>..\..\..\..\..\..\assets\license\bin\$(PdfSharpLicenseVersion)\PdfSharp.License.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
   <ItemGroup>
-    <InternalsVisibleTo Include="PDFsharp.Tests-gdi,             PublicKey=$(PDFsharpStronNamePublicKey)" />
-    <InternalsVisibleTo Include="PDFsharp.TestHelper-gdi,        PublicKey=$(PDFsharpStronNamePublicKey)" />
-    <InternalsVisibleTo Include="PDFsharp.BarCodes-gdi,          PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Tests-gdi,             PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.TestHelper-gdi,        PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.License.Tests-gdi,     PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.BarCodes-gdi,          PublicKey=$(PDFsharpStronNamePublicKey)" />
     <InternalsVisibleTo Include="PdfSharp.Annotations.Tests-gdi, PublicKey=$(PDFsharpStronNamePublicKey)" />
   </ItemGroup>
 

@@ -25,6 +25,7 @@
 	<s:String x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=961894CCC510410ABE2B99132B253C80/TodoIconStyle/@EntryValue">Edit</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=AESV/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=ID/@EntryIndexedValue">ID</s:String>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=AGPL/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=annots/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=ARGB/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=ascender/@EntryIndexedValue">True</s:Boolean>

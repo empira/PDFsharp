@@ -52,19 +52,26 @@
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
   </ItemGroup>
 
+  <ItemGroup >
+    <Reference Include="PdfSharp.License">
+      <HintPath>..\..\..\..\..\..\assets\license\bin\$(PdfSharpLicenseVersion)\PdfSharp.License.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
   <ItemGroup>
     <!-- Using just PublicKeyToken does not work, but I cannot find out why.
          If somebody can explain or fix it, please write me.
          For now we use the whole public key instead. />-->
-    <InternalsVisibleTo Include="$(AssemblyName).Quality,     PublicKey=$(PDFsharpStronNamePublicKey)" />
-    <InternalsVisibleTo Include="$(AssemblyName).Tests,       PublicKey=$(PDFsharpStronNamePublicKey)" />
-    <InternalsVisibleTo Include="$(AssemblyName).TestHelper,  PublicKey=$(PDFsharpStronNamePublicKey)" />
-    <InternalsVisibleTo Include="$(AssemblyName).Forms,       PublicKey=$(PDFsharpStronNamePublicKey)" />
-    <InternalsVisibleTo Include="$(AssemblyName).Forms.Tests, PublicKey=$(PDFsharpStronNamePublicKey)" />
-    <InternalsVisibleTo Include="PdfSharp.Annotations.Tests,  PublicKey=$(PDFsharpStronNamePublicKey)" />
-    <InternalsVisibleTo Include="MigraDoc.Graphics.Tests,     PublicKey=$(PDFsharpStronNamePublicKey)" />
-    <InternalsVisibleTo Include="PdfSharp.Graphics.Pdf.Tests, PublicKey=$(PDFsharpStronNamePublicKey)" />
-    <InternalsVisibleTo Include="PdfSharp.Graphics.Pdf.Tests, PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="$(AssemblyName).Quality,       PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="$(AssemblyName).Tests,         PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="$(AssemblyName).TestHelper,    PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="$(AssemblyName).License.Tests, PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="$(AssemblyName).Forms,         PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="$(AssemblyName).Forms.Tests,   PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Annotations.Tests,    PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="MigraDoc.Graphics.Tests,       PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Graphics.Pdf.Tests,   PublicKey=$(PDFsharpStronNamePublicKey)" />
+    <InternalsVisibleTo Include="PdfSharp.Graphics.Pdf.Tests,   PublicKey=$(PDFsharpStronNamePublicKey)" />
 
     <!-- TODO: Use a set of extensions to access PDFsharp stuff in PdfSharp.Graphics.Pdf. -->
     <InternalsVisibleTo Include="PdfSharp.Graphics.Pdf,       PublicKey=$(PDFsharpStronNamePublicKey)" />

@@ -4,6 +4,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
+using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Logging;
 using PdfSharp.Pdf;
@@ -36,7 +37,9 @@ namespace Shared.TestApp
             ILogger logger = loggerFactory.CreateLogger<Program>();
 
             LogHost.Logger.TestMessage("------------------------------------------------------------------------------");
-
+            
+            // Set AGPL license.
+            PdfSharpLicense.SetAgplLicense();
 
             // Call some developer specific test code from a file not in the repo.
             // Implement your code in ProgramEx.cs in partial class Program.

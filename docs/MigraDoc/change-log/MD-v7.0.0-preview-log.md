@@ -4,8 +4,6 @@ A copy of the text below this line is added to `docs.pdfsharp.net` **MigraDoc** 
 
 ## What’s new in version 7.0
 
-**This file is not yet up-to-date.**
-
 ### Breaking changes
 
 **PdfDate**  

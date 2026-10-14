@@ -1,0 +1,17 @@
+﻿# PDFsharp 7.0.0 change log
+
+A copy of the text below this line is added to `docs.pdfsharp.net` **PDFsharp** `History.md`.
+
+## What’s new in version 7.0.0 Preview 2
+
+### Breaking changes
+
+Also see breaking changes in general history.
+
+### Features
+
+*No changes in this version.*
+
+### Issues
+
+*No changes in this version.*

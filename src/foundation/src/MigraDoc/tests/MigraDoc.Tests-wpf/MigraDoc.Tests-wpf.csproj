@@ -28,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\MigraDoc.Tests\Initializer.cs" Link="Initializer.cs" />
     <Compile Include="..\MigraDoc.Tests\ChartTests.cs" Link="ChartTests.cs" />
     <Compile Include="..\MigraDoc.Tests\CultureAndRegionTests.cs" Link="CultureAndRegionTests.cs" />
     <Compile Include="..\MigraDoc.Tests\Extensions\XunitHelper.cs" Link="Extensions\XunitHelper.cs" />

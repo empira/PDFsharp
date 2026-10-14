@@ -9,7 +9,8 @@ if (Test-Path .\src\SemVersion.props) {
     & .\src\foundation\src\shared\src\PdfSharp.BuildConfig\CreateBuildConfiguration.ps1
 }
 Write-Output "Deleting..."
-Get-ChildItem .\ -include bin,obj -Recurse | 
+# Only delete bin and obj folders inside the src folder, so assets are not affected.
+Get-ChildItem .\src -include bin,obj -Recurse | 
 ForEach-Object ($_) {
     Remove-Item $_.fullname -Force -Recurse | Out-Null
 }

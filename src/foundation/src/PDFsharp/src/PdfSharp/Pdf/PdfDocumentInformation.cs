@@ -83,11 +83,7 @@ namespace PdfSharp.Pdf
         public string Producer
         {
             get => Elements.GetString(Keys.Producer);
-#if PDFSHARP_SET_PRODUCER
-            set => Elements.SetString(Keys.Producer, value);
-#else
             internal init => Elements.SetString(Keys.Producer, value);
-#endif
         }
 
         /// <summary>

@@ -41,6 +41,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfDocument()
         {
+            PdfSharpLicense.CheckLicense();
             PdfSharpLogHost.Logger.PdfDocumentCreated(Name);
             CreationDate = DateTimeOffset.Now;
             State = DocumentState.Created;
@@ -68,6 +69,7 @@ namespace PdfSharp.Pdf
         /// </summary>
         public PdfDocument(Stream outputStream)
         {
+            PdfSharpLicense.CheckLicense();
             CreationDate = DateTimeOffset.Now;
             State = DocumentState.Created;
             _version = 14;
@@ -79,6 +81,7 @@ namespace PdfSharp.Pdf
 
         internal PdfDocument(Lexer lexer)
         {
+            PdfSharpLicense.CheckLicense();
             CreationDate = DateTimeOffset.Now;
             State = DocumentState.Imported;
 
@@ -479,7 +482,7 @@ namespace PdfSharp.Pdf
         void PrepareForSave()
         {
             // The Creator is called “Application” in Acrobat.
-            // The Producer is call “Created by” in Acrobat.
+            // The Producer is called “Created by” in Acrobat.
 
             // Set Creator if value is undefined. This is the 'application' in Adobe Reader.
             //if (Info.Elements[PdfDocumentInformation.Keys.Creator] is null) // TODO #US373 Just a null check.
@@ -488,7 +491,7 @@ namespace PdfSharp.Pdf
 
             // We set Producer if it is not yet set.
 #if true // TODO clean up
-            var pdfProducer = DefaultProducer;
+            var pdfProducer = DefaultProducer.Trim();
 #else
             var pdfProducer = PdfSharpProductVersionInformation.Creator;
 #if DEBUG
@@ -497,19 +500,64 @@ namespace PdfSharp.Pdf
 #endif
 #endif
             // Keep original producer if file was imported. This is “PDF created by” in Adobe Reader.
-            string producer = Info.Producer;
+            var producer = RemoveLicenseInfoAndTrim(Info.Producer);
+            
+#if true
+            // If the document has no producer, simply set it.
+            if (producer.Length == 0)
+                producer = pdfProducer;
+            // If the document’s producer is already the one, we want to set, leave it.
+            // Otherwise, append the original producer to the new one.
+            else if (producer != pdfProducer)
+            {
+                // Prevent endless concatenation if file is edited with PDFsharp more than once.
+                // If already present, the part in "(Original ...)" shall remain.
+                const string originalProducerBegin = " (Original: ";
+                var originalProducerBeginPos = producer.LastIndexOf(originalProducerBegin, StringComparison.InvariantCulture);
+                if (originalProducerBeginPos > 0)
+                {
+                    originalProducerBeginPos += originalProducerBegin.Length;
+
+                    // OriginalProducerEndPos shall be the position of the closing brace belonging to "(Original", or producer.Length if it is missing.
+                    var originalProducerEndPos = producer.Length;
+                    var bracesLevel = 1;
+                    for (var i = originalProducerBeginPos; i < producer.Length; i++)
+                    {
+                        var c = producer[i];
+                        if (c == '(')
+                            bracesLevel++;
+                        else if (c == ')' && --bracesLevel == 0)
+                        {
+                            originalProducerEndPos = i;
+                            break;
+                        }
+                    }
+
+                    // Temporarily update producer to the original producer only.
+                    producer = producer[originalProducerBeginPos..originalProducerEndPos];
+                }
+                // With no "(Original ...)" found, producer contains still the original value read.
+
+                // Set the current producer and append the original producer value.
+                producer = $"{pdfProducer}{originalProducerBegin}{producer})";
+            }
+#else
             if (producer.Length == 0)
             {
                 producer = pdfProducer;
             }
             else
             {
+
                 // Prevent endless concatenation if file is edited with PDFsharp more than once.
                 if (!producer.StartsWith(PdfSharpProductVersionInformation.Title, StringComparison.Ordinal))
                     producer = $"{pdfProducer} (Original: {producer})";
             }
+#endif
 
             Info.Elements.SetString(PdfDocumentInformation.Keys.Producer, producer);
+
+            PrepareForSaveCallback?.Invoke(this);
 
             // Prepare used fonts.
             _fontTable?.PrepareForSave();
@@ -531,7 +579,51 @@ namespace PdfSharp.Pdf
 
             IrefTable.Renumber();
 #endif
+
+            string RemoveLicenseInfoAndTrim(string prod)
+            {
+                var licenseInfoStart = prod.IndexOf("(AGPL license", StringComparison.InvariantCulture);
+                if (licenseInfoStart == -1)
+                    licenseInfoStart = prod.IndexOf("(Commercial license", StringComparison.InvariantCulture);
+                if (licenseInfoStart == -1)
+                    return prod.Trim();
+
+                // Look for the appropriate bracket to close license info.
+                var length = prod.Length;
+                var licenseInfoEnd = licenseInfoStart + 1;
+                var bracketsLevel = 1;
+                for (; licenseInfoEnd < length; licenseInfoEnd++)
+                {
+                    var c = prod[licenseInfoEnd];
+                    if (c == '(')
+                        bracketsLevel++;
+                    else if (c == ')')
+                        bracketsLevel--;
+
+                    if (bracketsLevel == 0)
+                        break;
+                }
+
+                // Retain text after license info.
+                var producerPart2Start = licenseInfoEnd + 1;
+                if (producerPart2Start > length)
+                    producerPart2Start = length;
+
+                var producerPart1 = prod[..licenseInfoStart].Trim();
+                var producerPart2 = prod[producerPart2Start..length].Trim();
+
+                prod = producerPart1;
+                if (!String.IsNullOrEmpty(producerPart2))
+                    prod += $" {producerPart2}";
+
+                return prod;
+            }
         }
+
+        /// <summary>
+        /// Allows running external code on PrepareForSave.
+        /// </summary>
+        internal static Action<object>? PrepareForSaveCallback { private get; set; }
 
         /// <summary>
         /// Determines whether the document can be saved.

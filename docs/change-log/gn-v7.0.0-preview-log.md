@@ -4,12 +4,6 @@ This text is copied to `docs.pdfsharp.net`.
 
 ## What’s new in version 7.0
 
-**This file is not yet up-to-date.**
-
-<!--### PDFsharp 7.0.0 (final release)
-
-
--->
 ### Breaking changes
 
 * From 6.x to 7.0 needs a recompile.
