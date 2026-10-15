@@ -17,14 +17,36 @@ namespace PdfSharp.Pdf.Internal
     /// </summary>
     public static class PdfEncoders
     {
-        /// <summary>
-        /// Gets the PDFsharp specific encoder RawEncoding.
-        /// Ray encoding allows wo work with string instead of byte array.
-        /// A raw encoded string is equivalent to a byte array of the same length
-        /// where each sting character represents one byte.
-        /// Therefore, each character of a raw string has a value less than 256.
-        /// </summary>
-        public static Encoding RawEncoding => _rawEncoding ??= new RawEncoding();
+        static PdfEncoders()
+        {
+#if !NETFRAMEWORK
+#if NETSTANDARD
+            // netstandard2.0 は .NET Framework 上でも動作しうるため、ランタイムで判定
+            // .NET Framework は、CodePagesEncodingProvider を必要としないため、コンポーネントがないため呼び出し自体を避ける
+            if (System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase))
+                return;
+#endif
+			RegisterCodePages();
+#endif
+        }
+#if !NETFRAMEWORK
+        private static void RegisterCodePages()
+        {
+            // Register CodePagesEncodingProvider so that legacy encodings like Shift-JIS (CP932),
+            // GBK (CP936), Big5 (CP950), EUC-KR (CP949), etc. are available on all platforms.
+            // On .NET Framework, all code pages are natively available and registration is not needed.
+            Encoding.RegisterProvider( CodePagesEncodingProvider.Instance );
+        }
+#endif
+
+		/// <summary>
+		/// Gets the PDFsharp specific encoder RawEncoding.
+		/// Ray encoding allows wo work with string instead of byte array.
+		/// A raw encoded string is equivalent to a byte array of the same length
+		/// where each sting character represents one byte.
+		/// Therefore, each character of a raw string has a value less than 256.
+		/// </summary>
+		public static Encoding RawEncoding => _rawEncoding ??= new RawEncoding();
         static Encoding? _rawEncoding;
 
         internal static Encoding ByteStringEncoding => _rawEncoding ??= new RawEncoding();  // new name??
@@ -63,6 +85,20 @@ namespace PdfSharp.Pdf.Internal
         /// </summary>
         public static Encoding UnicodeEncoding => _unicodeEncoding ??= Encoding.Unicode;
         static Encoding? _unicodeEncoding;
+
+        /// <summary>
+        /// Gets an encoding that corresponds to the ANSI code page of the current culture.
+        /// </summary>
+        /// <remarks>The returned encoding is determined by the ANSI code page associated with the current
+        /// thread's culture. If the current culture does not define an ANSI code page, a default encoding such as
+        /// Latin1 may be used. This property is useful for interoperability with legacy systems or file formats that
+        /// rely on culture-specific encodings.</remarks>
+        public static Encoding AnsiCodepageEncoding =>
+#if NET5_0_OR_GREATER
+            CultureInfo.CurrentCulture.TextInfo.ANSICodePage != 0 ? Encoding.GetEncoding( CultureInfo.CurrentCulture.TextInfo.ANSICodePage ) : Encoding.Latin1;
+#else
+            Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.ANSICodePage);
+#endif
 
         ///// <summary>
         ///// Encodes a string from a byte array. Each character gets the code of the corresponding byte.
