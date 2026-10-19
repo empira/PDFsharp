@@ -1,4 +1,10 @@
-﻿# PDFsharp & MigraDoc 7
+﻿[![Maintained by PDFsharp Team](https://img.shields.io/badge/Maintained%20by-PDFsharp%20Team-blue?style=flat)](https://www.pdfsharp.com) 
+[![Commercial Support Available](https://img.shields.io/badge/Commercial%20Support-Available-blue?style=flat)](https://www.pdfsharp.com/Offers)
+
+> This project is actively maintained by the PDFsharp Team.  
+> Professional assistance for production is available upon request.
+
+# PDFsharp & MigraDoc 7
 
 Version **7.0.0 Preview 2**  
 Published **2026-10-13**
