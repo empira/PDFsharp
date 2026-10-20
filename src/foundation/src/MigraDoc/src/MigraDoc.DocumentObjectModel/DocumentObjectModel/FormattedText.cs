@@ -10,12 +10,12 @@ namespace MigraDoc.DocumentObjectModel
     /// <summary>
     /// Represents the format of a text.
     /// </summary>
-    public class FormattedText : DocumentObject, IVisitable
+    public class FormattedText : TextBasedDocumentObject, IVisitable
     {
         /// <summary>
         /// Initializes a new instance of the FormattedText class.
         /// </summary>
-        public FormattedText()
+        public FormattedText(TextRenderOption textRenderOption = TextRenderOption.Default) : base(textRenderOption)
         {
             BaseValues = new FormattedTextValues(this);
         }
@@ -23,7 +23,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Initializes a new instance of the FormattedText class with the specified parent.
         /// </summary>
-        internal FormattedText(DocumentObject parent) : base(parent)
+        internal FormattedText(DocumentObject parent, TextRenderOption textRenderOption = TextRenderOption.Default) : base(parent, textRenderOption)
         {
             BaseValues = new FormattedTextValues(this);
         }
@@ -67,73 +67,73 @@ namespace MigraDoc.DocumentObjectModel
         /// Adds a single character repeated the specified number of times to the formatted text.
         /// </summary>
         public Text AddChar(char ch, int count)
-            => Elements.AddChar(ch, count);
+            => Elements.AddChar(ch, count, TextRenderOption);
 
         /// <summary>
         /// Adds a single character to the formatted text.
         /// </summary>
         public Text AddChar(char ch)
-            => Elements.AddChar(ch);
+            => Elements.AddChar(ch, TextRenderOption);
 
         /// <summary>
         /// Adds a new PageField.
         /// </summary>
         public PageField AddPageField()
-            => Elements.AddPageField();
+            => Elements.AddPageField(TextRenderOption);
 
         /// <summary>
         /// Adds a new PageRefField.
         /// </summary>
         public PageRefField AddPageRefField(string name)
-            => Elements.AddPageRefField(name);
+            => Elements.AddPageRefField(name, TextRenderOption);
 
         /// <summary>
         /// Adds a new NumPagesField.
         /// </summary>
         public NumPagesField AddNumPagesField()
-            => Elements.AddNumPagesField();
+            => Elements.AddNumPagesField(TextRenderOption);
 
         /// <summary>
         /// Adds a new SectionField.
         /// </summary>
         public SectionField AddSectionField()
-            => Elements.AddSectionField();
+            => Elements.AddSectionField(TextRenderOption);
 
         /// <summary>
         /// Adds a new SectionPagesField.
         /// </summary>
         public SectionPagesField AddSectionPagesField()
-            => Elements.AddSectionPagesField();
+            => Elements.AddSectionPagesField(TextRenderOption);
 
         /// <summary>
         /// Adds a new DateField.
         /// </summary>
         public DateField AddDateField()
-            => Elements.AddDateField();
+            => Elements.AddDateField(TextRenderOption);
 
         /// <summary>
         /// Adds a new DateField.
         /// </summary>
         public DateField AddDateField(string format)
-            => Elements.AddDateField(format);
+            => Elements.AddDateField(format, TextRenderOption);
 
         /// <summary>
         /// Adds a new InfoField.
         /// </summary>
         public InfoField AddInfoField(InfoFieldType iType)
-            => Elements.AddInfoField(iType);
+            => Elements.AddInfoField(iType, TextRenderOption);
 
         /// <summary>
         /// Adds a new Footnote with the specified text.
         /// </summary>
         public Footnote AddFootnote(string text)
-            => Elements.AddFootnote(text);
+            => Elements.AddFootnote(text, TextRenderOption);
 
         /// <summary>
         /// Adds a new Footnote.
         /// </summary>
         public Footnote AddFootnote()
-            => Elements.AddFootnote();
+            => Elements.AddFootnote(TextRenderOption);
 
         /// <summary>
         /// Adds a text phrase to the formatted text.
@@ -141,49 +141,49 @@ namespace MigraDoc.DocumentObjectModel
         /// <param name="text">Content of the new text object.</param>
         /// <returns>Returns a new Text object with the last element of text that was added.</returns>
         public Text AddText(string text)
-            => Elements.AddText(text);
+            => Elements.AddText(text, TextRenderOption);
 
         /// <summary>
         /// Adds a new FormattedText.
         /// </summary>
         public FormattedText AddFormattedText()
-            => Elements.AddFormattedText();
+            => Elements.AddFormattedText(TextRenderOption);
 
         /// <summary>
         /// Adds a new FormattedText object with the given format.
         /// </summary>
         public FormattedText AddFormattedText(TextFormat textFormat)
-            => Elements.AddFormattedText(textFormat);
+            => Elements.AddFormattedText(textFormat, TextRenderOption);
 
         /// <summary>
         /// Adds a new FormattedText with the given Font.
         /// </summary>
         public FormattedText AddFormattedText(Font font)
-            => Elements.AddFormattedText(font);
+            => Elements.AddFormattedText(font, TextRenderOption);
 
         /// <summary>
         /// Adds a new FormattedText with the given text.
         /// </summary>
         public FormattedText AddFormattedText(string text)
-            => Elements.AddFormattedText(text);
+            => Elements.AddFormattedText(text, TextRenderOption);
 
         /// <summary>
         /// Adds a new FormattedText object with the given text and format.
         /// </summary>
         public FormattedText AddFormattedText(string text, TextFormat textFormat)
-            => Elements.AddFormattedText(text, textFormat);
+            => Elements.AddFormattedText(text, textFormat, TextRenderOption);
 
         /// <summary>
         /// Adds a new FormattedText object with the given text and font.
         /// </summary>
         public FormattedText AddFormattedText(string text, Font font)
-            => Elements.AddFormattedText(text, font);
+            => Elements.AddFormattedText(text, font, TextRenderOption);
 
         /// <summary>
         /// Adds a new FormattedText object with the given text and style.
         /// </summary>
         public FormattedText AddFormattedText(string text, string style)
-            => Elements.AddFormattedText(text, style);
+            => Elements.AddFormattedText(text, style, TextRenderOption);
 
         /// <summary>
         /// Adds a new Hyperlink of Type "Local", i.e. the target is a Bookmark within the Document.
@@ -259,43 +259,43 @@ namespace MigraDoc.DocumentObjectModel
         /// Adds a Symbol object.
         /// </summary>
         public Character AddCharacter(SymbolName symbolType)
-            => Elements.AddCharacter(symbolType);
+            => Elements.AddCharacter(symbolType, TextRenderOption);
 
         /// <summary>
         /// Adds one or more Symbol objects.
         /// </summary>
         public Character AddCharacter(SymbolName symbolType, int count)
-            => Elements.AddCharacter(symbolType, count);
+            => Elements.AddCharacter(symbolType, count, TextRenderOption);
 
         /// <summary>
         /// Adds a Symbol object defined by a character.
         /// </summary>
         public Character AddCharacter(char ch)
-            => Elements.AddCharacter(ch);
+            => Elements.AddCharacter(ch, TextRenderOption);
 
         /// <summary>
         /// Adds one or more Symbol objects defined by a character.
         /// </summary>
         public Character AddCharacter(char ch, int count)
-            => Elements.AddCharacter(ch, count);
+            => Elements.AddCharacter(ch, count, TextRenderOption);
 
         /// <summary>
         /// Adds one or more Space characters.
         /// </summary>
         public Character AddSpace(int count)
-            => Elements.AddSpace(count);
+            => Elements.AddSpace(count, TextRenderOption);
 
         /// <summary>
         /// Adds a horizontal tab.
         /// </summary>
         public void AddTab()
-            => Elements.AddTab();
+            => Elements.AddTab(TextRenderOption);
 
         /// <summary>
         /// Adds a line break.
         /// </summary>
         public void AddLineBreak()
-            => Elements.AddLineBreak();
+            => Elements.AddLineBreak(TextRenderOption);
 
         /// <summary>
         /// Adds a new Bookmark.

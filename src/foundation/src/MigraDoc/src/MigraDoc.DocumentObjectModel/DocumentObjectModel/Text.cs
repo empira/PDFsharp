@@ -6,12 +6,12 @@ namespace MigraDoc.DocumentObjectModel
     /// <summary>
     /// Represents text in a paragraph.
     /// </summary>
-    public class Text : DocumentObject
+    public class Text : TextBasedDocumentObject
     {
         /// <summary>
         /// Initializes a new instance of the Text class.
         /// </summary>
-        public Text()
+        public Text(TextRenderOption textRenderOption = TextRenderOption.Default) : base(textRenderOption)
         {
             BaseValues = new TextValues(this);
         }
@@ -19,7 +19,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Initializes a new instance of the Text class with the specified parent.
         /// </summary>
-        internal Text(DocumentObject parent) : base(parent)
+        internal Text(DocumentObject parent, TextRenderOption textRenderOption = TextRenderOption.Default) : base(parent, textRenderOption)
         {
             BaseValues = new TextValues(this);
         }
@@ -27,7 +27,7 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Initializes a new instance of the Text class with a string as paragraph content.
         /// </summary>
-        public Text(string content) : this()
+        public Text(string content, TextRenderOption textRenderOption = TextRenderOption.Default) : this(textRenderOption)
         {
             Content = content;
         }

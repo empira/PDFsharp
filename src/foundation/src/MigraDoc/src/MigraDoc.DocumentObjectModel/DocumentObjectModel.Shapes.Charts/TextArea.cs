@@ -73,9 +73,9 @@ namespace MigraDoc.DocumentObjectModel.Shapes.Charts
         /// <summary>
         /// Adds a new paragraph with the specified text to the text area.
         /// </summary>
-        public Paragraph AddParagraph(string paragraphText)
+        public Paragraph AddParagraph(string paragraphText, TextRenderOption textRenderOption = TextRenderOption.Default)
         {
-            return Elements.AddParagraph(paragraphText);
+            return Elements.AddParagraph(paragraphText, textRenderOption);
         }
 
         /// <summary>

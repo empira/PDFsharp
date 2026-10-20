@@ -57,104 +57,104 @@ namespace MigraDoc.DocumentObjectModel
         /// Adds a text phrase to the paragraph.
         /// </summary>
         /// <returns>Returns a new Text object with the last element of text that was added.</returns>
-        public Text AddText(string text)
-            => Elements.AddText(text);
+        public Text AddText(string text, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddText(text, textRenderOption);
 
         /// <summary>
         /// Adds a single character repeated the specified number of times to the paragraph.
         /// </summary>
-        public Text AddChar(char ch, int count)
-            => Elements.AddChar(ch, count);
+        public Text AddChar(char ch, int count, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddChar(ch, count, textRenderOption);
 
         /// <summary>
         /// Adds a single character to the paragraph.
         /// </summary>
-        public Text AddChar(char ch)
-            => Elements.AddChar(ch);
+        public Text AddChar(char ch, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddChar(ch, textRenderOption);
 
         /// <summary>
         /// Adds one or more Symbol objects.
         /// </summary>
-        public Character AddCharacter(SymbolName symbolType, int count)
-            => Elements.AddCharacter(symbolType, count);
+        public Character AddCharacter(SymbolName symbolType, int count, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddCharacter(symbolType, count, textRenderOption);
 
         /// <summary>
         /// Adds a Symbol object.
         /// </summary>
-        public Character AddCharacter(SymbolName symbolType)
-            => Elements.AddCharacter(symbolType);
+        public Character AddCharacter(SymbolName symbolType, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddCharacter(symbolType, textRenderOption);
 
         /// <summary>
         /// Adds one or more Symbol objects defined by a character.
         /// </summary>
-        public Character AddCharacter(char ch, int count)
-            => Elements.AddCharacter(ch, count);
+        public Character AddCharacter(char ch, int count, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddCharacter(ch, count, textRenderOption);
 
         /// <summary>
         /// Adds a Symbol object defined by a character.
         /// </summary>
-        public Character AddCharacter(char ch)
-            => Elements.AddCharacter(ch);
+        public Character AddCharacter(char ch, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddCharacter(ch, textRenderOption);
 
         /// <summary>
         /// Adds a space character as many as count.
         /// </summary>
-        public Character AddSpace(int count)
-            => Elements.AddSpace(count);
+        public Character AddSpace(int count, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddSpace(count, textRenderOption);
 
         /// <summary>
         /// Adds a horizontal tab.
         /// </summary>
-        public void AddTab()
-            => Elements.AddTab();
+        public void AddTab(TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddTab(textRenderOption);
 
         /// <summary>
         /// Adds a line break.
         /// </summary>
-        public void AddLineBreak()
-            => Elements.AddLineBreak();
+        public void AddLineBreak(TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddLineBreak(textRenderOption);
 
         /// <summary>
         /// Adds a new FormattedText.
         /// </summary>
-        public FormattedText AddFormattedText()
-            => Elements.AddFormattedText();
+        public FormattedText AddFormattedText(TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddFormattedText(textRenderOption);
 
         /// <summary>
         /// Adds a new FormattedText object with the given format.
         /// </summary>
-        public FormattedText AddFormattedText(TextFormat textFormat)
-            => Elements.AddFormattedText(textFormat);
+        public FormattedText AddFormattedText(TextFormat textFormat, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddFormattedText(textFormat, textRenderOption);
 
         /// <summary>
         /// Adds a new FormattedText with the given Font.
         /// </summary>
-        public FormattedText AddFormattedText(Font font)
-            => Elements.AddFormattedText(font);
+        public FormattedText AddFormattedText(Font font, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddFormattedText(font, textRenderOption);
 
         /// <summary>
         /// Adds a new FormattedText with the given text.
         /// </summary>
-        public FormattedText AddFormattedText(string text)
-            => Elements.AddFormattedText(text);
+        public FormattedText AddFormattedText(string text, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddFormattedText(text, textRenderOption);
 
         /// <summary>
         /// Adds a new FormattedText object with the given text and format.
         /// </summary>
-        public FormattedText AddFormattedText(string text, TextFormat textFormat)
-            => Elements.AddFormattedText(text, textFormat);
+        public FormattedText AddFormattedText(string text, TextFormat textFormat, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddFormattedText(text, textFormat, textRenderOption);
 
         /// <summary>
         /// Adds a new FormattedText object with the given text and font.
         /// </summary>
-        public FormattedText AddFormattedText(string text, Font font)
-            => Elements.AddFormattedText(text, font);
+        public FormattedText AddFormattedText(string text, Font font, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddFormattedText(text, font, textRenderOption);
 
         /// <summary>
         /// Adds a new FormattedText object with the given text and style.
         /// </summary>
-        public FormattedText AddFormattedText(string text, string style)
-            => Elements.AddFormattedText(text, style);
+        public FormattedText AddFormattedText(string text, string style, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddFormattedText(text, style, textRenderOption);
 
         /// <summary>
         /// Adds a new Hyperlink of Type "Local", i.e. the target is a Bookmark within the Document.
@@ -228,62 +228,62 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new PageField.
         /// </summary>
-        public PageField AddPageField()
-            => Elements.AddPageField();
+        public PageField AddPageField(TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddPageField(textRenderOption);
 
         /// <summary>
         /// Adds a new PageRefField.
         /// </summary>
-        public PageRefField AddPageRefField(string name)
-            => Elements.AddPageRefField(name);
+        public PageRefField AddPageRefField(string name, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddPageRefField(name, textRenderOption);
 
         /// <summary>
         /// Adds a new NumPagesField.
         /// </summary>
-        public NumPagesField AddNumPagesField()
-            => Elements.AddNumPagesField();
+        public NumPagesField AddNumPagesField(TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddNumPagesField(textRenderOption);
 
         /// <summary>
         /// Adds a new SectionField.
         /// </summary>
-        public SectionField AddSectionField()
-            => Elements.AddSectionField();
+        public SectionField AddSectionField(TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddSectionField(textRenderOption);
 
         /// <summary>
         /// Adds a new SectionPagesField.
         /// </summary>
-        public SectionPagesField AddSectionPagesField()
-            => Elements.AddSectionPagesField();
+        public SectionPagesField AddSectionPagesField(TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddSectionPagesField(textRenderOption);
 
         /// <summary>
         /// Adds a new DateField.
         /// </summary>
-        public DateField AddDateField()
-            => Elements.AddDateField();
+        public DateField AddDateField(TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddDateField(textRenderOption);
 
         /// <summary>
         /// Adds a new DateField.
         /// </summary>
-        public DateField AddDateField(string format)
-            => Elements.AddDateField(format);
+        public DateField AddDateField(string format, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddDateField(format, textRenderOption);
 
         /// <summary>
         /// Adds a new InfoField.
         /// </summary>
-        public InfoField AddInfoField(InfoFieldType iType)
-            => Elements.AddInfoField(iType);
+        public InfoField AddInfoField(InfoFieldType iType, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddInfoField(iType, textRenderOption);
 
         /// <summary>
         /// Adds a new Footnote with the specified text.
         /// </summary>
-        public Footnote AddFootnote(string text)
-            => Elements.AddFootnote(text);
+        public Footnote AddFootnote(string text, TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddFootnote(text, textRenderOption);
 
         /// <summary>
         /// Adds a new Footnote.
         /// </summary>
-        public Footnote AddFootnote()
-            => Elements.AddFootnote();
+        public Footnote AddFootnote(TextRenderOption textRenderOption = TextRenderOption.Default)
+            => Elements.AddFootnote(textRenderOption);
 
         /// <summary>
         /// Adds a new Image object.

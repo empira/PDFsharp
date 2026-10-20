@@ -10,30 +10,30 @@ namespace MigraDoc.DocumentObjectModel.Fields
     /// NumericFieldBase serves as a base for Numeric fields, which are: 
     /// NumPagesField, PageField, PageRefField, SectionField, SectionPagesField
     /// </summary>
-    public abstract class NumericFieldBase : DocumentObject
+    public abstract class NumericFieldBase : TextBasedDocumentObject
     {
         /// <summary>
         /// The valid format strings for the supported numeric types.
         /// </summary>
         protected static readonly string[] ValidFormatStrings =
-        [
+        {
             "",
             "ROMAN",
             "roman",
             "ALPHABETIC",
             "alphabetic"
-        ];
+        };
 
         /// <summary>
         /// Initializes a new instance of the NumericFieldBase class.
         /// </summary>
-        internal NumericFieldBase()
+        internal NumericFieldBase(TextRenderOption textRenderOption = TextRenderOption.Default) : base(textRenderOption)
         { }
 
         /// <summary>
         /// Initializes a new instance of the NumericFieldBase class with the specified parent.
         /// </summary>
-        internal NumericFieldBase(DocumentObject parent) : base(parent)
+        internal NumericFieldBase(DocumentObject parent, TextRenderOption textRenderOption = TextRenderOption.Default) : base(parent, textRenderOption)
         { }
 
         /// <summary>
