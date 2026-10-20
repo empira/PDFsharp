@@ -284,6 +284,10 @@ namespace PdfSharp.Pdf.Filters
 //            if (decodeParms is not null)
 //                PdfReference.Dereference(ref decodeParms);
 
+            // A null decode parameters entry, e.g. "/DecodeParms [null]", means the filter uses its default parameters.
+            if (decodeParms is PdfNull)
+                decodeParms = null;
+
             if (filterItem is PdfName && decodeParms is null or PdfDictionary)
             {
                 var filter = GetFilter(filterItem.ToString()!);
