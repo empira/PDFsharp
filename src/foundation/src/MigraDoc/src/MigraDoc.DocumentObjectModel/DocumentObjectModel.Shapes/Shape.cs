@@ -126,6 +126,19 @@ namespace MigraDoc.DocumentObjectModel.Shapes
         }
 
         /// <summary>
+        /// Gets the text in front or behind format of the shape.
+        /// </summary>
+        public TextWithShapeFormat TextWithShapeFormat
+        {
+            get => Values.TextWithShapeFormat ??= new TextWithShapeFormat(this);
+            set
+            {
+                SetParent(value);
+                Values.TextWithShapeFormat = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the height of the shape.
         /// </summary>
         public Unit Height
@@ -233,6 +246,12 @@ namespace MigraDoc.DocumentObjectModel.Shapes
             /// See enclosing document object class for documentation of this property.
             /// </summary>
             public FillFormat? FillFormat { get; set; }
+
+            /// <summary>
+            /// Gets or sets the internal nullable implementation value of the enclosing document object property.
+            /// See enclosing document object class for documentation of this property.
+            /// </summary>
+            public TextWithShapeFormat? TextWithShapeFormat { get; set; }
 
             /// <summary>
             /// Gets or sets the internal nullable implementation value of the enclosing document object property.

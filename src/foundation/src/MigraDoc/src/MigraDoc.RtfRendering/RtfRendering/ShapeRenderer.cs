@@ -57,6 +57,7 @@ namespace MigraDoc.RtfRendering
             }
             RenderLineFormat();
             RenderFillFormat();
+            RenderTextWithShapeFormat();
         }
 
         /// <summary>
@@ -72,6 +73,15 @@ namespace MigraDoc.RtfRendering
             }
             else
                 RenderNameValuePair("fFilled", "0");
+        }
+
+        protected void RenderTextWithShapeFormat()
+        {
+            var tf = GetValueAsIntended("TextWithShapeFormat") as TextWithShapeFormat;
+            if (tf != null && tf.TextInFront.HasValue && tf.TextInFront.Value)
+                RenderNameValuePair("fBehindDocument", "0");
+            else
+                RenderNameValuePair("fBehindDocument", "1");
         }
 
         protected Unit GetLineWidth()
