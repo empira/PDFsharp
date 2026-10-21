@@ -35,5 +35,17 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         [Obsolete("InformationOnly is not implemented, use Import instead.")]
         InformationOnly,
+
+        // Note: New members must be appended here to keep the numeric values of the existing members stable.
+
+        /// <summary>
+        /// Like <see cref="Modify"/>, but the object numbering of the original file is preserved: unreachable
+        /// objects are not removed and the cross-reference table is not renumbered. This is a prerequisite for
+        /// an append-only incremental update, where the bytes of the original file are written unchanged and
+        /// every object must keep the object number it has in that file.
+        /// A document opened in this mode can only be saved with
+        /// <see cref="PdfDocument.SaveIncremental(System.IO.Stream, bool)"/> and its overloads.
+        /// </summary>
+        ModifyIncremental,
     }
 }
