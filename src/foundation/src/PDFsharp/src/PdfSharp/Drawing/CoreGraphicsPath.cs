@@ -29,7 +29,7 @@ namespace PdfSharp.Drawing
             // Make a MoveTo if there is no previous subpath or the previous subpath was closed.
             // Otherwise, make a LineTo.
             // ReSharper disable once UseIndexFromEndExpression
-            if (_types.Count == 0 || (_types[_types.Count - 1] & PathPointTypeCloseSubpath) == PathPointTypeCloseSubpath)
+            if (_types.Count == 0 || _startNewFigure || (_types[_types.Count - 1] & PathPointTypeCloseSubpath) == PathPointTypeCloseSubpath)
                 MoveTo(x, y);
             else
                 LineTo(x, y, false);
@@ -39,6 +39,8 @@ namespace PdfSharp.Drawing
         {
             _points.Add(new XPoint(x, y));
             _types.Add(PathPointTypeStart);
+
+            _startNewFigure = false;
         }
 
         public void LineTo(double x, double y, bool closeSubpath)
@@ -49,6 +51,8 @@ namespace PdfSharp.Drawing
 
             _points.Add(new(x, y));
             _types.Add((byte)(PathPointTypeLine | (closeSubpath ? PathPointTypeCloseSubpath : 0)));
+
+            _startNewFigure = false;
         }
 
         public void BezierTo(double x1, double y1, double x2, double y2, double x3, double y3, bool closeSubpath)
@@ -59,6 +63,8 @@ namespace PdfSharp.Drawing
             _types.Add(PathPointTypeBézier);
             _points.Add(new XPoint(x3, y3));
             _types.Add((byte)(PathPointTypeBézier | (closeSubpath ? PathPointTypeCloseSubpath : 0)));
+
+            _startNewFigure = false;
         }
 
         /// <summary>
@@ -168,13 +174,22 @@ namespace PdfSharp.Drawing
         }
 
         /// <summary>
-        /// Closes the current subpath.
+        /// Closes the current subpath, and connects back to the start point.
         /// </summary>
         public void CloseSubpath()
         {
             int count = _types.Count;
             if (count > 0)
                 _types[count - 1] |= PathPointTypeCloseSubpath;
+            _startNewFigure = true;
+        }
+
+        /// <summary>
+        /// Begins a new subpath.
+        /// </summary>
+        public void StartSubpath()
+        {
+            _startNewFigure = true;
         }
 
         /// <summary>
@@ -270,5 +285,6 @@ namespace PdfSharp.Drawing
 
         readonly List<XPoint> _points = new();
         readonly List<byte> _types = new();
+        bool _startNewFigure = false;  // If true, then next MoveOrLineTo should be a Move.
     }
 }
