@@ -23,10 +23,13 @@ namespace MigraDoc.Rendering
         /// </summary>
         internal static XFont FontToXFont(Font font)
         {
-            // Check if both WeakReferences are still valid and point to the font we need.
-            if (_lastXFont != null && _lastFont != null &&
-                _lastFont.TryGetTarget(out var lastFont) && font == lastFont &&
-                _lastXFont.TryGetTarget(out var lastXFont))
+            // Read the whole cache entry once. The Font and the XFont are published together by a single
+            // reference assignment, so a concurrent update can never be observed half-applied and this can
+            // never return an XFont belonging to a different Font. See FontCacheEntry.
+            var entry = _lastEntry;
+            if (entry != null &&
+                entry.FontRef.TryGetTarget(out var lastFont) && font == lastFont &&
+                entry.XFontRef.TryGetTarget(out var lastXFont))
                 return lastXFont;
 
             XFontStyleEx style = GetXStyle(font);
@@ -39,16 +42,31 @@ namespace MigraDoc.Rendering
 #if DEBUG_
             CreateFontCounter++;
 #endif
-            _lastFont = new(font);
-            _lastXFont = new(xFont);
+            _lastEntry = new FontCacheEntry(font, xFont);
 #if FORCE_MEMORYLEAK
             _lastFont2 = font;
 #endif
             return xFont;
         }
 
-        static WeakReference<XFont>? _lastXFont;
-        static WeakReference<Font>? _lastFont;
+        /// <summary>
+        /// The single-entry font cache. Both WeakReferences are assigned in the constructor and the instance
+        /// is published by one atomic reference assignment, so a reader sees either the complete previous
+        /// entry or the complete new one — never the Font from one and the XFont from another.
+        /// </summary>
+        sealed class FontCacheEntry
+        {
+            internal FontCacheEntry(Font font, XFont xFont)
+            {
+                FontRef = new WeakReference<Font>(font);
+                XFontRef = new WeakReference<XFont>(xFont);
+            }
+
+            internal readonly WeakReference<Font> FontRef;
+            internal readonly WeakReference<XFont> XFontRef;
+        }
+
+        static volatile FontCacheEntry? _lastEntry;
 #if FORCE_MEMORYLEAK
         static Font? _lastFont2;
 #endif
