@@ -70,6 +70,14 @@ namespace PdfSharp.Pdf.Advanced
         public PdfReference this[PdfObjectID externalID] => _externalIDs[externalID.ToString()];
 
         /// <summary>
+        /// Attempts to get the cloned object that corresponds to the specified external identifier.
+        /// </summary>
+        public bool TryGetValue(PdfObjectID externalID, out PdfReference? iref)
+        {
+            return _externalIDs.TryGetValue(externalID.ToString(), out iref);
+        }
+
+        /// <summary>
         /// Maps external object identifiers to cross-reference entries of the importing document
         /// {PdfObjectID -> PdfReference}.
         /// </summary>
