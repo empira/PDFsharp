@@ -1,6 +1,7 @@
 ﻿// PDFsharp - A .NET library for processing PDF
 // See the LICENSE file in the solution root for more information.
 
+using System.Xml;
 using FluentAssertions;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
@@ -100,6 +101,43 @@ namespace PdfSharp.Tests.Pdf.Metadata
             info.Keywords = "KKKK";
             info.Creator = "CCCC";
 #endif
+        }
+
+        [Fact]
+        public void CreateDefaultMetadata_escapes_xml_and_strips_disallowed_control_chars()
+        {
+            var doc = new PdfDocument();
+            doc.Info.Title = "Profit & Loss <2026> \"Q1\" 'Draft'\u0000\u000B\u001F";
+            doc.Info.Author = "Smith & Sons <legal@example.com>";
+            doc.Info.Subject = "A & B > C";
+            doc.Info.Keywords = "tag1 & tag2, <xml>";
+            doc.Info.Creator = "Tool <1.0> & Co";
+            doc.Info.Elements.SetString(PdfDocumentInformation.Keys.Producer, "Producer & Engine");
+
+            var metadata = doc.Catalog.GetOrCreateMetadata();
+            var xml = metadata.CreateDefaultMetadata();
+
+            var xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(xml);
+
+            var ns = new XmlNamespaceManager(xmlDoc.NameTable);
+            ns.AddNamespace("dc", "http://purl.org/dc/elements/1.1/");
+            ns.AddNamespace("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+            ns.AddNamespace("pdf", "http://ns.adobe.com/pdf/1.3/");
+            ns.AddNamespace("xap", "http://ns.adobe.com/xap/1.0/");
+
+            xmlDoc.SelectSingleNode("//dc:title/rdf:Alt/rdf:li", ns)!.InnerText
+                .Should().Be("Profit & Loss <2026> \"Q1\" 'Draft'");
+            xmlDoc.SelectSingleNode("//dc:creator/rdf:Seq/rdf:li", ns)!.InnerText
+                .Should().Be("Smith & Sons <legal@example.com>");
+            xmlDoc.SelectSingleNode("//dc:description/rdf:Alt/rdf:li", ns)!.InnerText
+                .Should().Be("A & B > C");
+            xmlDoc.SelectSingleNode("//pdf:Keywords", ns)!.InnerText
+                .Should().Be("tag1 & tag2, <xml>");
+            xmlDoc.SelectSingleNode("//xap:CreatorTool", ns)!.InnerText
+                .Should().Be("Tool <1.0> & Co");
+            xmlDoc.SelectSingleNode("//pdf:Producer", ns)!.InnerText
+                .Should().Be("Producer & Engine");
         }
     }
 }

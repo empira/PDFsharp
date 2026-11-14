@@ -123,6 +123,16 @@ namespace PdfSharp.Pdf
             // ReSharper disable StringLiteralTypo because we deal with XML elements here.
             bool isPdfA = metadataInfo.PdfAFormat.HasValue;
 
+            var producer = EscapeXmlText(metadataInfo.Producer);
+            var keywords = EscapeXmlText(metadataInfo.Keywords);
+            var creator = EscapeXmlText(metadataInfo.Creator);
+            var creationDate = EscapeXmlText(metadataInfo.CreationDate);
+            var modificationDate = EscapeXmlText(metadataInfo.ModificationDate);
+            var metadataDate = !String.IsNullOrWhiteSpace(modificationDate) ? modificationDate : creationDate;
+            var title = EscapeXmlText(metadataInfo.Title);
+            var author = EscapeXmlText(metadataInfo.Author);
+            var subject = EscapeXmlText(metadataInfo.Subject);
+
             var xml =
                 // XMP header.
                 // Note that in a .NET string the BOM is represented as a human-readable string.
@@ -145,17 +155,17 @@ namespace PdfSharp.Pdf
                 // xmlns:pdf: Producer, Keywords
                 $"""
                      <rdf:Description rdf:about="" xmlns:pdf="http://ns.adobe.com/pdf/1.3/">
-                       <pdf:Producer>{metadataInfo.Producer}</pdf:Producer>
-                       <pdf:Keywords>{metadataInfo.Keywords}</pdf:Keywords>
+                       <pdf:Producer>{producer}</pdf:Producer>
+                       <pdf:Keywords>{keywords}</pdf:Keywords>
                      </rdf:Description>
                  """ + "\r\n" +
                 // xmlns:xap: CreatorTool, CreateDate, ModifyDate
                 $"""
                      <rdf:Description xmlns:xap="http://ns.adobe.com/xap/1.0/" rdf:about="">
-                       <xap:CreatorTool>{metadataInfo.Creator}</xap:CreatorTool>
-                       <xap:CreateDate>{metadataInfo.CreationDate}</xap:CreateDate>
-                       <xap:ModifyDate>{metadataInfo.ModificationDate}</xap:ModifyDate>
-                       <xap:MetadataDate>{(!String.IsNullOrWhiteSpace(metadataInfo.ModificationDate) ? metadataInfo.ModificationDate : metadataInfo.CreationDate)}</xap:MetadataDate>
+                       <xap:CreatorTool>{creator}</xap:CreatorTool>
+                       <xap:CreateDate>{creationDate}</xap:CreateDate>
+                       <xap:ModifyDate>{modificationDate}</xap:ModifyDate>
+                       <xap:MetadataDate>{metadataDate}</xap:MetadataDate>
                      </rdf:Description>
                  """ + "\r\n" +
                 // xmlns:dc: Title, Creator (author), Description
@@ -163,17 +173,17 @@ namespace PdfSharp.Pdf
                      <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">
                        <dc:title>
                          <rdf:Alt>
-                           <rdf:li xml:lang="x-default">{metadataInfo.Title}</rdf:li>
+                           <rdf:li xml:lang="x-default">{title}</rdf:li>
                          </rdf:Alt>
                        </dc:title>
                        <dc:creator>
                          <rdf:Seq>
-                           <rdf:li>{metadataInfo.Author}</rdf:li>
+                           <rdf:li>{author}</rdf:li>
                          </rdf:Seq>
                        </dc:creator>
                        <dc:description>
                          <rdf:Alt>
-                           <rdf:li xml:lang="x-default">{metadataInfo.Subject}</rdf:li>
+                           <rdf:li xml:lang="x-default">{subject}</rdf:li>
                          </rdf:Alt>
                        </dc:description>
                      </rdf:Description>
@@ -183,8 +193,8 @@ namespace PdfSharp.Pdf
                 // xmlns:xapMM: DocumentID, InstanceID
                 $"""
                      <rdf:Description rdf:about="" xmlns:xapMM="http://ns.adobe.com/xap/1.0/mm/">
-                       <xapMM:DocumentID>uuid:{metadataInfo.DocumentID}</xapMM:DocumentID>
-                       <xapMM:InstanceID>uuid:{metadataInfo.InstanceID}</xapMM:InstanceID>
+                       <xapMM:DocumentID>uuid:{EscapeXmlText(metadataInfo.DocumentID)}</xapMM:DocumentID>
+                       <xapMM:InstanceID>uuid:{EscapeXmlText(metadataInfo.InstanceID)}</xapMM:InstanceID>
                      </rdf:Description>
                  """ + "\r\n" +
 #endif
@@ -196,6 +206,43 @@ namespace PdfSharp.Pdf
                  """;
             // ReSharper restore StringLiteralTypo
             return xml;
+        }
+
+        /// <summary>
+        /// Escapes XML special characters and removes characters disallowed in XML 1.0.
+        /// </summary>
+        static string EscapeXmlText(string? value)
+        {
+            if (String.IsNullOrEmpty(value))
+                return "";
+
+            StringBuilder? sb = null;
+            for (int i = 0; i < value.Length; i++)
+            {
+                char ch = value[i];
+                string? replacement = ch switch
+                {
+                    '&' => "&amp;",
+                    '<' => "&lt;",
+                    '>' => "&gt;",
+                    '"' => "&quot;",
+                    '\'' => "&apos;",
+                    _ when (ch < 0x20 && ch is not ('\t' or '\n' or '\r')) || ch is '\uFFFE' or '\uFFFF' => "",
+                    _ => null
+                };
+
+                if (replacement != null)
+                {
+                    sb ??= new StringBuilder(value.Length + 16).Append(value, 0, i);
+                    sb.Append(replacement);
+                }
+                else
+                {
+                    sb?.Append(ch);
+                }
+            }
+
+            return sb?.ToString() ?? value;
         }
 
         /// <summary>
