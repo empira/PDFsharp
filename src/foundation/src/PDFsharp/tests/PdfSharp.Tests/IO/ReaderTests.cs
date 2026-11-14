@@ -567,5 +567,46 @@ namespace PdfSharp.Tests.IO
                 gfx.DrawString(footer, font, color, box, format);
             }
         }
+
+        [Fact]
+        public void Import_page_with_reference_to_free_object_resolves_to_null()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append("%PDF-1.4\n");
+            var offsets = new List<int> { 0 };
+
+            void AddObj(int id, string body)
+            {
+                offsets.Add(sb.Length);
+                sb.Append($"{id} 0 obj\n{body}\nendobj\n");
+            }
+
+            AddObj(1, "<< /Type /Catalog /Pages 2 0 R >>");
+            AddObj(2, "<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
+            AddObj(3, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Annots [4 0 R] >>");
+            AddObj(4, "<< /Type /Annot /Subtype /Link /Rect [100 700 300 720] /A << /S /GoTo /D 5 0 R >> /CustomArray [5 0 R] >>");
+
+            int xrefOffset = sb.Length;
+            sb.Append("xref\n0 6\n");
+            sb.Append("0000000000 65535 f \n");
+            for (int i = 1; i <= 4; i++)
+                sb.Append($"{offsets[i]:D10} 00000 n \n");
+            sb.Append("0000000000 65535 f \n");
+            sb.Append($"trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n{xrefOffset}\n%%EOF\n");
+
+            using var ms = new MemoryStream(System.Text.Encoding.ASCII.GetBytes(sb.ToString()));
+            var input = PdfReader.Open(ms, PdfDocumentOpenMode.Import);
+
+            var output = new PdfDocument();
+            var importedPage = output.AddPage(input.Pages[0]);
+
+            var annots = importedPage.Elements.GetArray("/Annots")!;
+            var annotRef = (PdfSharp.Pdf.Advanced.PdfReference)annots.Elements[0];
+            var annotDict = (PdfDictionary)annotRef.Value;
+            var actionDict = annotDict.Elements.GetDictionary("/A")!;
+            actionDict.Elements["/D"].Should().Be(PdfNull.Value);
+            var customArray = annotDict.Elements.GetArray("/CustomArray")!;
+            customArray.Elements[0].Should().Be(PdfNull.Value);
+        }
     }
 }

@@ -479,6 +479,23 @@ namespace PdfSharp.Pdf
             return objects[0];
         }
 
+        static PdfItem ResolveImportedReference(PdfImportedObjectTable iot, PdfDocument owner, PdfReference iref)
+        {
+            if (iref.Document == owner)
+                return iref;
+
+            if (iot.TryGetValue(iref.ObjectID, out var newXRef) && newXRef != null)
+            {
+                Debug.Assert(newXRef.Document == owner);
+                return newXRef;
+            }
+
+            // Per ISO 32000-1 (7.3.10), an indirect reference to a free or undefined object
+            // is treated as the null object.
+            Debug.Assert(iref.Value == null);
+            return PdfNull.Value;
+        }
+
         /// <summary>
         /// Replace all indirect references to external objects by their cloned counterparts
         /// owned by the importer document.
@@ -516,22 +533,9 @@ namespace PdfSharp.Pdf
                     // Is item an iref?
                     if (item is PdfReference iref)
                     {
-                        // Case: The item is a reference.
-
-                        // Does the iref already belong to the new owner?
-                        if (iref.Document == owner)
-                        {
-                            // Yes: fine. Happens when an already cloned object is reused.
-                            continue;
-                        }
-
-                        //Debug.Assert(iref.Document == iot.Document);
-                        // No: Replace with iref of cloned object.
-                        // The iot maps the external ID to its internal PdfReference.
-                        var newXRef = iot[iref.ObjectID];
-                        Debug.Assert(newXRef != null);
-                        Debug.Assert(newXRef.Document == owner);
-                        dict.Elements[name] = newXRef;
+                        var resolved = ResolveImportedReference(iot, owner, iref);
+                        if (!ReferenceEquals(resolved, iref))
+                            dict.Elements[name] = resolved;
                     }
                     else
                     {
@@ -580,21 +584,9 @@ namespace PdfSharp.Pdf
                     // Is item an iref?
                     if (item is PdfReference iref)
                     {
-                        // Case: The item is a reference.
-                        // Does the iref already belongs to the owner?
-                        if (iref.Document == owner)
-                        {
-                            // Yes: fine. Happens when an already cloned object is reused.
-                            continue;
-                        }
-
-                        //Debug.Assert(iref.Document == iot.ExternalDocument);
-                        // No: replace with iref of cloned object.
-                        // The iot maps the external ID to its internal PdfReference.
-                        var newXRef = iot[iref.ObjectID];
-                        Debug.Assert(newXRef != null);
-                        Debug.Assert(newXRef.Document == owner);
-                        array.Elements[idx] = newXRef;
+                        var resolved = ResolveImportedReference(iot, owner, iref);
+                        if (!ReferenceEquals(resolved, iref))
+                            array.Elements[idx] = resolved;
                     }
                     else
                     {
